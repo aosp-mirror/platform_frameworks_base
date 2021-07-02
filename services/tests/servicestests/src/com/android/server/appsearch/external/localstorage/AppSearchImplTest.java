@@ -869,6 +869,446 @@ public class AppSearchImplTest {
     }
 
     @Test
+    public void testGetNextPageToken_query() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.query("package1", "database1", "", searchSpec, /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+        searchResultPage = mAppSearchImpl.getNextPage("package1", nextPageToken);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
+    }
+
+    @Test
+    public void testGetNextPageWithDifferentPackage_query() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.query("package1", "database1", "", searchSpec, /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+
+        // Try getting next page with the wrong package, package2
+        AppSearchException e =
+                assertThrows(
+                        AppSearchException.class,
+                        () -> mAppSearchImpl.getNextPage("package2", nextPageToken));
+        assertThat(e)
+                .hasMessageThat()
+                .contains("Package \"package2\" cannot use nextPageToken: " + nextPageToken);
+        assertThat(e.getResultCode()).isEqualTo(AppSearchResult.RESULT_SECURITY_ERROR);
+
+        // Can continue getting next page for package1
+        searchResultPage = mAppSearchImpl.getNextPage("package1", nextPageToken);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
+    }
+
+    @Test
+    public void testGetNextPageToken_globalQuery() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.globalQuery(
+                        /*queryExpression=*/ "",
+                        searchSpec,
+                        "package1",
+                        /*visibilityStore=*/ null,
+                        Process.myUid(),
+                        /*callerHasSystemAccess=*/ false,
+                        /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+        searchResultPage = mAppSearchImpl.getNextPage("package1", nextPageToken);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
+    }
+
+    @Test
+    public void testGetNextPageWithDifferentPackage_globalQuery() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.globalQuery(
+                        /*queryExpression=*/ "",
+                        searchSpec,
+                        "package1",
+                        /*visibilityStore=*/ null,
+                        Process.myUid(),
+                        /*callerHasSystemAccess=*/ false,
+                        /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+
+        // Try getting next page with the wrong package, package2
+        AppSearchException e =
+                assertThrows(
+                        AppSearchException.class,
+                        () -> mAppSearchImpl.getNextPage("package2", nextPageToken));
+        assertThat(e)
+                .hasMessageThat()
+                .contains("Package \"package2\" cannot use nextPageToken: " + nextPageToken);
+        assertThat(e.getResultCode()).isEqualTo(AppSearchResult.RESULT_SECURITY_ERROR);
+
+        // Can continue getting next page for package1
+        searchResultPage = mAppSearchImpl.getNextPage("package1", nextPageToken);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
+    }
+
+    @Test
+    public void testInvalidateNextPageToken_query() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.query("package1", "database1", "", searchSpec, /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+
+        // Invalidate the token
+        mAppSearchImpl.invalidateNextPageToken("package1", nextPageToken);
+
+        // Can't get next page because we invalidated the token.
+        AppSearchException e =
+                assertThrows(
+                        AppSearchException.class,
+                        () -> mAppSearchImpl.getNextPage("package1", nextPageToken));
+        assertThat(e)
+                .hasMessageThat()
+                .contains("Package \"package1\" cannot use nextPageToken: " + nextPageToken);
+        assertThat(e.getResultCode()).isEqualTo(AppSearchResult.RESULT_SECURITY_ERROR);
+    }
+
+    @Test
+    public void testInvalidateNextPageTokenWithDifferentPackage_query() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.query("package1", "database1", "", searchSpec, /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+
+        // Try getting next page with the wrong package, package2
+        AppSearchException e =
+                assertThrows(
+                        AppSearchException.class,
+                        () -> mAppSearchImpl.invalidateNextPageToken("package2", nextPageToken));
+        assertThat(e)
+                .hasMessageThat()
+                .contains("Package \"package2\" cannot use nextPageToken: " + nextPageToken);
+        assertThat(e.getResultCode()).isEqualTo(AppSearchResult.RESULT_SECURITY_ERROR);
+
+        // Can continue getting next page for package1
+        searchResultPage = mAppSearchImpl.getNextPage("package1", nextPageToken);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
+    }
+
+    @Test
+    public void testInvalidateNextPageToken_globalQuery() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.globalQuery(
+                        /*queryExpression=*/ "",
+                        searchSpec,
+                        "package1",
+                        /*visibilityStore=*/ null,
+                        Process.myUid(),
+                        /*callerHasSystemAccess=*/ false,
+                        /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+
+        // Invalidate the token
+        mAppSearchImpl.invalidateNextPageToken("package1", nextPageToken);
+
+        // Can't get next page because we invalidated the token.
+        AppSearchException e =
+                assertThrows(
+                        AppSearchException.class,
+                        () -> mAppSearchImpl.getNextPage("package1", nextPageToken));
+        assertThat(e)
+                .hasMessageThat()
+                .contains("Package \"package1\" cannot use nextPageToken: " + nextPageToken);
+        assertThat(e.getResultCode()).isEqualTo(AppSearchResult.RESULT_SECURITY_ERROR);
+    }
+
+    @Test
+    public void testInvalidateNextPageTokenWithDifferentPackage_globalQuery() throws Exception {
+        // Insert package1 schema
+        List<AppSearchSchema> schema1 =
+                ImmutableList.of(new AppSearchSchema.Builder("schema1").build());
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database1",
+                schema1,
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert two package1 documents
+        GenericDocument document1 =
+                new GenericDocument.Builder<>("namespace", "id1", "schema1").build();
+        GenericDocument document2 =
+                new GenericDocument.Builder<>("namespace", "id2", "schema1").build();
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
+        mAppSearchImpl.putDocument("package1", "database1", document2, /*logger=*/ null);
+
+        // Query for only 1 result per page
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                        .setResultCountPerPage(1)
+                        .build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.globalQuery(
+                        /*queryExpression=*/ "",
+                        searchSpec,
+                        "package1",
+                        /*visibilityStore=*/ null,
+                        Process.myUid(),
+                        /*callerHasSystemAccess=*/ false,
+                        /*logger=*/ null);
+
+        // Document2 will come first because it was inserted last and default return order is
+        // most recent.
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+
+        long nextPageToken = searchResultPage.getNextPageToken();
+
+        // Try getting next page with the wrong package, package2
+        AppSearchException e =
+                assertThrows(
+                        AppSearchException.class,
+                        () -> mAppSearchImpl.invalidateNextPageToken("package2", nextPageToken));
+        assertThat(e)
+                .hasMessageThat()
+                .contains("Package \"package2\" cannot use nextPageToken: " + nextPageToken);
+        assertThat(e.getResultCode()).isEqualTo(AppSearchResult.RESULT_SECURITY_ERROR);
+
+        // Can continue getting next page for package1
+        searchResultPage = mAppSearchImpl.getNextPage("package1", nextPageToken);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
+    }
+
+    @Test
     public void testRemoveEmptyDatabase_noExceptionThrown() throws Exception {
         SearchSpec searchSpec =
                 new SearchSpec.Builder()
@@ -1777,11 +2217,11 @@ public class AppSearchImplTest {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> appSearchImpl.getNextPage(/*nextPageToken=*/ 1L));
+                () -> appSearchImpl.getNextPage("package", /*nextPageToken=*/ 1L));
 
         assertThrows(
                 IllegalStateException.class,
-                () -> appSearchImpl.invalidateNextPageToken(/*nextPageToken=*/ 1L));
+                () -> appSearchImpl.invalidateNextPageToken("package", /*nextPageToken=*/ 1L));
 
         assertThrows(
                 IllegalStateException.class,

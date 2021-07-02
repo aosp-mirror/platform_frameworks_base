@@ -173,6 +173,21 @@ public final class AppSearchImpl implements Closeable {
     @GuardedBy("mReadWriteLock")
     private final Map<String, Integer> mDocumentCountMapLocked = new ArrayMap<>();
 
+    // Maps packages to the set of valid nextPageTokens that the package can manipulate. A token
+    // is unique and constant per query (i.e. the same token '123' is used to iterate through
+    // pages of search results). The tokens themselves are generated and tracked by
+    // IcingSearchEngine. IcingSearchEngine considers a token valid and won't be reused
+    // until we call invalidateNextPageToken on the token.
+    //
+    // Note that we synchronize on itself because the nextPageToken cache is checked at
+    // query-time, and queries are done in parallel with a read lock. Ideally, this would be
+    // guarded by the normal mReadWriteLock.writeLock, but ReentrantReadWriteLocks can't upgrade
+    // read to write locks. This lock should be acquired at the smallest scope possible.
+    // mReadWriteLock is a higher-level lock, so calls shouldn't be made out
+    // to any functions that grab the lock.
+    @GuardedBy("mNextPageTokensLocked")
+    private final Map<String, Set<Long>> mNextPageTokensLocked = new ArrayMap<>();
+
     /**
      * The counter to check when to call {@link #checkForOptimize}. The interval is {@link
      * #CHECK_OPTIMIZE_INTERVAL}.
@@ -837,12 +852,15 @@ public final class AppSearchImpl implements Closeable {
             String prefix = createPrefix(packageName, databaseName);
             Set<String> allowedPrefixedSchemas = getAllowedPrefixSchemasLocked(prefix, searchSpec);
 
-            return doQueryLocked(
-                    Collections.singleton(createPrefix(packageName, databaseName)),
-                    allowedPrefixedSchemas,
-                    queryExpression,
-                    searchSpec,
-                    sStatsBuilder);
+            SearchResultPage searchResultPage =
+                    doQueryLocked(
+                            Collections.singleton(createPrefix(packageName, databaseName)),
+                            allowedPrefixedSchemas,
+                            queryExpression,
+                            searchSpec,
+                            sStatsBuilder);
+            addNextPageToken(packageName, searchResultPage.getNextPageToken());
+            return searchResultPage;
         } finally {
             mReadWriteLock.readLock().unlock();
             if (logger != null) {
@@ -956,12 +974,15 @@ public final class AppSearchImpl implements Closeable {
                 }
             }
 
-            return doQueryLocked(
-                    prefixFilters,
-                    prefixedSchemaFilters,
-                    queryExpression,
-                    searchSpec,
-                    sStatsBuilder);
+            SearchResultPage searchResultPage =
+                    doQueryLocked(
+                            prefixFilters,
+                            prefixedSchemaFilters,
+                            queryExpression,
+                            searchSpec,
+                            sStatsBuilder);
+            addNextPageToken(callerPackageName, searchResultPage.getNextPageToken());
+            return searchResultPage;
         } finally {
             mReadWriteLock.readLock().unlock();
 
@@ -1093,17 +1114,20 @@ public final class AppSearchImpl implements Closeable {
      *
      * <p>This method belongs to query group.
      *
+     * @param packageName Package name of the caller.
      * @param nextPageToken The token of pre-loaded results of previously executed query.
      * @return The next page of results of previously executed query.
-     * @throws AppSearchException on IcingSearchEngine error.
+     * @throws AppSearchException on IcingSearchEngine error or if can't advance on nextPageToken.
      */
     @NonNull
-    public SearchResultPage getNextPage(long nextPageToken) throws AppSearchException {
+    public SearchResultPage getNextPage(@NonNull String packageName, long nextPageToken)
+            throws AppSearchException {
         mReadWriteLock.readLock().lock();
         try {
             throwIfClosedLocked();
 
             mLogUtil.piiTrace("getNextPage, request", nextPageToken);
+            checkNextPageToken(packageName, nextPageToken);
             SearchResultProto searchResultProto =
                     mIcingSearchEngineLocked.getNextPage(nextPageToken);
             mLogUtil.piiTrace(
@@ -1122,16 +1146,26 @@ public final class AppSearchImpl implements Closeable {
      *
      * <p>This method belongs to query group.
      *
+     * @param packageName Package name of the caller.
      * @param nextPageToken The token of pre-loaded results of previously executed query to be
      *     Invalidated.
+     * @throws AppSearchException if nextPageToken is unusable.
      */
-    public void invalidateNextPageToken(long nextPageToken) {
+    public void invalidateNextPageToken(@NonNull String packageName, long nextPageToken)
+            throws AppSearchException {
         mReadWriteLock.readLock().lock();
         try {
             throwIfClosedLocked();
 
             mLogUtil.piiTrace("invalidateNextPageToken, request", nextPageToken);
+            checkNextPageToken(packageName, nextPageToken);
             mIcingSearchEngineLocked.invalidateNextPageToken(nextPageToken);
+
+            synchronized (mNextPageTokensLocked) {
+                // At this point, we're guaranteed that this nextPageToken exists for this package,
+                // otherwise checkNextPageToken would've thrown an exception.
+                mNextPageTokensLocked.get(packageName).remove(nextPageToken);
+            }
         } finally {
             mReadWriteLock.readLock().unlock();
         }
@@ -1568,6 +1602,9 @@ public final class AppSearchImpl implements Closeable {
                 Set<String> databaseNames = entry.getValue();
                 if (!installedPackages.contains(packageName) && databaseNames != null) {
                     mDocumentCountMapLocked.remove(packageName);
+                    synchronized (mNextPageTokensLocked) {
+                        mNextPageTokensLocked.remove(packageName);
+                    }
                     for (String databaseName : databaseNames) {
                         String removedPrefix = createPrefix(packageName, databaseName);
                         mSchemaMapLocked.remove(removedPrefix);
@@ -1601,6 +1638,9 @@ public final class AppSearchImpl implements Closeable {
         mSchemaMapLocked.clear();
         mNamespaceMapLocked.clear();
         mDocumentCountMapLocked.clear();
+        synchronized (mNextPageTokensLocked) {
+            mNextPageTokensLocked.clear();
+        }
         if (initStatsBuilder != null) {
             initStatsBuilder
                     .setHasReset(true)
@@ -2013,6 +2053,32 @@ public final class AppSearchImpl implements Closeable {
         // TODO(b/161935693) only allow GetSchemaResultProto NOT_FOUND on first run
         checkCodeOneOf(schemaProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
         return schemaProto.getSchema();
+    }
+
+    private void addNextPageToken(String packageName, long nextPageToken) {
+        synchronized (mNextPageTokensLocked) {
+            Set<Long> tokens = mNextPageTokensLocked.get(packageName);
+            if (tokens == null) {
+                tokens = new ArraySet<>();
+                mNextPageTokensLocked.put(packageName, tokens);
+            }
+            tokens.add(nextPageToken);
+        }
+    }
+
+    private void checkNextPageToken(String packageName, long nextPageToken)
+            throws AppSearchException {
+        synchronized (mNextPageTokensLocked) {
+            Set<Long> nextPageTokens = mNextPageTokensLocked.get(packageName);
+            if (nextPageTokens == null || !nextPageTokens.contains(nextPageToken)) {
+                throw new AppSearchException(
+                        AppSearchResult.RESULT_SECURITY_ERROR,
+                        "Package \""
+                                + packageName
+                                + "\" cannot use nextPageToken: "
+                                + nextPageToken);
+            }
+        }
     }
 
     private static void addToMap(

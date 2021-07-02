@@ -777,7 +777,7 @@ public class AppSearchManagerService extends SystemService {
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     SearchResultPage searchResultPage =
-                            instance.getAppSearchImpl().getNextPage(nextPageToken);
+                            instance.getAppSearchImpl().getNextPage(packageName, nextPageToken);
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -803,7 +803,7 @@ public class AppSearchManagerService extends SystemService {
                     verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
-                    instance.getAppSearchImpl().invalidateNextPageToken(nextPageToken);
+                    instance.getAppSearchImpl().invalidateNextPageToken(packageName, nextPageToken);
                 } catch (Throwable t) {
                     Log.e(TAG, "Unable to invalidate the query page token", t);
                 }
@@ -853,7 +853,7 @@ public class AppSearchManagerService extends SystemService {
                                                 .getGenericDocument().getBundle());
                             }
                             searchResultPage = instance.getAppSearchImpl().getNextPage(
-                                    searchResultPage.getNextPageToken());
+                                    packageName, searchResultPage.getNextPageToken());
                         }
                     }
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
