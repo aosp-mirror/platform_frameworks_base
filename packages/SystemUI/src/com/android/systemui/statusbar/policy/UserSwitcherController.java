@@ -671,6 +671,7 @@ public class UserSwitcherController implements Dumpable {
                     scheduleGuestCreation();
                 }
                 switchToUserId(targetUserId);
+                mUserManager.removeUser(currentUser.id);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't remove guest because ActivityManager or WindowManager is dead");

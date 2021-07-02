@@ -1243,6 +1243,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront, scrimForBubble);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
+        mLightRevealScrim.setRevealAmountListener(
+                mNotificationShadeWindowController::setLightRevealScrimAmount);
         mUnlockedScreenOffAnimationController.initialize(this, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
@@ -3894,21 +3896,33 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
 
-        if ((isDozing && mWakefulnessLifecycle.getLastSleepReason()
-                == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
-                || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
-                == PowerManager.WAKE_REASON_POWER_BUTTON)) {
-            mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
-        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
-            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
-        }
-
         mNotificationsController.requestNotificationUpdate("onDozingChanged");
         updateDozingState();
         mDozeServiceHost.updateDozing();
         updateScrimController();
         updateReportRejectedTouchVisibility();
         Trace.endSection();
+    }
+
+    /**
+     * Updates the light reveal effect to reflect the reason we're waking or sleeping (for example,
+     * from the power button).
+     * @param wakingUp Whether we're updating because we're waking up (true) or going to sleep
+     *                 (false).
+     */
+    private void updateRevealEffect(boolean wakingUp) {
+        if (mLightRevealScrim == null) {
+            return;
+        }
+
+        if (wakingUp && mWakefulnessLifecycle.getLastWakeReason()
+                == PowerManager.WAKE_REASON_POWER_BUTTON
+                || !wakingUp && mWakefulnessLifecycle.getLastSleepReason()
+                == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON) {
+            mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
+        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
+        }
     }
 
     public LightRevealScrim getLightRevealScrim() {
@@ -4043,6 +4057,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onStartedGoingToSleep() {
             String tag = "StatusBar#onStartedGoingToSleep";
             DejankUtils.startDetectingBlockingIpcs(tag);
+            updateRevealEffect(false /* wakingUp */);
             updateNotificationPanelTouchState();
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
@@ -4074,6 +4089,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // This is intentionally below the stopDozing call above, since it avoids that we're
             // unnecessarily animating the wakeUp transition. Animations should only be enabled
             // once we fully woke up.
+            updateRevealEffect(true /* wakingUp */);
             updateNotificationPanelTouchState();
             mPulseExpansionHandler.onStartedWakingUp();
 

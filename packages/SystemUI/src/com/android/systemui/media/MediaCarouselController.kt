@@ -26,6 +26,7 @@ import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -45,6 +46,7 @@ class MediaCarouselController @Inject constructor(
     private val visualStabilityManager: VisualStabilityManager,
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val activityStarter: ActivityStarter,
+    private val systemClock: SystemClock,
     @Main executor: DelayableExecutor,
     private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
@@ -358,12 +360,12 @@ class MediaCarouselController @Inject constructor(
             newPlayer.playerViewHolder?.player?.setLayoutParams(lp)
             newPlayer.bindPlayer(dataCopy, key)
             newPlayer.setListening(currentlyExpanded)
-            MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer)
+            MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer, systemClock)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers(curVisibleMediaKey)
         } else {
             existingPlayer.bindPlayer(dataCopy, key)
-            MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer)
+            MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer, systemClock)
             if (visualStabilityManager.isReorderingAllowed || shouldScrollToActivePlayer) {
                 reorderAllPlayers(curVisibleMediaKey)
             } else {
@@ -407,7 +409,7 @@ class MediaCarouselController @Inject constructor(
         newRecs.bindRecommendation(data.copy(backgroundColor = bgColor))
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
             .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
-        MediaPlayerData.addMediaRecommendation(key, data, newRecs, shouldPrioritize)
+        MediaPlayerData.addMediaRecommendation(key, data, newRecs, shouldPrioritize, systemClock)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers(curVisibleMediaKey)
         updatePageIndicator()
@@ -775,9 +777,9 @@ internal object MediaPlayerData {
     private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
     private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()
 
-    fun addMediaPlayer(key: String, data: MediaData, player: MediaControlPanel) {
+    fun addMediaPlayer(key: String, data: MediaData, player: MediaControlPanel, clock: SystemClock) {
         removeMediaPlayer(key)
-        val sortKey = MediaSortKey(isSsMediaRec = false, data, System.currentTimeMillis())
+        val sortKey = MediaSortKey(isSsMediaRec = false, data, clock.currentTimeMillis())
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
     }
@@ -786,11 +788,12 @@ internal object MediaPlayerData {
         key: String,
         data: SmartspaceMediaData,
         player: MediaControlPanel,
-        shouldPrioritize: Boolean
+        shouldPrioritize: Boolean,
+        clock: SystemClock
     ) {
         shouldPrioritizeSs = shouldPrioritize
         removeMediaPlayer(key)
-        val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, System.currentTimeMillis())
+        val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, clock.currentTimeMillis())
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
         smartspaceMediaData = data

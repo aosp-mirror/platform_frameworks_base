@@ -676,6 +676,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Разблокировать для оплаты"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не настроено"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки заблокированного экрана"</string>
@@ -1127,8 +1129,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты чатов"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на чат, чтобы добавить его на главный экран"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Здесь появятся ваши недавние разговоры."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Важные разговоры"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Недавние разговоры"</string>
     <string name="okay" msgid="6490552955618608554">"ОК"</string>

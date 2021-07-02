@@ -366,6 +366,7 @@ public final class SplitLayout {
 
         private final int mDisplayId;
 
+        private boolean mImeShown;
         private int mYOffsetForIme;
         private float mDimValue1;
         private float mDimValue2;
@@ -392,6 +393,7 @@ public final class SplitLayout {
             if (!mInitialized || imeTargetPosition == SPLIT_POSITION_UNDEFINED) return 0;
             mStartImeTop = showing ? hiddenTop : shownTop;
             mEndImeTop = showing ? shownTop : hiddenTop;
+            mImeShown = showing;
 
             // Update target dim values
             mLastDim1 = mDimValue1;
@@ -414,7 +416,7 @@ public final class SplitLayout {
             mSplitWindowManager.setInteractive(
                     !showing || imeTargetPosition == SPLIT_POSITION_UNDEFINED);
 
-            return 0;
+            return needOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
 
         @Override
@@ -430,6 +432,17 @@ public final class SplitLayout {
             if (displayId != mDisplayId || cancel) return;
             onProgress(1.0f);
             mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+        }
+
+        @Override
+        public void onImeControlTargetChanged(int displayId, boolean controlling) {
+            if (displayId != mDisplayId) return;
+            // Restore the split layout when wm-shell is not controlling IME insets anymore.
+            if (!controlling && mImeShown) {
+                reset();
+                mSplitWindowManager.setInteractive(true);
+                mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+            }
         }
 
         private int getTargetYOffset() {
@@ -461,8 +474,10 @@ public final class SplitLayout {
         }
 
         private void reset() {
-            mYOffsetForIme = 0;
-            mDimValue1 = mDimValue2 = 0.0f;
+            mImeShown = false;
+            mYOffsetForIme = mLastYOffset = mTargetYOffset = 0;
+            mDimValue1 = mLastDim1 = mTargetDim1 = 0.0f;
+            mDimValue2 = mLastDim2 = mTargetDim2 = 0.0f;
         }
 
         /* Adjust bounds with IME offset. */

@@ -72,7 +72,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -248,8 +247,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
-        assertThat(mKeyguardIndicationCaptor.getValue().getTextColor())
-                .isEqualTo(Utils.getColorError(mContext));
+        assertThat(mKeyguardIndicationCaptor.getValue().getTextColor().getDefaultColor())
+                .isEqualTo(mContext.getColor(R.color.misalignment_text_color));
     }
 
     @Test
@@ -265,8 +264,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
-        assertThat(mKeyguardIndicationCaptor.getValue().getTextColor())
-                .isEqualTo(Utils.getColorError(mContext));
+        assertThat(mKeyguardIndicationCaptor.getValue().getTextColor().getDefaultColor())
+                .isEqualTo(mContext.getColor(R.color.misalignment_text_color));
     }
 
     @Test
@@ -680,7 +679,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private void verifyHideIndication(int type) {
         if (type == INDICATION_TYPE_TRANSIENT) {
             verify(mRotateTextViewController).hideTransient();
-            verify(mRotateTextViewController, never()).showTransient(anyString(), anyBoolean());
+            verify(mRotateTextViewController, never()).showTransient(anyString());
         } else {
             verify(mRotateTextViewController).hideIndication(type);
             verify(mRotateTextViewController, never()).updateIndication(eq(type),
@@ -689,10 +688,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     private void verifyTransientMessage(String message) {
-        verify(mRotateTextViewController).showTransient(eq(message), anyBoolean());
+        verify(mRotateTextViewController).showTransient(eq(message));
     }
 
     private void verifyNoTransientMessage() {
-        verify(mRotateTextViewController, never()).showTransient(any(), anyBoolean());
+        verify(mRotateTextViewController, never()).showTransient(any());
     }
 }

@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"সবকটি দেখুন"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"পেমেন্ট করতে ডিভাইস আনলক করুন"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"সেট আপ করা নেই"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যবহার করতে আনলক করুন"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপনার কার্ড সংক্রান্ত তথ্য পেতে সমস্যা হয়েছে, পরে আবার চেষ্টা করুন"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্রিন সেটিংস"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"খোলা কথোপকথন"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"কথোপকথন উইজেট"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"কোনও কথোপথন আপনার হোম স্ক্রিনে যোগ করার জন্য এতে ট্যাপ করুন"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"আপনার সাম্প্রতিক কথোপকথন এখানে দেখা যাবে"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"গুরুত্বপূর্ণ কথোপকথন"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"সাম্প্রতিক কথোপকথন"</string>
     <string name="okay" msgid="6490552955618608554">"ঠিক আছে"</string>
