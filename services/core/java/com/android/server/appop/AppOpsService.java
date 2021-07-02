@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAG_TRUSTED;
 import static android.app.AppOpsManager.CALL_BACK_ON_SWITCHED_OP;
 import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
@@ -3332,7 +3333,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
         verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
 
-        skipProxyOperation = resolveSkipProxyOperation(skipProxyOperation, attributionSource);
+        skipProxyOperation = skipProxyOperation
+                && isCallerAndAttributionTrusted(attributionSource);
 
         String resolveProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
                 proxyPackageName);
@@ -3849,7 +3851,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
         verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
 
-        skipProxyOperation = resolveSkipProxyOperation(skipProxyOperation, attributionSource);
+        boolean isCallerTrusted = isCallerAndAttributionTrusted(attributionSource);
+        skipProxyOperation = isCallerTrusted && skipProxyOperation;
 
         String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
                 proxyPackageName);
@@ -3858,11 +3861,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                     proxiedPackageName);
         }
 
+        final boolean isChainTrusted = isCallerTrusted
+                && attributionChainId != ATTRIBUTION_CHAIN_ID_NONE
+                && ((proxyAttributionFlags & ATTRIBUTION_FLAG_TRUSTED) != 0
+                || (proxiedAttributionFlags & ATTRIBUTION_FLAG_TRUSTED) != 0);
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
                 == PackageManager.PERMISSION_GRANTED || isSelfBlame
-                || attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
+                || isChainTrusted;
 
         String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
                 proxiedPackageName);
@@ -4051,7 +4058,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
         final IBinder proxiedToken = attributionSource.getNextToken();
 
-        skipProxyOperation = resolveSkipProxyOperation(skipProxyOperation, attributionSource);
+        skipProxyOperation = skipProxyOperation
+                && isCallerAndAttributionTrusted(attributionSource);
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
@@ -4334,11 +4342,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private boolean resolveSkipProxyOperation(boolean requestsSkipProxyOperation,
-            @NonNull AttributionSource attributionSource) {
-        if (!requestsSkipProxyOperation) {
-            return false;
-        }
+    private boolean isCallerAndAttributionTrusted(@NonNull AttributionSource attributionSource) {
         if (attributionSource.getUid() != Binder.getCallingUid()
                 && attributionSource.isTrusted(mContext)) {
             return true;
