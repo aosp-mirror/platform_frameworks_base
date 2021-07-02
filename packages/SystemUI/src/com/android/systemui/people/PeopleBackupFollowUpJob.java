@@ -58,7 +58,7 @@ public class PeopleBackupFollowUpJob extends JobService {
     public static final int JOB_ID = 74823873;
 
     private static final long JOB_PERIODIC_DURATION = Duration.ofHours(6).toMillis();
-    private static final long CLEAN_UP_STORAGE_AFTER_DURATION = Duration.ofHours(24).toMillis();
+    private static final long CLEAN_UP_STORAGE_AFTER_DURATION = Duration.ofHours(48).toMillis();
 
     /** SharedPreferences file name for follow-up specific storage.*/
     public static final String SHARED_FOLLOW_UP = "shared_follow_up";

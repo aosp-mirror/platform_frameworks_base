@@ -16,11 +16,13 @@
 
 package com.android.lint
 
+import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.ISSUE_NESTED_CLEAR_IDENTITY_CALLS
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.ISSUE_NON_FINAL_TOKEN
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.ISSUE_UNUSED_TOKEN
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY
+import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.getIncidentMessageClearIdentityCallNotFollowedByTryFinally
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.getIncidentMessageNestedClearIdentityCallsPrimary
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.getIncidentMessageNestedClearIdentityCallsSecondary
 import com.android.lint.CallingIdentityTokenIssueRegistry.Companion.getIncidentMessageNonFinalToken
@@ -36,15 +38,15 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.PsiSearchScopeUtil
 import com.intellij.psi.search.SearchScope
+import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UDeclarationsExpression
 import org.jetbrains.uast.UElement
-import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.ULocalVariable
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.UTryExpression
 import org.jetbrains.uast.getParentOfType
-import org.jetbrains.uast.isUastChildOf
 
 /**
  * Lint Detector that finds issues with improper usages of the token returned by
@@ -104,7 +106,8 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
          * - Checks for non-final token issue
          * - Checks for unused token issue within different scopes
          * - Checks for nested calls of clearCallingIdentity() issue
-         * - Stores token variable name, scope in the file and its location in tokensMap
+         * - Checks for clearCallingIdentity() not followed by try-finally issue
+         * - Stores token variable name, scope in the file, location and finally block in tokensMap
          */
         override fun visitLocalVariable(node: ULocalVariable) {
             val rhsExpression = node.uastInitializer as? UQualifiedReferenceExpression ?: return
@@ -142,7 +145,23 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                         )
                 )
             }
-            tokensMap[variableName] = Token(variableName, node.sourcePsi?.getUseScope(), location)
+            // If the next statement in the tree is not a try-finally statement, we need to report
+            // the "clearCallingIdentity() is not followed by try-finally" issue
+            val finallyClause = (getNextStatementOfLocalVariable(node) as? UTryExpression)
+                    ?.finallyClause
+            if (finallyClause == null) {
+                context.report(
+                        ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
+                        location,
+                        getIncidentMessageClearIdentityCallNotFollowedByTryFinally(variableName)
+                )
+            }
+            tokensMap[variableName] = Token(
+                    variableName,
+                    node.sourcePsi?.getUseScope(),
+                    location,
+                    finallyClause
+            )
         }
 
         /**
@@ -169,18 +188,24 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             val selector = node.selector as UCallExpression
             val arg = selector.valueArguments[0] as? USimpleNameReferenceExpression ?: return
             val variableName = arg.identifier
-            if (!isInFinallyBlock(node)) {
+            val originalScope = tokensMap[variableName]?.scope ?: return
+            val psi = arg.sourcePsi ?: return
+            // Checks if Binder.restoreCallingIdentity(token) is called within the scope of the
+            // token declaration. If not within the scope, no action is needed because the token is
+            // irrelevant i.e. not in the same scope or was not declared with clearCallingIdentity()
+            if (!PsiSearchScopeUtil.isInScope(originalScope, psi)) return
+            // We do not report "restore identity call not in finally" issue when there is no
+            // finally block because that case is already handled by "clear identity call not
+            // followed by try-finally" issue
+            if (tokensMap[variableName]?.finallyBlock != null &&
+                    node.uastParent != tokensMap[variableName]?.finallyBlock) {
                 context.report(
                         ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
                         context.getLocation(node),
                         getIncidentMessageRestoreIdentityCallNotInFinallyBlock(variableName)
                 )
             }
-            val originalScope = tokensMap[variableName]?.scope ?: return
-            val psi = arg.sourcePsi ?: return
-            if (PsiSearchScopeUtil.isInScope(originalScope, psi)) {
-                tokensMap.remove(variableName)
-            }
+            tokensMap.remove(variableName)
         }
 
         private fun isCallerAwareMethod(expression: UQualifiedReferenceExpression): Boolean =
@@ -199,12 +224,58 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                             *method.args
                     )
         }
-    }
 
-    private fun isInFinallyBlock(expression: UExpression): Boolean {
-        val tryExpression = expression.getParentOfType<UTryExpression>(strict = true)
-                ?: return false
-        return expression.isUastChildOf(tryExpression.finallyClause)
+        /**
+         * ULocalVariable in the file tree:
+         *
+         * UBlockExpression
+         *     UDeclarationsExpression
+         *         ULocalVariable
+         *         ULocalVariable
+         *     UTryStatement
+         *     etc.
+         *
+         * To get the next statement of ULocalVariable:
+         * - If there exists a next sibling in UDeclarationsExpression, return the sibling
+         * - If there exists a next sibling of UDeclarationsExpression in UBlockExpression, return
+         *   the sibling
+         * - Otherwise, return null
+         *
+         * Example 1 - the next sibling is in UDeclarationsExpression:
+         * Code:
+         * {
+         *     int num1 = 0, num2 = methodThatThrowsException();
+         * }
+         * Returns: num2 = methodThatThrowsException()
+         *
+         * Example 2 - the next sibling is in UBlockExpression:
+         * Code:
+         * {
+         *     int num1 = 0;
+         *     methodThatThrowsException();
+         * }
+         * Returns: methodThatThrowsException()
+         *
+         * Example 3 - no next sibling;
+         * Code:
+         * {
+         *     int num1 = 0;
+         * }
+         * Returns: null
+         */
+        private fun getNextStatementOfLocalVariable(node: ULocalVariable): UElement? {
+            val declarationsExpression = node.uastParent as? UDeclarationsExpression ?: return null
+            val declarations = declarationsExpression.declarations
+            val indexInDeclarations = declarations.indexOf(node)
+            if (indexInDeclarations != -1 && declarations.size > indexInDeclarations + 1) {
+                return declarations[indexInDeclarations + 1]
+            }
+            val enclosingBlock = node
+                    .getParentOfType<UBlockExpression>(strict = true) ?: return null
+            val expressions = enclosingBlock.expressions
+            val indexInBlock = expressions.indexOf(declarationsExpression as UElement)
+            return if (indexInBlock == -1) null else expressions.getOrNull(indexInBlock + 1)
+        }
     }
 
     private fun findFirstTokenInScope(node: UElement): Token? {
@@ -283,6 +354,7 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
     private data class Token(
         val variableName: String,
         val scope: SearchScope?,
-        val location: Location
+        val location: Location,
+        val finallyBlock: UElement?
     )
 }

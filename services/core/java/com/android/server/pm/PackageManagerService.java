@@ -23858,7 +23858,6 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new IllegalArgumentException("Invalid new component state: "
                     + newState);
         }
-        PackageSetting pkgSetting;
         final int callingUid = Binder.getCallingUid();
         final int permission;
         if (callingUid == Process.SYSTEM_UID) {
@@ -23872,55 +23871,43 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         boolean sendNow = false;
         boolean isApp = (className == null);
-        final boolean isCallerInstantApp = (getInstantAppPackageName(callingUid) != null);
         String componentName = isApp ? packageName : className;
         ArrayList<String> components;
 
+        final boolean isCallerTargetApp = ArrayUtils.contains(
+                getPackagesForUid(callingUid), packageName);
+        final PackageSetting pkgSetting;
         // reader
         synchronized (mLock) {
             pkgSetting = mSettings.getPackageLPr(packageName);
-            if (pkgSetting == null) {
-                if (!isCallerInstantApp) {
-                    if (className == null) {
-                        throw new IllegalArgumentException("Unknown package: " + packageName);
-                    }
-                    throw new IllegalArgumentException(
-                            "Unknown component: " + packageName + "/" + className);
-                } else {
-                    // throw SecurityException to prevent leaking package information
+            // Limit who can change which apps
+            if (!isCallerTargetApp) {
+                // Don't allow apps that don't have permission to modify other apps
+                if (!allowedByPermission
+                        || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
                     throw new SecurityException(
                             "Attempt to change component state; "
-                            + "pid=" + Binder.getCallingPid()
-                            + ", uid=" + callingUid
-                            + (className == null
-                                    ? ", package=" + packageName
-                                    : ", component=" + packageName + "/" + className));
+                                    + "pid=" + Binder.getCallingPid()
+                                    + ", uid=" + callingUid
+                                    + (className == null
+                                            ? ", package=" + packageName
+                                            : ", component=" + packageName + "/" + className));
                 }
+                // Don't allow changing protected packages.
+                if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                    throw new SecurityException(
+                            "Cannot disable a protected package: " + packageName);
+                }
+            }
+            if (pkgSetting == null) {
+                if (className == null) {
+                    throw new IllegalArgumentException("Unknown package: " + packageName);
+                }
+                throw new IllegalArgumentException(
+                        "Unknown component: " + packageName + "/" + className);
             }
         }
 
-        // Limit who can change which apps
-        if (!UserHandle.isSameApp(callingUid, pkgSetting.appId)) {
-            // Don't allow apps that don't have permission to modify other apps
-            final boolean filterApp;
-            synchronized (mLock) {
-                filterApp = (!allowedByPermission
-                        || shouldFilterApplicationLocked(pkgSetting, callingUid, userId));
-            }
-            if (filterApp) {
-                throw new SecurityException(
-                        "Attempt to change component state; "
-                                + "pid=" + Binder.getCallingPid()
-                                + ", uid=" + callingUid
-                                + (className == null
-                                ? ", package=" + packageName
-                                        : ", component=" + packageName + "/" + className));
-            }
-            // Don't allow changing protected packages.
-            if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-                throw new SecurityException("Cannot disable a protected package: " + packageName);
-            }
-        }
         // Only allow apps with CHANGE_COMPONENT_ENABLED_STATE permission to change hidden
         // app details activity
         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)

@@ -45,7 +45,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val statusBarStateControllerImpl: StatusBarStateControllerImpl,
     private val keyguardViewMediatorLazy: dagger.Lazy<KeyguardViewMediator>,
-    private val keyguardStateController: KeyguardStateController
+    private val keyguardStateController: KeyguardStateController,
+    private val dozeParameters: dagger.Lazy<DozeParameters>
 ) : WakefulnessLifecycle.Observer {
     private val handler = Handler()
 
@@ -146,7 +147,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     override fun onStartedGoingToSleep() {
-        if (shouldPlayUnlockedScreenOffAnimation()) {
+        if (dozeParameters.get().shouldControlUnlockedScreenOff()) {
             lightRevealAnimationPlaying = true
             lightRevealAnimator.start()
 
@@ -164,6 +165,10 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * on the current state of the device.
      */
     fun shouldPlayUnlockedScreenOffAnimation(): Boolean {
+        if (!dozeParameters.get().canControlUnlockedScreenOff()) {
+            return false
+        }
+
         // We only play the unlocked screen off animation if we are... unlocked.
         if (statusBarStateControllerImpl.state != StatusBarState.SHADE) {
             return false

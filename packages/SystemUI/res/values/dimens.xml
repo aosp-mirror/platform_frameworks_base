@@ -208,7 +208,7 @@
     <dimen name="keyguard_indication_y_translation">24dp</dimen>
 
     <!-- The padding on the bottom of the notifications on the keyguard -->
-    <dimen name="keyguard_indication_bottom_padding">12sp</dimen>
+    <dimen name="keyguard_indication_bottom_padding">16sp</dimen>
 
     <!-- The padding at start and end of indication text shown on AOD -->
     <dimen name="keyguard_indication_text_padding">16dp</dimen>
@@ -743,6 +743,10 @@
     <dimen name="keyguard_clock_lock_margin">16dp</dimen>
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
+    <!-- When large clock is showing, offset the smartspace by this amount -->
+    <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
+    <!-- With the large clock, move up slightly from the center -->
+    <dimen name="keyguard_large_clock_top_margin">-52dp</dimen>
 
     <!-- Default line spacing multiplier between hours and minutes of the keyguard clock -->
     <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
@@ -1452,10 +1456,12 @@
     <dimen name="people_space_messages_count_radius">12dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
     <dimen name="required_width_for_medium">136dp</dimen>
+    <dimen name="required_height_for_medium">80dp</dimen>
     <dimen name="required_width_for_large">120dp</dimen>
     <dimen name="required_height_for_large">168dp</dimen>
     <dimen name="default_width">146dp</dimen>
     <dimen name="default_height">92dp</dimen>
+    <dimen name="avatar_size_for_medium_empty">64dp</dimen>
     <dimen name="avatar_size_for_medium">52dp</dimen>
     <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
     <dimen name="max_people_avatar_size">108dp</dimen>
@@ -1475,7 +1481,10 @@
     <dimen name="largest_predefined_icon">32dp</dimen>
     <dimen name="availability_dot_status_padding">8dp</dimen>
     <dimen name="availability_dot_notification_padding">12dp</dimen>
+    <dimen name="availability_dot_shown_padding">4dp</dimen>
+    <dimen name="availability_dot_missing_padding">12dp</dimen>
     <dimen name="medium_content_padding_above_name">4dp</dimen>
+    <dimen name="padding_above_predefined_icon_for_small">4dp</dimen>
     <dimen name="padding_between_suppressed_layout_items">8dp</dimen>
 
     <!-- Accessibility floating menu -->
@@ -1545,6 +1554,7 @@
     <dimen name="wallet_screen_header_icon_size">56dp</dimen>
     <dimen name="wallet_screen_header_view_size">80dp</dimen>
     <dimen name="card_margin">16dp</dimen>
+    <dimen name="wallet_card_carousel_container_top_margin">48dp</dimen>
     <dimen name="card_carousel_dot_offset">24dp</dimen>
     <dimen name="card_carousel_dot_unselected_radius">2dp</dimen>
     <dimen name="card_carousel_dot_selected_radius">3dp</dimen>
@@ -1563,4 +1573,35 @@
     <!-- The padding between the icon and the text. -->
     <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+
+    <!-- Internet panel related dimensions -->
+    <dimen name="internet_dialog_list_margin">12dp</dimen>
+    <dimen name="internet_dialog_list_max_height">614dp</dimen>
+
+    <!-- Signal icon in internet dialog -->
+    <dimen name="signal_strength_icon_size">24dp</dimen>
+
+    <!-- Internet dialog related dimensions -->
+    <dimen name="internet_dialog_corner_radius">24dp</dimen>
+
+    <!-- Size of internet dialog -->
+    <dimen name="settingslib_switchbar_margin">16dp</dimen>
+    <!-- Minimum width of switch -->
+    <dimen name="settingslib_min_switch_width">48dp</dimen>
+    <!-- Size of layout margin left -->
+    <dimen name="settingslib_switchbar_padding_left">20dp</dimen>
+    <!-- Size of layout margin right -->
+    <dimen name="settingslib_switchbar_padding_right">20dp</dimen>
+    <!-- Radius of switch bar -->
+    <dimen name="settingslib_switch_bar_radius">24dp</dimen>
+    <!-- Margin of switch thumb -->
+    <dimen name="settingslib_switch_thumb_margin">4dp</dimen>
+    <!-- Size of switch thumb -->
+    <dimen name="settingslib_switch_thumb_size">16dp</dimen>
+    <!-- Width of switch track -->
+    <dimen name="settingslib_switch_track_width">48dp</dimen>
+    <!-- Height of switch track -->
+    <dimen name="settingslib_switch_track_height">24dp</dimen>
+    <!-- Radius of switch track -->
+    <dimen name="settingslib_switch_track_radius">31dp</dimen>
 </resources>

@@ -333,6 +333,7 @@ class ProcessErrorStateRecord {
         if (errorId != null) {
             info.append("ErrorId: ").append(errorId.toString()).append("\n");
         }
+        info.append("Frozen: ").append(mApp.mOptRecord.isFrozen()).append("\n");
 
         // Retrieve controller with max ANR delay from AnrControllers
         // Note that we retrieve the controller before dumping stacks because dumping stacks can

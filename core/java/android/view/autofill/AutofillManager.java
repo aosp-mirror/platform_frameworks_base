@@ -2534,7 +2534,10 @@ public final class AutofillManager {
             // Client should never be null here, but it doesn't hurt to check...
             log.setPackageName(mContext.getPackageName());
         } else {
-            log.setComponentName(client.autofillClientGetComponentName());
+            // Remove activity name from logging
+            final ComponentName sanitizedComponentName =
+                    new ComponentName(client.autofillClientGetComponentName().getPackageName(), "");
+            log.setComponentName(sanitizedComponentName);
         }
         return log;
     }

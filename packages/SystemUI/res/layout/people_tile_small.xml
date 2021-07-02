@@ -44,7 +44,7 @@
             android:tint="?android:attr/textColorSecondary"
             android:layout_gravity="center"
             android:layout_width="18dp"
-            android:layout_height="22dp" />
+            android:layout_height="18dp" />
 
         <TextView
             android:id="@+id/messages_count"

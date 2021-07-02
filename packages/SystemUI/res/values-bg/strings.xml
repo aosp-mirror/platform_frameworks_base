@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показване на всички"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Отключване с цел плащане"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не е настроено"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки за заключения екран"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибриране"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибриране и се показва по-долу в секцията с разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да звъни или да вибрира въз основа на настройките за телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звъни или да вибрира въз основа на настройките за телефона. Разговорите от <xliff:g id="APP_NAME">%1$s</xliff:g> се показват като балончета по подразбиране."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звъни или да вибрира според настройките за телефона. Разговорите от <xliff:g id="APP_NAME">%1$s</xliff:g> се показват като балончета по подразбиране."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Задържа вниманието ви посредством плаващ пряк път към това съдържание."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Нека системата да определя дали дадено известие да се придружава от звук, или вибриране"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Състояние:&lt;/b&gt; Повишено до основно"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Приспособления за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Докоснете разговор, за да го добавите към началния си екран"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Скорошните ви разговори ще се показват тук"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Разговори с приоритет"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Скорошни разговори"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>

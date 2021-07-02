@@ -147,6 +147,7 @@ public class UdfpsController implements DozeReceiver {
     @Nullable private Runnable mCancelAodTimeoutAction;
     private boolean mScreenOn;
     private Runnable mAodInterruptRunnable;
+    private boolean mOnFingerDown;
 
     @VisibleForTesting
     public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
@@ -662,12 +663,12 @@ public class UdfpsController implements DozeReceiver {
 
     private void showUdfpsOverlay(@NonNull ServerRequest request) {
         mExecution.assertIsMainThread();
-
         final int reason = request.mRequestReason;
         if (mView == null) {
             try {
                 Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
                 mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
+                mOnFingerDown = false;
                 mView.setSensorProperties(mSensorProps);
                 mView.setHbmProvider(mHbmProvider);
                 UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
@@ -826,6 +827,7 @@ public class UdfpsController implements DozeReceiver {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
+        mOnFingerDown = true;
         mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
         Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
         Trace.beginAsyncSection("UdfpsController.e2e.startIllumination", 0);
@@ -843,7 +845,10 @@ public class UdfpsController implements DozeReceiver {
             Log.w(TAG, "Null view in onFingerUp");
             return;
         }
-        mFingerprintManager.onPointerUp(mSensorProps.sensorId);
+        if (mOnFingerDown) {
+            mFingerprintManager.onPointerUp(mSensorProps.sensorId);
+        }
+        mOnFingerDown = false;
         if (mView.isIlluminationRequested()) {
             mView.stopIllumination();
         }

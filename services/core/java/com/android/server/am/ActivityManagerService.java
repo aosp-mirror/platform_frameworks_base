@@ -5690,16 +5690,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        try {
-            if (uid != 0) { // bypass the root
-                final String[] packageNames = getPackageManager().getPackagesForUid(uid);
-                if (ArrayUtils.isEmpty(packageNames)) {
-                    // The uid is not existed or not visible to the caller.
-                    return PackageManager.PERMISSION_DENIED;
-                }
-            }
-        } catch (RemoteException e) {
-        }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
@@ -15591,13 +15581,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public List<ProcessMemoryState> getMemoryStateForProcesses() {
             List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
-            synchronized (mProcLock) {
-                synchronized (mPidsSelfLocked) {
-                    for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
-                        final ProcessRecord r = mPidsSelfLocked.valueAt(i);
-                        processMemoryStates.add(new ProcessMemoryState(
-                                r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
-                    }
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    processMemoryStates.add(new ProcessMemoryState(
+                            r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
                 }
             }
             return processMemoryStates;
@@ -16372,6 +16360,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new IllegalArgumentException("uid record for " + uid + " not found");
                 }
                 return uidRecord.getCurCapability();
+            }
+        }
+
+        /**
+         * @return The PID list of the isolated process with packages matching the given uid.
+         */
+        @Nullable
+        public List<Integer> getIsolatedProcesses(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mProcessList.getIsolatedProcessesLocked(uid);
             }
         }
     }

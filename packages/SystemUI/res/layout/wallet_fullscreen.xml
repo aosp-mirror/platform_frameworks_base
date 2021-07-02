@@ -27,12 +27,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:navigationContentDescription="@null" />
+        android:navigationContentDescription="@null">
+        <Button
+            android:id="@+id/wallet_toolbar_app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="end|center_horizontal"
+            android:paddingHorizontal="@dimen/wallet_button_horizontal_padding"
+            android:background="@drawable/wallet_app_button_bg"
+            android:text="@string/wallet_app_button_label"
+            android:textColor="?androidprv:attr/colorAccentPrimary"
+            android:textAlignment="center"
+            android:visibility="gone"/>
+    </Toolbar>
     <LinearLayout
         android:id="@+id/card_carousel_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="@dimen/wallet_card_carousel_container_top_margin"
         android:orientation="vertical">
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -54,6 +66,7 @@
                     android:id="@+id/label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
                     android:layout_marginHorizontal="48dp"
                     android:textColor="?androidprv:attr/textColorPrimary"
                     android:textAlignment="center"/>
@@ -67,7 +80,7 @@
                     android:transitionName="dotIndicator"
                     android:clipChildren="false"
                     android:clipToPadding="false"
-                    android:layout_marginVertical="24dp"/>
+                    android:layout_marginBottom="24dp"/>
                 <Button
                     android:id="@+id/wallet_action_button"
                     android:layout_width="wrap_content"
@@ -83,6 +96,7 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
         <View
+            android:id="@+id/dynamic_placeholder"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.1"/>

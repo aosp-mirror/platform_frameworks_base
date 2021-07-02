@@ -323,7 +323,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         // WHEN the clock position algorithm is run
         positionClock();
         // THEN the notif padding is zero.
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(0);
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(
+                (int) (mKeyguardStatusHeight * .667f));
     }
 
     @Test

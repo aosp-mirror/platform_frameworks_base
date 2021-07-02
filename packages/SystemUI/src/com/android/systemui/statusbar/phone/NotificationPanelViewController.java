@@ -2802,7 +2802,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private int calculatePanelHeightShade() {
         int emptyBottomMargin = mNotificationStackScrollLayoutController.getEmptyBottomMargin();
         int maxHeight = mNotificationStackScrollLayoutController.getHeight() - emptyBottomMargin;
-        maxHeight += mNotificationStackScrollLayoutController.getTopPaddingOverflow();
 
         if (mBarState == KEYGUARD) {
             int minKeyguardPanelBottom = mClockPositionAlgorithm.getLockscreenStatusViewHeight()
@@ -3492,6 +3491,14 @@ public class NotificationPanelViewController extends PanelViewController {
         return !isFullWidth() || !mShowIconsWhenExpanded;
     }
 
+    public final QS.ScrollListener mScrollListener = scrollY -> {
+        if (scrollY > 0 && !mQsFullyExpanded) {
+            if (DEBUG) Log.d(TAG, "Scrolling while not expanded. Forcing expand");
+            // If we are scrolling QS, we should be fully expanded.
+            expandWithQs();
+        }
+    };
+
     private final FragmentListener mFragmentListener = new FragmentListener() {
         @Override
         public void onFragmentViewCreated(String tag, Fragment fragment) {
@@ -3521,6 +3528,7 @@ public class NotificationPanelViewController extends PanelViewController {
             });
             mLockscreenShadeTransitionController.setQS(mQs);
             mNotificationStackScrollLayoutController.setQsContainer((ViewGroup) mQs.getView());
+            mQs.setScrollListener(mScrollListener);
             updateQsExpansion();
         }
 

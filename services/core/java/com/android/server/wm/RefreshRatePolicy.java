@@ -154,6 +154,21 @@ class RefreshRatePolicy {
         return 0;
     }
 
+    float getPreferredMinRefreshRate(WindowState w) {
+        // If app is animating, it's not able to control refresh rate because we want the animation
+        // to run in default refresh rate.
+        if (w.isAnimating(TRANSITION | PARENTS)) {
+            return 0;
+        }
+
+        // If app requests a certain refresh rate or mode, don't override it.
+        if (w.mAttrs.preferredDisplayModeId != 0) {
+            return 0;
+        }
+
+        return w.mAttrs.preferredMinDisplayRefreshRate;
+    }
+
     float getPreferredMaxRefreshRate(WindowState w) {
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
