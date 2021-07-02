@@ -868,7 +868,8 @@ public class ScreenshotView extends FrameLayout implements
             matrix.setScale(scale, scale);
             matrix.postTranslate(-scrollableArea.left * scale, -scrollableArea.top * scale);
 
-            mScrollablePreview.setTranslationX(scale * scrollableArea.left);
+            mScrollablePreview.setTranslationX(scale
+                    * (mDirectionLTR ? scrollableArea.left : scrollableArea.right - getWidth()));
             mScrollablePreview.setTranslationY(scale * scrollableArea.top);
             mScrollablePreview.setImageMatrix(matrix);
             mScrollablePreview.setImageBitmap(screenBitmap);
