@@ -1171,7 +1171,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
-            mResourcesManager.updatePendingAppInfoUpdates(ai);
+            mResourcesManager.appendPendingAppInfoUpdate(new String[]{ai.sourceDir}, ai);
             mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai);
             sendMessage(H.APPLICATION_INFO_CHANGED, ai);
         }
@@ -5975,16 +5975,12 @@ public final class ActivityThread extends ClientTransactionHandler
             resApk = ref != null ? ref.get() : null;
         }
 
-        final String[] oldResDirs = new String[2];
-
         if (apk != null) {
-            oldResDirs[0] = apk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
             apk.updateApplicationInfo(ai, oldPaths);
         }
         if (resApk != null) {
-            oldResDirs[1] = resApk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
@@ -5992,7 +5988,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
-            mResourcesManager.applyNewResourceDirs(ai, oldResDirs);
+            mResourcesManager.applyAllPendingAppInfoUpdates();
         }
     }
 
@@ -6241,7 +6237,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
                                 synchronized (mResourcesManager) {
                                     // Update affected Resources objects to use new ResourcesImpl
-                                    mResourcesManager.applyNewResourceDirs(aInfo, oldResDirs);
+                                    mResourcesManager.appendPendingAppInfoUpdate(oldResDirs,
+                                            aInfo);
+                                    mResourcesManager.applyAllPendingAppInfoUpdates();
                                 }
                             } catch (RemoteException e) {
                             }
