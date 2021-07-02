@@ -1334,8 +1334,7 @@ public class NotificationPanelViewController extends PanelViewController {
                         : mNotificationShelfController.getIntrinsicHeight() + notificationPadding;
 
         float lockIconPadding = 0;
-        if (mLockIconViewController.getTop() != 0
-                && (mUpdateMonitor.isUdfpsEnrolled() || mUpdateMonitor.isFaceEnrolled())) {
+        if (mLockIconViewController.getTop() != 0) {
             lockIconPadding = mStatusBar.getDisplayHeight() - mLockIconViewController.getTop();
         }
 
