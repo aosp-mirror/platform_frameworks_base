@@ -597,8 +597,8 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
             // Make sure this doesn't get stuck and burns in. Acquire wakelock until its cleared.
             mWakeLock.setAcquired(true);
-            hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
         }
+        hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
 
         updateIndication(false);
     }
@@ -802,7 +802,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         } else if (mKeyguardUpdateMonitor.isScreenOn()) {
             showTransientIndication(mContext.getString(R.string.keyguard_unlock),
                     false /* isError */, true /* hideOnScreenOff */);
-            hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
         }
     }
 
@@ -862,7 +861,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {
                     showTransientIndication(computePowerIndication());
-                    hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 } else if (wasPluggedIn && !mPowerPluggedIn) {
                     hideTransientIndication();
                 }
@@ -882,23 +880,19 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 return;
             }
 
-            if (biometricSourceType == BiometricSourceType.FACE
-                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                // suggest trying fingerprint
-                showTransientIndication(R.string.keyguard_try_fingerprint);
-                return;
-            }
-
             boolean showSwipeToUnlock =
                     msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
-                showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
-                if (!showSwipeToUnlock) {
-                    hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
+                if (biometricSourceType == BiometricSourceType.FACE
+                        && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
+                    // suggest trying fingerprint
+                    showTransientIndication(R.string.keyguard_try_fingerprint);
+                    return;
                 }
+                showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
             }
             if (showSwipeToUnlock) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SWIPE_UP_TO_UNLOCK),
@@ -913,7 +907,9 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 return;
             }
             if (biometricSourceType == BiometricSourceType.FACE
-                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
+                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
+                    && !mStatusBarKeyguardViewManager.isBouncerShowing()
+                    && mKeyguardUpdateMonitor.isScreenOn()) {
                 // suggest trying fingerprint
                 showTransientIndication(R.string.keyguard_try_fingerprint);
                 return;
@@ -935,8 +931,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
                 showTransientIndication(errString, /* isError */ true,
                     /* hideOnScreenOff */ true);
-                // We want to keep this message around in case the screen was off
-                hideTransientIndicationDelayed(HIDE_DELAY_MS);
             } else {
                 mMessageToShowOnScreenOn = errString;
             }
