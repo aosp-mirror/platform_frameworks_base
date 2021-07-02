@@ -121,7 +121,7 @@ void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
             .mergeTransaction = currentFunctor.mergeTransaction,
     };
 
-    if (!drawInfo.isLayer) {
+    if (Properties::enableWebViewOverlays && !drawInfo.isLayer) {
         renderthread::CanvasContext* activeContext =
                 renderthread::CanvasContext::getActiveContext();
         if (activeContext != nullptr) {

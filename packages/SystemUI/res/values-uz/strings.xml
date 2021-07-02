@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hammasi"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Toʻlov uchun qulfdan chiqarish"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Sozlanmagan"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Foydalanish uchun qulfdan chiqarish"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Bildirgilarni yuklashda xatolik yuz berdi, keyinroq qaytadan urining"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Qulflangan ekran sozlamalari"</string>

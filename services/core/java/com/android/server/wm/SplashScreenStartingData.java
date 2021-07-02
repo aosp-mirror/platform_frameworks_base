@@ -58,4 +58,9 @@ class SplashScreenStartingData extends StartingData {
                 mLogo, mWindowFlags, mMergedOverrideConfiguration,
                 activity.getDisplayContent().getDisplayId());
     }
+
+    @Override
+    boolean needRevealAnimation() {
+        return true;
+    }
 }
