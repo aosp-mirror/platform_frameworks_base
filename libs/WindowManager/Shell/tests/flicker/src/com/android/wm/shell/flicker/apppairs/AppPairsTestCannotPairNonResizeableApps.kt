@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -84,11 +85,9 @@ class AppPairsTestCannotPairNonResizeableApps(
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @FlakyTest
+    @Postsubmit
     @Test
-    override fun navBarLayerIsVisible() {
-        super.navBarLayerIsVisible()
-    }
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     @Presubmit
     @Test

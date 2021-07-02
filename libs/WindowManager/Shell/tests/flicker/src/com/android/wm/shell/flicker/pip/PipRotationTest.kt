@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -73,10 +74,18 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
             }
         }
 
-    @FlakyTest(bugId = 185400889)
+    @Postsubmit
     @Test
     override fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
         testSpec.config.endRotation, allStates = false)
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @FlakyTest
     @Test
@@ -90,7 +99,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
             testSpec.config.endRotation)
 
-    @FlakyTest(bugId = 185400889)
+    @Postsubmit
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
@@ -99,7 +108,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         }
     }
 
-    @FlakyTest(bugId = 185400889)
+    @Postsubmit
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {

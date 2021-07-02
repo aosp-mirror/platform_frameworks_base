@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -62,13 +63,13 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
             }
         }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarLayerIsVisible() {
         super.navBarLayerIsVisible()
@@ -80,19 +81,19 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
         super.navBarLayerRotatesAndScales()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarLayerIsVisible() {
         super.statusBarLayerIsVisible()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun appLayerReplacesLauncher() {
         super.appLayerReplacesLauncher()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() {
         super.appWindowReplacesLauncherAsTopWindow()

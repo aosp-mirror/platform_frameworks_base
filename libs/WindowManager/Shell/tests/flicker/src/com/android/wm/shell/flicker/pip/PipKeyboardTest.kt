@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -70,6 +71,14 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
                 imeApp.closeIME(wmHelper)
             }
         }
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     /**
      * Ensure the pip window remains visible throughout any keyboard interactions

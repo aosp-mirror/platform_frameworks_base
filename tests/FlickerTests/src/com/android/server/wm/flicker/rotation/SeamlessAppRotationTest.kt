@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManager
 import androidx.test.filters.FlakyTest
@@ -62,7 +61,7 @@ class SeamlessAppRotationTest(
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun appWindowFullScreen() {
         testSpec.assertWm {
@@ -76,7 +75,7 @@ class SeamlessAppRotationTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun appWindowSeamlessRotation() {
         testSpec.assertWm {
@@ -125,7 +124,7 @@ class SeamlessAppRotationTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
