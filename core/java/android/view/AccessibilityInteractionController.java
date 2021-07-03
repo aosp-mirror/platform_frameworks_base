@@ -616,9 +616,12 @@ public final class AccessibilityInteractionController {
                         // focus instead fetching all provider nodes to do the search here.
                         AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
                         if (provider != null) {
-                            if (mViewRootImpl.mAccessibilityFocusedVirtualView != null) {
-                                focused = AccessibilityNodeInfo.obtain(
-                                        mViewRootImpl.mAccessibilityFocusedVirtualView);
+                            final AccessibilityNodeInfo focusNode =
+                                    mViewRootImpl.mAccessibilityFocusedVirtualView;
+                            if (focusNode != null) {
+                                final int virtualNodeId = AccessibilityNodeInfo
+                                        .getVirtualDescendantId(focusNode.getSourceNodeId());
+                                focused = provider.createAccessibilityNodeInfo(virtualNodeId);
                             }
                         } else if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
                             focused = host.createAccessibilityNodeInfo();
