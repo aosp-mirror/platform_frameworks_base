@@ -251,7 +251,7 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Siete"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Podrobné denníky Wi‑Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdenie vyhľadávania sietí Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdiť vyhľadávanie sietí Wi‑Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Randomizácia dočasnej adresy MAC siete Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardvérová akcelerácia tetheringu"</string>
@@ -361,7 +361,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Povoliť vrstvy ladenia grafického procesora"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Povoliť načítanie vrstiev ladenia grafického procesora na ladenie aplikácií"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podr. zapis. dodáv. do denníka"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Mierka animácie okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mierka animácie premeny"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Mierka dĺžky animácie"</string>
@@ -570,12 +570,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Odobrať hosťa"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Obnoviť reláciu hosťa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Hosť"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8047270010895437534) -->
-    <skip />
-    <!-- no translation found for guest_reset_guest_confirm_button (2989915693215617237) -->
-    <skip />
-    <!-- no translation found for guest_resetting (7822120170191509566) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Chcete resetovať reláciu hosťa?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetovať"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Relácia hosťa sa resetuje…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Odfotiť"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Vybrať obrázok"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Vybrať fotku"</string>
