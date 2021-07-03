@@ -24,11 +24,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.service.autofill.IFillCallback;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.KeyEvent;
 
 import com.android.internal.os.IResultReceiver;
@@ -142,10 +140,4 @@ oneway interface IAutoFillManagerClient {
     * Requests to show the soft input method if the focus is on the given id.
     */
    void requestShowSoftInput(in AutofillId id);
-
-    /**
-     * Requests to determine if a screen can be autofilled by the client app.
-     */
-    void requestFillFromClient(int id, in InlineSuggestionsRequest request,
-            in IFillCallback callback);
 }
