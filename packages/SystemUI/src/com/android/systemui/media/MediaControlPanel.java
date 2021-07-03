@@ -455,8 +455,12 @@ public class MediaControlPanel {
 
             if (mKey != null) {
                 closeGuts();
-                mMediaDataManagerLazy.get().dismissMediaData(mKey,
-                        MediaViewController.GUTS_ANIMATION_DURATION + 100);
+                if (!mMediaDataManagerLazy.get().dismissMediaData(mKey,
+                        MediaViewController.GUTS_ANIMATION_DURATION + 100)) {
+                    Log.w(TAG, "Manager failed to dismiss media " + mKey);
+                    // Remove directly from carousel to let user recover - TODO(b/190799184)
+                    mMediaCarouselController.removePlayer(key, false, false);
+                }
             } else {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="
                         + data.getToken().getUid());
