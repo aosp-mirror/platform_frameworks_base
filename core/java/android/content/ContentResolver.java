@@ -3289,7 +3289,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @param authority the provider to specify in the sync request
      * @param extras extra parameters to go along with the sync request
      * @param pollFrequency how frequently the sync should be performed, in seconds.
-     * On Android API level 24 and above, a minmam interval of 15 minutes is enforced.
+     * On Android API level 24 and above, a minimum interval of 15 minutes is enforced.
      * On previous versions, the minimum interval is 1 hour.
      * @throws IllegalArgumentException if an illegal extra was set or if any of the parameters
      * are null.
