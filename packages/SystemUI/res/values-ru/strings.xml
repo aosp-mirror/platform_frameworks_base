@@ -675,7 +675,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Расплачивайтесь через телефон быстро и безопасно."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Разблокировать для оплаты"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не настроено"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
     <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
     <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
@@ -1159,8 +1160,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Будьте в курсе последних сообщений, пропущенных вызовов и обновлений статуса."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Чат"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Приостановлено в режиме \"Не беспокоить\""</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил сообщение"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил изображение"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не удается получить данные об уровне заряда батареи"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нажмите, чтобы узнать больше."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Будильников нет"</string>

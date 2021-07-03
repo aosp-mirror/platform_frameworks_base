@@ -382,9 +382,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
      */
     boolean onErrorReceived(int sensorId, int cookie, @BiometricConstants.Errors int error,
             int vendorCode) throws RemoteException {
-        if (DEBUG) {
-            Slog.v(TAG, "onErrorReceived sensor: " + sensorId + " error: " + error);
-        }
+        Slog.d(TAG, "onErrorReceived sensor: " + sensorId + " error: " + error);
 
         if (!containsCookie(cookie)) {
             Slog.e(TAG, "Unknown/expired cookie: " + cookie);

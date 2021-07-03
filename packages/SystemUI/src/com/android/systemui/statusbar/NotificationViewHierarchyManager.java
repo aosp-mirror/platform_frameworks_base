@@ -435,7 +435,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = mListContainer.getContainerChildCount();
 
         int visibleNotifications = 0;
-        boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        boolean onKeyguard =
+                mStatusBarStateController.getCurrentOrUpcomingState() == StatusBarState.KEYGUARD;
         Stack<ExpandableNotificationRow> stack = new Stack<>();
         for (int i = N - 1; i >= 0; i--) {
             View child = mListContainer.getContainerChildAt(i);

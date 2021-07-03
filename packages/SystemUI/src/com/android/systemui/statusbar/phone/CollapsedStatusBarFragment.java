@@ -42,6 +42,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
@@ -93,6 +94,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
     private NotificationIconAreaController mNotificationIconAreaController;
+    private final FeatureFlags mFeatureFlags;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -115,12 +117,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
-            NotificationIconAreaController notificationIconAreaController
+            NotificationIconAreaController notificationIconAreaController,
+            FeatureFlags featureFlags
     ) {
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mLocationPublisher = locationPublisher;
         mNotificationIconAreaController = notificationIconAreaController;
+        mFeatureFlags = featureFlags;
     }
 
     @Override
@@ -150,7 +154,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
+        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons), mFeatureFlags);
         mDarkIconManager.setShouldLog(true);
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_volume));
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_alarm_clock));

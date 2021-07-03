@@ -669,7 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"மொபைல் மூலம் விரைவாகவும் பாதுகாப்பாகவும் பர்ச்சேஸ்கள் செய்ய பேமெண்ட் முறையை அமைக்கவும்"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"அனைத்தையும் காட்டு"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"பணம் செலுத்த அன்லாக் செய்க"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"அமைக்கப்படவில்லை"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
     <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
     <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"பயன்படுத்துவதற்கு அன்லாக் செய்க"</string>
@@ -1147,8 +1148,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"சமீபத்திய மெசேஜ்களையும் தவறிய அழைப்புகளையும் ஸ்டேட்டஸ் அப்டேட்களையும் பார்க்கலாம்"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"உரையாடல்"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தால் இடைநிறுத்தப்பட்டது"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு மெசேஜ் அனுப்பியுள்ளார்"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு படம் அனுப்பியுள்ளார்"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"பேட்டரி அளவை அறிவதில் சிக்கல்"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"மேலும் தகவல்களுக்கு தட்டவும்"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"அலாரம் எதுவுமில்லை"</string>
