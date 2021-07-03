@@ -275,7 +275,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mNumAllUidCpuTimeReads;
 
     /** Container for Resource Power Manager stats. Updated by updateRpmStatsLocked. */
-    private final RpmStats mTmpRpmStats = new RpmStats();
+    private RpmStats mTmpRpmStats = null;
     /** The soonest the RPM stats can be updated after it was last updated. */
     private static final long RPM_STATS_UPDATE_FREQ_MS = 1000;
     /** Last time that RPM stats were updated by updateRpmStatsLocked. */
@@ -12387,19 +12387,34 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mLastBluetoothActivityInfo.set(info);
     }
-
     /**
-     * Read and record Resource Power Manager (RPM) state and voter times.
+     * Read Resource Power Manager (RPM) state and voter times.
      * If RPM stats were fetched more recently than RPM_STATS_UPDATE_FREQ_MS ago, uses the old data
      * instead of fetching it anew.
+     *
+     * Note: This should be called without synchronizing this BatteryStatsImpl object
      */
-    public void updateRpmStatsLocked(long elapsedRealtimeUs) {
+    public void fillLowPowerStats() {
         if (mPlatformIdleStateCallback == null) return;
+
+        RpmStats rpmStats = new RpmStats();
         long now = SystemClock.elapsedRealtime();
         if (now - mLastRpmStatsUpdateTimeMs >= RPM_STATS_UPDATE_FREQ_MS) {
-            mPlatformIdleStateCallback.fillLowPowerStats(mTmpRpmStats);
-            mLastRpmStatsUpdateTimeMs = now;
+            mPlatformIdleStateCallback.fillLowPowerStats(rpmStats);
+            synchronized (this) {
+                mTmpRpmStats = rpmStats;
+                mLastRpmStatsUpdateTimeMs = now;
+            }
         }
+    }
+
+    /**
+     * Record Resource Power Manager (RPM) state and voter times.
+     * TODO(b/185252376): Remove this logging. PowerStatsService logs the same data more
+     * efficiently.
+     */
+    public void updateRpmStatsLocked(long elapsedRealtimeUs) {
+        if (mTmpRpmStats == null) return;
 
         for (Map.Entry<String, RpmStats.PowerStatePlatformSleepState> pstate
                 : mTmpRpmStats.mPlatformLowPowerStats.entrySet()) {
