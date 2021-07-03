@@ -490,7 +490,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"சாதன மொழிகளைப் பயன்படுத்து"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> க்கான அமைப்புகளைத் திறப்பதில் தோல்வி"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"இந்த உள்ளீட்டு முறையானது, கடவுச்சொற்கள் மற்றும் கிரெடிட் கார்டு எண்கள் போன்ற தனிப்பட்ட தகவல் உள்பட நீங்கள் உள்ளிடும் எல்லா உரையையும் சேகரிக்கக்கூடும். இது <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> பயன்பாட்டிலிருந்து வந்துள்ளது. இந்த உள்ளீட்டு முறையைப் பயன்படுத்தவா?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலை அன்லாக் செய்யும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS பதிவின் நிலை"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"பதிவு செய்யப்பட்டது"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"பதிவு செய்யப்படவில்லை"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"கெஸ்ட்டை அகற்று"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"கெஸ்ட் அமர்வை மீட்டமை"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"கெஸ்ட்"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"கெஸ்ட்டை மீட்டமைக்கவா?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"மீட்டமை"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"கெஸ்ட்டை மீட்டமைக்கிறது…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"படமெடுங்கள்"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"படத்தைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"படத்தைத் தேர்ந்தெடுங்கள்"</string>

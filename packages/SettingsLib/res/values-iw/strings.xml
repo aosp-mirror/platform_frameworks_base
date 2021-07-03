@@ -570,6 +570,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח/ת"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"איפוס הגלישה כאורח"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"אורח"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"לאפס את הגלישה כאורח?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"איפוס"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"מתבצע איפוס של הגלישה כאורח…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"צילום תמונה"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"לבחירת תמונה"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"בחירת תמונה"</string>
@@ -579,7 +582,7 @@
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"צריך להפעיל מחדש את המכשיר כדי להחיל את השינוי. יש להפעיל מחדש עכשיו או לבטל."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"אוזניות חוטיות"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"פועלת"</string>
-    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"כבויה"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"מצב כבוי"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"רשת ספק משתנה"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>

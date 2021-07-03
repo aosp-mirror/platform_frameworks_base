@@ -23,11 +23,15 @@ import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -99,6 +103,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
 
+    private boolean mDownDetected;
+    private final Rect mSensorTouchLocation = new Rect();
+
     @Inject
     public LockIconViewController(
             @Nullable LockIconView view,
@@ -164,9 +171,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
-        mAccessibilityManager.addTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
-
+        mDownDetected = false;
         updateVisibility();
     }
 
@@ -176,8 +181,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
-        mAccessibilityManager.removeTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
 
         if (mCancelDelayedUpdateVisibilityRunnable != null) {
             mCancelDelayedUpdateVisibilityRunnable.run();
@@ -187,18 +190,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     public float getTop() {
         return mView.getLocationTop();
-    }
-
-    private boolean onAffordanceClick() {
-        if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
-            return false;
-        }
-
-        // pre-emptively set to true to hide view
-        mIsBouncerShowing = true;
-        updateVisibility();
-        mKeyguardViewController.showBouncer(/* scrim */ true);
-        return true;
     }
 
     /**
@@ -224,7 +215,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             && (!mUdfpsEnrolled || !mRunningFPS);
         mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
 
-        updateClickListener();
         final CharSequence prevContentDescription = mView.getContentDescription();
         if (mShowLockIcon) {
             mView.setImageDrawable(mLockIcon);
@@ -256,10 +246,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         getResources().getString(R.string.accessibility_enter_hint));
         public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(v, info);
-            if (mShowLockIcon) {
-                info.addAction(mAccessibilityAuthenticateHint);
-            } else if (mShowUnlockIcon) {
-                info.addAction(mAccessibilityEnterHint);
+            if (isClickable()) {
+                if (mShowLockIcon) {
+                    info.addAction(mAccessibilityAuthenticateHint);
+                } else if (mShowUnlockIcon) {
+                    info.addAction(mAccessibilityEnterHint);
+                }
             }
         }
     };
@@ -269,24 +261,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 && !mIsBouncerShowing
                 && !mQsExpanded
                 && mStatusBarState == StatusBarState.KEYGUARD;
-    }
-
-    private void updateClickListener() {
-        if (mView != null) {
-            if (mUdfpsEnrolled || mShowUnlockIcon) {
-                mView.setOnClickListener(v -> onAffordanceClick());
-                if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                    mView.setOnLongClickListener(null);
-                    mView.setLongClickable(false);
-                } else {
-                    mView.setOnLongClickListener(v -> onAffordanceClick());
-                }
-            } else {
-                mView.setOnClickListener(null);
-                mView.setOnLongClickListener(null);
-            }
-
-        }
     }
 
     private void updateKeyguardShowing() {
@@ -324,6 +298,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         mHeightPixels - mIndicationBottomPadding - distAboveKgBottomArea - radius),
                     (int) radius);
         }
+
+        mView.getHitRect(mSensorTouchLocation);
     }
 
     @Override
@@ -448,8 +424,80 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     };
 
-    private final AccessibilityManager.TouchExplorationStateChangeListener
-            mTouchExplorationStateChangeListener = enabled -> updateClickListener();
+    private final GestureDetector mGestureDetector =
+            new GestureDetector(new SimpleOnGestureListener() {
+                public boolean onDown(MotionEvent e) {
+                    if (!isClickable()) {
+                        mDownDetected = false;
+                        return false;
+                    }
+
+                    // intercept all following touches until we see MotionEvent.ACTION_CANCEL UP or
+                    // MotionEvent.ACTION_UP (see #onTouchEvent)
+                    mDownDetected = true;
+                    return true;
+                }
+
+                public void onLongPress(MotionEvent e) {
+                    if (!wasClickableOnDownEvent()) {
+                        return;
+                    }
+
+                    onAffordanceClick();
+                }
+
+                public boolean onSingleTapUp(MotionEvent e) {
+                    if (!wasClickableOnDownEvent()) {
+                        return false;
+                    }
+
+                    onAffordanceClick();
+                    return true;
+                }
+
+                private boolean wasClickableOnDownEvent() {
+                    return mDownDetected;
+                }
+
+                private void onAffordanceClick() {
+                    if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
+                        return;
+                    }
+
+                    // pre-emptively set to true to hide view
+                    mIsBouncerShowing = true;
+                    updateVisibility();
+                    mKeyguardViewController.showBouncer(/* scrim */ true);
+                }
+            });
+
+    /**
+     * Send touch events to this view and handles it if the touch is within this view and we are
+     * in a 'clickable' state
+     * @return whether to intercept the touch event
+     */
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
+                && mView.getVisibility() == View.VISIBLE) {
+            mGestureDetector.onTouchEvent(event);
+        }
+
+        // we continue to intercept all following touches until we see MotionEvent.ACTION_CANCEL UP
+        // or MotionEvent.ACTION_UP. this is to avoid passing the touch to NPV
+        // after the lock icon disappears on device entry
+        if (mDownDetected) {
+            if (event.getAction() == MotionEvent.ACTION_CANCEL
+                    || event.getAction() == MotionEvent.ACTION_UP) {
+                mDownDetected = false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isClickable() {
+        return mUdfpsEnrolled || mShowUnlockIcon;
+    }
 
     /**
      * Set the alpha of this view.

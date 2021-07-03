@@ -2286,8 +2286,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQSExpansionEnabledAmbient() {
         final float scrollRangeToTop = mAmbientState.getTopPadding() - mQuickQsOffsetHeight;
         mQsExpansionEnabledAmbient = mShouldUseSplitNotificationShade
-                || (mAmbientState.getScrollY() <= scrollRangeToTop
-                && !mAmbientState.isShadeOpening());
+                || (mAmbientState.getScrollY() <= scrollRangeToTop);
         setQsExpansionEnabled();
     }
 
@@ -3939,6 +3938,10 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
                 }
 
+                if (mLockIconViewController.onTouchEvent(event)) {
+                    return true;
+                }
+
                 handled |= super.onTouch(v, event);
                 return !mDozing || mPulsing || handled;
             }
@@ -4437,6 +4440,8 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     public void showAodUi() {
         setDozing(true /* dozing */, false /* animate */, null);
+        mStatusBarStateController.setUpcomingState(KEYGUARD);
+        mEntryManager.updateNotifications("showAodUi");
         mStatusBarStateListener.onStateChanged(KEYGUARD);
         mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
         setExpandedFraction(1f);

@@ -201,6 +201,11 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         @Override
+        public void ping(IRemoteCallback callback) throws RemoteException {
+            callback.sendResult(null);
+        }
+
+        @Override
         public void stopDetection() {
             HotwordDetectionService.this.onStopDetection();
         }

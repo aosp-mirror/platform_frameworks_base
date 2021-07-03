@@ -103,6 +103,8 @@ public class AudioManager {
     private static final AudioVolumeGroupChangeHandler sAudioAudioVolumeGroupChangedHandler =
             new AudioVolumeGroupChangeHandler();
 
+    private static Context sContext;
+
     /**
      * Broadcast intent, a hint for applications that audio is about to become
      * 'noisy' due to a change in audio outputs. For example, this intent may
@@ -798,6 +800,7 @@ public class AudioManager {
         } else {
             mOriginalContext = context;
         }
+        sContext = context;
     }
 
     @UnsupportedAppUsage
@@ -7220,15 +7223,56 @@ public class AudioManager {
 
     /**
      * Return if an asset contains haptic channels or not.
+     *
+     * @param context the {@link Context} to resolve the uri.
      * @param uri the {@link Uri} of the asset.
      * @return true if the assert contains haptic channels.
      * @hide
      */
-    public static boolean hasHapticChannels(Uri uri) {
+    public static boolean hasHapticChannelsImpl(@NonNull Context context, @NonNull Uri uri) {
+        MediaExtractor extractor = new MediaExtractor();
         try {
-            return getService().hasHapticChannels(uri);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            extractor.setDataSource(context, uri, null);
+            for (int i = 0; i < extractor.getTrackCount(); i++) {
+                MediaFormat format = extractor.getTrackFormat(i);
+                if (format.containsKey(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT)
+                        && format.getInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT) > 0) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "hasHapticChannels failure:" + e);
+        }
+        return false;
+    }
+
+    /**
+     * Return if an asset contains haptic channels or not.
+     *
+     * @param context the {@link Context} to resolve the uri.
+     * @param uri the {@link Uri} of the asset.
+     * @return true if the assert contains haptic channels.
+     * @hide
+     */
+    public static boolean hasHapticChannels(@Nullable Context context, @NonNull Uri uri) {
+        Objects.requireNonNull(uri);
+        if (context != null) {
+            return hasHapticChannelsImpl(context, uri);
+        } else if (sContext != null) {
+            if (DEBUG) {
+                Log.d(TAG, "Try to use static context to query if having haptic channels");
+            }
+            return hasHapticChannelsImpl(sContext, uri);
+        } else {
+            // Try with audio service context, this may fail to get correct result.
+            if (DEBUG) {
+                Log.d(TAG, "Try to use audio service context to query if having haptic channels");
+            }
+            try {
+                return getService().hasHapticChannels(uri);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
