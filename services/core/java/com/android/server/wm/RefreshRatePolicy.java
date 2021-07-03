@@ -89,18 +89,13 @@ class RefreshRatePolicy {
     }
 
     int getPreferredModeId(WindowState w) {
-
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
         if (w.isAnimating(TRANSITION | PARENTS)) {
             return 0;
         }
 
-        if (w.mAttrs.preferredRefreshRate != 0 || w.mAttrs.preferredDisplayModeId != 0) {
-            return w.mAttrs.preferredDisplayModeId;
-        }
-
-        return 0;
+        return w.mAttrs.preferredDisplayModeId;
     }
 
     /**
@@ -134,12 +129,9 @@ class RefreshRatePolicy {
             return 0;
         }
 
-        final String packageName = w.getOwningPackage();
-        if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
-            return mLowRefreshRateMode.getRefreshRate();
-        }
-
-        final int preferredModeId = getPreferredModeId(w);
+        // If the app set a preferredDisplayModeId, the preferred refresh rate is the refresh rate
+        // of that mode id.
+        final int preferredModeId = w.mAttrs.preferredDisplayModeId;
         if (preferredModeId > 0) {
             DisplayInfo info = w.getDisplayInfo();
             if (info != null) {
@@ -149,6 +141,17 @@ class RefreshRatePolicy {
                     }
                 }
             }
+        }
+
+        if (w.mAttrs.preferredRefreshRate > 0) {
+            return w.mAttrs.preferredRefreshRate;
+        }
+
+        // If the app didn't set a preferred mode id or refresh rate, but it is part of the deny
+        // list, we return the low refresh rate as the preferred one.
+        final String packageName = w.getOwningPackage();
+        if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
+            return mLowRefreshRateMode.getRefreshRate();
         }
 
         return 0;
@@ -161,11 +164,6 @@ class RefreshRatePolicy {
             return 0;
         }
 
-        // If app requests a certain refresh rate or mode, don't override it.
-        if (w.mAttrs.preferredDisplayModeId != 0) {
-            return 0;
-        }
-
         return w.mAttrs.preferredMinDisplayRefreshRate;
     }
 
@@ -173,11 +171,6 @@ class RefreshRatePolicy {
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
         if (w.isAnimating(TRANSITION | PARENTS)) {
-            return 0;
-        }
-
-        // If app requests a certain refresh rate or mode, don't override it.
-        if (w.mAttrs.preferredDisplayModeId != 0) {
             return 0;
         }
 
