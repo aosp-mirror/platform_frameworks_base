@@ -204,7 +204,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS pakalpojums"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensoru paziņojumu pakalpojums"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Krēslas noteikšanas pakalpojums"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Laika joslas noteikšanas rīks (nav savienojuma)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS laika atjaunināšanas pakalpojums"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Mūzikas atpazīšanas pārziņa pakalpojums"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jūsu ierīces dati tiks dzēsti"</string>
@@ -1503,6 +1502,8 @@
     <string name="deny" msgid="6632259981847676572">"Noraidīt"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Atļauja ir pieprasīta."</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Atļauja kontam <xliff:g id="ACCOUNT">%s</xliff:g>\nir pieprasīta."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Šo lietotni izmantojat ārpus sava darba profila"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Jūs izmantojat šo lietotni no sava darba profila."</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Ievades metode"</string>

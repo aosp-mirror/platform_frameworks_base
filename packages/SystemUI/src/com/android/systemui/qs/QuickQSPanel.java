@@ -180,6 +180,7 @@ public class QuickQSPanel extends QSPanel {
                     LayoutParams.WRAP_CONTENT);
             setLayoutParams(lp);
             setMaxColumns(4);
+            mLastRowPadding = true;
         }
 
         @Override

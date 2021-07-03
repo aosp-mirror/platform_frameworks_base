@@ -33,6 +33,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -175,6 +176,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(true);
         setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
+        EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, true);
         }
@@ -185,6 +187,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
+        EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }

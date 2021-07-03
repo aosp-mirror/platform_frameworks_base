@@ -1375,7 +1375,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
                 return context.getString(
                         com.android.internal.R.string.fingerprint_error_security_update_required);
-            case FINGERPRINT_ERROR_BAD_CALIBARTION:
+            case FINGERPRINT_ERROR_BAD_CALIBRATION:
                 return context.getString(
                             com.android.internal.R.string.fingerprint_error_bad_calibration);
             case FINGERPRINT_ERROR_VENDOR: {

@@ -38,6 +38,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.OptimizeStrategy;
+import com.android.server.appsearch.external.localstorage.UnlimitedLimitConfig;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
 import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 
@@ -88,7 +89,10 @@ public class VisibilityStoreImplTest {
 
         // Give ourselves global query permissions
         AppSearchImpl appSearchImpl = AppSearchImpl.create(
-                mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                mTemporaryFolder.newFolder(),
+                new UnlimitedLimitConfig(),
+                /*initStatsBuilder=*/ null,
+                ALWAYS_OPTIMIZE);
         mVisibilityStore = VisibilityStoreImpl.create(appSearchImpl, mContext);
         mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
     }
