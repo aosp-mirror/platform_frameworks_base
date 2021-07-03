@@ -777,20 +777,20 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
-    public void testRotation_resetsMagnification() {
+    public void testDisplaySizeChanged_resetsMagnification() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
-            rotation_resetsMagnification(i);
+            changeDisplaySize_resetsMagnification(i);
             resetMockWindowManager();
         }
     }
 
-    private void rotation_resetsMagnification(int displayId) {
+    private void changeDisplaySize_resetsMagnification(int displayId) {
         register(displayId);
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
         zoomIn2xToMiddle(displayId);
         mMessageCapturingHandler.sendAllMessages();
         assertTrue(mFullScreenMagnificationController.isMagnifying(displayId));
-        callbacks.onRotationChanged(0);
+        callbacks.onDisplaySizeChanged();
         mMessageCapturingHandler.sendAllMessages();
         assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
     }

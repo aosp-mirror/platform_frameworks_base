@@ -675,9 +675,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odklenite za plačevanje"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ni nastavljeno"</string>
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Dodajte kartico"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Posodabljanje"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odklenite za uporabo"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pri pridobivanju kartic je prišlo do težave. Poskusite znova pozneje."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavitve zaklepanja zaslona"</string>
@@ -1159,8 +1158,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Ogled nedavnih sporočil, neodgovorjenih klicev in posodobitev stanj"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pogovor"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"To je začasno zaustavil način »ne moti«."</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sporočilo."</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sliko."</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Težava z branjem indikatorja stanja napolnjenosti baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dotaknite se za več informacij"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ni nastavljenih alarmov"</string>

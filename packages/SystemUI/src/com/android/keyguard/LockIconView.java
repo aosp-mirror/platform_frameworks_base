@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -24,10 +23,17 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * A view positioned under the notification shade.
  */
-public class LockIconView extends ImageView {
+public class LockIconView extends ImageView implements Dumpable {
     @NonNull private final RectF mSensorRect;
     @NonNull private PointF mLockIconCenter = new PointF(0f, 0f);
     private int mRadius;
@@ -62,5 +68,12 @@ public class LockIconView extends ImageView {
 
     float getLocationTop() {
         return mLockIconCenter.y - mRadius;
+    }
+
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("Center in px (x, y)= (" + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");
+        pw.println("Radius in pixels: " + mRadius);
     }
 }

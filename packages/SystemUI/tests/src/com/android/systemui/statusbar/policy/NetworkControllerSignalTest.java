@@ -67,7 +67,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class));
+                mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags);
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -87,7 +87,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class));
+                mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags);
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -155,7 +155,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class));
+                mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags);
         setupNetworkController();
 
         // No Subscriptions.
@@ -269,7 +269,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         setConnectivityViaCallbackInNetworkController(
                 NetworkCapabilities.TRANSPORT_WIFI, true, true, mock(WifiInfo.class));
 
-        verifyLastMobileDataIndicators(false, DEFAULT_LEVEL, 0);
+        verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0);
     }
 
     // Some tests of actual NetworkController code, just internals not display stuff

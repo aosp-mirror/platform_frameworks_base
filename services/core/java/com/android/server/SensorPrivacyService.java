@@ -59,6 +59,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
@@ -441,7 +442,14 @@ public final class SensorPrivacyService extends SystemService {
                 inputMethodPackageName = ComponentName.unflattenFromString(
                         inputMethodComponent).getPackageName();
             }
-            int capability = mActivityManagerInternal.getUidCapability(uid);
+
+            int capability;
+            try {
+                capability = mActivityManagerInternal.getUidCapability(uid);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, e);
+                return;
+            }
 
             if (sensor == MICROPHONE) {
                 VoiceInteractionManagerInternal voiceInteractionManagerInternal =
@@ -604,7 +612,17 @@ public final class SensorPrivacyService extends SystemService {
                                     new Intent(Settings.ACTION_PRIVACY_SETTINGS),
                                     PendingIntent.FLAG_IMMUTABLE
                                             | PendingIntent.FLAG_UPDATE_CURRENT))
+                            .extend(new Notification.TvExtender())
+                            .setTimeoutAfter(isTelevision(mContext)
+                                    ? /* dismiss immediately */ 1
+                                    : /* no timeout */ 0)
                             .build());
+        }
+
+        private boolean isTelevision(Context context) {
+            int uiMode = context.getResources().getConfiguration().uiMode;
+            return (uiMode & Configuration.UI_MODE_TYPE_MASK)
+                    == Configuration.UI_MODE_TYPE_TELEVISION;
         }
 
         /**

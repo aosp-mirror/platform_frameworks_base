@@ -39,6 +39,9 @@ public final class VibratorHelper {
 
     private static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
     private static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
+    private static final int CHIRP_LEVEL_DURATION_MILLIS = 100;
+    private static final int DEFAULT_CHIRP_RAMP_DURATION_MILLIS = 100;
+    private static final int FALLBACK_CHIRP_RAMP_DURATION_MILLIS = 50;
 
     private final Vibrator mVibrator;
     private final long[] mDefaultPattern;
@@ -103,7 +106,7 @@ public final class VibratorHelper {
      */
     public VibrationEffect createFallbackVibration(boolean insistent) {
         if (mVibrator.hasFrequencyControl()) {
-            return createChirpVibration(insistent);
+            return createChirpVibration(FALLBACK_CHIRP_RAMP_DURATION_MILLIS, insistent);
         }
         return createWaveformVibration(mFallbackPattern, insistent);
     }
@@ -115,26 +118,28 @@ public final class VibratorHelper {
      */
     public VibrationEffect createDefaultVibration(boolean insistent) {
         if (mVibrator.hasFrequencyControl()) {
-            return createChirpVibration(insistent);
+            return createChirpVibration(DEFAULT_CHIRP_RAMP_DURATION_MILLIS, insistent);
         }
         return createWaveformVibration(mDefaultPattern, insistent);
     }
 
-    private static VibrationEffect createChirpVibration(boolean insistent) {
+    private static VibrationEffect createChirpVibration(int rampDuration, boolean insistent) {
         VibrationEffect.WaveformBuilder waveformBuilder = VibrationEffect.startWaveform()
                 .addStep(/* amplitude= */ 0, /* frequency= */ -0.85f, /* duration= */ 0)
-                .addRamp(/* amplitude= */ 1, /* frequency= */ -0.25f, /* duration= */ 100)
-                .addStep(/* amplitude= */ 1, /* duration= */ 150)
-                .addRamp(/* amplitude= */ 0, /* frequency= */ -0.85f, /* duration= */ 250);
+                .addRamp(/* amplitude= */ 1, /* frequency= */ -0.25f, rampDuration)
+                .addStep(/* amplitude= */ 1, /* frequency= */ -0.25f, CHIRP_LEVEL_DURATION_MILLIS)
+                .addRamp(/* amplitude= */ 0, /* frequency= */ -0.85f, rampDuration);
 
         if (insistent) {
-            return waveformBuilder.build(/* repeat= */ 0);
+            return waveformBuilder
+                    .addStep(/* amplitude= */ 0, CHIRP_LEVEL_DURATION_MILLIS)
+                    .build(/* repeat= */ 0);
         }
 
         VibrationEffect singleBeat = waveformBuilder.build();
         return VibrationEffect.startComposition()
                 .addEffect(singleBeat)
-                .addEffect(singleBeat)
+                .addEffect(singleBeat, /* delay= */ CHIRP_LEVEL_DURATION_MILLIS)
                 .compose();
     }
 

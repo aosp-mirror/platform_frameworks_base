@@ -282,11 +282,10 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     private SizeF computeSizeFromLayout(int left, int top, int right, int bottom) {
-        Rect padding = getDefaultPadding();
         float density = getResources().getDisplayMetrics().density;
         return new SizeF(
-                (right - left - padding.right - padding.left) / density,
-                (bottom - top - padding.bottom - padding.top) / density
+                (right - left - getPaddingLeft() - getPaddingRight()) / density,
+                (bottom - top - getPaddingTop() - getPaddingBottom()) / density
         );
     }
 
@@ -386,7 +385,7 @@ public class AppWidgetHostView extends FrameLayout {
             maxHeight = Math.max(maxHeight, paddedSize.getHeight());
         }
         if (paddedSizes.equals(
-                widgetManager.getAppWidgetOptions(mAppWidgetId).<PointF>getParcelableArrayList(
+                widgetManager.getAppWidgetOptions(mAppWidgetId).<SizeF>getParcelableArrayList(
                         AppWidgetManager.OPTION_APPWIDGET_SIZES))) {
             return;
         }
