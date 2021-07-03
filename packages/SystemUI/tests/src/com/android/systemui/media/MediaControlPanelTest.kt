@@ -345,4 +345,22 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(dismiss.isEnabled).isEqualTo(false)
     }
+
+    @Test
+    fun dismissButtonClick_notInManager() {
+        val mediaKey = "key for dismissal"
+        whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong())).thenReturn(false)
+
+        player.attachPlayer(holder)
+        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null,
+                notificationKey = KEY)
+        player.bindPlayer(state, mediaKey)
+
+        assertThat(dismiss.isEnabled).isEqualTo(true)
+        dismiss.callOnClick()
+
+        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
+        verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
+    }
 }

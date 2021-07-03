@@ -271,10 +271,6 @@ class NotificationShadeDepthController @Inject constructor(
                 brightnessMirrorSpring.finishIfRunning()
             }
         }
-
-        override fun onDozeAmountChanged(linear: Float, eased: Float) {
-            wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
-        }
     }
 
     init {
