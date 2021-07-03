@@ -570,6 +570,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Выдаліць госця"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Скінуць гасцявы сеанс"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Госць"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Скінуць гасцявы сеанс?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Скінуць"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Ідзе скід гасцявога сеанса…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зрабіць фота"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбраць відарыс"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбраць фота"</string>

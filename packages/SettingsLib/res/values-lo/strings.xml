@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"ລຶບແຂກອອກ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ຣີເຊັດແຂກ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ແຂກ"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ຣີເຊັດແຂກບໍ?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ຣີເຊັດ"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"ກຳລັງຣີເຊັດແຂກ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ຖ່າຍຮູບ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ເລືອກຮູບ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ເລືອກຮູບ"</string>
