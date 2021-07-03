@@ -562,6 +562,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 && (serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) == 0;
     }
 
+    void forceRestartHotwordDetector() {
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "Failed to force-restart hotword detection: no hotword detection active");
+            return;
+        }
+        mHotwordDetectionConnection.forceRestart();
+    }
+
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!mValid) {
             pw.print("  NOT VALID: ");

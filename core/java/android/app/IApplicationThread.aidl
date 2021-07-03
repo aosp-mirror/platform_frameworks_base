@@ -153,7 +153,7 @@ oneway interface IApplicationThread {
     void performDirectAction(IBinder activityToken, String actionId,
             in Bundle arguments, in RemoteCallback cancellationCallback,
             in RemoteCallback resultCallback);
-    void notifyContentProviderPublishStatus(in ContentProviderHolder holder, String auth,
+    void notifyContentProviderPublishStatus(in ContentProviderHolder holder, String authorities,
             int userId, boolean published);
     void instrumentWithoutRestart(in ComponentName instrumentationName,
             in Bundle instrumentationArgs,

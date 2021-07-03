@@ -163,6 +163,17 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
+     * Called after only the composing region is modified (so it isn't called if the text also
+     * changes).
+     * <p>
+     * Default implementation does nothing.
+     *
+     * @hide
+     */
+    public void endComposingRegionEditInternal() {
+    }
+
+    /**
      * Default implementation calls {@link #finishComposingText()} and
      * {@code setImeConsumesInput(false)}.
      */
@@ -468,6 +479,7 @@ public class BaseInputConnection implements InputConnection {
             // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
+            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -734,6 +746,7 @@ public class BaseInputConnection implements InputConnection {
             // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
+            endComposingRegionEditInternal();
         }
         return true;
     }

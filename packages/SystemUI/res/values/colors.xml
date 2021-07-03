@@ -93,7 +93,7 @@
     <color name="notification_material_background_dark_color">#ff333333</color>
 
     <!-- The color of the dividing line between grouped notifications. -->
-    <color name="notification_divider_color">#FF616161</color>
+    <color name="notification_divider_color">@*android:color/background_device_default_light</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>
@@ -199,9 +199,6 @@
     <color name="global_screenshot_button_ripple">#1f000000</color>
     <color name="global_screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
 
-    <!-- Long screenshot UI -->
-    <color name="screenshot_crop_scrim">#6444</color>
-
     <!-- GM2 colors -->
     <color name="GM2_grey_50">#F8F9FA</color>
     <color name="GM2_grey_100">#F1F3F4</color>
@@ -272,6 +269,7 @@
     <color name="misalignment_text_color">#F28B82</color>
 
     <color name="screenrecord_status_color">#E94235</color>
+    <color name="screenrecord_icon_color">#D93025</color><!-- red 600 -->
 
     <color name="privacy_chip_background">#3ddc84</color>
 

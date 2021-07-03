@@ -672,7 +672,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Postavite aplikaciju za brže i sigurnije kupovine putem telefona"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži sve"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Otključaj za plaćanje"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nije postavljeno"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Dodaj karticu"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Ažuriranje"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Otključajte da koristite"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Došlo je do problema prilikom preuzimanja vaših kartica. Pokušajte ponovo kasnije"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključavanja ekrana"</string>
@@ -1039,8 +1040,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Uvećavanje dijela ekrana"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prekidač"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Dugme za pristupačnost je zamijenilo pokret za pristupačnost\n\n"<annotation id="link">"Prikaži postavke"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Možete prebaciti s pokreta za pristupačnost na dugme\n\n"<annotation id="link">"Postavke"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Premjestite dugme do ivice da ga privremeno sakrijete"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Pomjeranje gore lijevo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Pomjeranje gore desno"</string>
@@ -1122,7 +1122,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti za razgovor"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da ga dodate na početni ekran"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Vratite se ovdje kada dobijete neku poruku"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Vaši nedavni razgovori će se pojaviti ovdje"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritetni razgovori"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nedavni razgovori"</string>
     <string name="okay" msgid="6490552955618608554">"Uredu"</string>
@@ -1151,8 +1151,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Pregledajte nedavne poruke, propuštene pozive i ažuriranja statusa"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Razgovor"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> je poslao/la poruku"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pauzirala je funkcija Ne ometaj"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> je poslao/la sliku"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Došlo je do problema prilikom očitavanja mjerača stanja baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije postavljen alarm"</string>

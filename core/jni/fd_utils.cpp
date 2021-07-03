@@ -52,7 +52,6 @@ static const char* kPathAllowlist[] = {
 
 static const char kFdPath[] = "/proc/self/fd";
 
-// static
 FileDescriptorAllowlist* FileDescriptorAllowlist::Get() {
     if (instance_ == nullptr) {
         instance_ = new FileDescriptorAllowlist();
@@ -169,8 +168,8 @@ class FileDescriptorInfo {
   // Create a FileDescriptorInfo for a given file descriptor.
   static FileDescriptorInfo* CreateFromFd(int fd, fail_fn_t fail_fn);
 
-  // Checks whether the file descriptor associated with this object
-  // refers to the same description.
+  // Checks whether the file descriptor associated with this object refers to
+  // the same description.
   bool RefersToSameFile() const;
 
   void ReopenOrDetach(fail_fn_t fail_fn) const;
@@ -185,8 +184,10 @@ class FileDescriptorInfo {
   const bool is_sock;
 
  private:
+  // Constructs for sockets.
   explicit FileDescriptorInfo(int fd);
 
+  // Constructs for non-socket file descriptors.
   FileDescriptorInfo(struct stat stat, const std::string& file_path, int fd, int open_flags,
                      int fd_flags, int fs_flags, off_t offset);
 
@@ -204,7 +205,6 @@ class FileDescriptorInfo {
   DISALLOW_COPY_AND_ASSIGN(FileDescriptorInfo);
 };
 
-// static
 FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) {
   struct stat f_stat;
   // This should never happen; the zygote should always have the right set
@@ -465,42 +465,24 @@ void FileDescriptorInfo::DetachSocket(fail_fn_t fail_fn) const {
   }
 }
 
-// static
+// TODO: Move the definitions here and eliminate the forward declarations. They
+// temporarily help making code reviews easier.
+static int ParseFd(dirent* dir_entry, int dir_fd);
+static std::unique_ptr<std::set<int>> GetOpenFdsIgnoring(const std::vector<int>& fds_to_ignore,
+                                                         fail_fn_t fail_fn);
+
 FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_ignore,
                                                  fail_fn_t fail_fn) {
-  DIR* proc_fd_dir = opendir(kFdPath);
-  if (proc_fd_dir == nullptr) {
-    fail_fn(std::string("Unable to open directory ").append(kFdPath));
-  }
-
-  int dir_fd = dirfd(proc_fd_dir);
-  dirent* dir_entry;
-
+  std::unique_ptr<std::set<int>> open_fds = GetOpenFdsIgnoring(fds_to_ignore, fail_fn);
   std::unordered_map<int, FileDescriptorInfo*> open_fd_map;
-  while ((dir_entry = readdir(proc_fd_dir)) != nullptr) {
-    const int fd = ParseFd(dir_entry, dir_fd);
-    if (fd == -1) {
-      continue;
-    }
-
-    if (std::find(fds_to_ignore.begin(), fds_to_ignore.end(), fd) != fds_to_ignore.end()) {
-      continue;
-    }
-
+  for (auto fd : *open_fds) {
     open_fd_map[fd] = FileDescriptorInfo::CreateFromFd(fd, fail_fn);
   }
-
-  if (closedir(proc_fd_dir) == -1) {
-    fail_fn("Unable to close directory");
-  }
-
   return new FileDescriptorTable(open_fd_map);
 }
 
-void FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, fail_fn_t fail_fn) {
-  std::set<int> open_fds;
-
-  // First get the list of open descriptors.
+static std::unique_ptr<std::set<int>> GetOpenFdsIgnoring(const std::vector<int>& fds_to_ignore,
+                                                         fail_fn_t fail_fn) {
   DIR* proc_fd_dir = opendir(kFdPath);
   if (proc_fd_dir == nullptr) {
     fail_fn(android::base::StringPrintf("Unable to open directory %s: %s",
@@ -508,6 +490,7 @@ void FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, fail_fn_
                                         strerror(errno)));
   }
 
+  auto result = std::make_unique<std::set<int>>();
   int dir_fd = dirfd(proc_fd_dir);
   dirent* dir_entry;
   while ((dir_entry = readdir(proc_fd_dir)) != nullptr) {
@@ -520,14 +503,26 @@ void FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, fail_fn_
       continue;
     }
 
-    open_fds.insert(fd);
+    result->insert(fd);
   }
 
   if (closedir(proc_fd_dir) == -1) {
     fail_fn(android::base::StringPrintf("Unable to close directory: %s", strerror(errno)));
   }
+  return result;
+}
 
-  RestatInternal(open_fds, fail_fn);
+std::unique_ptr<std::set<int>> GetOpenFds(fail_fn_t fail_fn) {
+  const std::vector<int> nothing_to_ignore;
+  return GetOpenFdsIgnoring(nothing_to_ignore, fail_fn);
+}
+
+void FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, fail_fn_t fail_fn) {
+  std::unique_ptr<std::set<int>> open_fds = GetOpenFdsIgnoring(fds_to_ignore, fail_fn);
+
+  // Check that the files did not change, and leave only newly opened FDs in
+  // |open_fds|.
+  RestatInternal(*open_fds, fail_fn);
 }
 
 // Reopens all file descriptors that are contained in the table.
@@ -546,6 +541,12 @@ void FileDescriptorTable::ReopenOrDetach(fail_fn_t fail_fn) {
 FileDescriptorTable::FileDescriptorTable(
     const std::unordered_map<int, FileDescriptorInfo*>& map)
     : open_fd_map_(map) {
+}
+
+FileDescriptorTable::~FileDescriptorTable() {
+    for (auto& it : open_fd_map_) {
+        delete it.second;
+    }
 }
 
 void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn) {
@@ -618,8 +619,7 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
   }
 }
 
-// static
-int FileDescriptorTable::ParseFd(dirent* dir_entry, int dir_fd) {
+static int ParseFd(dirent* dir_entry, int dir_fd) {
   char* end;
   const int fd = strtol(dir_entry->d_name, &end, 10);
   if ((*end) != '\0') {

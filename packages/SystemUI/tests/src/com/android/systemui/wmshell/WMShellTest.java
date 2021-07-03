@@ -27,6 +27,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -70,6 +71,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock LegacySplitScreen mLegacySplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock HideDisplayCutout mHideDisplayCutout;
+    @Mock WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock ProtoTracer mProtoTracer;
     @Mock ShellCommandHandler mShellCommandHandler;
     @Mock ShellExecutor mSysUiMainExecutor;
@@ -82,7 +84,8 @@ public class WMShellTest extends SysuiTestCase {
                 Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
                 Optional.of(mShellCommandHandler), mCommandQueue, mConfigurationController,
                 mKeyguardUpdateMonitor, mNavigationModeController,
-                mScreenLifecycle, mSysUiState, mProtoTracer, mSysUiMainExecutor);
+                mScreenLifecycle, mSysUiState, mProtoTracer, mWakefulnessLifecycle,
+                mSysUiMainExecutor);
     }
 
     @Test

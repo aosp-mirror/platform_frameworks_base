@@ -48,13 +48,13 @@
 
     <Button
         style="?android:attr/buttonBarButtonStyle"
-        android:id="@+id/okay_button"
+        android:id="@+id/got_it_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/rounded_bg_full_large_radius"
         android:onClick="dismissActivity"
-        android:text="@string/okay"
+        android:text="@string/got_it"
         android:textColor="?android:attr/textColorPrimary"
         android:layout_marginBottom="60dp"
         android:layout_alignParentBottom="true" />
@@ -62,7 +62,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/okay_button"
+        android:layout_above="@id/got_it_button"
         android:layout_below="@id/select_conversation"
         android:layout_centerInParent="true"
         android:clipToOutline="true">
@@ -72,7 +72,7 @@
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:background="@drawable/rounded_bg_full_large_radius"
-            android:layout_above="@id/okay_button">
+            android:layout_above="@id/got_it_button">
             <include layout="@layout/people_space_placeholder_layout" />
         </LinearLayout>
     </LinearLayout>

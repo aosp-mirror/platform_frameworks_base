@@ -361,6 +361,11 @@ public abstract class TranslationService extends Service {
                 new Consumer<Set<TranslationCapability>>() {
                     @Override
                     public void accept(Set<TranslationCapability> values) {
+                        if (!isValidCapabilities(sourceFormat, targetFormat, values)) {
+                            throw new IllegalStateException("Invalid capabilities and "
+                                    + "format compatibility");
+                        }
+
                         final ArraySet<TranslationCapability> capabilities = new ArraySet<>(values);
                         final Bundle bundle = new Bundle();
                         bundle.putParcelableArray(TranslationManager.EXTRA_CAPABILITIES,
@@ -368,5 +373,24 @@ public abstract class TranslationService extends Service {
                         resultReceiver.send(STATUS_SYNC_CALL_SUCCESS, bundle);
                     }
                 });
+    }
+
+    /**
+     * Helper method to validate capabilities and format compatibility.
+     */
+    private boolean isValidCapabilities(@TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat, Set<TranslationCapability> capabilities) {
+        if (sourceFormat != TranslationSpec.DATA_FORMAT_TEXT
+                && targetFormat != TranslationSpec.DATA_FORMAT_TEXT) {
+            return true;
+        }
+
+        for (TranslationCapability capability : capabilities) {
+            if (capability.getState() == TranslationCapability.STATE_REMOVED_AND_AVAILABLE) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

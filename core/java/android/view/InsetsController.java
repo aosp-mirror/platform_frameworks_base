@@ -1265,7 +1265,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     }
                     stateChanged |= getSourceConsumer(types.valueAt(j)).notifyAnimationFinished();
                 }
-                if (invokeCallback && runningAnimation.startDispatched) {
+                if (invokeCallback) {
                     dispatchAnimationEnd(runningAnimation.runner.getAnimation());
                 }
                 break;

@@ -443,7 +443,8 @@ class TaskSnapshotController {
         } else {
             excludeLayers = new SurfaceControl[0];
         }
-        builder.setHasImeSurface(!excludeIme && imeWindow != null && imeWindow.isDrawn());
+        builder.setHasImeSurface(!excludeIme && imeWindow != null && imeWindow.isVisible());
+
         final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                 SurfaceControl.captureLayersExcluding(
                         task.getSurfaceControl(), mTmpRect, scaleFraction,
@@ -643,7 +644,7 @@ class TaskSnapshotController {
 
     /** Called when the device is going to sleep (e.g. screen off, AOD without screen off). */
     void snapshotForSleeping(int displayId) {
-        if (shouldDisableSnapshots()) {
+        if (shouldDisableSnapshots() || !mService.mDisplayEnabled) {
             return;
         }
         final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);

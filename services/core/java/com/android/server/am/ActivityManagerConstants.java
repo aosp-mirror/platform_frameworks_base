@@ -52,8 +52,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
-
+    private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
     private static final String KEY_FGSERVICE_MIN_REPORT_TIME
@@ -109,10 +108,10 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
-    static final String KEY_KILL_FAS_CACHED_IDLE = "kill_fas_cached_idle";
     static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
+    private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -153,10 +152,6 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
-
-    static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
-    static final boolean DEFAULT_KILL_FAS_CACHED_IDLE = true;
-
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -196,6 +191,13 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED =
             "default_fgs_starts_restriction_enabled";
+
+    /**
+     * Default value for mFgsStartRestrictionNotificationEnabled if not explicitly set in
+     * Settings.Global.
+     */
+    private static final String KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED =
+            "default_fgs_starts_restriction_notification_enabled";
 
     /**
      * Default value for mFgsStartRestrictionCheckCallerTargetSdk if not explicitly set in
@@ -432,6 +434,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // at all.
     volatile boolean mFlagFgsStartRestrictionEnabled = true;
 
+    // Whether to display a notification when a service is restricted from startForeground due to
+    // foreground service background start restriction.
+    volatile boolean mFgsStartRestrictionNotificationEnabled = false;
+
     /**
      * Indicates whether the foreground service background start restriction is enabled for
      * caller app that is targeting S+.
@@ -488,12 +494,6 @@ final class ActivityManagerConstants extends ContentObserver {
      * If the value is 0.1, 10% of the installed packages would be sampled.
      */
     volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
-
-    /**
-     * Whether or not to kill apps in force-app-standby state and it's cached, its UID state is
-     * idle.
-     */
-    volatile boolean mKillForceAppStandByAndCachedIdle = DEFAULT_KILL_FAS_CACHED_IDLE;
 
     /**
      * Whether to allow "opt-out" from the foreground service restrictions.
@@ -652,6 +652,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED:
                                 updateFgsStartsRestriction();
                                 break;
+                            case KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED:
+                                updateFgsStartsRestrictionNotification();
+                                break;
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK:
                                 updateFgsStartsRestrictionCheckCallerTargetSdk();
                                 break;
@@ -705,9 +708,6 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_ATOM_SAMPLE_RATE:
                                 updateFgsAtomSamplePercent();
-                                break;
-                            case KEY_KILL_FAS_CACHED_IDLE:
-                                updateKillFasCachedIdle();
                                 break;
                             case KEY_FGS_ALLOW_OPT_OUT:
                                 updateFgsAllowOptOut();
@@ -953,6 +953,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 /*defaultValue*/ true);
     }
 
+    private void updateFgsStartsRestrictionNotification() {
+        mFgsStartRestrictionNotificationEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED,
+                /*defaultValue*/ false);
+    }
+
     private void updateFgsStartsRestrictionCheckCallerTargetSdk() {
         mFgsStartRestrictionCheckCallerTargetSdk = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1042,13 +1049,6 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_ATOM_SAMPLE_RATE,
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
-    }
-
-    private void updateKillFasCachedIdle() {
-        mKillForceAppStandByAndCachedIdle = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_KILL_FAS_CACHED_IDLE,
-                DEFAULT_KILL_FAS_CACHED_IDLE);
     }
 
     private void updateFgsAllowOptOut() {
@@ -1272,6 +1272,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFlagBackgroundFgsStartRestrictionEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED); pw.print("=");
         pw.println(mFlagFgsStartRestrictionEnabled);
+        pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED);
+                pw.print("=");
+        pw.println(mFgsStartRestrictionNotificationEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK);
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);

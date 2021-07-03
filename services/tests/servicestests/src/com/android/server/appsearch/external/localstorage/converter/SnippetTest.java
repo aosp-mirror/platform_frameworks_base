@@ -22,12 +22,12 @@ import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResultPage;
 
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
-import com.android.server.appsearch.proto.DocumentProto;
-import com.android.server.appsearch.proto.PropertyProto;
-import com.android.server.appsearch.proto.SchemaTypeConfigProto;
-import com.android.server.appsearch.proto.SearchResultProto;
-import com.android.server.appsearch.proto.SnippetMatchProto;
-import com.android.server.appsearch.proto.SnippetProto;
+import com.android.server.appsearch.icing.proto.DocumentProto;
+import com.android.server.appsearch.icing.proto.PropertyProto;
+import com.android.server.appsearch.icing.proto.SchemaTypeConfigProto;
+import com.android.server.appsearch.icing.proto.SearchResultProto;
+import com.android.server.appsearch.icing.proto.SnippetMatchProto;
+import com.android.server.appsearch.icing.proto.SnippetProto;
 
 import org.junit.Test;
 
@@ -46,7 +46,6 @@ public class SnippetTest {
                     PREFIX,
                     Collections.singletonMap(PREFIX + SCHEMA_TYPE, SCHEMA_TYPE_CONFIG_PROTO));
 
-    // TODO(tytytyww): Add tests for Double and Long Snippets.
     @Test
     public void testSingleStringSnippet() {
         final String propertyKeyString = "content";
@@ -112,7 +111,6 @@ public class SnippetTest {
         assertThat(match.getSnippet()).isEqualTo(window);
     }
 
-    // TODO(tytytyww): Add tests for Double and Long Snippets.
     @Test
     public void testNoSnippets() {
         final String propertyKeyString = "content";

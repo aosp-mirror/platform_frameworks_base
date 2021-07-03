@@ -312,6 +312,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind, true,
                 mScrimForBubble, false
         ));
+
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
     }
 
     @Test
@@ -321,8 +323,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE,
+                mScrimBehind, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
@@ -340,6 +343,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
+        assertEquals(0f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // Pulsing notification should conserve AOD wallpaper.
         mScrimController.transitionTo(ScrimState.PULSING);
@@ -348,6 +352,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
+        assertEquals(0f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
     }
 
     @Test
@@ -359,7 +364,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
@@ -378,7 +384,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
@@ -403,13 +410,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and that if we set it while we're in AOD, it does take immediate effect.
         mScrimController.setAodFrontScrimAlpha(1f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and make sure we recall the previous front scrim alpha even if we transition away
         // for a bit.
@@ -418,7 +427,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and alpha updates should be completely ignored if always_on is off.
         // Passing it forward would mess up the wake-up transition.
@@ -448,23 +458,28 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... but will take effect after docked
         when(mDockManager.isDocked()).thenReturn(true);
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setAodFrontScrimAlpha(0.5f);
         mScrimController.transitionTo(ScrimState.AOD);
+        finishAnimationsImmediately();
 
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and that if we set it while we're in AOD, it does take immediate effect after docked.
         mScrimController.setAodFrontScrimAlpha(1f);
+        finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // Reset value since enums are static.
         mScrimController.setAodFrontScrimAlpha(0f);
@@ -480,7 +495,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         mScrimController.transitionTo(ScrimState.PULSING);
         finishAnimationsImmediately();
@@ -489,7 +505,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Pulse callback should have been invoked
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
@@ -503,13 +520,16 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Front scrim should be semi-transparent
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
-                mScrimBehind, OPAQUE));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         mScrimController.setWakeLockScreenSensorActive(true);
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
-                mScrimBehind, SEMI_TRANSPARENT));
+                mScrimBehind, TRANSPARENT));
+        assertEquals(ScrimController.WAKE_SENSOR_SCRIM_ALPHA,
+                mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // Reset value since enums are static.
         mScrimController.setAodFrontScrimAlpha(0f);

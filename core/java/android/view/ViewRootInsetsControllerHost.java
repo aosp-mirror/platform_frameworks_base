@@ -110,6 +110,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation) {
         if (DEBUG) Log.d(TAG, "windowInsetsAnimation ended");
+        if (mViewRoot.mView == null) {
+            // The view has already detached from window.
+            return;
+        }
         mViewRoot.mView.dispatchWindowInsetsAnimationEnd(animation);
     }
 

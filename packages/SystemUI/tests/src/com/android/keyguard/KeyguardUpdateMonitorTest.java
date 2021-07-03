@@ -64,6 +64,7 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.Vibrator;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -108,6 +109,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -168,6 +170,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private TelephonyListenerManager mTelephonyListenerManager;
     @Mock
     private FeatureFlags mFeatureFlags;
+    @Mock
+    private Vibrator mVibrator;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
@@ -569,7 +573,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Stop scanning when bouncer becomes visible
         setKeyguardBouncerVisibility(true);
         clearInvocations(mFaceManager);
-        mKeyguardUpdateMonitor.requestFaceAuth();
+        mKeyguardUpdateMonitor.requestFaceAuth(true);
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
@@ -635,6 +639,45 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testFaceAndFingerprintLockout_onlyFace() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+
+        mKeyguardUpdateMonitor.mFaceAuthenticationCallback
+                .onAuthenticationError(FaceManager.FACE_ERROR_LOCKOUT_PERMANENT, "");
+
+        verify(mLockPatternUtils, never()).requireStrongAuth(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testFaceAndFingerprintLockout_onlyFingerprint() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
+                .onAuthenticationError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT, "");
+
+        verify(mLockPatternUtils, never()).requireStrongAuth(anyInt(), anyInt());
+    }
+
+
+    @Test
+    public void testFaceAndFingerprintLockout() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+
+        mKeyguardUpdateMonitor.mFaceAuthenticationCallback
+                .onAuthenticationError(FaceManager.FACE_ERROR_LOCKOUT_PERMANENT, "");
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
+                .onAuthenticationError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT, "");
+
+        verify(mLockPatternUtils).requireStrongAuth(anyInt(), anyInt());
     }
 
     @Test
@@ -979,7 +1022,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
-                    mAuthController, mTelephonyListenerManager, mFeatureFlags);
+                    mAuthController, mTelephonyListenerManager, mFeatureFlags,
+                    mVibrator);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

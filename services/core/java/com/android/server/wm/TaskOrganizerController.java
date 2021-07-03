@@ -197,6 +197,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                                 ANIMATION_TYPE_STARTING_REVEAL);
                         windowAnimationLeash = adaptor.mAnimationLeash;
                         mainFrame = mainWindow.getRelativeFrame();
+                        t.setPosition(windowAnimationLeash, mainFrame.left, mainFrame.top);
                     }
                 }
             }

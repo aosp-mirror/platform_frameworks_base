@@ -90,6 +90,7 @@ public final class AppSearchSession implements Closeable {
             @NonNull Consumer<AppSearchResult<AppSearchSession>> callback) {
         try {
             mService.initialize(
+                    mPackageName,
                     mUserHandle,
                     /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchResultCallback.Stub() {
@@ -136,8 +137,6 @@ public final class AppSearchSession implements Closeable {
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
      */
-    // TODO(b/169883602): Change @code references to @link when setPlatformSurfaceable APIs are
-    //  exposed.
     public void setSchema(
             @NonNull SetSchemaRequest request,
             @NonNull Executor workExecutor,
@@ -152,7 +151,7 @@ public final class AppSearchSession implements Closeable {
         for (AppSearchSchema schema : request.getSchemas()) {
             schemaBundles.add(schema.getBundle());
         }
-        Map<String, List<Bundle>> schemasPackageAccessibleBundles =
+        Map<String, List<Bundle>> schemasVisibleToPackagesBundles =
                 new ArrayMap<>(request.getSchemasVisibleToPackagesInternal().size());
         for (Map.Entry<String, Set<PackageIdentifier>> entry :
                 request.getSchemasVisibleToPackagesInternal().entrySet()) {
@@ -160,7 +159,7 @@ public final class AppSearchSession implements Closeable {
             for (PackageIdentifier packageIdentifier : entry.getValue()) {
                 packageIdentifierBundles.add(packageIdentifier.getBundle());
             }
-            schemasPackageAccessibleBundles.put(entry.getKey(), packageIdentifierBundles);
+            schemasVisibleToPackagesBundles.put(entry.getKey(), packageIdentifierBundles);
         }
 
         // No need to trigger migration if user never set migrator
@@ -168,14 +167,14 @@ public final class AppSearchSession implements Closeable {
             setSchemaNoMigrations(
                     request,
                     schemaBundles,
-                    schemasPackageAccessibleBundles,
+                    schemasVisibleToPackagesBundles,
                     callbackExecutor,
                     callback);
         } else {
             setSchemaWithMigrations(
                     request,
                     schemaBundles,
-                    schemasPackageAccessibleBundles,
+                    schemasVisibleToPackagesBundles,
                     workExecutor,
                     callbackExecutor,
                     callback);
@@ -687,7 +686,9 @@ public final class AppSearchSession implements Closeable {
         if (mIsMutated && !mIsClosed) {
             try {
                 mService.persistToDisk(
-                        mUserHandle, /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
+                        mPackageName,
+                        mUserHandle,
+                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the AppSearchSession", e);
@@ -704,7 +705,7 @@ public final class AppSearchSession implements Closeable {
     private void setSchemaNoMigrations(
             @NonNull SetSchemaRequest request,
             @NonNull List<Bundle> schemaBundles,
-            @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
+            @NonNull Map<String, List<Bundle>> schemasVisibleToPackagesBundles,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
         try {
@@ -713,7 +714,7 @@ public final class AppSearchSession implements Closeable {
                     mDatabaseName,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
-                    schemasPackageAccessibleBundles,
+                    schemasVisibleToPackagesBundles,
                     request.isForceOverride(),
                     request.getVersion(),
                     mUserHandle,
@@ -761,7 +762,7 @@ public final class AppSearchSession implements Closeable {
     private void setSchemaWithMigrations(
             @NonNull SetSchemaRequest request,
             @NonNull List<Bundle> schemaBundles,
-            @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
+            @NonNull Map<String, List<Bundle>> schemasVisibleToPackagesBundles,
             @NonNull Executor workExecutor,
             @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
@@ -787,7 +788,7 @@ public final class AppSearchSession implements Closeable {
 
                 // No need to trigger migration if no migrator is active.
                 if (activeMigrators.isEmpty()) {
-                    setSchemaNoMigrations(request, schemaBundles, schemasPackageAccessibleBundles,
+                    setSchemaNoMigrations(request, schemaBundles, schemasVisibleToPackagesBundles,
                             callbackExecutor, callback);
                     return;
                 }
@@ -801,7 +802,7 @@ public final class AppSearchSession implements Closeable {
                         mDatabaseName,
                         schemaBundles,
                         new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
-                        schemasPackageAccessibleBundles,
+                        schemasVisibleToPackagesBundles,
                         /*forceOverride=*/ false,
                         request.getVersion(),
                         mUserHandle,
@@ -853,7 +854,7 @@ public final class AppSearchSession implements Closeable {
                                 mDatabaseName,
                                 schemaBundles,
                                 new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
-                                schemasPackageAccessibleBundles,
+                                schemasVisibleToPackagesBundles,
                                 /*forceOverride=*/ true,
                                 request.getVersion(),
                                 mUserHandle,

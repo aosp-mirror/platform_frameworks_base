@@ -29,9 +29,10 @@ import java.util.HashMap;
 public class FakeAppOpsHelper extends AppOpsHelper {
 
     private static class AppOp {
-        private boolean mAllowed = true;
-        private boolean mStarted = false;
-        private int mNoteCount = 0;
+        AppOp() {}
+        boolean mAllowed = true;
+        boolean mStarted = false;
+        int mNoteCount = 0;
     }
 
     private final HashMap<String, SparseArray<AppOp>> mAppOps;

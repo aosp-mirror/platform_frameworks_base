@@ -184,7 +184,6 @@ public class RippleDrawable extends LayerDrawable {
     private PorterDuffColorFilter mMaskColorFilter;
     private PorterDuffColorFilter mFocusColorFilter;
     private boolean mHasValidMask;
-    private int mComputedRadius = -1;
 
     /** The current ripple. May be actively animating or pending entry. */
     private RippleForeground mRipple;
@@ -390,8 +389,6 @@ public class RippleDrawable extends LayerDrawable {
         if (mRipple != null) {
             mRipple.onBoundsChange();
         }
-
-        mComputedRadius = Math.round(computeRadius());
         invalidateSelf();
     }
 
@@ -750,7 +747,7 @@ public class RippleDrawable extends LayerDrawable {
         if (mBackground != null) {
             mBackground.onHotspotBoundsChanged();
         }
-        float newRadius = Math.round(computeRadius());
+        float newRadius = Math.round(getComputedRadius());
         for (int i = 0; i < mRunningAnimations.size(); i++) {
             RippleAnimationSession s = mRunningAnimations.get(i);
             s.setRadius(newRadius);
@@ -939,14 +936,13 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private float computeRadius() {
-        Rect b = getDirtyBounds();
-        float radius = (float) Math.sqrt(b.width() * b.width() + b.height() * b.height()) / 2;
-        return radius;
+        final float halfWidth = mHotspotBounds.width() / 2.0f;
+        final float halfHeight = mHotspotBounds.height() / 2.0f;
+        return (float) Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
     }
 
     private int getComputedRadius() {
         if (mState.mMaxRadius >= 0) return mState.mMaxRadius;
-        if (mComputedRadius >= 0) return mComputedRadius;
         return (int) computeRadius();
     }
 

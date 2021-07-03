@@ -398,6 +398,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         registerStatsCallbacks();
     }
 
+    /**
+     * Notifies BatteryStatsService that the system server is ready.
+     */
+    public void onSystemReady() {
+        mStats.onSystemReady();
+        if (BATTERY_USAGE_STORE_ENABLED) {
+            mBatteryUsageStatsStore.onSystemReady();
+        }
+    }
+
     private final class LocalService extends BatteryStatsInternal {
         @Override
         public String[] getWifiIfaces() {
@@ -784,6 +794,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     bus = getBatteryUsageStats(List.of(powerProfileQuery)).get(0);
                     break;
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET:
+                    if (!BATTERY_USAGE_STORE_ENABLED) {
+                        return StatsManager.PULL_SKIP;
+                    }
+
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
                     final long sessionEnd = mStats.getStartClockTime();

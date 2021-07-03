@@ -675,7 +675,10 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Расплачивайтесь через телефон быстро и безопасно."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Разблокировать для оплаты"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не настроено"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки заблокированного экрана"</string>
@@ -1044,8 +1047,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличить часть экрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Переключить"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жест заменен на кнопку специальных возможностей\n\n"<annotation id="link">"Открыть настройки"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Вы можете использовать кнопку вместо жеста.\n\n"<annotation id="link">"Настройки"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Чтобы временно скрыть кнопку, переместите ее к краю экрана"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перенести в левый верхний угол"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перенести в правый верхний угол"</string>
@@ -1128,7 +1130,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты чатов"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на чат, чтобы добавить его на главный экран"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Здесь вы увидите свои сообщения."</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Здесь появятся ваши недавние разговоры."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Важные разговоры"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Недавние разговоры"</string>
     <string name="okay" msgid="6490552955618608554">"ОК"</string>
@@ -1157,8 +1159,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Будьте в курсе последних сообщений, пропущенных вызовов и обновлений статуса."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Чат"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил сообщение"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Приостановлено в режиме \"Не беспокоить\""</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил изображение"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не удается получить данные об уровне заряда батареи"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нажмите, чтобы узнать больше."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Будильников нет"</string>

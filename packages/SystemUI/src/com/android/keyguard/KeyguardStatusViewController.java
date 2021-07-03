@@ -187,10 +187,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Get the height of the keyguard status view.
+     * Get the height of the keyguard status view without the notification icon area, as that's
+     * only visible on AOD.
      */
-    public int getHeight() {
-        return mView.getHeight();
+    public int getLockscreenHeight() {
+        return mView.getHeight() - mKeyguardClockSwitchController.getNotificationIconAreaHeight();
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.server.location.injector;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.settings.LocationSettings;
 
 /**
  * Injects various location dependencies so that they may be controlled by tests.
@@ -26,6 +27,9 @@ public interface Injector {
 
     /** Returns a UserInfoHelper. */
     UserInfoHelper getUserInfoHelper();
+
+    /** Returns a LocationSettings. */
+    LocationSettings getLocationSettings();
 
     /** Returns an AlarmHelper. */
     AlarmHelper getAlarmHelper();

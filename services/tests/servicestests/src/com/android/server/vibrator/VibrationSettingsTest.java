@@ -33,6 +33,7 @@ import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
@@ -69,6 +70,7 @@ import org.mockito.junit.MockitoRule;
 public class VibrationSettingsTest {
 
     private static final int UID = 1;
+    private static final int USER_OPERATION_TIMEOUT_MILLIS = 60_000; // 1 min
     private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
     private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
             .setBatterySaverEnabled(true).build();
@@ -403,6 +405,25 @@ public class VibrationSettingsTest {
         assertEquals(Vibrator.VIBRATION_INTENSITY_MEDIUM,
                 mVibrationSettings.getCurrentIntensity(
                         VibrationAttributes.USAGE_PHYSICAL_EMULATION));
+        assertEquals(Vibrator.VIBRATION_INTENSITY_LOW,
+                mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE));
+    }
+
+    @Test
+    public void getCurrentIntensity_updateTriggeredAfterUserSwitched() {
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_OFF);
+        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_HIGH);
+        assertEquals(Vibrator.VIBRATION_INTENSITY_HIGH,
+                mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE));
+
+        // Switching user is not working with FakeSettingsProvider.
+        // Testing the broadcast flow manually.
+        Settings.System.putIntForUser(mContextSpy.getContentResolver(),
+                Settings.System.RING_VIBRATION_INTENSITY, Vibrator.VIBRATION_INTENSITY_LOW,
+                UserHandle.USER_CURRENT);
+        mVibrationSettings.mUserReceiver.onReceive(mContextSpy,
+                new Intent(Intent.ACTION_USER_SWITCHED));
         assertEquals(Vibrator.VIBRATION_INTENSITY_LOW,
                 mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE));
     }

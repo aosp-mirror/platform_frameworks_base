@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -26,8 +28,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.net.Uri;
@@ -102,6 +106,7 @@ public class DisplayModeDirector {
     private final DisplayObserver mDisplayObserver;
     private final UdfpsObserver mUdfpsObserver;
     private final SensorObserver mSensorObserver;
+    private final HbmObserver mHbmObserver;
     private final DeviceConfigInterface mDeviceConfig;
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
 
@@ -127,7 +132,7 @@ public class DisplayModeDirector {
     private int mModeSwitchingType = DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS;
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler) {
-        this(context, handler, new RealInjector());
+        this(context, handler, new RealInjector(context));
     }
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
@@ -143,11 +148,13 @@ public class DisplayModeDirector {
         mDisplayObserver = new DisplayObserver(context, handler);
         mBrightnessObserver = new BrightnessObserver(context, handler);
         mUdfpsObserver = new UdfpsObserver();
-        mSensorObserver = new SensorObserver(context, (displayId, priority, vote) -> {
+        final BallotBox ballotBox = (displayId, priority, vote) -> {
             synchronized (mLock) {
                 updateVoteLocked(displayId, priority, vote);
             }
-        });
+        };
+        mSensorObserver = new SensorObserver(context, ballotBox);
+        mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler());
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mDeviceConfig = injector.getDeviceConfig();
         mAlwaysRespectAppRequest = false;
@@ -165,6 +172,7 @@ public class DisplayModeDirector {
         mDisplayObserver.observe();
         mBrightnessObserver.observe(sensorManager);
         mSensorObserver.observe();
+        mHbmObserver.observe();
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
@@ -596,6 +604,7 @@ public class DisplayModeDirector {
             mBrightnessObserver.dumpLocked(pw);
             mUdfpsObserver.dumpLocked(pw);
             mSensorObserver.dumpLocked(pw);
+            mHbmObserver.dumpLocked(pw);
         }
     }
 
@@ -904,10 +913,12 @@ public class DisplayModeDirector {
         // It votes [MIN_REFRESH_RATE, Float.POSITIVE_INFINITY]
         public static final int PRIORITY_USER_SETTING_MIN_REFRESH_RATE = 2;
 
-        // APP_REQUEST_MAX_REFRESH_RATE is used to for internal apps to limit the refresh
+        // APP_REQUEST_REFRESH_RATE_RANGE is used to for internal apps to limit the refresh
         // rate in certain cases, mostly to preserve power.
-        // It votes to [0, APP_REQUEST_MAX_REFRESH_RATE].
-        public static final int PRIORITY_APP_REQUEST_MAX_REFRESH_RATE = 3;
+        // @see android.view.WindowManager.LayoutParams#preferredMinRefreshRate
+        // @see android.view.WindowManager.LayoutParams#preferredMaxRefreshRate
+        // It votes to [preferredMinRefreshRate, preferredMaxRefreshRate].
+        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE = 3;
 
         // We split the app request into different priorities in case we can satisfy one desire
         // without the other.
@@ -938,13 +949,16 @@ public class DisplayModeDirector {
         // user seeing the display flickering when the switches occur.
         public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 8;
 
+        // High-brightness-mode may need a specific range of refresh-rates to function properly.
+        public static final int PRIORITY_HIGH_BRIGHTNESS_MODE = 9;
+
         // The proximity sensor needs the refresh rate to be locked in order to function, so this is
         // set to a high priority.
-        public static final int PRIORITY_PROXIMITY = 9;
+        public static final int PRIORITY_PROXIMITY = 10;
 
         // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
         // to function, so this needs to be the highest priority of all votes.
-        public static final int PRIORITY_UDFPS = 10;
+        public static final int PRIORITY_UDFPS = 11;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -955,7 +969,7 @@ public class DisplayModeDirector {
         // The cutoff for the app request refresh rate range. Votes with priorities lower than this
         // value will not be considered when constructing the app request refresh rate range.
         public static final int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
-                PRIORITY_APP_REQUEST_MAX_REFRESH_RATE;
+                PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE;
 
         /**
          * A value signifying an invalid width or height in a vote.
@@ -1021,29 +1035,30 @@ public class DisplayModeDirector {
 
         public static String priorityToString(int priority) {
             switch (priority) {
+                case PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE:
+                    return "PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE";
+                case PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE:
+                    return "PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE";
+                case PRIORITY_APP_REQUEST_SIZE:
+                    return "PRIORITY_APP_REQUEST_SIZE";
                 case PRIORITY_DEFAULT_REFRESH_RATE:
                     return "PRIORITY_DEFAULT_REFRESH_RATE";
                 case PRIORITY_FLICKER_REFRESH_RATE:
                     return "PRIORITY_FLICKER_REFRESH_RATE";
                 case PRIORITY_FLICKER_REFRESH_RATE_SWITCH:
                     return "PRIORITY_FLICKER_REFRESH_RATE_SWITCH";
-                case PRIORITY_USER_SETTING_MIN_REFRESH_RATE:
-                    return "PRIORITY_USER_SETTING_MIN_REFRESH_RATE";
-                case PRIORITY_APP_REQUEST_MAX_REFRESH_RATE:
-                    return "PRIORITY_APP_REQUEST_MAX_REFRESH_RATE";
-                case PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE:
-                    return "PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE";
-                case PRIORITY_APP_REQUEST_SIZE:
-                    return "PRIORITY_APP_REQUEST_SIZE";
-                case PRIORITY_USER_SETTING_PEAK_REFRESH_RATE:
-                    return "PRIORITY_USER_SETTING_PEAK_REFRESH_RATE";
+                case PRIORITY_HIGH_BRIGHTNESS_MODE:
+                    return "PRIORITY_HIGH_BRIGHTNESS_MODE";
+                case PRIORITY_PROXIMITY:
+                    return "PRIORITY_PROXIMITY";
                 case PRIORITY_LOW_POWER_MODE:
                     return "PRIORITY_LOW_POWER_MODE";
                 case PRIORITY_UDFPS:
                     return "PRIORITY_UDFPS";
-                case PRIORITY_PROXIMITY:
-                    return "PRIORITY_PROXIMITY";
-
+                case PRIORITY_USER_SETTING_MIN_REFRESH_RATE:
+                    return "PRIORITY_USER_SETTING_MIN_REFRESH_RATE";
+                case PRIORITY_USER_SETTING_PEAK_REFRESH_RATE:
+                    return "PRIORITY_USER_SETTING_PEAK_REFRESH_RATE";
                 default:
                     return Integer.toString(priority);
             }
@@ -1220,17 +1235,19 @@ public class DisplayModeDirector {
 
     final class AppRequestObserver {
         private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
-        private final SparseArray<Float> mAppPreferredMaxRefreshRateByDisplay;
+        private final SparseArray<RefreshRateRange> mAppPreferredRefreshRateRangeByDisplay;
 
         AppRequestObserver() {
             mAppRequestedModeByDisplay = new SparseArray<>();
-            mAppPreferredMaxRefreshRateByDisplay = new SparseArray<>();
+            mAppPreferredRefreshRateRangeByDisplay = new SparseArray<>();
         }
 
-        public void setAppRequest(int displayId, int modeId, float requestedMaxRefreshRate) {
+        public void setAppRequest(int displayId, int modeId, float requestedMinRefreshRateRange,
+                float requestedMaxRefreshRateRange) {
             synchronized (mLock) {
                 setAppRequestedModeLocked(displayId, modeId);
-                setAppPreferredMaxRefreshRateLocked(displayId, requestedMaxRefreshRate);
+                setAppPreferredRefreshRateRangeLocked(displayId, requestedMinRefreshRateRange,
+                        requestedMaxRefreshRateRange);
             }
         }
 
@@ -1259,26 +1276,36 @@ public class DisplayModeDirector {
             updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
         }
 
-        private void setAppPreferredMaxRefreshRateLocked(int displayId,
-                float requestedMaxRefreshRate) {
+        private void setAppPreferredRefreshRateRangeLocked(int displayId,
+                float requestedMinRefreshRateRange, float requestedMaxRefreshRateRange) {
             final Vote vote;
-            final Float requestedMaxRefreshRateVote =
-                    requestedMaxRefreshRate > 0
-                            ? new Float(requestedMaxRefreshRate) : null;
-            if (Objects.equals(requestedMaxRefreshRateVote,
-                    mAppPreferredMaxRefreshRateByDisplay.get(displayId))) {
+
+            RefreshRateRange refreshRateRange = null;
+            if (requestedMinRefreshRateRange > 0 || requestedMaxRefreshRateRange > 0) {
+                float min = requestedMinRefreshRateRange;
+                float max = requestedMaxRefreshRateRange > 0
+                        ? requestedMaxRefreshRateRange : Float.POSITIVE_INFINITY;
+                refreshRateRange = new RefreshRateRange(min, max);
+                if (refreshRateRange.min == 0 && refreshRateRange.max == 0) {
+                    // requestedMinRefreshRateRange/requestedMaxRefreshRateRange were invalid
+                    refreshRateRange = null;
+                }
+            }
+
+            if (Objects.equals(refreshRateRange,
+                    mAppPreferredRefreshRateRangeByDisplay.get(displayId))) {
                 return;
             }
 
-            if (requestedMaxRefreshRate > 0) {
-                mAppPreferredMaxRefreshRateByDisplay.put(displayId, requestedMaxRefreshRateVote);
-                vote = Vote.forRefreshRates(0, requestedMaxRefreshRate);
+            if (refreshRateRange != null) {
+                mAppPreferredRefreshRateRangeByDisplay.put(displayId, refreshRateRange);
+                vote = Vote.forRefreshRates(refreshRateRange.min, refreshRateRange.max);
             } else {
-                mAppPreferredMaxRefreshRateByDisplay.remove(displayId);
+                mAppPreferredRefreshRateRangeByDisplay.remove(displayId);
                 vote = null;
             }
             synchronized (mLock) {
-                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE, vote);
+                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE, vote);
             }
         }
 
@@ -1303,11 +1330,12 @@ public class DisplayModeDirector {
                 final Display.Mode mode = mAppRequestedModeByDisplay.valueAt(i);
                 pw.println("    " + id + " -> " + mode);
             }
-            pw.println("    mAppPreferredMaxRefreshRateByDisplay:");
-            for (int i = 0; i < mAppPreferredMaxRefreshRateByDisplay.size(); i++) {
-                final int id = mAppPreferredMaxRefreshRateByDisplay.keyAt(i);
-                final Float refreshRate = mAppPreferredMaxRefreshRateByDisplay.valueAt(i);
-                pw.println("    " + id + " -> " + refreshRate);
+            pw.println("    mAppPreferredRefreshRateRangeByDisplay:");
+            for (int i = 0; i < mAppPreferredRefreshRateRangeByDisplay.size(); i++) {
+                final int id = mAppPreferredRefreshRateRangeByDisplay.keyAt(i);
+                final RefreshRateRange refreshRateRange =
+                        mAppPreferredRefreshRateRangeByDisplay.valueAt(i);
+                pw.println("    " + id + " -> " + refreshRateRange);
             }
         }
     }
@@ -2155,6 +2183,75 @@ public class DisplayModeDirector {
         }
     }
 
+    /**
+     * Listens to DisplayManager for HBM status and applies any refresh-rate restrictions for
+     * HBM that are associated with that display. Restrictions are retrieved from
+     * DisplayManagerInternal but originate in the display-device-config file.
+     */
+    private static class HbmObserver implements DisplayManager.DisplayListener {
+        private final BallotBox mBallotBox;
+        private final Handler mHandler;
+        private final SparseBooleanArray mHbmEnabled = new SparseBooleanArray();
+        private final Injector mInjector;
+
+        private DisplayManagerInternal mDisplayManagerInternal;
+
+        HbmObserver(Injector injector, BallotBox ballotBox, Handler handler) {
+            mInjector = injector;
+            mBallotBox = ballotBox;
+            mHandler = handler;
+        }
+
+        public void observe() {
+            mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+            mInjector.registerDisplayListener(this, mHandler,
+                    DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
+                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {}
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            mBallotBox.vote(displayId, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE, null);
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            final BrightnessInfo info = mInjector.getBrightnessInfo(displayId);
+            if (info == null) {
+                // Display no longer there. Assume we'll get an onDisplayRemoved very soon.
+                return;
+            }
+            final boolean isHbmEnabled =
+                    info.highBrightnessMode != BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
+            if (isHbmEnabled == mHbmEnabled.get(displayId)) {
+                // no change, ignore.
+                return;
+            }
+            Vote vote = null;
+            mHbmEnabled.put(displayId, isHbmEnabled);
+            if (isHbmEnabled) {
+                final List<RefreshRateLimitation> limits =
+                        mDisplayManagerInternal.getRefreshRateLimitations(displayId);
+                for (int i = 0; limits != null && i < limits.size(); i++) {
+                    final RefreshRateLimitation limitation = limits.get(i);
+                    if (limitation.type == REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE) {
+                        vote = Vote.forRefreshRates(limitation.range.min, limitation.range.max);
+                        break;
+                    }
+                }
+            }
+            mBallotBox.vote(displayId, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE, vote);
+        }
+
+        void dumpLocked(PrintWriter pw) {
+            pw.println("   HbmObserver");
+            pw.println("     mHbmEnabled: " + mHbmEnabled);
+        }
+    }
+
     private class DeviceConfigDisplaySettings implements DeviceConfig.OnPropertiesChangedListener {
         public DeviceConfigDisplaySettings() {
         }
@@ -2309,10 +2406,21 @@ public class DisplayModeDirector {
 
         void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer);
+
+        void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
+                Handler handler, long flags);
+
+        BrightnessInfo getBrightnessInfo(int displayId);
     }
 
     @VisibleForTesting
     static class RealInjector implements Injector {
+        private final Context mContext;
+        private DisplayManager mDisplayManager;
+
+        RealInjector(Context context) {
+            mContext = context;
+        }
 
         @Override
         @NonNull
@@ -2338,6 +2446,28 @@ public class DisplayModeDirector {
                 @NonNull ContentObserver observer) {
             cr.registerContentObserver(PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
                     observer, UserHandle.USER_SYSTEM);
+        }
+
+        @Override
+        public void registerDisplayListener(DisplayManager.DisplayListener listener,
+                Handler handler, long flags) {
+            getDisplayManager().registerDisplayListener(listener, handler, flags);
+        }
+
+        @Override
+        public BrightnessInfo getBrightnessInfo(int displayId) {
+            final Display display = getDisplayManager().getDisplay(displayId);
+            if (display != null) {
+                return display.getBrightnessInfo();
+            }
+            return null;
+        }
+
+        private DisplayManager getDisplayManager() {
+            if (mDisplayManager == null) {
+                mDisplayManager = mContext.getSystemService(DisplayManager.class);
+            }
+            return mDisplayManager;
         }
     }
 

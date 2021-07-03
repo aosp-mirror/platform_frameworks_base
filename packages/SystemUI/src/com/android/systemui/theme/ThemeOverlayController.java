@@ -241,7 +241,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         @Override
         public void onReceive(Context context, Intent intent) {
             boolean newWorkProfile = Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction());
-            boolean userStarted = Intent.ACTION_USER_STARTED.equals(intent.getAction());
+            boolean userStarted = Intent.ACTION_USER_SWITCHED.equals(intent.getAction());
             boolean isManagedProfile = mUserManager.isManagedProfile(
                     intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
             if (userStarted || newWorkProfile) {
@@ -288,7 +288,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,

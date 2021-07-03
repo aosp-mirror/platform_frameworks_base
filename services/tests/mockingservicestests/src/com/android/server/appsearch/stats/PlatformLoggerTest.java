@@ -21,7 +21,6 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -63,7 +62,6 @@ public class PlatformLoggerTest {
     public void testCreateExtraStatsLocked_samplingIntervalNotSet_returnsDefault() {
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.of(UserHandle.USER_NULL),
                 mAppSearchConfig);
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
@@ -96,8 +94,7 @@ public class PlatformLoggerTest {
         int putDocumentSamplingInterval = 1;
         int batchCallSamplingInterval = 2;
         PlatformLogger logger = new PlatformLogger(
-                ApplicationProvider.getApplicationContext(),
-                UserHandle.of(UserHandle.USER_NULL), mAppSearchConfig);
+                ApplicationProvider.getApplicationContext(), mAppSearchConfig);
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
                 AppSearchConfig.KEY_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
@@ -143,7 +140,6 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.of(UserHandle.USER_NULL),
                 mAppSearchConfig);
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
@@ -162,7 +158,6 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.of(UserHandle.USER_NULL),
                 mAppSearchConfig);
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
@@ -186,7 +181,6 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.of(UserHandle.USER_NULL),
                 mAppSearchConfig);
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
@@ -214,7 +208,6 @@ public class PlatformLoggerTest {
         final String testPackageName = "packageName";
         PlatformLogger logger = new PlatformLogger(
                 ApplicationProvider.getApplicationContext(),
-                UserHandle.of(UserHandle.USER_NULL),
                 mAppSearchConfig);
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,

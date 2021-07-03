@@ -56,7 +56,6 @@ import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -71,6 +70,7 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
@@ -127,6 +127,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected DemoModeController mDemoModeController;
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    protected FeatureFlags mFeatureFlags;
 
     protected int mSubId;
 
@@ -157,9 +158,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
-                .mockStatic(FeatureFlagUtils.class).startMocking();
-        ExtendedMockito.doReturn(true).when(() -> FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_PROVIDER_MODEL));
+                .mockStatic(FeatureFlags.class).startMocking();
+        ExtendedMockito.doReturn(true).when(() ->
+                FeatureFlags.isProviderModelSettingEnabled(mContext));
+        mFeatureFlags = mock(FeatureFlags.class);
+        when(mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()).thenReturn(false);
+        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+
 
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
@@ -235,7 +240,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockProvisionController,
                 mMockBd,
                 mDemoModeController,
-                mCarrierConfigTracker);
+                mCarrierConfigTracker,
+                mFeatureFlags);
         setupNetworkController();
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
@@ -303,7 +309,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                        mCarrierConfigTracker);
+                        mCarrierConfigTracker, mFeatureFlags);
 
         setupNetworkController();
 
@@ -571,13 +577,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             boolean cutOut) {
         verifyLastMobileDataIndicators(
                 visible, icon, typeIcon, qsVisible, qsIcon, qsTypeIcon, dataIn, dataOut, cutOut,
-                null, null);
+                null, null, visible);
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
             boolean qsVisible, int qsIcon, int qsTypeIcon, boolean dataIn, boolean dataOut,
             boolean cutOut, CharSequence typeContentDescription,
-            CharSequence typeContentDescriptionHtml) {
+            CharSequence typeContentDescriptionHtml, boolean showQs) {
         ArgumentCaptor<MobileDataIndicators> indicatorsArg =
                 ArgumentCaptor.forClass(MobileDataIndicators.class);
         ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
@@ -606,7 +612,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         assertEquals("Signal icon in status bar", state, expected.statusIcon.icon);
         assertEquals("Visibility in status bar", visible, expected.statusIcon.visible);
 
-        if (visible) {
+        if (showQs) {
             assertEquals("Visibility in quick settings", qsVisible, expected.qsIcon.visible);
             assertEquals("Signal icon in quick settings", state, expected.qsIcon.icon);
         } else {

@@ -669,7 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"설정하여 휴대전화로 더욱 빠르고 안전하게 구매하세요."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"잠금 해제하여 결제"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"설정되지 않음"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"카드 추가"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"업데이트 중"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"카드를 가져오는 중에 문제가 발생했습니다. 나중에 다시 시도해 보세요."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"잠금 화면 설정"</string>
@@ -1034,8 +1035,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"화면 일부 확대"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"전환"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"접근성 동작이 접근성 버튼으로 대체되었습니다\n\n"<annotation id="link">"설정 보기"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"접근성 동작을 버튼으로 전환할 수 있습니다.\n\n"<annotation id="link">"설정"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"오른쪽 상단으로 이동"</string>
@@ -1116,7 +1116,7 @@
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"대화 위젯"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"대화를 탭하여 홈 화면에 추가하세요."</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"메시지를 받으면 여기서 다시 확인해 주세요."</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"최근 대화가 여기에 표시됩니다."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"우선순위 대화"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"최근 대화"</string>
     <string name="okay" msgid="6490552955618608554">"확인"</string>
@@ -1145,8 +1145,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"최근 메시지, 부재중 전화, 상태 업데이트 보기"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"대화"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>님이 메시지를 보냈습니다."</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"방해 금지 모드로 인해 일시중지됨"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>님이 이미지를 보냈습니다."</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"배터리 수준을 읽는 중에 문제가 발생함"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"탭하여 자세한 정보를 확인하세요."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"설정된 알람 없음"</string>

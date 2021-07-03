@@ -100,6 +100,7 @@ public:
             TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
             std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
     void syncContents(const WebViewSyncData& data);
+    void onRemovedFromTree();
     void applyColorTransform(ColorTransform transform);
 
     [[nodiscard]] bool isEmpty() const { return !mHas.content; }

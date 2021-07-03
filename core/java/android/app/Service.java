@@ -697,6 +697,18 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * service element of manifest file. The value of attribute
      * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
      *
+     * <div class="caution">
+     * <p><strong>Note:</strong>
+     * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#S},
+     * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
+     * or higher are not allowed to start foreground services from the background.
+     * See
+     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * Behavior changes: Apps targeting Android 12
+     * </a>
+     * for more details.
+     * </div>
+     *
      * @throws ForegroundServiceStartNotAllowedException
      * If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
@@ -732,6 +744,18 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
    * thrown. Specify foregroundServiceType parameter as
    * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST} to use all flags that
    * is specified in manifest attribute foregroundServiceType.</p>
+   *
+   * <div class="caution">
+   * <p><strong>Note:</strong>
+   * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#S},
+   * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
+   * or higher are not allowed to start foreground services from the background.
+   * See
+   * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+   * Behavior changes: Apps targeting Android 12
+   * </a>
+   * for more details.
+   * </div>
    *
    * @param id The identifier for this notification as per
    * {@link NotificationManager#notify(int, Notification)

@@ -245,7 +245,8 @@ public class NotificationMediaManager implements Dumpable {
         mMediaDataManager.addListener(new MediaDataManager.Listener() {
             @Override
             public void onMediaDataLoaded(@NonNull String key,
-                    @Nullable String oldKey, @NonNull MediaData data, boolean immediately) {
+                    @Nullable String oldKey, @NonNull MediaData data, boolean immediately,
+                    boolean isSsReactivated) {
             }
 
             @Override
@@ -318,7 +319,8 @@ public class NotificationMediaManager implements Dumpable {
         mMediaDataManager.addListener(new MediaDataManager.Listener() {
             @Override
             public void onMediaDataLoaded(@NonNull String key,
-                    @Nullable String oldKey, @NonNull MediaData data, boolean immediately) {
+                    @Nullable String oldKey, @NonNull MediaData data, boolean immediately,
+                    boolean isSsReactivated) {
             }
 
             @Override

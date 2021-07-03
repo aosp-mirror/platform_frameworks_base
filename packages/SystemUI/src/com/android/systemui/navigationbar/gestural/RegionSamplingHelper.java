@@ -65,6 +65,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private final float mLuminanceChangeThreshold;
     private boolean mFirstSamplingAfterStart;
     private boolean mWindowVisible;
+    private boolean mWindowHasBlurs;
     private SurfaceControl mRegisteredStopLayer = null;
     private ViewTreeObserver.OnDrawListener mUpdateOnDraw = new ViewTreeObserver.OnDrawListener() {
         @Override
@@ -153,6 +154,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         boolean isSamplingEnabled = mSamplingEnabled
                 && !mSamplingRequestBounds.isEmpty()
                 && mWindowVisible
+                && !mWindowHasBlurs
                 && (mSampledView.isAttachedToWindow() || mFirstSamplingAfterStart);
         if (isSamplingEnabled) {
             ViewRootImpl viewRootImpl = mSampledView.getViewRootImpl();
@@ -225,6 +227,14 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         updateSamplingListener();
     }
 
+    /**
+     * If we're blurring the shade window.
+     */
+    public void setWindowHasBlurs(boolean hasBlurs) {
+        mWindowHasBlurs = hasBlurs;
+        updateSamplingListener();
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("RegionSamplingHelper:");
         pw.println("  sampleView isAttached: " + mSampledView.isAttachedToWindow());
@@ -238,6 +248,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         pw.println("  mLastMedianLuma: " + mLastMedianLuma);
         pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
         pw.println("  mWindowVisible: " + mWindowVisible);
+        pw.println("  mWindowHasBlurs: " + mWindowHasBlurs);
         pw.println("  mWaitingOnDraw: " + mWaitingOnDraw);
         pw.println("  mRegisteredStopLayer: " + mRegisteredStopLayer);
         pw.println("  mIsDestroyed: " + mIsDestroyed);

@@ -129,7 +129,9 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -403,20 +405,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             needsExtraction = wallpaper.primaryColors == null;
         }
 
-        // Let's notify the current values, it's fine if it's null, it just means
-        // that we don't know yet.
-        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
-
         if (needsExtraction) {
             extractColors(wallpaper);
-            synchronized (mLock) {
-                // Don't need to notify if nothing changed.
-                if (wallpaper.primaryColors == null) {
-                    return;
-                }
-            }
-            notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
         }
+        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
     }
 
     private static <T extends IInterface> boolean emptyCallbackList(RemoteCallbackList<T> list) {
@@ -3140,7 +3132,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void writeWallpaperAttributes(TypedXmlSerializer out, String tag,
+
+    @VisibleForTesting
+    void writeWallpaperAttributes(TypedXmlSerializer out, String tag,
             WallpaperData wallpaper)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (DEBUG) {
@@ -3179,6 +3173,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     out.attributeInt(null, "colorValue" + i, wc.toArgb());
                 }
             }
+
+            int allColorsCount = wallpaper.primaryColors.getAllColors().size();
+            out.attributeInt(null, "allColorsCount", allColorsCount);
+            if (allColorsCount > 0) {
+                int index = 0;
+                for (Map.Entry<Integer, Integer> entry : wallpaper.primaryColors.getAllColors()
+                        .entrySet()) {
+                    out.attributeInt(null, "allColorsValue" + index, entry.getKey());
+                    out.attributeInt(null, "allColorsPopulation" + index, entry.getValue());
+                    index++;
+                }
+            }
+
             out.attributeInt(null, "colorHints", wallpaper.primaryColors.getColorHints());
         }
 
@@ -3410,7 +3417,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
+    @VisibleForTesting
+    void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
             boolean keepDimensionHints) throws XmlPullParserException {
         final int id = parser.getAttributeInt(null, "id", -1);
         if (id != -1) {
@@ -3437,7 +3445,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         wpData.mPadding.right = getAttributeInt(parser, "paddingRight", 0);
         wpData.mPadding.bottom = getAttributeInt(parser, "paddingBottom", 0);
         int colorsCount = getAttributeInt(parser, "colorsCount", 0);
-        if (colorsCount > 0) {
+        int allColorsCount =  getAttributeInt(parser, "allColorsCount", 0);
+        if (allColorsCount > 0) {
+            Map<Integer, Integer> allColors = new HashMap<>(allColorsCount);
+            for (int i = 0; i < allColorsCount; i++) {
+                int colorInt = getAttributeInt(parser, "allColorsValue" + i, 0);
+                int population = getAttributeInt(parser, "allColorsPopulation" + i, 0);
+                allColors.put(colorInt, population);
+            }
+            int colorHints = getAttributeInt(parser, "colorHints", 0);
+            wallpaper.primaryColors = new WallpaperColors(allColors, colorHints);
+        } else if (colorsCount > 0) {
             Color primary = null, secondary = null, tertiary = null;
             for (int i = 0; i < colorsCount; i++) {
                 Color color = Color.valueOf(getAttributeInt(parser, "colorValue" + i, 0));

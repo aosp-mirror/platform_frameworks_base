@@ -43,16 +43,18 @@ public class PipSurfaceTransactionHelper {
     public PictureInPictureSurfaceTransaction scale(
             SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect sourceBounds, Rect destinationBounds) {
+        float positionX = destinationBounds.left;
+        float positionY = destinationBounds.top;
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRectF.set(destinationBounds);
+        mTmpDestinationRectF.offsetTo(0, 0);
         mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
         final float cornerRadius = getScaledCornerRadius(sourceBounds, destinationBounds);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setPosition(leash, mTmpDestinationRectF.left, mTmpDestinationRectF.top)
+                .setPosition(leash, positionX, positionY)
                 .setCornerRadius(leash, cornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                mTmpDestinationRectF.left, mTmpDestinationRectF.top,
-                mTmpFloat9, 0 /* rotation */, cornerRadius, sourceBounds);
+                positionX, positionY, mTmpFloat9, 0 /* rotation */, cornerRadius, sourceBounds);
     }
 
     public PictureInPictureSurfaceTransaction scale(
@@ -61,6 +63,7 @@ public class PipSurfaceTransactionHelper {
             float degree, float positionX, float positionY) {
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRectF.set(destinationBounds);
+        mTmpDestinationRectF.offsetTo(0, 0);
         mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
         mTmpTransform.postRotate(degree, 0, 0);
         final float cornerRadius = getScaledCornerRadius(sourceBounds, destinationBounds);
@@ -82,8 +85,8 @@ public class PipSurfaceTransactionHelper {
         final float scale = sourceBounds.width() <= sourceBounds.height()
                 ? (float) destinationBounds.width() / sourceBounds.width()
                 : (float) destinationBounds.height() / sourceBounds.height();
-        final float left = destinationBounds.left - insets.left * scale;
-        final float top = destinationBounds.top - insets.top * scale;
+        final float left = destinationBounds.left - (insets.left + sourceBounds.left) * scale;
+        final float top = destinationBounds.top - (insets.top + sourceBounds.top) * scale;
         mTmpTransform.setScale(scale, scale);
         final float cornerRadius = getScaledCornerRadius(mTmpDestinationRect, destinationBounds);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)

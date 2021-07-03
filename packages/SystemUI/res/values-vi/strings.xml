@@ -669,7 +669,9 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Thiết lập để mua hàng nhanh hơn và an toàn hơn bằng điện thoại"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Mở khóa để thanh toán"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Chưa thiết lập"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Đang cập nhật"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Không phát âm thanh hoặc rung"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Không phát âm thanh hoặc rung và xuất hiện phía dưới trong phần cuộc trò chuyện"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> sẽ hiện ở dạng bong bóng theo mặc định."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Cho phép hệ thống quyết định xem thông báo này phát âm thanh hay rung"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã thay đổi thành Mặc định"</string>
@@ -1034,8 +1036,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Phóng to một phần màn hình"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Chuyển"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Nút hỗ trợ tiếp cận đã thay thế cử chỉ hỗ trợ tiếp cận\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Bạn có thể chuyển từ cử chỉ hỗ trợ tiếp cận sang nút hỗ trợ tiếp cận\n\n"<annotation id="link">"Cài đặt"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Chuyển lên trên cùng bên phải"</string>
@@ -1116,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Tiện ích trò chuyện"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Nhấn vào một cuộc trò chuyện để thêm cuộc trò chuyện đó vào Màn hình chính"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Hãy quay lại đây khi bạn nhận được tin nhắn"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Các cuộc trò chuyện gần đây của bạn sẽ xuất hiện ở đây"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Cuộc trò chuyện ưu tiên"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Cuộc trò chuyện gần đây"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>
@@ -1145,8 +1146,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Hơn <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Xem các tin nhắn, cuộc gọi nhỡ và thông tin cập nhật trạng thái gần đây"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Cuộc trò chuyện"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một tin nhắn"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Đã tạm dừng do chế độ Không làm phiền"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một hình ảnh"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Chưa đặt chuông báo"</string>

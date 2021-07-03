@@ -76,6 +76,7 @@ public abstract class HotwordDetectionService extends Service {
     private static final boolean DBG = true;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
@@ -200,6 +201,11 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         @Override
+        public void ping(IRemoteCallback callback) throws RemoteException {
+            callback.sendResult(null);
+        }
+
+        @Override
         public void stopDetection() {
             HotwordDetectionService.this.onStopDetection();
         }
@@ -291,9 +297,7 @@ public abstract class HotwordDetectionService extends Service {
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @DurationMillisLong long callbackTimeoutMillis,
-            @Nullable IntConsumer statusCallback) {
-        // TODO: Handle the unimplemented case by throwing?
-    }
+            @Nullable IntConsumer statusCallback) {}
 
     /**
      * Called when the {@link VoiceInteractionService} requests that this service
@@ -390,6 +394,14 @@ public abstract class HotwordDetectionService extends Service {
          */
         public void onDetected(@NonNull HotwordDetectedResult result) {
             requireNonNull(result);
+            final PersistableBundle persistableBundle = result.getExtras();
+            if (!persistableBundle.isEmpty() && HotwordDetectedResult.getParcelableSize(
+                    persistableBundle) > HotwordDetectedResult.getMaxBundleSize()) {
+                throw new IllegalArgumentException(
+                        "The bundle size of result is larger than max bundle size ("
+                                + HotwordDetectedResult.getMaxBundleSize()
+                                + ") of HotwordDetectedResult");
+            }
             try {
                 mRemoteCallback.onDetected(result);
             } catch (RemoteException e) {

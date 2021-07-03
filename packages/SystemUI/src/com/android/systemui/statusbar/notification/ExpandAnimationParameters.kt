@@ -22,10 +22,26 @@ class ExpandAnimationParameters(
     )
 
     var startTranslationZ = 0f
+
+    /**
+     * The top position of the notification at the start of the animation. This is needed in order
+     * to keep the notification at its place when launching a notification that is clipped rounded.
+     */
+    var startNotificationTop = 0f
     var startClipTopAmount = 0
     var parentStartClipTopAmount = 0
     var progress = 0f
     var linearProgress = 0f
+
+    /**
+     * The rounded top clipping at the beginning.
+     */
+    var startRoundedTopClipping = 0
+
+    /**
+     * The rounded top clipping of the parent notification at the start.
+     */
+    var parentStartRoundedTopClipping = 0
 
     override val topChange: Int
         get() {

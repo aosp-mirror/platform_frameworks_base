@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -219,6 +220,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction;
+
+    // The tag for the token to put root tasks on the displays to sleep.
+    private static final String DISPLAY_OFF_SLEEP_TOKEN_TAG = "Display-off";
 
     /** The token acquirer to put root tasks on the displays to sleep */
     final ActivityTaskManagerInternal.SleepTokenAcquirer mDisplayOffTokenAcquirer;
@@ -449,7 +453,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mService = service.mAtmService;
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
-        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl("Display-off");
+        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -1525,7 +1529,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Updates the extra information of the intent.
         if (fromHomeKey) {
             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
-            mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "startHomeActivity");
+            if (mWindowManager.getRecentsAnimationController() != null) {
+                mWindowManager.getRecentsAnimationController().cancelAnimationForHomeStart();
+            }
         }
         homeIntent.putExtra(WindowManagerPolicy.EXTRA_START_REASON, reason);
 
@@ -2653,12 +2659,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Slog.d(TAG, "Remove non-exist sleep token: " + token + " from " + Debug.getCallers(6));
         }
         mSleepTokens.remove(token.mHashKey);
-
         final DisplayContent display = getDisplayContent(token.mDisplayId);
         if (display != null) {
             display.mAllSleepTokens.remove(token);
             if (display.mAllSleepTokens.isEmpty()) {
                 mService.updateSleepIfNeededLocked();
+                if (token.mTag.equals(DISPLAY_OFF_SLEEP_TOKEN_TAG)) {
+                    display.mSkipAppTransitionAnimation = true;
+                }
             }
         }
     }
@@ -3383,6 +3391,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void lockAllProfileTasks(@UserIdInt int userId) {
         forAllLeafTasks(task -> {
+            final ActivityRecord top = task.topRunningActivity();
+            if (top != null && !top.finishing
+                    && ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER.equals(top.intent.getAction())
+                    && top.packageName.equals(
+                            mService.getSysUiServiceComponentLocked().getPackageName())) {
+                // Do nothing since the task is already secure by sysui.
+                return;
+            }
+
             if (task.getActivity(activity -> !activity.finishing && activity.mUserId == userId)
                     != null) {
                 mService.getTaskChangeNotificationController().notifyTaskProfileLocked(

@@ -19,10 +19,13 @@ package com.android.settingslib.utils.applications;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.UserManager;
 import android.util.Log;
 
-import com.android.settingslib.widget.R;
+import androidx.annotation.RequiresApi;
+
+import com.android.settingslib.utils.R;
 
 public class AppUtils {
 
@@ -49,6 +52,7 @@ public class AppUtils {
      * work app for accessibility purpose.
      * If the app is in a work profile, then add a "work" prefix to the app name.
      */
+    @RequiresApi(Build.VERSION_CODES.M)
     public static String getAppContentDescription(Context context, String packageName,
             int userId) {
         final CharSequence appLabel = getApplicationLabel(context.getPackageManager(), packageName);

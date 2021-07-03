@@ -50,18 +50,34 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
 
     @NonNull private final CurrentUserRetriever mCurrentUserRetriever;
     @NonNull private final UserSwitchCallback mUserSwitchCallback;
-    @NonNull @VisibleForTesting final ClientFinishedCallback mClientFinishedCallback;
-
     @Nullable private StopUserClient<?> mStopUserClient;
 
-    @VisibleForTesting
-    class ClientFinishedCallback implements BaseClientMonitor.Callback {
+    private class ClientFinishedCallback implements BaseClientMonitor.Callback {
+        private final BaseClientMonitor mOwner;
+
+        ClientFinishedCallback(BaseClientMonitor owner) {
+            mOwner = owner;
+        }
+
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
-                Slog.d(getTag(), "[Client finished] " + clientMonitor + ", success: " + success);
+                if (mOwner != clientMonitor) {
+                    Slog.e(getTag(), "[Wrong client finished], actual: "
+                            + clientMonitor + ", expected: " + mOwner);
+                    return;
+                }
 
-                startNextOperationIfIdle();
+                Slog.d(getTag(), "[Client finished] "
+                        + clientMonitor + ", success: " + success);
+                if (mCurrentOperation != null && mCurrentOperation.mClientMonitor == mOwner) {
+                    mCurrentOperation = null;
+                    startNextOperationIfIdle();
+                } else {
+                    // can usually be ignored (hal died, etc.)
+                    Slog.d(getTag(), "operation is already null or different (reset?): "
+                            + mCurrentOperation);
+                }
             });
         }
     }
@@ -76,7 +92,6 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
 
         mCurrentUserRetriever = currentUserRetriever;
         mUserSwitchCallback = userSwitchCallback;
-        mClientFinishedCallback = new ClientFinishedCallback();
     }
 
     public UserAwareBiometricScheduler(@NonNull String tag,
@@ -112,17 +127,27 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         } else if (currentUserId == UserHandle.USER_NULL) {
             final BaseClientMonitor startClient =
                     mUserSwitchCallback.getStartUserClient(nextUserId);
+            final ClientFinishedCallback finishedCallback =
+                    new ClientFinishedCallback(startClient);
+
             Slog.d(getTag(), "[Starting User] " + startClient);
-            startClient.start(mClientFinishedCallback);
+            mCurrentOperation = new Operation(
+                    startClient, finishedCallback, Operation.STATE_STARTED);
+            startClient.start(finishedCallback);
         } else {
             if (mStopUserClient != null) {
                 Slog.d(getTag(), "[Waiting for StopUser] " + mStopUserClient);
             } else {
                 mStopUserClient = mUserSwitchCallback
                         .getStopUserClient(currentUserId);
+                final ClientFinishedCallback finishedCallback =
+                        new ClientFinishedCallback(mStopUserClient);
+
                 Slog.d(getTag(), "[Stopping User] current: " + currentUserId
                         + ", next: " + nextUserId + ". " + mStopUserClient);
-                mStopUserClient.start(mClientFinishedCallback);
+                mCurrentOperation = new Operation(
+                        mStopUserClient, finishedCallback, Operation.STATE_STARTED);
+                mStopUserClient.start(finishedCallback);
             }
         }
     }

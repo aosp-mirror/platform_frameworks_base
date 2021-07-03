@@ -157,6 +157,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     private volatile boolean mOkToSendBroadcasts = false;
     private volatile boolean mBypassNextStagedInstallerCheck = false;
+    private volatile boolean mBypassNextAllowedApexUpdateCheck = false;
 
     /**
      * File storing persisted {@link #mSessions} metadata.
@@ -650,6 +651,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 throw new IllegalArgumentException(
                     "Non-staged APEX session doesn't support INSTALL_ENABLE_ROLLBACK");
             }
+            if (isCalledBySystemOrShell(callingUid) || mBypassNextAllowedApexUpdateCheck) {
+                params.installFlags |= PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK;
+            } else {
+                // Only specific APEX updates (installed through ADB, or for CTS tests) can disable
+                // allowed APEX update check.
+                params.installFlags &= ~PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK;
+            }
         }
 
         if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
@@ -674,6 +682,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         mBypassNextStagedInstallerCheck = false;
+        mBypassNextAllowedApexUpdateCheck = false;
+
         if (!params.isMultiPackage) {
             // Only system components can circumvent runtime permissions when installing.
             if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
@@ -979,7 +989,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 SessionInfo info =
                         session.generateInfoForCaller(false /*withIcon*/, Process.SYSTEM_UID);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
-                        && session.userId == userId && !session.hasParentSessionId()) {
+                        && session.userId == userId && !session.hasParentSessionId()
+                        && isCallingUidOwner(session)) {
                     result.add(info);
                 }
             }
@@ -1104,6 +1115,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("Caller not allowed to bypass staged installer check");
         }
         mBypassNextStagedInstallerCheck = value;
+    }
+
+    @Override
+    public void bypassNextAllowedApexUpdateCheck(boolean value) {
+        if (!isCalledBySystemOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Caller not allowed to bypass allowed apex update check");
+        }
+        mBypassNextAllowedApexUpdateCheck = value;
     }
 
     /**

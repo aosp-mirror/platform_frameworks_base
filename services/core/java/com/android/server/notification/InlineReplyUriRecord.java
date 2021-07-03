@@ -16,9 +16,11 @@
 
 package com.android.server.notification;
 
+import android.app.ActivityManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArraySet;
 
 /**
@@ -74,7 +76,9 @@ public final class InlineReplyUriRecord {
      */
     public int getUserId() {
         int userId = mUser.getIdentifier();
-        if (userId == UserHandle.USER_ALL) {
+        if (UserManager.isHeadlessSystemUserMode() && userId == UserHandle.USER_ALL) {
+            return ActivityManager.getCurrentUser();
+        } else if (userId == UserHandle.USER_ALL) {
             return UserHandle.USER_SYSTEM;
         } else {
             return userId;

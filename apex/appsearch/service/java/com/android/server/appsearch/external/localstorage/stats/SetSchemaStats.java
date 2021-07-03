@@ -17,6 +17,7 @@
 package com.android.server.appsearch.external.localstorage.stats;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.appsearch.AppSearchResult;
 
 import java.util.Objects;
@@ -37,6 +38,12 @@ public final class SetSchemaStats {
      * state.
      */
     @AppSearchResult.ResultCode private final int mStatusCode;
+
+    /**
+     * Stores stats of SchemaMigration in SetSchema process. Is {@code null} if no schema migration
+     * is needed.
+     */
+    @Nullable private final SchemaMigrationStats mSchemaMigrationStats;
 
     private final int mTotalLatencyMillis;
 
@@ -63,6 +70,7 @@ public final class SetSchemaStats {
         mPackageName = builder.mPackageName;
         mDatabase = builder.mDatabase;
         mStatusCode = builder.mStatusCode;
+        mSchemaMigrationStats = builder.mSchemaMigrationStats;
         mTotalLatencyMillis = builder.mTotalLatencyMillis;
         mNativeLatencyMillis = builder.mNativeLatencyMillis;
         mNewTypeCount = builder.mNewTypeCount;
@@ -88,6 +96,15 @@ public final class SetSchemaStats {
     @AppSearchResult.ResultCode
     public int getStatusCode() {
         return mStatusCode;
+    }
+
+    /**
+     * Returns the status of schema migration, if migration is executed during the SetSchema
+     * process. Otherwise, returns {@code null}.
+     */
+    @Nullable
+    public SchemaMigrationStats getSchemaMigrationStats() {
+        return mSchemaMigrationStats;
     }
 
     /** Returns the total latency of the SetSchema action. */
@@ -140,6 +157,7 @@ public final class SetSchemaStats {
         @NonNull final String mPackageName;
         @NonNull final String mDatabase;
         @AppSearchResult.ResultCode int mStatusCode;
+        @Nullable SchemaMigrationStats mSchemaMigrationStats;
         int mTotalLatencyMillis;
         int mNativeLatencyMillis;
         int mNewTypeCount;
@@ -161,7 +179,14 @@ public final class SetSchemaStats {
             return this;
         }
 
-        /** Sets total latency for the SetSchema action. */
+        /** Sets the status of schema migration. */
+        @NonNull
+        public Builder setSchemaMigrationStats(@NonNull SchemaMigrationStats schemaMigrationStats) {
+            mSchemaMigrationStats = Objects.requireNonNull(schemaMigrationStats);
+            return this;
+        }
+
+        /** Sets total latency for the SetSchema action in milliseconds. */
         @NonNull
         public Builder setTotalLatencyMillis(int totalLatencyMillis) {
             mTotalLatencyMillis = totalLatencyMillis;

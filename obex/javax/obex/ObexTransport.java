@@ -81,6 +81,8 @@ public interface ObexTransport {
      * size. Therefore this value shall not change.
      * For RFCOMM or other transport types where the OBEX packets size
      * is unrelated to the transport packet size, return -1;
+     * Exception can be made (like PBAP transport) with a smaller value
+     * to avoid bad effect on other profiles using the RFCOMM;
      * @return the maximum allowed OBEX packet that can be send over
      *         the transport. Or -1 in case of don't care.
      */

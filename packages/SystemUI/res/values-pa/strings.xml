@@ -669,7 +669,9 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ਆਪਣੇ ਫ਼ੋਨ ਨਾਲ ਜ਼ਿਆਦਾ ਤੇਜ਼ ਅਤੇ ਜ਼ਿਆਦਾ ਸੁਰੱਖਿਅਤ ਖਰੀਦਾਂ ਕਰਨ ਲਈ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ਸਭ ਦਿਖਾਓ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ਭੁਗਤਾਨ ਕਰਨ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ਤੁਹਾਡੇ ਕਾਰਡ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆਈ, ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ਲਾਕ ਸਕ੍ਰੀਨ ਸੈਟਿੰਗਾਂ"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ। ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ <xliff:g id="APP_NAME">%1$s</xliff:g> ਬਬਲ ਤੋਂ ਗੱਲਾਂਬਾਤਾਂ।"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ। ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਤੌਰ \'ਤੇ <xliff:g id="APP_NAME">%1$s</xliff:g> ਤੋਂ ਗੱਲਾਂਬਾਤਾਂ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ਇਸ ਸਮੱਗਰੀ ਦੇ ਅਸਥਿਰ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਆਪਣਾ ਧਿਆਨ ਕੇਂਦਰਿਤ ਰੱਖੋ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ਸਿਸਟਮ ਨੂੰ ਨਿਰਧਾਰਤ ਕਰਨ ਦਿਓ ਕਿ ਇਸ ਸੂਚਨਾ ਲਈ ਕੋਈ ਧੁਨੀ ਵਜਾਉਣੀ ਚਾਹੀਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਵਧਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
@@ -742,9 +744,9 @@
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਵਧਾਇਆ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾਇਆ ਗਿਆ"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ, ਬਬਲ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਜੋ ਕਿ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ, \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵੀ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ, ਬਬਲ ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ, \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵੀ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਜੋ ਕਿ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵਿਘਨ ਵੀ ਪਾ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
@@ -1034,8 +1036,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ਸਕ੍ਰੀਨ ਦੇ ਹਿੱਸੇ ਨੂੰ ਵੱਡਾ ਕਰੋ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ਸਵਿੱਚ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਬਦਲ ਦਿੱਤਾ ਗਿਆ\n\n"<annotation id="link">"ਸੈਟਿੰਗਾਂ ਦੇਖੋ"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"ਤੁਸੀਂ ਪਹੁੰਚਯੋਗਤਾ ਇਸ਼ਾਰੇ ਤੋਂ ਬਟਨ \'ਤੇ ਸਵਿੱਚ ਕਰ ਸਕਦੇ ਹੋ\n\n"<annotation id="link">"ਸੈਟਿੰਗਾਂ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ਬਟਨ ਨੂੰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਲੁਕਾਉਣ ਲਈ ਕਿਨਾਰੇ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ਉੱਪਰ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ਉੱਪਰ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
@@ -1116,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ਗੱਲਬਾਤ ਖੋਲ੍ਹੋ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ਗੱਲਬਾਤ ਵਿਜੇਟ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਕੋਈ ਗੱਲਬਾਤ ਚੁਣੋ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ਤੁਹਾਨੂੰ ਕੁਝ ਸੁਨੇਹੇ ਮਿਲਣ \'ਤੇ, ਉਹਨਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਵਾਪਸ ਇੱਥੇ ਆਓ"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"ਤੁਹਾਡੀਆਂ ਹਾਲੀਆ ਗੱਲਾਂਬਾਤਾਂ ਇੱਥੇ ਦਿਸਣਗੀਆਂ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ਹਾਲੀਆ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="okay" msgid="6490552955618608554">"ਠੀਕ ਹੈ"</string>
@@ -1145,8 +1146,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ਹਾਲੀਆ ਸੁਨੇਹੇ, ਮਿਸ ਕਾਲਾਂ ਅਤੇ ਸਥਿਤੀ ਸੰਬੰਧੀ ਅੱਪਡੇਟ ਦੇਖੋ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ਗੱਲਬਾਤ"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ਨੇ ਇੱਕ ਸੁਨੇਹਾ ਭੇਜਿਆ"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵਿਸ਼ੇਸ਼ਤਾ ਨੇ ਰੋਕ ਦਿੱਤਾ"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ਨੇ ਇੱਕ ਚਿੱਤਰ ਭੇਜਿਆ ਹੈ"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ਤੁਹਾਡੇ ਬੈਟਰੀ ਮੀਟਰ ਨੂੰ ਪੜ੍ਹਨ ਵਿੱਚ ਸਮੱਸਿਆ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ਕੋਈ ਅਲਾਰਮ ਸੈੱਟ ਨਹੀਂ"</string>

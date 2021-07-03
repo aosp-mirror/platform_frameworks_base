@@ -445,6 +445,9 @@
     <!-- Adjust the theme on fully custom and decorated custom view notifications -->
     <bool name="config_adjustThemeOnNotificationCustomViews">false</bool>
 
+    <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
+    <bool name="config_skinnyNotifsInLandscape">true</bool>
+
     <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
          does not work well, particularly with noisy touchscreens. Note that disabling it may
          increase the rate of unintentional unlocks. -->
@@ -520,8 +523,12 @@
      -->
     <string name="config_rounded_mask" translatable="false">"M8,0C3.6,0,0,3.6,0,8"</string>
 
-    <!-- Preferred refresh rate at keyguard, if supported by the display -->
+    <!-- Preferred refresh rate at keyguard, if supported by the display. Overrides
+         keyguardMaxRefreshRate. -->
     <integer name="config_keyguardRefreshRate">-1</integer>
+
+    <!-- Preferred max refresh rate at keyguard, if supported by the display. -->
+    <integer name="config_keyguardMaxRefreshRate">-1</integer>
 
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
@@ -654,13 +661,6 @@
         <!-- sensorLocationX -->
         <!-- sensorLocationY -->
         <!--sensorRadius -->
-    </integer-array>
-
-    <!-- The properties of the lock icon in pixels. -->
-    <integer-array name="config_lock_icon_props">
-        <!-- X -->
-        <!-- Y -->
-        <!-- radius -->
     </integer-array>
 
     <!-- Overrides the behavior of the face unlock keyguard bypass setting:

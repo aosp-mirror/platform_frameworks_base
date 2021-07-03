@@ -844,7 +844,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         public List<Step> play() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "ComposePrimitivesStep");
             try {
-                int segmentCount = effect.getSegments().size();
+                // Load the next PrimitiveSegments to create a single compose call to the vibrator,
+                // limited to the vibrator composition maximum size.
+                int limit = controller.getVibratorInfo().getCompositionSizeMax();
+                int segmentCount = limit > 0
+                        ? Math.min(effect.getSegments().size(), segmentIndex + limit)
+                        : effect.getSegments().size();
                 List<PrimitiveSegment> primitives = new ArrayList<>();
                 for (int i = segmentIndex; i < segmentCount; i++) {
                     VibrationEffectSegment segment = effect.getSegments().get(i);
@@ -896,7 +901,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         public List<Step> play() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "ComposePwleStep");
             try {
-                int segmentCount = effect.getSegments().size();
+                // Load the next RampSegments to create a single composePwle call to the vibrator,
+                // limited to the vibrator PWLE maximum size.
+                int limit = controller.getVibratorInfo().getPwleSizeMax();
+                int segmentCount = limit > 0
+                        ? Math.min(effect.getSegments().size(), segmentIndex + limit)
+                        : effect.getSegments().size();
                 List<RampSegment> pwles = new ArrayList<>();
                 for (int i = segmentIndex; i < segmentCount; i++) {
                     VibrationEffectSegment segment = effect.getSegments().get(i);

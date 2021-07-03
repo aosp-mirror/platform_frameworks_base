@@ -669,7 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configura una manera més ràpida i segura de fer compres amb el telèfon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostra-ho tot"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloqueja per pagar"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"No s\'ha configurat"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Afegeix una targeta"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"S\'està actualitzant"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloqueja per utilitzar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Hi ha hagut un problema en obtenir les teves targetes; torna-ho a provar més tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configuració de la pantalla de bloqueig"</string>
@@ -1034,8 +1035,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplia una part de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Canvia"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El gest d\'accessibilitat s\'ha substituït pel botó d\'accessibilitat\n\n"<annotation id="link">"Mostra la configuració"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Pots canviar del gest d\'accessibilitat a un botó\n\n"<annotation id="link">"Configuració"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mou el botó a l\'extrem per amagar-lo temporalment"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mou a dalt a l\'esquerra"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mou a dalt a la dreta"</string>
@@ -1116,7 +1116,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversa oberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toca una conversa per afegir-la a la teva pantalla d\'inici"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Torna a consultar aquesta pàgina quan rebis algun missatge"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Les converses recents es mostraran aquí"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Converses prioritàries"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Converses recents"</string>
     <string name="okay" msgid="6490552955618608554">"D\'acord"</string>
@@ -1145,8 +1145,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Consulta els missatges recents, les trucades perdudes i les actualitzacions d\'estat"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversa"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ha enviat un missatge"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Posat en pausa pel mode No molestis"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ha enviat una imatge"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Hi ha hagut un problema en llegir el mesurador de la bateria"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca per obtenir més informació"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Cap alarma configurada"</string>

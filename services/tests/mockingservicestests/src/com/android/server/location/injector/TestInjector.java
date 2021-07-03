@@ -16,9 +16,14 @@
 
 package com.android.server.location.injector;
 
+import android.content.Context;
+
+import com.android.server.location.settings.FakeLocationSettings;
+
 public class TestInjector implements Injector {
 
     private final FakeUserInfoHelper mUserInfoHelper;
+    private final FakeLocationSettings mLocationSettings;
     private final FakeAlarmHelper mAlarmHelper;
     private final FakeAppOpsHelper mAppOpsHelper;
     private final FakeLocationPermissionsHelper mLocationPermissionsHelper;
@@ -32,8 +37,9 @@ public class TestInjector implements Injector {
     private final FakeEmergencyHelper mEmergencyHelper;
     private final LocationUsageLogger mLocationUsageLogger;
 
-    public TestInjector() {
+    public TestInjector(Context context) {
         mUserInfoHelper = new FakeUserInfoHelper();
+        mLocationSettings = new FakeLocationSettings(context);
         mAlarmHelper = new FakeAlarmHelper();
         mAppOpsHelper = new FakeAppOpsHelper();
         mLocationPermissionsHelper = new FakeLocationPermissionsHelper(mAppOpsHelper);
@@ -51,6 +57,11 @@ public class TestInjector implements Injector {
     @Override
     public FakeUserInfoHelper getUserInfoHelper() {
         return mUserInfoHelper;
+    }
+
+    @Override
+    public FakeLocationSettings getLocationSettings() {
+        return mLocationSettings;
     }
 
     @Override

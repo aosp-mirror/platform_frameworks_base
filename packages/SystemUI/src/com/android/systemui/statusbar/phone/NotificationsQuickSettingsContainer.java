@@ -47,6 +47,8 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mKeyguardStatusBar;
     private boolean mQsExpanded;
     private boolean mCustomizerAnimating;
+    private boolean mCustomizing;
+    private boolean mDetailShowing;
 
     private int mBottomPadding;
     private int mStackScrollerMargin;
@@ -140,7 +142,18 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     }
 
     public void setCustomizerShowing(boolean isShowing) {
-        if (isShowing) {
+        mCustomizing = isShowing;
+        updateBottomMargin();
+        mStackScroller.setQsCustomizerShowing(isShowing);
+    }
+
+    public void setDetailShowing(boolean isShowing) {
+        mDetailShowing = isShowing;
+        updateBottomMargin();
+    }
+
+    private void updateBottomMargin() {
+        if (mCustomizing || mDetailShowing) {
             // Clear out bottom paddings/margins so the qs customization can be full height.
             setPadding(0, 0, 0, 0);
             setBottomMargin(mStackScroller, 0);
@@ -148,7 +161,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
             setPadding(0, 0, 0, mBottomPadding);
             setBottomMargin(mStackScroller, mStackScrollerMargin);
         }
-        mStackScroller.setQsCustomizerShowing(isShowing);
     }
 
     private void setBottomMargin(View v, int bottomMargin) {

@@ -239,6 +239,8 @@ public final class AppSearchResult<ValueType> {
             resultCode = AppSearchResult.RESULT_INVALID_ARGUMENT;
         } else if (t instanceof IOException) {
             resultCode = AppSearchResult.RESULT_IO_ERROR;
+        } else if (t instanceof SecurityException) {
+            resultCode = AppSearchResult.RESULT_SECURITY_ERROR;
         } else {
             resultCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
         }

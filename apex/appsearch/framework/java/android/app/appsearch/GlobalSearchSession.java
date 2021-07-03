@@ -73,6 +73,7 @@ public class GlobalSearchSession implements Closeable {
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         try {
             mService.initialize(
+                    mPackageName,
                     mUserHandle,
                     /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchResultCallback.Stub() {
@@ -187,7 +188,9 @@ public class GlobalSearchSession implements Closeable {
         if (mIsMutated && !mIsClosed) {
             try {
                 mService.persistToDisk(
-                        mUserHandle, /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
+                        mPackageName,
+                        mUserHandle,
+                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the GlobalSearchSession", e);

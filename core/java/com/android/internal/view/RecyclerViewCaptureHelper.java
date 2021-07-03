@@ -16,7 +16,11 @@
 
 package com.android.internal.view;
 
-import android.animation.ValueAnimator;
+import static com.android.internal.view.ScrollCaptureViewSupport.computeScrollAmount;
+import static com.android.internal.view.ScrollCaptureViewSupport.findScrollingReferenceView;
+import static com.android.internal.view.ScrollCaptureViewSupport.transformFromContainerToRequest;
+import static com.android.internal.view.ScrollCaptureViewSupport.transformFromRequestToContainer;
+
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.Log;
@@ -38,17 +42,10 @@ import android.view.ViewParent;
  * @see ScrollCaptureViewSupport
  */
 public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGroup> {
-
-    // Experiment
-    private static final boolean DISABLE_ANIMATORS = false;
-    // Experiment
-    private static final boolean STOP_RENDER_THREAD = false;
-
     private static final String TAG = "RVCaptureHelper";
     private int mScrollDelta;
     private boolean mScrollBarWasEnabled;
     private int mOverScrollMode;
-    private float mDurationScale;
 
     @Override
     public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
@@ -59,140 +56,81 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
 
         mScrollBarWasEnabled = view.isVerticalScrollBarEnabled();
         view.setVerticalScrollBarEnabled(false);
-        if (DISABLE_ANIMATORS) {
-            mDurationScale = ValueAnimator.getDurationScale();
-            ValueAnimator.setDurationScale(0);
-        }
-        if (STOP_RENDER_THREAD) {
-            view.getThreadedRenderer().stop();
-        }
     }
 
     @Override
     public ScrollResult onScrollRequested(@NonNull ViewGroup recyclerView, Rect scrollBounds,
             Rect requestRect) {
+        Log.d(TAG, "-----------------------------------------------------------");
+        Log.d(TAG, "onScrollRequested(scrollBounds=" + scrollBounds + ", "
+                + "requestRect=" + requestRect + ")");
+
         ScrollResult result = new ScrollResult();
         result.requestedArea = new Rect(requestRect);
         result.scrollDelta = mScrollDelta;
         result.availableArea = new Rect(); // empty
 
-        Log.d(TAG, "current scrollDelta: " + mScrollDelta);
         if (!recyclerView.isVisibleToUser() || recyclerView.getChildCount() == 0) {
             Log.w(TAG, "recyclerView is empty or not visible, cannot continue");
             return result; // result.availableArea == empty Rect
         }
 
-        // move from scrollBounds-relative to parent-local coordinates
-        Rect requestedContainerBounds = new Rect(requestRect);
-        requestedContainerBounds.offset(0, -mScrollDelta);
-        requestedContainerBounds.offset(scrollBounds.left, scrollBounds.top);
+        // Make requestRect relative to RecyclerView (from scrollBounds)
+        Rect requestedContainerBounds =
+                transformFromRequestToContainer(mScrollDelta, scrollBounds, requestRect);
 
-        // requestedContainerBounds is now in recyclerview-local coordinates
-        Log.d(TAG, "requestedContainerBounds: " + requestedContainerBounds);
-
-        // Save a copy for later
-        View anchor = findChildNearestTarget(recyclerView, requestedContainerBounds);
-        if (anchor == null) {
-            Log.d(TAG, "Failed to locate anchor view");
-            return result; // result.availableArea == null
-        }
-
-        Log.d(TAG, "Anchor view:" + anchor);
-        Rect requestedContentBounds = new Rect(requestedContainerBounds);
-        recyclerView.offsetRectIntoDescendantCoords(anchor, requestedContentBounds);
-
-        Log.d(TAG, "requestedContentBounds = " + requestedContentBounds);
-        int prevAnchorTop = anchor.getTop();
-        // Note: requestChildRectangleOnScreen may modify rectangle, must pass pass in a copy here
-        Rect input = new Rect(requestedContentBounds);
-        // Expand input rect to get the requested rect to be in the center
-        int remainingHeight = recyclerView.getHeight() - recyclerView.getPaddingTop()
-                - recyclerView.getPaddingBottom() - input.height();
-        if (remainingHeight > 0) {
-            input.inset(0, -remainingHeight / 2);
-        }
-        Log.d(TAG, "input (post center adjustment) = " + input);
-
-        if (recyclerView.requestChildRectangleOnScreen(anchor, input, true)) {
-            int scrolled = prevAnchorTop - anchor.getTop(); // inverse of movement
-            Log.d(TAG, "RecyclerView scrolled by " + scrolled + " px");
-            mScrollDelta += scrolled; // view.top-- is equivalent to parent.scrollY++
-            result.scrollDelta = mScrollDelta;
-            Log.d(TAG, "requestedContentBounds, (post-request-rect) = " + requestedContentBounds);
-        }
-
-        requestedContainerBounds.set(requestedContentBounds);
-        recyclerView.offsetDescendantRectToMyCoords(anchor, requestedContainerBounds);
-        Log.d(TAG, "requestedContainerBounds, (post-scroll): " + requestedContainerBounds);
-
-        Rect recyclerLocalVisible = new Rect(scrollBounds);
+        Rect recyclerLocalVisible = new Rect();
         recyclerView.getLocalVisibleRect(recyclerLocalVisible);
-        Log.d(TAG, "recyclerLocalVisible: " + recyclerLocalVisible);
 
-        if (!requestedContainerBounds.intersect(recyclerLocalVisible)) {
-            // Requested area is still not visible
-            Log.d(TAG, "requested bounds not visible!");
-            return result;
+        // Expand request rect match visible bounds to center the requested rect vertically
+        Rect adjustedContainerBounds = new Rect(requestedContainerBounds);
+        int remainingHeight = recyclerLocalVisible.height() -  requestedContainerBounds.height();
+        if (remainingHeight > 0) {
+            adjustedContainerBounds.inset(0, -remainingHeight / 2);
         }
-        Rect available = new Rect(requestedContainerBounds);
-        available.offset(-scrollBounds.left, -scrollBounds.top);
-        available.offset(0, mScrollDelta);
-        result.availableArea = available;
-        Log.d(TAG, "availableArea: " + result.availableArea);
+
+        int scrollAmount = computeScrollAmount(recyclerLocalVisible, adjustedContainerBounds);
+        if (scrollAmount < 0) {
+            Log.d(TAG, "About to scroll UP (content moves down within parent)");
+        } else if (scrollAmount > 0) {
+            Log.d(TAG, "About to scroll DOWN (content moves up within parent)");
+        }
+        Log.d(TAG, "scrollAmount: " + scrollAmount);
+
+        View refView = findScrollingReferenceView(recyclerView, scrollAmount);
+        int refTop = refView.getTop();
+
+        // Map the request into the child view coords
+        Rect requestedContentBounds = new Rect(adjustedContainerBounds);
+        recyclerView.offsetRectIntoDescendantCoords(refView, requestedContentBounds);
+        Log.d(TAG, "request rect, in child view space = " + requestedContentBounds);
+
+        // Note: requestChildRectangleOnScreen may modify rectangle, must pass pass in a copy here
+        Rect request = new Rect(requestedContentBounds);
+        recyclerView.requestChildRectangleOnScreen(refView, request, true);
+
+        int scrollDistance = refTop - refView.getTop();
+        Log.d(TAG, "Parent view scrolled vertically by " + scrollDistance + " px");
+
+        mScrollDelta += scrollDistance;
+        result.scrollDelta = mScrollDelta;
+        if (scrollDistance != 0) {
+            Log.d(TAG, "Scroll delta is now " + mScrollDelta + " px");
+        }
+
+        // Update, post-scroll
+        requestedContainerBounds = new Rect(
+                transformFromRequestToContainer(mScrollDelta, scrollBounds, requestRect));
+
+        // in case it might have changed (nested scrolling)
+        recyclerView.getLocalVisibleRect(recyclerLocalVisible);
+        if (requestedContainerBounds.intersect(recyclerLocalVisible)) {
+            result.availableArea = transformFromContainerToRequest(
+                    mScrollDelta, scrollBounds, requestedContainerBounds);
+        }
+        Log.d(TAG, "-----------------------------------------------------------");
         return result;
     }
-
-    /**
-     * Find a view that is located "closest" to targetRect. Returns the first view to fully
-     * vertically overlap the target targetRect. If none found, returns the view with an edge
-     * nearest the target targetRect.
-     *
-     * @param parent the parent vertical layout
-     * @param targetRect a rectangle in local coordinates of <code>parent</code>
-     * @return a child view within parent matching the criteria or null
-     */
-    static View findChildNearestTarget(ViewGroup parent, Rect targetRect) {
-        View selected = null;
-        int minCenterDistance = Integer.MAX_VALUE;
-        int maxOverlap = 0;
-
-        // allowable center-center distance, relative to targetRect.
-        // if within this range, taller views are preferred
-        final float preferredRangeFromCenterPercent = 0.25f;
-        final int preferredDistance =
-                (int) (preferredRangeFromCenterPercent * targetRect.height());
-
-        Rect parentLocalVis = new Rect();
-        parent.getLocalVisibleRect(parentLocalVis);
-        Log.d(TAG, "findChildNearestTarget: parentVis=" + parentLocalVis
-                + " targetRect=" + targetRect);
-
-        Rect frame = new Rect();
-        for (int i = 0; i < parent.getChildCount(); i++) {
-            final View child = parent.getChildAt(i);
-            child.getHitRect(frame);
-            Log.d(TAG, "child #" + i + " hitRect=" + frame);
-
-            if (child.getVisibility() != View.VISIBLE) {
-                Log.d(TAG, "child #" + i + " is not visible");
-                continue;
-            }
-
-            int centerDistance = Math.abs(targetRect.centerY() - frame.centerY());
-            Log.d(TAG, "child #" + i + " : center to center: " + centerDistance + "px");
-
-            if (centerDistance < minCenterDistance) {
-                // closer to center
-                minCenterDistance = centerDistance;
-                selected = child;
-            } else if (frame.intersect(targetRect) && (frame.height() > preferredDistance)) {
-                // within X% pixels of center, but taller
-                selected = child;
-            }
-        }
-        return selected;
-    }
-
 
     @Override
     public void onPrepareForEnd(@NonNull ViewGroup view) {
@@ -200,11 +138,5 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         view.scrollBy(0, -mScrollDelta);
         view.setOverScrollMode(mOverScrollMode);
         view.setVerticalScrollBarEnabled(mScrollBarWasEnabled);
-        if (DISABLE_ANIMATORS) {
-            ValueAnimator.setDurationScale(mDurationScale);
-        }
-        if (STOP_RENDER_THREAD) {
-            view.getThreadedRenderer().start();
-        }
     }
 }

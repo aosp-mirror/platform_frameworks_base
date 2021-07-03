@@ -57,6 +57,7 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
@@ -68,7 +69,6 @@ import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.LockoutHalImpl;
-import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
@@ -574,7 +574,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
-            ReEnrollNotificationUtils.cancelNotification(mContext);
+            BiometricNotificationUtils.cancelReEnrollNotification(mContext);
 
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
@@ -866,7 +866,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
         final boolean hasEnrolled = !getEnrolledFaces(mSensorId, targetUserId).isEmpty();
         final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
-                mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId, mCurrentUserId,
+                mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId,
                 hasEnrolled, mAuthenticatorIds);
         mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override

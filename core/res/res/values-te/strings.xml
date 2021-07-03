@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS సర్వీస్"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"సెన్సార్ నోటిఫికేషన్ సర్వీస్"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ట్విలైట్ సర్వీస్"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"టైమ్ జోన్ డిటెక్టర్ (కనెక్టివిటీ లేదు)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS సమయ అప్‌డేట్ సర్వీస్"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"మ్యూజిక్ గుర్తింపు మేనేజర్ సర్వీస్"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారీ మీ వేళ్ల స్థానాన్ని కొద్దిగా మార్చండి"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
@@ -601,6 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"వేలిముద్ర లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
@@ -610,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ఫేస్ అన్‌లాక్"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ఫేస్ అన్‌లాక్‌తో సమస్య"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ఫేస్ మోడల్‌ను తొలగించడానికి నొక్కండి, ఆపై మీ ముఖాన్ని మళ్లీ జోడించండి"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"వేలిముద్ర అన్‌లాక్"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ముఖం డేటా సరిగ్గా రాలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"వెలుతురు అధికంగా ఉంది. తక్కువ ఉండేలా చూడండి."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"చాలా చీకటిగా ఉంది. బాగా వెలుతురులో ప్రయత్నించండి."</string>
@@ -778,7 +782,7 @@
     <item msgid="7640927178025203330">"అనుకూలం"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"కార్యాలయం"</item>
+    <item msgid="6144047813304847762">"వర్క్"</item>
     <item msgid="7402720230065674193">"ఇతరం"</item>
     <item msgid="808230403067569648">"అనుకూలం"</item>
   </string-array>
@@ -840,7 +844,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"కార్యాలయం"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"వర్క్"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"ఇతరం"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"అనుకూలం"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"అనుకూలం"</string>
@@ -1458,10 +1462,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ప్యాకేజీల తొలగింపును అభ్యర్థించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"బ్యాటరీ అనుకూలీకరణలను విస్మరించడానికి అడగాలి"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ఆ యాప్ కోసం బ్యాటరీ అనుకూలీకరణలు విస్మరించేలా అనుమతి కోరడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"అన్ని ప్యాకేజీలను క్వెరీ చేయండి"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ఇన్‌స్టాల్ చేసిన అన్ని ప్యాకేజీలను చూడటానికి యాప్‌ను అనుమతించండి."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"జూమ్ నియంత్రణ కోసం రెండుసార్లు నొక్కండి"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"వెళ్లు"</string>
@@ -1480,6 +1482,8 @@
     <string name="deny" msgid="6632259981847676572">"తిరస్కరించండి"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"అనుమతి అభ్యర్థించబడింది"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి అభ్యర్థించబడింది."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"మీరు మీ కార్యాలయ ప్రొఫైల్‌కు వెలుపల ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ఇన్‌పుట్ పద్ధతి"</string>

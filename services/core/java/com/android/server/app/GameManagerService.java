@@ -21,10 +21,18 @@ import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 
 import static com.android.server.wm.CompatModePackages.DOWNSCALED;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_30;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_35;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_40;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_45;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_50;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_55;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_60;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_65;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_70;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_75;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_80;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_85;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_90;
 
 import android.Manifest;
@@ -213,6 +221,39 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
+    // Turn the raw string to the corresponding CompatChange id.
+    static long getCompatChangeId(String raw) {
+        switch (raw) {
+            case "0.3":
+                return DOWNSCALE_30;
+            case "0.35":
+                return DOWNSCALE_35;
+            case "0.4":
+                return DOWNSCALE_40;
+            case "0.45":
+                return DOWNSCALE_45;
+            case "0.5":
+                return DOWNSCALE_50;
+            case "0.55":
+                return DOWNSCALE_55;
+            case "0.6":
+                return DOWNSCALE_60;
+            case "0.65":
+                return DOWNSCALE_65;
+            case "0.7":
+                return DOWNSCALE_70;
+            case "0.75":
+                return DOWNSCALE_75;
+            case "0.8":
+                return DOWNSCALE_80;
+            case "0.85":
+                return DOWNSCALE_85;
+            case "0.9":
+                return DOWNSCALE_90;
+        }
+        return 0;
+    }
+
     /**
      * GamePackageConfiguration manages all game mode config details for its associated package.
      */
@@ -331,19 +372,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
              * Get the corresponding compat change id for the current scaling string.
              */
             public long getCompatChangeId() {
-                switch (mScaling) {
-                    case "0.5":
-                        return DOWNSCALE_50;
-                    case "0.6":
-                        return DOWNSCALE_60;
-                    case "0.7":
-                        return DOWNSCALE_70;
-                    case "0.8":
-                        return DOWNSCALE_80;
-                    case "0.9":
-                        return DOWNSCALE_90;
-                }
-                return 0;
+                return GameManagerService.getCompatChangeId(mScaling);
             }
         }
 
@@ -663,10 +692,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
             Slog.i(TAG, "Enabling downscale: " + scaleId + " for " + packageName);
             final ArrayMap<Long, PackageOverride> overrides = new ArrayMap<>();
             overrides.put(DOWNSCALED, COMPAT_ENABLED);
+            overrides.put(DOWNSCALE_30, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_35, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_40, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_45, COMPAT_DISABLED);
             overrides.put(DOWNSCALE_50, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_55, COMPAT_DISABLED);
             overrides.put(DOWNSCALE_60, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_65, COMPAT_DISABLED);
             overrides.put(DOWNSCALE_70, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_75, COMPAT_DISABLED);
             overrides.put(DOWNSCALE_80, COMPAT_DISABLED);
+            overrides.put(DOWNSCALE_85, COMPAT_DISABLED);
             overrides.put(DOWNSCALE_90, COMPAT_DISABLED);
             overrides.put(scaleId, COMPAT_ENABLED);
             final CompatibilityOverrideConfig changeConfig = new CompatibilityOverrideConfig(

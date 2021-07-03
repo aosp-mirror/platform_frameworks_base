@@ -122,7 +122,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             this.mCallback = callback;
         }
 
-        /** TODO: onDetected */
+        /** Called when the detected result is valid. */
         @Override
         public void onDetected(
                 @Nullable HotwordDetectedResult hotwordDetectedResult,
@@ -150,33 +150,45 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         public void onKeyphraseDetected(
                 SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
                 HotwordDetectedResult result) {
-
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onKeyphraseDetected event");
+            }
         }
 
         @Override
         public void onGenericSoundTriggerDetected(
                 SoundTrigger.GenericRecognitionEvent recognitionEvent) throws RemoteException {
-
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onGenericSoundTriggerDetected event");
+            }
         }
 
         @Override
         public void onRejected(HotwordRejectedResult result) throws RemoteException {
-
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onRejected event");
+            }
         }
 
         @Override
         public void onError(int status) throws RemoteException {
-
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onError (" + status + ") event");
+            }
         }
 
         @Override
         public void onRecognitionPaused() throws RemoteException {
-
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onRecognitionPaused event");
+            }
         }
 
         @Override
         public void onRecognitionResumed() throws RemoteException {
-
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onRecognitionResumed event");
+            }
         }
 
         @Override
@@ -186,6 +198,14 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
                     HotwordDetector.Callback::onHotwordDetectionServiceInitialized,
                     mCallback,
                     status));
+        }
+
+        @Override
+        public void onProcessRestarted() throws RemoteException {
+            Slog.v(TAG, "onProcessRestarted()");
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onHotwordDetectionServiceRestarted,
+                    mCallback));
         }
     }
 

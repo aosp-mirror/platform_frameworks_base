@@ -72,8 +72,6 @@ public class AmbientState {
     private boolean mUnlockHintRunning;
     private boolean mQsCustomizerShowing;
     private int mIntrinsicPadding;
-    private int mExpandAnimationTopChange;
-    private ExpandableNotificationRow mExpandingNotification;
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
@@ -516,22 +514,6 @@ public class AmbientState {
      */
     public boolean isDozingAndNotPulsing(ExpandableNotificationRow row) {
         return isDozing() && !isPulsing(row.getEntry());
-    }
-
-    public void setExpandAnimationTopChange(int expandAnimationTopChange) {
-        mExpandAnimationTopChange = expandAnimationTopChange;
-    }
-
-    public void setExpandingNotification(ExpandableNotificationRow row) {
-        mExpandingNotification = row;
-    }
-
-    public ExpandableNotificationRow getExpandingNotification() {
-        return mExpandingNotification;
-    }
-
-    public int getExpandAnimationTopChange() {
-        return mExpandAnimationTopChange;
     }
 
     /**

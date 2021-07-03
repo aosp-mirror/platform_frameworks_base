@@ -55,19 +55,20 @@ public class LocationEventLog extends LocalEventLog {
 
     private static final int EVENT_USER_SWITCHED = 1;
     private static final int EVENT_LOCATION_ENABLED = 2;
-    private static final int EVENT_PROVIDER_ENABLED = 3;
-    private static final int EVENT_PROVIDER_MOCKED = 4;
-    private static final int EVENT_PROVIDER_CLIENT_REGISTER = 5;
-    private static final int EVENT_PROVIDER_CLIENT_UNREGISTER = 6;
-    private static final int EVENT_PROVIDER_CLIENT_FOREGROUND = 7;
-    private static final int EVENT_PROVIDER_CLIENT_BACKGROUND = 8;
-    private static final int EVENT_PROVIDER_CLIENT_PERMITTED = 9;
-    private static final int EVENT_PROVIDER_CLIENT_UNPERMITTED = 10;
-    private static final int EVENT_PROVIDER_UPDATE_REQUEST = 11;
-    private static final int EVENT_PROVIDER_RECEIVE_LOCATION = 12;
-    private static final int EVENT_PROVIDER_DELIVER_LOCATION = 13;
-    private static final int EVENT_PROVIDER_STATIONARY_THROTTLED = 14;
-    private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 15;
+    private static final int EVENT_ADAS_LOCATION_ENABLED = 3;
+    private static final int EVENT_PROVIDER_ENABLED = 4;
+    private static final int EVENT_PROVIDER_MOCKED = 5;
+    private static final int EVENT_PROVIDER_CLIENT_REGISTER = 6;
+    private static final int EVENT_PROVIDER_CLIENT_UNREGISTER = 7;
+    private static final int EVENT_PROVIDER_CLIENT_FOREGROUND = 8;
+    private static final int EVENT_PROVIDER_CLIENT_BACKGROUND = 9;
+    private static final int EVENT_PROVIDER_CLIENT_PERMITTED = 10;
+    private static final int EVENT_PROVIDER_CLIENT_UNPERMITTED = 11;
+    private static final int EVENT_PROVIDER_UPDATE_REQUEST = 12;
+    private static final int EVENT_PROVIDER_RECEIVE_LOCATION = 13;
+    private static final int EVENT_PROVIDER_DELIVER_LOCATION = 14;
+    private static final int EVENT_PROVIDER_STATIONARY_THROTTLED = 15;
+    private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 16;
 
     @GuardedBy("mAggregateStats")
     private final ArrayMap<String, ArrayMap<CallerIdentity, AggregateStats>> mAggregateStats;
@@ -114,6 +115,11 @@ public class LocationEventLog extends LocalEventLog {
     /** Logs a location enabled/disabled event. */
     public void logLocationEnabled(int userId, boolean enabled) {
         addLogEvent(EVENT_LOCATION_ENABLED, userId, enabled);
+    }
+
+    /** Logs a location enabled/disabled event. */
+    public void logAdasLocationEnabled(int userId, boolean enabled) {
+        addLogEvent(EVENT_ADAS_LOCATION_ENABLED, userId, enabled);
     }
 
     /** Logs a location provider enabled/disabled event. */
@@ -219,6 +225,9 @@ public class LocationEventLog extends LocalEventLog {
                 return new UserSwitchedEvent(timeDelta, (Integer) args[0], (Integer) args[1]);
             case EVENT_LOCATION_ENABLED:
                 return new LocationEnabledEvent(timeDelta, (Integer) args[0], (Boolean) args[1]);
+            case EVENT_ADAS_LOCATION_ENABLED:
+                return new LocationAdasEnabledEvent(timeDelta, (Integer) args[0],
+                        (Boolean) args[1]);
             case EVENT_PROVIDER_ENABLED:
                 return new ProviderEnabledEvent(timeDelta, (String) args[0], (Integer) args[1],
                         (Boolean) args[2]);
@@ -514,6 +523,23 @@ public class LocationEventLog extends LocalEventLog {
         @Override
         public String getLogString() {
             return "location [u" + mUserId + "] " + (mEnabled ? "enabled" : "disabled");
+        }
+    }
+
+    private static final class LocationAdasEnabledEvent extends LogEvent {
+
+        private final int mUserId;
+        private final boolean mEnabled;
+
+        LocationAdasEnabledEvent(long timeDelta, int userId, boolean enabled) {
+            super(timeDelta);
+            mUserId = userId;
+            mEnabled = enabled;
+        }
+
+        @Override
+        public String getLogString() {
+            return "adas location [u" + mUserId + "] " + (mEnabled ? "enabled" : "disabled");
         }
     }
 

@@ -206,8 +206,8 @@ class ActivityMetricsLogger {
          * observer to identify which callbacks belong to a launch event.
          */
         final long mTransitionStartTimeNs;
-        /** The device uptime in seconds when this transition info is created. */
-        final int mCurrentTransitionDeviceUptime;
+        /** The device uptime in millis when this transition info is created. */
+        final long mTransitionDeviceUptimeMs;
         /** The type can be cold (new process), warm (new activity), or hot (bring to front). */
         final int mTransitionType;
         /** Whether the process was already running when the transition started. */
@@ -277,8 +277,7 @@ class ActivityMetricsLogger {
             mTransitionType = transitionType;
             mProcessRunning = processRunning;
             mProcessSwitch = processSwitch;
-            mCurrentTransitionDeviceUptime =
-                    (int) TimeUnit.MILLISECONDS.toSeconds(launchingState.mCurrentUpTimeMs);
+            mTransitionDeviceUptimeMs = launchingState.mCurrentUpTimeMs;
             setLatestLaunchedActivity(r);
             launchingState.mAssociatedTransitionInfo = this;
             if (options != null) {
@@ -610,13 +609,27 @@ class ActivityMetricsLogger {
             return;
         }
 
+        // If the launched activity is started from an existing active transition, it will be put
+        // into the transition info.
         if (info != null && info.canCoalesce(launchedActivity)) {
-            // If we are already in an existing transition on the same display, only update the
-            // activity name, but not the other attributes.
+            if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched consecutive launch");
 
-            if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched update launched activity");
+            final boolean crossPackage =
+                    !info.mLastLaunchedActivity.packageName.equals(launchedActivity.packageName);
+            // The trace name uses package name so different packages should be separated.
+            if (crossPackage) {
+                stopLaunchTrace(info);
+            }
+
+            mLastTransitionInfo.remove(info.mLastLaunchedActivity);
             // Coalesce multiple (trampoline) activities from a single sequence together.
             info.setLatestLaunchedActivity(launchedActivity);
+            // Update the latest one so it can be found when reporting fully-drawn.
+            mLastTransitionInfo.put(launchedActivity, info);
+
+            if (crossPackage) {
+                startLaunchTrace(info);
+            }
             return;
         }
 
@@ -639,11 +652,23 @@ class ActivityMetricsLogger {
             launchObserverNotifyIntentFailed();
         }
         if (launchedActivity.mDisplayContent.isSleeping()) {
-            // It is unknown whether the activity can be drawn or not, e.g. ut depends on the
+            // It is unknown whether the activity can be drawn or not, e.g. it depends on the
             // keyguard states and the attributes or flags set by the activity. If the activity
             // keeps invisible in the grace period, the tracker will be cancelled so it won't get
             // a very long launch time that takes unlocking as the end of launch.
             scheduleCheckActivityToBeDrawn(launchedActivity, UNKNOWN_VISIBILITY_CHECK_DELAY_MS);
+        }
+
+        // If the previous transitions are no longer visible, abort them to avoid counting the
+        // launch time when resuming from back stack. E.g. launch 2 independent tasks in a short
+        // time, the transition info of the first task should not keep active until it becomes
+        // visible such as after the top task is finished.
+        for (int i = mTransitionInfoList.size() - 2; i >= 0; i--) {
+            final TransitionInfo prevInfo = mTransitionInfoList.get(i);
+            prevInfo.updatePendingDraw();
+            if (prevInfo.allDrawn()) {
+                abort(prevInfo, "nothing will be drawn");
+            }
         }
     }
 
@@ -865,6 +890,7 @@ class ActivityMetricsLogger {
         final Boolean isHibernating =
                 mLastHibernationStates.remove(info.mLastLaunchedActivity.packageName);
         if (abort) {
+            mLastTransitionInfo.remove(info.mLastLaunchedActivity);
             mSupervisor.stopWaitingForActivityVisible(info.mLastLaunchedActivity);
             launchObserverNotifyActivityLaunchCancelled(info);
         } else {
@@ -908,7 +934,7 @@ class ActivityMetricsLogger {
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.isInterestingToLoggerAndObserver()) {
             mLoggerHandler.post(() -> logAppTransition(
-                    info.mCurrentTransitionDeviceUptime, info.mCurrentTransitionDelayMs,
+                    info.mTransitionDeviceUptimeMs, info.mCurrentTransitionDelayMs,
                     infoSnapshot, isHibernating));
         }
         mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
@@ -920,7 +946,7 @@ class ActivityMetricsLogger {
     }
 
     // This gets called on another thread without holding the activity manager lock.
-    private void logAppTransition(int currentTransitionDeviceUptime, int currentTransitionDelayMs,
+    private void logAppTransition(long transitionDeviceUptimeMs, int currentTransitionDelayMs,
             TransitionInfoSnapshot info, boolean isHibernating) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
         builder.setPackageName(info.packageName);
@@ -937,7 +963,7 @@ class ActivityMetricsLogger {
         }
         builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL, isInstantApp ? 1 : 0);
         builder.addTaggedData(APP_TRANSITION_DEVICE_UPTIME_SECONDS,
-                currentTransitionDeviceUptime);
+                TimeUnit.MILLISECONDS.toSeconds(transitionDeviceUptimeMs));
         builder.addTaggedData(APP_TRANSITION_DELAY_MS, currentTransitionDelayMs);
         builder.setSubtype(info.reason);
         if (info.startingWindowDelayMs != INVALID_DELAY) {
@@ -972,7 +998,7 @@ class ActivityMetricsLogger {
                 info.launchedActivityName,
                 info.launchedActivityLaunchedFromPackage,
                 isInstantApp,
-                currentTransitionDeviceUptime * 1000,
+                transitionDeviceUptimeMs,
                 info.reason,
                 currentTransitionDelayMs,
                 info.startingWindowDelayMs,

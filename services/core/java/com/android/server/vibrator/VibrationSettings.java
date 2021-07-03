@@ -19,7 +19,10 @@ package com.android.server.vibrator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IUidObserver;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
@@ -61,10 +64,15 @@ final class VibrationSettings {
     private final SettingsObserver mSettingObserver;
     @VisibleForTesting
     final UidObserver mUidObserver;
+    @VisibleForTesting
+    final UserObserver mUserReceiver;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
     private final SparseArray<VibrationEffect> mFallbackEffects;
+
+    private final int mRampStepDuration;
+    private final int mRampDownDuration;
 
     @GuardedBy("mLock")
     @Nullable
@@ -94,6 +102,13 @@ final class VibrationSettings {
         mContext = context;
         mSettingObserver = new SettingsObserver(handler);
         mUidObserver = new UidObserver();
+        mUserReceiver = new UserObserver();
+
+        // TODO(b/191150049): move these to vibrator static config file
+        mRampStepDuration = context.getResources().getInteger(
+                com.android.internal.R.integer.config_vibrationWaveformRampStepDuration);
+        mRampDownDuration = context.getResources().getInteger(
+                com.android.internal.R.integer.config_vibrationWaveformRampDownDuration);
 
         VibrationEffect clickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_virtualKeyVibePattern);
@@ -150,6 +165,7 @@ final class VibrationSettings {
                     }
                 });
 
+        mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
         registerSettingsObserver(Settings.Global.getUriFor(Settings.Global.APPLY_RAMPING_RINGER));
@@ -182,6 +198,23 @@ final class VibrationSettings {
         synchronized (mLock) {
             mListeners.remove(listener);
         }
+    }
+
+    /**
+     * The duration, in milliseconds, that should be applied to convert vibration effect's
+     * {@link android.os.vibrator.RampSegment} to a {@link android.os.vibrator.StepSegment} on
+     * devices without PWLE support.
+     */
+    public int getRampStepDuration() {
+        return mRampStepDuration;
+    }
+
+    /**
+     * The duration, in milliseconds, that should be applied to the ramp to turn off the vibrator
+     * when a vibration is cancelled or finished at non-zero amplitude.
+     */
+    public int getRampDownDuration() {
+        return mRampDownDuration;
     }
 
     /**
@@ -345,6 +378,9 @@ final class VibrationSettings {
                 + ", mLowPowerMode=" + mLowPowerMode
                 + ", mZenMode=" + Settings.Global.zenModeToString(mZenMode)
                 + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
+                + ", mHapticChannelMaxVibrationAmplitude=" + getHapticChannelMaxVibrationAmplitude()
+                + ", mRampStepDuration=" + mRampStepDuration
+                + ", mRampDownDuration=" + mRampDownDuration
                 + ", mHapticFeedbackIntensity="
                 + intensityToString(getCurrentIntensity(VibrationAttributes.USAGE_TOUCH))
                 + ", mHapticFeedbackDefaultIntensity="
@@ -403,6 +439,12 @@ final class VibrationSettings {
         }
     }
 
+    private float getHapticChannelMaxVibrationAmplitude() {
+        synchronized (mLock) {
+            return mVibrator == null ? Float.NaN : mVibrator.getHapticChannelMaximumAmplitude();
+        }
+    }
+
     private int getSystemSetting(String settingName, int defaultValue) {
         return Settings.System.getIntForUser(mContext.getContentResolver(),
                 settingName, defaultValue, UserHandle.USER_CURRENT);
@@ -454,6 +496,17 @@ final class VibrationSettings {
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
+        }
+    }
+
+    /** Implementation of {@link BroadcastReceiver} to update settings on current user change. */
+    @VisibleForTesting
+    final class UserObserver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                updateSettings();
+            }
         }
     }
 

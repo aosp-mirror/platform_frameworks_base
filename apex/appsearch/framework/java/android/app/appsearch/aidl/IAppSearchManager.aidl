@@ -32,7 +32,7 @@ interface IAppSearchManager {
      * @param schemaBundles List of {@link AppSearchSchema} bundles.
      * @param schemasNotDisplayedBySystem Schema types that should not be surfaced on platform
      *     surfaces.
-     * @param schemasPackageAccessibleBundles Schema types that are visible to the specified
+     * @param schemasVisibleToPackagesBundles Schema types that are visible to the specified
      *     packages. The value List contains PackageIdentifier Bundles.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
@@ -48,7 +48,7 @@ interface IAppSearchManager {
         in String databaseName,
         in List<Bundle> schemaBundles,
         in List<String> schemasNotDisplayedBySystem,
-        in Map<String, List<Bundle>> schemasPackageAccessibleBundles,
+        in Map<String, List<Bundle>> schemasVisibleToPackagesBundles,
         boolean forceOverride,
         in int schemaVersion,
         in UserHandle userHandle,
@@ -181,21 +181,30 @@ interface IAppSearchManager {
      * Fetches the next page of results of a previously executed query. Results can be empty if
      * next-page token is invalid or all pages have been returned.
      *
+     * @param packageName The name of the package to persist to disk for.
      * @param nextPageToken The token of pre-loaded results of previously executed query.
      * @param userHandle Handle of the calling user
      * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
      *                  operation.
      */
-    void getNextPage(in long nextPageToken, in UserHandle userHandle, in IAppSearchResultCallback callback);
+    void getNextPage(
+        in String packageName,
+        in long nextPageToken,
+        in UserHandle userHandle,
+        in IAppSearchResultCallback callback);
 
     /**
      * Invalidates the next-page token so that no more results of the related query can be returned.
      *
+     * @param packageName The name of the package to persist to disk for.
      * @param nextPageToken The token of pre-loaded results of previously executed query to be
      *                      Invalidated.
      * @param userHandle Handle of the calling user
      */
-    void invalidateNextPageToken(in long nextPageToken, in UserHandle userHandle);
+    void invalidateNextPageToken(
+        in String packageName,
+        in long nextPageToken,
+        in UserHandle userHandle);
 
     /**
     * Searches a document based on a given specifications.
@@ -336,20 +345,26 @@ interface IAppSearchManager {
     /**
      * Persists all update/delete requests to the disk.
      *
+     * @param packageName The name of the package to persist to disk for.
      * @param userHandle Handle of the calling user
      * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      */
-    void persistToDisk(in UserHandle userHandle, in long binderCallStartTimeMillis);
+    void persistToDisk(
+        in String packageName,
+        in UserHandle userHandle,
+        in long binderCallStartTimeMillis);
 
     /**
      * Creates and initializes AppSearchImpl for the calling app.
      *
+     * @param packageName The name of the package to initialize for.
      * @param userHandle Handle of the calling user
      * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
     void initialize(
+        in String packageName,
         in UserHandle userHandle,
         in long binderCallStartTimeMillis,
         in IAppSearchResultCallback callback);

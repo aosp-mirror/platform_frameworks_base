@@ -78,4 +78,7 @@ oneway interface IHotwordRecognitionStatusCallback {
      * @param status The status about the result of requesting update state action.
      */
     void onStatusReported(int status);
+
+    /** Called when the hotword detection process is restarted */
+    void onProcessRestarted();
 }

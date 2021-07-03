@@ -5606,11 +5606,21 @@ public class Notification implements Parcelable
 
             final boolean snoozeEnabled = !hideSnoozeButton
                     && mContext.getContentResolver() != null
-                    && (Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
+                    && isSnoozeSettingEnabled();
             if (snoozeEnabled) {
                 big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
                         RemoteViews.MARGIN_BOTTOM, 0);
+            }
+        }
+
+        private boolean isSnoozeSettingEnabled() {
+            try {
+                return Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1;
+            } catch (SecurityException ex) {
+                // Most 3p apps can't access this snooze setting, so their NotificationListeners
+                // would be unable to create notification views if we propagated this exception.
+                return false;
             }
         }
 
@@ -6334,11 +6344,10 @@ public class Notification implements Parcelable
             ApplicationInfo applicationInfo = n.extras.getParcelable(
                     EXTRA_BUILDER_APPLICATION_INFO);
             Context builderContext;
-            if (applicationInfo != null && applicationInfo.packageName != null) {
+            if (applicationInfo != null) {
                 try {
-                    builderContext = context.createPackageContextAsUser(applicationInfo.packageName,
-                            Context.CONTEXT_RESTRICTED,
-                            UserHandle.getUserHandleForUid(applicationInfo.uid));
+                    builderContext = context.createApplicationContext(applicationInfo,
+                            Context.CONTEXT_RESTRICTED);
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
                     builderContext = context;  // try with our context

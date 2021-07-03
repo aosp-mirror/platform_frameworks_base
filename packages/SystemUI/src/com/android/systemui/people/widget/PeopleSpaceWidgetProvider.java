@@ -70,6 +70,13 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
         mPeopleSpaceWidgetManager.deleteWidgets(appWidgetIds);
     }
 
+    @Override
+    public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
+        super.onRestored(context, oldWidgetIds, newWidgetIds);
+        ensurePeopleSpaceWidgetManagerInitialized();
+        mPeopleSpaceWidgetManager.remapWidgets(oldWidgetIds, newWidgetIds);
+    }
+
     private void ensurePeopleSpaceWidgetManagerInitialized() {
         mPeopleSpaceWidgetManager.init();
     }

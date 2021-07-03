@@ -669,7 +669,10 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lisää maksutapa, niin voit maksaa nopeasti ja turvallisesti puhelimella"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Näytä kaikki"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Avaa lukitus ja maksa"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ei otettu käyttöön"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Avaa lukitus ja käytä"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Korttien noutamisessa oli ongelma, yritä myöhemmin uudelleen"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lukitusnäytön asetukset"</string>
@@ -1034,8 +1037,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Suurenna osa näytöstä"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Vaihda"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Esteettömyyspainike on korvannut esteettömyyseleen\n\n"<annotation id="link">"Katso asetukset"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Voit vaihtaa käyttämään esteettömyyseleen sijaan painiketta\n\n"<annotation id="link">"Asetukset"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Piilota painike tilapäisesti siirtämällä se reunaan"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Siirrä vasempaan yläreunaan"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Siirrä oikeaan yläreunaan"</string>
@@ -1116,7 +1118,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Avaa keskustelu"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Keskusteluwidgetit"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Lisää keskustelu aloitusnäytölle napauttamalla sitä"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Palaa taas tänne, kun olet saanut viestejä"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Viimeaikaiset keskustelusi näkyvät täällä"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Tärkeät keskustelut"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Uusimmat keskustelut"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1145,8 +1147,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Yli <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Katso viimeaikaiset viestit, vastaamattomat puhelut ja tilapäivitykset"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Keskustelu"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> lähetti viestin"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Älä häiritse ‑tilan keskeyttämä"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> lähetti kuvan"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Ongelma akkumittarin lukemisessa"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Saat lisätietoja napauttamalla"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ei herätyksiä"</string>

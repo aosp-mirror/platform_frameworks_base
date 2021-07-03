@@ -13,6 +13,9 @@
       "name": "CtsAppEnumerationTestCases"
     },
     {
+      "name": "AppEnumerationInternalTests"
+    },
+    {
       "name": "CtsMatchFlagTestCases"
     },
     {
@@ -159,9 +162,6 @@
           "include-filter": "com.android.server.pm.parsing.SystemPartitionParseTest"
         }
       ]
-    },
-    {
-      "name": "CtsPackageManagerBootTestCases"
     }
   ],
   "imports": [

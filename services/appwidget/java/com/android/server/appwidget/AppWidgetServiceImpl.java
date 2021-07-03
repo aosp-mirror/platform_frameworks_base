@@ -409,6 +409,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
                 // If the set of providers has been modified, notify each active AppWidgetHost
                 scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                // Possibly notify any new components of widget id changes
+                mBackupRestoreController.widgetComponentsChanged(userId);
             }
         }
     }
@@ -2471,8 +2473,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public void restoreStarting(int userId) {
-        mBackupRestoreController.restoreStarting(userId);
+    public void systemRestoreStarting(int userId) {
+        mBackupRestoreController.systemRestoreStarting(userId);
     }
 
     @Override
@@ -2481,8 +2483,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public void restoreFinished(int userId) {
-        mBackupRestoreController.restoreFinished(userId);
+    public void systemRestoreFinished(int userId) {
+        mBackupRestoreController.systemRestoreFinished(userId);
     }
 
     @SuppressWarnings("deprecation")
@@ -4272,6 +4274,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         private final HashMap<Host, ArrayList<RestoreUpdateRecord>> mUpdatesByHost =
                 new HashMap<>();
 
+        @GuardedBy("mLock")
+        private boolean mHasSystemRestoreFinished;
+
         public List<String> getWidgetParticipants(int userId) {
             if (DEBUG) {
                 Slog.i(TAG, "Getting widget participants for user: " + userId);
@@ -4375,12 +4380,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return stream.toByteArray();
         }
 
-        public void restoreStarting(int userId) {
+        public void systemRestoreStarting(int userId) {
             if (DEBUG) {
-                Slog.i(TAG, "Restore starting for user: " + userId);
+                Slog.i(TAG, "System restore starting for user: " + userId);
             }
 
             synchronized (mLock) {
+                mHasSystemRestoreFinished = false;
                 // We're starting a new "system" restore operation, so any widget restore
                 // state that we see from here on is intended to replace the current
                 // widget configuration of any/all of the affected apps.
@@ -4542,26 +4548,90 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
         }
 
-        // Called once following the conclusion of a restore operation.  This is when we
+        // Called once following the conclusion of a system restore operation.  This is when we
         // send out updates to apps involved in widget-state restore telling them about
-        // the new widget ID space.
-        public void restoreFinished(int userId) {
+        // the new widget ID space.  Apps that are not yet installed will be notifed when they are.
+        public void systemRestoreFinished(int userId) {
             if (DEBUG) {
-                Slog.i(TAG, "restoreFinished for " + userId);
+                Slog.i(TAG, "systemRestoreFinished for " + userId);
+            }
+            synchronized (mLock) {
+                mHasSystemRestoreFinished = true;
+                maybeSendWidgetRestoreBroadcastsLocked(userId);
+            }
+        }
+
+        // Called when widget components (hosts or providers) are added or changed.  If system
+        // restore has completed, we use this opportunity to tell the apps to update to the new
+        // widget ID space.  If system restore is still in progress, we delay the updates until
+        // the end, to allow all participants to restore their state before updating widget IDs.
+        public void widgetComponentsChanged(int userId) {
+            synchronized (mLock) {
+                if (mHasSystemRestoreFinished) {
+                    maybeSendWidgetRestoreBroadcastsLocked(userId);
+                }
+            }
+        }
+
+        // Called following the conclusion of a restore operation and when widget components
+        // are added or changed.  This is when we send out updates to apps involved in widget-state
+        // restore telling them about the new widget ID space.
+        @GuardedBy("mLock")
+        private void maybeSendWidgetRestoreBroadcastsLocked(int userId) {
+            if (DEBUG) {
+                Slog.i(TAG, "maybeSendWidgetRestoreBroadcasts for " + userId);
             }
 
             final UserHandle userHandle = new UserHandle(userId);
-            synchronized (mLock) {
-                // Build the providers' broadcasts and send them off
-                Set<Map.Entry<Provider, ArrayList<RestoreUpdateRecord>>> providerEntries
-                        = mUpdatesByProvider.entrySet();
-                for (Map.Entry<Provider, ArrayList<RestoreUpdateRecord>> e : providerEntries) {
-                    // For each provider there's a list of affected IDs
-                    Provider provider = e.getKey();
+            // Build the providers' broadcasts and send them off
+            Set<Map.Entry<Provider, ArrayList<RestoreUpdateRecord>>> providerEntries
+                    = mUpdatesByProvider.entrySet();
+            for (Map.Entry<Provider, ArrayList<RestoreUpdateRecord>> e : providerEntries) {
+                // For each provider there's a list of affected IDs
+                Provider provider = e.getKey();
+                if (provider.zombie) {
+                    // Provider not installed, we can't send them broadcasts yet.
+                    // We'll be called again when the provider is installed.
+                    continue;
+                }
+                ArrayList<RestoreUpdateRecord> updates = e.getValue();
+                final int pending = countPendingUpdates(updates);
+                if (DEBUG) {
+                    Slog.i(TAG, "Provider " + provider + " pending: " + pending);
+                }
+                if (pending > 0) {
+                    int[] oldIds = new int[pending];
+                    int[] newIds = new int[pending];
+                    final int N = updates.size();
+                    int nextPending = 0;
+                    for (int i = 0; i < N; i++) {
+                        RestoreUpdateRecord r = updates.get(i);
+                        if (!r.notified) {
+                            r.notified = true;
+                            oldIds[nextPending] = r.oldId;
+                            newIds[nextPending] = r.newId;
+                            nextPending++;
+                            if (DEBUG) {
+                                Slog.i(TAG, "   " + r.oldId + " => " + r.newId);
+                            }
+                        }
+                    }
+                    sendWidgetRestoreBroadcastLocked(
+                            AppWidgetManager.ACTION_APPWIDGET_RESTORED,
+                            provider, null, oldIds, newIds, userHandle);
+                }
+            }
+
+            // same thing per host
+            Set<Map.Entry<Host, ArrayList<RestoreUpdateRecord>>> hostEntries
+                    = mUpdatesByHost.entrySet();
+            for (Map.Entry<Host, ArrayList<RestoreUpdateRecord>> e : hostEntries) {
+                Host host = e.getKey();
+                if (host.id.uid != UNKNOWN_UID) {
                     ArrayList<RestoreUpdateRecord> updates = e.getValue();
                     final int pending = countPendingUpdates(updates);
                     if (DEBUG) {
-                        Slog.i(TAG, "Provider " + provider + " pending: " + pending);
+                        Slog.i(TAG, "Host " + host + " pending: " + pending);
                     }
                     if (pending > 0) {
                         int[] oldIds = new int[pending];
@@ -4581,43 +4651,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             }
                         }
                         sendWidgetRestoreBroadcastLocked(
-                                AppWidgetManager.ACTION_APPWIDGET_RESTORED,
-                                provider, null, oldIds, newIds, userHandle);
-                    }
-                }
-
-                // same thing per host
-                Set<Map.Entry<Host, ArrayList<RestoreUpdateRecord>>> hostEntries
-                        = mUpdatesByHost.entrySet();
-                for (Map.Entry<Host, ArrayList<RestoreUpdateRecord>> e : hostEntries) {
-                    Host host = e.getKey();
-                    if (host.id.uid != UNKNOWN_UID) {
-                        ArrayList<RestoreUpdateRecord> updates = e.getValue();
-                        final int pending = countPendingUpdates(updates);
-                        if (DEBUG) {
-                            Slog.i(TAG, "Host " + host + " pending: " + pending);
-                        }
-                        if (pending > 0) {
-                            int[] oldIds = new int[pending];
-                            int[] newIds = new int[pending];
-                            final int N = updates.size();
-                            int nextPending = 0;
-                            for (int i = 0; i < N; i++) {
-                                RestoreUpdateRecord r = updates.get(i);
-                                if (!r.notified) {
-                                    r.notified = true;
-                                    oldIds[nextPending] = r.oldId;
-                                    newIds[nextPending] = r.newId;
-                                    nextPending++;
-                                    if (DEBUG) {
-                                        Slog.i(TAG, "   " + r.oldId + " => " + r.newId);
-                                    }
-                                }
-                            }
-                            sendWidgetRestoreBroadcastLocked(
-                                    AppWidgetManager.ACTION_APPWIDGET_HOST_RESTORED,
-                                    null, host, oldIds, newIds, userHandle);
-                        }
+                                AppWidgetManager.ACTION_APPWIDGET_HOST_RESTORED,
+                                null, host, oldIds, newIds, userHandle);
                     }
                 }
             }
