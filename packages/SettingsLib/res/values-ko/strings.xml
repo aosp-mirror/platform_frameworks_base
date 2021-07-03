@@ -422,7 +422,7 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"색상 보정을 사용하면 기기에 표시되는 색상을 조절할 수 있습니다."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간: 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"내 사용량을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"내 사용량(<xliff:g id="LEVEL">%2$s</xliff:g>)을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
