@@ -26,7 +26,6 @@
     android:layout_gravity="top"
     android:orientation="horizontal"
     android:clickable="true"
-    android:paddingTop="@dimen/status_bar_padding_top"
     android:minHeight="48dp">
 
     <FrameLayout

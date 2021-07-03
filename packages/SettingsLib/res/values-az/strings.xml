@@ -454,7 +454,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Tam şarj edilənədək <xliff:g id="TIME">%1$s</xliff:g> qalıb"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - tam şarj edilənədək <xliff:g id="TIME">%2$s</xliff:g> qalıb"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj müvəqqəti olaraq məhdudlaşdırılıb"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj müvəqqəti məhdudlaşdırılıb"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Naməlum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Enerji doldurma"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Sürətlə doldurulur"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Qonağı silin"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Qonaq sessiyasını sıfırlayın"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Qonaq"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Qonaq məlumatı sıfırlansın?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Sıfırlayın"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Qonaq məlumatı sıfırlanır…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto çəkin"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Şəkil seçin"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto seçin"</string>

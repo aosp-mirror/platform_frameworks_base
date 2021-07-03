@@ -240,7 +240,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"Ояу тұру"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Зарядтау кезінде экран өшпейді."</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI қадағалау журналын қосу"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth пакеттерін алу (осы параметрді өзгерткен соң, Bluetooth-ды қосыңыз немесе өшіріңіз)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth пакеттерін алу (осы параметрді өзгерткен соң, Bluetooth-ты қосыңыз немесе өшіріңіз)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM құлып ашу функциясы"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Операциялық жүйені жүктеу құралының құлпыy ашуға рұқсат ету"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бекітпесін ашуға рұқсат ету керек пе?"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты жою"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Қонақ сеансын әдепкі күйге қайтару"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Қонақ"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Қонақ сеансы бастапқы күйге қайтарылсын ба?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Бастапқы күйге қайтару"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Қонақ сеансы бастапқы күйге қайтарылуда…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Фотосуретке түсіру"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сурет таңдау"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Фотосурет таңдау"</string>

@@ -156,7 +156,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Beberapa setelan default"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tidak ada setelan default"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setelan text-to-speech"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Ouput text-to-speech"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Output text-to-speech"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan ucapan"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kecepatan teks diucapkan"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tinggi nada"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Hapus tamu"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Reset tamu"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Tamu"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Reset tamu?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reset"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Mereset tamu …"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih gambar"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Pilih foto"</string>

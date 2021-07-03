@@ -16,6 +16,8 @@
 
 package com.android.server.compat;
 
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+
 import android.annotation.Nullable;
 import android.app.compat.ChangeIdStateCache;
 import android.app.compat.PackageOverride;
@@ -693,7 +695,7 @@ final class CompatConfig {
     private Long getVersionCodeOrNull(String packageName) {
         try {
             ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
-                    packageName, 0);
+                    packageName, MATCH_ANY_USER);
             return applicationInfo.longVersionCode;
         } catch (PackageManager.NameNotFoundException e) {
             return null;
