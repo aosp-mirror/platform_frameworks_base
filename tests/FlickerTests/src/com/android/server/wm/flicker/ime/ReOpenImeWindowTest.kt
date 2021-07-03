@@ -43,6 +43,7 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -102,7 +103,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(
+                    ignoreWindows = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
+                            "RecentTaskScreenshotSurface#0")
+            )
         }
     }
 
@@ -112,12 +117,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(true)
 
     @Presubmit
     @Test
-    fun imeAppWindowBecomesVisible() =
-        testSpec.imeAppWindowBecomesVisible(testAppComponentName.className)
+    fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(testApp, true)
 
     @Presubmit
     @Test
@@ -135,7 +139,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    fun imeLayerIsAlwaysVisible() = testSpec.imeLayerIsAlwaysVisible(true)
 
     @Presubmit
     @Test
@@ -171,7 +175,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                     repetitions = 1,
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     )
                 )
         }

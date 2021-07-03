@@ -46,7 +46,7 @@ public class TypeClassifier extends FalsingClassifier {
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
         if (interactionType == Classifier.UDFPS_AUTHENTICATION
-                || interactionType == Classifier.DISABLED_UDFPS_AFFORDANCE) {
+                || interactionType == Classifier.LOCK_ICON) {
             return Result.passed(0);
         }
 

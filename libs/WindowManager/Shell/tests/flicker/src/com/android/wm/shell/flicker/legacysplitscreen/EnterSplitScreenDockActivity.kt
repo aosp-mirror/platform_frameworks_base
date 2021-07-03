@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -91,13 +93,25 @@ class EnterSplitScreenDockActivity(
         }
     }
 
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
-                supportedRotations = listOf(Surface.ROTATION_0) // bugId = 179116910
+                supportedRotations = listOf(Surface.ROTATION_0), // bugId = 179116910
+                supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
             )
         }
     }

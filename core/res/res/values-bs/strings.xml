@@ -204,7 +204,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Usluga GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Usluga obavještavanja putem senzora"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Usluga Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detektor vremenske zone (nije povezan)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS usluga za ažuriranje vremena"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Usluga upravitelja prepoznavanja muzike"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti izbrisan"</string>
@@ -1504,6 +1503,7 @@
     <string name="deny" msgid="6632259981847676572">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Upućen zahtjev za odobrenje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Upućen zahtjev za dozvolu\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> zatražila je dopuštenje\nza račun <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Aplikaciju koristite van poslovnog profila"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Aplikaciju koristite u poslovnom profilu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Način unosa"</string>

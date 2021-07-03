@@ -60,6 +60,8 @@ import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.provider.Settings;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
@@ -592,6 +594,7 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private ValueAnimator mQsClippingAnimation = null;
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
+    private final Region mQsInterceptRegion = new Region();
 
     /**
      * The alpha of the views which only show on the keyguard but not in shade / shade locked
@@ -614,6 +617,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private final SecureSettings mSecureSettings;
 
     private KeyguardMediaController mKeyguardMediaController;
+
+    private boolean mStatusViewCentered = false;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -1022,15 +1027,15 @@ public class NotificationPanelViewController extends PanelViewController {
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
                     R.id.qs_edge_guideline, START);
-            constraintSet.connect(R.id.keyguard_status_view, END, R.id.qs_edge_guideline, END);
         } else {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
-            constraintSet.connect(R.id.keyguard_status_view, END, PARENT_ID, END);
         }
         constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
         constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
         constraintSet.applyTo(mNotificationContainerParent);
+
+        updateKeyguardStatusViewAlignment(false /* animate */);
 
         mKeyguardMediaController.refreshMediaPosition();
     }
@@ -1282,6 +1287,7 @@ public class NotificationPanelViewController extends PanelViewController {
         } else {
             mKeyguardStatusViewController.displayClock(LARGE);
         }
+        updateKeyguardStatusViewAlignment(true /* animate */);
         int userIconHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         float expandedFraction =
@@ -1325,6 +1331,26 @@ public class NotificationPanelViewController extends PanelViewController {
         updateClock();
     }
 
+    private void updateKeyguardStatusViewAlignment(boolean animate) {
+        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
+        boolean shouldBeCentered = !mShouldUseSplitNotificationShade || !hasVisibleNotifications;
+        if (mStatusViewCentered != shouldBeCentered) {
+            mStatusViewCentered = shouldBeCentered;
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(mNotificationContainerParent);
+            int statusConstraint = shouldBeCentered ? PARENT_ID : R.id.qs_edge_guideline;
+            constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
+            if (animate) {
+                ChangeBounds transition = new ChangeBounds();
+                transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+                transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
+            }
+            constraintSet.applyTo(mNotificationContainerParent);
+        }
+    }
+
     /**
      * @return the padding of the stackscroller when unlocked
      */
@@ -1346,8 +1372,7 @@ public class NotificationPanelViewController extends PanelViewController {
                         : mNotificationShelfController.getIntrinsicHeight() + notificationPadding;
 
         float lockIconPadding = 0;
-        if (mLockIconViewController.getTop() != 0
-                && (mUpdateMonitor.isUdfpsEnrolled() || mUpdateMonitor.isFaceEnrolled())) {
+        if (mLockIconViewController.getTop() != 0) {
             lockIconPadding = mStatusBar.getDisplayHeight() - mLockIconViewController.getTop();
         }
 
@@ -2261,8 +2286,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQSExpansionEnabledAmbient() {
         final float scrollRangeToTop = mAmbientState.getTopPadding() - mQuickQsOffsetHeight;
         mQsExpansionEnabledAmbient = mShouldUseSplitNotificationShade
-                || (mAmbientState.getScrollY() <= scrollRangeToTop
-                && !mAmbientState.isShadeOpening());
+                || (mAmbientState.getScrollY() <= scrollRangeToTop);
         setQsExpansionEnabled();
     }
 
@@ -2684,10 +2708,16 @@ public class NotificationPanelViewController extends PanelViewController {
             return false;
         }
         View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
-        final boolean
-                onHeader =
-                x >= mQsFrame.getX() && x <= mQsFrame.getX() + mQsFrame.getWidth()
-                        && y >= header.getTop() && y <= header.getBottom();
+
+        mQsInterceptRegion.set(
+                /* left= */ (int) mQsFrame.getX(),
+                /* top= */ header.getTop(),
+                /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
+                /* bottom= */ header.getBottom());
+        // Also allow QS to intercept if the touch is near the notch.
+        mStatusBarTouchableRegionManager.updateRegionForNotch(mQsInterceptRegion);
+        final boolean onHeader = mQsInterceptRegion.contains((int) x, (int) y);
+
         if (mQsExpanded) {
             return onHeader || (yDiff < 0 && isInQsArea(x, y));
         } else {
@@ -3908,6 +3938,10 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
                 }
 
+                if (mLockIconViewController.onTouchEvent(event)) {
+                    return true;
+                }
+
                 handled |= super.onTouch(v, event);
                 return !mDozing || mPulsing || handled;
             }
@@ -4406,6 +4440,8 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     public void showAodUi() {
         setDozing(true /* dozing */, false /* animate */, null);
+        mStatusBarStateController.setUpcomingState(KEYGUARD);
+        mEntryManager.updateNotifications("showAodUi");
         mStatusBarStateListener.onStateChanged(KEYGUARD);
         mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
         setExpandedFraction(1f);

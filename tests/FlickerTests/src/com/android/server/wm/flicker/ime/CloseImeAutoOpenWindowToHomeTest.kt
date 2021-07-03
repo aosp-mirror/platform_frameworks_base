@@ -120,7 +120,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
         Surface.ROTATION_0)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerVisibleStart() {
         testSpec.assertLayersStart {
@@ -128,7 +128,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerInvisibleEnd() {
         testSpec.assertLayersEnd {
@@ -136,7 +136,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
 
@@ -150,7 +150,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         }
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
@@ -166,7 +166,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 

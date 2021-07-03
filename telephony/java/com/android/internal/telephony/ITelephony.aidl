@@ -2383,6 +2383,11 @@ interface ITelephony {
      */
     String getContactFromEab(String contact);
 
+    /**
+     * Get the EAB capability from the EAB database.
+     */
+    String getCapabilityFromEab(String contact);
+
     /*
      * Check whether the device supports RCS User Capability Exchange or not.
      */

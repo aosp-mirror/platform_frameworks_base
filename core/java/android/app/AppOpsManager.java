@@ -742,6 +742,13 @@ public class AppOpsManager {
     public static final int ATTRIBUTION_FLAG_RECEIVER = 0x4;
 
     /**
+     * Attribution chain flag: Specifies that all attribution sources in the chain were trusted.
+     * Must only be set by system server.
+     * @hide
+     */
+    public static final int ATTRIBUTION_FLAG_TRUSTED = 0x8;
+
+    /**
      * No attribution flags.
      * @hide
      */
@@ -760,7 +767,8 @@ public class AppOpsManager {
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             ATTRIBUTION_FLAG_ACCESSOR,
             ATTRIBUTION_FLAG_INTERMEDIARY,
-            ATTRIBUTION_FLAG_RECEIVER
+            ATTRIBUTION_FLAG_RECEIVER,
+            ATTRIBUTION_FLAG_TRUSTED
     })
     public @interface AttributionFlags {}
 

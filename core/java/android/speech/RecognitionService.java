@@ -115,14 +115,28 @@ public abstract class RecognitionService extends Service {
             @NonNull AttributionSource attributionSource) {
         try {
             if (mCurrentCallback == null) {
-                if (DBG) {
-                    Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
+                Context attributionContext = createContext(new ContextParams.Builder()
+                        .setNextAttributionSource(attributionSource)
+                        .build());
+                boolean preflightPermissionCheckPassed = checkPermissionForPreflight(
+                        attributionContext.getAttributionSource());
+                if (preflightPermissionCheckPassed) {
+                    if (DBG) {
+                        Log.d(TAG, "created new mCurrentCallback, listener = "
+                                + listener.asBinder());
+                    }
+                    mCurrentCallback = new Callback(listener, attributionSource,
+                            attributionContext);
+                    RecognitionService.this.onStartListening(intent, mCurrentCallback);
                 }
-                mCurrentCallback = new Callback(listener, attributionSource);
 
-                RecognitionService.this.onStartListening(intent, mCurrentCallback);
-                if (!checkPermissionAndStartDataDelivery()) {
+                if (!preflightPermissionCheckPassed || !checkPermissionAndStartDataDelivery()) {
                     listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
+                    if (preflightPermissionCheckPassed) {
+                        // If we attempted to start listening, cancel the callback
+                        RecognitionService.this.onCancel(mCurrentCallback);
+                        dispatchClearCallback();
+                    }
                     Log.i(TAG, "caller doesn't have permission:"
                             + Manifest.permission.RECORD_AUDIO);
                 }
@@ -279,8 +293,15 @@ public abstract class RecognitionService extends Service {
 
         private Callback(IRecognitionListener listener,
                 @NonNull AttributionSource attributionSource) {
+            this(listener, attributionSource, null);
+        }
+
+        private Callback(IRecognitionListener listener,
+                @NonNull AttributionSource attributionSource,
+                @Nullable Context attributionContext) {
             mListener = listener;
             mCallingAttributionSource = attributionSource;
+            mAttributionContext = attributionContext;
         }
 
         /**
@@ -458,6 +479,12 @@ public abstract class RecognitionService extends Service {
             mStartedDataDelivery = true;
         }
         return mStartedDataDelivery;
+    }
+
+    private boolean checkPermissionForPreflight(AttributionSource attributionSource) {
+        return PermissionChecker.checkPermissionForPreflight(RecognitionService.this,
+                Manifest.permission.RECORD_AUDIO, attributionSource)
+                == PermissionChecker.PERMISSION_GRANTED;
     }
 
     void finishDataDelivery() {
