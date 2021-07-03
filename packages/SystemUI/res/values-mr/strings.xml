@@ -669,9 +669,9 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"तुमचा फोन वापरून जलदरीत्या, अधिक सुरक्षित खरेदी करण्यासाठी सेट करा"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सर्व दाखवा"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"पैसे देण्यासाठी अनलॉक करा"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"सेट केलेले नाही"</string>
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
     <skip />
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"अपडेट करत आहे"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"वापरण्यासाठी अनलॉक करा"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तुमची कार्ड मिळवताना समस्या आली, कृपया नंतर पुन्हा प्रयत्न करा"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन सेटिंग्ज"</string>
@@ -1147,8 +1147,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"अलीकडील मेसेज, मिस्ड कॉल आणि स्टेटस अपडेट पाहा"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"संभाषण"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"व्यत्यय आणू नका द्वारे थांबवले गेले"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> यांनी मेसेज पाठवला"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> यांनी इमेज पाठवली"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"तुमचे बॅटरी मीटर वाचताना समस्या आली"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"अधिक माहितीसाठी टॅप करा"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"अलार्म सेट केला नाही"</string>
@@ -1159,4 +1162,29 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"उघडण्यासाठी फिंगरप्रिंट वापरा"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ऑथेंटिकेशन आवश्यक आहे. ऑथेंटिकेट करण्यासाठी फिंगरप्रिंट सेन्सरला स्पर्श करा."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"फोन कॉल सुरू आहे"</string>
+    <!-- no translation found for airplane_mode (2536350001462130668) -->
+    <skip />
+    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
+    <skip />
+    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
+    <skip />
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट केले आहे"</string>
+    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
+    <skip />
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"कोणतेही कनेक्शन नाही"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"इतर कोणतेही नेटवर्क उपलब्ध नाहीत"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"कोणतेही नेटवर्क उपलब्‍ध नाही"</string>
+    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
+    <skip />
+    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
+    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
+    <skip />
+    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
+    <skip />
+    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
+    <skip />
+    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
+    <skip />
+    <!-- no translation found for see_all_networks (3773666844913168122) -->
+    <skip />
 </resources>

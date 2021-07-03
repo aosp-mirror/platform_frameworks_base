@@ -11869,23 +11869,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // Get the text and trim it to the range we are reporting.
                 CharSequence text = getText();
-                if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
-                    text = text.subSequence(expandedTopChar, expandedBottomChar);
-                }
 
-                if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
-                    structure.setText(text);
-                } else {
-                    structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
-
-                    final int[] lineOffsets = new int[bottomLine - topLine + 1];
-                    final int[] lineBaselines = new int[bottomLine - topLine + 1];
-                    final int baselineOffset = getBaselineOffset();
-                    for (int i = topLine; i <= bottomLine; i++) {
-                        lineOffsets[i - topLine] = layout.getLineStart(i);
-                        lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                if (text != null) {
+                    if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
+                        text = text.subSequence(expandedTopChar, expandedBottomChar);
                     }
-                    structure.setTextLines(lineOffsets, lineBaselines);
+
+                    if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+                        structure.setText(text);
+                    } else {
+                        structure.setText(text,
+                                selStart - expandedTopChar,
+                                selEnd - expandedTopChar);
+
+                        final int[] lineOffsets = new int[bottomLine - topLine + 1];
+                        final int[] lineBaselines = new int[bottomLine - topLine + 1];
+                        final int baselineOffset = getBaselineOffset();
+                        for (int i = topLine; i <= bottomLine; i++) {
+                            lineOffsets[i - topLine] = layout.getLineStart(i);
+                            lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                        }
+                        structure.setTextLines(lineOffsets, lineBaselines);
+                    }
                 }
             }
 
@@ -13916,7 +13921,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onCreateViewTranslationRequest(@NonNull int[] supportedFormats,
             @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         if (supportedFormats == null || supportedFormats.length == 0) {
-            // TODO(b/182433547): remove before S release
             if (UiTranslationController.DEBUG) {
                 Log.w(LOG_TAG, "Do not provide the support translation formats.");
             }
@@ -13927,7 +13931,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Support Text translation
         if (ArrayUtils.contains(supportedFormats, TranslationSpec.DATA_FORMAT_TEXT)) {
             if (mText == null || mText.length() == 0) {
-                // TODO(b/182433547): remove before S release
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
                 }
@@ -13941,7 +13944,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             //  it, it needs broader changes to text APIs, we only allow to translate non selectable
             //  and editable text in S.
             if (isTextEditable() || isPassword || isTextSelectable()) {
-                // TODO(b/182433547): remove before S release
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request. editable = "
                             + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "

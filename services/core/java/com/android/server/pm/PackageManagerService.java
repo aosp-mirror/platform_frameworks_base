@@ -11838,6 +11838,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ParallelPackageParser.ParseResult parseResult = parallelPackageParser.take();
             Throwable throwable = parseResult.throwable;
             int errorCode = PackageManager.INSTALL_SUCCEEDED;
+            String errorMsg = null;
 
             if (throwable == null) {
                 // TODO(toddke): move lower in the scan chain
@@ -11850,20 +11851,22 @@ public class PackageManagerService extends IPackageManager.Stub
                             currentTime, null);
                 } catch (PackageManagerException e) {
                     errorCode = e.error;
-                    Slog.w(TAG, "Failed to scan " + parseResult.scanFile + ": " + e.getMessage());
+                    errorMsg = "Failed to scan " + parseResult.scanFile + ": " + e.getMessage();
+                    Slog.w(TAG, errorMsg);
                 }
             } else if (throwable instanceof PackageParserException) {
                 PackageParserException e = (PackageParserException)
                         throwable;
                 errorCode = e.error;
-                Slog.w(TAG, "Failed to parse " + parseResult.scanFile + ": " + e.getMessage());
+                errorMsg = "Failed to parse " + parseResult.scanFile + ": " + e.getMessage();
+                Slog.w(TAG, errorMsg);
             } else {
                 throw new IllegalStateException("Unexpected exception occurred while parsing "
                         + parseResult.scanFile, throwable);
             }
 
             if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0 && errorCode != INSTALL_SUCCEEDED) {
-                mApexManager.reportErrorWithApkInApex(scanDir.getAbsolutePath());
+                mApexManager.reportErrorWithApkInApex(scanDir.getAbsolutePath(), errorMsg);
             }
 
             // Delete invalid userdata apps

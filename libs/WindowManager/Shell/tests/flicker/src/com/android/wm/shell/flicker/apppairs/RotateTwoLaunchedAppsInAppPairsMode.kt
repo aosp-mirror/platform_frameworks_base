@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -61,11 +61,13 @@ class RotateTwoLaunchedAppsInAppPairsMode(
             }
         }
 
-    @FlakyTest
+    @Postsubmit
     @Test
-    override fun statusBarLayerIsVisible() {
-        super.statusBarLayerIsVisible()
-    }
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @Presubmit
     @Test
@@ -80,13 +82,13 @@ class RotateTwoLaunchedAppsInAppPairsMode(
     @Test
     fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
 
-    @FlakyTest(bugId = 172776659)
+    @Postsubmit
     @Test
     fun appPairsPrimaryBoundsIsVisible() =
         testSpec.appPairsPrimaryBoundsIsVisible(testSpec.config.endRotation,
             primaryApp.defaultWindowName)
 
-    @FlakyTest(bugId = 172776659)
+    @Postsubmit
     @Test
     fun appPairsSecondaryBoundsIsVisible() =
         testSpec.appPairsSecondaryBoundsIsVisible(testSpec.config.endRotation,

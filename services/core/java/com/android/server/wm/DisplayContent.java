@@ -1918,10 +1918,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 }
             }
         }
-
-        if (mWmService.mAccessibilityController != null) {
-            mWmService.mAccessibilityController.onRotationChanged(this);
-        }
     }
 
     void configureDisplayPolicy() {
@@ -5606,6 +5602,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.setNewDisplayOverrideConfiguration(currOverrideConfig, this);
         mAtmService.addWindowLayoutReasons(
                 ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
+    }
+
+    @Override
+    void onResize() {
+        super.onResize();
+        if (mWmService.mAccessibilityController != null) {
+            mWmService.mAccessibilityController.onDisplaySizeChanged(this);
+        }
     }
 
     /**

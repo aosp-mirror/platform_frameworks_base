@@ -589,7 +589,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void initializeInternal(@NonNull IBinder token, int displayId,
+        public final void initializeInternal(@NonNull IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
             if (InputMethodPrivilegedOperationsRegistry.isRegistered(token)) {
                 Log.w(TAG, "The token has already registered, ignore this initialization.");
@@ -599,7 +599,6 @@ public class InputMethodService extends AbstractInputMethodService {
             mConfigTracker.onInitialize(configChanges);
             mPrivOps.set(privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
-            updateInputMethodDisplay(displayId);
             attachToken(token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -632,25 +631,6 @@ public class InputMethodService extends AbstractInputMethodService {
             attachToWindowToken(token);
             mToken = token;
             mWindow.setToken(token);
-        }
-
-        // TODO(b/149463653): remove updateInputMethodDisplay(int displayId) since we'll get the
-        // right display by attachToWindowToken
-        /**
-         * {@inheritDoc}
-         * @hide
-         */
-        @MainThread
-        @Override
-        public void updateInputMethodDisplay(int displayId) {
-            if (getDisplayId() == displayId) {
-                return;
-            }
-            // Update display for adding IME window to the right display.
-            // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
-            // for update resources & configuration correctly when show soft input
-            // in non-default display.
-            updateDisplay(displayId);
         }
 
         /**

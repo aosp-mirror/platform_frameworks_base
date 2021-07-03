@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS サービス"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"センサー通知サービス"</string>
     <string name="twilight_service" msgid="8964898045693187224">"トワイライト サービス"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Time Zone Detector（未接続）"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 時間アップデートサービス"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"楽曲認識マネージャー サービス"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
@@ -1484,6 +1483,7 @@
     <string name="deny" msgid="6632259981847676572">"拒否"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"権限がリクエストされました"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"次のアカウントにアクセスする権限が\nリクエストされました: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"アカウント <xliff:g id="ACCOUNT">%2$s</xliff:g> へのアクセス権限が\n<xliff:g id="APP">%1$s</xliff:g> からリクエストされました。"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"仕事用プロファイルの外部でこのアプリを使用しています"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"仕事用プロファイルでこのアプリを使用しています"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"入力方法"</string>

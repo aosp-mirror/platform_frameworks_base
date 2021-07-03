@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -132,9 +132,19 @@ class LegacySplitScreenToLauncher(
     @Test
     fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(testApp.getPackage())
 
-    @FlakyTest(bugId = 151179149)
+    @Postsubmit
     @Test
     fun focusDoesNotChange() = testSpec.focusDoesNotChange()
+
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

@@ -19,9 +19,11 @@ package android.permission;
 import static android.Manifest.permission_group.CAMERA;
 import static android.Manifest.permission_group.LOCATION;
 import static android.Manifest.permission_group.MICROPHONE;
+import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAGS_NONE;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAG_TRUSTED;
 import static android.app.AppOpsManager.AttributionFlags;
 import static android.app.AppOpsManager.OPSTR_CAMERA;
 import static android.app.AppOpsManager.OPSTR_COARSE_LOCATION;
@@ -180,7 +182,10 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     public void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
             @Nullable String attributionTag, boolean active, @AttributionFlags int attributionFlags,
             int attributionChainId) {
-        if ((attributionFlags & ATTRIBUTION_FLAGS_NONE) != 0) {
+        if (attributionChainId == ATTRIBUTION_CHAIN_ID_NONE
+                || attributionFlags == ATTRIBUTION_FLAGS_NONE
+                || (attributionFlags & ATTRIBUTION_FLAG_TRUSTED) == 0) {
+            // If this is not a chain, or it is untrusted, return
             return;
         }
 

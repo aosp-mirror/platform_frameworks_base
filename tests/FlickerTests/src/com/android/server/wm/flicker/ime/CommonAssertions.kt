@@ -22,6 +22,22 @@ import com.android.server.wm.flicker.FlickerTestParameter
 const val IME_WINDOW_TITLE = "InputMethod"
 const val IME_LAYER_TITLE = "$IME_WINDOW_TITLE#0"
 
+fun FlickerTestParameter.imeLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
+    if (rotatesScreen) {
+        assertLayers {
+            this.isVisible(IME_WINDOW_TITLE)
+                .then()
+                .isInvisible(IME_WINDOW_TITLE)
+                .then()
+                .isVisible(IME_WINDOW_TITLE)
+        }
+    } else {
+        assertLayers {
+            this.isVisible(IME_WINDOW_TITLE)
+        }
+    }
+}
+
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
         this.isInvisible(IME_LAYER_TITLE)
@@ -50,6 +66,22 @@ fun FlickerTestParameter.imeAppWindowIsAlwaysVisible(testApp: IAppHelper) {
     }
 }
 
+fun FlickerTestParameter.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
+    if (rotatesScreen) {
+        assertWm {
+            this.showsNonAppWindow(IME_WINDOW_TITLE)
+                .then()
+                .hidesNonAppWindow(IME_WINDOW_TITLE)
+                .then()
+                .showsNonAppWindow(IME_WINDOW_TITLE)
+        }
+    } else {
+        assertWm {
+            this.showsNonAppWindow(IME_WINDOW_TITLE)
+        }
+    }
+}
+
 fun FlickerTestParameter.imeWindowBecomesVisible() {
     assertWm {
         this.hidesNonAppWindow(IME_WINDOW_TITLE)
@@ -63,6 +95,25 @@ fun FlickerTestParameter.imeWindowBecomesInvisible() {
         this.showsNonAppWindow(IME_WINDOW_TITLE)
             .then()
             .hidesNonAppWindow(IME_WINDOW_TITLE)
+    }
+}
+
+fun FlickerTestParameter.imeAppWindowIsAlwaysVisible(
+    testApp: IAppHelper,
+    rotatesScreen: Boolean = false
+) {
+    if (rotatesScreen) {
+        assertWm {
+            this.showsAppWindow(testApp.getPackage())
+                .then()
+                .hidesAppWindow(testApp.getPackage())
+                .then()
+                .showsAppWindow(testApp.getPackage())
+        }
+    } else {
+        assertWm {
+            this.showsAppWindow(testApp.getPackage())
+        }
     }
 }
 

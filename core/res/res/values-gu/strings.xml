@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS સેવા"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"સેન્સર નોટિફિકેશન સેવા"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ટ્વાઇલાઇટ સેવા"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"સમય ઝોન શોધવાની સુવિધા (કનેક્ટિવિટી જરૂરી નથી)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS સમય અપડેટ કરવાની સેવા"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"મ્યુઝિકની ઓળખ માટે મેનેજમેન્ટ સેવા"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
@@ -602,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"કોઈ ફિંગરપ્રિન્ટની નોંધણી કરવામાં આવી નથી."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ફિંગરપ્રિન્ટ સેન્સરનો ઉપયોગ કરી શકાતો નથી. રિપેર કરવાની સેવા આપતા પ્રદાતાની મુલાકાત લો"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ફિંગરપ્રિન્ટ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
@@ -619,12 +617,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"તમારા ફોનની તરફ જોઈને તેને અનલૉક કરો"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"અનલૉક કરવાની બીજી રીતોનું સેટઅપ કરો"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ફિંગરપ્રિન્ટ ઉમેરવા માટે ટૅપ કરો"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ફિંગરપ્રિન્ટ અનલૉક"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ફિંગરપ્રિન્ટ સેન્સરનો ઉપયોગ કરી શકાતો નથી"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"રિપેર કરવાની સેવા આપતા પ્રદાતાની મુલાકાત લો."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ચહેરાનો સચોટ ડેટા કૅપ્ચર ન થયો. ફરી પ્રયાસ કરો."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"અતિશય પ્રકાશિત. થોડો હળવો પ્રકાશ અજમાવી જુઓ."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"અતિશય ઘેરી. વધુ ઝળહળતો પ્રકાશ અજમાવો"</string>
@@ -1488,6 +1483,8 @@
     <string name="deny" msgid="6632259981847676572">"નકારો"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"પરવાનગીની વિનંતી કરી"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"એકાઉન્ટ <xliff:g id="ACCOUNT">%s</xliff:g> માટે\nપરવાનગીની વિનંતી કરી."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"તમે તમારી કાર્ય પ્રોફાઇલની બહાર આ એપ્લિકેશનનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"તમે તમારી કાર્ય પ્રોફાઇલમાં આ એપ્લિકેશનનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ઇનપુટ પદ્ધતિ"</string>

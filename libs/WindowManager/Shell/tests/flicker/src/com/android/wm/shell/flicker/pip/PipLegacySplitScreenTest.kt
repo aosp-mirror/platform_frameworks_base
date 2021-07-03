@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -46,7 +46,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 161435597)
 @Group3
 class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
@@ -80,7 +79,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 161435597)
     @Test
     fun pipWindowInsideDisplayBounds() {
         testSpec.assertWm {
@@ -88,7 +87,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
@@ -98,15 +97,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
-    @Presubmit
+    @FlakyTest(bugId = 161435597)
     @Test
     fun pipLayerInsideDisplayBounds() {
         testSpec.assertLayers {
@@ -114,7 +105,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
@@ -123,13 +114,25 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Presubmit
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
+
+    @Postsubmit
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
+
+    @FlakyTest(bugId = 161435597)
+    @Test
+    override fun noUncoveredRegions() = super.noUncoveredRegions()
 
     companion object {
         const val TEST_REPETITIONS = 2

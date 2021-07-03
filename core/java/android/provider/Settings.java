@@ -11010,7 +11010,7 @@ public final class Settings {
          */
         @Readable
         public static final String SHOW_MEDIA_ON_QUICK_SETTINGS =
-                "qs_media_player";
+                "qs_media_controls";
 
         /**
          * The interval in milliseconds at which location requests will be throttled when they are

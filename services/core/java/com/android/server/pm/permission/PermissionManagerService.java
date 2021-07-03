@@ -20,7 +20,10 @@ import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.UPDATE_APP_OPS_STATS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAGS_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -5592,13 +5595,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @PermissionCheckerManager.PermissionResult
         public int checkOp(int op, AttributionSourceState attributionSource,
                 String message, boolean forDataDelivery, boolean startDataDelivery) {
-            int result = checkOp(mContext, op, new AttributionSource(attributionSource), message,
-                    forDataDelivery, startDataDelivery);
+            int result = checkOp(mContext, op, mPermissionManagerServiceInternal,
+                    new AttributionSource(attributionSource), message, forDataDelivery,
+                    startDataDelivery);
             if (result != PermissionChecker.PERMISSION_GRANTED && startDataDelivery) {
                 // Finish any started op if some step in the attribution chain failed.
                 finishDataDelivery(op, attributionSource, /*fromDatasource*/ false);
             }
-            return  result;
+            return result;
         }
 
         @PermissionCheckerManager.PermissionResult
@@ -5722,8 +5726,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final int op = AppOpsManager.permissionToOpCode(permission);
             final int attributionChainId =
                     getAttributionChainId(startDataDelivery, attributionSource);
+            final boolean hasChain = attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
             AttributionSource current = attributionSource;
             AttributionSource next = null;
+            // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
+            // every attributionSource in the chain is registered with the system.
+            final boolean isChainStartTrusted = !hasChain || checkPermission(context,
+                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current.getUid(),
+                    current.getRenouncedPermissions());
 
             while (true) {
                 final boolean skipCurrentChecks = (fromDatasource || next != null);
@@ -5768,13 +5778,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         && current.equals(attributionSource)
                         && next != null && next.getNext() == null);
                 final boolean selfAccess = singleReceiverFromDatasource || next == null;
+                final boolean isLinkTrusted = isChainStartTrusted
+                        && (current.isTrusted(context) || current.equals(attributionSource))
+                        && (next == null || next.isTrusted(context));
 
-                final int proxyAttributionFlags = (!skipCurrentChecks)
+                final int proxyAttributionFlags = (!skipCurrentChecks && hasChain)
                         ? resolveProxyAttributionFlags(attributionSource, current, fromDatasource,
-                                startDataDelivery, selfAccess)
-                        : AppOpsManager.ATTRIBUTION_FLAGS_NONE;
-                final int proxiedAttributionFlags = resolveProxiedAttributionFlags(
-                        attributionSource, next, fromDatasource, startDataDelivery, selfAccess);
+                                startDataDelivery, selfAccess, isLinkTrusted)
+                        : ATTRIBUTION_FLAGS_NONE;
+                final int proxiedAttributionFlags = hasChain ? resolveProxiedAttributionFlags(
+                        attributionSource, next, fromDatasource, startDataDelivery, selfAccess,
+                        isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
 
                 final int opMode = performOpTransaction(context, op, current, message,
                         forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
@@ -5829,48 +5843,52 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         private static @AttributionFlags int resolveProxyAttributionFlags(
                 @NonNull AttributionSource attributionChain,
                 @NonNull AttributionSource current, boolean fromDatasource,
-                boolean startDataDelivery, boolean selfAccess) {
+                boolean startDataDelivery, boolean selfAccess, boolean isTrusted) {
             return resolveAttributionFlags(attributionChain, current, fromDatasource,
-                    startDataDelivery, selfAccess, /*flagsForProxy*/ true);
+                    startDataDelivery, selfAccess, isTrusted, /*flagsForProxy*/ true);
         }
 
         private static @AttributionFlags int resolveProxiedAttributionFlags(
                 @NonNull AttributionSource attributionChain,
                 @NonNull AttributionSource current, boolean fromDatasource,
-                boolean startDataDelivery, boolean selfAccess) {
+                boolean startDataDelivery, boolean selfAccess, boolean isTrusted) {
             return resolveAttributionFlags(attributionChain, current, fromDatasource,
-                    startDataDelivery, selfAccess, /*flagsForProxy*/ false);
+                    startDataDelivery, selfAccess, isTrusted, /*flagsForProxy*/ false);
         }
 
         private static @AttributionFlags int resolveAttributionFlags(
                 @NonNull AttributionSource attributionChain,
                 @NonNull AttributionSource current, boolean fromDatasource,
-                boolean startDataDelivery, boolean selfAccess, boolean flagsForProxy) {
+                boolean startDataDelivery, boolean selfAccess, boolean isTrusted,
+                boolean flagsForProxy) {
             if (current == null || !startDataDelivery) {
                 return AppOpsManager.ATTRIBUTION_FLAGS_NONE;
             }
+            int trustedFlag = isTrusted
+                    ? AppOpsManager.ATTRIBUTION_FLAG_TRUSTED : AppOpsManager.ATTRIBUTION_FLAGS_NONE;
             if (flagsForProxy) {
                 if (selfAccess) {
-                    return AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
                 } else if (!fromDatasource && current.equals(attributionChain)) {
-                    return AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
                 }
             } else {
                 if (selfAccess) {
-                    return AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
                 } else if (fromDatasource && current.equals(attributionChain.getNext())) {
-                    return AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
                 } else if (current.getNext() == null) {
-                    return AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
                 }
             }
             if (fromDatasource && current.equals(attributionChain)) {
                 return AppOpsManager.ATTRIBUTION_FLAGS_NONE;
             }
-            return AppOpsManager.ATTRIBUTION_FLAG_INTERMEDIARY;
+            return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_INTERMEDIARY;
         }
 
         private static int checkOp(@NonNull Context context, @NonNull int op,
+                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
                 @NonNull AttributionSource attributionSource, @Nullable String message,
                 boolean forDataDelivery, boolean startDataDelivery) {
             if (op < 0 || attributionSource.getPackageName() == null) {
@@ -5879,9 +5897,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             final int attributionChainId =
                     getAttributionChainId(startDataDelivery, attributionSource);
+            final boolean hasChain = attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
 
             AttributionSource current = attributionSource;
             AttributionSource next = null;
+
+            // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
+            // every attributionSource in the chain is registered with the system.
+            final boolean isChainStartTrusted = !hasChain || checkPermission(context,
+                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current.getUid(),
+                    current.getRenouncedPermissions());
 
             while (true) {
                 final boolean skipCurrentChecks = (next != null);
@@ -5895,14 +5920,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 // The access is for oneself if this is the single attribution source in the chain.
                 final boolean selfAccess = (next == null);
+                final boolean isLinkTrusted = isChainStartTrusted
+                        && (current.isTrusted(context) || current.equals(attributionSource))
+                        && (next == null || next.isTrusted(context));
 
-                final int proxyAttributionFlags = (!skipCurrentChecks)
+                final int proxyAttributionFlags = (!skipCurrentChecks && hasChain)
                         ? resolveProxyAttributionFlags(attributionSource, current,
-                                /*fromDatasource*/ false, startDataDelivery, selfAccess)
-                        : AppOpsManager.ATTRIBUTION_FLAGS_NONE;
-                final int proxiedAttributionFlags = resolveProxiedAttributionFlags(
+                                /*fromDatasource*/ false, startDataDelivery, selfAccess,
+                        isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
+                final int proxiedAttributionFlags = hasChain ? resolveProxiedAttributionFlags(
                         attributionSource, next, /*fromDatasource*/ false, startDataDelivery,
-                        selfAccess);
+                        selfAccess, isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
 
                 final int opMode = performOpTransaction(context, op, current, message,
                         forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,

@@ -261,7 +261,7 @@ public class AuthService extends SystemService {
         private void authenticateFastFail(String message, IBiometricServiceReceiver receiver) {
             // notify caller in cases where authentication is aborted before calling into
             // IBiometricService without raising an exception
-            Slog.e(TAG, message);
+            Slog.e(TAG, "authenticateFastFail: " + message);
             try {
                 receiver.onError(TYPE_NONE, BIOMETRIC_ERROR_CANCELED, 0 /*vendorCode */);
             } catch (RemoteException e) {

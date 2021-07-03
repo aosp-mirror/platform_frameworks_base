@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -823,8 +824,10 @@ public class RecentsAnimationController implements DeathRecipient {
         if (mCanceled) {
             return;
         }
-        cancelAnimation(mWillFinishToHome ? REORDER_MOVE_TO_TOP : REORDER_KEEP_IN_PLACE,
-                true /* screenshot */, "cancelAnimationForHomeStart");
+        final int reorderMode = mTargetActivityType == ACTIVITY_TYPE_HOME && mWillFinishToHome
+                ? REORDER_MOVE_TO_TOP
+                : REORDER_KEEP_IN_PLACE;
+        cancelAnimation(reorderMode, true /* screenshot */, "cancelAnimationForHomeStart");
     }
 
     /**

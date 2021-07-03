@@ -120,9 +120,15 @@ public abstract class RecognitionService extends Service {
                 }
                 mCurrentCallback = new Callback(listener, attributionSource);
 
-                RecognitionService.this.onStartListening(intent, mCurrentCallback);
-                if (!checkPermissionAndStartDataDelivery()) {
+                boolean preflightPermissionCheckPassed =
+                        checkPermissionForPreflight();
+                if (preflightPermissionCheckPassed) {
+                    RecognitionService.this.onStartListening(intent, mCurrentCallback);
+                }
+                if (!preflightPermissionCheckPassed || !checkPermissionAndStartDataDelivery()) {
                     listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
+                    RecognitionService.this.onCancel(mCurrentCallback);
+                    dispatchClearCallback();
                     Log.i(TAG, "caller doesn't have permission:"
                             + Manifest.permission.RECORD_AUDIO);
                 }
@@ -259,6 +265,7 @@ public abstract class RecognitionService extends Service {
     @Override
     public void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy");
+        finishDataDelivery();
         mCurrentCallback = null;
         mBinder.clearReference();
         super.onDestroy();
@@ -457,6 +464,12 @@ public abstract class RecognitionService extends Service {
             mStartedDataDelivery = true;
         }
         return mStartedDataDelivery;
+    }
+
+    private boolean checkPermissionForPreflight() {
+        return PermissionChecker.checkPermissionForPreflight(RecognitionService.this,
+                Manifest.permission.RECORD_AUDIO, mCurrentCallback.getAttributionContextForCaller()
+                        .getAttributionSource()) == PermissionChecker.PERMISSION_GRANTED;
     }
 
     void finishDataDelivery() {

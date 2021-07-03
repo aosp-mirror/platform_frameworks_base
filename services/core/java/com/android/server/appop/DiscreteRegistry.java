@@ -19,6 +19,7 @@ package com.android.server.appop;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAG_TRUSTED;
 import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
@@ -359,7 +360,8 @@ final class DiscreteRegistry {
                         for (int opEventNum = 0; opEventNum < nOpEvents; opEventNum++) {
                             DiscreteOpEvent event = opEvents.get(opEventNum);
                             if (event == null
-                                    || event.mAttributionChainId == ATTRIBUTION_CHAIN_ID_NONE) {
+                                    || event.mAttributionChainId == ATTRIBUTION_CHAIN_ID_NONE
+                                    || (event.mAttributionFlags & ATTRIBUTION_FLAG_TRUSTED) == 0) {
                                 continue;
                             }
 
