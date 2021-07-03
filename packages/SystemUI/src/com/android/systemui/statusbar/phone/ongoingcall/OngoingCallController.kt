@@ -172,10 +172,16 @@ class OngoingCallController @Inject constructor(
             currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
 
         if (currentChipView != null && timeView != null && backgroundView != null) {
-            timeView.base = currentCallNotificationInfo.callStartTime -
-                    System.currentTimeMillis() +
-                    systemClock.elapsedRealtime()
-            timeView.start()
+            if (currentCallNotificationInfo.hasValidStartTime()) {
+                timeView.setShouldHideText(false)
+                timeView.base = currentCallNotificationInfo.callStartTime -
+                        systemClock.currentTimeMillis() +
+                        systemClock.elapsedRealtime()
+                timeView.start()
+            } else {
+                timeView.setShouldHideText(true)
+                timeView.stop()
+            }
 
             currentCallNotificationInfo.intent?.let { intent ->
                 currentChipView.setOnClickListener {
@@ -260,7 +266,9 @@ class OngoingCallController @Inject constructor(
     @VisibleForTesting
     fun tearDownChipView() = chipView?.getTimeView()?.stop()
 
-    private fun View.getTimeView(): Chronometer? = this.findViewById(R.id.ongoing_call_chip_time)
+    private fun View.getTimeView(): OngoingCallChronometer? {
+        return this.findViewById(R.id.ongoing_call_chip_time)
+    }
 
     private data class CallNotificationInfo(
         val key: String,
@@ -269,7 +277,13 @@ class OngoingCallController @Inject constructor(
         val uid: Int,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
         val isOngoing: Boolean
-    )
+    ) {
+        /**
+         * Returns true if the notification information has a valid call start time.
+         * See b/192379214.
+         */
+        fun hasValidStartTime(): Boolean = callStartTime > 0
+    }
 }
 
 private fun isCallNotification(entry: NotificationEntry): Boolean {

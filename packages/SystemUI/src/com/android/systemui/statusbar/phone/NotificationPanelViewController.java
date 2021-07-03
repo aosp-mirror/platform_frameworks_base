@@ -590,6 +590,7 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private ValueAnimator mQsClippingAnimation = null;
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
+    private final Region mQsInterceptRegion = new Region();
 
     /**
      * The alpha of the views which only show on the keyguard but not in shade / shade locked
@@ -1333,8 +1334,7 @@ public class NotificationPanelViewController extends PanelViewController {
                         : mNotificationShelfController.getIntrinsicHeight() + notificationPadding;
 
         float lockIconPadding = 0;
-        if (mLockIconViewController.getTop() != 0
-                && (mUpdateMonitor.isUdfpsEnrolled() || mUpdateMonitor.isFaceEnrolled())) {
+        if (mLockIconViewController.getTop() != 0) {
             lockIconPadding = mStatusBar.getDisplayHeight() - mLockIconViewController.getTop();
         }
 
@@ -2670,10 +2670,16 @@ public class NotificationPanelViewController extends PanelViewController {
             return false;
         }
         View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
-        final boolean
-                onHeader =
-                x >= mQsFrame.getX() && x <= mQsFrame.getX() + mQsFrame.getWidth()
-                        && y >= header.getTop() && y <= header.getBottom();
+
+        mQsInterceptRegion.set(
+                /* left= */ (int) mQsFrame.getX(),
+                /* top= */ header.getTop(),
+                /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
+                /* bottom= */ header.getBottom());
+        // Also allow QS to intercept if the touch is near the notch.
+        mStatusBarTouchableRegionManager.updateRegionForNotch(mQsInterceptRegion);
+        final boolean onHeader = mQsInterceptRegion.contains((int) x, (int) y);
+
         if (mQsExpanded) {
             return onHeader || (yDiff < 0 && isInQsArea(x, y));
         } else {
@@ -3894,6 +3900,10 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
                 }
 
+                if (mLockIconViewController.onTouchEvent(event)) {
+                    return true;
+                }
+
                 handled |= super.onTouch(v, event);
                 return !mDozing || mPulsing || handled;
             }
@@ -4392,6 +4402,8 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     public void showAodUi() {
         setDozing(true /* dozing */, false /* animate */, null);
+        mStatusBarStateController.setUpcomingState(KEYGUARD);
+        mEntryManager.updateNotifications("showAodUi");
         mStatusBarStateListener.onStateChanged(KEYGUARD);
         mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
         setExpandedFraction(1f);

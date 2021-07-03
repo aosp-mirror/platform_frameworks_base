@@ -180,17 +180,25 @@ public class UdfpsDialogMeasureAdapter {
                 iconFrame.measure(
                         MeasureSpec.makeMeasureSpec(remeasuredWidth, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.EXACTLY));
-            } else if (child.getId() == R.id.space_above_icon || child.getId() == R.id.button_bar) {
-                // Adjust the width of the top spacer and button bar while preserving their heights.
+            } else if (child.getId() == R.id.space_above_icon) {
+                // Adjust the width and height of the top spacer if necessary.
+                final int newTopSpacerHeight = child.getLayoutParams().height
+                        - Math.min(bottomSpacerHeight, 0);
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(remeasuredWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(newTopSpacerHeight, MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.button_bar) {
+                // Adjust the width of the button bar while preserving its height.
                 child.measure(
                         MeasureSpec.makeMeasureSpec(remeasuredWidth, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(
                                 child.getLayoutParams().height, MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.space_below_icon) {
                 // Adjust the bottom spacer height to align the fingerprint icon with the sensor.
+                final int newBottomSpacerHeight = Math.max(bottomSpacerHeight, 0);
                 child.measure(
                         MeasureSpec.makeMeasureSpec(remeasuredWidth, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(bottomSpacerHeight, MeasureSpec.EXACTLY));
+                        MeasureSpec.makeMeasureSpec(newBottomSpacerHeight, MeasureSpec.EXACTLY));
             } else {
                 // Use the remeasured width for all other child views.
                 child.measure(
@@ -208,7 +216,7 @@ public class UdfpsDialogMeasureAdapter {
 
     private int getViewHeightPx(@IdRes int viewId) {
         final View view = mView.findViewById(viewId);
-        return view != null ? view.getMeasuredHeight() : 0;
+        return view != null && view.getVisibility() != View.GONE ? view.getMeasuredHeight() : 0;
     }
 
     private int getDialogMarginPx() {

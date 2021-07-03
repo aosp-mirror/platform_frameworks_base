@@ -153,6 +153,37 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 createCallNotifEntry(ongoingCallStyle, nullContentIntent = true))
     }
 
+    /** Regression test for b/192379214. */
+    @Test
+    fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(0)
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isEqualTo(0)
+    }
+
+    @Test
+    fun onEntryUpdated_notificationWhenIsValid_timeShown() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(clock.currentTimeMillis())
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isGreaterThan(0)
+    }
+
     /**
      * If a call notification is never added before #onEntryRemoved is called, then the listener
      * should never be notified.

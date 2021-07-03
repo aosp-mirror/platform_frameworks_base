@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -153,6 +154,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private BubbleDataRepository mDataRepository;
     @Mock
     private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Mock
+    private AuthController mAuthController;
 
     private SysUiState mSysUiState = new SysUiState();
 
@@ -222,7 +225,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

@@ -683,12 +683,12 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testCancelForStartHome() throws Exception {
         mWm.setRecentsAnimationController(mController);
+        final ActivityRecord homeActivity = createHomeActivity();
         final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
         activity.addWindow(win1);
 
-        RecentsAnimationController.TaskAnimationAdapter adapter = mController.addAnimation(
-                activity.getTask(), false /* isRecentTaskInvisible */);
+        initializeRecentsAnimationController(mController, homeActivity);
         mController.setWillFinishToHome(true);
 
         // Verify cancel is called with a snapshot and that we've created an overlay

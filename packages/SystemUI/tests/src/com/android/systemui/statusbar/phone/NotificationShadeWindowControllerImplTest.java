@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -73,6 +74,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private DumpManager mDumpManager;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private AuthController mAuthController;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
@@ -87,7 +89,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 

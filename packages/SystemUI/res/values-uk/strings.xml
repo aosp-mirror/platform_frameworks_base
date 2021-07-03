@@ -675,7 +675,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Швидше й безпечніше сплачуйте за покупки за допомогою телефона"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показати все"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Розблокувати, щоб сплатити"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не налаштовано"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
     <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
     <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Розблокувати, щоб використовувати"</string>
@@ -1159,8 +1160,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Переглядайте останні повідомлення, пропущені виклики й оновлення статусу"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Розмова"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Призупинено функцією \"Не турбувати\""</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> надсилає повідомлення"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> надсилає зображення"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не вдалось отримати дані лічильника акумулятора"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Натисніть, щоб дізнатися більше"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Немає будильників"</string>

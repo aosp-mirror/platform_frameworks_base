@@ -18,6 +18,7 @@
 
 #include "DamageAccumulator.h"
 #include "Debug.h"
+#include "Properties.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "private/hwui/WebViewFunctor.h"
@@ -473,6 +474,9 @@ void RenderNode::decParentRefCount(TreeObserver& observer, TreeInfo* info) {
 }
 
 void RenderNode::onRemovedFromTree(TreeInfo* info) {
+    if (Properties::enableWebViewOverlays && mDisplayList) {
+        mDisplayList.onRemovedFromTree();
+    }
     destroyHardwareResources(info);
 }
 

@@ -87,6 +87,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
      * operation still needs to wait for the HAL to send ERROR_CANCELED.
      */
     public void onUserCanceled() {
+        Slog.d(TAG, "onUserCanceled");
+
         // Send USER_CANCELED, but do not finish. Wait for the HAL to respond with ERROR_CANCELED,
         // which then finishes the AcquisitionClient's lifecycle.
         onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED, 0 /* vendorCode */,
@@ -95,6 +97,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     }
 
     protected void onErrorInternal(int errorCode, int vendorCode, boolean finish) {
+        Slog.d(TAG, "onErrorInternal code: " + errorCode + ", finish: " + finish);
+
         // In some cases, the framework will send an error to the caller before a true terminal
         // case (success, failure, or error) is received from the HAL (e.g. versions of fingerprint
         // that do not handle lockout under the HAL. In these cases, ensure that the framework only
@@ -133,6 +137,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     @Override
     public void cancelWithoutStarting(@NonNull Callback callback) {
+        Slog.d(TAG, "cancelWithoutStarting: " + this);
+
         final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
         try {
             if (getListener() != null) {
