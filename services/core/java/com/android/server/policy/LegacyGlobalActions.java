@@ -135,7 +135,10 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-        context.registerReceiver(mBroadcastReceiver, filter);
+        // By default CLOSE_SYSTEM_DIALOGS broadcast is sent only for current user, which is user
+        // 10 on devices with headless system user enabled.
+        // In order to receive the broadcast, register the broadcast receiver with UserHandle.ALL.
+        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         mHasTelephony =
                 context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);

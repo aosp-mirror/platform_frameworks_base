@@ -13,6 +13,10 @@ android_library {
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
 
+    static_libs: [
+        "androidx.annotation_annotation",
+    ],
+
     sdk_version: "system_current",
     min_sdk_version: "21",
 
@@ -20,5 +24,6 @@ android_library {
 
         "//apex_available:platform",
         "com.android.permission",
+        "com.android.cellbroadcast",
     ],
 }

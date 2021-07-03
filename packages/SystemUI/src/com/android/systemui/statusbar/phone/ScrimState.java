@@ -197,7 +197,7 @@ public enum ScrimState {
         }
 
         @Override
-        public float getBehindAlpha() {
+        public float getMaxLightRevealScrimAlpha() {
             return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
         }
 
@@ -220,18 +220,11 @@ public enum ScrimState {
             mBlankScreen = mDisplayRequiresBlanking;
             mAnimationDuration = mWakeLockScreenSensorActive
                     ? ScrimController.ANIMATION_DURATION_LONG : ScrimController.ANIMATION_DURATION;
-
-            // Wake sensor will show the wallpaper, let's fade from black. Otherwise it will
-            // feel like the screen is flashing if the wallpaper is light.
-            if (mWakeLockScreenSensorActive && previousState == AOD) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
-            }
         }
-
         @Override
-        public float getBehindAlpha() {
+        public float getMaxLightRevealScrimAlpha() {
             return mWakeLockScreenSensorActive ? ScrimController.WAKE_SENSOR_SCRIM_ALPHA
-                    : AOD.getBehindAlpha();
+                : AOD.getMaxLightRevealScrimAlpha();
         }
     },
 
@@ -349,6 +342,10 @@ public enum ScrimState {
 
     public float getBehindAlpha() {
         return mBehindAlpha;
+    }
+
+    public float getMaxLightRevealScrimAlpha() {
+        return 1f;
     }
 
     public float getNotifAlpha() {

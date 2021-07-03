@@ -341,11 +341,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             }
         }
 
-        try {
-            flush(FLUSH_REASON_SESSION_FINISHED);
-        } finally {
-            onDestroy();
-        }
+        onDestroy();
     }
 
     abstract void onDestroy();

@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -81,6 +82,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -152,6 +154,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private BubbleDataRepository mDataRepository;
     @Mock
     private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Mock
+    private AuthController mAuthController;
 
     private SysUiState mSysUiState = new SysUiState();
 
@@ -197,6 +201,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private ShellTaskOrganizer mShellTaskOrganizer;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private TestableBubblePositioner mPositioner;
 
@@ -218,7 +224,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController);
+                mColorExtractor, mDumpManager, mKeyguardStateController,
+                mUnlockedScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

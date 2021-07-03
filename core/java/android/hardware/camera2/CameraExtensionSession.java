@@ -195,8 +195,9 @@ public abstract class CameraExtensionSession implements AutoCloseable {
          * This method is called if the session cannot be configured as requested.
          *
          * <p>This can happen if the set of requested outputs contains unsupported sizes,
-         * too many outputs are requested at once or the camera device encounters an
-         * unrecoverable error during configuration.</p>
+         * too many outputs are requested at once or when trying to initialize multiple
+         * concurrent extension sessions from two (or more) separate camera devices
+         * or the camera device encounters an unrecoverable error during configuration.</p>
          *
          * <p>The session is considered to be closed, and all methods called on it after this
          * callback is invoked will throw an IllegalStateException.</p>

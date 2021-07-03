@@ -1371,8 +1371,12 @@ public final class ViewRootImpl implements ViewParent,
         HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
                                                                  nativeSurfaceControlObj,
                                                                  frameNr) -> {
-            Transaction t = new Transaction(nativeTransactionObj);
-            mergeWithNextTransaction(t, frameNr);
+            if (mBlastBufferQueue == null) {
+                return false;
+            } else {
+                mBlastBufferQueue.mergeWithNextTransaction(nativeTransactionObj, frameNr);
+                return true;
+            }
         };
         mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
     }
@@ -1438,8 +1442,10 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
-                    addPrepareSurfaceControlForWebviewCallback();
-                    addASurfaceTransactionCallback();
+                    if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                        addPrepareSurfaceControlForWebviewCallback();
+                        addASurfaceTransactionCallback();
+                    }
                     mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 }
             }
@@ -5290,7 +5296,16 @@ public final class ViewRootImpl implements ViewParent,
                     // b) When loosing control, controller can restore server state by taking last
                     // dispatched state as truth.
                     mInsetsController.onStateChanged((InsetsState) args.arg1);
-                    mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
+                    InsetsSourceControl[] controls = (InsetsSourceControl[]) args.arg2;
+                    if (mAdded) {
+                        mInsetsController.onControlsChanged(controls);
+                    } else if (controls != null) {
+                        for (InsetsSourceControl control : controls) {
+                            if (control != null) {
+                                control.release(SurfaceControl::release);
+                            }
+                        }
+                    }
                     args.recycle();
                     break;
                 }
@@ -7764,8 +7779,10 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
-                addPrepareSurfaceControlForWebviewCallback();
-                addASurfaceTransactionCallback();
+                if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                    addPrepareSurfaceControlForWebviewCallback();
+                    addASurfaceTransactionCallback();
+                }
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
         } else {
@@ -8135,6 +8152,10 @@ public final class ViewRootImpl implements ViewParent,
                     destroySurface();
                 }
             }
+
+            // If our window is removed, we might not get notified about losing control.
+            // Invoking this can release the leashes as soon as possible instead of relying on GC.
+            mInsetsController.onControlsChanged(null);
 
             mAdded = false;
         }
@@ -10381,5 +10402,9 @@ public final class ViewRootImpl implements ViewParent,
             mergeWithNextTransaction(t, frame);
         });
         return true;
+    }
+
+    int getSurfaceTransformHint() {
+        return mSurfaceControl.getTransformHint();
     }
 }

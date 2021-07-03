@@ -77,6 +77,10 @@
                 <xs:annotation name="final"/>
             </xs:element>
             <xs:element name="timing" type="hbmTiming" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="refreshRateRange" name="refreshRate" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:all>
         <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
     </xs:complexType>

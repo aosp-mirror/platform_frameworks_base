@@ -56,6 +56,7 @@ import javax.inject.Inject;
 public class ScrollCaptureClient {
     private static final int TILE_SIZE_PX_MAX = 4 * (1024 * 1024);
     private static final int TILES_PER_PAGE = 2; // increase once b/174571735 is addressed
+    private static final int MAX_TILES = 30;
 
     @VisibleForTesting
     static final int MATCH_ANY_TASK = ActivityTaskManager.INVALID_TASK_ID;
@@ -83,11 +84,12 @@ public class ScrollCaptureClient {
         int getMaxTiles();
 
         /**
-         * @return the maximum combined capture height for this session, in pixels.
+         * Target pixel height for acquisition this session. Session may yield more or less data
+         * than this, but acquiring this height is considered sufficient for completion.
+         *
+         * @return target height in pixels.
          */
-        default int getMaxHeight() {
-            return getMaxTiles() * getTileHeight();
-        }
+        int getTargetHeight();
 
         /**
          * @return the height of each image tile
@@ -234,11 +236,11 @@ public class ScrollCaptureClient {
         private final int mTileWidth;
         private Rect mRequestRect;
         private boolean mStarted;
+        private final int mTargetHeight;
 
         private ICancellationSignal mCancellationSignal;
         private final Rect mWindowBounds;
         private final Rect mBoundsInWindow;
-        private final int mMaxTiles;
 
         private Completer<Session> mStartCompleter;
         private Completer<CaptureResult> mTileRequestCompleter;
@@ -256,7 +258,7 @@ public class ScrollCaptureClient {
 
             mTileWidth = mBoundsInWindow.width();
             mTileHeight = pxPerTile / mBoundsInWindow.width();
-            mMaxTiles = (int) Math.ceil(maxPages * TILES_PER_PAGE);
+            mTargetHeight = (int) (mBoundsInWindow.height() * maxPages);
 
             if (DEBUG_SCROLL) {
                 Log.d(TAG, "boundsInWindow: " + mBoundsInWindow);
@@ -285,7 +287,7 @@ public class ScrollCaptureClient {
 
         private void start(Completer<Session> completer) {
             mReader = ImageReader.newInstance(mTileWidth, mTileHeight, PixelFormat.RGBA_8888,
-                    mMaxTiles, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+                    MAX_TILES, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
             mStartCompleter = completer;
             try {
                 mCancellationSignal = mConnection.startCapture(mReader.getSurface(), this);
@@ -410,8 +412,13 @@ public class ScrollCaptureClient {
         }
 
         @Override
+        public int getTargetHeight() {
+            return mTargetHeight;
+        }
+
+        @Override
         public int getMaxTiles() {
-            return mMaxTiles;
+            return MAX_TILES;
         }
     }
 }

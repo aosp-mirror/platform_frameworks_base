@@ -323,6 +323,8 @@ public class DeviceIdleControllerTest {
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
         doNothing().when(mWakeLock).acquire();
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), anyString(), any(), any());
+        doNothing().when(mAlarmManager)
+                .setWindow(anyInt(), anyLong(), anyLong(), anyString(), any(), any());
         doReturn(mock(Sensor.class)).when(mSensorManager)
                 .getDefaultSensor(eq(Sensor.TYPE_SIGNIFICANT_MOTION), eq(true));
         doReturn(true).when(mSensorManager).registerListener(any(), any(), anyInt());
@@ -1043,24 +1045,28 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
-                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT));
+                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT),
+                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX));
 
         // Should just alternate between IDLE and IDLE_MAINTENANCE now.
 
         mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
-                longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET));
+                longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET),
+                longThat(l -> l == mConstants.FLEX_TIME_SHORT));
 
         mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
-                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT));
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT),
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX));
 
         mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
-                longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET));
+                longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET),
+                longThat(l -> l == mConstants.FLEX_TIME_SHORT));
 
         // Test that motion doesn't reset the idle timeout.
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
@@ -1068,7 +1074,8 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
-                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT));
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT),
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX));
     }
 
     ///////////////// EXIT conditions ///////////////////
@@ -1824,9 +1831,9 @@ public class DeviceIdleControllerTest {
                 .forClass(AlarmManager.OnAlarmListener.class);
         final ArgumentCaptor<AlarmManager.OnAlarmListener> motionRegistrationAlarmListener =
                 ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
-        doNothing().when(mAlarmManager).set(anyInt(), anyLong(), eq("DeviceIdleController.motion"),
-                motionAlarmListener.capture(), any());
-        doNothing().when(mAlarmManager).set(anyInt(), anyLong(),
+        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
+                eq("DeviceIdleController.motion"), motionAlarmListener.capture(), any());
+        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
                 eq("DeviceIdleController.motion_registration"),
                 motionRegistrationAlarmListener.capture(), any());
 
@@ -1900,9 +1907,9 @@ public class DeviceIdleControllerTest {
         mInjector.nowElapsed += mConstants.QUICK_DOZE_DELAY_TIMEOUT;
         final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListener = ArgumentCaptor
                 .forClass(AlarmManager.OnAlarmListener.class);
-        doNothing().when(mAlarmManager)
-                .set(anyInt(), anyLong(), eq("DeviceIdleController.motion"), any(), any());
-        doNothing().when(mAlarmManager).set(anyInt(), anyLong(),
+        doNothing().when(mAlarmManager).setWindow(
+                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"), any(), any());
+        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
                 eq("DeviceIdleController.motion_registration"),
                 alarmListener.capture(), any());
         ArgumentCaptor<TriggerEventListener> listenerCaptor =
@@ -1944,9 +1951,9 @@ public class DeviceIdleControllerTest {
         mInjector.nowElapsed += mConstants.QUICK_DOZE_DELAY_TIMEOUT;
         final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListener = ArgumentCaptor
                 .forClass(AlarmManager.OnAlarmListener.class);
-        doNothing().when(mAlarmManager)
-                .set(anyInt(), anyLong(), eq("DeviceIdleController.motion"), any(), any());
-        doNothing().when(mAlarmManager).set(anyInt(), anyLong(),
+        doNothing().when(mAlarmManager).setWindow(
+                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"), any(), any());
+        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
                 eq("DeviceIdleController.motion_registration"),
                 alarmListener.capture(), any());
         ArgumentCaptor<SensorEventListener> listenerCaptor =

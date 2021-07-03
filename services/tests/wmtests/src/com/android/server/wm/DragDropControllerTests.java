@@ -22,6 +22,7 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
+import static android.view.DragEvent.ACTION_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
@@ -31,7 +32,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -267,10 +270,30 @@ public class DragDropControllerTests extends WindowTestsBase {
                     assertTrue(globalInterceptWindowDragEvents.get(0).getAction()
                             == ACTION_DRAG_STARTED);
 
+                    // Verify that only the global intercept window receives the clip data with the
+                    // resolved activity info for the drag
+                    assertNull(localWindowDragEvents.get(0).getClipData());
+                    assertTrue(globalInterceptWindowDragEvents.get(0).getClipData()
+                            .willParcelWithActivityInfo());
+
                     mTarget.reportDropWindow(globalInterceptWindow.mInputChannelToken, 0, 0);
                     mTarget.handleMotionEvent(false, 0, 0);
                     mToken = globalInterceptWindow.mClient.asBinder();
+
+                    // Verify the drop event is only sent for the global intercept window
+                    assertTrue(nonLocalWindowDragEvents.isEmpty());
+                    assertTrue(last(localWindowDragEvents).getAction() != ACTION_DROP);
+                    assertTrue(last(globalInterceptWindowDragEvents).getAction() == ACTION_DROP);
+
+                    // Verify that item extras were not sent with the drop event
+                    assertNull(last(localWindowDragEvents).getClipData());
+                    assertFalse(last(globalInterceptWindowDragEvents).getClipData()
+                            .willParcelWithActivityInfo());
                 });
+    }
+
+    private DragEvent last(ArrayList<DragEvent> list) {
+        return list.get(list.size() - 1);
     }
 
     @Test

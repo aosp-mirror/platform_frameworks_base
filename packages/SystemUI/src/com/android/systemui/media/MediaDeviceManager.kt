@@ -67,7 +67,8 @@ class MediaDeviceManager @Inject constructor(
         key: String,
         oldKey: String?,
         data: MediaData,
-        immediately: Boolean
+        immediately: Boolean,
+        isSsReactivated: Boolean
     ) {
         if (oldKey != null && oldKey != key) {
             val oldEntry = entries.remove(oldKey)

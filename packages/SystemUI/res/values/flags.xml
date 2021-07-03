@@ -34,7 +34,14 @@
     <bool name="flag_conversations">false</bool>
 
     <!-- The new animations to/from lockscreen and AOD! -->
-    <bool name="flag_lockscreen_animations">false</bool>
+    <bool name="flag_lockscreen_animations">true</bool>
+
+    <!-- The new swipe to unlock animation, which shows the app/launcher behind the keyguard during
+    the swipe. -->
+    <bool name="flag_new_unlock_swipe_animation">true</bool>
+
+    <!-- The shared-element transition between lockscreen smartspace and launcher smartspace. -->
+    <bool name="flag_smartspace_shared_element_transition">false</bool>
 
     <bool name="flag_pm_lite">true</bool>
 
@@ -45,4 +52,6 @@
     <bool name="flag_smartspace">false</bool>
 
     <bool name="flag_smartspace_deduping">true</bool>
+
+    <bool name="flag_combined_status_bar_signal_icons">false</bool>
 </resources>

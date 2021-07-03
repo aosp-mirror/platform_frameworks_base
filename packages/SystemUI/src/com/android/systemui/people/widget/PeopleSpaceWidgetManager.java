@@ -22,12 +22,15 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE;
 
 import static com.android.systemui.people.NotificationHelper.getContactUri;
 import static com.android.systemui.people.NotificationHelper.getHighestPriorityNotification;
 import static com.android.systemui.people.NotificationHelper.shouldFilterOut;
 import static com.android.systemui.people.NotificationHelper.shouldMatchNotificationByUri;
+import static com.android.systemui.people.PeopleBackupFollowUpJob.SHARED_FOLLOW_UP;
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
@@ -37,6 +40,7 @@ import static com.android.systemui.people.PeopleSpaceUtils.augmentTileFromNotifi
 import static com.android.systemui.people.PeopleSpaceUtils.getMessagesCount;
 import static com.android.systemui.people.PeopleSpaceUtils.getNotificationsByUri;
 import static com.android.systemui.people.PeopleSpaceUtils.removeNotificationFields;
+import static com.android.systemui.people.widget.PeopleBackupHelper.getEntryType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,6 +49,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.backup.BackupManager;
+import android.app.job.JobScheduler;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
@@ -62,6 +68,7 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -82,8 +89,10 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.people.NotificationHelper;
+import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.people.PeopleTileViewHelper;
+import com.android.systemui.people.SharedPreferencesHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -91,11 +100,13 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -124,6 +135,7 @@ public class PeopleSpaceWidgetManager {
     private Optional<Bubbles> mBubblesOptional;
     private UserManager mUserManager;
     private PeopleSpaceWidgetManager mManager;
+    private BackupManager mBackupManager;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     private NotificationManager mNotificationManager;
     private BroadcastDispatcher mBroadcastDispatcher;
@@ -162,6 +174,7 @@ public class PeopleSpaceWidgetManager {
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mBubblesOptional = bubblesOptional;
         mUserManager = userManager;
+        mBackupManager = new BackupManager(context);
         mNotificationManager = notificationManager;
         mManager = this;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -172,6 +185,7 @@ public class PeopleSpaceWidgetManager {
     public void init() {
         synchronized (mLock) {
             if (!mRegisteredReceivers) {
+                if (DEBUG) Log.d(TAG, "Register receivers");
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
                 filter.addAction(ACTION_BOOT_COMPLETED);
@@ -185,6 +199,15 @@ public class PeopleSpaceWidgetManager {
                 mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
 
                         null /* executor */, UserHandle.ALL);
+                IntentFilter perAppFilter = new IntentFilter(ACTION_PACKAGE_REMOVED);
+                perAppFilter.addAction(ACTION_PACKAGE_ADDED);
+                perAppFilter.addDataScheme("package");
+                // BroadcastDispatcher doesn't allow data schemes.
+                mContext.registerReceiver(mBaseBroadcastReceiver, perAppFilter);
+                IntentFilter bootComplete = new IntentFilter(ACTION_BOOT_COMPLETED);
+                bootComplete.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+                // BroadcastDispatcher doesn't allow priority.
+                mContext.registerReceiver(mBaseBroadcastReceiver, bootComplete);
                 mRegisteredReceivers = true;
             }
         }
@@ -213,7 +236,7 @@ public class PeopleSpaceWidgetManager {
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager, PackageManager packageManager,
-            Optional<Bubbles> bubblesOptional, UserManager userManager,
+            Optional<Bubbles> bubblesOptional, UserManager userManager, BackupManager backupManager,
             INotificationManager iNotificationManager, NotificationManager notificationManager,
             @Background Executor executor) {
         mContext = context;
@@ -225,6 +248,7 @@ public class PeopleSpaceWidgetManager {
         mPackageManager = packageManager;
         mBubblesOptional = bubblesOptional;
         mUserManager = userManager;
+        mBackupManager = backupManager;
         mINotificationManager = iNotificationManager;
         mNotificationManager = notificationManager;
         mManager = this;
@@ -246,8 +270,6 @@ public class PeopleSpaceWidgetManager {
                 if (DEBUG) Log.d(TAG, "no widgets to update");
                 return;
             }
-
-            if (DEBUG) Log.d(TAG, "updating " + widgetIds.length + " widgets: " + widgetIds);
             synchronized (mLock) {
                 updateSingleConversationWidgets(widgetIds);
             }
@@ -263,6 +285,7 @@ public class PeopleSpaceWidgetManager {
     public void updateSingleConversationWidgets(int[] appWidgetIds) {
         Map<Integer, PeopleSpaceTile> widgetIdToTile = new HashMap<>();
         for (int appWidgetId : appWidgetIds) {
+            if (DEBUG) Log.d(TAG, "Updating widget: " + appWidgetId);
             PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
             if (tile == null) {
                 Log.e(TAG, "Matching conversation not found for shortcut ID");
@@ -282,14 +305,16 @@ public class PeopleSpaceWidgetManager {
     private void updateAppWidgetViews(int appWidgetId, PeopleSpaceTile tile, Bundle options) {
         PeopleTileKey key = getKeyFromStorageByWidgetId(appWidgetId);
         if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + " for: " + key.toString());
-        if (!key.isValid()) {
+
+        if (!PeopleTileKey.isValid(key)) {
             Log.e(TAG, "Cannot update invalid widget");
             return;
         }
-        RemoteViews views = new PeopleTileViewHelper(mContext, tile, appWidgetId,
-                options, key).getViews();
+        RemoteViews views = PeopleTileViewHelper.createRemoteViews(mContext, tile, appWidgetId,
+                options, key);
 
         // Tell the AppWidgetManager to perform an update on the current app widget.
+        if (DEBUG) Log.d(TAG, "Calling update widget for widgetId: " + appWidgetId);
         mAppWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
@@ -304,8 +329,7 @@ public class PeopleSpaceWidgetManager {
     /** Updates tile in app widget options and the current view. */
     public void updateAppWidgetOptionsAndView(int appWidgetId, PeopleSpaceTile tile) {
         if (tile == null) {
-            if (DEBUG) Log.w(TAG, "Requested to store null tile");
-            return;
+            if (DEBUG) Log.w(TAG, "Storing null tile");
         }
         synchronized (mTiles) {
             mTiles.put(appWidgetId, tile);
@@ -320,6 +344,17 @@ public class PeopleSpaceWidgetManager {
      */
     @Nullable
     public PeopleSpaceTile getTileForExistingWidget(int appWidgetId) {
+        try {
+            return getTileForExistingWidgetThrowing(appWidgetId);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
+            return null;
+        }
+    }
+
+    @Nullable
+    private PeopleSpaceTile getTileForExistingWidgetThrowing(int appWidgetId) throws
+            PackageManager.NameNotFoundException {
         // First, check if tile is cached in memory.
         PeopleSpaceTile tile;
         synchronized (mTiles) {
@@ -348,8 +383,9 @@ public class PeopleSpaceWidgetManager {
      * If a {@link PeopleTileKey} is not provided, fetch one from {@link SharedPreferences}.
      */
     @Nullable
-    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId) {
-        if (!key.isValid()) {
+    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId) throws
+            PackageManager.NameNotFoundException {
+        if (!PeopleTileKey.isValid(key)) {
             Log.e(TAG, "PeopleTileKey invalid: " + key.toString());
             return null;
         }
@@ -358,13 +394,12 @@ public class PeopleSpaceWidgetManager {
             Log.d(TAG, "System services are null");
             return null;
         }
-
         try {
             if (DEBUG) Log.d(TAG, "Retrieving Tile from storage: " + key.toString());
             ConversationChannel channel = mIPeopleManager.getConversation(
                     key.getPackageName(), key.getUserId(), key.getShortcutId());
             if (channel == null) {
-                Log.d(TAG, "Could not retrieve conversation from storage");
+                if (DEBUG) Log.d(TAG, "Could not retrieve conversation from storage");
                 return null;
             }
 
@@ -383,9 +418,9 @@ public class PeopleSpaceWidgetManager {
             }
 
             // Add current state.
-            return updateWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
+            return getTileWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not retrieve data: " + e);
             return null;
         }
     }
@@ -397,7 +432,6 @@ public class PeopleSpaceWidgetManager {
     public void updateWidgetsWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
         if (DEBUG) {
-            Log.d(TAG, "updateWidgetsWithNotificationChanged called");
             if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
                 Log.d(TAG, "Notification posted, key: " + sbn.getKey());
             } else {
@@ -413,7 +447,7 @@ public class PeopleSpaceWidgetManager {
         try {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
-            if (!key.isValid()) {
+            if (!PeopleTileKey.isValid(key)) {
                 Log.d(TAG, "Sbn doesn't contain valid PeopleTileKey: " + key.toString());
                 return;
             }
@@ -545,14 +579,14 @@ public class PeopleSpaceWidgetManager {
 
         if (DEBUG) Log.d(TAG, "Augmenting tile from notification, key: " + key.toString());
         return augmentTileFromNotification(mContext, tile, key, highestPriority, messagesCount,
-                appWidgetId);
+                appWidgetId, mBackupManager);
     }
 
     /** Returns an augmented tile for an existing widget. */
     @Nullable
     public Optional<PeopleSpaceTile> getAugmentedTileForExistingWidget(int widgetId,
             Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
-        Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
+        if (DEBUG) Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
         PeopleSpaceTile tile = getTileForExistingWidget(widgetId);
         if (tile == null) {
             if (DEBUG) {
@@ -572,7 +606,7 @@ public class PeopleSpaceWidgetManager {
 
     /** Returns stored widgets for the conversation specified. */
     public Set<String> getMatchingKeyWidgetIds(PeopleTileKey key) {
-        if (!key.isValid()) {
+        if (!PeopleTileKey.isValid(key)) {
             return new HashSet<>();
         }
         return new HashSet<>(mSharedPrefs.getStringSet(key.toString(), new HashSet<>()));
@@ -760,7 +794,7 @@ public class PeopleSpaceWidgetManager {
         // PeopleTileKey arguments.
         if (DEBUG) Log.d(TAG, "onAppWidgetOptionsChanged called for widget: " + appWidgetId);
         PeopleTileKey optionsKey = AppWidgetOptionsHelper.getPeopleTileKeyFromBundle(newOptions);
-        if (optionsKey.isValid()) {
+        if (PeopleTileKey.isValid(optionsKey)) {
             if (DEBUG) {
                 Log.d(TAG, "PeopleTileKey was present in Options, shortcutId: "
                         + optionsKey.getShortcutId());
@@ -775,7 +809,13 @@ public class PeopleSpaceWidgetManager {
     /** Adds a widget based on {@code key} mapped to {@code appWidgetId}. */
     public void addNewWidget(int appWidgetId, PeopleTileKey key) {
         if (DEBUG) Log.d(TAG, "addNewWidget called with key for appWidgetId: " + appWidgetId);
-        PeopleSpaceTile tile = getTileFromPersistentStorage(key, appWidgetId);
+        PeopleSpaceTile tile = null;
+        try {
+            tile = getTileFromPersistentStorage(key, appWidgetId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Cannot add widget since app was uninstalled");
+            return;
+        }
         if (tile == null) {
             return;
         }
@@ -786,7 +826,7 @@ public class PeopleSpaceWidgetManager {
             existingKeyIfStored = getKeyFromStorageByWidgetId(appWidgetId);
         }
         // Delete previous storage if the widget already existed and is just reconfigured.
-        if (existingKeyIfStored.isValid()) {
+        if (PeopleTileKey.isValid(existingKeyIfStored)) {
             if (DEBUG) Log.d(TAG, "Remove previous storage for widget: " + appWidgetId);
             deleteWidgets(new int[]{appWidgetId});
         } else {
@@ -798,7 +838,7 @@ public class PeopleSpaceWidgetManager {
         synchronized (mLock) {
             if (DEBUG) Log.d(TAG, "Add storage for : " + key.toString());
             PeopleSpaceUtils.setSharedPreferencesStorageForTile(mContext, key, appWidgetId,
-                    tile.getContactUri());
+                    tile.getContactUri(), mBackupManager);
         }
         if (DEBUG) Log.d(TAG, "Ensure listener is registered for widget: " + appWidgetId);
         registerConversationListenerIfNeeded(appWidgetId, key);
@@ -816,7 +856,7 @@ public class PeopleSpaceWidgetManager {
     /** Registers a conversation listener for {@code appWidgetId} if not already registered. */
     public void registerConversationListenerIfNeeded(int widgetId, PeopleTileKey key) {
         // Retrieve storage needed for registration.
-        if (!key.isValid()) {
+        if (!PeopleTileKey.isValid(key)) {
             if (DEBUG) Log.w(TAG, "Could not register listener for widget: " + widgetId);
             return;
         }
@@ -865,7 +905,7 @@ public class PeopleSpaceWidgetManager {
                         widgetSp.getString(SHORTCUT_ID, null),
                         widgetSp.getInt(USER_ID, INVALID_USER_ID),
                         widgetSp.getString(PACKAGE_NAME, null));
-                if (!key.isValid()) {
+                if (!PeopleTileKey.isValid(key)) {
                     if (DEBUG) Log.e(TAG, "Could not delete " + widgetId);
                     return;
                 }
@@ -1009,80 +1049,102 @@ public class PeopleSpaceWidgetManager {
                 Optional.empty());
 
         if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
-        return new PeopleTileViewHelper(mContext, augmentedTile, 0, options,
-                new PeopleTileKey(augmentedTile)).getViews();
+        return PeopleTileViewHelper.createRemoteViews(mContext, augmentedTile, 0, options,
+                new PeopleTileKey(augmentedTile));
     }
 
     protected final BroadcastReceiver mBaseBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (DEBUG) Log.d(TAG, "Update widgets from: " + action);
-            mBgExecutor.execute(() -> updateWidgetsOnStateChange(action));
+            if (DEBUG) Log.d(TAG, "Update widgets from: " + intent.getAction());
+            mBgExecutor.execute(() -> updateWidgetsFromBroadcastInBackground(intent.getAction()));
         }
     };
 
-    /** Updates any app widget based on the current state. */
+    /** Updates any app widget to the current state, triggered by a broadcast update. */
     @VisibleForTesting
-    void updateWidgetsOnStateChange(String entryPoint) {
+    void updateWidgetsFromBroadcastInBackground(String entryPoint) {
         int[] appWidgetIds = mAppWidgetManager.getAppWidgetIds(
                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
         if (appWidgetIds == null) {
             return;
         }
-        synchronized (mLock) {
-            for (int appWidgetId : appWidgetIds) {
-                PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
-                if (tile == null) {
-                    Log.e(TAG, "Matching conversation not found for shortcut ID");
-                } else {
-                    tile = updateWithCurrentState(tile, entryPoint);
+        for (int appWidgetId : appWidgetIds) {
+            if (DEBUG) Log.d(TAG, "Updating widget from broadcast, widget id: " +  appWidgetId);
+            PeopleSpaceTile existingTile = null;
+            PeopleSpaceTile updatedTile = null;
+            try {
+                synchronized (mLock) {
+                    existingTile = getTileForExistingWidgetThrowing(appWidgetId);
+                    if (existingTile == null) {
+                        Log.e(TAG, "Matching conversation not found for shortcut ID");
+                        continue;
+                    }
+                    updatedTile = getTileWithCurrentState(existingTile, entryPoint);
+                    updateAppWidgetOptionsAndView(appWidgetId, updatedTile);
                 }
-                updateAppWidgetOptionsAndView(appWidgetId, tile);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Delete data for uninstalled widgets.
+                Log.e(TAG, "Package no longer found for tile: " + e);
+                JobScheduler jobScheduler = mContext.getSystemService(JobScheduler.class);
+                if (jobScheduler != null
+                        && jobScheduler.getPendingJob(PeopleBackupFollowUpJob.JOB_ID) != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Device was recently restored, wait before deleting storage.");
+                    }
+                    continue;
+                }
+                synchronized (mLock) {
+                    updateAppWidgetOptionsAndView(appWidgetId, updatedTile);
+                }
+                deleteWidgets(new int[]{appWidgetId});
             }
         }
     }
 
-    /** Checks the current state of {@code tile} dependencies, updating fields as necessary. */
+    /** Checks the current state of {@code tile} dependencies, modifying fields as necessary. */
     @Nullable
-    private PeopleSpaceTile updateWithCurrentState(PeopleSpaceTile tile,
-            String entryPoint) {
+    private PeopleSpaceTile getTileWithCurrentState(PeopleSpaceTile tile,
+            String entryPoint) throws
+            PackageManager.NameNotFoundException {
         PeopleSpaceTile.Builder updatedTile = tile.toBuilder();
-        try {
-            switch (entryPoint) {
-                case NotificationManager
-                        .ACTION_INTERRUPTION_FILTER_CHANGED:
-                    updatedTile.setNotificationPolicyState(getNotificationPolicyState());
-                    break;
-                case Intent.ACTION_PACKAGES_SUSPENDED:
-                case Intent.ACTION_PACKAGES_UNSUSPENDED:
-                    updatedTile.setIsPackageSuspended(getPackageSuspended(tile));
-                    break;
-                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
-                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
-                case Intent.ACTION_USER_UNLOCKED:
-                    updatedTile.setIsUserQuieted(getUserQuieted(tile));
-                    break;
-                case Intent.ACTION_LOCALE_CHANGED:
-                    break;
-                case ACTION_BOOT_COMPLETED:
-                default:
-                    updatedTile.setIsUserQuieted(getUserQuieted(tile)).setIsPackageSuspended(
-                            getPackageSuspended(tile)).setNotificationPolicyState(
-                            getNotificationPolicyState());
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Package no longer found for tile: " + tile.toString() + e);
-            return null;
+        switch (entryPoint) {
+            case NotificationManager
+                    .ACTION_INTERRUPTION_FILTER_CHANGED:
+                updatedTile.setNotificationPolicyState(getNotificationPolicyState());
+                break;
+            case Intent.ACTION_PACKAGES_SUSPENDED:
+            case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                updatedTile.setIsPackageSuspended(getPackageSuspended(tile));
+                break;
+            case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+            case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+            case Intent.ACTION_USER_UNLOCKED:
+                updatedTile.setIsUserQuieted(getUserQuieted(tile));
+                break;
+            case Intent.ACTION_LOCALE_CHANGED:
+                break;
+            case ACTION_BOOT_COMPLETED:
+            default:
+                updatedTile.setIsUserQuieted(getUserQuieted(tile)).setIsPackageSuspended(
+                        getPackageSuspended(tile)).setNotificationPolicyState(
+                        getNotificationPolicyState());
         }
         return updatedTile.build();
     }
 
-    private boolean getPackageSuspended(PeopleSpaceTile tile) throws Exception {
+    private boolean getPackageSuspended(PeopleSpaceTile tile) throws
+            PackageManager.NameNotFoundException {
         boolean packageSuspended = !TextUtils.isEmpty(tile.getPackageName())
                 && mPackageManager.isPackageSuspended(tile.getPackageName());
         if (DEBUG) Log.d(TAG, "Package suspended: " + packageSuspended);
+        // isPackageSuspended() only throws an exception if the app has been uninstalled, and the
+        // app data has also been cleared. We want to empty the layout when the app is uninstalled
+        // regardless of app data clearing, which getApplicationInfoAsUser() handles.
+        mPackageManager.getApplicationInfoAsUser(
+                tile.getPackageName(), PackageManager.GET_META_DATA,
+                PeopleSpaceUtils.getUserId(tile));
         return packageSuspended;
     }
 
@@ -1149,5 +1211,150 @@ public class PeopleSpaceWidgetManager {
                 if (DEBUG) Log.d(TAG, "Block conversations");
                 return PeopleSpaceTile.BLOCK_CONVERSATIONS;
         }
+    }
+
+    /**
+     * Modifies widgets storage after a restore operation, since widget ids get remapped on restore.
+     * This is guaranteed to run after the PeopleBackupHelper restore operation.
+     */
+    public void remapWidgets(int[] oldWidgetIds, int[] newWidgetIds) {
+        if (DEBUG) {
+            Log.d(TAG, "Remapping widgets, old: " + Arrays.toString(oldWidgetIds) + ". new: "
+                    + Arrays.toString(newWidgetIds));
+        }
+
+        Map<String, String> widgets = new HashMap<>();
+        for (int i = 0; i < oldWidgetIds.length; i++) {
+            widgets.put(String.valueOf(oldWidgetIds[i]), String.valueOf(newWidgetIds[i]));
+        }
+
+        remapWidgetFiles(widgets);
+        remapSharedFile(widgets);
+        remapFollowupFile(widgets);
+
+        int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
+                new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
+        Bundle b = new Bundle();
+        b.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED, true);
+        for (int id : widgetIds) {
+            if (DEBUG) Log.d(TAG, "Setting widget as restored, widget id:" + id);
+            mAppWidgetManager.updateAppWidgetOptions(id, b);
+        }
+
+        updateWidgets(widgetIds);
+    }
+
+    /** Remaps widget ids in widget specific files. */
+    public void remapWidgetFiles(Map<String, String> widgets) {
+        if (DEBUG) Log.d(TAG, "Remapping widget files");
+        Map<String, PeopleTileKey> remapped = new HashMap<>();
+        for (Map.Entry<String, String> entry : widgets.entrySet()) {
+            String from = String.valueOf(entry.getKey());
+            String to = String.valueOf(entry.getValue());
+            if (Objects.equals(from, to)) {
+                continue;
+            }
+
+            SharedPreferences src = mContext.getSharedPreferences(from, Context.MODE_PRIVATE);
+            PeopleTileKey key = SharedPreferencesHelper.getPeopleTileKey(src);
+            if (PeopleTileKey.isValid(key)) {
+                if (DEBUG) {
+                    Log.d(TAG, "Moving PeopleTileKey: " + key.toString() + " from file: "
+                            + from + ", to file: " + to);
+                }
+                remapped.put(to, key);
+                SharedPreferencesHelper.clear(src);
+            } else {
+                if (DEBUG) Log.d(TAG, "Widget file has invalid key: " + key);
+            }
+        }
+        for (Map.Entry<String, PeopleTileKey> entry : remapped.entrySet()) {
+            SharedPreferences dest = mContext.getSharedPreferences(
+                    entry.getKey(), Context.MODE_PRIVATE);
+            SharedPreferencesHelper.setPeopleTileKey(dest, entry.getValue());
+        }
+    }
+
+    /** Remaps widget ids in default shared storage. */
+    public void remapSharedFile(Map<String, String> widgets) {
+        if (DEBUG) Log.d(TAG, "Remapping shared file");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sp.edit();
+        Map<String, ?> all = sp.getAll();
+        for (Map.Entry<String, ?> entry : all.entrySet()) {
+            String key = entry.getKey();
+            PeopleBackupHelper.SharedFileEntryType keyType = getEntryType(entry);
+            if (DEBUG) Log.d(TAG, "Remapping key:" + key);
+            switch (keyType) {
+                case WIDGET_ID:
+                    String newId = widgets.get(key);
+                    if (TextUtils.isEmpty(newId)) {
+                        Log.w(TAG, "Key is widget id without matching new id, skipping: " + key);
+                        break;
+                    }
+                    if (DEBUG) Log.d(TAG, "Key is widget id: " + key + ", replace with: " + newId);
+                    try {
+                        editor.putString(newId, (String) entry.getValue());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Malformed entry value: " + entry.getValue());
+                    }
+                    editor.remove(key);
+                    break;
+                case PEOPLE_TILE_KEY:
+                case CONTACT_URI:
+                    Set<String> oldWidgetIds;
+                    try {
+                        oldWidgetIds = (Set<String>) entry.getValue();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Malformed entry value: " + entry.getValue());
+                        editor.remove(key);
+                        break;
+                    }
+                    Set<String> newWidgets = getNewWidgets(oldWidgetIds, widgets);
+                    if (DEBUG) {
+                        Log.d(TAG, "Key is PeopleTileKey or contact URI: " + key
+                                + ", replace values with new ids: " + newWidgets);
+                    }
+                    editor.putStringSet(key, newWidgets);
+                    break;
+                case UNKNOWN:
+                    Log.e(TAG, "Key not identified:" + key);
+            }
+        }
+        editor.apply();
+    }
+
+    /** Remaps widget ids in follow-up job file. */
+    public void remapFollowupFile(Map<String, String> widgets) {
+        if (DEBUG) Log.d(TAG, "Remapping follow up file");
+        SharedPreferences followUp = mContext.getSharedPreferences(
+                SHARED_FOLLOW_UP, Context.MODE_PRIVATE);
+        SharedPreferences.Editor followUpEditor = followUp.edit();
+        Map<String, ?> followUpAll = followUp.getAll();
+        for (Map.Entry<String, ?> entry : followUpAll.entrySet()) {
+            String key = entry.getKey();
+            Set<String> oldWidgetIds;
+            try {
+                oldWidgetIds = (Set<String>) entry.getValue();
+            } catch (Exception e) {
+                Log.e(TAG, "Malformed entry value: " + entry.getValue());
+                followUpEditor.remove(key);
+                continue;
+            }
+            Set<String> newWidgets = getNewWidgets(oldWidgetIds, widgets);
+            if (DEBUG) {
+                Log.d(TAG, "Follow up key: " + key + ", replace with new ids: " + newWidgets);
+            }
+            followUpEditor.putStringSet(key, newWidgets);
+        }
+        followUpEditor.apply();
+    }
+
+    private Set<String> getNewWidgets(Set<String> oldWidgets, Map<String, String> widgetsMapping) {
+        return oldWidgets
+                .stream()
+                .map(widgetsMapping::get)
+                .filter(id -> !TextUtils.isEmpty(id))
+                .collect(Collectors.toSet());
     }
 }

@@ -242,6 +242,27 @@ public class VcnTest {
         verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(VCN_STATUS_CODE_SAFE_MODE);
     }
 
+    @Test
+    public void testSubscriptionSnapshotUpdatesMobileDataState() {
+        final NetworkRequestListener requestListener = verifyAndGetRequestListener();
+        startVcnGatewayWithCapabilities(requestListener, TEST_CAPS[0]);
+
+        // Expect mobile data enabled from setUp()
+        assertTrue(mVcn.isMobileDataEnabled());
+
+        final TelephonySubscriptionSnapshot updatedSnapshot =
+                mock(TelephonySubscriptionSnapshot.class);
+        doReturn(TEST_SUB_IDS_IN_GROUP)
+                .when(updatedSnapshot)
+                .getAllSubIdsInGroup(eq(TEST_SUB_GROUP));
+        doReturn(false).when(mTelephonyManager).isDataEnabled();
+
+        mVcn.updateSubscriptionSnapshot(updatedSnapshot);
+        mTestLooper.dispatchAll();
+
+        assertFalse(mVcn.isMobileDataEnabled());
+    }
+
     private void triggerVcnRequestListeners(NetworkRequestListener requestListener) {
         for (final int[] caps : TEST_CAPS) {
             startVcnGatewayWithCapabilities(requestListener, caps);

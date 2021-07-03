@@ -24,6 +24,41 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+python_binary_host {
+    name: "api_versions_trimmer",
+    srcs: ["api_versions_trimmer.py"],
+    version: {
+        py2: {
+            enabled: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: false,
+        },
+    },
+}
+
+python_test_host {
+    name: "api_versions_trimmer_unittests",
+    main: "api_versions_trimmer_unittests.py",
+    srcs: [
+        "api_versions_trimmer_unittests.py",
+        "api_versions_trimmer.py",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+    version: {
+        py2: {
+            enabled: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: false,
+        },
+    },
+}
+
 metalava_cmd = "$(location metalava)"
 // Silence reflection warnings. See b/168689341
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
@@ -430,4 +465,42 @@ genrule {
             dest: "removed.txt",
         },
     ],
+}
+
+// This rule will filter classes present in the jar files of mainline modules
+// from the lint database in api-versions.xml.
+// This is done to reduce the number of false positive NewApi findings in
+// java libraries that compile against the module SDK
+genrule {
+    name: "api-versions-xml-public-filtered",
+    srcs: [
+        // Note: order matters: first parameter is the full api-versions.xml
+        // after that the stubs files in any order
+        // stubs files are all modules that export API surfaces EXCEPT ART
+        ":framework-doc-stubs{.api_versions.xml}",
+        ":android.net.ipsec.ike.stubs{.jar}",
+        ":conscrypt.module.public.api.stubs{.jar}",
+        ":framework-appsearch.stubs{.jar}",
+        ":framework-connectivity.stubs{.jar}",
+        ":framework-graphics.stubs{.jar}",
+        ":framework-media.stubs{.jar}",
+        ":framework-mediaprovider.stubs{.jar}",
+        ":framework-permission.stubs{.jar}",
+        ":framework-permission-s.stubs{.jar}",
+        ":framework-scheduling.stubs{.jar}",
+        ":framework-sdkextensions.stubs{.jar}",
+        ":framework-statsd.stubs{.jar}",
+        ":framework-tethering.stubs{.jar}",
+        ":framework-wifi.stubs{.jar}",
+        ":i18n.module.public.api.stubs{.jar}",
+    ],
+    out: ["api-versions-public-filtered.xml"],
+    tools: ["api_versions_trimmer"],
+    cmd: "$(location api_versions_trimmer) $(out) $(in)",
+    dist: {
+        targets: [
+            "sdk",
+            "win_sdk",
+        ],
+    },
 }

@@ -669,7 +669,10 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"اپنے فون سے تیز تر مزید محفوظ خریداریاں کرنے کے لیے، سیٹ اپ مکمل کریں"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"سبھی دکھائیں"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ادائیگی کرنے کے لیے غیر مقفل کریں"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"سیٹ اپ نہیں کیا گیا"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"استعمال کرنے کے لیے غیر مقفل کریں"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"آپ کے کارڈز حاصل کرنے میں ایک مسئلہ درپیش تھا، براہ کرم بعد میں دوبارہ کوشش کریں"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"مقفل اسکرین کی ترتیبات"</string>
@@ -1034,8 +1037,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"اسکرین کا حصہ بڑا کریں"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"سوئچ کریں"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ایکسیسبیلٹی بٹن کو ایکسیسبیلٹی اشارے سے بدل دیا گیا\n\n"<annotation id="link">"ترتیبات دیکھیں"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"آپ ایکسیسبیلٹی اشارے سے بٹن پر سوئچ کر سکتے ہیں\n\n"<annotation id="link">"ترتیبات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"عارضی طور پر بٹن کو چھپانے کے لئے اسے کنارے پر لے جائیں"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"اوپر بائیں جانب لے جائیں"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"اوپر دائیں جانب لے جائيں"</string>
@@ -1116,7 +1118,7 @@
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"گفتگو ویجیٹس"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنے ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"کچھ پیغامات حاصل کرنے کے بعد یہاں دوبارہ چیک کریں"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"آپ کی حالیہ گفتگوئیں یہاں دکھائی دیں گی"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ترجیحی گفتگوئیں"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"حالیہ گفتگوئیں"</string>
     <string name="okay" msgid="6490552955618608554">"ٹھیک ہے"</string>
@@ -1145,8 +1147,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+<xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"حالیہ پیغامات، چھوٹی ہوئی کالز اور اسٹیٹس اپ ڈیٹس دیکھیں"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"گفتگو"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک پیغام بھیجا"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ڈسٹرب نہ کریں\' کے ذریعے موقوف کیا گیا"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک تصویر بھیجی"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"آپ کے بیٹری میٹر کو پڑھنے میں دشواری"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"مزید معلومات کے لیے تھپتھپائیں"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"کوئی الارم سیٹ نہیں ہے"</string>

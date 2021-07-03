@@ -254,14 +254,25 @@ public class AppSearchStatsTest {
 
     @Test
     public void testAppSearchStats_SetSchemaStats() {
+        SchemaMigrationStats schemaMigrationStats =
+                new SchemaMigrationStats.Builder()
+                        .setGetSchemaLatencyMillis(1)
+                        .setQueryAndTransformLatencyMillis(2)
+                        .setFirstSetSchemaLatencyMillis(3)
+                        .setSecondSetSchemaLatencyMillis(4)
+                        .setSaveDocumentLatencyMillis(5)
+                        .setMigratedDocumentCount(6)
+                        .setSavedDocumentCount(7)
+                        .build();
         int nativeLatencyMillis = 1;
         int newTypeCount = 2;
         int compatibleTypeChangeCount = 3;
         int indexIncompatibleTypeChangeCount = 4;
         int backwardsIncompatibleTypeChangeCount = 5;
-        final SetSchemaStats sStats =
+        SetSchemaStats sStats =
                 new SetSchemaStats.Builder(TEST_PACKAGE_NAME, TEST_DATA_BASE)
                         .setStatusCode(TEST_STATUS_CODE)
+                        .setSchemaMigrationStats(schemaMigrationStats)
                         .setTotalLatencyMillis(TEST_TOTAL_LATENCY_MILLIS)
                         .setNativeLatencyMillis(nativeLatencyMillis)
                         .setNewTypeCount(newTypeCount)
@@ -274,6 +285,7 @@ public class AppSearchStatsTest {
         assertThat(sStats.getPackageName()).isEqualTo(TEST_PACKAGE_NAME);
         assertThat(sStats.getDatabase()).isEqualTo(TEST_DATA_BASE);
         assertThat(sStats.getStatusCode()).isEqualTo(TEST_STATUS_CODE);
+        assertThat(sStats.getSchemaMigrationStats()).isEqualTo(schemaMigrationStats);
         assertThat(sStats.getTotalLatencyMillis()).isEqualTo(TEST_TOTAL_LATENCY_MILLIS);
         assertThat(sStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
         assertThat(sStats.getNewTypeCount()).isEqualTo(newTypeCount);
@@ -282,6 +294,35 @@ public class AppSearchStatsTest {
                 .isEqualTo(indexIncompatibleTypeChangeCount);
         assertThat(sStats.getBackwardsIncompatibleTypeChangeCount())
                 .isEqualTo(backwardsIncompatibleTypeChangeCount);
+    }
+
+    @Test
+    public void testAppSearchStats_SchemaMigrationStats() {
+        int getSchemaLatency = 1;
+        int queryAndTransformLatency = 2;
+        int firstSetSchemaLatency = 3;
+        int secondSetSchemaLatency = 4;
+        int saveDocumentLatency = 5;
+        int migratedDocumentCount = 6;
+        int savedDocumentCount = 7;
+        SchemaMigrationStats sStats =
+                new SchemaMigrationStats.Builder()
+                        .setGetSchemaLatencyMillis(getSchemaLatency)
+                        .setQueryAndTransformLatencyMillis(queryAndTransformLatency)
+                        .setFirstSetSchemaLatencyMillis(firstSetSchemaLatency)
+                        .setSecondSetSchemaLatencyMillis(secondSetSchemaLatency)
+                        .setSaveDocumentLatencyMillis(saveDocumentLatency)
+                        .setMigratedDocumentCount(migratedDocumentCount)
+                        .setSavedDocumentCount(savedDocumentCount)
+                        .build();
+
+        assertThat(sStats.getGetSchemaLatencyMillis()).isEqualTo(getSchemaLatency);
+        assertThat(sStats.getQueryAndTransformLatencyMillis()).isEqualTo(queryAndTransformLatency);
+        assertThat(sStats.getFirstSetSchemaLatencyMillis()).isEqualTo(firstSetSchemaLatency);
+        assertThat(sStats.getSecondSetSchemaLatencyMillis()).isEqualTo(secondSetSchemaLatency);
+        assertThat(sStats.getSaveDocumentLatencyMillis()).isEqualTo(saveDocumentLatency);
+        assertThat(sStats.getMigratedDocumentCount()).isEqualTo(migratedDocumentCount);
+        assertThat(sStats.getSavedDocumentCount()).isEqualTo(savedDocumentCount);
     }
 
     @Test

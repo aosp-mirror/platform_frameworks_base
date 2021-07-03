@@ -1799,9 +1799,10 @@ public final class BluetoothAdapter {
      * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
      * not discoverable by default, and need to be entered into a special mode.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
-     * will return false. After turning on Bluetooth,
-     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
-     * to get the updated value.
+     * will return false. After turning on Bluetooth, wait for {@link #ACTION_STATE_CHANGED}
+     * with {@link #STATE_ON} to get the updated value.
+     * <p>If a device is currently bonding, this request will be queued and executed once that
+     * device has finished bonding. If a request is already queued, this request will be ignored.
      *
      * @return true on success, false on error
      */
@@ -3054,6 +3055,9 @@ public final class BluetoothAdapter {
                 return true;
             }
             return false;
+        } else if (profile == BluetoothProfile.LE_AUDIO) {
+            BluetoothLeAudio leAudio = new BluetoothLeAudio(context, listener, this);
+            return true;
         } else {
             return false;
         }
@@ -3142,6 +3146,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEARING_AID:
                 BluetoothHearingAid hearingAid = (BluetoothHearingAid) proxy;
                 hearingAid.close();
+                break;
+            case BluetoothProfile.LE_AUDIO:
+                BluetoothLeAudio leAudio = (BluetoothLeAudio) proxy;
+                leAudio.close();
         }
     }
 

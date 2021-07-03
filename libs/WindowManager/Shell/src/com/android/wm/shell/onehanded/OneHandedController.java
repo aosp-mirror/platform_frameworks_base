@@ -81,6 +81,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private volatile boolean mIsSwipeToNotificationEnabled;
     private boolean mTaskChangeToExit;
     private boolean mLockedDisabled;
+    private boolean mKeyguardShowing;
     private int mUserId;
     private float mOffSetFraction;
 
@@ -94,7 +95,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private final OneHandedTouchHandler mTouchHandler;
     private final OneHandedState mState;
     private final OneHandedTutorialHandler mTutorialHandler;
-    private final OneHandedUiEventLogger mOneHandedUiEventLogger;
     private final TaskStackListenerImpl mTaskStackListener;
     private final IOverlayManager mOverlayManager;
     private final ShellExecutor mMainExecutor;
@@ -104,6 +104,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private OneHandedEventCallback mEventCallback;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
+    private OneHandedUiEventLogger mOneHandedUiEventLogger;
 
     /**
      * Handle rotation based on OnDisplayChangingListener callback
@@ -114,6 +115,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                     return;
                 }
                 mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation, wct);
+                mOneHandedUiEventLogger.writeEvent(
+                        OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT);
             };
 
     private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
@@ -357,7 +360,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void startOneHanded() {
-        if (isLockedDisabled()) {
+        if (isLockedDisabled() || mKeyguardShowing) {
             Slog.d(TAG, "Temporary lock disabled");
             return;
         }
@@ -481,7 +484,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void notifyExpandNotification() {
-        mMainExecutor.execute(() -> mEventCallback.notifyExpandNotification());
+        if (mEventCallback != null) {
+            mMainExecutor.execute(() -> mEventCallback.notifyExpandNotification());
+        }
     }
 
     @VisibleForTesting
@@ -495,6 +500,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void onActivatedActionChanged() {
+        if (!isShortcutEnabled()) {
+            Slog.w(TAG, "Shortcut not enabled, skip onActivatedActionChanged()");
+            return;
+        }
+
         if (!isOneHandedEnabled()) {
             final boolean success = mOneHandedSettingsUtil.setOneHandedModeEnabled(
                     mContext.getContentResolver(), 1 /* Enabled for shortcut */, mUserId);
@@ -583,6 +593,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                         mContext.getContentResolver(), mUserId);
         setSwipeToNotificationEnabled(enabled);
 
+        mOneHandedUiEventLogger.writeEvent(enabled
+                ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_ON
+                : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_OFF);
+
         // Also checks one handed mode settings since they all need gesture overlay.
         setEnabledGesturalOverlay(
                 enabled || mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
@@ -605,6 +619,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     @VisibleForTesting
+    boolean isShortcutEnabled() {
+        return mOneHandedSettingsUtil.getShortcutEnabled(mContext.getContentResolver(), mUserId);
+    }
+
+    @VisibleForTesting
     boolean isSwipeToNotificationEnabled() {
         return mIsSwipeToNotificationEnabled;
     }
@@ -614,8 +633,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             mMainExecutor.execute(() -> stopOneHanded());
         }
 
-        // Reset and align shortcut one_handed_mode_activated status with current mState
-        notifyShortcutState(mState.getState());
+        // If setting is pull screen, notify shortcut one_handed_mode_activated to reset
+        // and align status with current mState when function enabled.
+        if (isOneHandedEnabled() && !isSwipeToNotificationEnabled()) {
+            notifyShortcutState(mState.getState());
+        }
 
         mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
 
@@ -692,6 +714,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mTutorialHandler.onConfigurationChanged();
     }
 
+    private void onKeyguardVisibilityChanged(boolean showing) {
+        mKeyguardShowing = showing;
+    }
+
     private void onUserSwitch(int newUserId) {
         unregisterSettingObservers();
         mUserId = newUserId;
@@ -710,6 +736,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         pw.println(mLockedDisabled);
         pw.print(innerPrefix + "mUserId=");
         pw.println(mUserId);
+        pw.print(innerPrefix + "isShortcutEnabled=");
+        pw.println(isShortcutEnabled());
 
         if (mBackgroundPanelOrganizer != null) {
             mBackgroundPanelOrganizer.dump(pw);
@@ -836,6 +864,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         public void onUserSwitch(int userId) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.onUserSwitch(userId);
+            });
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            mMainExecutor.execute(() -> {
+                OneHandedController.this.onKeyguardVisibilityChanged(showing);
             });
         }
     }

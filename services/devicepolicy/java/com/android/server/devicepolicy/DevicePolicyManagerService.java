@@ -3827,10 +3827,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 isProfileOwner(caller) || isDeviceOwner(caller) || isSystemUid(caller)
                 || isPasswordLimitingAdminTargetingP(caller));
 
-        final boolean qualityMayApplyToParent =
-                canSetPasswordQualityOnParent(who.getPackageName(), caller);
-        if (!qualityMayApplyToParent) {
-            Preconditions.checkCallAuthorization(!parent,
+        if (parent) {
+            Preconditions.checkCallAuthorization(
+                    canSetPasswordQualityOnParent(who.getPackageName(), caller),
                     "Profile Owner may not apply password quality requirements device-wide");
         }
 
@@ -3856,7 +3855,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (passwordPolicy.quality != quality) {
                     passwordPolicy.quality = quality;
                     ap.mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
-                    ap.mPasswordPolicyAppliesToParent = qualityMayApplyToParent;
                     resetInactivePasswordRequirementsIfRPlus(userId, ap);
                     updatePasswordValidityCheckpointLocked(userId, parent);
                     updatePasswordQualityCacheForUserGroup(userId);
@@ -4588,8 +4586,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
+        final List<ActiveAdmin> admins;
         synchronized (getLockObject()) {
-            final List<ActiveAdmin> admins;
             if (deviceWideOnly) {
                 admins = getActiveAdminsForUserAndItsManagedProfilesLocked(userId,
                         /* shouldIncludeProfileAdmins */ (user) -> false);
@@ -4597,16 +4595,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 admins = getActiveAdminsForLockscreenPoliciesLocked(userId);
             }
             for (ActiveAdmin admin : admins) {
-                final boolean isAdminOfUser = userId == admin.getUserHandle().getIdentifier();
-                // Use the password metrics from the admin in one of three cases:
-                // (1) The admin is of the user we're getting the minimum metrics for. The admin
-                //     always affects the user it's managing. This applies also to the parent
-                //     ActiveAdmin instance: It'd have the same user handle.
-                // (2) The mPasswordPolicyAppliesToParent field is true: That indicates the
-                //     call to setPasswordQuality was made by an admin that may affect the parent.
-                if (isAdminOfUser || admin.mPasswordPolicyAppliesToParent) {
-                    adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
-                }
+                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
             }
         }
         return PasswordMetrics.merge(adminMetrics);
@@ -4821,7 +4810,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.mPasswordComplexity = passwordComplexity;
                     // Reset the password policy.
                     admin.mPasswordPolicy = new PasswordPolicy();
-                    admin.mPasswordPolicyAppliesToParent = true;
                     updatePasswordValidityCheckpointLocked(caller.getUserId(), calledOnParent);
                     updatePasswordQualityCacheForUserGroup(caller.getUserId());
                     saveSettingsLocked(caller.getUserId());
@@ -8030,8 +8018,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             inForeground = true;
             receiverComponent = resolveDelegateReceiver(
                 DELEGATION_SECURITY_LOGGING, action, userId);
-            // STOPSHIP(b/185004808): remove excessive log.
-            Slogf.d(LOG_TAG, "Delegate for security logs broadcast: " + receiverComponent);
         }
         if (receiverComponent == null) {
             receiverComponent = getOwnerComponent(userId);
@@ -14319,7 +14305,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isAffiliatedUser() {
+    public boolean isCallingUserAffiliated() {
         if (!mHasFeature) {
             return false;
         }
@@ -14327,6 +14313,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             return isUserAffiliatedWithDeviceLocked(mInjector.userHandleGetCallingUserId());
         }
+    }
+
+    @Override
+    public boolean isAffiliatedUser(@UserIdInt int userId) {
+        if (!mHasFeature) {
+            return false;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
+
+        return isUserAffiliatedWithDeviceLocked(userId);
     }
 
     private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {
@@ -17556,10 +17553,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isUsbDataSignalingEnabled(String packageName) {
+        final CallerIdentity caller = getCallerIdentity(packageName);
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(
-                    getCallerIdentity(packageName));
-            return admin.mUsbDataSignalingEnabled;
+            // If the caller is an admin, return the policy set by itself. Otherwise
+            // return the device-wide policy.
+            if (isDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+                return getProfileOwnerOrDeviceOwnerLocked(caller).mUsbDataSignalingEnabled;
+            } else {
+                return isUsbDataSignalingEnabledInternalLocked();
+            }
         }
     }
 
@@ -17569,10 +17571,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isSystemUid(caller));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            return admin == null || admin.mUsbDataSignalingEnabled;
+            return isUsbDataSignalingEnabledInternalLocked();
         }
+    }
+
+    private boolean isUsbDataSignalingEnabledInternalLocked() {
+        final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                UserHandle.USER_SYSTEM);
+        return admin == null || admin.mUsbDataSignalingEnabled;
     }
 
     @Override

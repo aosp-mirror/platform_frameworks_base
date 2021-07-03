@@ -228,7 +228,7 @@ public interface ServiceConnector<I extends IInterface> {
         private final int mBindingFlags;
         private final @Nullable Function<IBinder, I> mBinderAsInterface;
         private final @NonNull Handler mHandler;
-        private final @NonNull Executor mExecutor;
+        protected final @NonNull Executor mExecutor;
 
         private volatile I mService = null;
         private boolean mBinding = false;

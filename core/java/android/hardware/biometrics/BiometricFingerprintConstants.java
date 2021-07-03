@@ -60,7 +60,8 @@ public interface BiometricFingerprintConstants {
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_RE_ENROLL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
-            FINGERPRINT_ERROR_UNKNOWN})
+            FINGERPRINT_ERROR_UNKNOWN,
+            FINGERPRINT_ERROR_BAD_CALIBRATION})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintError {}
 
@@ -181,6 +182,12 @@ public interface BiometricFingerprintConstants {
     int FINGERPRINT_ERROR_UNKNOWN = 17;
 
     /**
+     * Error indicating that the fingerprint sensor has bad calibration.
+     * @hide
+     */
+    int FINGERPRINT_ERROR_BAD_CALIBRATION = 18;
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -201,7 +208,9 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_TOO_FAST,
             FINGERPRINT_ACQUIRED_VENDOR,
             FINGERPRINT_ACQUIRED_START,
-            FINGERPRINT_ACQUIRED_UNKNOWN})
+            FINGERPRINT_ACQUIRED_UNKNOWN,
+            FINGERPRINT_ACQUIRED_IMMOBILE,
+            FINGERPRINT_ACQUIRED_TOO_BRIGHT})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -269,6 +278,21 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_UNKNOWN = 8;
+
+    /**
+     * This message may be sent during enrollment if the same area of the finger has already
+     * been captured during this enrollment session. In general, enrolling multiple areas of the
+     * same finger can help against false rejections.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_IMMOBILE = 9;
+
+    /**
+     * For sensors that require illumination, such as optical under-display fingerprint sensors,
+     * the image was too bright to be used for matching.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_TOO_BRIGHT = 10;
 
     /**
      * @hide

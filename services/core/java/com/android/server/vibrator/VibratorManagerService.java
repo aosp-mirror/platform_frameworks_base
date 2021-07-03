@@ -176,7 +176,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mVibrationSettings = new VibrationSettings(mContext, mHandler);
         mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
         mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
-        mDeviceVibrationEffectAdapter = new DeviceVibrationEffectAdapter(mContext);
+        mDeviceVibrationEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
 
         VibrationCompleteListener listener = new VibrationCompleteListener(this);
         mNativeWrapper = injector.getNativeWrapper();

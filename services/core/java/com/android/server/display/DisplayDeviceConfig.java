@@ -19,6 +19,8 @@ package com.android.server.display;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.text.TextUtils;
@@ -85,6 +87,9 @@ public class DisplayDeviceConfig {
 
     // The details of the proximity sensor associated with this display.
     private final SensorData mProximitySensor = new SensorData();
+
+    private final List<RefreshRateLimitation> mRefreshRateLimitations =
+            new ArrayList<>(2 /*initialCapacity*/);
 
     // Nits and backlight values that are loaded from either the display device config file, or
     // config.xml. These are the raw values and just used for the dumpsys
@@ -306,6 +311,10 @@ public class DisplayDeviceConfig {
         return hbmData;
     }
 
+    public List<RefreshRateLimitation> getRefreshRateLimitations() {
+        return mRefreshRateLimitations;
+    }
+
     @Override
     public String toString() {
         String str = "DisplayDeviceConfig{"
@@ -329,6 +338,7 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mProximitySensor=" + mProximitySensor
+                + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
                 + "}";
         return str;
     }
@@ -647,6 +657,13 @@ public class DisplayDeviceConfig {
             mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
             mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
             mHbmData.timeMinMillis = hbmTiming.getTimeMinSecs_all().longValue() * 1000;
+            final RefreshRateRange rr = hbm.getRefreshRate_all();
+            if (rr != null) {
+                final float min = rr.getMinimum().floatValue();
+                final float max = rr.getMaximum().floatValue();
+                mRefreshRateLimitations.add(new RefreshRateLimitation(
+                        DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE, min, max));
+            }
         }
     }
 

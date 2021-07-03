@@ -26,6 +26,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -254,11 +255,14 @@ public class SystemVibrator extends Vibrator {
      * <p>This uses the first vibrator on the list as the default one for all hardware spec, but
      * uses an intersection of all vibrators to decide the capabilities and effect/primitive
      * support.
+     *
+     * @hide
      */
-    private static class AllVibratorsInfo extends VibratorInfo {
+    @VisibleForTesting
+    public static class AllVibratorsInfo extends VibratorInfo {
         private final VibratorInfo[] mVibratorInfos;
 
-        AllVibratorsInfo(VibratorInfo[] vibrators) {
+        public AllVibratorsInfo(VibratorInfo[] vibrators) {
             super(/* id= */ -1, capabilitiesIntersection(vibrators),
                     vibrators.length > 0 ? vibrators[0] : VibratorInfo.EMPTY_VIBRATOR_INFO);
             mVibratorInfos = vibrators;
@@ -266,6 +270,9 @@ public class SystemVibrator extends Vibrator {
 
         @Override
         public int isEffectSupported(int effectId) {
+            if (mVibratorInfos.length == 0) {
+                return Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
+            }
             int supported = Vibrator.VIBRATION_EFFECT_SUPPORT_YES;
             for (VibratorInfo info : mVibratorInfos) {
                 int effectSupported = info.isEffectSupported(effectId);
@@ -280,12 +287,28 @@ public class SystemVibrator extends Vibrator {
 
         @Override
         public boolean isPrimitiveSupported(int primitiveId) {
+            if (mVibratorInfos.length == 0) {
+                return false;
+            }
             for (VibratorInfo info : mVibratorInfos) {
                 if (!info.isPrimitiveSupported(primitiveId)) {
                     return false;
                 }
             }
             return true;
+        }
+
+        @Override
+        public int getPrimitiveDuration(int primitiveId) {
+            int maxDuration = 0;
+            for (VibratorInfo info : mVibratorInfos) {
+                int duration = info.getPrimitiveDuration(primitiveId);
+                if (duration == 0) {
+                    return 0;
+                }
+                maxDuration = Math.max(maxDuration, duration);
+            }
+            return maxDuration;
         }
 
         private static int capabilitiesIntersection(VibratorInfo[] infos) {

@@ -17,6 +17,7 @@
 package com.android.systemui.people;
 
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
+import static com.android.systemui.people.PeopleSpaceUtils.getContactLookupKeysWithBirthdaysToday;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,9 +33,11 @@ import static org.mockito.Mockito.when;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Person;
+import android.app.backup.BackupManager;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -64,12 +67,17 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,6 +120,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                     .setNotificationDataUri(URI)
                     .setMessagesCount(1)
                     .build();
+    private static final String TEST_DISPLAY_NAME = "Display Name";
 
     private final ShortcutInfo mShortcutInfo = new ShortcutInfo.Builder(mContext,
             SHORTCUT_ID_1).setLongLabel(
@@ -190,6 +199,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private NotificationEntryManager mNotificationEntryManager;
     @Mock
     private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
+    @Mock
+    private BackupManager mBackupManager;
 
     private Bundle mOptions;
 
@@ -227,6 +238,12 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 .thenReturn(List.of(mNotificationEntry1, mNotificationEntry2, mNotificationEntry3));
     }
 
+    @After
+    public void tearDown() {
+        cleanupTestContactFromContactProvider();
+    }
+
+
     @Test
     public void testAugmentTileFromNotification() {
         PeopleSpaceTile tile =
@@ -238,7 +255,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, mNotificationEntry1, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
         assertThat(actual.getNotificationSender()).isEqualTo(null);
@@ -278,7 +295,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
         assertThat(actual.getNotificationSender().toString()).isEqualTo("name");
@@ -311,7 +328,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_1);
         assertThat(actual.getNotificationDataUri()).isEqualTo(URI);
@@ -344,7 +361,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_1);
         assertThat(actual.getNotificationDataUri()).isNull();
@@ -362,7 +379,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, mNotificationEntry3, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent()).isEqualTo(null);
     }
@@ -466,5 +483,83 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         verify(mPeopleSpaceWidgetManager, times(1)).updateAppWidgetOptionsAndView(
                 eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
+    }
+
+    @Test
+    public void testBirthdayQueriesWithYear() throws Exception {
+        String birthdayToday = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        addBirthdayToContactsDatabase(birthdayToday);
+
+        List<String> lookupKeys = getContactLookupKeysWithBirthdaysToday(mContext);
+
+        assertThat(lookupKeys).hasSize(1);
+    }
+
+    @Test
+    public void testBirthdayQueriesWithoutYear() throws Exception {
+        String birthdayToday = new SimpleDateFormat("--MM-dd").format(new Date());
+        addBirthdayToContactsDatabase(birthdayToday);
+
+        List<String> lookupKeys = getContactLookupKeysWithBirthdaysToday(mContext);
+
+        assertThat(lookupKeys).hasSize(1);
+    }
+
+    @Test
+    public void testBirthdayQueriesWithDifferentDates() throws Exception {
+        Date yesterday = new Date(System.currentTimeMillis() - Duration.ofDays(1).toMillis());
+        String birthdayYesterday = new SimpleDateFormat("--MM-dd").format(yesterday);
+        addBirthdayToContactsDatabase(birthdayYesterday);
+
+        List<String> lookupKeys = getContactLookupKeysWithBirthdaysToday(mContext);
+
+        assertThat(lookupKeys).isEmpty();
+    }
+
+    private void addBirthdayToContactsDatabase(String birthdayDate) throws Exception {
+        ContentResolver resolver = mContext.getContentResolver();
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>(3);
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, "com.google")
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, "fakeAccountName")
+                .build());
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+                        TEST_DISPLAY_NAME)
+                .build());
+        ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE)
+                .withValue(
+                        ContactsContract.CommonDataKinds.Event.TYPE,
+                        ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY)
+                .withValue(
+                        ContactsContract.CommonDataKinds.Event.START_DATE, birthdayDate)
+                .build());
+        resolver.applyBatch(ContactsContract.AUTHORITY, ops);
+    }
+
+    private void cleanupTestContactFromContactProvider() {
+        Cursor cursor = mContext.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
+                null,
+                ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + "=?",
+                new String[]{TEST_DISPLAY_NAME},
+                null);
+        while (cursor.moveToNext()) {
+            String contactId = cursor.getString(cursor.getColumnIndex(
+                    ContactsContract.Contacts.NAME_RAW_CONTACT_ID));
+            mContext.getContentResolver().delete(ContactsContract.Data.CONTENT_URI,
+                    ContactsContract.Data.RAW_CONTACT_ID + "=?",
+                    new String[]{contactId});
+        }
+        cursor.close();
     }
 }

@@ -41,8 +41,18 @@ static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnComplete;
 static jclass sFrequencyMappingClass;
 static jmethodID sFrequencyMappingCtor;
-static jclass sVibratorInfoClass;
-static jmethodID sVibratorInfoCtor;
+static struct {
+    jmethodID setCapabilities;
+    jmethodID setSupportedEffects;
+    jmethodID setSupportedBraking;
+    jmethodID setPwlePrimitiveDurationMax;
+    jmethodID setPwleSizeMax;
+    jmethodID setSupportedPrimitive;
+    jmethodID setPrimitiveDelayMax;
+    jmethodID setCompositionSizeMax;
+    jmethodID setQFactor;
+    jmethodID setFrequencyMapping;
+} sVibratorInfoBuilderClassInfo;
 static struct {
     jfieldID id;
     jfieldID scale;
@@ -352,68 +362,88 @@ static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong ptr, 
     wrapper->halCall<void>(alwaysOnDisableFn, "alwaysOnDisable");
 }
 
-static jobject vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
-                               jfloat suggestedSafeRange) {
+static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                jfloat suggestedSafeRange, jobject vibratorInfoBuilder) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorGetInfo failed because native wrapper was not initialized");
-        return nullptr;
+        return JNI_FALSE;
     }
     vibrator::Info info = wrapper->getVibratorInfo();
 
-    jlong capabilities =
-            static_cast<jlong>(info.capabilities.valueOr(vibrator::Capabilities::NONE));
-    jfloat minFrequency = static_cast<jfloat>(info.minFrequency.valueOr(NAN));
-    jfloat resonantFrequency = static_cast<jfloat>(info.resonantFrequency.valueOr(NAN));
-    jfloat frequencyResolution = static_cast<jfloat>(info.frequencyResolution.valueOr(NAN));
-    jfloat qFactor = static_cast<jfloat>(info.qFactor.valueOr(NAN));
-    jintArray supportedEffects = nullptr;
-    jintArray supportedBraking = nullptr;
-    jintArray supportedPrimitives = nullptr;
-    jintArray primitiveDurations = nullptr;
-    jfloatArray maxAmplitudes = nullptr;
-
+    if (info.capabilities.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setCapabilities,
+                              static_cast<jlong>(info.capabilities.value()));
+    }
     if (info.supportedEffects.isOk()) {
         std::vector<aidl::Effect> effects = info.supportedEffects.value();
-        supportedEffects = env->NewIntArray(effects.size());
+        jintArray supportedEffects = env->NewIntArray(effects.size());
         env->SetIntArrayRegion(supportedEffects, 0, effects.size(),
                                reinterpret_cast<jint*>(effects.data()));
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setSupportedEffects, supportedEffects);
     }
     if (info.supportedBraking.isOk()) {
         std::vector<aidl::Braking> braking = info.supportedBraking.value();
-        supportedBraking = env->NewIntArray(braking.size());
+        jintArray supportedBraking = env->NewIntArray(braking.size());
         env->SetIntArrayRegion(supportedBraking, 0, braking.size(),
                                reinterpret_cast<jint*>(braking.data()));
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setSupportedBraking, supportedBraking);
+    }
+    if (info.pwlePrimitiveDurationMax.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setPwlePrimitiveDurationMax,
+                              static_cast<jint>(info.pwlePrimitiveDurationMax.value().count()));
+    }
+    if (info.pwleSizeMax.isOk()) {
+        // Use (pwleMaxSize - 1) to account for a possible extra braking segment added by the
+        // vibratorPerformPwleEffect method.
+        env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setPwleSizeMax,
+                              static_cast<jint>(info.pwleSizeMax.value() - 1));
     }
     if (info.supportedPrimitives.isOk()) {
-        std::vector<aidl::CompositePrimitive> primitives = info.supportedPrimitives.value();
-        supportedPrimitives = env->NewIntArray(primitives.size());
-        env->SetIntArrayRegion(supportedPrimitives, 0, primitives.size(),
-                               reinterpret_cast<jint*>(primitives.data()));
-    }
-    if (info.primitiveDurations.isOk()) {
-        std::vector<int32_t> durations;
-        for (auto duration : info.primitiveDurations.value()) {
-            durations.push_back(duration.count());
+        auto durations = info.primitiveDurations.valueOr({});
+        for (auto& primitive : info.supportedPrimitives.value()) {
+            auto primitiveIdx = static_cast<size_t>(primitive);
+            auto duration = durations.size() > primitiveIdx ? durations[primitiveIdx].count() : 0;
+            env->CallObjectMethod(vibratorInfoBuilder,
+                                  sVibratorInfoBuilderClassInfo.setSupportedPrimitive,
+                                  static_cast<jint>(primitive), static_cast<jint>(duration));
         }
-        primitiveDurations = env->NewIntArray(durations.size());
-        env->SetIntArrayRegion(primitiveDurations, 0, durations.size(),
-                               reinterpret_cast<jint*>(durations.data()));
     }
+    if (info.primitiveDelayMax.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setPrimitiveDelayMax,
+                              static_cast<jint>(info.primitiveDelayMax.value().count()));
+    }
+    if (info.compositionSizeMax.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setCompositionSizeMax,
+                              static_cast<jint>(info.compositionSizeMax.value()));
+    }
+    if (info.qFactor.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setQFactor,
+                              static_cast<jfloat>(info.qFactor.value()));
+    }
+
+    jfloat minFrequency = static_cast<jfloat>(info.minFrequency.valueOr(NAN));
+    jfloat resonantFrequency = static_cast<jfloat>(info.resonantFrequency.valueOr(NAN));
+    jfloat frequencyResolution = static_cast<jfloat>(info.frequencyResolution.valueOr(NAN));
+    jfloatArray maxAmplitudes = nullptr;
     if (info.maxAmplitudes.isOk()) {
         std::vector<float> amplitudes = info.maxAmplitudes.value();
         maxAmplitudes = env->NewFloatArray(amplitudes.size());
         env->SetFloatArrayRegion(maxAmplitudes, 0, amplitudes.size(),
                                  reinterpret_cast<jfloat*>(amplitudes.data()));
     }
-
     jobject frequencyMapping = env->NewObject(sFrequencyMappingClass, sFrequencyMappingCtor,
                                               minFrequency, resonantFrequency, frequencyResolution,
                                               suggestedSafeRange, maxAmplitudes);
+    env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyMapping,
+                          frequencyMapping);
 
-    return env->NewObject(sVibratorInfoClass, sVibratorInfoCtor, wrapper->getVibratorId(),
-                          capabilities, supportedEffects, supportedBraking, supportedPrimitives,
-                          primitiveDurations, qFactor, frequencyMapping);
+    return info.checkAndLogFailure("vibratorGetInfo") ? JNI_FALSE : JNI_TRUE;
 }
 
 static const JNINativeMethod method_table[] = {
@@ -433,7 +463,7 @@ static const JNINativeMethod method_table[] = {
         {"setExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
         {"alwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
         {"alwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
-        {"getInfo", "(JF)Landroid/os/VibratorInfo;", (void*)vibratorGetInfo},
+        {"getInfo", "(JFLandroid/os/VibratorInfo$Builder;)Z", (void*)vibratorGetInfo},
 };
 
 int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env) {
@@ -459,11 +489,38 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sFrequencyMappingClass = static_cast<jclass>(env->NewGlobalRef(frequencyMappingClass));
     sFrequencyMappingCtor = GetMethodIDOrDie(env, sFrequencyMappingClass, "<init>", "(FFFF[F)V");
 
-    jclass vibratorInfoClass = FindClassOrDie(env, "android/os/VibratorInfo");
-    sVibratorInfoClass = (jclass)env->NewGlobalRef(vibratorInfoClass);
-    sVibratorInfoCtor =
-            GetMethodIDOrDie(env, sVibratorInfoClass, "<init>",
-                             "(IJ[I[I[I[IFLandroid/os/VibratorInfo$FrequencyMapping;)V");
+    jclass vibratorInfoBuilderClass = FindClassOrDie(env, "android/os/VibratorInfo$Builder");
+    sVibratorInfoBuilderClassInfo.setCapabilities =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setCapabilities",
+                             "(J)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setSupportedEffects =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setSupportedEffects",
+                             "([I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setSupportedBraking =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setSupportedBraking",
+                             "([I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setPwlePrimitiveDurationMax =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setPwlePrimitiveDurationMax",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setPwleSizeMax =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setPwleSizeMax",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setSupportedPrimitive =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setSupportedPrimitive",
+                             "(II)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setPrimitiveDelayMax =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setPrimitiveDelayMax",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setCompositionSizeMax =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setCompositionSizeMax",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setQFactor =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setQFactor",
+                             "(F)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setFrequencyMapping =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyMapping",
+                             "(Landroid/os/VibratorInfo$FrequencyMapping;)"
+                             "Landroid/os/VibratorInfo$Builder;");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/vibrator/VibratorController$NativeWrapper",

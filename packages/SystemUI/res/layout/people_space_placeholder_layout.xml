@@ -22,26 +22,40 @@
 
     <LinearLayout
         android:background="@drawable/people_space_tile_view_card"
-        android:id="@+id/item"
+        android:clipToOutline="true"
+        android:id="@android:id/background"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_gravity="top"
+        android:layout_gravity="center"
         android:paddingVertical="8dp"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="2dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <TextView
+            android:layout_weight="6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"/>
 
         <LinearLayout
+            android:layout_weight="34"
             android:orientation="vertical"
-            android:paddingEnd="20dp"
-            android:gravity="start|bottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
+            android:gravity="start|center_vertical"
+            android:layout_gravity="start|center_vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
             <ImageView
-                android:background="@drawable/ic_person"
-                android:layout_width="48dp"
-                android:layout_height="48dp" />
+                android:layout_weight="1"
+                android:gravity="start"
+                android:layout_gravity="start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_avatar_with_badge"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/name"
@@ -54,16 +68,25 @@
                 android:ellipsize="end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <TextView
-            android:text="@string/empty_status"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
-            android:textSize="12sp"
-            android:layout_width="wrap_content"
+            android:layout_weight="52"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="@string/empty_status"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="12sp" />
+        <TextView
+            android:layout_weight="6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </LinearLayout>

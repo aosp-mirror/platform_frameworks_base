@@ -60,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
@@ -121,8 +122,8 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() {
-        final Task taskController1 = createTask(mDisplayContent);
-        final Task task = createTaskInRootTask(taskController1, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         task.removeIfPossible();
@@ -130,12 +131,14 @@ public class TaskTests extends WindowTestsBase {
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
         assertNull(activity.getParent());
+        verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(task);
+        verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(rootTask);
     }
 
     @Test
     public void testRemoveContainer_deferRemoval() {
-        final Task taskController1 = createTask(mDisplayContent);
-        final Task task = createTaskInRootTask(taskController1, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         doReturn(true).when(task).shouldDeferRemoval();

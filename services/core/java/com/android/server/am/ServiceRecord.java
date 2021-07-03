@@ -20,6 +20,7 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -928,13 +929,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     public void postNotification() {
         final int appUid = appInfo.uid;
         final int appPid = app.getPid();
-        if (foregroundId != 0 && foregroundNoti != null) {
+        if (isForeground && foregroundNoti != null) {
             // Do asynchronous communication with notification manager to
             // avoid deadlocks.
             final String localPackageName = packageName;
             final int localForegroundId = foregroundId;
             final Notification _foregroundNoti = foregroundNoti;
             final ServiceRecord record = this;
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.d(TAG, "Posting notification " + _foregroundNoti
+                        + " for foreground service " + this);
+            }
             ams.mHandler.post(new Runnable() {
                 public void run() {
                     NotificationManagerInternal nm = LocalServices.getService(
@@ -1066,10 +1071,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     public void stripForegroundServiceFlagFromNotification() {
-        if (foregroundId == 0) {
-            return;
-        }
-
         final int localForegroundId = foregroundId;
         final int localUserId = userId;
         final String localPackageName = packageName;

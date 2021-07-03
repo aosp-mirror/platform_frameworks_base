@@ -17,6 +17,8 @@
 package com.android.server;
 
 import static android.Manifest.permission.MANAGE_SENSOR_PRIVACY;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
 import static android.app.ActivityManager.getCurrentUser;
@@ -26,9 +28,9 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
-import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
@@ -41,9 +43,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -55,6 +59,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
@@ -83,6 +88,7 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -156,8 +162,10 @@ public final class SensorPrivacyService extends SystemService {
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
     private final UserManagerInternal mUserManagerInternal;
     private final ActivityManager mActivityManager;
+    private final ActivityManagerInternal mActivityManagerInternal;
     private final ActivityTaskManager mActivityTaskManager;
     private final AppOpsManager mAppOpsManager;
+    private final AppOpsManagerInternal mAppOpsManagerInternal;
     private final TelephonyManager mTelephonyManager;
 
     private final IBinder mAppOpsRestrictionToken = new Binder();
@@ -167,15 +175,18 @@ public final class SensorPrivacyService extends SystemService {
     private EmergencyCallHelper mEmergencyCallHelper;
     private KeyguardManager mKeyguardManager;
 
+    private int mCurrentUser = -1;
+
     public SensorPrivacyService(Context context) {
         super(context);
         mContext = context;
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
+        mAppOpsManagerInternal = getLocalService(AppOpsManagerInternal.class);
         mUserManagerInternal = getLocalService(UserManagerInternal.class);
         mActivityManager = context.getSystemService(ActivityManager.class);
+        mActivityManagerInternal = getLocalService(ActivityManagerInternal.class);
         mActivityTaskManager = context.getSystemService(ActivityTaskManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
-
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
     }
 
@@ -193,6 +204,20 @@ public final class SensorPrivacyService extends SystemService {
             mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
             mEmergencyCallHelper = new EmergencyCallHelper();
         }
+    }
+
+    @Override
+    public void onUserStarting(TargetUser user) {
+        if (mCurrentUser == -1) {
+            mCurrentUser = user.getUserIdentifier();
+            setGlobalRestriction();
+        }
+    }
+
+    @Override
+    public void onUserSwitching(TargetUser from, TargetUser to) {
+        mCurrentUser = to.getUserIdentifier();
+        setGlobalRestriction();
     }
 
     class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
@@ -255,17 +280,6 @@ public final class SensorPrivacyService extends SystemService {
             synchronized (mLock) {
                 if (readPersistedSensorPrivacyStateLocked()) {
                     persistSensorPrivacyStateLocked();
-                }
-
-                for (int i = 0; i < mIndividualEnabled.size(); i++) {
-                    int userId = mIndividualEnabled.keyAt(i);
-                    SparseBooleanArray userIndividualEnabled =
-                            mIndividualEnabled.valueAt(i);
-                    for (int j = 0; j < userIndividualEnabled.size(); j++) {
-                        int sensor = userIndividualEnabled.keyAt(j);
-                        boolean enabled = userIndividualEnabled.valueAt(j);
-                        setUserRestriction(userId, sensor, enabled);
-                    }
                 }
             }
 
@@ -421,11 +435,40 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
 
-            VoiceInteractionManagerInternal voiceInteractionManagerInternal =
-                    LocalServices.getService(VoiceInteractionManagerInternal.class);
+            String inputMethodComponent = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD);
+            String inputMethodPackageName = null;
+            if (inputMethodComponent != null) {
+                inputMethodPackageName = ComponentName.unflattenFromString(
+                        inputMethodComponent).getPackageName();
+            }
 
-            if (sensor == MICROPHONE && voiceInteractionManagerInternal != null
-                    && voiceInteractionManagerInternal.hasActiveSession(packageName)) {
+            int capability;
+            try {
+                capability = mActivityManagerInternal.getUidCapability(uid);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, e);
+                return;
+            }
+
+            if (sensor == MICROPHONE) {
+                VoiceInteractionManagerInternal voiceInteractionManagerInternal =
+                        LocalServices.getService(VoiceInteractionManagerInternal.class);
+                if (voiceInteractionManagerInternal != null
+                        && voiceInteractionManagerInternal.hasActiveSession(packageName)) {
+                    enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                    return;
+                }
+
+                if (TextUtils.equals(packageName, inputMethodPackageName)
+                        && (capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
+                    enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                    return;
+                }
+            }
+
+            if (sensor == CAMERA && TextUtils.equals(packageName, inputMethodPackageName)
+                    && (capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                 enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
                 return;
             }
@@ -485,7 +528,8 @@ public final class SensorPrivacyService extends SystemService {
             options.setLaunchTaskId(info.mTaskId);
             options.setTaskOverlay(true, true);
 
-            dialogIntent.addFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            dialogIntent.addFlags(
+                    FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | FLAG_ACTIVITY_NO_USER_ACTION);
 
             dialogIntent.putExtra(EXTRA_PACKAGE_NAME, info.mPackageName);
             if (sensors.size() == 1) {
@@ -568,7 +612,17 @@ public final class SensorPrivacyService extends SystemService {
                                     new Intent(Settings.ACTION_PRIVACY_SETTINGS),
                                     PendingIntent.FLAG_IMMUTABLE
                                             | PendingIntent.FLAG_UPDATE_CURRENT))
+                            .extend(new Notification.TvExtender())
+                            .setTimeoutAfter(isTelevision(mContext)
+                                    ? /* dismiss immediately */ 1
+                                    : /* no timeout */ 0)
                             .build());
+        }
+
+        private boolean isTelevision(Context context) {
+            int uiMode = context.getResources().getConfiguration().uiMode;
+            return (uiMode & Configuration.UI_MODE_TYPE_MASK)
+                    == Configuration.UI_MODE_TYPE_TELEVISION;
         }
 
         /**
@@ -1351,7 +1405,10 @@ public final class SensorPrivacyService extends SystemService {
             SparseArray<RemoteCallbackList<ISensorPrivacyListener>> listenersForUser =
                     mIndividualSensorListeners.get(userId);
 
-            setUserRestriction(userId, sensor, enabled);
+            setGlobalRestriction();
+            if (userId == mCurrentUser) {
+                setGlobalRestriction();
+            }
 
             if (listenersForUser == null) {
                 return;
@@ -1380,16 +1437,18 @@ public final class SensorPrivacyService extends SystemService {
         }
     }
 
-    private void setUserRestriction(int userId, int sensor, boolean enabled) {
-        if (sensor == CAMERA) {
-            mAppOpsManager.setUserRestrictionForUser(OP_CAMERA, enabled,
-                    mAppOpsRestrictionToken, null, userId);
-        } else if (sensor == MICROPHONE) {
-            mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO, enabled,
-                    mAppOpsRestrictionToken, null, userId);
-            mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO_HOTWORD, enabled,
-                    mAppOpsRestrictionToken, null, userId);
-        }
+    private void setGlobalRestriction() {
+        boolean camState =
+                mSensorPrivacyServiceImpl
+                        .isIndividualSensorPrivacyEnabled(mCurrentUser, CAMERA);
+        boolean micState =
+                mSensorPrivacyServiceImpl
+                        .isIndividualSensorPrivacyEnabled(mCurrentUser, MICROPHONE);
+
+        mAppOpsManagerInternal
+                .setGlobalRestriction(OP_CAMERA, camState, mAppOpsRestrictionToken);
+        mAppOpsManagerInternal
+                .setGlobalRestriction(OP_RECORD_AUDIO, micState, mAppOpsRestrictionToken);
     }
 
     private final class DeathRecipient implements IBinder.DeathRecipient {
@@ -1507,7 +1566,7 @@ public final class SensorPrivacyService extends SystemService {
     }
 
     private class EmergencyCallHelper {
-        private OutogingEmergencyStateCallback mEmergencyStateCallback;
+        private OutgoingEmergencyStateCallback mEmergencyStateCallback;
         private CallStateCallback mCallStateCallback;
 
         private boolean mIsInEmergencyCall;
@@ -1516,7 +1575,7 @@ public final class SensorPrivacyService extends SystemService {
         private Object mEmergencyStateLock = new Object();
 
         EmergencyCallHelper() {
-            mEmergencyStateCallback = new OutogingEmergencyStateCallback();
+            mEmergencyStateCallback = new OutgoingEmergencyStateCallback();
             mCallStateCallback = new CallStateCallback();
 
             mTelephonyManager.registerTelephonyCallback(FgThread.getExecutor(),
@@ -1531,7 +1590,7 @@ public final class SensorPrivacyService extends SystemService {
             }
         }
 
-        private class OutogingEmergencyStateCallback extends TelephonyCallback implements
+        private class OutgoingEmergencyStateCallback extends TelephonyCallback implements
                 TelephonyCallback.OutgoingEmergencyCallListener {
             @Override
             public void onOutgoingEmergencyCall(EmergencyNumber placedEmergencyNumber,

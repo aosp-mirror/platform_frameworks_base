@@ -306,14 +306,23 @@ public final class BatteryUsageStats implements Parcelable {
                     AggregateBatteryConsumer.CREATOR.createFromParcel(source);
             mAggregateBatteryConsumers[i].setCustomPowerComponentNames(mCustomPowerComponentNames);
         }
-        int uidCount = source.readInt();
+
+        // UidBatteryConsumers are included as a blob to avoid a TransactionTooLargeException
+        final Parcel blob = Parcel.obtain();
+        final byte[] bytes = source.readBlob();
+        blob.unmarshall(bytes, 0, bytes.length);
+        blob.setDataPosition(0);
+
+        final int uidCount = blob.readInt();
         mUidBatteryConsumers = new ArrayList<>(uidCount);
         for (int i = 0; i < uidCount; i++) {
             final UidBatteryConsumer consumer =
-                    UidBatteryConsumer.CREATOR.createFromParcel(source);
+                    UidBatteryConsumer.CREATOR.createFromParcel(blob);
             consumer.setCustomPowerComponentNames(mCustomPowerComponentNames);
             mUidBatteryConsumers.add(consumer);
         }
+        blob.recycle();
+
         int userCount = source.readInt();
         mUserBatteryConsumers = new ArrayList<>(userCount);
         for (int i = 0; i < userCount; i++) {
@@ -323,14 +332,10 @@ public final class BatteryUsageStats implements Parcelable {
             mUserBatteryConsumers.add(consumer);
         }
         if (source.readBoolean()) {
-            mHistoryBuffer = Parcel.obtain();
-            mHistoryBuffer.setDataSize(0);
-            mHistoryBuffer.setDataPosition(0);
+            final byte[] historyBlob = source.readBlob();
 
-            int historyBufferSize = source.readInt();
-            int curPos = source.dataPosition();
-            mHistoryBuffer.appendFrom(source, curPos, historyBufferSize);
-            source.setDataPosition(curPos + historyBufferSize);
+            mHistoryBuffer = Parcel.obtain();
+            mHistoryBuffer.unmarshall(historyBlob, 0, historyBlob.length);
 
             int historyTagCount = source.readInt();
             mHistoryTagPool = new ArrayList<>(historyTagCount);
@@ -362,21 +367,26 @@ public final class BatteryUsageStats implements Parcelable {
         for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
             mAggregateBatteryConsumers[i].writeToParcel(dest, flags);
         }
-        dest.writeInt(mUidBatteryConsumers.size());
+
+        // UidBatteryConsumers are included as a blob, because each UidBatteryConsumer
+        // takes > 300 bytes, so a typical number of UIDs in the system, 300 would result
+        // in a 90 kB Parcel, which is not safe to pass in a binder transaction because
+        // of the possibility of TransactionTooLargeException
+        final Parcel blob = Parcel.obtain();
+        blob.writeInt(mUidBatteryConsumers.size());
         for (int i = mUidBatteryConsumers.size() - 1; i >= 0; i--) {
-            mUidBatteryConsumers.get(i).writeToParcel(dest, flags);
+            mUidBatteryConsumers.get(i).writeToParcel(blob, flags);
         }
+        dest.writeBlob(blob.marshall());
+        blob.recycle();
+
         dest.writeInt(mUserBatteryConsumers.size());
         for (int i = mUserBatteryConsumers.size() - 1; i >= 0; i--) {
             mUserBatteryConsumers.get(i).writeToParcel(dest, flags);
         }
         if (mHistoryBuffer != null) {
             dest.writeBoolean(true);
-
-            final int historyBufferSize = mHistoryBuffer.dataSize();
-            dest.writeInt(historyBufferSize);
-            dest.appendFrom(mHistoryBuffer, 0, historyBufferSize);
-
+            dest.writeBlob(mHistoryBuffer.marshall());
             dest.writeInt(mHistoryTagPool.size());
             for (int i = mHistoryTagPool.size() - 1; i >= 0; i--) {
                 final BatteryStats.HistoryTag tag = mHistoryTagPool.get(i);

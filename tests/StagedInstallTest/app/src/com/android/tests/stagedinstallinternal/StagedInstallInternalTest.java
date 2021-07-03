@@ -179,6 +179,26 @@ public class StagedInstallInternalTest {
         assertThat(info.isStagedSessionFailed()).isTrue();
     }
 
+    @Test
+    public void testApexActivationFailureIsCapturedInSession_Commit() throws Exception {
+        int sessionId = Install.single(TestApp.Apex1).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testApexActivationFailureIsCapturedInSession_Verify() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        assertSessionFailedWithMessage(sessionId, "has unexpected SHA512 hash");
+    }
+
+    private static void assertSessionFailedWithMessage(int sessionId, String msg) {
+        assertSessionState(sessionId, (session) -> {
+            assertThat(session.isStagedSessionFailed()).isTrue();
+            assertThat(session.getStagedSessionErrorMessage()).contains(msg);
+        });
+    }
+
     private static void assertSessionReady(int sessionId) {
         assertSessionState(sessionId,
                 (session) -> assertThat(session.isStagedSessionReady()).isTrue());

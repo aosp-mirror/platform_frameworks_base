@@ -669,7 +669,10 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Legg til en betalingsmåte for å gjennomføre kjøp raskere og sikrere med telefonen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Vis alle"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lås opp for å betale"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ikke konfigurert"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv igjen senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
@@ -1034,8 +1037,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstørr en del av skjermen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Bytt"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tilgjengelighet-knappen har erstattet tilgjengelighetsbevegelsen\n\n"<annotation id="link">"Se innstillingene"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Du kan bytte fra tilgjengelighetsbevegelsen til en knapp\n\n"<annotation id="link">"Innstillinger"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytt knappen til kanten for å skjule den midlertidig"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Flytt til øverst til venstre"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Flytt til øverst til høyre"</string>
@@ -1116,7 +1118,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Åpen samtale"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Samtalemoduler"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Trykk på en samtale for å legge den til på startskjermen"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Sjekk her igjen når du mottar noen meldinger"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"De nylige samtalene dine vises her"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriterte samtaler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nylige samtaler"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>
@@ -1145,8 +1147,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se nylige meldinger, tapte anrop og statusoppdateringer"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Samtale"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> har sendt en melding"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Satt på pause av «Ikke forstyrr»"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> har sendt et bilde"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Kunne ikke lese batterimåleren"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Trykk for å få mer informasjon"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ingen alarm angitt"</string>

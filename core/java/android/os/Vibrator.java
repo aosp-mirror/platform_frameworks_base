@@ -126,6 +126,7 @@ public abstract class Vibrator {
     // The default vibration intensity level for ringtones.
     @VibrationIntensity
     private int mDefaultRingVibrationIntensity;
+    private float mHapticChannelMaxVibrationAmplitude;
 
     /**
      * @hide to prevent subclassing from outside of the framework
@@ -134,7 +135,7 @@ public abstract class Vibrator {
     public Vibrator() {
         mPackageName = ActivityThread.currentPackageName();
         final Context ctx = ActivityThread.currentActivityThread().getSystemContext();
-        loadVibrationIntensities(ctx);
+        loadVibrationConfig(ctx);
     }
 
     /**
@@ -142,20 +143,26 @@ public abstract class Vibrator {
      */
     protected Vibrator(Context context) {
         mPackageName = context.getOpPackageName();
-        loadVibrationIntensities(context);
+        loadVibrationConfig(context);
     }
 
-    private void loadVibrationIntensities(Context context) {
+    private void loadVibrationConfig(Context context) {
         mDefaultHapticFeedbackIntensity = loadDefaultIntensity(context,
                 com.android.internal.R.integer.config_defaultHapticFeedbackIntensity);
         mDefaultNotificationVibrationIntensity = loadDefaultIntensity(context,
                 com.android.internal.R.integer.config_defaultNotificationVibrationIntensity);
         mDefaultRingVibrationIntensity = loadDefaultIntensity(context,
                 com.android.internal.R.integer.config_defaultRingVibrationIntensity);
+        mHapticChannelMaxVibrationAmplitude = loadFloat(context,
+                com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude, 0);
     }
 
     private int loadDefaultIntensity(Context ctx, int resId) {
         return ctx != null ? ctx.getResources().getInteger(resId) : VIBRATION_INTENSITY_MEDIUM;
+    }
+
+    private float loadFloat(Context ctx, int resId, float defaultValue) {
+        return ctx != null ? ctx.getResources().getFloat(resId) : defaultValue;
     }
 
     /** @hide */
@@ -294,6 +301,24 @@ public abstract class Vibrator {
     @FloatRange(from = 0, to = 1)
     public float getMaximumAmplitude(float relativeFrequency) {
         return getInfo().getMaxAmplitude(relativeFrequency);
+    }
+
+    /**
+     * Return the maximum amplitude the vibrator can play using the audio haptic channels.
+     *
+     * <p>This is a positive value, or {@link Float#NaN NaN} if it's unknown. If this returns a
+     * positive value <code>maxAmplitude</code>, then the signals from the haptic channels of audio
+     * tracks should be in the range <code>[-maxAmplitude, maxAmplitude]</code>.
+     *
+     * @return a positive value representing the maximum absolute value the device can play signals
+     * from audio haptic channels, or {@link Float#NaN NaN} if it's unknown.
+     * @hide
+     */
+    public float getHapticChannelMaximumAmplitude() {
+        if (mHapticChannelMaxVibrationAmplitude <= 0) {
+            return Float.NaN;
+        }
+        return mHapticChannelMaxVibrationAmplitude;
     }
 
     /**

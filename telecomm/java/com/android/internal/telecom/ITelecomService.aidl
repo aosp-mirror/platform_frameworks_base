@@ -79,7 +79,7 @@ interface ITelecomService {
     /**
      * @see TelecomManager#getPhoneAccount
      */
-    PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
+    PhoneAccount getPhoneAccount(in PhoneAccountHandle account, String callingPackage);
 
     /**
      * @see TelecomManager#getAllPhoneAccountsCount

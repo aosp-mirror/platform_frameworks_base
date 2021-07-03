@@ -36,7 +36,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -62,7 +61,6 @@ import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Context.CreatePackageOptions;
 import android.content.IContentProvider;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -73,7 +71,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
@@ -447,7 +444,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @GuardedBy("mLock")
         ContentProviderHolder mHolder; // Temp holder to be used between notifier and waiter
-        Object mLock; // The lock to be used to get notified when the provider is ready
+        final Object mLock; // The lock to be used to get notified when the provider is ready
 
         public ProviderKey(String authority, int userId) {
             this.authority = authority;
@@ -1172,6 +1169,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
+            mResourcesManager.appendPendingAppInfoUpdate(new String[]{ai.sourceDir}, ai);
             mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai);
             sendMessage(H.APPLICATION_INFO_CHANGED, ai);
         }
@@ -1827,11 +1825,14 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void notifyContentProviderPublishStatus(@NonNull ContentProviderHolder holder,
-                @NonNull String auth, int userId, boolean published) {
-            final ProviderKey key = getGetProviderKey(auth, userId);
-            synchronized (key.mLock) {
-                key.mHolder = holder;
-                key.mLock.notifyAll();
+                @NonNull String authorities, int userId, boolean published) {
+            final String auths[] = authorities.split(";");
+            for (String auth: auths) {
+                final ProviderKey key = getGetProviderKey(auth, userId);
+                synchronized (key.mLock) {
+                    key.mHolder = holder;
+                    key.mLock.notifyAll();
+                }
             }
         }
 
@@ -2373,22 +2374,16 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            @CreatePackageOptions int flags) {
+            int flags) {
         return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
     }
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            @CreatePackageOptions int flags, @UserIdInt int userId) {
-        return getPackageInfo(packageName, compatInfo, flags, userId, 0 /* packageFlags */);
-    }
-
-    public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            @CreatePackageOptions int flags, @UserIdInt int userId,
-            @ApplicationInfoFlags int packageFlags) {
+            int flags, int userId) {
         final boolean differentUser = (UserHandle.myUserId() != userId);
         ApplicationInfo ai = PackageManager.getApplicationInfoAsUserCached(
                 packageName,
-                packageFlags | PackageManager.GET_SHARED_LIBRARY_FILES
+                PackageManager.GET_SHARED_LIBRARY_FILES
                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId < 0) ? UserHandle.myUserId() : userId);
         synchronized (mResourcesManager) {
@@ -2431,7 +2426,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(trackingBug = 171933273)
     public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
-            @CreatePackageOptions int flags) {
+            int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
                 && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
@@ -6006,16 +6001,12 @@ public final class ActivityThread extends ClientTransactionHandler
             resApk = ref != null ? ref.get() : null;
         }
 
-        final String[] oldResDirs = new String[2];
-
         if (apk != null) {
-            oldResDirs[0] = apk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
             apk.updateApplicationInfo(ai, oldPaths);
         }
         if (resApk != null) {
-            oldResDirs[1] = resApk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
@@ -6023,7 +6014,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
-            mResourcesManager.applyNewResourceDirs(ai, oldResDirs);
+            mResourcesManager.applyAllPendingAppInfoUpdates();
         }
     }
 
@@ -6279,7 +6270,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
                                 synchronized (mResourcesManager) {
                                     // Update affected Resources objects to use new ResourcesImpl
-                                    mResourcesManager.applyNewResourceDirs(aInfo, oldResDirs);
+                                    mResourcesManager.appendPendingAppInfoUpdate(oldResDirs,
+                                            aInfo);
+                                    mResourcesManager.applyAllPendingAppInfoUpdates();
                                 }
                             } catch (RemoteException e) {
                             }

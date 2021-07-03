@@ -60,6 +60,7 @@ import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -113,6 +114,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private UserTracker mUserTracker;
+    @Mock private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
@@ -150,7 +152,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
         FakeSystemClock clock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(clock);
         mBgExecutor = new FakeExecutor(clock);
-        mTileQueryHelper = new TileQueryHelper(mContext, mUserTracker, mMainExecutor, mBgExecutor);
+        mTileQueryHelper = new TileQueryHelper(
+                mContext, mUserTracker, mMainExecutor, mBgExecutor, mFeatureFlags);
         mTileQueryHelper.setListener(mListener);
     }
 

@@ -117,13 +117,14 @@ def get_emoji_map(font):
     reverse_cmap = {glyph: code for code, glyph in emoji_map.items() if not contains_pua(code) }
 
     # Add variation sequences
-    vs_dict = get_variation_sequences_cmap(font).uvsDict
-    for vs in vs_dict:
-        for base, glyph in vs_dict[vs]:
-            if glyph is None:
-                emoji_map[(base, vs)] = emoji_map[base]
-            else:
-                emoji_map[(base, vs)] = glyph
+    vs_cmap = get_variation_sequences_cmap(font)
+    if vs_cmap:
+        for vs in vs_cmap.uvsDict:
+            for base, glyph in vs_cmap.uvsDict[vs]:
+                if glyph is None:
+                    emoji_map[(base, vs)] = emoji_map[base]
+                else:
+                    emoji_map[(base, vs)] = glyph
 
     # Add GSUB rules
     ttfont = open_font(font)
@@ -310,17 +311,12 @@ def parse_fonts_xml(fonts_xml_path):
 
 
 def check_emoji_coverage(all_emoji, equivalent_emoji):
-    emoji_font = get_emoji_font()
-    check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji)
+    emoji_fonts = get_emoji_fonts()
+    check_emoji_font_coverage(emoji_fonts, all_emoji, equivalent_emoji)
 
 
-def get_emoji_font():
-    emoji_fonts = [
-        record.font for record in _all_fonts
-        if 'Zsye' in record.scripts]
-    assert len(emoji_fonts) == 1, 'There are %d emoji fonts.' % len(emoji_fonts)
-    return emoji_fonts[0]
-
+def get_emoji_fonts():
+    return [ record.font for record in _all_fonts if 'Zsye' in record.scripts ]
 
 def is_pua(x):
     return 0xE000 <= x <= 0xF8FF or 0xF0000 <= x <= 0xFFFFD or 0x100000 <= x <= 0x10FFFD
@@ -331,58 +327,71 @@ def contains_pua(sequence):
   else:
     return is_pua(sequence)
 
+def get_psname(ttf):
+    return str(next(x for x in ttf['name'].names
+        if x.platformID == 3 and x.platEncID == 1 and x.nameID == 6))
 
 def check_emoji_compat():
-    ttf = open_font(get_emoji_font())
-    meta = ttf['meta']
-    assert meta, 'Compat font must have meta table'
-    assert 'Emji' in meta.data, 'meta table should have \'Emji\' data.'
+    for emoji_font in get_emoji_fonts():
+        ttf = open_font(emoji_font)
+        psname = get_psname(ttf)
 
-def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
-    coverage = get_emoji_map(emoji_font)
+        # If the font file is NotoColorEmoji, it must be Compat font.
+        if psname == 'NotoColorEmoji':
+            meta = ttf['meta']
+            assert meta, 'Compat font must have meta table'
+            assert 'Emji' in meta.data, 'meta table should have \'Emji\' data.'
+
+def check_emoji_font_coverage(emoji_fonts, all_emoji, equivalent_emoji):
+    coverages = []
+    for emoji_font in emoji_fonts:
+        coverages.append(get_emoji_map(emoji_font))
 
     errors = []
 
     for sequence in all_emoji:
-        if not sequence in coverage:
-          errors.append('%s is not supported in the emoji font.' % printable(sequence))
+        if all([sequence not in coverage for coverage in coverages]):
+            errors.append('%s is not supported in the emoji font.' % printable(sequence))
 
-    for sequence in coverage:
-        if sequence in {0x0000, 0x000D, 0x0020}:
-            # The font needs to support a few extra characters, which is OK
-            continue
+    for coverage in coverages:
+        for sequence in coverage:
+            if sequence in {0x0000, 0x000D, 0x0020}:
+                # The font needs to support a few extra characters, which is OK
+                continue
 
-        if contains_pua(sequence):
-            # The font needs to have some PUA for EmojiCompat library.
-            continue
+            if contains_pua(sequence):
+                # The font needs to have some PUA for EmojiCompat library.
+                continue
 
-        if sequence not in all_emoji:
-          errors.append('%s support unexpected in the emoji font.' % printable(sequence))
+            if sequence not in all_emoji:
+                errors.append('%s support unexpected in the emoji font.' % printable(sequence))
 
     for first, second in equivalent_emoji.items():
-        if first not in coverage or second not in coverage:
-            continue  # sequence will be reported missing
-        if coverage[first] != coverage[second]:
-            errors.append('%s and %s should map to the same glyph.' % (
-                printable(first),
-                printable(second)))
+        for coverage in coverages:
+            if first not in coverage or second not in coverage:
+                continue  # sequence will be reported missing
+            if coverage[first] != coverage[second]:
+                errors.append('%s and %s should map to the same glyph.' % (
+                    printable(first),
+                    printable(second)))
 
-    for glyph in set(coverage.values()):
-        maps_to_glyph = [
-            seq for seq in coverage if coverage[seq] == glyph and not contains_pua(seq) ]
-        if len(maps_to_glyph) > 1:
-            # There are more than one sequences mapping to the same glyph. We
-            # need to make sure they were expected to be equivalent.
-            equivalent_seqs = set()
-            for seq in maps_to_glyph:
-                equivalent_seq = seq
-                while equivalent_seq in equivalent_emoji:
-                    equivalent_seq = equivalent_emoji[equivalent_seq]
-                equivalent_seqs.add(equivalent_seq)
-            if len(equivalent_seqs) != 1:
-                errors.append('The sequences %s should not result in the same glyph %s' % (
-                    printable(equivalent_seqs),
-                    glyph))
+    for coverage in coverages:
+        for glyph in set(coverage.values()):
+            maps_to_glyph = [
+                seq for seq in coverage if coverage[seq] == glyph and not contains_pua(seq) ]
+            if len(maps_to_glyph) > 1:
+                # There are more than one sequences mapping to the same glyph. We
+                # need to make sure they were expected to be equivalent.
+                equivalent_seqs = set()
+                for seq in maps_to_glyph:
+                    equivalent_seq = seq
+                    while equivalent_seq in equivalent_emoji:
+                        equivalent_seq = equivalent_emoji[equivalent_seq]
+                    equivalent_seqs.add(equivalent_seq)
+                if len(equivalent_seqs) != 1:
+                    errors.append('The sequences %s should not result in the same glyph %s' % (
+                        printable(equivalent_seqs),
+                        glyph))
 
     assert not errors, '%d emoji font errors:\n%s\n%d emoji font coverage errors' % (len(errors), '\n'.join(errors), len(errors))
 

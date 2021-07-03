@@ -14,7 +14,8 @@ android_library {
     resource_dirs: ["res"],
 
     static_libs: [
-          "androidx.preference_preference",
+        "androidx.preference_preference",
+        "SettingsLibUtils",
     ],
 
     sdk_version: "system_current",

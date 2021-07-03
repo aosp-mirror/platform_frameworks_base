@@ -22,7 +22,6 @@ import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -55,11 +54,8 @@ import java.util.Random;
 public final class PlatformLogger implements AppSearchLogger {
     private static final String TAG = "AppSearchPlatformLogger";
 
-    // Context of the system service.
-    private final Context mContext;
-
-    // User we're logging for.
-    private final UserHandle mUserHandle;
+    // Context of the user we're logging for.
+    private final Context mUserContext;
 
     // Manager holding the configuration flags
     private final AppSearchConfig mConfig;
@@ -120,10 +116,9 @@ public final class PlatformLogger implements AppSearchLogger {
      * Westworld constructor
      */
     public PlatformLogger(
-            @NonNull Context context, @NonNull UserHandle userHandle,
+            @NonNull Context userContext,
             @NonNull AppSearchConfig config) {
-        mContext = Objects.requireNonNull(context);
-        mUserHandle = Objects.requireNonNull(userHandle);
+        mUserContext = Objects.requireNonNull(userContext);
         mConfig = Objects.requireNonNull(config);
     }
 
@@ -451,7 +446,7 @@ public final class PlatformLogger implements AppSearchLogger {
     private int getPackageUidAsUserLocked(@NonNull String packageName) {
         Integer packageUid = mPackageUidCacheLocked.get(packageName);
         if (packageUid == null) {
-            packageUid = PackageUtil.getPackageUidAsUser(mContext, packageName, mUserHandle);
+            packageUid = PackageUtil.getPackageUid(mUserContext, packageName);
             if (packageUid != Process.INVALID_UID) {
                 mPackageUidCacheLocked.put(packageName, packageUid);
             }

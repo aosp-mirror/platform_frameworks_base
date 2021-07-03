@@ -307,6 +307,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runLogVisibility();
                 case "bypass-staged-installer-check":
                     return runBypassStagedInstallerCheck();
+                case "bypass-allowed-apex-update-check":
+                    return runBypassAllowedApexUpdateCheck();
                 case "set-silent-updates-policy":
                     return runSetSilentUpdatesPolicy();
                 default: {
@@ -415,6 +417,20 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             mInterface.getPackageInstaller()
                     .bypassNextStagedInstallerCheck(Boolean.parseBoolean(getNextArg()));
+            return 0;
+        } catch (RemoteException e) {
+            pw.println("Failure ["
+                    + e.getClass().getName() + " - "
+                    + e.getMessage() + "]");
+            return -1;
+        }
+    }
+
+    private int runBypassAllowedApexUpdateCheck() {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            mInterface.getPackageInstaller()
+                    .bypassNextAllowedApexUpdateCheck(Boolean.parseBoolean(getNextArg()));
             return 0;
         } catch (RemoteException e) {
             pw.println("Failure ["

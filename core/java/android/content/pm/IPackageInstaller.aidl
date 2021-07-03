@@ -62,6 +62,8 @@ interface IPackageInstaller {
 
     void bypassNextStagedInstallerCheck(boolean value);
 
+    void bypassNextAllowedApexUpdateCheck(boolean value);
+
     void setAllowUnlimitedSilentUpdates(String installerPackageName);
     void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
 }

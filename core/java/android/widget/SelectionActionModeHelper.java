@@ -565,6 +565,7 @@ public final class SelectionActionModeHelper {
          */
         public void onSmartSelection(SelectionResult result) {
             onClassifiedSelection(result);
+            mTextView.notifyContentCaptureTextChanged();
             mLogger.logSelectionModified(
                     result.mStart, result.mEnd, result.mClassification, result.mSelection);
         }
@@ -595,6 +596,7 @@ public final class SelectionActionModeHelper {
                 mSelectionStart = selectionStart;
                 mSelectionEnd = selectionEnd;
                 mAllowReset = false;
+                mTextView.notifyContentCaptureTextChanged();
                 mLogger.logSelectionModified(selectionStart, selectionEnd, classification, null);
             }
         }
@@ -604,6 +606,7 @@ public final class SelectionActionModeHelper {
          */
         public void onSelectionDestroyed() {
             mAllowReset = false;
+            mTextView.notifyContentCaptureTextChanged();
             // Wait a few ms to see if the selection was destroyed because of a text change event.
             mDelayedLogAbandon.schedule(100 /* ms */);
         }

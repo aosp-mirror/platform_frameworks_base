@@ -114,6 +114,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -165,6 +166,8 @@ public class AppStandbyControllerTests {
 
     /** Mock variable used in {@link MyInjector#isPackageInstalled(String, int, int)} */
     private static boolean isPackageInstalled = true;
+
+    private static final Random sRandom = new Random();
 
     private MyInjector mInjector;
     private AppStandbyController mController;
@@ -294,7 +297,7 @@ public class AppStandbyControllerTests {
 
         @Override
         File getDataSystemDirectory() {
-            return new File(getContext().getFilesDir(), Long.toString(Math.randomLongInternal()));
+            return new File(getContext().getFilesDir(), Long.toString(sRandom.nextLong()));
         }
 
         @Override
@@ -1176,6 +1179,36 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_ACTIVE);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    /**
+     * Test that an app that "timed out" into the RESTRICTED bucket can be raised out by system
+     * interaction.
+     */
+    @Test
+    public void testSystemInteractionOverridesRestrictedTimeout() throws Exception {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Long enough that it could have timed out into RESTRICTED.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Report system interaction.
+        mInjector.mElapsedRealtime += 1000;
+        reportEvent(mController, SYSTEM_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Ensure that it's raised out of RESTRICTED for the system interaction elevation duration.
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+        mInjector.mElapsedRealtime += 1000;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Elevation duration over. Should fall back down.
+        mInjector.mElapsedRealtime += 10 * MINUTE_MS;
+        mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
 

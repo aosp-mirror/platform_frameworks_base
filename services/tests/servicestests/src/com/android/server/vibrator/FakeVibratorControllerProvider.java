@@ -56,6 +56,8 @@ final class FakeVibratorControllerProvider {
     private int[] mSupportedEffects;
     private int[] mSupportedBraking;
     private int[] mSupportedPrimitives;
+    private int mCompositionSizeMax;
+    private int mPwleSizeMax;
     private float mMinFrequency = Float.NaN;
     private float mResonantFrequency = Float.NaN;
     private float mFrequencyResolution = Float.NaN;
@@ -151,12 +153,22 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public VibratorInfo getInfo(float suggestedFrequencyRange) {
-            VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
-                    mMinFrequency, mResonantFrequency, mFrequencyResolution,
-                    suggestedFrequencyRange, mMaxAmplitudes);
-            return new VibratorInfo(vibratorId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                    mSupportedPrimitives, null, mQFactor, frequencyMapping);
+        public boolean getInfo(float suggestedFrequencyRange, VibratorInfo.Builder infoBuilder) {
+            infoBuilder.setCapabilities(mCapabilities);
+            infoBuilder.setSupportedBraking(mSupportedBraking);
+            infoBuilder.setPwleSizeMax(mPwleSizeMax);
+            infoBuilder.setSupportedEffects(mSupportedEffects);
+            if (mSupportedPrimitives != null) {
+                for (int primitive : mSupportedPrimitives) {
+                    infoBuilder.setSupportedPrimitive(primitive, EFFECT_DURATION);
+                }
+            }
+            infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
+            infoBuilder.setQFactor(mQFactor);
+            infoBuilder.setFrequencyMapping(new VibratorInfo.FrequencyMapping(mMinFrequency,
+                    mResonantFrequency, mFrequencyResolution, suggestedFrequencyRange,
+                    mMaxAmplitudes));
+            return true;
         }
 
         private void applyLatency() {
@@ -234,6 +246,16 @@ final class FakeVibratorControllerProvider {
             Arrays.sort(primitives);
         }
         mSupportedPrimitives = primitives;
+    }
+
+    /** Set the max number of primitives allowed in a composition by the fake vibrator hardware. */
+    public void setCompositionSizeMax(int compositionSizeMax) {
+        mCompositionSizeMax = compositionSizeMax;
+    }
+
+    /** Set the max number of PWLEs allowed in a composition by the fake vibrator hardware. */
+    public void setPwleSizeMax(int pwleSizeMax) {
+        mPwleSizeMax = pwleSizeMax;
     }
 
     /** Set the resonant frequency of the fake vibrator hardware. */

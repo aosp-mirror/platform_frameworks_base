@@ -43,6 +43,7 @@ import static android.app.people.PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS;
 import static android.app.people.PeopleSpaceTile.SHOW_STARRED_CONTACTS;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_PACKAGES_SUSPENDED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.PermissionChecker.PERMISSION_GRANTED;
 import static android.content.PermissionChecker.PERMISSION_HARD_DENIED;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE;
@@ -72,6 +73,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Person;
+import android.app.backup.BackupManager;
 import android.app.people.ConversationChannel;
 import android.app.people.ConversationStatus;
 import android.app.people.IPeopleManager;
@@ -88,7 +90,6 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.ConversationChannelWrapper;
@@ -102,7 +103,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;
+import com.android.systemui.people.SharedPreferencesHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.SbnBuilder;
@@ -141,6 +144,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE_A = "com.android.systemui.tests";
     private static final String TEST_PACKAGE_B = "com.test.package_b";
+    private static final String TEST_PACKAGE_C = "com.test.package_c";
     private static final String TEST_CHANNEL_ID = "channel_id";
     private static final String TEST_CHANNEL_NAME = "channel_name";
     private static final String TEST_PARENT_CHANNEL_ID = "parent_channel_id";
@@ -151,8 +155,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private static final int WIDGET_ID_WITH_KEY_IN_OPTIONS = 4;
     private static final int WIDGET_ID_WITH_SAME_URI = 5;
     private static final int WIDGET_ID_WITH_DIFFERENT_URI = 6;
+    private static final int WIDGET_ID_8 = 8;
+    private static final int WIDGET_ID_9 = 9;
+    private static final int WIDGET_ID_11 = 11;
+    private static final int WIDGET_ID_14 = 14;
+    private static final int WIDGET_ID_15 = 15;
     private static final String SHORTCUT_ID = "101";
     private static final String OTHER_SHORTCUT_ID = "102";
+    private static final String THIRD_SHORTCUT_ID = "103";
     private static final String NOTIFICATION_KEY = "0|com.android.systemui.tests|0|null|0";
     private static final String NOTIFICATION_CONTENT_1 = "message text 1";
     private static final Uri URI = Uri.parse("fake_uri");
@@ -195,6 +205,20 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             | SUPPRESSED_EFFECT_NOTIFICATION_LIST;
     private static final long SBN_POST_TIME = 567L;
 
+    private static final Map<String, String> WIDGETS_MAPPING = Map.of(
+            String.valueOf(WIDGET_ID_8), String.valueOf(WIDGET_ID_WITH_SHORTCUT),
+            String.valueOf(WIDGET_ID_9), String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT),
+            String.valueOf(WIDGET_ID_11), String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS),
+            String.valueOf(WIDGET_ID_14), String.valueOf(WIDGET_ID_WITH_SAME_URI),
+            String.valueOf(WIDGET_ID_15), String.valueOf(WIDGET_ID_WITH_DIFFERENT_URI)
+    );
+
+    private static final Map<String, String> WIDGETS_MAPPING_CROSS_MAPPING = Map.of(
+            String.valueOf(WIDGET_ID_WITH_SHORTCUT), String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS),
+            String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT), String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT),
+            String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS), String.valueOf(WIDGET_ID_WITH_SHORTCUT)
+    );
+
     private ShortcutInfo mShortcutInfo;
     private NotificationEntry mNotificationEntry;
 
@@ -228,6 +252,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private NotificationManager.Policy mNotificationPolicy;
     @Mock
     private Bubbles mBubbles;
+    @Mock
+    private BackupManager mBackupManager;
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
@@ -246,8 +272,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mManager = new PeopleSpaceWidgetManager(mContext, mAppWidgetManager, mIPeopleManager,
                 mPeopleManager, mLauncherApps, mNotificationEntryManager, mPackageManager,
-                Optional.of(mBubbles), mUserManager, mINotificationManager, mNotificationManager,
-                mFakeExecutor);
+                Optional.of(mBubbles), mUserManager, mBackupManager, mINotificationManager,
+                mNotificationManager, mFakeExecutor);
         mManager.attach(mListenerService);
 
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
@@ -1104,7 +1130,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetPeopleTileFromPersistentStorageNoConversation() throws RemoteException {
+    public void testGetPeopleTileFromPersistentStorageNoConversation() throws Exception {
         when(mIPeopleManager.getConversation(TEST_PACKAGE_A, 0, SHORTCUT_ID)).thenReturn(null);
         PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
         PeopleSpaceTile tile = mManager.getTileFromPersistentStorage(key, WIDGET_ID_WITH_SHORTCUT);
@@ -1223,8 +1249,38 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChange() {
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+    public void testUpdateWidgetsFromBroadcastInBackgroundBootCompleteWithPackageUninstalled()
+            throws Exception {
+        when(mPackageManager.getApplicationInfoAsUser(any(), anyInt(), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+
+        // We should remove widgets if the package is uninstalled at next reboot if we missed the
+        // package removed broadcast.
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
+
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
+        assertThat(tile).isNull();
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+    }
+
+    @Test
+    public void testUpdateWidgetsFromBroadcastInBackgroundPackageRemovedWithPackageUninstalled()
+            throws Exception {
+        when(mPackageManager.getApplicationInfoAsUser(any(), anyInt(), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_PACKAGE_REMOVED);
+
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
+        assertThat(tile).isNull();
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+    }
+
+    @Test
+    public void testUpdateWidgetsFromBroadcastInBackground() {
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isFalse();
@@ -1236,10 +1292,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeWithUserQuieted() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundWithUserQuieted() {
         when(mUserManager.isQuietModeEnabled(any())).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isFalse();
@@ -1248,10 +1304,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeWithPackageSuspended() throws Exception {
+    public void testUpdateWidgetsFromBroadcastInBackgroundWithPackageSuspended() throws Exception {
         when(mPackageManager.isPackageSuspended(any())).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_PACKAGES_SUSPENDED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_PACKAGES_SUSPENDED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isTrue();
@@ -1260,9 +1316,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeNotInDnd() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundNotInDnd() {
         int expected = 0;
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1270,14 +1326,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllConversations() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllConversations() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
         when(mNotificationPolicy.allowConversations()).thenReturn(true);
         setFinalField("priorityConversationSenders", CONVERSATION_SENDERS_ANYONE);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1285,7 +1341,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowOnlyImportantConversations() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowOnlyImportantConversations() {
         int expected = 0;
         // Only allow important conversations.
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
@@ -1293,7 +1349,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mNotificationPolicy.allowConversations()).thenReturn(true);
         setFinalField("priorityConversationSenders", CONVERSATION_SENDERS_IMPORTANT);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1302,13 +1358,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowNoConversations() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowNoConversations() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
         when(mNotificationPolicy.allowConversations()).thenReturn(false);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1316,7 +1372,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowNoConversationsAllowContactMessages() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowNoConversationsAllowContactMessages() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
@@ -1324,14 +1380,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mNotificationPolicy.allowMessagesFrom()).thenReturn(ZenModeConfig.SOURCE_CONTACT);
         when(mNotificationPolicy.allowMessages()).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONTACTS);
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowNoConversationsAllowStarredContactMessages() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowNoConversationsAllowStarredContactMessages() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
@@ -1339,26 +1395,26 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mNotificationPolicy.allowMessagesFrom()).thenReturn(ZenModeConfig.SOURCE_STAR);
         when(mNotificationPolicy.allowMessages()).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_STARRED_CONTACTS);
 
         setFinalField("suppressedVisualEffects", SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                 | SUPPRESSED_EFFECT_AMBIENT);
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowAlarmsOnly() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowAlarmsOnly() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_ALARMS);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1366,7 +1422,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowVisualEffectsAndAllowAlarmsOnly() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowVisualEffectsAndAllowAlarmsOnly() {
         int expected = 0;
         // If we show visuals, but just only make sounds for alarms, still show content in tiles.
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
@@ -1374,10 +1430,120 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         setFinalField("suppressedVisualEffects", SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                 | SUPPRESSED_EFFECT_AMBIENT);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
+    }
+
+    @Test
+    public void testRemapWidgetFiles() {
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_8, URI);
+        setStorageForTile(OTHER_SHORTCUT_ID, TEST_PACKAGE_B, WIDGET_ID_11, URI);
+
+        mManager.remapWidgetFiles(WIDGETS_MAPPING);
+
+        SharedPreferences sp1 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT), Context.MODE_PRIVATE);
+        PeopleTileKey key1 = SharedPreferencesHelper.getPeopleTileKey(sp1);
+        assertThat(key1.getShortcutId()).isEqualTo(SHORTCUT_ID);
+        assertThat(key1.getPackageName()).isEqualTo(TEST_PACKAGE_A);
+
+        SharedPreferences sp4 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS), Context.MODE_PRIVATE);
+        PeopleTileKey key4 = SharedPreferencesHelper.getPeopleTileKey(sp4);
+        assertThat(key4.getShortcutId()).isEqualTo(OTHER_SHORTCUT_ID);
+        assertThat(key4.getPackageName()).isEqualTo(TEST_PACKAGE_B);
+
+        SharedPreferences sp8 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_8), Context.MODE_PRIVATE);
+        PeopleTileKey key8 = SharedPreferencesHelper.getPeopleTileKey(sp8);
+        assertThat(key8.getShortcutId()).isNull();
+        assertThat(key8.getPackageName()).isNull();
+
+        SharedPreferences sp11 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_11), Context.MODE_PRIVATE);
+        PeopleTileKey key11 = SharedPreferencesHelper.getPeopleTileKey(sp11);
+        assertThat(key11.getShortcutId()).isNull();
+        assertThat(key11.getPackageName()).isNull();
+    }
+
+    @Test
+    public void testRemapWidgetFiles_crossMapping() {
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT, URI);
+        setStorageForTile(OTHER_SHORTCUT_ID, TEST_PACKAGE_B, WIDGET_ID_WITHOUT_SHORTCUT, URI);
+        setStorageForTile(THIRD_SHORTCUT_ID, TEST_PACKAGE_C, WIDGET_ID_WITH_KEY_IN_OPTIONS, URI);
+
+        mManager.remapWidgetFiles(WIDGETS_MAPPING_CROSS_MAPPING);
+
+        SharedPreferences sp1 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT), Context.MODE_PRIVATE);
+        PeopleTileKey key1 = SharedPreferencesHelper.getPeopleTileKey(sp1);
+        assertThat(key1.getShortcutId()).isEqualTo(THIRD_SHORTCUT_ID);
+        assertThat(key1.getPackageName()).isEqualTo(TEST_PACKAGE_C);
+
+        SharedPreferences sp2 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT), Context.MODE_PRIVATE);
+        PeopleTileKey key2 = SharedPreferencesHelper.getPeopleTileKey(sp2);
+        assertThat(key2.getShortcutId()).isEqualTo(OTHER_SHORTCUT_ID);
+        assertThat(key2.getPackageName()).isEqualTo(TEST_PACKAGE_B);
+
+        SharedPreferences sp4 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS), Context.MODE_PRIVATE);
+        PeopleTileKey key4 = SharedPreferencesHelper.getPeopleTileKey(sp4);
+        assertThat(key4.getShortcutId()).isEqualTo(SHORTCUT_ID);
+        assertThat(key4.getPackageName()).isEqualTo(TEST_PACKAGE_A);
+    }
+
+    @Test
+    public void testRemapSharedFile() {
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_8, URI);
+        setStorageForTile(OTHER_SHORTCUT_ID, TEST_PACKAGE_B, WIDGET_ID_11, URI);
+
+        mManager.remapSharedFile(WIDGETS_MAPPING);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        assertThat(sp.getString(String.valueOf(WIDGET_ID_8), null)).isNull();
+        assertThat(sp.getString(String.valueOf(WIDGET_ID_11), null)).isNull();
+        assertThat(sp.getString(String.valueOf(WIDGET_ID_WITH_SHORTCUT), null))
+                .isEqualTo(URI.toString());
+        assertThat(sp.getString(String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS), null))
+                .isEqualTo(URI.toString());
+
+        assertThat(sp.getStringSet(URI.toString(), new HashSet<>())).containsExactly(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT),
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS));
+
+        PeopleTileKey key8 = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
+        assertThat(sp.getStringSet(key8.toString(), new HashSet<>())).containsExactly(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT));
+
+        PeopleTileKey key11 = new PeopleTileKey(OTHER_SHORTCUT_ID, 0, TEST_PACKAGE_B);
+        assertThat(sp.getStringSet(key11.toString(), new HashSet<>())).containsExactly(
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS));
+    }
+
+    @Test
+    public void testRemapFollowupFile() {
+        PeopleTileKey key8 = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
+        PeopleTileKey key11 = new PeopleTileKey(OTHER_SHORTCUT_ID, 0, TEST_PACKAGE_B);
+        Set<String> set8 = new HashSet<>(Collections.singleton(String.valueOf(WIDGET_ID_8)));
+        Set<String> set11 = new HashSet<>(Collections.singleton(String.valueOf(WIDGET_ID_11)));
+
+        SharedPreferences followUp = mContext.getSharedPreferences(
+                PeopleBackupFollowUpJob.SHARED_FOLLOW_UP, Context.MODE_PRIVATE);
+        SharedPreferences.Editor followUpEditor = followUp.edit();
+        followUpEditor.putStringSet(key8.toString(), set8);
+        followUpEditor.putStringSet(key11.toString(), set11);
+        followUpEditor.apply();
+
+        mManager.remapFollowupFile(WIDGETS_MAPPING);
+
+        assertThat(followUp.getStringSet(key8.toString(), new HashSet<>())).containsExactly(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT));
+        assertThat(followUp.getStringSet(key11.toString(), new HashSet<>())).containsExactly(
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS));
     }
 
     private void setFinalField(String fieldName, int value) {

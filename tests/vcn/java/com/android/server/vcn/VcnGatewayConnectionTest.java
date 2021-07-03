@@ -24,8 +24,12 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -190,5 +194,24 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
 
         verify(mDisconnectRequestAlarm).cancel();
+    }
+
+    @Test
+    public void testQuittingCleansUpPersistentState() {
+        final VcnIkeSession vcnIkeSession = mock(VcnIkeSession.class);
+        final VcnNetworkAgent vcnNetworkAgent = mock(VcnNetworkAgent.class);
+
+        mGatewayConnection.setIkeSession(vcnIkeSession);
+        mGatewayConnection.setNetworkAgent(vcnNetworkAgent);
+
+        mGatewayConnection.quitNow();
+        mTestLooper.dispatchAll();
+
+        assertNull(mGatewayConnection.getIkeSession());
+        verify(vcnIkeSession).kill();
+        assertNull(mGatewayConnection.getNetworkAgent());
+        verify(vcnNetworkAgent).unregister();
+
+        verifyWakeLockReleased();
     }
 }

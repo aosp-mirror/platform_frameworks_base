@@ -64,7 +64,7 @@ class SecurityLogMonitor implements Runnable {
         mLastForceNanos = System.nanoTime();
     }
 
-    private static final boolean DEBUG = true;  // STOPSHIP if true.
+    private static final boolean DEBUG = false;  // STOPSHIP if true.
     private static final String TAG = "SecurityLogMonitor";
     /**
      * Each log entry can hold up to 4K bytes (but as of {@link android.os.Build.VERSION_CODES#N}
@@ -427,7 +427,7 @@ class SecurityLogMonitor implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 final boolean force = mForceSemaphore.tryAcquire(POLLING_INTERVAL_MS, MILLISECONDS);
-                if (DEBUG) Slog.d(TAG, "Retrieving next batch, force=" + force);
+
                 getNextBatch(newLogs);
 
                 mLock.lockInterruptibly();
@@ -469,11 +469,6 @@ class SecurityLogMonitor implements Runnable {
                 return;
             }
             final int logSize = mPendingLogs.size();
-            if (DEBUG) {
-                Slog.d(TAG, String.format(
-                        "notifyDeviceOwnerOrProfileOwnerIfNeeded, size: %d now: %d next: %d",
-                        logSize, SystemClock.elapsedRealtime(), mNextAllowedRetrievalTimeMillis));
-            }
             if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL || (force && logSize > 0)) {
                 // Allow DO to retrieve logs if too many pending logs or if forced.
                 if (!mAllowedToRetrieve) {
@@ -512,7 +507,6 @@ class SecurityLogMonitor implements Runnable {
         synchronized (mForceSemaphore) {
             final long toWaitNanos = mLastForceNanos + FORCE_FETCH_THROTTLE_NS - nowNanos;
             if (toWaitNanos > 0) {
-                if (DEBUG) Slog.d(TAG, "Forcing security logs throttled");
                 return NANOSECONDS.toMillis(toWaitNanos) + 1; // Round up.
             }
             mLastForceNanos = nowNanos;
@@ -521,7 +515,6 @@ class SecurityLogMonitor implements Runnable {
             if (mForceSemaphore.availablePermits() == 0) {
                 mForceSemaphore.release();
             }
-            if (DEBUG) Slog.d(TAG, "Forcing security logs semaphore released");
             return 0;
         }
     }

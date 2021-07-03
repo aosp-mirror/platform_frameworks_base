@@ -37,6 +37,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -302,8 +303,15 @@ public final class ProfcollectForwardingService extends SystemService {
             return;
         }
 
+        if (!getUploaderEnabledConfig(getContext())) {
+            return;
+        }
+
         new Thread(() -> {
             try {
+                Context context = getContext();
+                final String uploaderPkg = getUploaderPackageName(context);
+                final String uploaderAction = getUploaderActionName(context);
                 String reportUuid = mIProfcollect.report();
 
                 final int profileId = getBBProfileId();
@@ -317,13 +325,12 @@ public final class ProfcollectForwardingService extends SystemService {
                 }
 
                 Intent uploadIntent =
-                        new Intent("com.google.android.apps.betterbug.intent.action.UPLOAD_PROFILE")
-                        .setPackage("com.google.android.apps.internal.betterbug")
+                        new Intent(uploaderAction)
+                        .setPackage(uploaderPkg)
                         .putExtra("EXTRA_DESTINATION", "PROFCOLLECT")
                         .putExtra("EXTRA_PACKAGE_NAME", getContext().getPackageName())
                         .putExtra("EXTRA_PROFILE_PATH", reportPath)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                Context context = getContext();
 
                 List<ResolveInfo> receivers =
                         context.getPackageManager().queryBroadcastReceivers(uploadIntent, 0);
@@ -355,5 +362,20 @@ public final class ProfcollectForwardingService extends SystemService {
             }
         }
         return UserHandle.USER_SYSTEM;
+    }
+
+    private boolean getUploaderEnabledConfig(Context context) {
+        return context.getResources().getBoolean(
+            R.bool.config_profcollectReportUploaderEnabled);
+    }
+
+    private String getUploaderPackageName(Context context) {
+        return context.getResources().getString(
+            R.string.config_defaultProfcollectReportUploaderApp);
+    }
+
+    private String getUploaderActionName(Context context) {
+        return context.getResources().getString(
+            R.string.config_defaultProfcollectReportUploaderAction);
     }
 }

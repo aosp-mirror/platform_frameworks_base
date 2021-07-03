@@ -83,7 +83,8 @@ class MediaDataFilter @Inject constructor(
         key: String,
         oldKey: String?,
         data: MediaData,
-        immediately: Boolean
+        immediately: Boolean,
+        isSsReactivated: Boolean
     ) {
         if (oldKey != null && oldKey != key) {
             allEntries.remove(oldKey)
@@ -101,7 +102,7 @@ class MediaDataFilter @Inject constructor(
 
         // Notify listeners
         listeners.forEach {
-            it.onMediaDataLoaded(key, oldKey, data)
+            it.onMediaDataLoaded(key, oldKey, data, isSsReactivated = isSsReactivated)
         }
     }
 
@@ -118,6 +119,8 @@ class MediaDataFilter @Inject constructor(
         // Override the pass-in value here, as the order of Smartspace card is only determined here.
         var shouldPrioritizeMutable = false
         smartspaceMediaData = data
+        // Override the pass-in value here, as the Smartspace reactivation could only happen here.
+        var isSsReactivated = false
 
         // Before forwarding the smartspace target, first check if we have recently inactive media
         val sorted = userEntries.toSortedMap(compareBy {
@@ -137,9 +140,13 @@ class MediaDataFilter @Inject constructor(
             // Notify listeners to consider this media active
             Log.d(TAG, "reactivating $lastActiveKey instead of smartspace")
             reactivatedKey = lastActiveKey
+            if (MediaPlayerData.firstActiveMediaIndex() == -1) {
+                isSsReactivated = true
+            }
             val mediaData = sorted.get(lastActiveKey)!!.copy(active = true)
             listeners.forEach {
-                it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData)
+                it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData,
+                        isSsReactivated = isSsReactivated)
             }
         } else {
             // Mark to prioritize Smartspace card if no recent media.

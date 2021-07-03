@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportWidth="50"
+    android:viewportHeight="50">
+  <path
+      android:pathData="M0,24C0,10.7452 10.7452,0 24,0V0C37.2548,0 48,10.7452 48,24V24C48,37.2548 37.2548,48 24,48V48C10.7452,48 0,37.2548 0,24V24Z"
+      android:fillColor="?androidprv:attr/colorAccentSecondary"/>
+  <path
+      android:pathData="M31.2003,19.2C31.2003,23.1764 27.9767,26.4 24.0003,26.4C20.0238,26.4 16.8003,23.1764 16.8003,19.2C16.8003,15.2235 20.0238,12 24.0003,12C27.9767,12 31.2003,15.2235 31.2003,19.2ZM28.8003,19.2C28.8003,21.851 26.6513,24 24.0003,24C21.3493,24 19.2003,21.851 19.2003,19.2C19.2003,16.549 21.3493,14.4 24.0003,14.4C26.6513,14.4 28.8003,16.549 28.8003,19.2Z"
+      android:fillColor="@color/people_tile_background"
+      android:fillType="evenOdd"/>
+  <path
+      android:pathData="M24.0003,30C16.231,30 9.6114,34.5941 7.0898,41.0305C7.7041,41.6404 8.3512,42.2174 9.0282,42.7585C10.9059,36.8492 16.7964,32.4 24.0003,32.4C31.2042,32.4 37.0947,36.8492 38.9724,42.7585C39.6494,42.2174 40.2965,41.6404 40.9108,41.0305C38.3892,34.5941 31.7696,30 24.0003,30Z"
+      android:fillColor="@color/people_tile_background"/>
+  <path
+      android:pathData="M40,40m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"
+      android:fillColor="?androidprv:attr/colorAccentTertiary"/>
+</vector>

@@ -66,6 +66,7 @@ public class BatteryUsageStatsRule implements TestRule {
         mMockClocks.currentTime = currentTime;
         mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
         mBatteryStats.setPowerProfile(mPowerProfile);
+        mBatteryStats.onSystemReady();
     }
 
     public BatteryUsageStatsRule setAveragePower(String key, double value) {

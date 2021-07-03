@@ -31,6 +31,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mCellMarginVertical;
     protected int mSidePadding;
     protected int mRows = 1;
+    protected boolean mLastRowPadding = false;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected boolean mListening;
@@ -167,6 +168,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         }
 
         int height = (mCellHeight + mCellMarginVertical) * mRows;
+        if (!mLastRowPadding) {
+            height -= mCellMarginVertical;
+        }
+
         if (height < 0) height = 0;
 
         setMeasuredDimension(width, height);

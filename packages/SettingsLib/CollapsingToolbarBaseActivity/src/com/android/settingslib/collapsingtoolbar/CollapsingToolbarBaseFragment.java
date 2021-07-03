@@ -25,8 +25,10 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 /**
@@ -34,8 +36,14 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  */
 public abstract class CollapsingToolbarBaseFragment extends Fragment {
 
+    private static final float TOOLBAR_LINE_SPACING_MULTIPLIER = 1.1f;
+
+    @Nullable
+    private CoordinatorLayout mCoordinatorLayout;
     @Nullable
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @Nullable
+    private AppBarLayout mAppBarLayout;
     @NonNull
     private Toolbar mToolbar;
     @NonNull
@@ -47,7 +55,13 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
             @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.collapsing_toolbar_base_layout, container,
                 false);
+        mCoordinatorLayout = view.findViewById(R.id.content_parent);
         mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
+        mAppBarLayout = view.findViewById(R.id.app_bar);
+        if (mCollapsingToolbarLayout != null) {
+            mCollapsingToolbarLayout.setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
+        }
+        disableCollapsingToolbarLayoutScrollingBehavior();
         mToolbar = view.findViewById(R.id.action_bar);
         mContentFrameLayout = view.findViewById(R.id.content_frame);
         return view;
@@ -58,6 +72,22 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         requireActivity().setActionBar(mToolbar);
+    }
+
+    /**
+     * Return an instance of CoordinatorLayout.
+     */
+    @Nullable
+    public CoordinatorLayout getCoordinatorLayout() {
+        return mCoordinatorLayout;
+    }
+
+    /**
+     * Return an instance of app bar.
+     */
+    @Nullable
+    public AppBarLayout getAppBarLayout() {
+        return mAppBarLayout;
     }
 
     /**
@@ -74,5 +104,22 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
     @NonNull
     public FrameLayout getContentFrameLayout() {
         return mContentFrameLayout;
+    }
+
+    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+        if (mAppBarLayout == null) {
+            return;
+        }
+        final CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+        final AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
+        behavior.setDragCallback(
+                new AppBarLayout.Behavior.DragCallback() {
+                    @Override
+                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
+                        return false;
+                    }
+                });
+        params.setBehavior(behavior);
     }
 }

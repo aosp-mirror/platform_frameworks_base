@@ -22,6 +22,7 @@ import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILATI
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
 
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
@@ -288,7 +289,7 @@ public class ArtStatsLogUtils {
                             ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_UNKNOWN),
                     COMPILATION_REASON_MAP.getOrDefault(compilationReason, ArtStatsLog.
                             ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_UNKNOWN),
-                    /*timestamp_millis=*/ 0L,
+                    /*timestamp_millis=*/ SystemClock.uptimeMillis(),
                     ArtStatsLog.ART_DATUM_REPORTED__THREAD_TYPE__ART_THREAD_MAIN,
                     kind,
                     value,

@@ -649,7 +649,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected class MockAppSearchManager implements IAppSearchManager {
 
-        protected Map<String, List<PackageIdentifier>> mSchemasPackageAccessible =
+        protected Map<String, List<PackageIdentifier>> mSchemasVisibleToPackages =
                 new ArrayMap<>(1);
         private Map<String, Map<String, GenericDocument>> mDocumentMap = new ArrayMap<>(1);
 
@@ -659,19 +659,19 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
-                List<String> schemasNotPlatformSurfaceable,
-                Map<String, List<Bundle>> schemasPackageAccessibleBundles, boolean forceOverride,
+                List<String> schemasNotDisplayedBySystem,
+                Map<String, List<Bundle>> schemasVisibleToPackagesBundles, boolean forceOverride,
                 int version, UserHandle userHandle, long binderCallStartTimeMillis,
                 IAppSearchResultCallback callback) throws RemoteException {
             for (Map.Entry<String, List<Bundle>> entry :
-                    schemasPackageAccessibleBundles.entrySet()) {
+                    schemasVisibleToPackagesBundles.entrySet()) {
                 final String key = entry.getKey();
                 final List<PackageIdentifier> packageIdentifiers;
-                if (!mSchemasPackageAccessible.containsKey(key)) {
+                if (!mSchemasVisibleToPackages.containsKey(key)) {
                     packageIdentifiers = new ArrayList<>(entry.getValue().size());
-                    mSchemasPackageAccessible.put(key, packageIdentifiers);
+                    mSchemasVisibleToPackages.put(key, packageIdentifiers);
                 } else {
-                    packageIdentifiers = mSchemasPackageAccessible.get(key);
+                    packageIdentifiers = mSchemasVisibleToPackages.get(key);
                 }
                 for (int i = 0; i < entry.getValue().size(); i++) {
                     packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));
@@ -785,7 +785,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void getNextPage(long nextPageToken, UserHandle userHandle,
+        public void getNextPage(String packageName, long nextPageToken, UserHandle userHandle,
                 IAppSearchResultCallback callback) throws RemoteException {
             final Bundle page = new Bundle();
             page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
@@ -795,8 +795,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void invalidateNextPageToken(long nextPageToken, UserHandle userHandle)
-                throws RemoteException {
+        public void invalidateNextPageToken(String packageName, long nextPageToken,
+                UserHandle userHandle) throws RemoteException {
         }
 
         @Override
@@ -875,13 +875,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void persistToDisk(UserHandle userHandle, long binderCallStartTimeMillis)
-                throws RemoteException {
+        public void persistToDisk(String packageName, UserHandle userHandle,
+                long binderCallStartTimeMillis) throws RemoteException {
         }
 
         @Override
-        public void initialize(UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchResultCallback callback)
+        public void initialize(String packageName, UserHandle userHandle,
+                long binderCallStartTimeMillis, IAppSearchResultCallback callback)
                 throws RemoteException {
             ignore(callback);
         }

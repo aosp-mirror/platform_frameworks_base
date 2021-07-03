@@ -675,7 +675,10 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"מגדירים אמצעי תשלום ונהנים מביצוע מהיר ומאובטח יותר של רכישות באמצעות הטלפון"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"הצגת הכול"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"לביטול הנעילה ולתשלום"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"לא מוגדר"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"יש לבטל את הנעילה כדי להשתמש"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"הייתה בעיה בקבלת הכרטיסים שלך. כדאי לנסות שוב מאוחר יותר"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"הגדרות מסך הנעילה"</string>
@@ -721,7 +724,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ההודעות אלה יישלחו כהתראות"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"ההתראות האלה בדרך כלל נדחות על ידך. \nלהמשיך להציג אותן?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"סיום"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"החלה"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"אישור"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"שנמשיך להציג לך את ההתראות האלה?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"לא, אל תמשיכו"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"הצגה ללא צליל"</string>
@@ -750,7 +753,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"מוצגת בחלק העליון של קטע ההתראות וכתמונת פרופיל במסך הנעילה"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מפריעה במצב \'נא לא להפריע\'"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה הצפה ומפריעה במצב \'נא לא להפריע\'"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה צפה ומפריעה במצב \'נא לא להפריע\'"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
@@ -1044,8 +1047,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"הגדלת חלק מהמסך"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"מעבר"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"לחצן הנגישות החליף את תנועת הנגישות\n\n"<annotation id="link">"להצגת ההגדרות"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"ניתן להחליף את תנועת הנגישות בלחצן\n\n"<annotation id="link">"הגדרות"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"כדי להסתיר זמנית את הלחצן, יש להזיז אותו לקצה"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"העברה לפינה השמאלית העליונה"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"העברה לפינה הימנית העליונה"</string>
@@ -1128,7 +1130,7 @@
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ווידג\'טים של שיחות"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"יש להקיש על שיחה כדי להוסיף אותה למסך הבית"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"אפשר לחזור לכאן ולהתעדכן לאחר קבלת מספר הודעות"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"השיחות האחרונות שלך יופיעו כאן"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"שיחות בעדיפות גבוהה"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"שיחות אחרונות"</string>
     <string name="okay" msgid="6490552955618608554">"בסדר"</string>
@@ -1157,8 +1159,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ההודעות האחרונות, שיחות שלא נענו ועדכוני סטטוס"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"שיחה"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה הודעה"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"ההתראה הושהתה על ידי \'נא לא להפריע\'"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה תמונה"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה התראה"</string>

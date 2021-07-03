@@ -23,8 +23,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toolbar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.resources.TextAppearanceConfig;
 
@@ -32,9 +36,14 @@ import com.google.android.material.resources.TextAppearanceConfig;
  * A base Activity that has a collapsing toolbar layout is used for the activities intending to
  * enable the collapsing toolbar function.
  */
-public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
+public class CollapsingToolbarBaseActivity extends FragmentActivity {
 
+    private static final float TOOLBAR_LINE_SPACING_MULTIPLIER = 1.1f;
+
+    @Nullable
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @Nullable
+    private AppBarLayout mAppBarLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +52,11 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
         TextAppearanceConfig.setShouldLoadFontSynchronously(true);
         super.setContentView(R.layout.collapsing_toolbar_base_layout);
         mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
+        mAppBarLayout = findViewById(R.id.app_bar);
+        if (mCollapsingToolbarLayout != null) {
+            mCollapsingToolbarLayout.setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
+        }
+        disableCollapsingToolbarLayoutScrollingBehavior();
 
         final Toolbar toolbar = findViewById(R.id.action_bar);
         setActionBar(toolbar);
@@ -104,7 +118,33 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
     /**
      * Returns an instance of collapsing toolbar.
      */
+    @Nullable
     public CollapsingToolbarLayout getCollapsingToolbarLayout() {
         return mCollapsingToolbarLayout;
+    }
+
+    /**
+     * Return an instance of app bar.
+     */
+    @Nullable
+    public AppBarLayout getAppBarLayout() {
+        return mAppBarLayout;
+    }
+
+    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+        if (mAppBarLayout == null) {
+            return;
+        }
+        final CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+        final AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
+        behavior.setDragCallback(
+                new AppBarLayout.Behavior.DragCallback() {
+                    @Override
+                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
+                        return false;
+                    }
+                });
+        params.setBehavior(behavior);
     }
 }
