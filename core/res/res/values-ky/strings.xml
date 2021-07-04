@@ -1194,7 +1194,7 @@
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет күйгүзүлүүдө…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Түзмөк күйүгүзүлүүдө…"</string>
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Сактагыч ыңгайлаштырылууда."</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Тутумду жаңыртуу аяктоодо…"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Система жаңырып бүтөйүн деп калды…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> жаңыртылууда..."</string>
     <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо оптималдаштырылууда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
@@ -1413,8 +1413,7 @@
     <string name="deny" msgid="6632259981847676572">"Уруксат берилбейт"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу\n <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунтуна кирүүгө уруксат сурады."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Бул колдонмо жумуш профилиңиздин сыртында колдонулуп жатат"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Бул колдонмону жумуш профилиңизде пайдаланып жатасыз"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Киргизүү ыкмасы"</string>
