@@ -675,10 +675,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"מגדירים אמצעי תשלום ונהנים מביצוע מהיר ומאובטח יותר של רכישות באמצעות הטלפון"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"הצגת הכול"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"לביטול הנעילה ולתשלום"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"הוספת כרטיס"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"מתבצע עדכון"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"יש לבטל את הנעילה כדי להשתמש"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"הייתה בעיה בקבלת הכרטיסים שלך. כדאי לנסות שוב מאוחר יותר"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"הגדרות מסך הנעילה"</string>
