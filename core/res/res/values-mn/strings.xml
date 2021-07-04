@@ -2095,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Энэ мэдэгдлийг дээгүүр зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Энэ мэдэгдлийг доогуур зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Сайжруулсан мэдэгдэл"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Санал болгосон үйлдлүүд болон хариунуудыг одоо сайржуулсан мэдэгдлээр олгоно. Android-н Орчинтой тохирсон мэдэгдлийг цаашид дэмжихээ больсон."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Санал болгосон үйлдэл, хариултыг одоо сайржуулсан мэдэгдлээр олгоно. Android-н Орчинтой тохирсон мэдэгдлийг цаашид дэмжихээ больсон."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Унтраах"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Нэмэлт мэдээлэл авах"</string>
