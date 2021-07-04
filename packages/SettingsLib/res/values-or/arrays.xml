@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"ସକ୍ଷମ କରାଯାଇଛି"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="8036025277512210160">"AVRCP 1.4 (ଡିଫଲ୍ଟ)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.5 (ଡିଫଲ୍ଟ)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
-    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
+    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="8965800440990431014">"avrcp14"</item>
+    <item msgid="4041937689950033942">"avrcp15"</item>
     <item msgid="1613629084012791988">"avrcp13"</item>
-    <item msgid="4398977131424970917">"avrcp15"</item>
+    <item msgid="99467845610592181">"avrcp14"</item>
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
@@ -156,12 +156,12 @@
     <item msgid="5001852592115448348">", ସକ୍ରିୟ (ଫୋନ୍)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="1191094707770726722">"ଅଫ୍"</item>
+    <item msgid="1191094707770726722">"ବନ୍ଦ"</item>
     <item msgid="7839165897132179888">"64K"</item>
     <item msgid="2715700596495505626">"256K"</item>
     <item msgid="7099386891713159947">"1M"</item>
     <item msgid="6069075827077845520">"4M"</item>
-    <item msgid="8243549501764402572">"16M"</item>
+    <item msgid="6078203297886482480">"8M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"ବନ୍ଦ"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"256K ଲଗ୍‌ ପ୍ରତି ବଫର୍‌"</item>
     <item msgid="8539423820514360724">"1M ପ୍ରତି ଲଗ୍‌ ବଫର୍‌"</item>
     <item msgid="1984761927103140651">"ଲଗ୍‌ ବଫର୍‌ ପ୍ରତି 4M"</item>
-    <item msgid="7892098981256010498">"16M ଲଗ ପିଛା ବଫର୍‌"</item>
+    <item msgid="2983219471251787208">"ଲଗ୍ ବଫର୍ ପ୍ରତି 8M"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"ବନ୍ଦ"</item>
@@ -184,7 +184,7 @@
     <item msgid="7300881231043255746">"କେବଳ କର୍ନେଲ୍"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="97587758561106269">"ଅଫ"</item>
+    <item msgid="97587758561106269">"ବନ୍ଦ"</item>
     <item msgid="7126170197336963369">"ସମସ୍ତ ଲଗ୍‌ ବଫର୍‌"</item>
     <item msgid="7167543126036181392">"ରେଡିଓ ଲଗ୍‌ ବଫର୍‌‌ଗୁଡିକ ଛଡ଼ା ଅନ୍ୟ ସବୁ"</item>
     <item msgid="5135340178556563979">"କେବଳ କର୍ନେଲ୍‌ ଲଗ୍‌ ବଫର୍‌"</item>
@@ -237,7 +237,7 @@
     <item msgid="7345673972166571060">"glGetError ରେ କଲ୍‌ ଷ୍ଟାକ୍"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="2482978351289846212">"ଅଫ୍"</item>
+    <item msgid="2482978351289846212">"ବନ୍ଦ"</item>
     <item msgid="3405519300199774027">"ଅଣ-ଆୟତାକାର କ୍ଲିପ୍ କ୍ଷେତ୍ର ନୀଳ ରଙ୍ଗରେ ଆଙ୍କନ୍ତୁ"</item>
     <item msgid="1212561935004167943">"ଟେଷ୍ଟ ହୋଇଥିବା ଅଙ୍କନ କମାଣ୍ଡଗୁଡ଼ିକୁ ସବୁଜରେ ଚିହ୍ନିତ କରନ୍ତୁ"</item>
   </string-array>
@@ -247,7 +247,7 @@
     <item msgid="5023908510820531131">"ରେ <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"ଅଫ୍"</item>
+    <item msgid="1968128556747588800">"ବନ୍ଦ"</item>
     <item msgid="3033215374382962216">"ଓଭର୍‌ ଡ୍ର କ୍ଷେତ୍ରଗୁଡ଼ିକୁ ଦେଖାଅ"</item>
     <item msgid="3474333938380896988">"ଡିଉଟେରାନୋମାଲୀ ପାଇଁ କ୍ଷେତ୍ର ଦେଖନ୍ତୁ"</item>
   </string-array>
