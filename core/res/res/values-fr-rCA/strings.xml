@@ -272,8 +272,8 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"Sécurité"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Mode Voiture"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"État du compte"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"Messages des concepteurs"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Messages importants à l\'intention des concepteurs"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"Messages des développeurs"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Messages importants à l\'intention des développeurs"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Mises à jour"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"État du réseau"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Alertes réseau"</string>
@@ -572,7 +572,7 @@
     <string name="permlab_manageFace" msgid="4569549381889283282">"gérer le matériel de déverrouillage par reconnaissance faciale"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permet à l\'appli d\'employer des méthodes d\'aj. et de suppr. de modèles de reconn. visage."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utiliser le matériel de déverrouillage par reconnaissance faciale"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet à l\'appli d\'utiliser du matériel de déverr. par reconn faciale pour l\'authentific."</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet à l\'appli d\'utiliser du matériel de déverr. par reconn. faciale pour l\'authentific."</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Inscrivez votre visage à nouveau"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Réessayer"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Réessayer"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Déverr. pour acc. aux autres fonction. et données"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nombre maximal autorisé de tentatives Face Unlock atteint."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nombre maximal atteint de tentatives de déverrouillage par reconnaissance faciale"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Aucune carte SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Aucune carte SIM n\'est insérée dans la tablette."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Aucune carte SIM ne se trouve dans votre appareil Android TV."</string>
@@ -1213,7 +1213,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"L\'empreinte de mémoire <xliff:g id="PROC">%1$s</xliff:g> est prête"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"L\'empreinte de mémoire a été recueillie. Touchez ici pour la partager."</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"Partager l\'empreinte de mémoire?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"Le processus <xliff:g id="PROC">%1$s</xliff:g> a dépassé sa limite de mémoire de <xliff:g id="SIZE">%2$s</xliff:g>. Vous pouvez partager son empreinte de mémoire avec son concepteur. Attention : Cette empreinte peut contenir certains de vos renseignements personnels auxquels l\'application a accès."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"Le processus <xliff:g id="PROC">%1$s</xliff:g> a dépassé sa limite de mémoire de <xliff:g id="SIZE">%2$s</xliff:g>. Vous pouvez partager son empreinte de mémoire avec son développeur. Attention : Cette empreinte peut contenir certains de vos renseignements personnels auxquels l\'application a accès."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Le processus <xliff:g id="PROC">%1$s</xliff:g> a dépassé sa limite de mémoire de <xliff:g id="SIZE">%2$s</xliff:g>. Vous pouvez partager son empreinte de mémoire. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Une empreinte de mémoire du processus lié à l\'application <xliff:g id="PROC">%1$s</xliff:g> peut être partagée. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="sendText" msgid="493003724401350724">"Sélectionner une action pour le texte"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarque"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"In-quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Taille inconnue au format portrait"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Taille inconnue au format paysage"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Annulé"</string>
@@ -1896,7 +1908,7 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'application n\'est pas accessible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas accessible pour le moment."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et pourrait ne pas fonctionner correctement. Essayez de vérifier les mises à jour ou communiquez avec son concepteur."</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et pourrait ne pas fonctionner correctement. Essayez de vérifier les mises à jour ou communiquez avec son développeur."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Vérifier la présence de mises à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ouvrez l\'application de messagerie texte pour l\'afficher"</string>

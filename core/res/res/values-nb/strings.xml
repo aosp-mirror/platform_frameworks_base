@@ -184,7 +184,7 @@
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Av en ukjent tredjepart"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Av administratoren for jobbprofilen din"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Av <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"Arbeidsprofilen er slettet"</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"Jobbprofilen er slettet"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administratorappen for jobbprofilen mangler eller er skadet. Dette har ført til at jobbprofilen og alle data knyttet til den, har blitt slettet. Ta kontakt med administratoren for å få hjelp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jobbprofilen din er ikke lenger tilgjengelig på denne enheten"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"For mange passordforsøk"</string>
@@ -571,7 +571,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon for fingeravtrykk"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"administrere maskinvare for Ansiktslås"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lar appen bruke metoder for å legge til og slette ansiktmaler for bruk."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"bruke maskinvare for Ansiktslås"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"bruk maskinvare for Ansiktslås"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Lar appen bruke maskinvare for Ansiktslås til autentisering"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registrer ansiktet ditt på nytt"</string>
@@ -1418,7 +1418,7 @@
     <string name="deny" msgid="6632259981847676572">"Avslå"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Tillatelse forespurt"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Tillatelse forespurt\nfor kontoen <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du bruker denne appen utenfor arbeidsprofilen"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du bruker denne appen utenfor jobbprofilen"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Du bruker denne appen i jobbprofilen din"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Inndatametode"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synkronisering"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Ukjent portrett"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Ukjent landskap"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Kansellert"</string>

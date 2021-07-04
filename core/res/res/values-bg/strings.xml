@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Разрешава на приложението да бъде лентата на състоянието."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"разгъване или свиване на лентата на състоянието"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Разрешава на приложението да разгъва или свива лентата на състоянието."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталиране на преки пътища"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Инсталиране на преки пътища"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Разрешава на приложението да добавя към началния екран преки пътища без намеса на потребителя."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталиране на преки пътища"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Разрешава на приложението да премахва преки пътища от началния екран без намеса на потребителя."</string>
@@ -1297,7 +1297,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Не се изискват разрешения"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"това може да ви струва пари"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Това устройство се зарежда през USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Устройството се зарежда през USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Свързаното устройство се зарежда през USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Прехвърлянето на файлове през USB е включено"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режимът PTP през USB е включен"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Неизвестен вертикален формат"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Неизвестен хоризонтален формат"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Анулирано"</string>
@@ -1800,7 +1812,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n•·включва тъмната тема;\n•·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n• включва тъмната тема;\n• изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли „Икономия на данни“?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Включване на „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
