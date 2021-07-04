@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Батерията е с две чертички."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Батерията е с три чертички."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Батерията е пълна."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Процентът на батерията е неизвестен."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Няма телефон."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Телефонът е с една чертичка."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Телефонът е с две чертички."</string>
@@ -712,7 +713,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибриране"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибриране и се показва по-долу в секцията с разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да звъни или да вибрира въз основа на настройките за телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звъни или да вибрира въз основа на настройките за телефона. Разговорите от <xliff:g id="APP_NAME">%1$s</xliff:g> се показват като балончета по подразбиране."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звъни или да вибрира според настройките за телефона. Разговорите от <xliff:g id="APP_NAME">%1$s</xliff:g> се показват като балончета по подразбиране."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Задържа вниманието ви посредством плаващ пряк път към това съдържание."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Показва се като плаващо балонче в горната част на секцията с разговори, показва снимката на потр. профил на заключения екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
@@ -1050,7 +1051,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"за премахване на означаването като любимо"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместете на позиция <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Избиране на контроли, които да са достъпни в менюто за захранване"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Избиране на контроли, които да са достъпни в менюто за вкл./изкл."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задръжте и плъзнете, за да пренаредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Всички контроли са премахнати"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не са запазени"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (връзката е прекратена)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Неуспешно свързване. Опитайте отново."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Сдвояване на ново устройство"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Възникна проблем при четенето на данните за нивото на батерията"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Докоснете за още информация"</string>
 </resources>

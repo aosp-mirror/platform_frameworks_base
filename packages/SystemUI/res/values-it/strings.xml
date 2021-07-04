@@ -73,7 +73,7 @@
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Per proteggere il dispositivo da liquidi o detriti, la porta USB è stata disattivata e non rileverà gli accessori.\n\nTi avviseremo quando sarà di nuovo possibile utilizzarla."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Porta USB attivata per rilevare caricabatterie e accessori"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Attiva USB"</string>
-    <string name="learn_more" msgid="4690632085667273811">"Ulteriori informazioni"</string>
+    <string name="learn_more" msgid="4690632085667273811">"Scopri di più"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom per riempire schermo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estendi per riemp. schermo"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Avviare la registrazione?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può acquisire dati sensibili visibili sullo schermo o riprodotti sul tuo dispositivo, tra cui password, dati di pagamento, foto, messaggi e audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può acquisire informazioni sensibili visibili sullo schermo o riprodotte sul tuo dispositivo, tra cui password, dati di pagamento, foto, messaggi e audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Registra audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Suoni del dispositivo, come musica, chiamate e suonerie"</string>
@@ -109,7 +109,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Annulla"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Condividi"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Registrazione dello schermo annullata"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Registrazione dello schermo salvata. Tocca per visualizzarla."</string>
+    <string name="screenrecord_save_message" msgid="490522052388998226">"Registrazione schermo salvata. Tocca per visualizzare."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Errore durante l\'eliminazione della registrazione dello schermo"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Impossibile ottenere le autorizzazioni"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Errore durante l\'avvio della registrazione dello schermo"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batteria: due barre."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batteria: tre barre."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batteria carica."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percentuale della batteria sconosciuta."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Nessun telefono."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefono: una barra."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefono: due barre."</string>
@@ -557,7 +558,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> utilizza l\'app <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> per gestire il dispositivo."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"L\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Ulteriori informazioni"</string>
+    <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Scopri di più"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Sei connesso a <xliff:g id="VPN_APP">%1$s</xliff:g>, che consente di monitorare le attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Apri impostazioni VPN"</string>
@@ -590,7 +591,7 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"attiva"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"disattiva"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Cambia dispositivo di uscita"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"L\'app è bloccata su schermo"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"L\'app è bloccata sullo schermo"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Indietro e Home."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Rimarrà visibile finché non viene sbloccata. Scorri verso l\'alto e tieni premuto per sbloccarla."</string>
@@ -632,7 +633,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"riattiva l\'audio"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrazione"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controlli del volume %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Chiamate e notifiche faranno suonare il dispositivo (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"La suoneria sarà attiva per chiamate e notifiche (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Uscita contenuti multimediali"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Uscita telefonate"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Nessun dispositivo trovato"</string>
@@ -712,7 +713,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Nessun suono o vibrazione"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nessun suono o vibrazione e appare più in basso nella sezione delle conversazioni"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Può suonare o vibrare in base alle impostazioni del telefono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Le conversazioni di <xliff:g id="APP_NAME">%1$s</xliff:g> appaiono come bolla per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Appare in cima alla sezione delle conversazioni e sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
@@ -853,8 +854,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Keycode destra"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icona sinistra"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icona destra"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tieni premuto e trascina per aggiungere icone"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tieni premuto e trascina per riordinare le icone"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tieni premuto e trascina per aggiungere riquadri"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tieni premuto e trascina per riordinare i riquadri"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Trascina qui per rimuovere"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Occorrono almeno <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> schede"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifica"</string>
@@ -993,9 +994,9 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"Fotocamera"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"luogo"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"un microfono"</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"fotocamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"posizione"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"microfono"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensori disattivati"</string>
     <string name="device_services" msgid="1549944177856658705">"Servizi del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
@@ -1014,9 +1015,9 @@
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Ignora bolla"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Non mettere la conversazione nella bolla"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatta utilizzando le bolle"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Le nuove conversazioni vengono visualizzate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Le nuove conversazioni vengono mostrate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controlla le bolle quando vuoi"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tocca Gestisci per disattivare le bolle dall\'app"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tocca Gestisci per disattivare le bolle di questa app"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Impostazioni <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
@@ -1050,7 +1051,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"rimuovere l\'elemento dai preferiti"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Sposta nella posizione <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlli"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Seleziona i controlli a cui accedere dal menu di accensione"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Seleziona i controlli a cui accedere dal menu del tasto di accensione"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tieni premuto e trascina per riordinare i controlli"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tutti i controlli sono stati rimossi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modifiche non salvate"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (disconnesso)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Impossibile connettersi. Riprova."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Accoppia nuovo dispositivo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema durante la lettura dell\'indicatore di livello della batteria"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tocca per ulteriori informazioni"</string>
 </resources>

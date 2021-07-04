@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Dve čiarky batérie."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tri čiarky batérie."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batéria je nabitá."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percento batérie nie je známe."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Žiadna telefónna sieť."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Jeden stĺpec signálu telefónnej siete."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dve čiarky signálu telefónnej siete."</string>
@@ -550,7 +551,7 @@
     <string name="disconnect_vpn" msgid="26286850045344557">"Odpojiť sieť VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Zobraziť pravidlá"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadení a informácie o jeho polohe.\n\nViac sa dozviete od správcu IT."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zariadenie patrí vašej organizácii.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadením a informácie o jeho polohe.\n\n. Viac sa dozviete od správcu IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zariadenie patrí vašej organizácii.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadením a informácie o jeho polohe.\n\nViac sa dozviete od správcu IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizácia nainštalovala pre toto zariadenie certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizácia nainštalovala pre váš pracovný profil certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
@@ -998,7 +999,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Keď batéria klesne pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%, automaticky sa aktivujte Šetrič batérie."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Nastavenia"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Dobre"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> používa zoznam <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (odpojené)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Nepodarilo sa pripojiť. Skúste to znova."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovať nové zariadenie"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pri čítaní meradla batérie sa vyskytol problém"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím si zobrazíte ďalšie informácie"</string>
 </resources>

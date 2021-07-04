@@ -176,11 +176,12 @@
     <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"小さい画面から大きい画面に拡大。"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetoothに接続済み。"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"Bluetoothが切断されました。"</string>
-    <string name="accessibility_no_battery" msgid="3789287732041910804">"電池残量:なし"</string>
-    <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"電池残量:レベル1"</string>
-    <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"電池残量:レベル2"</string>
-    <string name="accessibility_battery_three_bars" msgid="118341923832368291">"電池残量:レベル3"</string>
-    <string name="accessibility_battery_full" msgid="1480463938961288494">"電池残量:満"</string>
+    <string name="accessibility_no_battery" msgid="3789287732041910804">"バッテリー残量: なし"</string>
+    <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"バッテリー残量: レベル1"</string>
+    <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"バッテリー残量: レベル2"</string>
+    <string name="accessibility_battery_three_bars" msgid="118341923832368291">"バッテリー残量: レベル3"</string>
+    <string name="accessibility_battery_full" msgid="1480463938961288494">"バッテリー残量: フル"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"バッテリー残量は不明です。"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"電波状態:なし"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"電波状態:レベル1"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"電波状態:レベル2"</string>
@@ -237,8 +238,8 @@
     <string name="accessibility_no_sims" msgid="5711270400476534667">"SIMカードが挿入されていません。"</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"携帯通信会社のネットワークを変更します"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"電池の詳細情報を開きます"</string>
-    <string name="accessibility_battery_level" msgid="5143715405241138822">"電池残量: <xliff:g id="NUMBER">%d</xliff:g>パーセント"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"電池残量: <xliff:g id="PERCENTAGE">%1$s</xliff:g>、およそ <xliff:g id="TIME">%2$s</xliff:g> に電池切れ（使用状況に基づく）"</string>
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"バッテリー残量: <xliff:g id="NUMBER">%d</xliff:g>パーセント"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"バッテリー残量: <xliff:g id="PERCENTAGE">%1$s</xliff:g>、およそ <xliff:g id="TIME">%2$s</xliff:g> にバッテリー切れ（使用状況に基づく）"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"電池充電中: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>パーセント"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"システム設定。"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"通知。"</string>
@@ -266,7 +267,7 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wi-FiをOFFにしました。"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-FiをONにしました。"</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"モバイル: <xliff:g id="SIGNAL">%1$s</xliff:g>、<xliff:g id="TYPE">%2$s</xliff:g>、<xliff:g id="NETWORK">%3$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"電池<xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"バッテリー<xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"機内モードがOFFです。"</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"機内モードがONです。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"機内モードをOFFにしました。"</string>
@@ -348,7 +349,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth（デバイス数<xliff:g id="NUMBER">%d</xliff:g>）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"Bluetooth OFF"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ペア設定されたデバイスがありません"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電池 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ヘッドセット"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"入力"</string>
@@ -418,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"日の出まで"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> に ON"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> まで"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ダークテーマ"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ダークモード"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"バッテリー セーバー"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"日の入りに ON"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"日の出まで"</string>
@@ -501,7 +502,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"パフォーマンスとバックグラウンドデータを制限します"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"バッテリー セーバーを OFF"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、画面上に表示される情報またはキャスト先に転送する情報すべてに、録画中またはキャスト中にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"次回から表示しない"</string>
@@ -596,15 +597,15 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"固定を解除するまで常に表示されます。上にスワイプして長押しすると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスできる可能性があります。"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスされる可能性があります。"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定したアプリが他のアプリを開く可能性があります。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"このアプリの固定を解除するには [戻る] ボタンと [最近] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"このアプリの固定を解除するには [戻る] ボタンと [ホーム] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"このアプリの固定を解除するには、上にスワイプして長押しします"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"固定したアプリ"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"固定を解除したアプリ"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"非表示"</string>
@@ -641,8 +642,8 @@
     <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth と Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"システムUI調整ツール"</string>
-    <string name="show_battery_percentage" msgid="6235377891802910455">"内蔵電池の残量の割合を表示する"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
+    <string name="show_battery_percentage" msgid="6235377891802910455">"内蔵バッテリーの残量の割合を表示する"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"充電していないときにはバッテリー残量の割合をステータスバーアイコンに表示する"</string>
     <string name="quick_settings" msgid="6211774484997470203">"クイック設定"</string>
     <string name="status_bar" msgid="4357390266055077437">"ステータスバー"</string>
     <string name="overview" msgid="3522318590458536816">"最近"</string>
@@ -671,7 +672,7 @@
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"設定からシステムUI調整ツールを削除して、全機能の使用を停止しますか？"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"アプリがデバイスにインストールされていません"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"時計の秒を表示"</string>
-    <string name="clock_seconds_desc" msgid="2415312788902144817">"ステータスバーに時計の秒を表示します。電池使用量に影響する可能性があります。"</string>
+    <string name="clock_seconds_desc" msgid="2415312788902144817">"ステータスバーに時計の秒を表示します。バッテリー使用量に影響する可能性があります。"</string>
     <string name="qs_rearrange" msgid="484816665478662911">"クイック設定を並べ替え"</string>
     <string name="show_brightness" msgid="6700267491672470007">"クイック設定に明るさ調整バーを表示する"</string>
     <string name="experimental" msgid="3549865454812314826">"試験運用版"</string>
@@ -709,7 +710,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"サイレント"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"デフォルト"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"バブル"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"着信音もバイブレーションも無効です"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"着信音もバイブレーションも無効になります"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"着信音もバイブレーションも無効になり会話セクションの下に表示されます"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"スマートフォンの設定を基に着信音またはバイブレーションが有効になります"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"スマートフォンの設定を基に着信音またはバイブレーションが有効になります。デフォルトでは <xliff:g id="APP_NAME">%1$s</xliff:g> からの会話がバブルとして表示されます。"</string>
@@ -717,7 +718,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"会話セクションの一番上にバブルとして表示され、プロフィール写真がロック画面に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話機能に対応していません"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたバブルはありません"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近表示されたバブルや閉じたバブルが、ここに表示されます"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
@@ -814,7 +815,7 @@
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"サイレント モード"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"音量ボタンのショートカット"</string>
     <string name="volume_up_silent" msgid="1035180298885717790">"音量大ボタンでサイレント モードを OFF にします"</string>
-    <string name="battery" msgid="769686279459897127">"電池"</string>
+    <string name="battery" msgid="769686279459897127">"バッテリー"</string>
     <string name="clock" msgid="8978017607326790204">"時計"</string>
     <string name="headset" msgid="4485892374984466437">"ヘッドセット"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"設定を開く"</string>
@@ -946,7 +947,7 @@
     <string name="tuner_menu" msgid="363690665924769420">"メニュー"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> アプリ"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"アラート"</string>
-    <string name="notification_channel_battery" msgid="9219995638046695106">"電池"</string>
+    <string name="notification_channel_battery" msgid="9219995638046695106">"バッテリー"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"スクリーンショット"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"一般メッセージ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ストレージ"</string>
@@ -970,7 +971,7 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"設定を維持"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"設定を変更"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"バックグラウンドで実行中のアプリ"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"タップして電池やデータの使用量を確認"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"タップしてバッテリーやデータの使用量を確認"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"モバイルデータを OFF にしますか？"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"携帯通信会社"</string>
@@ -1015,7 +1016,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をバブルで表示しない"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでバブルを使う"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"いつでもバブルを管理"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"バブルはいつでも管理可能"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"このアプリからのバブルを OFF にするには、[管理] をタップしてください"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> の設定"</string>
@@ -1034,7 +1035,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"拡大ウィンドウ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"拡大ウィンドウ コントロール"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"接続済みデバイスのコントロールを追加します"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"コネクテッド デバイスのコントロールを追加します"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"コントロールにアクセスするには、電源ボタンを長押しします"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"コントロールを追加するアプリの選択"</string>
@@ -1050,7 +1051,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタン メニューからアクセスするコントロールを選択する"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタンメニューからアクセスするコントロールを選択します"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>（未接続）"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"接続できませんでした。もう一度お試しください。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"新しいデバイスとのペア設定"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"バッテリー残量の読み込み中に問題が発生しました"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"タップすると詳細が表示されます"</string>
 </resources>

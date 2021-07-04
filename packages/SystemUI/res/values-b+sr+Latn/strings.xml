@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka na USB-u nije dozvoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može da uključi otklanjanje grešaka na USB-u. Da biste koristili ovu funkciju, prebacite na primarnog korisnika."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite da omogućite bežično otklanjanje grešaka na ovoj mreži?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite da dozvolite bežično otklanjanje grešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi adresa (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvek dozvoli na ovoj mreži"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Dozvoli"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Baterija od dve crte."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Baterija od tri crte."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Baterija je puna."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Procenat napunjenosti baterije nije poznat."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Nema telefona."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Signal telefona ima jednu crtu."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Signal telefona od dve crte."</string>
@@ -517,7 +518,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzacije"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Obrišite sva nečujna obaveštenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Obaveštenja su pauzirana režimom Ne uznemiravaj"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"Započni odmah"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"Započni"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obaveštenja"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil se možda nadgleda"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Mreža se možda nadgleda"</string>
@@ -1056,7 +1057,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonili iz omiljenih"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premestite na <xliff:g id="NUMBER">%d</xliff:g>. poziciju"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima ćete pristupati iz menija napajanja"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima ćete pristupati iz menija dugmeta za uključivanje"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i prevucite da biste promenili raspored kontrola"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promene nisu sačuvane"</string>
@@ -1103,4 +1104,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (veza je prekinuta)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezivanje nije uspelo. Probajte ponovo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Upari novi uređaj"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem sa očitavanjem merača baterije"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
 </resources>

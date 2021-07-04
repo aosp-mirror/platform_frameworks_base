@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Battery two bars."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Battery three bars."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Battery full."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Battery percentage unknown."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"No phone."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Phone one bar."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Phone two bars."</string>
@@ -596,7 +597,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"This keeps it in view until you unpin. Swipe up and hold to unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"This keeps it in view until you unpin. Touch &amp; hold Overview to unpin."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"This keeps it in view until you unpin. Touch &amp; hold Home to unpin."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Personal data may be accessible (such as contacts and email content)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Personal data may be accessible, such as contacts and email content."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Pinned app may open other apps."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"To unpin this app, touch and hold Back and Overview buttons"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"To unpin this app, touch and hold Back and Home buttons"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (disconnected)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Couldn\'t connect. Try again."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Pair new device"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem reading your battery meter"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tap for more information"</string>
 </resources>

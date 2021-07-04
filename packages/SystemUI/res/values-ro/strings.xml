@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Începeți"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Se înregistrează ecranul"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Se înregistrează ecranul și conținutul audio"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afișează atingerile de pe ecran"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afișați atingerile de pe ecran"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Atingeți pentru a opri"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Opriți"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Întrerupeți"</string>
@@ -109,7 +109,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anulați"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Trimiteți"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Înregistrarea ecranului a fost anulată"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Înregistrarea ecranului a fost salvată. Atingeți pentru vizualizare"</string>
+    <string name="screenrecord_save_message" msgid="490522052388998226">"S-a salvat înregistrarea ecranului. Atingeți pentru vizualizare"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Eroare la ștergerea înregistrării ecranului"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nu s-au obținut permisiunile"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Eroare la începerea înregistrării ecranului"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Baterie: două bare."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Baterie: trei bare."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Baterie: complet."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Procentajul bateriei este necunoscut."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Nu există semnal pentru telefon."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Semnal pentru telefon: o bară."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Semnal pentru telefon: două bare."</string>
@@ -1103,4 +1104,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (s-a deconectat)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Nu s-a putut conecta. Reîncercați."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Asociați un nou dispozitiv"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problemă la citirea măsurării bateriei"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Atingeți pentru mai multe informații"</string>
 </resources>
