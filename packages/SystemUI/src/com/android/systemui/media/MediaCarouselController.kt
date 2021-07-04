@@ -12,10 +12,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
@@ -27,6 +29,8 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -51,8 +55,9 @@ class MediaCarouselController @Inject constructor(
     private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
     falsingCollector: FalsingCollector,
-    falsingManager: FalsingManager
-) {
+    falsingManager: FalsingManager,
+    dumpManager: DumpManager
+) : Dumpable {
     /**
      * The current width of the carousel
      */
@@ -166,6 +171,7 @@ class MediaCarouselController @Inject constructor(
     lateinit var updateUserVisibility: () -> Unit
 
     init {
+        dumpManager.registerDumpable(TAG, this)
         mediaFrame = inflateMediaCarousel()
         mediaCarousel = mediaFrame.requireViewById(R.id.media_carousel_scroller)
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
@@ -421,7 +427,7 @@ class MediaCarouselController @Inject constructor(
         }
     }
 
-    private fun removePlayer(
+    fun removePlayer(
         key: String,
         dismissMediaData: Boolean = true,
         dismissRecommendation: Boolean = true
@@ -747,6 +753,15 @@ class MediaCarouselController @Inject constructor(
             }
         }
         mediaManager.onSwipeToDismiss()
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.apply {
+            println("keysNeedRemoval: $keysNeedRemoval")
+            println("playerKeys: ${MediaPlayerData.playerKeys()}")
+            println("smartspaceMediaData: ${MediaPlayerData.smartspaceMediaData}")
+            println("shouldPrioritizeSs: ${MediaPlayerData.shouldPrioritizeSs}")
+        }
     }
 }
 
