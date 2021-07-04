@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batareya ikkta panelda."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batareya uchta panelda."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batareya to‘la."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareya quvvati foizi nomaʼlum."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Signal yo‘q."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon bitta panelda."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon ikkita panelda."</string>
@@ -355,7 +356,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Eshitish apparatlari"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Yoqilmoqda…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Yorqinlik"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avtomatik burilish"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avto-burilish"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekranning avtomatik burilishi"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Aylanmaydigan qilingan"</string>
@@ -427,7 +428,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC o‘chiq"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC yoniq"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekranni yozib olish"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekran yozuvi"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Qurilma"</string>
@@ -548,7 +549,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Tashkilotingiz bu qurilmada CA sertifikatini o‘rnatdi. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Tashkilotingiz ishchi profilingizga CA sertifikatini o‘rnatdi. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Qurilmada CA sertifikati o‘rnatilgan. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> ilovasi ishga tushirilgan. U internetdagi harakatlaringiz, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> va <xliff:g id="VPN_APP_1">%2$s</xliff:g> ilovalari ishga tushirilgan. Ular tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ishchi profilingizda tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin bo‘lgan <xliff:g id="VPN_APP">%1$s</xliff:g> ilovasi ishga tushirilgan."</string>
@@ -563,7 +564,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN sozlamalarini ochish"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Ishonchli sertifikatlarni ochish"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi.\n\nBatafsil axborot olish uchun administratoringizga murojaat qiling."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan.\n\nBatafsil axborot olish uchun administratoringizga murojaat qiling."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Siz ilovaga VPN tarmog‘iga ulanishga ruxsat bergansiz.\n\nUshbu ilova qurilmangiz va internetdagi harakatlaringizni, jumladan, e-pochta, ilovalar va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Sizning ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministrator internetdagi harakatlaringizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlar bilan ishlashingizni kuzatishi mumkin.\n\nBatafsil axborot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz VPN tarmog‘iga ham ulangansiz. U internetdagi harakatlaringizni kuzatishi mumkin."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
@@ -580,7 +581,7 @@
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Kerak emas"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Sozlash"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="5901885672973736563">"O‘chiring"</string>
+    <string name="volume_zen_end_now" msgid="5901885672973736563">"Faolsizlantirish"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tovush sozlamalari"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Yig‘ish"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (uzilgan)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ulanmadi. Qayta urining."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yangi qurilmani ulash"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batareya quvvati aniqlanmadi"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Batafsil axborot olish uchun bosing"</string>
 </resources>

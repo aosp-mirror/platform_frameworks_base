@@ -102,7 +102,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"جارٍ تسجيل الشاشة"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"جارٍ تسجيل الشاشة والصوت"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"إظهار اللمسات على الشاشة"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"انقر لإيقاف التسجيل"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"انقر لإيقاف التسجيل."</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"إيقاف"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"إيقاف مؤقت"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"استئناف"</string>
@@ -168,7 +168,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف هذا المستخدم."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"إغلاق"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس زر استشعار بصمة الإصبع"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس مستشعر بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"جارٍ البحث عن وجهك…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"رمز الوجه"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"إشارة البطارية تتكون من شريطين."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"إشارة البطارية تتكون من ثلاثة أشرطة."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"إشارة البطارية كاملة."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"نسبة شحن البطارية غير معروفة."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ليست هناك إشارة بالهاتف."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"إشارة الهاتف تتكون من شريط واحد."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"إشارة الهاتف تتكون من شريطين."</string>
@@ -359,7 +360,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"جارٍ التفعيل…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"السطوع"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"دوران تلقائي"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"تدوير تلقائي"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"التدوير التلقائي للشاشة"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"وضع <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"تم قفل التدوير"</string>
@@ -521,11 +522,11 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"إدارة"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"السجلّ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"الإشعارات الجديدة"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"صامت"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"صامتة"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"الإشعارات"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"المحادثات"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"الرجاء عدم الإزعاج\""</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ليس هناك أي اشعارات"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"ربما تتم مراقبة الملف الشخصي"</string>
@@ -608,7 +609,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"يؤدي هذا الإجراء إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. لإلغاء تثبيت الشاشة على هذا التطبيق، اسحب بسرعة للأعلى مع إبقاء الإصبع على الشاشة."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"الشاشة الرئيسية\" لإزالة التثبيت."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"عند تثبيت الشاشة على تطبيق معيّن، سيظل بإمكان التطبيق فتح تطبيقات أخرى."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"لمحة عامة\" (رمز المربّع)."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"الشاشة الرئيسية\"."</string>
@@ -616,7 +617,7 @@
     <string name="screen_pinning_positive" msgid="3285785989665266984">"حسنًا"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"لا، شكرًا"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"تم تثبيت الشاشة على التطبيق."</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"تم إلغاء تثبيت الشاشة"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"تم إلغاء تثبيت الشاشة."</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"هل تريد إخفاء <xliff:g id="TILE_LABEL">%1$s</xliff:g>؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"سيظهر مرة أخرى عند تمكينه في الإعدادات المرة التالية."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"إخفاء"</string>
@@ -712,7 +713,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"حظر"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"الاستمرار في تلقّي الإشعارات"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"تصغير"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"صامت"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"صامتة"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"متابعة عرض الإشعارات بدون صوت"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"تنبيه"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"متابعة إرسال التنبيهات"</string>
@@ -723,7 +724,7 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"فقاعة"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"يلفِت هذا الإشعار انتباهك لهذا المحتوى باستخدام اختصار عائم."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"تظهر في أعلى قسم المحادثات وتظهر كفقاعة عائمة وتعرض صورة الملف الشخصي على شاشة القفل"</string>
@@ -844,7 +845,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"تم تفعيل توفير البيانات"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"تم إيقاف توفير البيانات"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"مفعّل"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"إيقاف"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"متوقف"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"غير متوفّر"</string>
     <string name="nav_bar" msgid="4642708685386136807">"شريط التنقل"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"التنسيق"</string>
@@ -1121,4 +1122,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (غير متّصل)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"تعذّر الاتصال. يُرجى إعادة المحاولة."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"إقران جهاز جديد"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"حدثت مشكلة أثناء قراءة مقياس مستوى شحن البطارية."</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"انقر للحصول على مزيد من المعلومات."</string>
 </resources>
