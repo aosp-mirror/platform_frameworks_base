@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Մարտկոցի երկու գիծ:"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Մարտկոցի երեք գիծ:"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Մարտկոցը լիքն է:"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Մարտկոցի լիցքի մակարդակն անհայտ է։"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Հեռախոս չկա:"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Հեռախոսի մեկ գիծ:"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Հեռախոսի երկու գիծ:"</string>
@@ -307,7 +308,7 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Աշխատանքային ռեժիմը միացվեց:"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Տվյալների խնայումն անջատվեց:"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Թրաֆիկի տնտեսումը միացվեց:"</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Տվիչների գաղտնիությունն անջատած է:"</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Տվիչների գաղտնիությունն անջատված է:"</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Տվիչների գաղտնիությունը միացված է:"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Ցուցադրել պայծառությունը"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"Լիցքավորում"</string>
@@ -592,10 +593,10 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Փոխել արտածման սարքը"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Հավելվածն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար մատը սահեցրեք վեր և պահեք։"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև չեղարկեք ամրացումը: Չեղարկելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Էկրանը կցուցադրվի, մինչև չեղարկեք ամրացումը: Չեղարկելու համար մատը սահեցրեք վեր և պահեք։"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Համատեսք կոճակը:"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Էկրանը կցուցադրվի, մինչև չեղարկեք ամրացումը: Չեղարկելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Ձեր անձնական տվյալները (օր․՝ կոնտակտները և նամակների բովանդակությունը) կարող են հասանելի դառնալ։"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Ամրացված հավելվածը կարող է այլ հավելվածներ գործարկել։"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Հավելվածն ապամրացնելու համար հպեք և պահեք «Հետ» և «Համատեսք» կոճակները"</string>
@@ -622,7 +623,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Թրթռոց"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Անձայն"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Հեռախոսում միացված է թրթռոցը"</string>
-    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Հեռախոսի ձայնն անջատած է"</string>
+    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Հեռախոսի ձայնն անջատված է"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s: Հպեք՝ ձայնը միացնելու համար:"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռումը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
@@ -683,8 +684,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"Ձայնը չանջատել"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Ձայնը չանջատել և չարգելափակել"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ծանուցումների ընդլայնված կառավարում"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Միացնել"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Անջատել"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Միացված է"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Անջատված է"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Ծանուցումների ընդլայնված կառավարման օգնությամբ կարող եք յուրաքանչյուր հավելվածի ծանուցումների համար նշանակել կարևորության աստիճան՝ 0-5 սահմաններում: \n\n"<b>"5-րդ աստիճան"</b>" \n- Ցուցադրել ծանուցումների ցանկի վերևում \n- Թույլատրել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"4-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"3-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n\n"<b>"2-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n\n"<b>"1-ին աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n- Չցուցադրել կողպէկրանում և կարգավիճակի գոտում \n- Ցուցադրել ծանուցումների ցանկի ներքևում \n\n"<b>"0-րդ աստիճան"</b>\n"- Արգելափակել հավելվածի բոլոր ծանուցումները"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ծանուցումներ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Այլևս չեք ստանա նման ծանուցումներ"</string>
@@ -823,10 +824,10 @@
     <string name="data_saver" msgid="3484013368530820763">"Թրաֆիկի տնտեսում"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Թրաֆիկի տնտեսումը միացված է"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Տվյալների խնայումն անջատված է"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Միացնել"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Անջատել"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Միացված է"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Անջատված է"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Հասանելի չէ"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"Նավարկման գոտի"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"Նավիգացիայի գոտի"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Դասավորություն"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Լրացուցիչ ձախ կոճակի տեսակ"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Լրացուցիչ աջ կոճակի տեսակ"</string>
@@ -848,7 +849,7 @@
     <string name="reset" msgid="8715144064608810383">"Վերակայել"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Կարգավորել կոճակի լայնությունը"</string>
     <string name="clipboard" msgid="8517342737534284617">"Սեղմատախտակ"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավարկման կոճակ"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավիգացիայի կոճակ"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Ձախ ստեղնային կոդ"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Աջ ստեղնային կոդ"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ձախ պատկերակ"</string>
@@ -922,7 +923,7 @@
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Փոխել չափը"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել էր տաքանալու պատճառով"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Հեռախոսն այժմ նորմալ է աշխատում։\nՀպեք՝ ավելին իմանալու համար։"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավարկման հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավիգացիայի հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Հեռախոսը տաքանում է"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են։\nՀպեք՝ ավելին իմանալու համար։"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (անջատված է)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Չհաջողվեց միանալ։ Նորից փորձեք։"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Նոր սարքի զուգակցում"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Մարտկոցի ցուցիչի ցուցմունքը կարդալու հետ կապված խնդիր կա"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Հպեք՝ ավելին իմանալու համար"</string>
 </resources>

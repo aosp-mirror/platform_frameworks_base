@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ແບັດເຕີຣີສອງຂີດ."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ແບັດເຕີຣີສາມຂີດ."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ແບັດເຕີຣີເຕັມ."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ບໍ່ຮູ້ເປີເຊັນແບັດເຕີຣີ."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ບໍ່ມີໂທລະສັບ."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ສັນຍານນຶ່ງຂີດ."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ສັນຍານສອງຂີດ."</string>
@@ -543,8 +544,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"ປິດ​ການ​ໃຊ້ VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"ຕັດ​ການ​ເຊື່ອມ​ຕໍ່ VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ເບິ່ງນະໂຍບາຍ"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"ອຸປະກອນນີ້ເປັນຂອງ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"ອຸປະກອນນີ້ເປັນຂອງ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານ ແລະ ຂໍ້ມູນສະຖານທີ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານ ແລະ ຂໍ້ມູນສະຖານທີ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ອົງກອນຂອງທ່ານຕິດຕັ້ງອຳນາດໃບຮັບຮອງໄວ້ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ອົງກອນຂອງທ່ານຕິດຕັ້ງອຳນາດໃບຮັບຮອງໄວ້ໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ມີອຳນາດໃບຮັບຮອງຕິດຕັ້ງຢູ່ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
@@ -712,9 +713,9 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ບໍ່ມີສຽງ ຫຼື ການສັ່ນເຕືອນ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ບໍ່ມີສຽງ ຫຼື ການສັ່ນເຕືອນ ແລະ ປາກົດຢູ່ທາງລຸ່ມຂອງພາກສ່ວນການສົນທະນາ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ. ການສົນທະນາຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ຈະເປັນ bubble ຕາມຄ່າເລີ່ມຕົ້ນ."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ. ການສົນທະນາຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ຈະສະແດງເປັນຟອງຕາມຄ່າເລີ່ມຕົ້ນ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ເອົາໃຈໃສ່ທາງລັດແບບລອຍໄປຫາເນື້ອຫານີ້."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ, ປາກົດເປັນ bubble ແບບລອຍ, ສະແດງຮູບໂປຣໄຟລ໌ຢູ່ໜ້າຈໍລັອກ"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ, ປາກົດເປັນຟອງແບບລອຍ, ສະແດງຮູບໂປຣໄຟລ໌ຢູ່ໜ້າຈໍລັອກ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ຕັ້ງຄ່າ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ສຳຄັນ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ຮອງຮັບຄຸນສົມບັດການສົນທະນາ"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ຕັດການເຊື່ອມຕໍ່ແລ້ວ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້. ລອງໃໝ່."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ຈັບຄູ່ອຸປະກອນໃໝ່"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ເກີດບັນຫາໃນການອ່ານຕົວວັດແທກແບັດເຕີຣີຂອງທ່ານ"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ແຕະເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ"</string>
 </resources>

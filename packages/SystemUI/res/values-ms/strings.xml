@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Bateri dua bar."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Bateri tiga bar."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateri penuh."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Peratusan kuasa bateri tidak diketahui."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Tiada telefon."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon satu bar."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon dua bar."</string>
@@ -853,7 +854,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Kod kunci kanan"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ikon kiri"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ikon kanan"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tahan dan seret untuk menambah jubin"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tahan dan seret untuk menambahkan jubin"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tahan dan seret untuk mengatur semula jubin"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Seret ke sini untuk mengalih keluar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Anda memerlukan sekurang-kurangnya <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> jubin"</string>
@@ -1037,7 +1038,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Tambah kawalan untuk peranti yang disambungkan"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Sediakan kawalan peranti"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Tahan butang Kuasa untuk mengakses kawalan anda"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Pilih apl untuk menambah kawalan"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Pilih apl untuk menambahkan kawalan"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kawalan ditambah.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kawalan ditambah.</item>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (diputuskan sambungan)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Tidak boleh menyambung. Cuba lagi."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Gandingkan peranti baharu"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Masalah membaca meter bateri anda"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ketik untuk mendapatkan maklumat lanjut"</string>
 </resources>

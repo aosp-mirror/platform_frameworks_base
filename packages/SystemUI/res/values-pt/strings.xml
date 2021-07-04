@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"Interf sist"</string>
+    <string name="app_label" msgid="4811759950673118541">"Interface do sistema"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Limpar"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Em andamento"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Duas barras de bateria."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Três barras de bateria."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria cheia."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentagem da bateria desconhecida."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sem telefone."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Uma barra de sinal do telefone."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Duas barras de sinal do telefone."</string>
@@ -431,8 +432,8 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslize para cima para alternar entre os apps"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para alternar rapidamente entre os apps"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslize para cima para mudar de app"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para mudar rapidamente de app"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Alternar Visão geral"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Carregado"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Carregando"</string>
@@ -548,7 +549,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Sua organização instalou uma autoridade de certificação neste dispositivo. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Sua organização instalou uma autoridade de certificação no seu perfil de trabalho. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Uma autoridade de certificação foi instalada neste dispositivo. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Seu administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"O administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Você está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade na rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Você está conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que podem monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Seu perfil de trabalho está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
@@ -563,7 +564,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Abrir credenciais confiáveis"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Seu administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo.\n\nPara ver mais informações, entre em contato com o administrador."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"O administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo.\n\nPara ver mais informações, entre em contato com o administrador."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Você deu permissão para um app configurar uma conexão VPN.\n\nEsse app pode monitorar seu dispositivo e a atividade na rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Seu perfil de trabalho é gerenciado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSeu administrador pode monitorar sua atividade de rede, incluindo e-mails, apps e websites.\n\nPara ver mais informações, entre em contato com o administrador.\n\nVocê também está conectado a uma VPN, que pode monitorar sua atividade de rede."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
@@ -706,7 +707,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Continuar alertando"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desativar notificações"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Continuar mostrando notificações desse app?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Silencioso"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Silenciosas"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Padrão"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bolha"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>
@@ -714,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Podem vibrar ou tocar com base nas configurações do smartphone"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode vibrar ou tocar com base nas configurações do smartphone. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém sua atenção com um atalho flutuante para esse conteúdo."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparecem na parte superior de uma seção de conversa, em forma de balões, mostrando a foto do perfil na tela de bloqueio"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparecem na parte superior de uma seção de conversa, na forma de balões, mostrando a foto do perfil na tela de bloqueio"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configurações"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Não foi possível conectar. Tente novamente."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parear novo dispositivo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema para ler seu medidor de bateria"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toque para mais informações"</string>
 </resources>

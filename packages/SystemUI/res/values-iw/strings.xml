@@ -65,7 +65,7 @@
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏למשתמש המחובר לחשבון במכשיר הזה אין אפשרות להפעיל ניפוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"לאשר ניפוי באגים אלחוטי ברשת הזו?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏שם הרשת (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nכתובת Wi‑Fi‏ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"אפשר תמיד ברשת הזו"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"לאשר תמיד ברשת הזו"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"אישור"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"אין הרשאה לניפוי באגים אלחוטי"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"למשתמש המחובר לחשבון במכשיר הזה אין אפשרות להפעיל ניפוי באגים אלחוטי. כדי להשתמש בתכונה הזו, יש לעבור אל המשתמש הראשי."</string>
@@ -102,7 +102,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"מתבצעת הקלטה של המסך"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"מתבצעת הקלטה של המסך והאודיו"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"הצגת מיקומים של נגיעות במסך"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"אפשר להקיש כדי להפסיק"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"אפשר להקיש כדי להפסיק את ההקלטה"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"עצירה"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"השהיה"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"המשך"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"שני פסים של סוללה."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"שלושה פסים של סוללה."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"סוללה מלאה."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"אחוז טעינת הסוללה לא ידוע."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"אין טלפון."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"פס אחד של טלפון."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"שני פסים של טלפון."</string>
@@ -317,7 +318,7 @@
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"השימוש בנתונים מושהה"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"הגעת למגבלת הנתונים שהגדרת. כבר לא נעשה שימוש בחבילת הגלישה.\n\nהמשך הפעולה עשוי לגרום לחיובים על שימוש בנתונים."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"המשך"</string>
-    <string name="gps_notification_searching_text" msgid="231304732649348313">"‏מחפש GPS"</string>
+    <string name="gps_notification_searching_text" msgid="231304732649348313">"‏מתבצע חיפוש GPS"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"‏המיקום מוגדר על ידי GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"בקשות מיקום פעילות"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ההגדרה \'חיישנים כבויים\' פעילה"</string>
@@ -487,7 +488,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"כן, להמשיך"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"משתמש אורח"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"יש להסיר את המשתמש האורח כדי למחוק אפליקציות ונתונים"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"הסרת אורח"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"הסרת אורח/ת"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ניתוק משתמש"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ניתוק המשתמש הנוכחי"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ניתוק משתמש"</string>
@@ -507,7 +508,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"השבתת התכונה \'חיסכון בסוללה\'"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או העברה (casting). המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"‏להתחיל להקליט או להעביר (cast)?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"לא להציג שוב"</string>
@@ -699,7 +700,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ההודעות אלה יישלחו כהתראות"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"ההתראות האלה בדרך כלל נדחות על ידך. \nלהמשיך להציג אותן?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"סיום"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"החלה"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"אישור"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"שנמשיך להציג לך את ההתראות האלה?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"לא, אל תמשיכו"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"הצגה ללא צליל"</string>
@@ -722,7 +723,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"מעוררת תשומת לב באמצעות קיצור דרך צף לתוכן הזה."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"מוצגת בחלק העליון של קטע התראות השיחה, מופיעה בבועה צפה, תוצג תמונת פרופיל במסך הנעילה"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"עדיפות"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"אין בועות מהזמן האחרון"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"בועות אחרונות ובועות שנסגרו יופיעו כאן"</string>
@@ -863,8 +864,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"קוד מפתח ימני"</string>
     <string name="left_icon" msgid="5036278531966897006">"סמל שמאלי"</string>
     <string name="right_icon" msgid="1103955040645237425">"סמל ימני"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"יש ללחוץ ולגרור כדי להוסיף אריחים"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"יש ללחוץ ולגרור כדי לסדר מחדש את האריחים"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"יש ללחוץ ולגרור כדי להוסיף כרטיסי מידע"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"יש ללחוץ ולגרור כדי לסדר מחדש את כרטיסי המידע"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"אפשר לגרור לכאן כדי להסיר"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"יש צורך ב-<xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> אריחים לפחות"</string>
     <string name="qs_edit" msgid="5583565172803472437">"עריכה"</string>
@@ -872,7 +873,7 @@
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"הצגת שעות, דקות ושניות"</item>
     <item msgid="1271006222031257266">"הצגת שעות ודקות (ברירת מחדל)"</item>
-    <item msgid="6135970080453877218">"לא להציג את הסמל הזה"</item>
+    <item msgid="6135970080453877218">"בלי הסמל הזה"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"תמיד להציג באחוזים"</item>
@@ -998,7 +999,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"מצב חיסכון בסוללה יופעל באופן אוטומטי כשרמת טעינת הסוללה תהיה נמוכה מ-<xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"הגדרות"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"הבנתי"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏ערימת Dump SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"האפליקציה <xliff:g id="APP">%1$s</xliff:g> משתמשת ב<xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"אפליקציות משתמשות ב<xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"לא ניתן היה להתחבר. יש לנסות שוב."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"התאמה של מכשיר חדש"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
 </resources>

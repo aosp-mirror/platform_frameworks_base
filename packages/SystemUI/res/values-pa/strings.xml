@@ -63,9 +63,9 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ਕਰਨ ਦਿਓ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB ਡਿਬੱਗਿੰਗ ਦੀ ਆਗਿਆ ਨਹੀਂ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"ਕੀ ਇਸ ਨੈੱਟਵਰਕ \'ਤੇ ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"ਕੀ ਇਸ ਨੈੱਟਵਰਕ \'ਤੇ ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"ਨੈੱਟਵਰਕ ਨਾਮ (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nਵਾਈ-ਫਾਈ ਪਤਾ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"ਇਸ ਨੈੱਟਵਰਕ \'ਤੇ ਹਮੇਸ਼ਾਂ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"ਇਸ ਨੈੱਟਵਰਕ \'ਤੇ ਹਮੇਸ਼ਾਂ ਆਗਿਆ ਦਿਓ"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"ਆਗਿਆ ਦਿਓ"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ਵਰਤਮਾਨ ਵਿੱਚ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਾਈਨ-ਇਨ ਕੀਤਾ ਵਰਤੋਂਕਾਰ ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਨੂੰ ਚਾਲੂ ਨਹੀਂ ਕਰ ਸਕਦਾ। ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣ ਲਈ, ਮੁੱਖ ਵਰਤੋਂਕਾਰ \'ਤੇ ਬਦਲੋ।"</string>
@@ -102,7 +102,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"ਸਕ੍ਰੀਨ ਅਤੇ ਆਡੀਓ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"ਸਕ੍ਰੀਨ \'ਤੇ ਸਪਰਸ਼ਾਂ ਨੂੰ ਦਿਖਾਓ"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"ਰੋਕਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ਬੰਦ ਕਰੋ"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"ਰੋਕੋ"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ਬੈਟਰੀ ਦੋ ਬਾਰਸ।"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ਬੈਟਰੀ ਤਿੰਨ ਬਾਰਸ।"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ਬੈਟਰੀ ਪੂਰੀ।"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ਬੈਟਰੀ ਪ੍ਰਤੀਸ਼ਤ ਅਗਿਆਤ ਹੈ।"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ਕੋਈ ਫ਼ੋਨ ਨਹੀਂ।"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ਫ਼ੋਨ ਇੱਕ ਬਾਰ।"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ਫ਼ੋਨ ਦੋ ਬਾਰਸ।"</string>
@@ -427,7 +428,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ਰੋਕੋ"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ਡੀਵਾਈਸ"</string>
@@ -592,8 +593,8 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ਆਊਟਪੁੱਟ ਡੀਵਾਈਸ ਵਰਤੋ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਅਤੇ ਫੜ ਕੇ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ਨਿੱਜੀ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ (ਜਿਵੇਂ ਕਿ ਸੰਪਰਕ ਅਤੇ ਈਮੇਲ ਸਮੱਗਰੀ)।"</string>
@@ -700,7 +701,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"ਬਲਾਕ ਕਰੋ"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"ਛੋਟਾ ਕਰੋ"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"ਖਾਮੋਸ਼"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"ਸ਼ਾਂਤ"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ਚੁੱਪ ਰਹੋ"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"ਸੁਚੇਤਨਾ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ਸੁਚੇਤ ਰਖੋ"</string>
@@ -712,9 +713,9 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ। ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ <xliff:g id="APP_NAME">%1$s</xliff:g> ਬਬਲ ਤੋਂ ਗੱਲਾਂਬਾਤਾਂ।"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ। ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਤੌਰ \'ਤੇ <xliff:g id="APP_NAME">%1$s</xliff:g> ਤੋਂ ਗੱਲਾਂਬਾਤਾਂ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ਇਸ ਸਮੱਗਰੀ ਦੇ ਅਸਥਿਰ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਆਪਣਾ ਧਿਆਨ ਕੇਂਦਰਿਤ ਰੱਖੋ।"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ, ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਫਲੋਟਿੰਗ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ, ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
@@ -826,11 +827,11 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ਚਾਲੂ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ਬੰਦ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ਅਣਉਪਲਬਧ"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਪੱਟੀ"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"ਨੈਵੀਗੇਸ਼ਨ ਵਾਲੀ ਪੱਟੀ"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ਖਾਕਾ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ਵਧੇਰੇ ਖੱਬੇ ਬਟਨ ਕਿਸਮ"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"ਵਧੇਰੇ ਸੱਜੇ ਬਟਨ ਕਿਸਮ"</string>
-    <string name="nav_bar_default" msgid="8386559913240761526">"(ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</string>
+    <string name="nav_bar_default" msgid="8386559913240761526">"(ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="2681220472659720036">"ਕਲਿੱਪਬੋਰਡ"</item>
     <item msgid="4795049793625565683">"ਕੀ-ਕੋਡ"</item>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ਡਿਸਕਨੈਕਟ ਹੋਇਆ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ਨਵਾਂ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ਤੁਹਾਡੇ ਬੈਟਰੀ ਮੀਟਰ ਨੂੰ ਪੜ੍ਹਨ ਵਿੱਚ ਸਮੱਸਿਆ ਹੋ ਰਹੀ ਹੈ"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
 </resources>
