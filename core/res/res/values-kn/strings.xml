@@ -2096,7 +2096,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ಈ ಅಧಿಸೂಚನೆಗೆ ಮೇಲಿನ ಸ್ಥಾನವನ್ನು ನೀಡಲಾಗಿದೆ. ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ಈ ಅಧಿಸೂಚನೆಗೆ ಕೆಳಗಿನ ಸ್ಥಾನವನ್ನು ನೀಡಲಾಗಿದೆ. ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ಸೂಚಿಸಲಾದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ಈಗ ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳಿಂದ ಒದಗಿಸಲಾಗಿದೆ. Android ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳು ಇನ್ನು ಮುಂದೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ಸೂಚಿಸಲಾದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ಈಗ ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು ಒದಗಿಸುತ್ತವೆ. Android ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳು ಇನ್ನು ಮುಂದೆ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ಸರಿ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
