@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuller"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Parring giver adgang til dine kontakter og din opkaldshistorik, når enhederne er forbundet."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> på grund af en forkert pinkode eller adgangsnøgle."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Parring med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> mislykkedes på grund af en forkert pinkode eller adgangsnøgle."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Der kan ikke kommunikeres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Parring afvist af <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -206,15 +206,15 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB-fejlretning"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Fejlretningstilstand, når USB er tilsluttet"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Tilbagekald tilladelser for USB-fejlretning"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådløs fejlfinding"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådløs fejlretning"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Fejlfindingstilstand, når der er Wi-Fi-forbindelse"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Fejl"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådløs fejlfinding"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådløs fejlretning"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Du kan se og bruge tilgængelige enheder ved at aktivere trådløs fejlretning"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Dan par med en enhed ved hjælp af en QR-kode"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Dan par med nye enheder ved hjælp af QR-kodescanneren"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Dan par med en enhed ved hjælp af en parringskode"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Dan par med nye enheder ved hjælp af den sekscifrede kode"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Par enhed ved hjælp af en QR-kode"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Par nye enheder ved hjælp af QR-kodescanneren"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Par enhed ved hjælp af en parringskode"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Par nye enheder ved hjælp af den sekscifrede kode"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Parrede enheder"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Forbundet lige nu"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Enhedsoplysninger"</string>
@@ -222,19 +222,20 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Fingeraftryk for enhed: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Forbindelsen mislykkedes"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Sørg for, at <xliff:g id="DEVICE_NAME">%1$s</xliff:g> har forbindelse til det rigtige netværk."</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Dan par med enhed"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Par med enhed"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Parringskode til Wi-Fi"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Parringen mislykkedes"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Pardannelse mislykkedes"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Sørg for, at enheden er forbundet til det samme netværk."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Dan par med en enhed via Wi-Fi ved at scanne en QR-kode"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Par en enhed via Wi-Fi ved at scanne en QR-kode"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Parrer enhed…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Enheden blev ikke parret. Det skyldes enten, at QR-koden var forkert, eller at enheden ikke er forbundet til det samme netværk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adresse og port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR-kode"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Dan par med en enhed via Wi-Fi ved at scanne en QR-kode"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Par en enhed via Wi-Fi ved at scanne en QR-kode"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Opret forbindelse til et Wi-Fi-netværk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, fejlfinding, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genvej til fejlrapportering"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knap til oprettelse af fejlrapporter i afbrydermenuen"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knap til oprettelse af fejlrapporter i menuen for afbryderknappen"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Lås ikke"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skærmen går ikke i dvale under opladning"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktivér Bluetooth HCI spionlog"</string>
@@ -250,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivér detaljeret Wi-Fi-logføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrænsning af Wi-Fi-scanning"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑forbedret MAC-randomisering"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er altid aktiveret"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwareacceleration ved netdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheder uden navne"</string>
@@ -281,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reducerer batteriforbruget og forbedrer netværkets effektivitet"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Når denne tilstand er aktiveret, skifter enhedens MAC-adresse muligvis, hver gang den opretter forbindelse til et netværk, hvor MAC-randomisering er aktiveret."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forbrugsafregnet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ikke forbrugsafregnet"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Størrelser for Logger-buffer"</string>
@@ -298,16 +301,17 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Brug hardwareacceleration ved netdeling, hvis det er muligt"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Vil du tillade USB-fejlretning?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden notifikation og læse logdata."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Vil du tillade trådløs fejlfinding?"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Vil du tillade trådløs fejlretning?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Trådløs fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden notifikation og læse logdata."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Vil du ophæve adgangen til USB-fejlretning for alle computere, du tidligere har godkendt?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Vil du tillade udviklingsindstillinger?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens apps går ned eller ikke fungerer korrekt."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificer apps via USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Tjek apps, der er installeret via ADB/ADT, for skadelig adfærd."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Tjek apps, der er installeret via ADB/ADT, for skadelig adfærd"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-enheder uden navne (kun MAC-adresser) vises"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Deaktiverer funktionen til absolut lydstyrke via Bluetooth i tilfælde af problemer med lydstyrken på eksterne enheder, f.eks. uacceptabel høj lyd eller manglende kontrol."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Aktiverer funktioner fra Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktivér funktionen Enhanced Connectivity."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivér terminalappen, der giver lokal shell-adgang"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrol"</string>
@@ -343,7 +347,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Simuler farverum"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktivér OpenGL-spor"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Slå USB-lydhåndtering fra"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå autom. lydhåndtering fra for USB-lydenheder"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå automatisk lydhåndtering fra for USB-lydenheder"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Vis layoutgrænser"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Vis grænser for klip, margener osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tving læsning mod venstre"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUI-profilgengivelse"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktivér fejlretningslag for grafikprocessor"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillad, at fejlretningslag indlæses for grafikprocessor i apps til fejlretning"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivér detaljeret leverandørlogging"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Medtag yderligere enhedsspecifikke leverandørlogfiler i fejlrapporter, som muligvis indeholder personlige oplysninger. Dette bruger muligvis mere batteri og/eller lagerplads."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animationsskala for vindue"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Overgangsanimationsskala"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatorvarighedsskala"</string>
@@ -369,9 +375,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Gennemtving tilladelse til eksternt lager"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Gennemtving, at aktiviteter kan tilpasses"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tillad, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tillad, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivér vinduer i frit format"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivér understøttelse af eksperimentelle vinduer i frit format."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivér understøttelse af eksperimentelle vinduer i frit format"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal backup"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Lokale komplette backups er i øjeblikket ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal backup"</string>
@@ -411,8 +417,8 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranopi (rød-grøn)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korriger farver"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Farvekorrigering gør det nemmere for farveblinde at se farver mere nøjagtigt"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farvekorrigering"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ved hjælp af farvekorrigering kan du justere, hvordan farver ser ud på din enhed"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Tilsidesat af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
@@ -426,11 +432,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Indtil <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Forlæng batteritiden til efter <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batteriet aflades muligvis inden <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonen lukker muligvis snart ned"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Denne tablet lukker muligvis snart ned"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Enheden lukker muligvis snart ned"</string>
@@ -440,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Opladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – opladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimerer batteritilstanden"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukendt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Oplader"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Oplader hurtigt"</string>
@@ -501,6 +508,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Spørg hver gang"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Indtil du deaktiverer"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Lige nu"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Denne enhed"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens højttaler"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Der kunne ikke oprettes forbindelse. Sluk og tænd enheden"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhed med ledning"</string>
+    <string name="help_label" msgid="3528360748637781274">"Hjælp og feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Lager"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Delte data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Se og rediger delte data"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Der er ingen delte data for denne bruger."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Der opstod en fejl, da de delte data skulle hentes. Prøv igen."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Id for delte data: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Udløber <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Der opstod en fejl, da de delte data skulle slettes."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Der er ingen lejeaftaler i forbindelse med disse data. Vil du slette dem?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Apps, der deler data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Der er ikke angivet nogen beskrivelse af appen."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Leasingen udløber <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Slet delte data"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Er du sikker på, at du vil slette disse delte data?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Brugere har egne apps og eget indhold"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Du kan begrænse adgangen til apps og indhold fra din konto"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Bruger"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrænset profil"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfigurer nu"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ikke nu"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Tilføj"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Ny bruger"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Ny profil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Brugeroplysninger"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profiloplysninger"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Før du kan oprette en begrænset profil, skal du oprette en skærmlås for at beskytte dine apps og personlige data."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurer låseskærmen"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Skift til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæst"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gæsten"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gæst"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Enhedens standardindstilling"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiveret"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiveret"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Din enhed skal genstartes for at anvende denne ændring. Genstart nu, eller annuller."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Høretelefoner med ledning"</string>
 </resources>
