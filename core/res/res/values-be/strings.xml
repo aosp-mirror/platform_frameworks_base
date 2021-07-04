@@ -341,7 +341,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Дазваляе прыкладанням быць радком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"разгарнуць/згарнуць радок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дазваляе прыкладанню разгортваць ці згортваць радок стану."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"усталёўваць ярлыкі"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Стварэнне ярлыкоў"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Дазваляе праграме дадаваць ярлыкі на Галоўны экран без умяшання карыстальніка."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"выдаляць ярлыкі"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Дазваляе праграме выдаляць ярлыкі з Галоўнага экрана без умяшання карыстальніка."</string>
@@ -843,7 +843,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Паўтарыце спробу"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Паўтарыце спробу"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Разблакіраваць для ўсіх функцый і даных"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перавышана максімальная колькасць спроб разблакоўкі праз Фэйскантроль"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перавышана максімальная колькасць спроб разблакоўкі праз распазнаванне твару"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Няма SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Няма SIM-карты ў планшэце."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"У вашай прыладзе Android TV няма SIM-карты."</string>
@@ -1697,8 +1697,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колеру"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колераў"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колераў"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
@@ -1762,6 +1762,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1798,6 +1809,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Невядомы (кніжная арыентацыя)"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Невядомы (альбомная арыентацыя)"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Скасавана"</string>
@@ -2123,8 +2135,8 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Размова"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групавая размова"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Асабістыя"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"Працоўныя"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Асабісты"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Працоўны"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Прагляд асабістага змесціва"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Прагляд працоўнага змесціва"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Не ўдалося абагуліць гэта змесціва з працоўнымі праграмамі"</string>
