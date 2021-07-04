@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Татгалзах"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Зөвшөөрөл хүсэв"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> бүртгэл зөвшөөрөл \n хүссэн"</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g>\n нь <xliff:g id="ACCOUNT">%2$s</xliff:g> бүртгэлд зөвшөөрөл хүссэн."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Та энэ апп-г өөрийн ажлын профайлаас гадуур ашиглаж байна"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Та энэ апп-г өөрийн ажлын профайл дотор ашиглаж байна"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Оруулах арга"</string>
@@ -2096,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Энэ мэдэгдлийг дээгүүр зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Энэ мэдэгдлийг доогуур зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Сайжруулсан мэдэгдэл"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Санал болгосон үйлдлүүд болон хариунуудыг одоо сайржуулсан мэдэгдлээр олгоно. Android-н Орчинтой тохирсон мэдэгдлийг цаашид дэмжихээ больсон."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Санал болгосон үйлдэл, хариултыг одоо сайржуулсан мэдэгдлээр олгоно. Android-н Орчинтой тохирсон мэдэгдлийг цаашид дэмжихээ больсон."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Унтраах"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Нэмэлт мэдээлэл авах"</string>
