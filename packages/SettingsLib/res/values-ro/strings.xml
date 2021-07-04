@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulați"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Asocierea dispozitivelor vă permite accesul la persoanele de contact și la istoricul apelurilor când dispozitivul este conectat."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau al unei chei de acces incorecte."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut asocia cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau a unei chei de acces incorecte."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nu se poate comunica cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Împerechere respinsă de <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -204,15 +204,15 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Setările pentru tethering nu sunt disponibile pentru acest utilizator"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Setările pentru „Nume puncte de acces” nu sunt disponibile pentru acest utilizator"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Remedierea erorilor prin USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de depanare când este conectat USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de remediere a erorilor când este conectat USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoc autorizații remediere a erorilor prin USB"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor prin wireless"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor wireless"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modul de remediere a erorilor când rețeaua Wi-Fi este conectată"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Eroare"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Remedierea erorilor prin wireless"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Remedierea erorilor wireless"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Activați remedierea erorilor wireless pentru a vedea și a folosi dispozitivele disponibile"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Asociați dispozitivul folosind codul QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Asociați dispozitive noi folosind scannerul de coduri QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Asociați dispozitive noi folosind scannerul de coduri QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Asociați dispozitivul folosind codul de conectare"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Asociați dispozitive noi folosind codul din șase cifre"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispozitive asociate"</string>
@@ -231,7 +231,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Nu s-a asociat dispozitivul. Codul QR este incorect sau dispozitivul nu este conectat la aceeași rețea."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP și portul"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scanați codul QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Asociați dispozitivul prin Wi-Fi scanând un cod QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Asociați dispozitivul prin Wi-Fi scanând un cod QR"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conectați-vă la o rețea Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, remedierea erorilor, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Comandă rapidă pentru raportul de erori"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afișați un buton în meniul de pornire pentru a realiza un raport de erori"</string>
@@ -250,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Înregistrare prin Wi-Fi de volume mari de date"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitare căutare de rețele Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizare MAC îmbunătățită prin Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accelerare hardware pentru tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afișați dispozitivele Bluetooth fără nume"</string>
@@ -281,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce descărcarea bateriei și îmbunătățește performanța rețelei"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Când acest mod este activat, adresa MAC a dispozitivului se poate schimba de fiecare dată când se conectează la o rețea care are activată randomizarea MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Contorizată"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Necontorizată"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensiunile memoriei temporare a jurnalului"</string>
@@ -298,8 +301,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Folosiți accelerarea hardware pentru tethering, dacă este disponibilă"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Permiteți remedierea erorilor prin USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Remedierea erorilor prin USB are exclusiv scopuri de dezvoltare. Utilizați-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Permiteți remedierea erorilor prin wireless?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Remedierea erorilor prin wireless are exclusiv scopuri de dezvoltare. Folosiți-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Permiteți remedierea erorilor wireless?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Remedierea erorilor wireless are exclusiv scopuri de dezvoltare. Folosiți-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revocați accesul la remedierea erorilor prin USB de pe toate computerele pe care le-ați autorizat anterior?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permiteți setările pentru dezvoltare?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Aceste setări sunt destinate exclusiv utilizării pentru dezvoltare. Din cauza lor, este posibil ca dispozitivul dvs. și aplicațiile de pe acesta să nu mai funcționeze sau să funcționeze necorespunzător."</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Vor fi afișate dispozitivele Bluetooth fără nume (numai adresele MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Dezactivează funcția Bluetooth de volum absolut în cazul problemelor de volum apărute la dispozitivele la distanță, cum ar fi volumul mult prea ridicat sau lipsa de control asupra acestuia."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Activează setul de funcții Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Activează funcția Conectivitate îmbunătățită."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Aplicație terminal locală"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activați aplicația terminal care oferă acces la shell local"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verificare HDCP"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profil redare cu HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activați nivelurile de depanare GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permiteți încărcarea nivelurilor de depanare GPU pentru aplicațiile de depanare"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activați înregistrarea detaliată a furnizorilor"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Includeți alte jurnale ale furnizorilor de dispozitive în rapoartele de eroare, care pot conține informații private, folosiți mai multă baterie și/sau mai mult spațiu de stocare."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scară animație fereastră"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scară tranziție animații"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Scară durată Animator"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (roșu-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (albastru-galben)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corecția culorii"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Corecția culorii ajută persoanele cu daltonism să vadă culori mai exacte"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Folosind corecția culorii, puteți ajusta modul în care se afișează culorile pe dispozitiv"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valoare înlocuită de <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Timp aproximativ rămas: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -426,11 +432,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ar trebui să reziste până la <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ar trebui să reziste până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Extindeți autonomia bateriei după <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"a mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria se poate descărca până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonul se poate închide în curând"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tableta se poate închide în curând"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Dispozitivul se poate închide în curând"</string>
@@ -440,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Au mai rămas <xliff:g id="TIME">%1$s</xliff:g> până la încărcare"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> până la încărcare"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Se fac optimizări pentru buna funcționare a bateriei"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Necunoscut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Se încarcă"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Se încarcă rapid"</string>
@@ -451,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Dezactivată"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Permise"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nepermise"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalare aplicații necunoscute"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalarea aplicațiilor necunoscute"</string>
     <string name="home" msgid="973834627243661438">"Ecran principal Setări"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -460,8 +467,8 @@
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Acum <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Timp rămas: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mic"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilit"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mică"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilită"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Mare"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Mai mare"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Cel mai mare"</string>
@@ -502,6 +509,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Întreabă de fiecare dată"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Până când dezactivați"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Chiar acum"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Acest dispozitiv"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Difuzorul telefonului"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problemă la conectare. Opriți și reporniți dispozitivul."</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispozitiv audio cu fir"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ajutor și feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Stocare"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Date la care se permite accesul"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Vedeți și modificați datele la care se permite accesul"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Nu există date la care se permite accesul pentru acest utilizator."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"A apărut o eroare la preluarea datelor la care se permite accesul. Încercați din nou."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"ID-ul datelor la care se permite accesul: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Expiră pe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"A apărut o eroare la ștergerea datelor la care se permite accesul."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Nu există închirieri pentru datele la care se permite accesul. Doriți să le ștergeți?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Aplicații care permit accesul la date"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Aplicația nu oferă nicio descriere."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Închirierea expiră pe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ștergeți datele la care se permite accesul"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Sigur ștergeți aceste date la care se permite accesul?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Utilizatorii dețin aplicații și materiale proprii"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Puteți restricționa accesul la aplicații și la conținut din contul dvs."</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizator"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil limitat"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Adăugați un utilizator nou?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puteți să permiteți accesul la acest dispozitiv altor persoane creând utilizatori suplimentari. Fiecare utilizator are propriul spațiu, pe care îl poate personaliza cu aplicații, imagini de fundal etc. De asemenea, utilizatorii pot ajusta setările dispozitivului, cum ar fi setările pentru Wi-Fi, care îi afectează pe toți ceilalți utilizatori.\n\nDupă ce adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOricare dintre utilizatori poate actualiza aplicațiile pentru toți ceilalți utilizatori. Este posibil ca setările de accesibilitate și serviciile să nu se transfere la noul utilizator."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurați utilizatorul acum?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Asigurați-vă că utilizatorul are posibilitatea de a prelua dispozitivul și de a-și configura spațiul"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurați profilul acum?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Configurați acum"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Nu acum"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Adăugați"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Utilizator nou"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Profil nou"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Info. utilizator"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Informații de profil"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Înainte de a putea crea un profil cu permisiuni limitate, va trebui să configurați blocarea ecranului pentru a vă proteja aplicațiile și datele personale."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Configurați blocarea"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Treceți la <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Adăugați un invitat"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ștergeți invitatul"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Invitat"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Prestabilit pentru dispozitiv"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Dezactivat"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activat"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Pentru ca modificarea să se aplice, trebuie să reporniți dispozitivul. Reporniți-l acum sau anulați."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Căști cu fir"</string>
 </resources>

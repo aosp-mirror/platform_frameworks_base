@@ -210,9 +210,9 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"連上 Wi-Fi 時啟用偵錯模式"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"錯誤"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"無線偵錯"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"如要查看並使用可用的裝置，請開啟無線偵錯"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"如要查看並使用可用的裝置，請開啟無線偵錯功能"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"使用 QR 圖碼配對裝置"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"使用 QR 圖碼掃描器配對新裝置"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"使用 QR 圖碼掃描器配對新裝置"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"使用配對碼配對裝置"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位數的配對碼配對新裝置"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"已配對的裝置"</string>
@@ -231,7 +231,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"無法配對裝置。可能是QR 圖碼錯誤，或是裝置未連上相同的網路。"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 位址和通訊埠"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"掃描 QR 圖碼"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"掃描 QR 圖碼即可透過 Wi-Fi 配對裝置"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"掃描 QR 圖碼即可透過 Wi-Fi 配對裝置"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"請連上 Wi-Fi 網路"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, 偵錯, 開發"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"錯誤回報捷徑"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在電源選單中顯示取得錯誤報告的按鈕"</string>
@@ -250,8 +251,9 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"無線螢幕分享認證"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"啟用 Wi‑Fi 詳細記錄設定"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi-Fi 掃描調節"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi 加強型 MAC 隨機化"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"行動數據連線一律保持啟用狀態"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"數據連線硬體加速"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"網路共用硬體加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"顯示沒有名稱的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"停用絕對音量功能"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"啟用 Gabeldorsche"</string>
@@ -281,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細記錄"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗電量以及改善網路效能"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"啟用這個模式後，每次連線到啟用了 MAC 隨機化的網路時，這部裝置的 MAC 位址都可能會有所變更。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"計量付費"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"非計量付費"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"記錄器緩衝區空間"</string>
@@ -295,7 +298,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"允許模擬位置"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"啟用檢視屬性檢查"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"即使 Wi‑Fi 連線已啟用，一律將行動數據連線保持啟用狀態 (以便快速切換網路)。"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用數據連線硬體加速功能 (如果可用的話)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用網路共用硬體加速功能 (如果可用的話)"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"允許 USB 偵錯嗎？"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB 偵錯是針對應用程式開發而設計的功能，可讓你複製電腦和裝置中的資料、不需經由通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"要啟用無線偵錯嗎？"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"系統會顯示沒有名稱 (僅具有 MAC 位址) 的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"只要停用藍牙絕對音量功能，即可避免在連線到遠端裝置時，發生音量過大或無法控制音量等問題。"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"啟用藍牙 Gabeldorsche 功能堆疊。"</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"啟用「加強型連線」功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 檢查"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"剖析 HWUI 轉譯"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"啟用 GPU 偵錯圖層"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"允許載入 GPU 偵錯圖層為應用程式偵錯"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"啟用詳細供應商記錄功能"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"在錯誤報告中附上其他的裝置專屬供應商記錄。如果你這麼做，可能會增加電池用量及/或占用較多儲存空間，報告中可能也會包含私人資訊。"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"視窗動畫比例"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"轉場動畫比例"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"動畫影片長度比例"</string>
@@ -373,7 +379,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"啟用自由形式視窗"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"啟用實驗版自由形式視窗的支援功能。"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"電腦備份密碼"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"電腦完整備份目前未受保護"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"目前尚未設定密碼來保護完整的備份檔案 (透過電腦備份的檔案)"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"輕觸即可變更或移除電腦完整備份的密碼"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"已設定新備份密碼"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"新密碼與確認密碼不符。"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅-綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍-黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"色彩校正可協助色盲使用者看見較準確的色彩"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"色彩校正可讓你調整裝置上顯示的顏色"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已改為<xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"還能使用約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -423,14 +429,14 @@
     <skip />
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"根據你的使用情形，目前電量為 <xliff:g id="LEVEL">%2$s</xliff:g>，預估可持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"根據你的使用情形，預估可持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"目前電量 <xliff:g id="LEVEL">%2$s</xliff:g>，預估還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"預估還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"在 <xliff:g id="TIME">%1$s</xliff:g>後延長電池續航力"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"電池可用時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"電池可用時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"目前電量 <xliff:g id="LEVEL">%2$s</xliff:g>，預估可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"預估電力大約可使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"電池電力可能於<xliff:g id="TIME">%1$s</xliff:g> 前耗盡"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"電池可用時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"電池可用時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"手機可能即將關機"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"平板電腦可能即將關機"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"裝置可能即將關機"</string>
@@ -440,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g>後充飽電"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽電"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 最佳化調整電池狀態"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
@@ -501,6 +508,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"每次都詢問"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"直到你關閉為止"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"這個裝置"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"手機喇叭"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連線，請關閉裝置後再重新開啟"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音訊裝置"</string>
+    <string name="help_label" msgid="3528360748637781274">"說明與意見回饋"</string>
+    <string name="storage_category" msgid="2287342585424631813">"儲存空間"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"共用資料"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"查看及修改共用資料"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"這位使用者沒有任何共用資料。"</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"擷取共用資料時發生錯誤，請再試一次。"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"共用資料 ID：<xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"到期時間：<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"刪除共用資料時發生錯誤。"</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"這項共用資料沒有任何釋出期，要刪除這項資料嗎？"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"分享資料的應用程式"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"應用程式未提供任何說明。"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"租約到期時間：<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"刪除共用資料"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"確定要刪除這項共用資料嗎？"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"使用者擁有個人專屬的應用程式和內容"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"你可以限制他人透過你的帳戶存取應用程式和內容"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"使用者"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"設有限制的個人資料"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"新增使用者？"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"你可以建立其他使用者，藉此與他人共用這個裝置。每位使用者都有自己的專屬空間，並可使用應用程式、桌布等項目自訂個人空間。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙設定和服務可能無法轉移到新的使用者。"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"新增的使用者需要自行設定個人空間。\n\n任何使用者皆可為其他所有使用者更新應用程式。"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"立即設定使用者？"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"請確保對方可以使用裝置並設定自己的空間"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"立即建立個人資料？"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"立即設定"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"暫時不要"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"新增"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"新使用者"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"新的個人資料"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"使用者資訊"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"設定檔資訊"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"如要建立設有限制的個人資料，你必須先設定螢幕鎖定來保護你的應用程式和個人資料。"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"設定鎖定"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"切換至<xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"新增訪客"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"移除訪客"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"訪客"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"裝置預設設定"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已啟用"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"裝置必須重新啟動才能套用這項變更。請立即重新啟動或取消變更。"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"有線耳機"</string>
 </resources>
