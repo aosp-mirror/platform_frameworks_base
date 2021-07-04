@@ -89,7 +89,6 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
@@ -212,7 +211,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     private GroupMembershipManager mGroupMembershipManager;
     private GroupExpansionManager mGroupExpansionManager;
-    private NotificationActivityStarter mNotificationActivityStarter;
     private HashSet<ExpandableView> mChildrenToAddAnimated = new HashSet<>();
     private ArrayList<View> mAddedHeadsUpChildren = new ArrayList<>();
     private ArrayList<ExpandableView> mChildrenToRemoveAnimated = new ArrayList<>();
@@ -563,6 +561,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return NotificationStackScrollLayout.this;
         }
     };
+
+    @Nullable
+    private OnClickListener mManageButtonClickListener;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -4361,6 +4362,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return -1;
     }
 
+    /**
+     * Returns whether or not a History button is shown in the footer. If there is no footer, then
+     * this will return false.
+     **/
+    public boolean isHistoryShown() {
+        return mFooterView != null && mFooterView.isHistoryShown();
+    }
+
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
@@ -4370,6 +4379,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mFooterView = footerView;
         addView(mFooterView, index);
+        if (mManageButtonClickListener != null) {
+            mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5073,9 +5085,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    public void setNotificationActivityStarter(
-            NotificationActivityStarter notificationActivityStarter) {
-        mNotificationActivityStarter = notificationActivityStarter;
+    /** Register a {@link View.OnClickListener} to be invoked when the Manage button is clicked. */
+    public void setManageButtonClickListener(@Nullable OnClickListener listener) {
+        mManageButtonClickListener = listener;
+        if (mFooterView != null) {
+            mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+        }
     }
 
     @VisibleForTesting
@@ -5088,9 +5103,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mFooterDismissListener.onDismiss();
             }
             clearNotifications(ROWS_ALL, true /* closeShade */);
-        });
-        footerView.setManageButtonClickListener(v -> {
-            mNotificationActivityStarter.startHistoryIntent(v, mFooterView.isHistoryShown());
         });
         setFooterView(footerView);
     }
