@@ -42,12 +42,12 @@
     <string name="keyguard_low_battery" msgid="1868012396800230904">"အားသွင်းကိရိယာကို ချိတ်ဆက်ပါ။"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ဆင်းမ်ကဒ် မရှိပါ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ဆင်းမ်ကဒ် ထည့်ပါ။"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ဆင်းမ်ကတ် မရှိပါ"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ဆင်းမ်ကတ် ထည့်ပါ။"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ဆင်းမ်ကဒ်မရှိပါ သို့မဟုတ် အသုံးပြု၍မရပါ။ ဆင်းမ်ကဒ်တစ်ခု ထည့်ပါ။"</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"အသုံးပြု၍ မရတော့သော ဆင်းမ်ကဒ်။"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"အသုံးပြု၍ မရတော့သော ဆင်းမ်ကတ်။"</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"သင့်ဆင်းမ်ကဒ်ကို အပြီးအပိုင် ပိတ်လိုက်ပါပြီ။\n နောက်ထပ်ဆင်းမ်ကဒ်တစ်ခု ရယူရန်အတွက် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
-    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"ဆင်းမ်ကဒ် လော့ခ်ကျနေပါသည်။"</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"ဆင်းမ်ကတ် လော့ခ်ကျနေပါသည်။"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"ဆင်းမ်ကဒ်သည် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လော့ခ်ကျနေပါသည်။"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"ဆင်းမ်ကဒ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"ပင်နံပါတ်နေရာ"</string>
@@ -69,7 +69,7 @@
       <item quantity="one">၁ စက္ကန့် အကြာတွင် ထပ်လုပ်ကြည့်ပါ</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="5376036737065051736">"ပုံစံကို ဆွဲပါ"</string>
-    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"ဆင်းမ်ကဒ် ပင်နံပါတ်ကို ထည့်ပါ။"</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"ဆင်းမ်ကတ် ပင်နံပါတ်ကို ထည့်ပါ။"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" အတွက် ဆင်းမ်ကဒ်ပင်နံပါတ်ကို ထည့်ပါ။"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> မိုဘိုင်းဝန်ဆောင်မှု မရှိဘဲ စက်ပစ္စည်းကို အသုံးပြုရန် eSIM ကို ပိတ်ပါ။"</string>
     <string name="kg_pin_instructions" msgid="822353548385014361">"ပင်နံပါတ်ကို ထည့်ပါ"</string>
@@ -97,7 +97,7 @@
       <item quantity="one">ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် မှန်ကန်မှုမရှိပါ။ ဆင်းမ်ကဒ်ကို အပြီးအပိုင်မပိတ်ခင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ်စမ်းသပ်ခွင့် ရှိပါသေးသည်။</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"ဆင်းမ်ကဒ်ပင်နံပါတ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
-    <string name="kg_password_puk_failed" msgid="6778867411556937118">"ဆင်းမ်ကဒ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
+    <string name="kg_password_puk_failed" msgid="6778867411556937118">"ဆင်းမ်ကတ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
     <string name="kg_pin_accepted" msgid="1625501841604389716">"ကုဒ်ကို လက်ခံလိုက်ပါပြီ။"</string>
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"ဝန်ဆောင်မှု မရှိပါ။"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"စာရိုက်စနစ်ပြောင်းရန်"</string>
@@ -128,14 +128,14 @@
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"မသိ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"မသိ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="other">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
-      <item quantity="one">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်ပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+      <item quantity="other">ဆင်းမ်ကတ် ပင်နံပါတ် ထည့်ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+      <item quantity="one">ဆင်းမ်ကတ် ပင်နံပါတ် ထည့်ပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
-      <item quantity="one">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
+      <item quantity="other">ဆင်းမ်ကတ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကတ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
+      <item quantity="one">ဆင်းမ်ကတ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကတ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"မူလ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ပူဖောင်းကွက်"</string>
-    <string name="clock_title_analog" msgid="8409262532900918273">"လက်တံနာရီ"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"ရိုးရိုး"</string>
 </resources>
