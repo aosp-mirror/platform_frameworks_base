@@ -43,6 +43,7 @@ import android.app.backup.BackupManager;
 import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.bluetooth.BluetoothProfile;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
@@ -5317,6 +5318,68 @@ public class SettingsProvider extends ContentProvider {
                                         .getResources()
                                         .getBoolean(
                                                 R.bool.def_wearable_mobileSignalDetectorAllowed));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_ENABLED,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_ambientEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_TILT_TO_WAKE,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_tiltToWakeEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_touchToWakeEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_tiltToBrightEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.DECOMPOSABLE_WATCHFACE, false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
+                                SystemProperties.getBoolean("ro.ambient.force_when_docked", false));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
+                                SystemProperties.getInt("ro.ambient.gesture_sensor_id", 0));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
+                                SystemProperties.getBoolean("ro.ambient.low_bit_enabled", false));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                                SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.COMPANION_ADDRESS, "");
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                                Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
+                                Settings.Global.Wearable.HFP_CLIENT_UNSET);
+                        Setting disabledProfileSetting =
+                                getGlobalSettingsLocked()
+                                        .getSettingLocked(
+                                                Settings.Global.BLUETOOTH_DISABLED_PROFILES);
+                        final long disabledProfileSettingValue =
+                                disabledProfileSetting.isNull()
+                                        ? 0
+                                        : Long.parseLong(disabledProfileSetting.getValue());
+                        final boolean isHfpClientProfileEnabled =
+                                (disabledProfileSettingValue
+                                                & (1 << BluetoothProfile.HEADSET_CLIENT))
+                                        == 0;
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
+                                isHfpClientProfileEnabled);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.COMPANION_OS_VERSION,
+                                Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;

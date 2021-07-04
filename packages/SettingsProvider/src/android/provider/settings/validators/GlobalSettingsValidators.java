@@ -255,6 +255,41 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.DISPLAY_SHAPE_SQUARE)
                         }));
         VALIDATORS.put(Global.Wearable.MOBILE_SIGNAL_DETECTOR, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_WAKE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_TOUCH_TO_WAKE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.DECOMPOSABLE_WATCHFACE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_GESTURE_SENSOR_ID, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_LOW_BIT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_BRIGHT, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_ANDROID),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.COMPANION_BLE_ROLE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.BLUETOOTH_ROLE_CENTRAL),
+                            String.valueOf(Global.Wearable.BLUETOOTH_ROLE_PERIPHERAL)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.USER_HFP_CLIENT_SETTING,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.HFP_CLIENT_UNSET),
+                            String.valueOf(Global.Wearable.HFP_CLIENT_ENABLED),
+                            String.valueOf(Global.Wearable.HFP_CLIENT_DISABLED)
+                        }));
+        VALIDATORS.put(Global.Wearable.HFP_CLIENT_PROFILE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.COMPANION_OS_VERSION, ANY_INTEGER_VALIDATOR);
     }
 }
 
