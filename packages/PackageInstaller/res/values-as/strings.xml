@@ -87,7 +87,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"আপোনাৰ টেবলেট আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপটো ইনষ্টল কৰি এপটোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"আপোনাৰ টিভি আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপটো ইনষ্টল কৰি এপটোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"অব্যাহত ৰাখক"</string>
-    <string name="external_sources_settings" msgid="4046964413071713807">"ছেটিংসমূহ"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"ছেটিং"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ৱেৰ এপসমূহ ইনষ্টল/আনইনষ্টল কৰি থকা হৈছে"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"এপ্ ইনষ্টল কৰাৰ জাননী"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"সফলতাৰে ইনষ্টল কৰা হ’ল"</string>
