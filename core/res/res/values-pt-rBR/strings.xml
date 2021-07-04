@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acesse seus contatos"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Local"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Localização"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acesse o local do dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite que o app seja a barra de status."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"expandir/recolher barra de status"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite que o app expanda ou recolha a barra de status."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar atalhos"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalar atalhos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que um app adicione atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar atalhos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que o app remova atalhos da tela inicial sem a intervenção do usuário."</string>
@@ -424,9 +424,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que o app acesse comandos do provedor não relacionados à localização. Isso pode permitir que o app interfira no funcionamento do GPS ou de outras fontes de localização."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acessar localização precisa apenas em primeiro plano"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar seu local exato por meio dos Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar sua localização exata com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acessar local aproximado apenas em primeiro plano"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar seu local aproximado por meio dos Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar sua localização aproximada com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acessar a localização em segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esse app poderá acessar o local a qualquer momento, mesmo quando não estiver sendo usado."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"alterar as suas configurações de áudio"</string>
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tente novamente"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Tente novamente"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueio para todos os recursos e dados"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de desbloqueio por reconhecimento facial foi excedido"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Sem chip"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Não há um chip no tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nenhum chip no seu dispositivo Android TV."</string>
@@ -989,9 +989,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Limpar consulta"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Pesquisa por voz"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Ativar exploração pelo toque?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar a exploração pelo toque. Com ela, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o tablet através de gestos."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar a exploração pelo toque. Com ela, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o telefone através de gestos."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Ativar o Explorar por toque?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar o Explorar por toque. Com ele, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o tablet por gestos."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar o Explorar por toque. Com ele, você pode ouvir ou ver descrições do que está sob seu dedo e interagir com o telefone por gestos."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 mês atrás"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Antes de 1 mês atrás"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1158,8 +1158,8 @@
     <string name="noApplications" msgid="1186909265235544019">"Nenhum app pode realizar esta ação."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> parou"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> parou"</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> apresenta falhas continuamente"</string>
-    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> apresenta falhas continuamente"</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"o app <xliff:g id="APPLICATION">%1$s</xliff:g> apresenta falhas contínuas"</string>
+    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> apresenta falhas contínuas"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Abrir app novamente"</string>
     <string name="aerr_report" msgid="3095644466849299308">"Enviar feedback"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Fechar"</string>
@@ -1309,7 +1309,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuração USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toque para desativar a depuração USB."</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toque para desativar a depuração USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecione para desativar a depuração USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuração por Wi-Fi conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toque para desativar a depuração por Wi-Fi"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Retrato desconhecido"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Paisagem desconhecido"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancelado"</string>
@@ -1800,7 +1812,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para prolongar a duração da carga, a \"Economia de bateria\":\n\n• ativa o tema escuro;\n• desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\".\n\n"<annotation id="url">"Saiba mais"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Para prolongar a duração da carga, a \"Economia de bateria\":\n\n• ativa o tema escuro;\n• desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar \"Economia de dados\"?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1845,7 +1857,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Durante a semana à noite"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormindo"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormir"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Há um problema interno com seu dispositivo. Entre em contato com o fabricante para saber mais detalhes."</string>

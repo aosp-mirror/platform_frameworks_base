@@ -575,10 +575,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"керувати апаратним забезпечення для Фейсконтролю"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"керувати апаратним забезпечення фейсконтролю"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Додаток може активувати способи додавання й видалення шаблонів облич."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"використовувати апаратне забезпечення для Фейсконтролю"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Додаток може використовувати апаратне забезпечення для Фейсконтролю"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Додаток зможе використовувати для автентифікації апаратне забезпечення фейсконтролю"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Повторно проскануйте обличчя"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Повторно проскануйте обличчя для ефективнішого розпізнавання"</string>
@@ -605,15 +605,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Скористайтеся Фейсконтролем ще раз."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Спробуйте скористатися фейсконтролем ще раз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Не вдається зберегти нові дані про обличчя. Видаліть старі."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Користувач скасував Фейсконтроль."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Фейсконтроль: користувач скасував операцію."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Забагато спроб. Фейсконтроль вимкнено."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували Фейсконтроль"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується Фейсконтроль."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували фейсконтроль"</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується фейсконтроль."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик тимчасово вимкнено."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -1349,7 +1349,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Виявлено аналоговий аксесуар для аудіо"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Під’єднаний пристрій несумісний із цим телефоном. Торкніться, щоб дізнатися більше."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Налагодження USB підключено"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Торкніться, щоб вимкнути налагодження через USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Торкніться, щоб вимкнути його"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Виберіть, щоб вимкнути налагодження за USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Активне налагодження через Wi-Fi"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Натисніть, щоб вимкнути налагодження через Wi-Fi"</string>
@@ -1685,7 +1685,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати вміст над іншими додатками."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Переглянути й виконати дії"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Цей сервіс може відстежувати вашу взаємодію з додатком чи апаратним датчиком, а також взаємодіяти з додатками від вашого імені."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволити"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Заборонити"</string>
@@ -1762,6 +1762,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch (Пн. Америка)"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto (Пн. Америка)"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap (Пн. Америка)"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K (Китай)"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K (Китай)"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1 (Китай)"</string>
@@ -1798,6 +1809,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu (Японія)"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2 (Японія)"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4 (Японія)"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Невідома книжкова орієнтація"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Невідома альбомна орієнтація"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Скасовано"</string>
