@@ -212,7 +212,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"ವೈರ್‌ಲೆಸ್ ಆನ್‌ ಮಾಡಿ"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"ವೈರ್‌ಲೆಸ್ ಆಫ್ ಮಾಡು"</string>
     <string name="screen_lock" msgid="2072642720826409809">"ಸ್ಕ್ರೀನ್ ಲಾಕ್"</string>
-    <string name="power_off" msgid="4111692782492232778">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
+    <string name="power_off" msgid="4111692782492232778">"ಪವರ್ ಆಫ್"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ರಿಂಗರ್ ಆಫ್"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ರಿಂಗರ್ ವೈಬ್ರೇಷನ್‌"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"ರಿಂಗರ್ ಆನ್"</string>
@@ -220,7 +220,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"ಅಪ್‌ಡೇಟೇ ಮಾಡಲು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"ಅಪ್‌ಡೇಟ್ ಪ್ಯಾಕೇಜ್ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"ಮರುಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ..."</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ಮರುಹೊಂದಿಕೆ"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"ಮರುಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತಿದೆ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ."</string>
@@ -236,7 +236,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ಆಯ್ಕೆಗಳು"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ಫೋನ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ಸ್ಕ್ರೀನ್ ಲಾಕ್"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"ಪವರ್ ಆಫ್"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ಪವರ್"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ಮರುಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ತುರ್ತು"</string>
@@ -313,7 +313,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ದೇಹದ ಸೆನ್ಸರ್‌"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ಬಾಡಿ ಸೆನ್ಸರ್‌"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
@@ -685,9 +685,9 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"ಪರದೆಯು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ಲಾಕ್ ಆಗಬೇಕೆಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿ"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ಮರುಹೊಂದಿಕೆಯನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಟ್ಯಾಬ್ಲೆಟ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ಮರುಹೊಂದಿಕೆ ಮಾಡುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ನಿಮ್ಮ Android TV ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ಮರುಹೊಂದಿಕೆಯನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಫೋನ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಅನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಟ್ಯಾಬ್ಲೆಟ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಮಾಡುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ನಿಮ್ಮ Android TV ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಅನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಫೋನ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ಬಳಕೆದಾರ ಡೇಟಾ ಅಳಿಸಿ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ಯಾವುದೇ ಸೂಚನೆ ಇಲ್ಲದೆ ಈ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ಈ Android TV ಸಾಧನದಲ್ಲಿನ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
@@ -865,9 +865,9 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"ನಿಮ್ಮ ಅನ್‌ಲಾಕ್‌ ನಮೂನೆಯನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಚಿತ್ರಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಬಾರಿ ವಿಫಲ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾಡಿರುವಿರಿ, Google ಸೈನ್‌ ಇನ್‌ ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌‌‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ನಿಮ್ಮನ್ನು ಕೇಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"ನಿಮ್ಮ ಅನ್‌ಲಾಕ್‌ ನಮೂನೆಯನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಚಿತ್ರಿಸಿರುವಿರಿ. ಇನ್ನೂ <xliff:g id="NUMBER_1">%2$d</xliff:g> ಬಾರಿಯ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ನಿಮ್ಮ Google ಸೈನ್‌ ಇನ್‌ ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ನಿಮ್ಮನ್ನು ಕೇಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"ನಿಮ್ಮ ಅನ್‌ಲಾಕ್‌ ನಮೂನೆಯನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಚಿತ್ರಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಬಾರಿ ವಿಫಲ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾಡಿರುವಿರಿ, Google ಸೈನ್‌ ಇನ್‌ ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಫೋನ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ನಿಮ್ಮನ್ನು ಕೇಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಅನ್‍‍ಲಾಕ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಬಾರಿಯ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಫೋನ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಅನ್‍‍ಲಾಕ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಬಾರಿಯ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಫೋನ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಇದೀಗ ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಅನ್‍‍ಲಾಕ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಇದೀಗ ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. ಫೋನ್ ಅನ್ನು ಇದೀಗ ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ."</string>
@@ -935,7 +935,7 @@
     <string name="double_tap_toast" msgid="7065519579174882778">"ಸಲಹೆ: ಝೂಮ್ ಇನ್ ಮತ್ತು ಝೂಮ್ ಔಟ್ ಮಾಡಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ಸ್ವಯಂತುಂಬುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ನೊಂದಿಗೆ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ಸಹಾಯದಿಂದ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1309,7 +1309,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗಿಂಗ್ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
@@ -1335,7 +1335,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ಭಾಷೆ ಮತ್ತು ವಿನ್ಯಾಸವನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ಇತರ ಅಪ್ಲಿಕೇಶನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"‍ಇತರ ಆ್ಯಪ್‍ಗಳ ಮೇಲೆ ಪ್ರದರ್ಶಿಸುವಿಕೆ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> ಇತರೆ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> ಇತರೆ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
@@ -1613,9 +1613,9 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"ನಿಮ್ಮ ಪಿನ್‌ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"ನಿಮ್ಮ ಪಾಸ್‍‍ವರ್ಡ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಚಿತ್ರಿಸಿರುವಿರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಅನ್‍‍ಲಾಕ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಬಾರಿಯ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g>  ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಫೋನ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಅನ್‍‍ಲಾಕ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಬಾರಿಯ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಎಲ್ಲಾ ಬಳಕೆದಾರ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g>  ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಫೋನ್ ಅನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾ ಕಳೆದು ಹೋಗುತ್ತದೆ."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಇದೀಗ ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಅನ್‍‍ಲಾಕ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಇದೀಗ ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಫ್ಯಾಕ್ಟರಿ ಡೀಫಾಲ್ಟ್‌ಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. ಫೋನ್ ಅನ್ನು ಇದೀಗ ಫ್ಯಾಕ್ಟರಿ ಢೀಫಾಲ್ಟ್‌ಗೆ ಮರು ಹೊಂದಿಸಲಾಗುತ್ತದೆ."</string>
@@ -1639,7 +1639,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ನಿಮ್ಮ ಸಾಧನದ ಪೂರ್ಣ ನಿಯಂತ್ರಣ ಹೊಂದಲು <xliff:g id="SERVICE">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ನೀವು <xliff:g id="SERVICE">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಿದರೆ, ನಿಮ್ಮ ಸಾಧನವು ಡೇಟಾ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಅನ್ನು ವರ್ಧಿಸಲು ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಸುವುದಿಲ್ಲ."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ಪ್ರವೇಶಿಸುವಿಕೆಯ ಅವಶ್ಯಕತೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ ಪೂರ್ಣ ನಿಯಂತ್ರಣ ನೀಡುವುದು ಸೂಕ್ತವಾಗಿರುತ್ತದೆ, ಆದರೆ ಬಹುತೇಕ ಆ್ಯಪ್‌ಗಳಿಗೆ ಇದು ಸೂಕ್ತವಲ್ಲ."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ಸ್ಕ್ರೀನ್ ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ಇದು ಪರದೆಯ ಮೇಲಿನ ಎಲ್ಲಾ ವಿಷಯವನ್ನು ಓದಬಹುದು ಮತ್ತು ಇತರ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ವಿಷಯವನ್ನು ಪ್ರದರ್ಶಿಸಬಹುದು."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ಕ್ರಿಯೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ಇದು ಆ್ಯಪ್ ಅಥವಾ ಹಾರ್ಡ್‌ವೇರ್ ಸೆನ್ಸರ್‌ನ ಜೊತೆಗಿನ ನಿಮ್ಮ ಸಂವಹನಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಆ್ಯಪ್‌ಗಳ ಜೊತೆ ಸಂವಹನ ನಡೆಸಬಹುದು."</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ಮೊನಾರ್ಕ್‌"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ಕ್ವಾರ್ಟೊ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"ಅಪರಿಚಿತ ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"ಅಪರಿಚಿತ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ರದ್ದುಮಾಡಲಾಗಿದೆ"</string>
@@ -1847,7 +1859,7 @@
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ಈವೆಂಟ್"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ನಿದ್ರೆಯ ಸಮಯ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
-    <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ಮರುಹೊಂದಿಸುವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
+    <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ರೀಸೆಟ್ ಮಾಡುವವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ. ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ತಯಾರಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD ವಿನಂತಿಯನ್ನು ಸಾಮಾನ್ಯ ಕರೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD ವಿನಂತಿಯನ್ನು SS ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
@@ -1909,7 +1921,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> ಗೆ ಪಿನ್ ಮಾಡಿ"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ಅನ್‌ಪಿನ್"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಿ"</string>
-    <string name="app_info" msgid="6113278084877079851">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
+    <string name="app_info" msgid="6113278084877079851">"ಆ್ಯಪ್ ಮಾಹಿತಿ"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ಡೆಮೋ ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"ಸಾಧನ ಮರುಹೊಂದಿಸಲಾಗುತ್ತಿದೆ..."</string>

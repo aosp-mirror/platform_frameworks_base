@@ -341,7 +341,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Pozwala aplikacji na występowanie na pasku stanu."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"rozwijanie/zwijanie paska stanu"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Pozwala aplikacji na rozwijanie lub zwijanie paska stanu."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalowanie skrótów"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalowanie skrótów"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Pozwala aplikacji dodawać skróty na ekranie głównym bez interwencji użytkownika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinstalowywanie skrótów"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Pozwala aplikacji usuwać skróty z ekranu głównego bez interwencji użytkownika."</string>
@@ -605,7 +605,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznania twarzy ponownie."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Spróbuj rozpoznawania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Analiza twarzy została anulowana."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Użytkownik anulował rozpoznawanie twarzy."</string>
@@ -1198,7 +1198,7 @@
     <string name="noApplications" msgid="1186909265235544019">"Żadna z aplikacji nie może wykonać tej czynności."</string>
     <string name="aerr_application" msgid="4090916809370389109">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> przestała działać"</string>
     <string name="aerr_process" msgid="4268018696970966407">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> przestał działać"</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> wciąż przestaje działać"</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> wciąż przestaje działać"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> wciąż przestaje działać"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Otwórz aplikację ponownie"</string>
     <string name="aerr_report" msgid="3095644466849299308">"Prześlij opinię"</string>
@@ -1669,7 +1669,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Usuń"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu do ułatwień dostępu?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Gdy skrót jest włączony, jednoczesne naciskanie przez trzy sekundy obu przycisków głośności uruchamia funkcję ułatwień dostępu."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Włączyć ułatwienia dostępu?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Przytrzymanie obu klawiszy głośności przez kilka sekund włącza ułatwienia dostępu. Może to zmienić sposób działania urządzenia.\n\nBieżące funkcje:\n<xliff:g id="SERVICE">%1$s</xliff:g>\naby zmienić wybrane funkcje, kliknij Ustawienia &gt; Ułatwienia dostępu."</string>
@@ -1683,7 +1683,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Pozwolić usłudze <xliff:g id="SERVICE">%1$s</xliff:g> na pełną kontrolę nad urządzeniem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jeśli włączysz usługę <xliff:g id="SERVICE">%1$s</xliff:g>, Twoje urządzenie nie będzie korzystać z blokady ekranu, by usprawnić szyfrowanie danych."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które pomagają Ci radzić sobie z niepełnosprawnością, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i steruj ekranem"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i kontroluj ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Może odczytywać całą zawartość ekranu i wyświetlać treść nad innymi aplikacjami."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Wyświetlaj i wykonuj działania"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Może śledzić Twoje interakcje z aplikacjami lub czujnikiem sprzętowym, a także obsługiwać aplikacje za Ciebie."</string>
@@ -1762,6 +1762,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1798,6 +1809,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Nieznany pionowy"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Nieznany poziomy"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Anulowane"</string>

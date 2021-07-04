@@ -301,7 +301,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedir al calendari"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar i llegir missatges SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fitxers i multimèdia"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fitxers i contingut multimèdia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micròfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar àudio"</string>
@@ -326,7 +326,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Fer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes digitals"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes dactilars del dispositiu."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fes una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pots fer una captura de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permet que l\'aplicació sigui la barra d\'estat."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"desplega/contrau la barra d\'estat"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet que l\'aplicació desplegui o replegui la barra d\'estat."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instal·lar dreceres"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instal·lar dreceres"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet que una aplicació afegeixi dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstal·la dreceres"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
@@ -530,8 +530,8 @@
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permet que l\'aplicació invoqui mètodes per afegir i suprimir plantilles d\'empremtes dactilars que es puguin fer servir."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilitzar el maquinari d\'empremtes digitals"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet que l\'aplicació faci servir maquinari d\'empremtes digitals per a l\'autenticació"</string>
-    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar la teva col·lecció de música"</string>
-    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permet que l\'aplicació modifiqui la teva col·lecció de música."</string>
+    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar la teva biblioteca de música"</string>
+    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permet que l\'aplicació modifiqui la teva biblioteca de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar la teva col·lecció de vídeos"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Permet que l\'aplicació modifiqui la teva col·lecció de vídeos."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"modificar la teva col·lecció de fotos"</string>
@@ -546,7 +546,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha definit cap PIN, patró o contrasenya"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor d\'empremtes dactilars està brut. Neteja\'l i torna-ho a provar."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor d\'empremtes digitals està brut. Neteja\'l i torna-ho a provar."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"El dit s\'ha mogut massa ràpid. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -560,19 +560,19 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes dactilars."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Torna-ho a provar."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No s\'ha registrat cap empremta digital."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes dactilars."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor està desactivat temporalment."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gestiona el maquinari de desbloqueig facial"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"gestiona el maquinari de Desbloqueig facial"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilitza el maquinari de desbloqueig facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet que l\'aplicació faci servir el maquinari de desbloqueig facial per a l\'autenticació"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilitza el maquinari de Desbloqueig facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permet que l\'aplicació faci servir el maquinari de Desbloqueig facial per a l\'autenticació"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per millorar el reconeixement, torna a registrar la cara"</string>
@@ -604,7 +604,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"S\'ha cancel·lat el reconeixement facial."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"L\'usuari ha cancel·lat el desbloqueig facial."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Massa intents. Torna-ho a provar més tard."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Massa intents. S\'ha desactivat el desbloqueig facial."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Massa intents. S\'ha desactivat Desbloqueig facial."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No es pot verificar la cara. Torna-ho a provar."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"No has configurat el desbloqueig facial"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"El desbloqueig facial no és compatible amb el dispositiu."</string>
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Torna-ho a provar"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Torna-ho a provar"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbl. per accedir a totes les funcions i dades"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S\'ha superat el nombre màxim d\'intents de desbloqueig facial"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S\'ha superat el nombre màxim d\'intents de Desbloqueig facial"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"No hi ha cap SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"No hi ha cap SIM a la tauleta."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"No hi ha cap targeta SIM al dispositiu Android TV."</string>
@@ -1211,8 +1211,8 @@
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> es tancarà sense desar els canvis"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria"</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"L\'abocament de memòria en monticle del procés <xliff:g id="PROC">%1$s</xliff:g> ja està a punt"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"S\'ha recopilat un procés \"heap dump\". Toca per compartir-lo."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Vols compartir el \"heap dump\"?"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"S\'ha recopilat un abocament de memòria en monticle. Toca per compartir-lo."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Vols compartir l\'abocament de memòria en monticle?"</string>
     <string name="dump_heap_text" msgid="1692649033835719336">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria (<xliff:g id="SIZE">%2$s</xliff:g>). Hi ha un abocament de memòria en monticle disponible perquè el comparteixis amb el desenvolupador. Ves amb compte, ja que pot contenir informació personal a la qual el procés pot accedir."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria (<xliff:g id="SIZE">%2$s</xliff:g>). Hi ha un abocament de memòria en monticle disponible que pots compartir. Ves amb compte, ja que pot contenir informació personal sensible a la qual el procés pot accedir, com ara text que hagis introduït."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Hi ha un abocament de memòria en monticle del procés de <xliff:g id="PROC">%1$s</xliff:g> disponible que pots compartir. Ves amb compte, ja que pot contenir informació personal sensible a la qual el procés pot accedir, com ara text que hagis introduït."</string>
@@ -1567,7 +1567,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Pantalla sense fil"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Emet"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Connexió al dispositiu"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Emet pantalla al dispositiu"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Emet la pantalla al dispositiu"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"S\'estan cercant dispositius…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Configuració"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Desconnecta"</string>
@@ -1641,7 +1641,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total és adequat per a les aplicacions que t\'ajuden amb l\'accessibilitat, però no per a la majoria de les aplicacions."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Veure i controlar la pantalla"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pot llegir tot el contingut de la pantalla i mostrar contingut sobre altres aplicacions."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Mostra i duu a terme accions"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Mostrar i dur a terme accions"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pot fer un seguiment de les teves interaccions amb una aplicació o un sensor de maquinari, i interaccionar amb aplicacions en nom teu."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permet"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denega"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quart"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foli"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Vertical desconegut"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Horitzontal desconegut"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancel·lada"</string>
@@ -1790,7 +1802,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2n <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3r <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el codi PIN per deixar de fixar"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demana la contrasenya per deixar de fixar"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instal·lat per l\'administrador"</string>
@@ -1800,7 +1812,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1882,7 +1894,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Afegeix un idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferència de regió"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Nom de l\'idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Escriu el nom de l\'idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggerits"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tots els idiomes"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Totes les regions"</string>

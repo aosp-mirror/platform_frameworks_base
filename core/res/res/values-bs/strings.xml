@@ -338,7 +338,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Dozvoljava aplikaciji da postane statusna traka."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"proširivanje/sužavanje statusne trake"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Dozvoljava aplikaciji proširivanje ili sužavanje statusne trake."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instaliranje prečica"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instaliranje prečica"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Omogućava aplikaciji dodavanje prečice za početni ekran bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"uklanjanje prečica"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Omogućava aplikaciji uklanjanje prečice početnog ekrana bez intervencije korisnika."</string>
@@ -1125,7 +1125,7 @@
     <string name="redo" msgid="7231448494008532233">"Ponovo uradi"</string>
     <string name="autofill" msgid="511224882647795296">"Automatsko popunjavanje"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Odabir teksta"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Dodaj u rječnik"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Dodajte u rječnik"</string>
     <string name="deleteText" msgid="4200807474529938112">"Izbriši"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Akcije za tekst"</string>
@@ -1241,14 +1241,14 @@
     <string name="volume_music" msgid="7727274216734955095">"Jačina zvuka medija"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Medijski sadržaj se reproducira preko Bluetooth veze"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Postavljena nečujna melodija zvona"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Jačina zvuka tokom poziva"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Jačina zvuka tokom poziva preko Bluetooth veze"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Jačina zvuka poziva"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Jačina zvuka poziva putem Bluetootha"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Jačina zvuka alarma"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Jačina zvuka za obavještenja"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Jačina zvuka"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Jačina zvuka za Bluetooth vezu"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Jačina zvuka melodije"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Jačina zvuka tokom poziva"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Jačina zvuka poziva"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Jačina zvuka medija"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Jačina zvuka za obavještenja"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Zadana melodija zvona"</string>
@@ -1740,6 +1740,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,6 +1787,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Neodređeni uspravni format"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Neodređeni vodoravni format"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Otkazano"</string>
@@ -1836,9 +1848,9 @@
       <item quantity="other">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">Za %1$d sat (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">Za %1$d sata (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Za %1$d sati (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">%1$d sat (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%1$d sata (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d sati (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
       <item quantity="one">%1$d sat (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -318,17 +318,17 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceseze datele de la senzori despre semnele vitale"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Analizează conținutul ferestrei"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Analizeze conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspectează conținutul unei ferestre cu care interacționați."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activează funcția Explorați prin atingere"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activeze funcția Explorați prin atingere"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Elementele atinse vor fi rostite cu voce tare, iar ecranul poate fi explorat utilizând gesturi."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Remarcă textul pe care îl introduceți"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Remarce textul pe care îl introduceți"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Controlează mărirea pe afișaj"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controlează nivelul de zoom și poziționarea afișajului."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Folosește gesturi"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Poate atinge, glisa, ciupi sau folosi alte gesturi."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesturi ce implică amprente"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Redea gesturi ce implică amprente"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Poate reda gesturile făcute pe senzorul de amprentă al dispozitivului."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Faceți o captură de ecran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Poate face o captură de ecran."</string>
@@ -338,7 +338,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite aplicației să fie bară de stare."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"extindere/restrângere bară de stare"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite aplicației să extindă sau să restrângă bara de stare."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalează comenzi rapide"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalarea de comenzi rapide"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite unei aplicații să adauge comenzi rapide pe ecranul de pornire, fără intervenția utilizatorului."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"dezinstalează comenzi rapide"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite aplicației să elimine comenzi rapide de pe ecranul de pornire, fără intervenția utilizatorului."</string>
@@ -1740,6 +1740,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super-B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,6 +1787,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Portret necunoscut"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Peisaj necunoscut"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Anulat"</string>

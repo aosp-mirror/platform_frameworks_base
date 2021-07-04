@@ -258,7 +258,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"El sonido está Desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"El sonido está Activado"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo avión"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo de avión"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"El modo avión está Activado"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"El modo avión está Desactivado"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Configuración"</string>
@@ -309,7 +309,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"acceder a tu actividad física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tomar fotografías y grabar videos"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Llamadas"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registros de llamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leer y escribir el registro de llamadas telefónicas"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite que la aplicación sea la barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"expandir o reducir la barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite que la aplicación muestre y oculte la barra de estado."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar accesos directos"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalar accesos directos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que una aplicación agregue accesos directos a la pantalla principal sin que el usuario intervenga."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar accesos directos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que la aplicación elimine accesos directos de la pantalla principal sin que el usuario intervenga."</string>
@@ -393,7 +393,7 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Permite que la aplicación se inicie en cuanto el sistema haya finalizado la inicialización. Esto puede ocasionar que la tablet tarde más en inicializarse y que la aplicación ralentice el funcionamiento general de la tablet al estar en ejecución constante."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"Permite que se active la app en cuanto el sistema haya terminado de iniciarse. Esto puede ocasionar que el dispositivo Android TV tarde más en arrancar y que la app, al estar en ejecución constante, ralentice el funcionamiento general."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"Permite que la aplicación se inicie en cuanto el sistema haya finalizado la inicialización. Esto puede ocasionar que el dispositivo tarde más en inicializarse y que la aplicación ralentice el funcionamiento general del dispositivo al estar en ejecución constante."</string>
-    <string name="permlab_broadcastSticky" msgid="4552241916400572230">"enviar emisiones pegajosas"</string>
+    <string name="permlab_broadcastSticky" msgid="4552241916400572230">"enviar emisiones persistentes"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"Permite que la aplicación envíe transmisiones persistentes que permanecen después de que finaliza la transmisión. Un uso excesivo podría ralentizar la tablet o hacer que funcione de manera inestable al forzarla a utilizar mucha memoria."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Permite que la app envíe transmisiones persistentes que permanecen después de que finaliza la emisión. Un uso excesivo podría ralentizar el dispositivo Android TV o forzarlo a utilizar demasiada memoria, lo que generaría un funcionamiento inestable."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite que la aplicación envíe transmisiones persistentes que permanecen después de que finaliza la transmisión. Un uso excesivo podría ralentizar el dispositivo o hacer que funcione de manera inestable al forzarlo a utilizar mucha memoria."</string>
@@ -1297,8 +1297,8 @@
     <string name="no_permissions" msgid="5729199278862516390">"No se requieren permisos"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"esto puede costarte dinero"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Cargando dispositivo mediante USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Cargando el dispositivo conectado mediante USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Cargando dispositivo por USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Cargando por USB el dispositivo conectado"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Se activó la transferencia de archivos mediante USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Se activó el modo PTP mediante USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Se activó la conexión mediante dispositivo móvil por USB"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarca"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Cuartilla"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Folio"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Cualquier tamaño vertical"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Cualquier tamaño horizontal"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancelada"</string>
