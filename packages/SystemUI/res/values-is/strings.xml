@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Tvö strik á rafhlöðu."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Þrjú strik á rafhlöðu."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Rafhlaða fullhlaðin."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Staða rafhlöðu óþekkt."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Ekkert símasamband."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Styrkur símasambands er eitt strik."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Styrkur símasambands er tvö strik."</string>
@@ -714,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Gæti hringt eða titrað eftir stillingum símans"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Gæti hringt eða titrað eftir stillingum símans. Samtöl á <xliff:g id="APP_NAME">%1$s</xliff:g> birtast sjálfkrafa í blöðru."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fangar athygli þína með fljótandi flýtileið á þetta efni."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Birtist efst í samtalshluta, birtist sem fljótandi blaðra, birtir prófílmynd á lásskjánum"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Birtist efst í samtalshluta sem fljótandi blaðra, birtir prófílmynd á lásskjánum"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Áfram"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Forgangur"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> styður ekki samtalseiginleika"</string>
@@ -989,7 +990,7 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Stillingar"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ég skil"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Vista SysUI-gögn"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> er að nota <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> notar eftirfarandi: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Forrit eru að nota <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (aftengt)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Tenging mistókst. Reyndu aftur."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Para nýtt tæki"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Vandamál við að lesa stöðu rafhlöðu"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ýttu til að fá frekari upplýsingar"</string>
 </resources>

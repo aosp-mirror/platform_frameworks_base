@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Akusäästja sisselülitamine"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Seaded"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"WiFi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Pööra ekraani automaatselt"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Kuva automaatne pööramine"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"SUMMUTA"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Märguanded"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Aku: kaks pulka."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Aku: kolm pulka."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Aku täis."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Aku laetuse protsent on teadmata."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Telefonisignaal puudub"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefonisignaal: üks pulk."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefonisignaal: kaks pulka."</string>
@@ -225,7 +226,7 @@
     <string name="data_connection_roaming" msgid="375650836665414797">"Rändlus"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"WiFi"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-kaarti pole."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-i pole."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobiilne andmeside"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobiilne andmeside on sees"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Mobiilne andmeside on väljas"</string>
@@ -356,7 +357,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Sisselülitamine …"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Heledus"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automaatne pööramine"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Pööra ekraani automaatselt"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Kuva automaatne pööramine"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Režiim <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Pööramine on lukustatud"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Vertikaalpaigutus"</string>
@@ -387,7 +388,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WiFi-ühendus puudub"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Heledus"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMAATNE"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Vaheta värve"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Värvide vahetamine"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Värviparandusrežiim"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Rohkem seadeid"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Valmis"</string>
@@ -598,9 +599,9 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Avakuva."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Isiklikud andmed (nt kontaktid ja meilide sisu) võivad olla juurdepääsetavad."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Kinnitatud rakendused võivad avada muid rakendusi."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Rakenduse vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Rakenduse vabastamiseks puudutage pikalt nuppe Tagasi ja Avaekraan"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Rakenduse vabastamiseks pühkige üles ja hoidke sõrme ekraanil"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Selle rakenduse vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Selle rakenduse vabastamiseks puudutage pikalt nuppe Tagasi ja Avaekraan"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Selle rakenduse vabastamiseks pühkige üles ja hoidke sõrme ekraanil"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Selge"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Tänan, ei"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Rakendus on kinnitatud"</string>
@@ -955,7 +956,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Rakendus avati installimata."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Rakendus avati installimata. Lisateabe saamiseks puudutage."</string>
-    <string name="app_info" msgid="5153758994129963243">"Rakenduste teave"</string>
+    <string name="app_info" msgid="5153758994129963243">"Rakenduse teave"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ava brauser"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilne andmeside"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (pole ühendatud)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ühenduse loomine ebaõnnestus. Proovige uuesti."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uue seadme sidumine"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Probleem akumõõdiku lugemisel"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Puudutage lisateabe saamiseks"</string>
 </resources>
