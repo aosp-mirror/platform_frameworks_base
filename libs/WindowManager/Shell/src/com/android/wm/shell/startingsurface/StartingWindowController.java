@@ -17,6 +17,7 @@ package com.android.wm.shell.startingsurface;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
@@ -31,6 +32,7 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowInfo.StartingWindowType;
 import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 
@@ -106,10 +108,6 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
         mTaskLaunchingCallback = listener;
     }
 
-    private boolean shouldSendToListener(int suggestionType) {
-        return suggestionType != STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
-    }
-
     /**
      * Called when a task need a starting window.
      */
@@ -120,12 +118,9 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
             final int suggestionType = mStartingWindowTypeAlgorithm.getSuggestedWindowType(
                     windowInfo);
             final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
-            if (suggestionType == STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
+            if (isSplashScreenType(suggestionType)) {
                 mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
-                        false /* emptyView */);
-            } else if (suggestionType == STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN) {
-                mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
-                        true /* emptyView */);
+                        suggestionType);
             } else if (suggestionType == STARTING_WINDOW_TYPE_SNAPSHOT) {
                 final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
                 mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken,
@@ -133,7 +128,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
             } else /* suggestionType == STARTING_WINDOW_TYPE_NONE */ {
                 // Don't add a staring window.
             }
-            if (mTaskLaunchingCallback != null && shouldSendToListener(suggestionType)) {
+            if (mTaskLaunchingCallback != null && isSplashScreenType(suggestionType)) {
                 int taskId = runningTaskInfo.taskId;
                 int color = mStartingSurfaceDrawer.getStartingWindowBackgroundColorForTask(taskId);
                 mTaskLaunchingCallback.accept(taskId, suggestionType, color);
@@ -141,6 +136,12 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
 
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         });
+    }
+
+    private static boolean isSplashScreenType(@StartingWindowType int suggestionType) {
+        return suggestionType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
+                || suggestionType == STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+                || suggestionType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
     }
 
     public void copySplashScreenView(int taskId) {
