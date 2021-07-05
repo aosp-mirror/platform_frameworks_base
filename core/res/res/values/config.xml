@@ -3370,8 +3370,7 @@
     <integer name="config_vibrationWaveformRampStepDuration">5</integer>
 
     <!-- The duration (in milliseconds) that should be applied to waveform vibrations that ends in
-         non-zero amplitudes, . The waveform will
-         be played as a PWLE instead of on/off calls if this value is set. -->
+         non-zero amplitudes, to bring the vibrator amplitude down to zero using this timing. -->
     <integer name="config_vibrationWaveformRampDownDuration">0</integer>
 
     <!-- Number of retries Cell Data should attempt for a given error code before
