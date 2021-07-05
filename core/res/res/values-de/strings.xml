@@ -571,7 +571,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Ermöglicht der App,  Gesichtsvorlagen hinzuzufügen oder zu entfernen."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Hardware für Gesichtsentsperrung verwenden"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Ermöglicht der App, zur Authentifizierung Hardware für Gesichtsentsperrung zu verwenden"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Gesichtsentsperrung"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Entsperrung per Gesichtserkennung"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Gesicht neu scannen lassen"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Für bessere Erkennung Gesicht neu scannen lassen"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
