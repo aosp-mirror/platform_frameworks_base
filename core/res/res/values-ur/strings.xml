@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"مسترد کریں"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"اجازت طلب کی گئی"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"اکاؤنٹ <xliff:g id="ACCOUNT">%s</xliff:g> کیلئے\nاجازت طلب کی گئی۔"</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> اکاؤنٹ کیلئے\n<xliff:g id="APP">%1$s</xliff:g> نے اجازت کی درخواست کی۔"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"آپ اس ایپ کا استعمال اپنے دفتری پروفائل کے باہر کر رہے ہیں"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"آپ اس ایپ کو اپنے دفتری پروفائل میں استعمال کر رہے ہیں"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"اندراج کا طریقہ"</string>

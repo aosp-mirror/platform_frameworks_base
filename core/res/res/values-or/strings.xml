@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"ଅଗ୍ରାହ୍ୟ କରନ୍ତୁ"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ଅନୁମତି ଅନୁରୋଧ କରାଯାଇଛି"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> ଆକାଉଣ୍ଟ ପାଇଁ ଅନୁମତି\n ଅନୁରୋଧ କରାଯାଇଛି।"</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ଆକାଉଣ୍ଟକୁ ଆକ୍ସେସ୍ ପାଇଁ\n<xliff:g id="APP">%1$s</xliff:g> ଦ୍ୱାରା ଅନୁମତି ନିମନ୍ତେ ଅନୁରୋଧ କରାଯାଇଛି।"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"ଆପଣ ନିଜର ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ ବାହାରେ ଏହି ଆପ୍‌ର ପ୍ରୟୋଗ କରୁଛନ୍ତି"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"ଆପଣ ନିଜ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ରେ ଏହି ଆପ୍‌ର ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>

@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Rədd et"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"İcazə tələb olunur"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">\n" hesabı üçün<xliff:g id="ACCOUNT">%s</xliff:g> icazə sorğusu göndərildi."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g>\ntərəfindən <xliff:g id="ACCOUNT">%2$s</xliff:g> hesabı üçün icazə tələb edilib."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Bu tətbiqi iş profilinizdən kənarda istifadə edirsiniz"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Bu tətbiqi iş profilinizdə istifadə edirsiniz"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Daxiletmə metodu"</string>
@@ -2095,12 +2094,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildiriş Səssiz rejimə keçirilib. Rəy bildirmək üçün toxunun."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildiriş yuxarı sıraya keçirilib. Rəy bildirmək üçün toxunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildiriş aşağı sıraya keçirilib. Rəy bildirmək üçün toxunun."</string>
-    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Genişləndirilmiş bildirişlər"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Təklif olunan əməliyyatlar və cavablar artıq genişləndirilmiş bildirişlər tərəfindən təmin olunur. Android Adaptiv Bildirişləri artıq dəstəklənmir."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Qabaqcıl bildirişlər"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Cəld cavablar və əməliyyatlar qabaqcıl bildirişlərə artıq daxildir. Android adaptiv bildirişləri daha dəstəklənmir."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Deaktiv edin"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ətraflı məlumat"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Genişləndirilmiş bildirişlər Android 12-də Android Adaptiv Bildirişləri əvəz etdi. Bu funksiya təklif olunan əməliyyatları və cavabları göstərir və bildirişlərinizi təşkil edir.\n\nGenişləndirilmiş bildirişlər, kontakt adları və mesajlar kimi şəxsi məlumatlar daxil olmaqla bütün bildiriş məzmununa giriş edə bilər. Bu funksiya telefon zənglərinə cavab vermək və Narahat Etməyin rejimini idarə etmək kimi bildirişləri qapada və ya cavablandıra bilər."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-də qabaqcıl bildirişlər var. Bu funksiya bütün bildirişləri qaydaya salır, cavab və əməliyyatlara dair tövsiyə verir.\n\nFunksiyanın kontaktlar, mesajlar və şəxsi məlumatlar daxil olmaqla bütün bildirişlərə girişi var. Zənglərə cavab verə, \"Narahat etməyin\" rejimini idarə edə, bildirişləri qapada və cavablaya bilər."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rejim üçün məlumat bildirişi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya həmişəki vaxtdan əvvəl bitə bilər"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Enerjiyə Qənaət rejimi batareya istifadəsinin müddətini artırmaq üçün aktiv edilir"</string>

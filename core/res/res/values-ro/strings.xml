@@ -1502,8 +1502,7 @@
     <string name="deny" msgid="6632259981847676572">"Refuzați"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permisiune solicitată"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permisiune solicitată\npentru contul <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permisiune solicitată de <xliff:g id="APP">%1$s</xliff:g>\npentru contul <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Utilizați această aplicație în afara profilului de serviciu"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Utilizați această aplicație în profilul de serviciu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metodă de intrare"</string>

@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Ukatu"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Baimena eskatu da"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Baimena eskatu da \n<xliff:g id="ACCOUNT">%s</xliff:g> konturako."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> aplikazioak <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua atzitzeko baimena\neskatu du."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Laneko profiletik kanpo ari zara aplikazioa erabiltzen"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Laneko profilean ari zara aplikazioa erabiltzen"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Idazketa-metodoa"</string>

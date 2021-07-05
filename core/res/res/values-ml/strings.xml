@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"നിരസിക്കുക"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"അനുമതി ആവശ്യമാണ്"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> എന്ന അക്കൗണ്ടിനായി\nഅനുമതി അഭ്യർത്ഥിച്ചു."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> അക്കൗണ്ട് ആക്സസ് ചെയ്യാൻ \n<xliff:g id="APP">%1$s</xliff:g> അനുമതി അഭ്യർത്ഥിച്ചു."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിന് പുറത്ത് ഈ അപ്ലിക്കേഷൻ ഉപയോഗിക്കുന്നു"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിൽ ഈ അപ്ലിക്കേഷൻ ഉപയോഗിക്കുന്നു"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ടൈപ്പുചെയ്യൽ രീതി"</string>
@@ -2096,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ഈ അറിയിപ്പിന് ഉയർന്ന റാങ്ക് നൽകി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ഈ അറിയിപ്പിന് താഴ്‌ന്ന റാങ്ക് നൽകി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"നിർദ്ദേശിക്കുന്ന പ്രവർത്തനങ്ങളും മറുപടികളും, \'മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ\' ഫീച്ചറാണ് ഇപ്പോൾ നൽകുന്നത്. Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് ഇനി പിന്തുണയില്ല."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"നിർദ്ദേശിക്കുന്ന പ്രവർത്തനങ്ങളും മറുപടികളും ഇപ്പോൾ നൽകുന്നത് മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ എന്ന ഫീച്ചറാണ്. Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് ഇനി പിന്തുണയില്ല."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ശരി"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ഓഫാക്കുക"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
