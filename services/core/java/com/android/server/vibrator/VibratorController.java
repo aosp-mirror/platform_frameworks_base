@@ -54,6 +54,8 @@ final class VibratorController {
     private boolean mIsVibrating;
     @GuardedBy("mLock")
     private boolean mIsUnderExternalControl;
+    @GuardedBy("mLock")
+    private float mCurrentAmplitude;
 
     /** Listener for vibration completion callbacks from native. */
     public interface OnVibrationCompleteListener {
@@ -131,6 +133,23 @@ final class VibratorController {
         }
     }
 
+    /**
+     * Returns the current amplitude the device is vibrating.
+     *
+     * <p>This value is set to 1 by the method {@link #on(long, long)}, and can be updated via
+     * {@link #setAmplitude(float)} if called while the device is vibrating.
+     *
+     * <p>If the device is vibrating via any other {@link #on} method then the current amplitude is
+     * unknown and this will return -1.
+     *
+     * <p>If {@link #isVibrating()} is false then this will be zero.
+     */
+    public float getCurrentAmplitude() {
+        synchronized (mLock) {
+            return mCurrentAmplitude;
+        }
+    }
+
     /** Return {@code true} if this vibrator is under external control, false otherwise. */
     public boolean isUnderExternalControl() {
         synchronized (mLock) {
@@ -192,6 +211,9 @@ final class VibratorController {
             if (mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
                 mNativeWrapper.setAmplitude(amplitude);
             }
+            if (mIsVibrating) {
+                mCurrentAmplitude = amplitude;
+            }
         }
     }
 
@@ -208,6 +230,7 @@ final class VibratorController {
         synchronized (mLock) {
             long duration = mNativeWrapper.on(milliseconds, vibrationId);
             if (duration > 0) {
+                mCurrentAmplitude = -1;
                 notifyVibratorOnLocked();
             }
             return duration;
@@ -228,6 +251,7 @@ final class VibratorController {
             long duration = mNativeWrapper.perform(prebaked.getEffectId(),
                     prebaked.getEffectStrength(), vibrationId);
             if (duration > 0) {
+                mCurrentAmplitude = -1;
                 notifyVibratorOnLocked();
             }
             return duration;
@@ -250,6 +274,7 @@ final class VibratorController {
         synchronized (mLock) {
             long duration = mNativeWrapper.compose(primitives, vibrationId);
             if (duration > 0) {
+                mCurrentAmplitude = -1;
                 notifyVibratorOnLocked();
             }
             return duration;
@@ -272,6 +297,7 @@ final class VibratorController {
             int braking = mVibratorInfo.getDefaultBraking();
             long duration = mNativeWrapper.composePwle(primitives, braking, vibrationId);
             if (duration > 0) {
+                mCurrentAmplitude = -1;
                 notifyVibratorOnLocked();
             }
             return duration;
@@ -282,19 +308,23 @@ final class VibratorController {
     public void off() {
         synchronized (mLock) {
             mNativeWrapper.off();
+            mCurrentAmplitude = 0;
             notifyVibratorOffLocked();
         }
     }
 
     @Override
     public String toString() {
-        return "VibratorController{"
-                + "mVibratorInfo=" + mVibratorInfo
-                + ", mIsVibrating=" + mIsVibrating
-                + ", mIsUnderExternalControl=" + mIsUnderExternalControl
-                + ", mVibratorStateListeners count="
-                + mVibratorStateListeners.getRegisteredCallbackCount()
-                + '}';
+        synchronized (mLock) {
+            return "VibratorController{"
+                    + "mVibratorInfo=" + mVibratorInfo
+                    + ", mIsVibrating=" + mIsVibrating
+                    + ", mCurrentAmplitude=" + mCurrentAmplitude
+                    + ", mIsUnderExternalControl=" + mIsUnderExternalControl
+                    + ", mVibratorStateListeners count="
+                    + mVibratorStateListeners.getRegisteredCallbackCount()
+                    + '}';
+        }
     }
 
     @GuardedBy("mLock")
