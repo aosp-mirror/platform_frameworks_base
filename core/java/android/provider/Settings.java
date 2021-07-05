@@ -16512,6 +16512,135 @@ public final class Settings {
              * @hide
              */
             public static final String MOBILE_SIGNAL_DETECTOR = "mobile_signal_detector";
+
+
+            /**
+             * Whether ambient is currently enabled.
+             * @hide
+             */
+            public static final String AMBIENT_ENABLED = "ambient_enabled";
+
+            /**
+             * Whether ambient tilt to wake is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_TILT_TO_WAKE = "ambient_tilt_to_wake";
+
+            /**
+             * Whether ambient low bit mode is enabled by developer options.
+             * @hide
+             */
+            public static final String AMBIENT_LOW_BIT_ENABLED_DEV = "ambient_low_bit_enabled_dev";
+
+            /**
+             * Whether ambient touch to wake is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_TOUCH_TO_WAKE = "ambient_touch_to_wake";
+
+            /**
+             * Whether ambient tilt to bright is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_TILT_TO_BRIGHT = "ambient_tilt_to_bright";
+
+            /**
+             * Whether the current watchface is decomposable.
+             * @hide
+             */
+            public static final String DECOMPOSABLE_WATCHFACE = "current_watchface_decomposable";
+
+            /**
+             * Whether to force ambient when docked.
+             * @hide
+             */
+            public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
+
+            /**
+             * The id of the gesture sensor.
+             * @hide
+             */
+            public static final String AMBIENT_GESTURE_SENSOR_ID = "ambient_gesture_sensor_id";
+
+            /**
+             * Whether the ambient low bit mode is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_LOW_BIT_ENABLED = "ambient_low_bit_enabled";
+
+            /**
+             * The timeout duration in minutes of ambient mode when plugged in.
+             * @hide
+             */
+            public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
+
+            /**
+             * The companion device's bluetooth address.
+             * @hide
+             */
+            public static final String COMPANION_ADDRESS = "companion_address";
+
+            /**
+             * What OS does paired device has.
+             * @hide
+             */
+            public static final String PAIRED_DEVICE_OS_TYPE = "paired_device_os_type";
+
+            // Possible values of PAIRED_DEVICE_OS_TYPE
+            /** @hide */
+            public static final int PAIRED_DEVICE_OS_TYPE_UNKNOWN = 0;
+            /** @hide */
+            public static final int PAIRED_DEVICE_OS_TYPE_ANDROID = 1;
+            /** @hide */
+            public static final int PAIRED_DEVICE_OS_TYPE_IOS = 2;
+
+            /**
+             * The bluetooth settings selected BLE role for the companion.
+             * @hide
+             */
+            public static final String COMPANION_BLE_ROLE = "companion_ble_role";
+
+            // Possible values of COMPANION_BLE_ROLE
+            /** @hide */
+            public static final int BLUETOOTH_ROLE_CENTRAL = 1;
+            /** @hide */
+            public static final int BLUETOOTH_ROLE_PERIPHERAL = 2;
+
+            /**
+             * The bluetooth settings stored companion device name.
+             * @hide
+             */
+            public static final String COMPANION_NAME = "companion_bt_name";
+
+            /**
+             * The user's last setting for hfp client.
+             * @hide
+             */
+            public static final String USER_HFP_CLIENT_SETTING = "user_hfp_client_setting";
+
+            // Possible hfp client user setting values
+            /** @hide */
+            public static final int HFP_CLIENT_UNSET = 0;
+            /** @hide */
+            public static final int HFP_CLIENT_ENABLED = 1;
+            /** @hide */
+            public static final int HFP_CLIENT_DISABLED = 2;
+
+            /**
+             * The current HFP client profile setting.
+             * @hide
+             */
+            public static final String HFP_CLIENT_PROFILE_ENABLED = "hfp_client_profile_enabled";
+
+            /**
+             * The companion phone's android version.
+             * @hide
+             */
+            public static final String COMPANION_OS_VERSION = "wear_companion_os_version";
+
+            // Companion os version constants
+            /** @hide */
+            public static final int COMPANION_OS_VERSION_UNDEFINED = -1;
         }
     }
 

@@ -635,7 +635,24 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.DISPLAY_SHAPE,
                     Settings.Global.Wearable.BOTTOM_OFFSET,
                     Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
-                    Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR);
+                    Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
+                    Settings.Global.Wearable.AMBIENT_ENABLED,
+                    Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,
+                    Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV,
+                    Settings.Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+                    Settings.Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                    Settings.Global.Wearable.DECOMPOSABLE_WATCHFACE,
+                    Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
+                    Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
+                    Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
+                    Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                    Settings.Global.Wearable.COMPANION_ADDRESS,
+                    Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                    Settings.Global.Wearable.COMPANION_BLE_ROLE,
+                    Settings.Global.Wearable.COMPANION_NAME,
+                    Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
+                    Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
+                    Settings.Global.Wearable.COMPANION_OS_VERSION);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

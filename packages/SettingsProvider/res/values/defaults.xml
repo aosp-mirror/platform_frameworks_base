@@ -311,4 +311,16 @@
 
     <!-- Whether to allow mobile signal detector by default. -->
     <bool name="def_wearable_mobileSignalDetectorAllowed">true</bool>
+
+    <!-- If ambient mode is enabled by default. -->
+    <bool name="def_wearable_ambientEnabled">true</bool>
+
+    <!-- Whether tilt to wake is enabled by default. -->
+    <bool name="def_wearable_tiltToWakeEnabled">true</bool>
+
+    <!-- Whether touch to wake is enabled by default. -->
+    <bool name="def_wearable_touchToWakeEnabled">true</bool>
+
+    <!-- Whether tilt to bright is enabled by default. -->
+    <bool name="def_wearable_tiltToBrightEnabled">false</bool>
 </resources>
