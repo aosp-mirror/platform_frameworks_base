@@ -286,7 +286,11 @@ public final class SplitLayout {
     }
 
     private void flingDividePosition(int from, int to) {
-        if (from == to) return;
+        if (from == to) {
+            // No animation run, it should stop resizing here.
+            mSplitWindowManager.setResizingSplits(false);
+            return;
+        }
         ValueAnimator animator = ValueAnimator
                 .ofInt(from, to)
                 .setDuration(250);
