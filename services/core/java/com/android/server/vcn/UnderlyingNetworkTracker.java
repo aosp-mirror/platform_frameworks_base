@@ -409,7 +409,7 @@ public class UnderlyingNetworkTracker {
     }
 
     private void reevaluateNetworks() {
-        if (mRouteSelectionCallback == null) {
+        if (mIsQuitting || mRouteSelectionCallback == null) {
             return; // UnderlyingNetworkTracker has quit.
         }
 
