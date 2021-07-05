@@ -174,10 +174,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                     Html.fromHtml(wifiEntry.getSummary(false), Html.FROM_HTML_MODE_LEGACY));
 
             mWifiListLayout.setOnClickListener(v -> {
-                if (!isOpenNetwork(security)) {
-                    // Popup Wi-Fi password dialog condition:
-                    // 1. The access point is a non-open network.
-                    // 2. The Wi-Fi connection is not connected with this access point.
+                if (wifiEntry.shouldEditBeforeConnect()) {
                     final Intent intent = new Intent(ACTION_WIFI_DIALOG);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
