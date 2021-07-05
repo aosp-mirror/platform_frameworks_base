@@ -185,6 +185,11 @@ public class NotificationPanelViewController extends PanelViewController {
     private static final boolean DEBUG = false;
 
     /**
+     * The parallax amount of the quick settings translation when dragging down the panel
+     */
+    private static final float QS_PARALLAX_AMOUNT = 0.175f;
+
+    /**
      * Fling expanding QS.
      */
     private static final int FLING_EXPAND = 0;
@@ -548,6 +553,11 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mDistanceForQSFullShadeTransition;
 
     /**
+     * The translation amount for QS for the full shade transition
+     */
+    private float mQsTranslationForFullShadeTransition;
+
+    /**
      * The maximum overshoot allowed for the top padding for the full shade transition
      */
     private int mMaxOverscrollAmountForPulse;
@@ -593,6 +603,11 @@ public class NotificationPanelViewController extends PanelViewController {
      * The animator for the qs clipping bounds.
      */
     private ValueAnimator mQsClippingAnimation = null;
+
+    /**
+     * Is the current animator resetting the qs translation.
+     */
+    private boolean mIsQsTranslationResetAnimator;
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
     private final Region mQsInterceptRegion = new Region();
 
@@ -2364,6 +2379,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mQsClippingAnimation = null;
+                    mIsQsTranslationResetAnimator = false;
                 }
             });
             mQsClippingAnimation.start();
@@ -2387,7 +2403,18 @@ public class NotificationPanelViewController extends PanelViewController {
             statusBarClipTop = top - mKeyguardStatusBar.getTop();
         }
         if (mQs != null) {
-            mQs.setFancyClipping(top, bottom, radius, qsVisible
+            float qsTranslation = 0;
+            if (mTransitioningToFullShadeProgress > 0.0f || (mQsClippingAnimation != null
+                    && mIsQsTranslationResetAnimator)) {
+                qsTranslation = (top - mQs.getHeader().getHeight()) * QS_PARALLAX_AMOUNT;
+            }
+            mQsTranslationForFullShadeTransition = qsTranslation;
+            updateQsFrameTranslation();
+            float currentTranslation = mQsFrame.getTranslationY();
+            mQs.setFancyClipping((
+                    int) (top - currentTranslation),
+                    (int) (bottom - currentTranslation),
+                    radius, qsVisible
                     && !mShouldUseSplitNotificationShade);
         }
         mKeyguardStatusViewController.setClipBounds(
@@ -2524,6 +2551,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (animate && !mShouldUseSplitNotificationShade) {
             animateNextNotificationBounds(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE,
                     delay);
+            mIsQsTranslationResetAnimator = mQsTranslationForFullShadeTransition > 0.0f;
         }
 
         float endPosition = 0;
@@ -2923,7 +2951,7 @@ public class NotificationPanelViewController extends PanelViewController {
         float startHeight = -mQsExpansionHeight;
         if (!mShouldUseSplitNotificationShade && mBarState == StatusBarState.SHADE) {
             // Small parallax as we pull down and clip QS
-            startHeight = -mQsExpansionHeight * 0.2f;
+            startHeight = -mQsExpansionHeight * QS_PARALLAX_AMOUNT;
         }
         if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()) {
             if (mNotificationStackScrollLayoutController.isPulseExpanding()) {
@@ -3105,8 +3133,13 @@ public class NotificationPanelViewController extends PanelViewController {
         super.setOverExpansion(overExpansion);
         // Translating the quick settings by half the overexpansion to center it in the background
         // frame
-        mQsFrame.setTranslationY(overExpansion / 2f);
+        updateQsFrameTranslation();
         mNotificationStackScrollLayoutController.setOverExpansion(overExpansion);
+    }
+
+    private void updateQsFrameTranslation() {
+        float translation = mOverExpansion / 2.0f + mQsTranslationForFullShadeTransition;
+        mQsFrame.setTranslationY(translation);
     }
 
     @Override
