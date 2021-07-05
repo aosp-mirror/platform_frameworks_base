@@ -15,8 +15,7 @@
  */
 package com.android.systemui.qs.tiles.dialog;
 
-import static android.view.WindowInsets.Type.navigationBars;
-import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 
 import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
 
@@ -166,7 +165,6 @@ public class InternetDialog extends SystemUIDialog implements
         if (!aboveStatusBar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
-        show();
     }
 
     @Override
@@ -179,16 +177,19 @@ public class InternetDialog extends SystemUIDialog implements
         mDialogView = LayoutInflater.from(mContext).inflate(R.layout.internet_connectivity_dialog,
                 null);
         final Window window = getWindow();
-        final WindowManager.LayoutParams lp = window.getAttributes();
-        lp.gravity = Gravity.BOTTOM;
-        lp.setFitInsetsTypes(statusBars() | navigationBars());
-        lp.setFitInsetsSides(WindowInsets.Side.all());
-        lp.setFitInsetsIgnoringVisibility(true);
-        window.setAttributes(lp);
+        final WindowManager.LayoutParams layoutParams = window.getAttributes();
+        layoutParams.gravity = Gravity.BOTTOM;
+        // Move down the dialog to overlay the navigation bar.
+        layoutParams.setFitInsetsTypes(
+                layoutParams.getFitInsetsTypes() & ~WindowInsets.Type.navigationBars());
+        layoutParams.setFitInsetsSides(WindowInsets.Side.all());
+        layoutParams.setFitInsetsIgnoringVisibility(true);
+        window.setAttributes(layoutParams);
         window.setContentView(mDialogView);
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setWindowAnimations(R.style.Animation_InternetDialog);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.addFlags(FLAG_LAYOUT_NO_LIMITS);
 
         mInternetDialogTitle = mDialogView.requireViewById(R.id.internet_dialog_title);
         mInternetDialogSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
