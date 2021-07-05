@@ -18,11 +18,13 @@ package com.android.wm.shell.startingsurface.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
@@ -54,30 +56,38 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         final boolean activityCreated = (parameter & TYPE_PARAMETER_ACTIVITY_CREATED) != 0;
         final boolean useEmptySplashScreen =
                 (parameter & TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN) != 0;
+        final boolean legacySplashScreen =
+                ((parameter & TYPE_PARAMETER_LEGACY_SPLASH_SCREEN) != 0);
         final boolean topIsHome = windowInfo.taskInfo.topActivityType == ACTIVITY_TYPE_HOME;
 
         if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-            Slog.d(TAG, "preferredStartingWindowType newTask " + newTask
-                    + " taskSwitch " + taskSwitch
-                    + " processRunning " + processRunning
-                    + " allowTaskSnapshot " + allowTaskSnapshot
-                    + " activityCreated " + activityCreated
-                    + " useEmptySplashScreen " + useEmptySplashScreen
-                    + " topIsHome " + topIsHome);
+            Slog.d(TAG, "preferredStartingWindowType newTask:" + newTask
+                    + " taskSwitch:" + taskSwitch
+                    + " processRunning:" + processRunning
+                    + " allowTaskSnapshot:" + allowTaskSnapshot
+                    + " activityCreated:" + activityCreated
+                    + " useEmptySplashScreen:" + useEmptySplashScreen
+                    + " legacySplashScreen:" + legacySplashScreen
+                    + " topIsHome:" + topIsHome);
         }
+
+        final int visibleSplashScreenType = legacySplashScreen
+                ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+                : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+
         if (!topIsHome) {
             if (!processRunning) {
                 return useEmptySplashScreen
                         ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
-                        : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                        : visibleSplashScreenType;
             }
             if (newTask) {
                 return useEmptySplashScreen
                         ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
-                        : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                        : visibleSplashScreenType;
             }
             if (taskSwitch && !activityCreated) {
-                return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                return visibleSplashScreenType;
             }
         }
         if (taskSwitch && allowTaskSnapshot) {
