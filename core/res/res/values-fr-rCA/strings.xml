@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Refuser"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Autorisation demandée"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Autorisation demandée\npour le compte \"<xliff:g id="ACCOUNT">%s</xliff:g>\""</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Autorisation demandée par <xliff:g id="APP">%1$s</xliff:g>\npour le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Vous utilisez cette application en dehors de votre profil professionnel"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Vous utilisez cette application dans votre profil professionnel"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Mode de saisie"</string>
@@ -2100,7 +2099,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponse, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponses, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La pile pourrait s\'épuiser avant la charge habituelle"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Le mode Économiseur de pile est activé afin de prolonger l\'autonomie"</string>
