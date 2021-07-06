@@ -9161,26 +9161,15 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        final long eventSourceNodeId = event.getSourceNodeId();
-        final long focusedSourceNodeId = mAccessibilityFocusedVirtualView.getSourceNodeId();
-
-        // Only change types that may affect the bounds of the focused virtual view should run
-        // the update bounds logic after this if block.
+        // We only care about change types that may affect the bounds of the
+        // focused virtual view.
         final int changes = event.getContentChangeTypes();
         if ((changes & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) == 0
                 && changes != AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED) {
-            // Now the changes(text, content description, state description) are local to this node.
-            // If the focused virtual view changed, we need to update the
-            // mAccessibilityFocusedVirtualView, otherwise A11y services will get stale value.
-            if (eventSourceNodeId == focusedSourceNodeId) {
-                int focusedChildId =
-                        AccessibilityNodeInfo.getVirtualDescendantId(focusedSourceNodeId);
-                mAccessibilityFocusedVirtualView =
-                        provider.createAccessibilityNodeInfo(focusedChildId);
-            }
             return;
         }
 
+        final long eventSourceNodeId = event.getSourceNodeId();
         final int changedViewId = AccessibilityNodeInfo.getAccessibilityViewId(eventSourceNodeId);
 
         // Search up the tree for subtree containment.
@@ -9204,6 +9193,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
+        final long focusedSourceNodeId = mAccessibilityFocusedVirtualView.getSourceNodeId();
         int focusedChildId = AccessibilityNodeInfo.getVirtualDescendantId(focusedSourceNodeId);
 
         // Refresh the node for the focused virtual view.
