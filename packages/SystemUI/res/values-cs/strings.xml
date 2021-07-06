@@ -520,7 +520,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiché"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tichá oznámení"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Oznámení"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazat všechna tichá oznámení"</string>
@@ -735,7 +735,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Dál upozorňovat"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Vypnout oznámení"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Ticho"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Tiché"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Výchozí"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automaticky"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žádný zvuk ani vibrace"</string>
@@ -748,10 +748,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stav:&lt;/b&gt; priorita snížena na Tiché"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno výše"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno níže"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, deaktivuje režim Nerušit"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny a deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny a deaktivuje režim Nerušit"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
