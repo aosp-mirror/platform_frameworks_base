@@ -402,8 +402,11 @@
     <dimen name="status_bar_header_padding_bottom">48dp</dimen>
 
     <!-- The height of the container that holds the battery and time in the quick settings header.
+    Preferred over using "@*android:dimen/quick_qs_offset_height" as system icons are not always
+    present in quick settings (e.g. in split shade) and it's useful to be able to override this
+    value in such cases.
          -->
-    <dimen name="qs_header_system_icons_area_height">48dp</dimen>
+    <dimen name="qs_header_system_icons_area_height">@*android:dimen/quick_qs_offset_height</dimen>
 
     <!-- How far the quick-quick settings panel extends below the status bar -->
     <dimen name="qs_quick_header_panel_height">128dp</dimen>
@@ -454,6 +457,9 @@
 
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
+
+    <!-- Height of status bar in split shade mode - visible only on large screens -->
+    <dimen name="split_shade_status_bar_height">@*android:dimen/quick_qs_offset_height</dimen>
 
     <!-- The top margin of the panel that holds the list of notifications. -->
     <dimen name="notification_panel_margin_top">0dp</dimen>
