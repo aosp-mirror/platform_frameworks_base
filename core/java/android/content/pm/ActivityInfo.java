@@ -1363,7 +1363,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public boolean alwaysSandboxDisplayApis() {
         return CompatChanges.isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS,
                 applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid));
+                UserHandle.getUserHandleForUid(applicationInfo.uid))
+                || ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(applicationInfo);
     }
 
     /** @hide */
