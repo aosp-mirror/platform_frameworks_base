@@ -8134,9 +8134,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // This could prevent if there is no container animation, we still have to apply the
             // pending transaction and exit waiting.
             mAnimator.mNotifyWhenNoAnimation = true;
+            boolean animateStarting = false;
             while (timeoutRemaining > 0) {
+                // Waiting until all starting windows has finished animating.
+                animateStarting = mRoot.forAllActivities(a -> {
+                    return a.hasStartingWindow();
+                });
                 boolean isAnimating = mAnimator.isAnimationScheduled()
-                        || mRoot.isAnimating(TRANSITION | CHILDREN, ANIMATION_TYPE_ALL);
+                        || mRoot.isAnimating(TRANSITION | CHILDREN, ANIMATION_TYPE_ALL)
+                        || animateStarting;
                 if (!isAnimating) {
                     break;
                 }
@@ -8152,13 +8158,14 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowContainer animatingContainer;
             animatingContainer = mRoot.getAnimatingContainer(TRANSITION | CHILDREN,
                     ANIMATION_TYPE_ALL);
-            if (mAnimator.isAnimationScheduled() || animatingContainer != null) {
+            if (mAnimator.isAnimationScheduled() || animatingContainer != null || animateStarting) {
                 Slog.w(TAG, "Timed out waiting for animations to complete,"
                         + " animatingContainer=" + animatingContainer
                         + " animationType=" + SurfaceAnimator.animationTypeToString(
                         animatingContainer != null
                                 ? animatingContainer.mSurfaceAnimator.getAnimationType()
-                                : SurfaceAnimator.ANIMATION_TYPE_NONE));
+                                : SurfaceAnimator.ANIMATION_TYPE_NONE)
+                        + " animateStarting=" + animateStarting);
             }
         }
     }
