@@ -32,14 +32,14 @@
     <!-- no translation found for tile_states_default:1 (7086813178962737808) -->
     <!-- no translation found for tile_states_default:2 (9192445505551219506) -->
   <string-array name="tile_states_internet">
-    <item msgid="5499482407653291407">"Indisponibilă"</item>
-    <item msgid="3048856902433862868">"Dezactivată"</item>
-    <item msgid="6877982264300789870">"Activată"</item>
+    <item msgid="5499482407653291407">"Indisponibil"</item>
+    <item msgid="3048856902433862868">"Dezactivat"</item>
+    <item msgid="6877982264300789870">"Activat"</item>
   </string-array>
   <string-array name="tile_states_wifi">
-    <item msgid="8054147400538405410">"Indisponibilă"</item>
-    <item msgid="4293012229142257455">"Dezactivată"</item>
-    <item msgid="6221288736127914861">"Activată"</item>
+    <item msgid="8054147400538405410">"Indisponibil"</item>
+    <item msgid="4293012229142257455">"Dezactivat"</item>
+    <item msgid="6221288736127914861">"Activat"</item>
   </string-array>
   <string-array name="tile_states_cell">
     <item msgid="1235899788959500719">"Indisponibilă"</item>
@@ -67,14 +67,14 @@
     <item msgid="7105052717007227415">"Activată"</item>
   </string-array>
   <string-array name="tile_states_bt">
-    <item msgid="5330252067413512277">"Indisponibilă"</item>
-    <item msgid="5315121904534729843">"Dezactivată"</item>
-    <item msgid="503679232285959074">"Activată"</item>
+    <item msgid="5330252067413512277">"Indisponibil"</item>
+    <item msgid="5315121904534729843">"Dezactivat"</item>
+    <item msgid="503679232285959074">"Activat"</item>
   </string-array>
   <string-array name="tile_states_airplane">
-    <item msgid="1985366811411407764">"Indisponibilă"</item>
-    <item msgid="4801037224991420996">"Dezactivată"</item>
-    <item msgid="1982293347302546665">"Activată"</item>
+    <item msgid="1985366811411407764">"Indisponibil"</item>
+    <item msgid="4801037224991420996">"Dezactivat"</item>
+    <item msgid="1982293347302546665">"Activat"</item>
   </string-array>
   <string-array name="tile_states_location">
     <item msgid="3316542218706374405">"Indisponibilă"</item>
@@ -82,9 +82,9 @@
     <item msgid="6744077414775180687">"Activată"</item>
   </string-array>
   <string-array name="tile_states_hotspot">
-    <item msgid="3145597331197351214">"Indisponibilă"</item>
-    <item msgid="5715725170633593906">"Dezactivată"</item>
-    <item msgid="2075645297847971154">"Activată"</item>
+    <item msgid="3145597331197351214">"Indisponibil"</item>
+    <item msgid="5715725170633593906">"Dezactivat"</item>
+    <item msgid="2075645297847971154">"Activat"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Indisponibilă"</item>
@@ -97,14 +97,14 @@
     <item msgid="7520663805910678476">"Activată"</item>
   </string-array>
   <string-array name="tile_states_dark">
-    <item msgid="2762596907080603047">"Indisponibilă"</item>
-    <item msgid="400477985171353">"Dezactivată"</item>
-    <item msgid="630890598801118771">"Activată"</item>
+    <item msgid="2762596907080603047">"Indisponibil"</item>
+    <item msgid="400477985171353">"Dezactivat"</item>
+    <item msgid="630890598801118771">"Activat"</item>
   </string-array>
   <string-array name="tile_states_work">
-    <item msgid="389523503690414094">"Indisponibilă"</item>
-    <item msgid="8045580926543311193">"Dezactivată"</item>
-    <item msgid="4913460972266982499">"Activată"</item>
+    <item msgid="389523503690414094">"Indisponibil"</item>
+    <item msgid="8045580926543311193">"Dezactivat"</item>
+    <item msgid="4913460972266982499">"Activat"</item>
   </string-array>
   <string-array name="tile_states_cast">
     <item msgid="6032026038702435350">"Indisponibilă"</item>
@@ -127,9 +127,9 @@
     <item msgid="8031106212477483874">"Activată"</item>
   </string-array>
   <string-array name="tile_states_reduce_brightness">
-    <item msgid="1839836132729571766">"Indisponibilă"</item>
-    <item msgid="4572245614982283078">"Dezactivată"</item>
-    <item msgid="6536448410252185664">"Activată"</item>
+    <item msgid="1839836132729571766">"Indisponibil"</item>
+    <item msgid="4572245614982283078">"Dezactivat"</item>
+    <item msgid="6536448410252185664">"Activat"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"Indisponibilă"</item>
@@ -147,9 +147,9 @@
     <item msgid="3422023746567004609">"Activată"</item>
   </string-array>
   <string-array name="tile_states_wallet">
-    <item msgid="4177615438710836341">"Indisponibilă"</item>
-    <item msgid="7571394439974244289">"Dezactivată"</item>
-    <item msgid="6866424167599381915">"Activată"</item>
+    <item msgid="4177615438710836341">"Indisponibil"</item>
+    <item msgid="7571394439974244289">"Dezactivat"</item>
+    <item msgid="6866424167599381915">"Activat"</item>
   </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"Indisponibilă"</item>
