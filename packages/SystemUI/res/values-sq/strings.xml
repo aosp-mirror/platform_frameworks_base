@@ -669,10 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguro për të kryer pagesa më të shpejta dhe më të sigurta përmes telefonit"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Shkyçe për të paguar"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Shto një kartë"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Po përditësohet"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Shkyçe për ta përdorur"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pati një problem me marrjen e kartave të tua. Provo përsëri më vonë"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cilësimet e ekranit të kyçjes"</string>
