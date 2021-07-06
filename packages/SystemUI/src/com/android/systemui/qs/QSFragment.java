@@ -173,7 +173,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSPanelScrollView.setOnScrollChangeListener(
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
                     // Lazily update animators whenever the scrolling changes
-                    mQSAnimator.onQsScrollingChanged();
+                    mQSAnimator.requestAnimatorUpdate();
                     mHeader.setExpandedScrollAmount(scrollY);
                     if (mScrollListener != null) {
                         mScrollListener.onQsPanelScrollChanged(scrollY);
@@ -214,6 +214,14 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     if (sizeChanged) {
                         setQsExpansion(mLastQSExpansion, mLastHeaderTranslation);
                     }
+                });
+        mQSPanelController.setUsingHorizontalLayoutChangeListener(
+                () -> {
+                    // The hostview may be faded out in the horizontal layout. Let's make sure to
+                    // reset the alpha when switching layouts. This is fine since the animator will
+                    // update the alpha if it's not supposed to be 1.0f
+                    mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
+                    mQSAnimator.requestAnimatorUpdate();
                 });
     }
 
