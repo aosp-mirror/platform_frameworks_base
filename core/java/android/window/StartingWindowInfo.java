@@ -55,6 +55,9 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public static final int STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN = 3;
 
+    /** @hide **/
+    public static final int STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN = 4;
+
     /**
      * @hide
      */
@@ -62,7 +65,8 @@ public final class StartingWindowInfo implements Parcelable {
             STARTING_WINDOW_TYPE_NONE,
             STARTING_WINDOW_TYPE_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_SNAPSHOT,
-            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN,
+            STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingWindowType {}
 
@@ -103,7 +107,8 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
-            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN
+            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN,
+            TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
 
@@ -122,6 +127,11 @@ public final class StartingWindowInfo implements Parcelable {
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
     /** @hide */
     public static final int TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN = 0x00000020;
+    /**
+     * Application is allowed to use the legacy splash screen
+     * @hide
+     */
+    public static final int TYPE_PARAMETER_LEGACY_SPLASH_SCREEN = 0x80000000;
 
     /**
      * The parameters which effect the starting window type.

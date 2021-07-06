@@ -68,6 +68,7 @@ class AutomaticBrightnessController {
     private static final int MSG_INVALIDATE_SHORT_TERM_MODEL = 3;
     private static final int MSG_UPDATE_FOREGROUND_APP = 4;
     private static final int MSG_UPDATE_FOREGROUND_APP_SYNC = 5;
+    private static final int MSG_RUN_UPDATE = 6;
 
     // Length of the ambient light horizon used to calculate the long term estimate of ambient
     // light.
@@ -358,6 +359,13 @@ class AutomaticBrightnessController {
 
     public BrightnessConfiguration getDefaultConfig() {
         return mBrightnessMapper.getDefaultConfig();
+    }
+
+    /**
+     * Force recalculate of the state of automatic brightness.
+     */
+    public void update() {
+        mHandler.sendEmptyMessage(MSG_RUN_UPDATE);
     }
 
     private boolean setDisplayPolicy(int policy) {
@@ -910,6 +918,10 @@ class AutomaticBrightnessController {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_RUN_UPDATE:
+                    updateAutoBrightness(true /*sendUpdate*/, false /*isManuallySet*/);
+                    break;
+
                 case MSG_UPDATE_AMBIENT_LUX:
                     updateAmbientLux();
                     break;
