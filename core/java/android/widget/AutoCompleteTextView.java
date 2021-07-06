@@ -788,8 +788,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && isPopupShowing()
-                && !mPopup.isDropDownAlwaysVisible()) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
+                && isPopupShowing() && !mPopup.isDropDownAlwaysVisible()) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
             if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
