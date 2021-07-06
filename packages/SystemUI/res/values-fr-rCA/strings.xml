@@ -669,10 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Préparez-vous à faire des achats plus rapidement et de façon plus sûre avec votre téléphone"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tout afficher"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Déverrouiller pour payer"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Ajouter une carte"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Mise à jour en cours…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Un problème est survenu lors de la récupération de vos cartes, veuillez réessayer plus tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Paramètres de l\'écran de verrouillage"</string>

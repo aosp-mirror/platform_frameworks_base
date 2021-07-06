@@ -1017,8 +1017,8 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacje używają: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Używa tego aplikacja <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Ostatnio używała tego aplikacja <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Używane przez aplikację <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Ostatnio używane przez aplikację <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(praca)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Rozmowa telefoniczna"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(przez: <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -1158,11 +1158,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Zobacz ostatnie wiadomości, nieodebrane połączenia i stany"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Rozmowa"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Wstrzymane przez tryb Nie przeszkadzać"</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> wysyła wiadomość: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> wysyła zdjęcie"</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ma nowy stan: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem z odczytaniem pomiaru wykorzystania baterii"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nie ustawiono alarmu"</string>

@@ -669,9 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ਆਪਣੇ ਫ਼ੋਨ ਨਾਲ ਜ਼ਿਆਦਾ ਤੇਜ਼ ਅਤੇ ਜ਼ਿਆਦਾ ਸੁਰੱਖਿਅਤ ਖਰੀਦਾਂ ਕਰਨ ਲਈ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ਸਭ ਦਿਖਾਓ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ਭੁਗਤਾਨ ਕਰਨ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"ਕੋਈ ਕਾਰਡ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"ਅੱਪਡੇਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ਤੁਹਾਡੇ ਕਾਰਡ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆਈ, ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ਲਾਕ ਸਕ੍ਰੀਨ ਸੈਟਿੰਗਾਂ"</string>
