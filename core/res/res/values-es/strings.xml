@@ -617,7 +617,7 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloqueo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para añadir una huella digital"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con Huella Digital"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huella digital"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"No se puede usar el sensor de huellas digitales"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un proveedor de reparaciones."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Datos faciales no reconocidos. Vuelve a intentarlo."</string>
