@@ -149,9 +149,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
 
-    private static final Uri BRIGHTNESS_FLOAT_URI =
-            Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
-
     private final Object mLock = new Object();
 
     private final Context mContext;
@@ -1518,7 +1515,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 () -> {
                     sendUpdatePowerStateLocked();
                     mHandler.post(mOnBrightnessChangeRunnable);
-                });
+                    // TODO(b/192258832): Switch the HBMChangeCallback to a listener pattern.
+                    mAutomaticBrightnessController.update();
+                }, mContext);
     }
 
     private void blockScreenOn() {
