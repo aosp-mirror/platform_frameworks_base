@@ -520,7 +520,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiché"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tichá oznámení"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Oznámení"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazat všechna tichá oznámení"</string>
@@ -735,7 +735,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Dál upozorňovat"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Vypnout oznámení"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Ticho"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Tiché"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Výchozí"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automaticky"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žádný zvuk ani vibrace"</string>
@@ -748,10 +748,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stav:&lt;/b&gt; priorita snížena na Tiché"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno výše"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno níže"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, deaktivuje režim Nerušit"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny a deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny a deaktivuje režim Nerušit"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
@@ -1173,29 +1173,18 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"K otevření použijte otisk prstu"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Je vyžadováno ověření. Dotkněte se snímače otisků prstů."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Probíhající hovor"</string>
-    <!-- no translation found for airplane_mode (2536350001462130668) -->
-    <skip />
-    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
-    <skip />
-    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
-    <skip />
+    <string name="airplane_mode" msgid="2536350001462130668">"Režim Letadlo"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilní data"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Připojeno"</string>
-    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Internet se nebude automaticky připojovat"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Žádné připojení"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Žádné další sítě nejsou k dispozici"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nejsou k dispozici žádné sítě"</string>
-    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
-    <skip />
-    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
-    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
-    <skip />
-    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
-    <skip />
-    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
-    <skip />
-    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
-    <skip />
-    <!-- no translation found for see_all_networks (3773666844913168122) -->
-    <skip />
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Podrobnosti sítě"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Klepněte na síť, ke které se chcete připojit"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Vyhledávání sítí…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Připojení k síti se nezdařilo"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Zobrazit vše"</string>
 </resources>

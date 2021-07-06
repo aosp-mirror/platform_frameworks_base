@@ -1146,11 +1146,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Yeni mesajları, cevapsız aramaları ve durum güncellemelerini görün"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Görüşme"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Rahatsız Etmeyin özelliği tarafından duraklatıldı"</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> bir mesaj gönderdi: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> bir resim gönderdi"</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g>, durumunu güncelledi: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pil ölçeriniz okunurken sorun oluştu"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Daha fazla bilgi için dokunun"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarm ayarlanmadı"</string>
@@ -1161,29 +1159,18 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Açmak için parmak izi kullanın"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kimlik doğrulaması gerekiyor. Kimlik doğrulaması için parmak izi sensörüne dokunun."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Devam eden telefon görüşmesi"</string>
-    <!-- no translation found for airplane_mode (2536350001462130668) -->
-    <skip />
-    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
-    <skip />
-    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
-    <skip />
+    <string name="airplane_mode" msgid="2536350001462130668">"Uçak modu"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil veri"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Bağlı"</string>
-    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"İnternete otomatik olarak bağlanmaz"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Bağlantı yok"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Kullanılabilir başka ağ yok"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Kullanılabilir ağ yok"</string>
-    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
-    <skip />
-    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
-    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
-    <skip />
-    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
-    <skip />
-    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
-    <skip />
-    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
-    <skip />
-    <!-- no translation found for see_all_networks (3773666844913168122) -->
-    <skip />
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Kablosuz"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Ağ bilgileri"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Bağlanmak için bir ağa dokunun"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Ağlar aranıyor…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ağa bağlanılamadı"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Tümünü göster"</string>
 </resources>

@@ -1146,11 +1146,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"हाल के मैसेज, मिस्ड कॉल, और स्टेटस अपडेट देखें"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"बातचीत"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\'परेशान न करें\' की वजह से सूचनाएं नहीं दिख रहीं"</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ने एक मैसेज भेजा है: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ने एक इमेज भेजी है"</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ने स्टेटस अपडेट किया है: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"आपके डिवाइस के बैटरी मीटर की रीडिंग लेने में समस्या आ रही है"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ज़्यादा जानकारी के लिए टैप करें"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"कोई अलार्म सेट नहीं है"</string>
@@ -1161,29 +1159,18 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"खोलने के लिए, फ़िंगरप्रिंट का इस्तेमाल करें"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"पुष्टि करना ज़रूरी है. पुष्टि करने के लिए, फ़िंगरप्रिंट सेंसर को छुएं."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"फ़ोन कॉल चल रहा है"</string>
-    <!-- no translation found for airplane_mode (2536350001462130668) -->
-    <skip />
-    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
-    <skip />
-    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
-    <skip />
+    <string name="airplane_mode" msgid="2536350001462130668">"हवाई जहाज़ मोड"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट हो गया"</string>
-    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"इंटरनेट अपने-आप कनेक्ट नहीं होगा"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"इंटरनेट कनेक्शन नहीं है"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"कोई दूसरा नेटवर्क उपलब्ध नहीं है"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"कोई नेटवर्क उपलब्ध नहीं है"</string>
-    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
-    <skip />
-    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
-    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
-    <skip />
-    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
-    <skip />
-    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
-    <skip />
-    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
-    <skip />
-    <!-- no translation found for see_all_networks (3773666844913168122) -->
-    <skip />
+    <string name="turn_on_wifi" msgid="1308379840799281023">"वाई-फ़ाई"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"नेटवर्क की जानकारी"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"इंटरनेट से कनेक्ट करने के लिए, किसी नेटवर्क पर टैप करें"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्क खोजे जा रहे हैं…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्क से कनेक्ट नहीं किया जा सका"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"सभी देखें"</string>
 </resources>

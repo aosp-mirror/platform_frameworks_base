@@ -1161,29 +1161,18 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"തുറക്കുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. പരിശോധിച്ചുറപ്പിക്കാൻ, വിരലടയാള സെൻസറിൽ സ്‌പർശിക്കുക."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"സജീവമായ ഫോൺ കോൾ"</string>
-    <!-- no translation found for airplane_mode (2536350001462130668) -->
-    <skip />
-    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
-    <skip />
-    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
-    <skip />
+    <string name="airplane_mode" msgid="2536350001462130668">"ഫ്ലൈറ്റ് മോഡ്"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
-    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ഇന്റർനെറ്റ് സ്വയമേവ കണക്‌റ്റ് ചെയ്യില്ല"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"കണക്ഷനില്ല"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"മറ്റ് നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
-    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
-    <skip />
-    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
-    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
-    <skip />
-    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
-    <skip />
-    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
-    <skip />
-    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
-    <skip />
-    <!-- no translation found for see_all_networks (3773666844913168122) -->
-    <skip />
+    <string name="turn_on_wifi" msgid="1308379840799281023">"വൈഫൈ"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"നെറ്റ്‌വർക്ക് വിശദാംശങ്ങൾ"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"കണക്‌റ്റ് ചെയ്യാൻ ഒരു നെറ്റ്‌വർക്കിൽ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"നെറ്റ്‌വർക്കുകൾ തിരയുന്നു…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"നെറ്റ്‌വർക്കിൽ കണക്റ്റ് ചെയ്യാനായില്ല"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"എല്ലാം കാണുക"</string>
 </resources>
