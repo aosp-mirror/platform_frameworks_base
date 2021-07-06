@@ -5696,7 +5696,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Only update focus/visibility for the last one because there may be many root tasks are
         // reparented and the intermediate states are unnecessary.
         if (lastReparentedRootTask != null) {
-            lastReparentedRootTask.postReparent();
+            lastReparentedRootTask.resumeNextFocusAfterReparent();
         }
         releaseSelfIfNeeded();
         mDisplayPolicy.release();
