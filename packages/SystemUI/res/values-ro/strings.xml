@@ -672,10 +672,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configurați pentru a face achiziții mai rapide și mai sigure cu telefonul dvs."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Afișați-le pe toate"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Deblocați pentru a plăti"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Adăugați un card"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Se actualizează"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Deblocați pentru a folosi"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"A apărut o problemă la preluarea cardurilor. Încercați din nou mai târziu"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Setările ecranului de blocare"</string>

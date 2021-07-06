@@ -64,6 +64,7 @@ import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.hdmi.HdmiAudioSystemClient;
+import android.hardware.hdmi.HdmiClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiTvClient;
@@ -585,11 +586,12 @@ public class AudioService extends IAudioService.Stub
     Set<Integer> mFixedVolumeDevices = new HashSet<>(Arrays.asList(
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
-            AudioSystem.DEVICE_OUT_HDMI_ARC,
-            AudioSystem.DEVICE_OUT_HDMI_EARC,
             AudioSystem.DEVICE_OUT_AUX_LINE));
     // Devices for which the volume is always max, no volume panel
-    Set<Integer> mFullVolumeDevices = new HashSet<>();
+    Set<Integer> mFullVolumeDevices = new HashSet<>(Arrays.asList(
+            AudioSystem.DEVICE_OUT_HDMI_ARC,
+            AudioSystem.DEVICE_OUT_HDMI_EARC
+    ));
     // Devices for the which use the "absolute volume" concept (framework sends audio signal
     // full scale, and volume control separately) and can be used for multiple use cases reflected
     // by the audio mode (e.g. media playback in MODE_NORMAL, and phone calls in MODE_IN_CALL).
@@ -2280,7 +2282,6 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Master mute %s, user=%d", masterMute, currentUser));
         }
-        setSystemAudioMute(masterMute);
         AudioSystem.setMasterMute(masterMute);
         broadcastMasterMuteStatus(masterMute);
 
@@ -2861,9 +2862,6 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     state = direction == AudioManager.ADJUST_MUTE;
                 }
-                if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
-                    setSystemAudioMute(state);
-                }
                 for (int stream = 0; stream < mStreamStates.length; stream++) {
                     if (streamTypeAlias == mStreamVolumeAlias[stream]) {
                         if (!(readCameraSoundForced()
@@ -2929,11 +2927,6 @@ public class AudioService extends IAudioService.Stub
                     mDeviceBroker.postSetHearingAidVolumeIndex(newIndex, streamType);
                 }
             }
-
-            // Check if volume update should be sent to Hdmi system audio.
-            if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
-                setSystemAudioVolume(oldIndex, newIndex, getStreamMaxVolume(streamType), flags);
-            }
         }
 
         final int newIndex = mStreamStates[streamType].getIndex(device);
@@ -2941,7 +2934,13 @@ public class AudioService extends IAudioService.Stub
         if (adjustVolume) {
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager != null) {
-                    if (mHdmiPlaybackClient != null
+                    // At most one of mHdmiPlaybackClient and mHdmiTvClient should be non-null
+                    HdmiClient fullVolumeHdmiClient = mHdmiPlaybackClient;
+                    if (mHdmiTvClient != null) {
+                        fullVolumeHdmiClient = mHdmiTvClient;
+                    }
+
+                    if (fullVolumeHdmiClient != null
                             && mHdmiCecVolumeControlEnabled
                             && streamTypeAlias == AudioSystem.STREAM_MUSIC
                             // vol change on a full volume device
@@ -2955,6 +2954,10 @@ public class AudioService extends IAudioService.Stub
                                 keyCode = KeyEvent.KEYCODE_VOLUME_DOWN;
                                 break;
                             case AudioManager.ADJUST_TOGGLE_MUTE:
+                            case AudioManager.ADJUST_MUTE:
+                            case AudioManager.ADJUST_UNMUTE:
+                                // Many CEC devices only support toggle mute. Therefore, we send the
+                                // same keycode for all three mute options.
                                 keyCode = KeyEvent.KEYCODE_VOLUME_MUTE;
                                 break;
                             default:
@@ -2963,17 +2966,16 @@ public class AudioService extends IAudioService.Stub
                         if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
                             final long ident = Binder.clearCallingIdentity();
                             try {
-                                final long time = java.lang.System.currentTimeMillis();
                                 switch (keyEventMode) {
                                     case VOL_ADJUST_NORMAL:
-                                        mHdmiPlaybackClient.sendVolumeKeyEvent(keyCode, true);
-                                        mHdmiPlaybackClient.sendVolumeKeyEvent(keyCode, false);
+                                        fullVolumeHdmiClient.sendVolumeKeyEvent(keyCode, true);
+                                        fullVolumeHdmiClient.sendVolumeKeyEvent(keyCode, false);
                                         break;
                                     case VOL_ADJUST_START:
-                                        mHdmiPlaybackClient.sendVolumeKeyEvent(keyCode, true);
+                                        fullVolumeHdmiClient.sendVolumeKeyEvent(keyCode, true);
                                         break;
                                     case VOL_ADJUST_END:
-                                        mHdmiPlaybackClient.sendVolumeKeyEvent(keyCode, false);
+                                        fullVolumeHdmiClient.sendVolumeKeyEvent(keyCode, false);
                                         break;
                                     default:
                                         Log.e(TAG, "Invalid keyEventMode " + keyEventMode);
@@ -3026,27 +3028,6 @@ public class AudioService extends IAudioService.Stub
                 getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
                 isStreamMute(AudioSystem.STREAM_MUSIC));
         Binder.restoreCallingIdentity(identity);
-    }
-
-    private void setSystemAudioVolume(int oldVolume, int newVolume, int maxVolume, int flags) {
-        // Sets the audio volume of AVR when we are in system audio mode. The new volume info
-        // is tranformed to HDMI-CEC commands and passed through CEC bus.
-        synchronized (mHdmiClientLock) {
-            if (mHdmiManager == null
-                    || mHdmiTvClient == null
-                    || oldVolume == newVolume
-                    || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0
-                    || !mHdmiSystemAudioSupported
-                    || !mHdmiCecVolumeControlEnabled) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHdmiTvClient.setSystemAudioVolume(oldVolume, newVolume, maxVolume);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
@@ -3559,10 +3540,6 @@ public class AudioService extends IAudioService.Stub
                 mDeviceBroker.postSetHearingAidVolumeIndex(index, streamType);
             }
 
-            if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
-                setSystemAudioVolume(oldIndex, index, getStreamMaxVolume(streamType), flags);
-            }
-
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC && isFixedVolumeDevice(device)) {
                 flags |= AudioManager.FLAG_FIXED_VOLUME;
@@ -3824,18 +3801,6 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void setSystemAudioMute(boolean state) {
-        synchronized (mHdmiClientLock) {
-            if (mHdmiManager == null || mHdmiTvClient == null || !mHdmiSystemAudioSupported) return;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHdmiTvClient.setSystemAudioMute(state);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-    }
-
     /** get stream mute state. */
     public boolean isStreamMute(int streamType) {
         if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
@@ -3986,7 +3951,6 @@ public class AudioService extends IAudioService.Stub
         if ((isPlatformAutomotive() && userId == UserHandle.USER_SYSTEM)
                 || (getCurrentUserId() == userId)) {
             if (mute != AudioSystem.getMasterMute()) {
-                setSystemAudioMute(mute);
                 AudioSystem.setMasterMute(mute);
                 sendMasterMuteUpdate(mute, flags);
             }

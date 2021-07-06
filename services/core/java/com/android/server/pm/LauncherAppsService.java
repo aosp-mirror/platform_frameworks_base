@@ -407,11 +407,16 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public boolean shouldHideFromSuggestions(String packageName, UserHandle user) {
-            if (!canAccessProfile(user.getIdentifier(), "cannot get shouldHideFromSuggestions")) {
+            final int userId = user.getIdentifier();
+            if (!canAccessProfile(userId, "cannot get shouldHideFromSuggestions")) {
                 return false;
             }
-            final int flags = mPackageManagerInternal.getDistractingPackageRestrictions(packageName,
-                    user.getIdentifier());
+            if (mPackageManagerInternal.filterAppAccess(
+                    packageName, Binder.getCallingUid(), userId)) {
+                return false;
+            }
+            final int flags = mPackageManagerInternal.getDistractingPackageRestrictions(
+                    packageName, userId);
             return (flags & PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS) != 0;
         }
 

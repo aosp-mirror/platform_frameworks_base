@@ -669,10 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"നിങ്ങളുടെ ഫോൺ ഉപയോഗിച്ച് വാങ്ങലുകൾ വേഗത്തിലും സുരക്ഷിതമായും നടത്താനുള്ള സജ്ജീകരണം നടത്തുക"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"എല്ലാം കാണിക്കുക"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"പണമടയ്‌ക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"കാർഡ് ചേർക്കുക"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"അപ്‌ഡേറ്റ് ചെയ്യുന്നു"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"നിങ്ങളുടെ കാർഡുകൾ ലഭ്യമാക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ടായി, പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ലോക്ക് സ്ക്രീൻ ക്രമീകരണം"</string>

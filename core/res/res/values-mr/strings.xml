@@ -1483,8 +1483,7 @@
     <string name="deny" msgid="6632259981847676572">"नकार द्या"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"परवानगीची विनंती केली"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> खात्यासाठी\nपरवानगीची विनंती केली."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> ने तुमचे \n<xliff:g id="ACCOUNT">%2$s</xliff:g> खाते ॲक्सेस करण्यासाठी परवानगीची विनंती केली आहे."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"तुम्ही हा अ‍ॅप आपल्‍या कार्य प्रोफाईलच्या बाहेर वापरत आहात"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"तुम्ही हा अ‍ॅप आपल्या कार्य प्रोफाईलमध्‍ये वापरत आहात"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"इनपुट पद्धत"</string>
