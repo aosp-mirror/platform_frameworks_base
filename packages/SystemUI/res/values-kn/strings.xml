@@ -984,7 +984,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"ನಿರಾಕರಿಸಿ"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಅನ್ನು ನಿಗದಿಗೊಳಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"ಬ್ಯಾಟರಿ ಖಾಲಿಯಾಗುವ ಸಾಧ್ಯತೆ ಇದ್ದಾಗ ಆನ್ ಮಾಡಿ"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"ಬೇಡ"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ಬ್ಯಾಟರಿ ಸೇವರ್ ನಿಗದಿಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ಗಿಂತ ಕಡಿಮೆ ಆದಾಗ ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
