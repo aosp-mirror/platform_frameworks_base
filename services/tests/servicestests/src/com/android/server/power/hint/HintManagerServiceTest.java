@@ -26,6 +26,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -43,6 +45,7 @@ import android.os.IHintSession;
 import android.os.Process;
 
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.power.hint.HintManagerService.AppHintSession;
 import com.android.server.power.hint.HintManagerService.Injector;
 import com.android.server.power.hint.HintManagerService.NativeWrapper;
@@ -74,6 +77,7 @@ public class HintManagerServiceTest {
 
     @Mock private Context mContext;
     @Mock private HintManagerService.NativeWrapper mNativeWrapperMock;
+    @Mock private ActivityManagerInternal mAmInternalMock;
 
     private HintManagerService mService;
 
@@ -86,6 +90,9 @@ public class HintManagerServiceTest {
               eq(DEFAULT_TARGET_DURATION))).thenReturn(1L);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_B),
               eq(DEFAULT_TARGET_DURATION))).thenReturn(2L);
+        when(mAmInternalMock.getIsolatedProcesses(anyInt())).thenReturn(null);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
     }
 
     private HintManagerService createService() {
@@ -102,6 +109,17 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         verify(mNativeWrapperMock).halInit();
         assertThat(service.mHintSessionPreferredRate).isEqualTo(DEFAULT_HINT_PREFERRED_RATE);
+    }
+
+    @Test
+    public void testCreateHintSessionInvalidPid() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        // Make sure we throw exception when adding a TID doesn't belong to the processes
+        // In this case, we add `init` PID into the list.
+        assertThrows(SecurityException.class,
+                () -> service.getBinderServiceInstance().createHintSession(token,
+                        new int[]{TID, 1}, DEFAULT_TARGET_DURATION));
     }
 
     @Test
