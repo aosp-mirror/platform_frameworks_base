@@ -5430,6 +5430,12 @@ public final class ActivityThread extends ClientTransactionHandler
                     // behave properly when activity is relaunching.
                     r.window.clearContentView();
                 } else {
+                    final ViewRootImpl viewRoot = v.getViewRootImpl();
+                    if (viewRoot != null) {
+                        // Clear the callback to avoid the destroyed activity from receiving
+                        // configuration changes that are no longer effective.
+                        viewRoot.setActivityConfigCallback(null);
+                    }
                     wm.removeViewImmediate(v);
                 }
             }
@@ -5834,10 +5840,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
-        final SizeConfigurationBuckets buckets = getActivityClient(activityToken)
-                .mSizeConfigurations;
+        final ActivityClientRecord r = mActivities.get(activityToken);
         final int diff = diffPublicWithSizeBuckets(activity.mCurrentConfig,
-                newConfig, buckets);
+                newConfig, r != null ? r.mSizeConfigurations : null);
         final boolean hasPublicConfigChange = diff != 0;
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
         // ResourcesImpl constructions.
