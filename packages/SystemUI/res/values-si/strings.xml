@@ -669,10 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ඔබගේ දුරකථනය සමඟ වඩා වේගවත්, වඩා සුරක්ෂිත මිලදී ගැනීම් සිදු කිරීමට සූදානම් වන්න"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"සියල්ල පෙන්වන්න"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ගෙවීමට අගුලු හරින්න"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"කාඩ්පතක් එක් කරන්න"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"යාවත්කාලීන වේ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"භාවිත කිරීමට අගුලු හරින්න"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ඔබගේ කාඩ්පත ලබා ගැනීමේ ගැටලුවක් විය, කරුණාකර පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"අගුලු තිර සැකසීම්"</string>

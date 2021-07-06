@@ -669,10 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"फोनमार्फत अझ छिटो र थप सुरक्षित तरिकाले खरिद गर्न भुक्तानी विधि सेटअप गर्नुहोस्"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सबै देखाइयोस्"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"भुक्तानी गर्न अनलक गर्नुहोस्"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"कार्ड हाल्नुहोस्"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"अपडेट गरिँदै छ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"यो वालेट प्रयोग गर्न डिभाइस अनलक गर्नुहोस्"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तपाईंका कार्डहरू प्राप्त गर्ने क्रममा समस्या भयो, कृपया पछि फेरि प्रयास गर्नुहोस्"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लक स्क्रिनसम्बन्धी सेटिङ"</string>

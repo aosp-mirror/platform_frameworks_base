@@ -2096,7 +2096,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Aquesta notificació s\'ha classificat amb un nivell superior. Toca per proporcionar suggeriments."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Aquesta notificació s\'ha classificat amb un nivell inferior. Toca per proporcionar suggeriments."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificacions millorades"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Ara, les accions i respostes suggerides les proporcionen les notificacions millorades. Les notificacions adaptatives d\'Android ja no s\'admeten."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Ara les accions i respostes suggerides es proporcionen mitjançant les notificacions millorades. Les notificacions adaptatives d\'Android ja no s\'admeten."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"D\'acord"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactiva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Més informació"</string>

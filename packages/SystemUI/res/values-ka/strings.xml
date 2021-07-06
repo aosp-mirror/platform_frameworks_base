@@ -669,10 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"დააყენეთ შესყიდვების თქვენი ტელეფონით უფრო სწრაფად და უსაფრთხოდ შესასრულებლად"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ყველას ჩვენება"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"გადასახდელად განბლოკვა"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"ბარათის დამატება"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"მიმდინარეობს განახლება"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"გამოსაყენებლად განბლოკვა"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"თქვენი ბარათების მიღებისას პრობლემა წარმოიშვა. ცადეთ ხელახლა მოგვიანებით"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ჩაკეტილი ეკრანის პარამეტრები"</string>

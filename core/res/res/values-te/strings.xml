@@ -1483,8 +1483,7 @@
     <string name="deny" msgid="6632259981847676572">"తిరస్కరించండి"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"అనుమతి అభ్యర్థించబడింది"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి అభ్యర్థించబడింది."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> ద్వారా అనుమతి రిక్వెస్ట్ చేయబడింది\nఖాతా <xliff:g id="ACCOUNT">%2$s</xliff:g> కోసం."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"మీరు మీ కార్యాలయ ప్రొఫైల్‌కు వెలుపల ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ఇన్‌పుట్ పద్ధతి"</string>

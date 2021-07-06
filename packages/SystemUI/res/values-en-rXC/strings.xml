@@ -1146,11 +1146,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‏‎‎‎‏‏‎‎‎‎‏‎‏‎‎‏‎‎‎‎‏‎‏‎‎‏‎‏‎‏‎‎‎See recent messages, missed calls, and status updates‎‏‎‎‏‎"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‎‏‏‎‏‎‎‏‎‏‏‎‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎‎‎Conversation‎‏‎‎‏‎"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎Paused by Do Not Disturb‎‏‎‎‏‎"</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‎‎‏‏‎‎‎‎‎‏‎‏‎‎‎‎‏‎‏‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ sent a message: ‎‏‎‎‏‏‎<xliff:g id="NOTIFICATION">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‎‎‎‏‏‎‏‎‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ sent an image‎‏‎‎‏‎"</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ has a status update: ‎‏‎‎‏‏‎<xliff:g id="STATUS">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‏‏‎‎‎‏‏‏‎‎‏‏‏‏‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎‎Problem reading your battery meter‎‏‎‎‏‎"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‎‏‏‎‏‏‎‎‎‎‏‎‏‏‏‏‏‏‎‎‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‏‎‎‎‏‎‎‎‏‏‎Tap for more information‎‏‎‎‏‎"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‎‎‎‏‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎No alarm set‎‏‎‎‏‎"</string>
