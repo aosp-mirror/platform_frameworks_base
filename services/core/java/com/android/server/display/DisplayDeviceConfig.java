@@ -39,6 +39,7 @@ import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateRange;
 import com.android.server.display.config.SensorDetails;
+import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.config.XmlParser;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -657,6 +658,8 @@ public class DisplayDeviceConfig {
             mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
             mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
             mHbmData.timeMinMillis = hbmTiming.getTimeMinSecs_all().longValue() * 1000;
+            mHbmData.thermalStatusLimit = convertThermalStatus(hbm.getThermalStatusLimit_all());
+            mHbmData.allowInLowPowerMode = hbm.getAllowInLowPowerMode_all();
             final RefreshRateRange rr = hbm.getRefreshRate_all();
             if (rr != null) {
                 final float min = rr.getMinimum().floatValue();
@@ -743,6 +746,31 @@ public class DisplayDeviceConfig {
         }
     }
 
+    private @PowerManager.ThermalStatus int convertThermalStatus(ThermalStatus value) {
+        if (value == null) {
+            return PowerManager.THERMAL_STATUS_NONE;
+        }
+        switch (value) {
+            case none:
+                return PowerManager.THERMAL_STATUS_NONE;
+            case light:
+                return PowerManager.THERMAL_STATUS_LIGHT;
+            case moderate:
+                return PowerManager.THERMAL_STATUS_MODERATE;
+            case severe:
+                return PowerManager.THERMAL_STATUS_SEVERE;
+            case critical:
+                return PowerManager.THERMAL_STATUS_CRITICAL;
+            case emergency:
+                return PowerManager.THERMAL_STATUS_EMERGENCY;
+            case shutdown:
+                return PowerManager.THERMAL_STATUS_SHUTDOWN;
+            default:
+                Slog.wtf(TAG, "Unexpected Thermal Status: " + value);
+                return PowerManager.THERMAL_STATUS_NONE;
+        }
+    }
+
     static class SensorData {
         public String type;
         public String name;
@@ -781,6 +809,12 @@ public class DisplayDeviceConfig {
         /** Brightness level at which we transition from normal to high-brightness. */
         public float transitionPoint;
 
+        /** Enable HBM only if the thermal status is not higher than this. */
+        public @PowerManager.ThermalStatus int thermalStatusLimit;
+
+        /** Whether HBM is allowed when {@code Settings.Global.LOW_POWER_MODE} is active. */
+        public boolean allowInLowPowerMode;
+
         /** Time window for HBM. */
         public long timeWindowMillis;
 
@@ -792,13 +826,16 @@ public class DisplayDeviceConfig {
 
         HighBrightnessModeData() {}
 
-        HighBrightnessModeData(float minimumLux, float transitionPoint,
-                long timeWindowMillis, long timeMaxMillis, long timeMinMillis) {
+        HighBrightnessModeData(float minimumLux, float transitionPoint, long timeWindowMillis,
+                long timeMaxMillis, long timeMinMillis,
+                @PowerManager.ThermalStatus int thermalStatusLimit, boolean allowInLowPowerMode) {
             this.minimumLux = minimumLux;
             this.transitionPoint = transitionPoint;
             this.timeWindowMillis = timeWindowMillis;
             this.timeMaxMillis = timeMaxMillis;
             this.timeMinMillis = timeMinMillis;
+            this.thermalStatusLimit = thermalStatusLimit;
+            this.allowInLowPowerMode = allowInLowPowerMode;
         }
 
         /**
@@ -807,10 +844,12 @@ public class DisplayDeviceConfig {
          */
         public void copyTo(@NonNull HighBrightnessModeData other) {
             other.minimumLux = minimumLux;
-            other.transitionPoint = transitionPoint;
             other.timeWindowMillis = timeWindowMillis;
             other.timeMaxMillis = timeMaxMillis;
             other.timeMinMillis = timeMinMillis;
+            other.transitionPoint = transitionPoint;
+            other.thermalStatusLimit = thermalStatusLimit;
+            other.allowInLowPowerMode = allowInLowPowerMode;
         }
 
         @Override
@@ -821,6 +860,8 @@ public class DisplayDeviceConfig {
                     + ", timeWindow: " + timeWindowMillis + "ms"
                     + ", timeMax: " + timeMaxMillis + "ms"
                     + ", timeMin: " + timeMinMillis + "ms"
+                    + ", thermalStatusLimit: " + thermalStatusLimit
+                    + ", allowInLowPowerMode: " + allowInLowPowerMode
                     + "} ";
         }
     }

@@ -460,6 +460,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private void stopDragging() {
         mHandle.setTouching(false, true /* animate */);
         mWindowManager.setSlippery(true);
+        mWindowManagerProxy.setResizing(false);
         releaseBackground();
     }
 
