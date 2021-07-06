@@ -68,7 +68,7 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
-    private static final int TEST_UID = Process.myUid();
+    private static final int TEST_UID = Process.myUid() + 1;
 
     private static final ParcelUuid TEST_PARCEL_UUID = new ParcelUuid(UUID.randomUUID());
     private static final int TEST_SIM_SLOT_INDEX = 1;
@@ -137,7 +137,7 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
             }
         }
 
-        assertArrayEquals(new int[] {TEST_UID}, vcnCaps.getAdministratorUids());
+        assertArrayEquals(new int[] {Process.myUid(), TEST_UID}, vcnCaps.getAdministratorUids());
         assertTrue(vcnCaps.getTransportInfo() instanceof VcnTransportInfo);
         assertEquals(TEST_UPSTREAM_BANDWIDTH, vcnCaps.getLinkUpstreamBandwidthKbps());
         assertEquals(TEST_DOWNSTREAM_BANDWIDTH, vcnCaps.getLinkDownstreamBandwidthKbps());
