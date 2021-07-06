@@ -670,7 +670,7 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tampilkan semua"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Buka kunci untuk membayar"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Tambahkan kartu"</string>
-    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Mengupdate"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Memperbarui"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Terjadi masalah saat mendapatkan kartu Anda, coba lagi nanti"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Setelan layar kunci"</string>
@@ -1146,11 +1146,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Lihat pesan terbaru, panggilan tak terjawab, dan pembaruan status"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Percakapan"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Dijeda oleh fitur Jangan Ganggu"</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> mengirim pesan: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> mengirim gambar"</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> memposting pembaruan status: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Terjadi masalah saat membaca indikator baterai"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ketuk untuk informasi selengkapnya"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarm tidak disetel"</string>
