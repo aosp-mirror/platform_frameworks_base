@@ -274,7 +274,9 @@ public class StackScrollAlgorithm {
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -ambientState.getScrollY();
-        if (!ambientState.isOnKeyguard()) {
+        if (!ambientState.isOnKeyguard()
+                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
+            // add top padding at the start as long as we're not on the lock screen
             currentY += mNotificationScrimPadding;
         }
         state.firstViewInShelf = null;
@@ -324,7 +326,8 @@ public class StackScrollAlgorithm {
      */
     private void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        if (!ambientState.isOnKeyguard()) {
+        if (!ambientState.isOnKeyguard()
+                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
             algorithmState.mCurrentYPosition += mNotificationScrimPadding;
             algorithmState.mCurrentExpandedYPosition += mNotificationScrimPadding;
         }
@@ -355,7 +358,9 @@ public class StackScrollAlgorithm {
                 && algorithmState.firstViewInShelf != null;
 
         final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
-        final float scrimPadding = ambientState.isOnKeyguard() ? 0 : mNotificationScrimPadding;
+        final float scrimPadding = ambientState.isOnKeyguard()
+                && (!ambientState.isBypassEnabled() || !ambientState.isPulseExpanding())
+                ? 0 : mNotificationScrimPadding;
 
         final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
