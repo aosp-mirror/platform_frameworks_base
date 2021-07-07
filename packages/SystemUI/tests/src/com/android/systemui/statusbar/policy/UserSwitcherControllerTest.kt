@@ -37,6 +37,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.telephony.TelephonyListenerManager
@@ -71,6 +72,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var userDetailAdapter: UserSwitcherController.UserDetailAdapter
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
+    @Mock private lateinit var falsingManager: FalsingManager
     private lateinit var testableLooper: TestableLooper
     private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -109,6 +111,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 activityStarter,
                 broadcastDispatcher,
                 uiEventLogger,
+                falsingManager,
                 telephonyListenerManager,
                 activityTaskManager,
                 userDetailAdapter,
