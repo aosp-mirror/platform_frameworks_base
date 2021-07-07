@@ -148,6 +148,8 @@ import java.util.Objects;
 public final class SensorPrivacyService extends SystemService {
 
     private static final String TAG = SensorPrivacyService.class.getSimpleName();
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_LOGGING = false;
 
     /** Version number indicating compatibility parsing the persisted file */
     private static final int CURRENT_PERSISTENCE_VERSION = 1;
@@ -290,14 +292,6 @@ public final class SensorPrivacyService extends SystemService {
                 }
                 return false;
             }
-
-            private long getCurrentTimeMillis() {
-                try {
-                    return SystemClock.currentNetworkTimeMillis();
-                } catch (Exception e) {
-                    return System.currentTimeMillis();
-                }
-            }
         }
 
         private class SensorUseReminderDialogInfo {
@@ -364,11 +358,11 @@ public final class SensorPrivacyService extends SystemService {
             // Reset sensor privacy when restriction is added
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
-                setIndividualSensorPrivacyUnchecked(userId, CAMERA, false);
+                setIndividualSensorPrivacyUnchecked(userId, OTHER, CAMERA, false);
             }
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
-                setIndividualSensorPrivacyUnchecked(userId, MICROPHONE, false);
+                setIndividualSensorPrivacyUnchecked(userId, OTHER, MICROPHONE, false);
             }
         }
 
@@ -709,28 +703,32 @@ public final class SensorPrivacyService extends SystemService {
                 return;
             }
 
-            if (userId == mUserManagerInternal.getProfileParentId(userId)) {
-                logSensorPrivacyToggle(source, sensor, enable);
-            }
-
-            setIndividualSensorPrivacyUnchecked(userId, sensor, enable);
+            setIndividualSensorPrivacyUnchecked(userId, source, sensor, enable);
         }
 
-        private void setIndividualSensorPrivacyUnchecked(int userId, int sensor, boolean enable) {
+        private void setIndividualSensorPrivacyUnchecked(int userId, int source, int sensor,
+                boolean enable) {
             synchronized (mLock) {
                 SparseArray<SensorState> userIndividualEnabled = mIndividualEnabled.get(userId,
                         new SparseArray<>());
                 SensorState sensorState = userIndividualEnabled.get(sensor);
+                long lastChange;
                 if (sensorState != null) {
+                    lastChange = sensorState.mLastChange;
                     if (!sensorState.setEnabled(enable)) {
                         // State not changing
                         return;
                     }
                 } else {
                     sensorState = new SensorState(enable);
+                    lastChange = sensorState.mLastChange;
                     userIndividualEnabled.put(sensor, sensorState);
                 }
                 mIndividualEnabled.put(userId, userIndividualEnabled);
+
+                if (userId == mUserManagerInternal.getProfileParentId(userId)) {
+                    logSensorPrivacyToggle(source, sensor, sensorState.mEnabled, lastChange);
+                }
 
                 if (!enable) {
                     long token = Binder.clearCallingIdentity();
@@ -775,12 +773,12 @@ public final class SensorPrivacyService extends SystemService {
             return true;
         }
 
-        private void logSensorPrivacyToggle(int source, int sensor, boolean enable) {
-            long logMins = 0L;
-            //(TODO:pyuli) : Add timestamp after persistent storage for timestamp is done.
+        private void logSensorPrivacyToggle(int source, int sensor, boolean enabled,
+                long lastChange) {
+            long logMins = Math.max(0, (getCurrentTimeMillis() - lastChange) / (1000 * 60));
 
             int logAction = -1;
-            if (enable) {
+            if (enabled) {
                 logAction = PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
             } else {
                 logAction = PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
@@ -813,6 +811,11 @@ public final class SensorPrivacyService extends SystemService {
                     logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SOURCE_UNKNOWN;
             }
 
+            if (DEBUG || DEBUG_LOGGING) {
+                Log.d(TAG, "Logging sensor toggle interaction:" + " logSensor=" + logSensor
+                        + " logAction=" + logAction + " logSource=" + logSource + " logMins="
+                        + logMins);
+            }
             write(PRIVACY_SENSOR_TOGGLE_INTERACTION, logSensor, logAction, logSource, logMins);
 
         }
@@ -1741,7 +1744,7 @@ public final class SensorPrivacyService extends SystemService {
                     if (mSensorPrivacyServiceImpl
                             .isIndividualSensorPrivacyEnabled(getCurrentUser(), MICROPHONE)) {
                         mSensorPrivacyServiceImpl.setIndividualSensorPrivacyUnchecked(
-                                getCurrentUser(), MICROPHONE, false);
+                                getCurrentUser(), OTHER, MICROPHONE, false);
                         mMicUnmutedForEmergencyCall = true;
                     } else {
                         mMicUnmutedForEmergencyCall = false;
@@ -1756,11 +1759,19 @@ public final class SensorPrivacyService extends SystemService {
                     mIsInEmergencyCall = false;
                     if (mMicUnmutedForEmergencyCall) {
                         mSensorPrivacyServiceImpl.setIndividualSensorPrivacyUnchecked(
-                                getCurrentUser(), MICROPHONE, true);
+                                getCurrentUser(), OTHER, MICROPHONE, true);
                         mMicUnmutedForEmergencyCall = false;
                     }
                 }
             }
+        }
+    }
+
+    private static long getCurrentTimeMillis() {
+        try {
+            return SystemClock.currentNetworkTimeMillis();
+        } catch (Exception e) {
+            return System.currentTimeMillis();
         }
     }
 }
