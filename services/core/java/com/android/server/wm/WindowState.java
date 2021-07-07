@@ -5984,6 +5984,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mWinAnimator.finishDrawingLocked(postDrawTransaction);
         }
 
+        if (mActivityRecord != null
+                && mWmService.mAtmService.getTransitionController().isShellTransitionsEnabled()
+                && mAttrs.type == TYPE_APPLICATION_STARTING) {
+            mWmService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
+                    .notifyStartingWindowDrawn(mActivityRecord);
+        }
+
         if (postDrawTransaction != null) {
             mSyncTransaction.merge(postDrawTransaction);
         }

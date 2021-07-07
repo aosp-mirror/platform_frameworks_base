@@ -97,12 +97,13 @@ public class Transitions implements RemoteCallable<Transitions> {
     private float mTransitionAnimationScaleSetting = 1.0f;
 
     private static final class ActiveTransition {
-        IBinder mToken = null;
-        TransitionHandler mHandler = null;
-        boolean mMerged = false;
-        TransitionInfo mInfo = null;
-        SurfaceControl.Transaction mStartT = null;
-        SurfaceControl.Transaction mFinishT = null;
+        IBinder mToken;
+        TransitionHandler mHandler;
+        boolean mMerged;
+        boolean mAborted;
+        TransitionInfo mInfo;
+        SurfaceControl.Transaction mStartT;
+        SurfaceControl.Transaction mFinishT;
     }
 
     /** Keeps track of currently playing transitions in the order of receipt. */
@@ -422,17 +423,19 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     /** Special version of finish just for dealing with no-op/invalid transitions. */
     private void onAbort(IBinder transition) {
-        final int activeIdx = findActiveTransition(transition);
-        if (activeIdx < 0) return;
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                "Transition animation aborted due to no-op, notifying core %s", transition);
-        mActiveTransitions.remove(activeIdx);
-        mOrganizer.finishTransition(transition, null /* wct */, null /* wctCB */);
+        onFinish(transition, null /* wct */, null /* wctCB */, true /* abort */);
     }
 
     private void onFinish(IBinder transition,
             @Nullable WindowContainerTransaction wct,
             @Nullable WindowContainerTransactionCallback wctCB) {
+        onFinish(transition, wct, wctCB, false /* abort */);
+    }
+
+    private void onFinish(IBinder transition,
+            @Nullable WindowContainerTransaction wct,
+            @Nullable WindowContainerTransactionCallback wctCB,
+            boolean abort) {
         int activeIdx = findActiveTransition(transition);
         if (activeIdx < 0) {
             Log.e(TAG, "Trying to finish a non-running transition. Either remote crashed or "
@@ -440,28 +443,37 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         } else if (activeIdx > 0) {
             // This transition was merged.
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged: %s",
-                    transition);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged (abort=%b:"
+                    + " %s", abort, transition);
             final ActiveTransition active = mActiveTransitions.get(activeIdx);
             active.mMerged = true;
+            active.mAborted = abort;
             if (active.mHandler != null) {
                 active.mHandler.onTransitionMerged(active.mToken);
             }
             return;
         }
+        mActiveTransitions.get(activeIdx).mAborted = abort;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                "Transition animation finished, notifying core %s", transition);
+                "Transition animation finished (abort=%b), notifying core %s", abort, transition);
         // Merge all relevant transactions together
         SurfaceControl.Transaction fullFinish = mActiveTransitions.get(activeIdx).mFinishT;
         for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
             final ActiveTransition toMerge = mActiveTransitions.get(iA);
             if (!toMerge.mMerged) break;
+            // aborted transitions have no start/finish transactions
+            if (mActiveTransitions.get(iA).mStartT == null) break;
+            if (fullFinish == null) {
+                fullFinish = new SurfaceControl.Transaction();
+            }
             // Include start. It will be a no-op if it was already applied. Otherwise, we need it
             // to maintain consistent state.
             fullFinish.merge(mActiveTransitions.get(iA).mStartT);
             fullFinish.merge(mActiveTransitions.get(iA).mFinishT);
         }
-        fullFinish.apply();
+        if (fullFinish != null) {
+            fullFinish.apply();
+        }
         // Now perform all the finishes.
         mActiveTransitions.remove(activeIdx);
         mOrganizer.finishTransition(transition, wct, wctCB);
@@ -469,6 +481,12 @@ public class Transitions implements RemoteCallable<Transitions> {
             if (!mActiveTransitions.get(activeIdx).mMerged) break;
             ActiveTransition merged = mActiveTransitions.remove(activeIdx);
             mOrganizer.finishTransition(merged.mToken, null /* wct */, null /* wctCB */);
+        }
+        // sift through aborted transitions
+        while (mActiveTransitions.size() > activeIdx
+                && mActiveTransitions.get(activeIdx).mAborted) {
+            ActiveTransition aborted = mActiveTransitions.remove(activeIdx);
+            mOrganizer.finishTransition(aborted.mToken, null /* wct */, null /* wctCB */);
         }
         if (mActiveTransitions.size() <= activeIdx) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition animations "
@@ -500,6 +518,12 @@ public class Transitions implements RemoteCallable<Transitions> {
         int mergeIdx = activeIdx + 1;
         while (mergeIdx < mActiveTransitions.size()) {
             ActiveTransition mergeCandidate = mActiveTransitions.get(mergeIdx);
+            if (mergeCandidate.mAborted) {
+                // transition was aborted, so we can skip for now (still leave it in the list
+                // so that it gets cleaned-up in the right order).
+                ++mergeIdx;
+                continue;
+            }
             if (mergeCandidate.mMerged) {
                 throw new IllegalStateException("Can't merge a transition after not-merging"
                         + " a preceding one.");

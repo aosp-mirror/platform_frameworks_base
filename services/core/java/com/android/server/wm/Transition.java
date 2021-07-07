@@ -40,6 +40,9 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
+import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -395,6 +398,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
+        reportStartReasonsToLogger();
+
         // Manually show any activities that are visibleRequested. This is needed to properly
         // support simultaneous animation queueing/merging. Specifically, if transition A makes
         // an activity invisible, it's finishTransaction (which is applied *after* the animation)
@@ -573,6 +578,23 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
             mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
         }
+    }
+
+    private void reportStartReasonsToLogger() {
+        // Record transition start in metrics logger. We just assume everything is "DRAWN"
+        // at this point since splash-screen is a presentation (shell) detail.
+        ArrayMap<WindowContainer, Integer> reasons = new ArrayMap<>();
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            ActivityRecord r = mParticipants.valueAt(i).asActivityRecord();
+            if (r == null) continue;
+            // At this point, r is "ready", but if it's not "ALL ready" then it is probably only
+            // ready due to starting-window.
+            reasons.put(r, (r.mStartingData instanceof SplashScreenStartingData
+                    && !r.mLastAllReadyAtSync)
+                    ? APP_TRANSITION_SPLASH_SCREEN : APP_TRANSITION_WINDOWS_DRAWN);
+        }
+        mController.mAtm.mTaskSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
+                reasons);
     }
 
     @Override
@@ -951,6 +973,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         return out;
+    }
+
+    boolean getLegacyIsReady() {
+        return mState == STATE_STARTED && mSyncId >= 0 && mSyncEngine.isReady(mSyncId);
     }
 
     static Transition fromBinder(IBinder binder) {
