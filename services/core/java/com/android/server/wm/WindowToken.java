@@ -231,6 +231,11 @@ class WindowToken extends WindowContainer<WindowState> {
             ProtoLog.w(WM_DEBUG_WINDOW_MOVEMENT,
                     "removeAllWindowsIfPossible: removing win=%s", win);
             win.removeIfPossible();
+            if (i > mChildren.size()) {
+                // It's possible for removeIfPossible to delete siblings (for example if it is a
+                // starting window, it will perform operations on the ActivityRecord).
+                i = mChildren.size();
+            }
         }
     }
 
