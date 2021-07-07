@@ -3331,6 +3331,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Special helper to check that all windows are synced (vs just top one). This is only
+     * used to differentiate between starting-window vs full-drawn in activity-metrics reporting.
+     */
+    boolean allSyncFinished() {
+        if (!isVisibleRequested()) return true;
+        if (mSyncState != SYNC_STATE_READY) return false;
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (!child.allSyncFinished()) return false;
+        }
+        return true;
+    }
+
+    /**
      * Called during reparent to handle sync state when the hierarchy changes.
      * If this is in a sync group and gets reparented out, it will cancel syncing.
      * If this is not in a sync group and gets parented into one, it will prepare itself.
