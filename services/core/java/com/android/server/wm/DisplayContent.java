@@ -5026,6 +5026,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Check if pending app transition is for activity / task launch. */
     boolean isNextTransitionForward() {
+        // TODO(b/191375840): decouple "forwardness" from transition system.
+        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            @WindowManager.TransitionType int type =
+                    mAtmService.getTransitionController().getCollectingTransitionType();
+            return type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT;
+        }
         return mAppTransition.containsTransitRequest(TRANSIT_OPEN)
                 || mAppTransition.containsTransitRequest(TRANSIT_TO_FRONT);
     }
