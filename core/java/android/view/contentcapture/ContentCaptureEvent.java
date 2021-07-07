@@ -33,13 +33,12 @@ import android.util.Log;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.BaseInputConnection;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** @hide */
 @SystemApi
@@ -173,13 +172,13 @@ public final class ContentCaptureEvent implements Parcelable {
 
     /** @hide */
     public ContentCaptureEvent setAutofillId(@NonNull AutofillId id) {
-        mId = Preconditions.checkNotNull(id);
+        mId = Objects.requireNonNull(id);
         return this;
     }
 
     /** @hide */
     public ContentCaptureEvent setAutofillIds(@NonNull ArrayList<AutofillId> ids) {
-        mIds = Preconditions.checkNotNull(ids);
+        mIds = Objects.requireNonNull(ids);
         return this;
     }
 
@@ -189,7 +188,7 @@ public final class ContentCaptureEvent implements Parcelable {
      * @hide
      */
     public ContentCaptureEvent addAutofillId(@NonNull AutofillId id) {
-        Preconditions.checkNotNull(id);
+        Objects.requireNonNull(id);
         if (mIds == null) {
             mIds = new ArrayList<>();
             if (mId == null) {
@@ -253,7 +252,7 @@ public final class ContentCaptureEvent implements Parcelable {
     /** @hide */
     @NonNull
     public ContentCaptureEvent setViewNode(@NonNull ViewNode node) {
-        mNode = Preconditions.checkNotNull(node);
+        mNode = Objects.requireNonNull(node);
         return this;
     }
 
@@ -425,7 +424,7 @@ public final class ContentCaptureEvent implements Parcelable {
      * @hide
      */
     public void mergeEvent(@NonNull ContentCaptureEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         final int eventType = event.getType();
         if (mType != eventType) {
             Log.e(TAG, "mergeEvent(" + getTypeAsString(eventType) + ") cannot be merged "

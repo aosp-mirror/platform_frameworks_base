@@ -276,7 +276,7 @@ public final class ContentCaptureContext implements Parcelable {
          * @param id id associated with this context.
          */
         public Builder(@NonNull LocusId id) {
-            mId = Preconditions.checkNotNull(id);
+            mId = Objects.requireNonNull(id);
         }
 
         /**
@@ -291,7 +291,7 @@ public final class ContentCaptureContext implements Parcelable {
          */
         @NonNull
         public Builder setExtras(@NonNull Bundle extras) {
-            mExtras = Preconditions.checkNotNull(extras);
+            mExtras =  Objects.requireNonNull(extras);
             throwIfDestroyed();
             return this;
         }

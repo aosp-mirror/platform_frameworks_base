@@ -34,6 +34,7 @@ import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -280,7 +281,7 @@ public final class Dataset implements Parcelable {
          * @param presentation The presentation used to visualize this dataset.
          */
         public Builder(@NonNull RemoteViews presentation) {
-            Preconditions.checkNotNull(presentation, "presentation must be non-null");
+            Objects.requireNonNull(presentation, "presentation must be non-null");
             mPresentation = presentation;
         }
 
@@ -296,7 +297,7 @@ public final class Dataset implements Parcelable {
          */
         @SystemApi
         public Builder(@NonNull InlinePresentation inlinePresentation) {
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation must be non-null");
             mInlinePresentation = inlinePresentation;
         }
 
@@ -321,7 +322,7 @@ public final class Dataset implements Parcelable {
         public @NonNull Builder setInlinePresentation(
                 @NonNull InlinePresentation inlinePresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation must be non-null");
             mInlinePresentation = inlinePresentation;
             return this;
         }
@@ -343,8 +344,8 @@ public final class Dataset implements Parcelable {
                 @NonNull InlinePresentation inlinePresentation,
                 @NonNull InlinePresentation inlineTooltipPresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
-            Preconditions.checkNotNull(inlineTooltipPresentation,
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation must be non-null");
+            Objects.requireNonNull(inlineTooltipPresentation,
                     "inlineTooltipPresentation must be non-null");
             mInlinePresentation = inlinePresentation;
             mInlineTooltipPresentation = inlineTooltipPresentation;
@@ -540,7 +541,7 @@ public final class Dataset implements Parcelable {
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @NonNull RemoteViews presentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(presentation, "presentation cannot be null");
+            Objects.requireNonNull(presentation, "presentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, presentation, null, null);
             return this;
         }
@@ -613,7 +614,7 @@ public final class Dataset implements Parcelable {
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @Nullable Pattern filter, @NonNull RemoteViews presentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(presentation, "presentation cannot be null");
+            Objects.requireNonNull(presentation, "presentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, presentation, null,
                     new DatasetFieldFilter(filter));
             return this;
@@ -644,8 +645,8 @@ public final class Dataset implements Parcelable {
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @NonNull RemoteViews presentation, @NonNull InlinePresentation inlinePresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
+            Objects.requireNonNull(presentation, "presentation cannot be null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, presentation, inlinePresentation, null);
             return this;
         }
@@ -676,9 +677,9 @@ public final class Dataset implements Parcelable {
                 @NonNull RemoteViews presentation, @NonNull InlinePresentation inlinePresentation,
                 @NonNull InlinePresentation inlineTooltipPresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
-            Preconditions.checkNotNull(inlineTooltipPresentation,
+            Objects.requireNonNull(presentation, "presentation cannot be null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation cannot be null");
+            Objects.requireNonNull(inlineTooltipPresentation,
                     "inlineTooltipPresentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, presentation, inlinePresentation,
                     inlineTooltipPresentation, null);
@@ -722,8 +723,8 @@ public final class Dataset implements Parcelable {
                 @Nullable Pattern filter, @NonNull RemoteViews presentation,
                 @NonNull InlinePresentation inlinePresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
+            Objects.requireNonNull(presentation, "presentation cannot be null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, presentation, inlinePresentation,
                     new DatasetFieldFilter(filter));
             return this;
@@ -761,9 +762,9 @@ public final class Dataset implements Parcelable {
                 @NonNull InlinePresentation inlinePresentation,
                 @NonNull InlinePresentation inlineTooltipPresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
-            Preconditions.checkNotNull(inlineTooltipPresentation,
+            Objects.requireNonNull(presentation, "presentation cannot be null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation cannot be null");
+            Objects.requireNonNull(inlineTooltipPresentation,
                     "inlineTooltipPresentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, presentation, inlinePresentation,
                     inlineTooltipPresentation, new DatasetFieldFilter(filter));
@@ -800,7 +801,7 @@ public final class Dataset implements Parcelable {
                 @Nullable AutofillValue value, @Nullable Pattern filter,
                 @NonNull InlinePresentation inlinePresentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
+            Objects.requireNonNull(inlinePresentation, "inlinePresentation cannot be null");
             setLifeTheUniverseAndEverything(id, value, null, inlinePresentation,
                     new DatasetFieldFilter(filter));
             return this;
@@ -819,7 +820,7 @@ public final class Dataset implements Parcelable {
                 @Nullable InlinePresentation inlinePresentation,
                 @Nullable InlinePresentation tooltip,
                 @Nullable DatasetFieldFilter filter) {
-            Preconditions.checkNotNull(id, "id cannot be null");
+            Objects.requireNonNull(id, "id cannot be null");
             if (mFieldIds != null) {
                 final int existingIdx = mFieldIds.indexOf(id);
                 if (existingIdx >= 0) {

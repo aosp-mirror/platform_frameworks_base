@@ -68,7 +68,6 @@ import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
@@ -77,6 +76,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -1363,9 +1363,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor resultExecutor,
             @NonNull Consumer<List<DirectAction>> callback) {
-        Preconditions.checkNotNull(activityId);
-        Preconditions.checkNotNull(resultExecutor);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(activityId);
+        Objects.requireNonNull(resultExecutor);
+        Objects.requireNonNull(callback);
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
         }
@@ -1444,8 +1444,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
         }
-        Preconditions.checkNotNull(resultExecutor);
-        Preconditions.checkNotNull(resultListener);
+        Objects.requireNonNull(resultExecutor);
+        Objects.requireNonNull(resultListener);
 
         if (cancellationSignal != null) {
             cancellationSignal.throwIfCanceled();

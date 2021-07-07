@@ -28,6 +28,7 @@ import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Defines actions to be applied to a {@link RemoteViews template presentation}.
@@ -94,7 +95,7 @@ public final class BatchUpdates implements Parcelable {
          */
         public Builder updateTemplate(@NonNull RemoteViews updates) {
             throwIfDestroyed();
-            mUpdates = Preconditions.checkNotNull(updates);
+            mUpdates = Objects.requireNonNull(updates);
             return this;
         }
 
