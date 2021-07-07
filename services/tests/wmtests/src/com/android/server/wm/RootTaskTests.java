@@ -30,7 +30,6 @@ import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -89,9 +88,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Tests for the root {@link Task} behavior.
@@ -1506,41 +1502,6 @@ public class RootTaskTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIterateOccludedActivity() {
-        final ArrayList<ActivityRecord> occludedActivities = new ArrayList<>();
-        final Consumer<ActivityRecord> handleOccludedActivity = occludedActivities::add;
-        final Task task = new TaskBuilder(mSupervisor).build();
-        final ActivityRecord bottomActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        // Top activity occludes bottom activity.
-        doReturn(true).when(task).shouldBeVisible(any());
-        assertTrue(topActivity.shouldBeVisible());
-        assertFalse(bottomActivity.shouldBeVisible());
-
-        task.forAllOccludedActivities(handleOccludedActivity);
-        assertThat(occludedActivities).containsExactly(bottomActivity);
-
-        // Top activity doesn't occlude parent, so the bottom activity is not occluded.
-        doReturn(false).when(topActivity).occludesParent();
-        assertTrue(bottomActivity.shouldBeVisible());
-
-        occludedActivities.clear();
-        task.forAllOccludedActivities(handleOccludedActivity);
-        assertThat(occludedActivities).isEmpty();
-
-        // A finishing activity should not occlude other activities behind.
-        final ActivityRecord finishingActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        finishingActivity.finishing = true;
-        doCallRealMethod().when(finishingActivity).occludesParent();
-        assertTrue(topActivity.shouldBeVisible());
-        assertTrue(bottomActivity.shouldBeVisible());
-
-        occludedActivities.clear();
-        task.forAllOccludedActivities(handleOccludedActivity);
-        assertThat(occludedActivities).isEmpty();
-    }
-
-    @Test
     public void testClearUnknownAppVisibilityBehindFullscreenActivity() {
         final UnknownAppVisibilityController unknownAppVisibilityController =
                 mDefaultTaskDisplayArea.mDisplayContent.mUnknownAppVisibilityController;
@@ -1564,14 +1525,13 @@ public class RootTaskTests extends WindowTestsBase {
         }
         mSupervisor.endDeferResume();
 
-        setBooted(mAtm);
         // 2 activities are started while keyguard is locked, so they are waiting to be resolved.
         assertFalse(unknownAppVisibilityController.allResolved());
 
-        // Assume the top activity is going to resume and
-        // {@link RootWindowContainer#cancelInitializingActivities} should clear the unknown
-        // visibility records that are occluded.
-        task.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+        // Any common path that updates activity visibility should clear the unknown visibility
+        // records that are no longer visible according to hierarchy.
+        task.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */);
         // Assume the top activity relayouted, just remove it directly.
         unknownAppVisibilityController.appRemovedOrHidden(activities[1]);
         // All unresolved records should be removed.

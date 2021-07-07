@@ -76,7 +76,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
@@ -1427,14 +1426,6 @@ class Task extends TaskFragment {
         }
         return getActivity((r) -> r.getWindow(window ->
                 window.getBaseType() == TYPE_APPLICATION_STARTING) != null);
-    }
-
-    ActivityRecord topActivityWithStartingWindow() {
-        if (getParent() == null) {
-            return null;
-        }
-        return getActivity((r) -> r.mStartingWindowState == STARTING_WINDOW_SHOWN
-                && r.okToShowLocked());
     }
 
     /**
@@ -2838,25 +2829,6 @@ class Task extends TaskFragment {
         final ActivityRecord top = getActivity(ActivityRecord::occludesParent,
                 true /* traverseTopToBottom */, activity);
         return top != activity ? top : null;
-    }
-
-    /** Iterates through all occluded activities. */
-    void forAllOccludedActivities(Consumer<ActivityRecord> handleOccludedActivity) {
-        if (!shouldBeVisible(null /* starting */)) {
-            // The root task is invisible so all activities are occluded.
-            forAllActivities(handleOccludedActivity);
-            return;
-        }
-        final ActivityRecord topOccluding = getOccludingActivityAbove(null);
-        if (topOccluding == null) {
-            // No activities are occluded.
-            return;
-        }
-        // Invoke the callback on the activities behind the top occluding activity.
-        forAllActivities(r -> {
-            handleOccludedActivity.accept(r);
-            return false;
-        }, topOccluding, false /* includeBoundary */, true /* traverseTopToBottom */);
     }
 
     @Override
@@ -4897,8 +4869,6 @@ class Task extends TaskFragment {
             return false;
         }
 
-        mRootWindowContainer.cancelInitializingActivities();
-
         final ActivityRecord topActivity = topRunningActivity(true /* focusableOnly */);
         if (topActivity == null) {
             // There are no activities left in this task, let's look somewhere else.
@@ -5056,7 +5026,8 @@ class Task extends TaskFragment {
                 // window manager to keep the previous window it had previously
                 // created, if it still had one.
                 Task prevTask = r.getTask();
-                ActivityRecord prev = prevTask.topActivityWithStartingWindow();
+                ActivityRecord prev = prevTask.getActivity(
+                        a -> a.mStartingData != null && a.okToShowLocked());
                 if (prev != null) {
                     // We don't want to reuse the previous starting preview if:
                     // (1) The current activity is in a different task.
