@@ -98,7 +98,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private float mHeightPixels;
     private float mWidthPixels;
     private float mDensity;
-    private int mIndicationBottomPadding;
+    private int mKgBottomAreaHeight;
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -280,7 +280,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mWidthPixels = metrics.widthPixels;
         mHeightPixels = metrics.heightPixels;
         mDensity = metrics.density;
-        mIndicationBottomPadding = mView.getContext().getResources().getDimensionPixelSize(
+        mKgBottomAreaHeight = mView.getContext().getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_margin_bottom)
+            + mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
         updateLockIconLocation();
     }
@@ -288,15 +290,15 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private void updateLockIconLocation() {
         if (mHasUdfps) {
             FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
-            mView.setLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
+            mView.setCenterLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
                     props.sensorRadius);
         } else {
             final float distAboveKgBottomArea = 12 * mDensity;
             final float radius = 36 * mDensity;
-            mView.setLocation(
+            mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - mIndicationBottomPadding - distAboveKgBottomArea - radius),
-                    (int) radius);
+                        mHeightPixels - mKgBottomAreaHeight - distAboveKgBottomArea
+                            - radius / 2), (int) radius);
         }
 
         mView.getHitRect(mSensorTouchLocation);
