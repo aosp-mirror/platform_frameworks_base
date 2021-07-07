@@ -20,15 +20,15 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
+import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
+
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -85,8 +85,6 @@ import dagger.Lazy;
 public class NavigationBarController implements Callbacks,
         ConfigurationController.ConfigurationListener,
         NavigationModeController.ModeChangedListener, Dumpable {
-
-    private static final float TABLET_MIN_DPS = 600;
 
     private static final String TAG = NavigationBarController.class.getSimpleName();
 
@@ -196,14 +194,14 @@ public class NavigationBarController implements Callbacks,
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setOverviewProxyService(overviewProxyService,
                 navigationBarA11yHelper, mSysUiFlagsContainer);
-        mIsTablet = isTablet(mContext.getResources().getConfiguration());
+        mIsTablet = isTablet(mContext);
         mUserTracker = userTracker;
     }
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
         boolean isOldConfigTablet = mIsTablet;
-        mIsTablet = isTablet(newConfig);
+        mIsTablet = isTablet(newConfig, mContext);
         boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
         // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
         if (largeScreenChanged && updateNavbarForTaskbar()) {
@@ -275,7 +273,7 @@ public class NavigationBarController implements Callbacks,
     @Override
     public void onDisplayReady(int displayId) {
         Display display = mDisplayManager.getDisplay(displayId);
-        mIsTablet = isTablet(mContext.getResources().getConfiguration());
+        mIsTablet = isTablet(mContext);
         createNavigationBar(display, null /* savedState */, null /* result */);
     }
 
@@ -468,15 +466,6 @@ public class NavigationBarController implements Callbacks,
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
-    }
-
-    private boolean isTablet(Configuration newConfig) {
-        float density = Resources.getSystem().getDisplayMetrics().density;
-        int size = Math.min((int) (density * newConfig.screenWidthDp),
-                (int) (density* newConfig.screenHeightDp));
-        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-        float densityRatio = (float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
-        return (size / densityRatio) >= TABLET_MIN_DPS;
     }
 
     @Override
