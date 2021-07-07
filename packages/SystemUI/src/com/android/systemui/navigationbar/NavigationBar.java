@@ -42,6 +42,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSE
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_FORCE_OPAQUE;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
+import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
@@ -878,7 +879,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (hints == mNavigationIconHints) return;
 
         mNavigationIconHints = hints;
-        mNavigationBarView.setNavigationIconHints(hints);
+        if (!isTablet(mContext)) {
+            // All IME functions handled by launcher via Sysui flags for large screen
+            mNavigationBarView.setNavigationIconHints(hints);
+        }
         checkBarModes();
         updateSystemUiStateFlags(-1);
     }
