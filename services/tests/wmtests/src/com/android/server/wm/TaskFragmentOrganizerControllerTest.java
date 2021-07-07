@@ -102,6 +102,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.registerOrganizer(mIOrganizer);
 
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentAppeared(any());
     }
@@ -110,6 +111,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testOnTaskFragmentInfoChanged() {
         mController.registerOrganizer(mIOrganizer);
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
         // No callback if the info is not changed.
         doReturn(true).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
@@ -117,6 +119,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         mController.onTaskFragmentInfoChanged(mTaskFragment.getTaskFragmentOrganizer(),
                 mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
 
@@ -125,6 +128,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         mController.onTaskFragmentInfoChanged(mTaskFragment.getTaskFragmentOrganizer(),
                 mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentInfoChanged(mTaskFragmentInfo);
     }
@@ -133,7 +137,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testOnTaskFragmentVanished() {
         mController.registerOrganizer(mIOrganizer);
 
+        mTaskFragment.mTaskFragmentAppearedSent = true;
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentVanished(any());
     }
@@ -148,8 +154,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         doReturn(parentConfig).when(parent).getConfiguration();
         doReturn(parent).when(parent).asTask();
 
+        mTaskFragment.mTaskFragmentAppearedSent = true;
         mController.onTaskFragmentParentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mFragmentToken), any());
 
@@ -158,6 +166,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         mController.onTaskFragmentParentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), any());
 
@@ -166,6 +175,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         mController.onTaskFragmentParentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mFragmentToken), any());
     }
