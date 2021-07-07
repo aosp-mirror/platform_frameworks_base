@@ -1158,11 +1158,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Ogled nedavnih sporočil, neodgovorjenih klicev in posodobitev stanj"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pogovor"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"To je začasno zaustavil način »ne moti«."</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sporočilo: <xliff:g id="NOTIFICATION">%2$s</xliff:g>."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sliko."</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je posodobila stanje: <xliff:g id="STATUS">%2$s</xliff:g>."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Težava z branjem indikatorja stanja napolnjenosti baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dotaknite se za več informacij"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ni nastavljenih alarmov"</string>

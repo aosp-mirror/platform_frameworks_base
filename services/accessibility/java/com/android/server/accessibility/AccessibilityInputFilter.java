@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
 
 import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.PowerManager;
@@ -44,7 +45,10 @@ import com.android.server.accessibility.magnification.WindowMagnificationGesture
 import com.android.server.accessibility.magnification.WindowMagnificationPromptController;
 import com.android.server.policy.WindowManagerPolicy;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.StringJoiner;
 
 /**
  * This class is an input filter for implementing accessibility features such
@@ -172,9 +176,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private int mEnabledFeatures;
 
-    private EventStreamState mMouseStreamState;
+    private final SparseArray<EventStreamState> mMouseStreamStates = new SparseArray<>(0);
 
-    private EventStreamState mTouchScreenStreamState;
+    private final SparseArray<EventStreamState> mTouchScreenStreamStates = new SparseArray<>(0);
 
     private EventStreamState mKeyboardStreamState;
 
@@ -212,10 +216,17 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         super.onUninstalled();
     }
 
-    void onDisplayChanged() {
+    void onDisplayAdded(@NonNull Display display) {
         if (mInstalled) {
-            disableFeatures();
-            enableFeatures();
+            resetStreamStateForDisplay(display.getDisplayId());
+            enableFeaturesForDisplay(display);
+        }
+    }
+
+    void onDisplayRemoved(int displayId) {
+        if (mInstalled) {
+            disableFeaturesForDisplay(displayId);
+            resetStreamStateForDisplay(displayId);
         }
     }
 
@@ -243,16 +254,17 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             return;
         }
 
-        int eventSource = event.getSource();
+        final int eventSource = event.getSource();
+        final int displayId = event.getDisplayId();
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
             state.reset();
-            clearEventsForAllEventHandlers(eventSource);
+            clearEventStreamHandler(displayId, eventSource);
             super.onInputEvent(event, policyFlags);
             return;
         }
 
         if (state.updateInputSource(event.getSource())) {
-            clearEventsForAllEventHandlers(eventSource);
+            clearEventStreamHandler(displayId, eventSource);
         }
 
         if (!state.inputSourceValid()) {
@@ -281,35 +293,39 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     private EventStreamState getEventStreamState(InputEvent event) {
         if (event instanceof MotionEvent) {
-          if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
-              if (mTouchScreenStreamState == null) {
-                  mTouchScreenStreamState = new TouchScreenEventStreamState();
-              }
-              return mTouchScreenStreamState;
-          }
-          if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
-              if (mMouseStreamState == null) {
-                  mMouseStreamState = new MouseEventStreamState();
-              }
-              return mMouseStreamState;
-          }
+            final int displayId = event.getDisplayId();
+
+            if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
+                EventStreamState touchScreenStreamState = mTouchScreenStreamStates.get(displayId);
+                if (touchScreenStreamState == null) {
+                    touchScreenStreamState = new TouchScreenEventStreamState();
+                    mTouchScreenStreamStates.put(displayId, touchScreenStreamState);
+                }
+                return touchScreenStreamState;
+            }
+            if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                EventStreamState mouseStreamState = mMouseStreamStates.get(displayId);
+                if (mouseStreamState == null) {
+                    mouseStreamState = new MouseEventStreamState();
+                    mMouseStreamStates.put(displayId, mouseStreamState);
+                }
+                return mouseStreamState;
+            }
         } else if (event instanceof KeyEvent) {
-          if (event.isFromSource(InputDevice.SOURCE_KEYBOARD)) {
-              if (mKeyboardStreamState == null) {
-                  mKeyboardStreamState = new KeyboardEventStreamState();
-              }
-              return mKeyboardStreamState;
-          }
+            if (event.isFromSource(InputDevice.SOURCE_KEYBOARD)) {
+                if (mKeyboardStreamState == null) {
+                    mKeyboardStreamState = new KeyboardEventStreamState();
+                }
+                return mKeyboardStreamState;
+            }
         }
         return null;
     }
 
-    private void clearEventsForAllEventHandlers(int eventSource) {
-        for (int i = 0; i < mEventHandler.size(); i++) {
-            final EventStreamTransformation eventHandler = mEventHandler.valueAt(i);
-            if (eventHandler != null) {
-                eventHandler.clearEvents(eventSource);
-            }
+    private void clearEventStreamHandler(int displayId, int eventSource) {
+        final EventStreamTransformation eventHandler = mEventHandler.get(displayId);
+        if (eventHandler != null) {
+            eventHandler.clearEvents(eventSource);
         }
     }
 
@@ -425,56 +441,69 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private void enableFeatures() {
         if (DEBUG) Slog.i(TAG, "enableFeatures()");
 
-        resetStreamState();
+        resetAllStreamState();
 
         final ArrayList<Display> displaysList = mAms.getValidDisplayList();
 
-        if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
-            mAutoclickController = new AutoclickController(
-                    mContext, mUserId, mAms.getTraceManager());
-            addFirstEventHandlerForAllDisplays(displaysList, mAutoclickController);
-        }
-
         for (int i = displaysList.size() - 1; i >= 0; i--) {
-            final int displayId = displaysList.get(i).getDisplayId();
-            final Context displayContext = mContext.createDisplayContext(displaysList.get(i));
+            enableFeaturesForDisplay(displaysList.get(i));
+        }
+        enableDisplayIndependentFeatures();
+    }
 
-            if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
-                TouchExplorer explorer = new TouchExplorer(displayContext, mAms);
-                if ((mEnabledFeatures & FLAG_SERVICE_HANDLES_DOUBLE_TAP) != 0) {
-                    explorer.setServiceHandlesDoubleTap(true);
-                }
-                if ((mEnabledFeatures & FLAG_REQUEST_MULTI_FINGER_GESTURES) != 0) {
-                    explorer.setMultiFingerGesturesEnabled(true);
-                }
-                if ((mEnabledFeatures & FLAG_REQUEST_2_FINGER_PASSTHROUGH) != 0) {
-                    explorer.setTwoFingerPassthroughEnabled(true);
-                }
-                if ((mEnabledFeatures & FLAG_SEND_MOTION_EVENTS) != 0) {
-                    explorer.setSendMotionEventsEnabled(true);
-                }
-                addFirstEventHandler(displayId, explorer);
-                mTouchExplorer.put(displayId, explorer);
-            }
-
-            if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
-                    || ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0)
-                    || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0)) {
-                final MagnificationGestureHandler magnificationGestureHandler =
-                        createMagnificationGestureHandler(displayId,
-                                displayContext);
-                addFirstEventHandler(displayId, magnificationGestureHandler);
-                mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
-            }
-
-            if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
-                MotionEventInjector injector = new MotionEventInjector(
-                        mContext.getMainLooper(), mAms.getTraceManager());
-                addFirstEventHandler(displayId, injector);
-                mMotionEventInjectors.put(displayId, injector);
-            }
+    private void enableFeaturesForDisplay(Display display) {
+        if (DEBUG) {
+            Slog.i(TAG, "enableFeaturesForDisplay() : display Id = " + display.getDisplayId());
         }
 
+        final Context displayContext = mContext.createDisplayContext(display);
+        final int displayId = display.getDisplayId();
+
+        if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
+            if (mAutoclickController == null) {
+                mAutoclickController = new AutoclickController(
+                        mContext, mUserId, mAms.getTraceManager());
+            }
+            addFirstEventHandler(displayId, mAutoclickController);
+        }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
+            TouchExplorer explorer = new TouchExplorer(displayContext, mAms);
+            if ((mEnabledFeatures & FLAG_SERVICE_HANDLES_DOUBLE_TAP) != 0) {
+                explorer.setServiceHandlesDoubleTap(true);
+            }
+            if ((mEnabledFeatures & FLAG_REQUEST_MULTI_FINGER_GESTURES) != 0) {
+                explorer.setMultiFingerGesturesEnabled(true);
+            }
+            if ((mEnabledFeatures & FLAG_REQUEST_2_FINGER_PASSTHROUGH) != 0) {
+                explorer.setTwoFingerPassthroughEnabled(true);
+            }
+            if ((mEnabledFeatures & FLAG_SEND_MOTION_EVENTS) != 0) {
+                explorer.setSendMotionEventsEnabled(true);
+            }
+            addFirstEventHandler(displayId, explorer);
+            mTouchExplorer.put(displayId, explorer);
+        }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
+                || ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0)
+                || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0)) {
+            final MagnificationGestureHandler magnificationGestureHandler =
+                    createMagnificationGestureHandler(displayId,
+                            displayContext);
+            addFirstEventHandler(displayId, magnificationGestureHandler);
+            mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
+        }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
+            MotionEventInjector injector = new MotionEventInjector(
+                    mContext.getMainLooper(), mAms.getTraceManager());
+            addFirstEventHandler(displayId, injector);
+            mMotionEventInjectors.put(displayId, injector);
+        }
+    }
+
+    private void enableDisplayIndependentFeatures() {
         if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
             mAms.setMotionEventInjectors(mMotionEventInjectors);
         }
@@ -507,55 +536,57 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mEventHandler.put(displayId, eventHandler);
     }
 
-    /**
-     * Adds an event handler to the event handler chain for all displays. The handler is added at
-     * the beginning of the chain.
-     *
-     * @param displayList The list of displays
-     * @param handler The handler to be added to the event handlers list.
-     */
-    private void addFirstEventHandlerForAllDisplays(ArrayList<Display> displayList,
-            EventStreamTransformation handler) {
-        for (int i = 0; i < displayList.size(); i++) {
-            final int displayId = displayList.get(i).getDisplayId();
-            addFirstEventHandler(displayId, handler);
+    private void disableFeatures() {
+        final ArrayList<Display> displaysList = mAms.getValidDisplayList();
+
+        for (int i = displaysList.size() - 1; i >= 0; i--) {
+            disableFeaturesForDisplay(displaysList.get(i).getDisplayId());
+        }
+        mAms.setMotionEventInjectors(null);
+        disableDisplayIndependentFeatures();
+
+        resetAllStreamState();
+    }
+
+    private void disableFeaturesForDisplay(int displayId) {
+        if (DEBUG) {
+            Slog.i(TAG, "disableFeaturesForDisplay() : display Id = " + displayId);
+        }
+
+        final MotionEventInjector injector = mMotionEventInjectors.get(displayId);
+        if (injector != null) {
+            injector.onDestroy();
+            mMotionEventInjectors.remove(displayId);
+        }
+
+        final TouchExplorer explorer = mTouchExplorer.get(displayId);
+        if (explorer != null) {
+            explorer.onDestroy();
+            mTouchExplorer.remove(displayId);
+        }
+
+        final MagnificationGestureHandler handler = mMagnificationGestureHandler.get(displayId);
+        if (handler != null) {
+            handler.onDestroy();
+            mMagnificationGestureHandler.remove(displayId);
+        }
+
+        final EventStreamTransformation eventStreamTransformation = mEventHandler.get(displayId);
+        if (eventStreamTransformation != null) {
+            mEventHandler.remove(displayId);
         }
     }
 
-    private void disableFeatures() {
-        for (int i = mMotionEventInjectors.size() - 1; i >= 0; i--) {
-            final MotionEventInjector injector = mMotionEventInjectors.valueAt(i);
-            if (injector != null) {
-                injector.onDestroy();
-            }
-        }
-        mAms.setMotionEventInjectors(null);
-        mMotionEventInjectors.clear();
+    private void disableDisplayIndependentFeatures() {
         if (mAutoclickController != null) {
             mAutoclickController.onDestroy();
             mAutoclickController = null;
         }
-        for (int i = mTouchExplorer.size() - 1; i >= 0; i--) {
-            final TouchExplorer explorer = mTouchExplorer.valueAt(i);
-            if (explorer != null) {
-                explorer.onDestroy();
-            }
-        }
-        mTouchExplorer.clear();
-        for (int i = mMagnificationGestureHandler.size() - 1; i >= 0; i--) {
-            final MagnificationGestureHandler handler = mMagnificationGestureHandler.valueAt(i);
-            if (handler != null) {
-                handler.onDestroy();
-            }
-        }
-        mMagnificationGestureHandler.clear();
+
         if (mKeyboardInterceptor != null) {
             mKeyboardInterceptor.onDestroy();
             mKeyboardInterceptor = null;
         }
-
-        mEventHandler.clear();
-        resetStreamState();
     }
 
     private MagnificationGestureHandler createMagnificationGestureHandler(
@@ -584,15 +615,29 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         return magnificationGestureHandler;
     }
 
-    void resetStreamState() {
-        if (mTouchScreenStreamState != null) {
-            mTouchScreenStreamState.reset();
+    void resetAllStreamState() {
+        final ArrayList<Display> displaysList = mAms.getValidDisplayList();
+
+        for (int i = displaysList.size() - 1; i >= 0; i--) {
+            resetStreamStateForDisplay(displaysList.get(i).getDisplayId());
         }
-        if (mMouseStreamState != null) {
-            mMouseStreamState.reset();
-        }
+
         if (mKeyboardStreamState != null) {
             mKeyboardStreamState.reset();
+        }
+    }
+
+    void resetStreamStateForDisplay(int displayId) {
+        final EventStreamState touchScreenStreamState = mTouchScreenStreamStates.get(displayId);
+        if (touchScreenStreamState != null) {
+            touchScreenStreamState.reset();
+            mTouchScreenStreamStates.remove(displayId);
+        }
+
+        final EventStreamState mouseStreamState = mMouseStreamStates.get(displayId);
+        if (mouseStreamState != null) {
+            mouseStreamState.reset();
+            mMouseStreamStates.remove(displayId);
         }
     }
 
@@ -844,6 +889,47 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
         if (region != null && mTouchExplorer.contains(displayId)) {
             mTouchExplorer.get(displayId).setTouchExplorationPassthroughRegion(region);
+        }
+    }
+
+    /**
+     * Dumps all {@link AccessibilityInputFilter}s here.
+     */
+    public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        if (mEventHandler == null) {
+            return;
+        }
+        pw.append("A11yInputFilter Info : ");
+        pw.println();
+
+        final ArrayList<Display> displaysList = mAms.getValidDisplayList();
+        for (int i = 0; i < displaysList.size(); i++) {
+            final int displayId = displaysList.get(i).getDisplayId();
+            EventStreamTransformation next = mEventHandler.get(displayId);
+            if (next != null) {
+                pw.append("Enabled features of Display [");
+                pw.append(Integer.toString(displayId));
+                pw.append("] = ");
+
+                final StringJoiner joiner = new StringJoiner(",", "[", "]");
+
+                while (next != null) {
+                    if (next instanceof MagnificationGestureHandler) {
+                        joiner.add("MagnificationGesture");
+                    } else if (next instanceof KeyboardInterceptor) {
+                        joiner.add("KeyboardInterceptor");
+                    } else if (next instanceof TouchExplorer) {
+                        joiner.add("TouchExplorer");
+                    } else if (next instanceof AutoclickController) {
+                        joiner.add("AutoclickController");
+                    } else if (next instanceof MotionEventInjector) {
+                        joiner.add("MotionEventInjector");
+                    }
+                    next = next.getNext();
+                }
+                pw.append(joiner.toString());
+            }
+            pw.println();
         }
     }
 }
