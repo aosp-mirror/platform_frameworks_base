@@ -47,7 +47,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.displayhash.DisplayHashParams;
 import android.service.displayhash.DisplayHashingService;
 import android.service.displayhash.IDisplayHashingService;
@@ -380,8 +379,7 @@ public class DisplayHashController {
                     intent.setComponent(component);
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        mContext.bindServiceAsUser(intent, mServiceConnection,
-                                Context.BIND_AUTO_CREATE, UserHandle.CURRENT);
+                        mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
                         if (DEBUG) Slog.v(TAG, "bound");
                     } finally {
                         Binder.restoreCallingIdentity(token);
@@ -404,8 +402,15 @@ public class DisplayHashController {
 
         final Intent intent = new Intent(DisplayHashingService.SERVICE_INTERFACE);
         intent.setPackage(packageName);
-        final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+        final ResolveInfo resolveInfo;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            resolveInfo = mContext.getPackageManager().resolveService(intent,
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
             Slog.w(TAG, "No valid components found.");
             return null;
