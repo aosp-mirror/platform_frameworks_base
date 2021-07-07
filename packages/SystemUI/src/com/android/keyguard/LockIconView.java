@@ -43,7 +43,7 @@ public class LockIconView extends ImageView implements Dumpable {
         mSensorRect = new RectF();
     }
 
-    void setLocation(@NonNull PointF center, int radius) {
+    void setCenterLocation(@NonNull PointF center, int radius) {
         mLockIconCenter = center;
         mRadius = radius;
 
