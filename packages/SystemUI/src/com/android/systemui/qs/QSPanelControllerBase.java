@@ -103,6 +103,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private boolean mUsingHorizontalLayout;
 
+    @Nullable
+    private Runnable mUsingHorizontalLayoutChangedListener;
+
     protected QSPanelControllerBase(
             T view,
             QSTileHost host,
@@ -133,6 +136,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected void onInit() {
         mView.initialize();
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
+    }
+
+    /**
+     * @return the media host for this panel
+     */
+    public MediaHost getMediaHost() {
+        return mMediaHost;
     }
 
     @Override
@@ -303,6 +313,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mUsingHorizontalLayout = horizontal;
             mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
+            if (mUsingHorizontalLayoutChangedListener != null) {
+                mUsingHorizontalLayoutChangedListener.run();
+            }
             return true;
         }
         return false;
@@ -384,6 +397,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
      */
     public void setMediaVisibilityChangedListener(@NonNull Consumer<Boolean> listener) {
         mMediaVisibilityChangedListener = listener;
+    }
+
+    /**
+     * Add a listener when the horizontal layout changes
+     */
+    public void setUsingHorizontalLayoutChangeListener(Runnable listener) {
+        mUsingHorizontalLayoutChangedListener = listener;
     }
 
     /** */
