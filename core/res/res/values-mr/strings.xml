@@ -652,7 +652,7 @@
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"बरेच प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"तुम्ही फेस अनलॉक सेट केले नाही"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"फेस अनलॉक या डिव्हाइसवर सपोर्ट करत नाही"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"या डिव्हाइसवर फेस अनलॉकला सपोर्ट नाही"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"सेन्सर तात्पुरता बंद केला आहे."</string>
     <string name="face_name_template" msgid="3877037340223318119">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="5854024256907828015">"फेस अनलॉक वापरा"</string>

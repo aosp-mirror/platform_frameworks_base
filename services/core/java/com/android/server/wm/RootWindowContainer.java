@@ -71,7 +71,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
-import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
@@ -2078,6 +2077,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     + " to its current taskDisplayArea=" + taskDisplayArea);
         }
         rootTask.reparent(taskDisplayArea, onTop);
+
+        // Resume focusable root task after reparenting to another display area.
+        rootTask.resumeNextFocusAfterReparent();
+
         // TODO(multi-display): resize rootTasks properly if moved from split-screen.
     }
 

@@ -133,6 +133,8 @@ public final class SplashScreenView extends FrameLayout {
         private @ColorInt int mIconBackground;
         private Bitmap mParceledIconBitmap;
         private Drawable mIconDrawable;
+        // It is only set for legacy splash screen which won't be sent across processes.
+        private Drawable mOverlayDrawable;
         private SurfaceControlViewHost.SurfacePackage mSurfacePackage;
         private RemoteCallback mClientCallback;
         private int mBrandingImageWidth;
@@ -193,6 +195,14 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
+         * Set the Drawable object to fill entire view
+         */
+        public Builder setOverlayDrawable(@Nullable Drawable drawable) {
+            mOverlayDrawable = drawable;
+            return this;
+        }
+
+        /**
          * Set the Drawable object to fill the center view.
          */
         public Builder setCenterViewDrawable(@Nullable Drawable drawable) {
@@ -236,7 +246,11 @@ public final class SplashScreenView extends FrameLayout {
                     layoutInflater.inflate(R.layout.splash_screen_view, null, false);
             view.mInitBackgroundColor = mBackgroundColor;
             view.mInitIconBackgroundColor = mIconBackground;
-            view.setBackgroundColor(mBackgroundColor);
+            if (mOverlayDrawable != null) {
+                view.setBackground(mOverlayDrawable);
+            } else {
+                view.setBackgroundColor(mBackgroundColor);
+            }
             view.mClientCallback = mClientCallback;
 
             view.mBrandingImageView = view.findViewById(R.id.splashscreen_branding_view);
@@ -260,6 +274,9 @@ public final class SplashScreenView extends FrameLayout {
                         view.mIconView.setBackground(mIconDrawable);
                     }
                 }
+            }
+            if (mOverlayDrawable != null || mIconDrawable == null) {
+                view.setNotCopyable();
             }
 
             if (mParceledIconBitmap != null) {

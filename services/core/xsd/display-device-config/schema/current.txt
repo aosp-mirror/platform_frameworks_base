@@ -42,14 +42,18 @@ package com.android.server.display.config {
 
   public class HighBrightnessMode {
     ctor public HighBrightnessMode();
+    method @NonNull public final boolean getAllowInLowPowerMode_all();
     method public boolean getEnabled();
     method @NonNull public final java.math.BigDecimal getMinimumLux_all();
     method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate_all();
+    method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatusLimit_all();
     method public com.android.server.display.config.HbmTiming getTiming_all();
     method @NonNull public final java.math.BigDecimal getTransitionPoint_all();
+    method public final void setAllowInLowPowerMode_all(@NonNull boolean);
     method public void setEnabled(boolean);
     method public final void setMinimumLux_all(@NonNull java.math.BigDecimal);
     method public final void setRefreshRate_all(@Nullable com.android.server.display.config.RefreshRateRange);
+    method public final void setThermalStatusLimit_all(@NonNull com.android.server.display.config.ThermalStatus);
     method public void setTiming_all(com.android.server.display.config.HbmTiming);
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
@@ -83,6 +87,17 @@ package com.android.server.display.config {
     method public final void setName(@Nullable String);
     method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
     method public final void setType(@Nullable String);
+  }
+
+  public enum ThermalStatus {
+    method public String getRawName();
+    enum_constant public static final com.android.server.display.config.ThermalStatus critical;
+    enum_constant public static final com.android.server.display.config.ThermalStatus emergency;
+    enum_constant public static final com.android.server.display.config.ThermalStatus light;
+    enum_constant public static final com.android.server.display.config.ThermalStatus moderate;
+    enum_constant public static final com.android.server.display.config.ThermalStatus none;
+    enum_constant public static final com.android.server.display.config.ThermalStatus severe;
+    enum_constant public static final com.android.server.display.config.ThermalStatus shutdown;
   }
 
   public class XmlParser {
