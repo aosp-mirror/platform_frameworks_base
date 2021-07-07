@@ -82,6 +82,7 @@ open class KeyguardBypassController : Dumpable {
         private set
 
     var bouncerShowing: Boolean = false
+    var altBouncerShowing: Boolean = false
     var launchingAffordance: Boolean = false
     var qSExpanded = false
         set(value) {
@@ -172,6 +173,7 @@ open class KeyguardBypassController : Dumpable {
         if (bypassEnabled) {
             return when {
                 bouncerShowing -> true
+                altBouncerShowing -> true
                 statusBarStateController.state != StatusBarState.KEYGUARD -> false
                 launchingAffordance -> false
                 isPulseExpanding || qSExpanded -> false
@@ -210,6 +212,7 @@ open class KeyguardBypassController : Dumpable {
         pw.println("  bypassEnabled: $bypassEnabled")
         pw.println("  canBypass: ${canBypass()}")
         pw.println("  bouncerShowing: $bouncerShowing")
+        pw.println("  altBouncerShowing: $altBouncerShowing")
         pw.println("  isPulseExpanding: $isPulseExpanding")
         pw.println("  launchingAffordance: $launchingAffordance")
         pw.println("  qSExpanded: $qSExpanded")
