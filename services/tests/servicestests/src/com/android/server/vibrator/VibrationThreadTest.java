@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,6 +87,7 @@ public class VibrationThreadTest {
     private static final int VIBRATOR_ID = 1;
     private static final String PACKAGE_NAME = "package";
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder().build();
+    private static final int TEST_RAMP_STEP_DURATION = 5;
 
     @Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -100,6 +102,7 @@ public class VibrationThreadTest {
     private IBatteryStats mIBatteryStatsMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
+    private VibrationSettings mVibrationSettings;
     private DeviceVibrationEffectAdapter mEffectAdapter;
     private PowerManager.WakeLock mWakeLock;
     private TestLooper mTestLooper;
@@ -109,9 +112,9 @@ public class VibrationThreadTest {
         mTestLooper = new TestLooper();
 
         Context context = InstrumentationRegistry.getContext();
-        VibrationSettings vibrationSettings = new VibrationSettings(context,
-                new Handler(mTestLooper.getLooper()));
-        mEffectAdapter = new DeviceVibrationEffectAdapter(vibrationSettings);
+        mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
+                /* rampDownDuration= */ 0, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mWakeLock = context.getSystemService(
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
 
@@ -128,8 +131,7 @@ public class VibrationThreadTest {
         waitForCompletion(thread);
 
         verify(mControllerCallbacks, never()).onComplete(anyInt(), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
-                eq(Vibration.Status.IGNORED_UNSUPPORTED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.IGNORED_UNSUPPORTED);
     }
 
     @Test
@@ -143,8 +145,7 @@ public class VibrationThreadTest {
         waitForCompletion(thread);
 
         verify(mControllerCallbacks, never()).onComplete(anyInt(), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
-                eq(Vibration.Status.IGNORED_UNSUPPORTED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.IGNORED_UNSUPPORTED);
     }
 
     @Test
@@ -159,7 +160,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(10)),
@@ -178,7 +179,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(10)),
@@ -200,7 +201,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(15L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(15)),
@@ -232,7 +233,7 @@ public class VibrationThreadTest {
 
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), anyLong());
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         List<Float> playedAmplitudes = fakeVibrator.getAmplitudes();
@@ -269,7 +270,7 @@ public class VibrationThreadTest {
         waitForCompletion(vibrationThread, /* timeout= */ 50);
         waitForCompletion(cancellingThread);
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
     }
 
@@ -294,7 +295,7 @@ public class VibrationThreadTest {
         waitForCompletion(vibrationThread, /* timeout= */ 50);
         waitForCompletion(cancellingThread);
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
     }
 
@@ -310,7 +311,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(20L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_THUD)),
@@ -333,7 +334,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(10)),
@@ -352,8 +353,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock, never()).noteVibratorOn(eq(UID), anyLong());
         verify(mIBatteryStatsMock, never()).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
-                eq(Vibration.Status.IGNORED_UNSUPPORTED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.IGNORED_UNSUPPORTED);
         assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
     }
 
@@ -373,7 +373,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(40L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
         assertEquals(Arrays.asList(
                 expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0),
@@ -393,8 +393,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock, never()).noteVibratorOn(eq(UID), anyLong());
         verify(mIBatteryStatsMock, never()).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
-                eq(Vibration.Status.IGNORED_UNSUPPORTED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.IGNORED_UNSUPPORTED);
         assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
     }
 
@@ -413,7 +412,7 @@ public class VibrationThreadTest {
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         // Vibrator compose called twice.
         verify(mControllerCallbacks, times(2)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         assertEquals(3, fakeVibrator.getEffectSegments().size());
@@ -443,7 +442,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks, times(4)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
         assertEquals(Arrays.asList(
                 expectedOneShot(10),
@@ -479,7 +478,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(100L));
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
         assertEquals(Arrays.asList(
                 expectedRamp(/* amplitude= */ 1, /* frequency= */ 150, /* duration= */ 10),
@@ -512,7 +511,7 @@ public class VibrationThreadTest {
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         // Vibrator compose called twice.
         verify(mControllerCallbacks, times(2)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         assertEquals(4, fakeVibrator.getEffectSegments().size());
@@ -537,7 +536,7 @@ public class VibrationThreadTest {
         waitForCompletion(thread);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
     }
 
     @Test
@@ -545,10 +544,10 @@ public class VibrationThreadTest {
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         long vibrationId = 1;
-        waitForCompletion(startThreadAndDispatcher(vibrationId++,
+        waitForCompletion(startThreadAndDispatcher(vibrationId,
                 VibrationEffect.createOneShot(10, 100)));
 
-        verify(mThreadCallbacks).onVibrationEnded(anyLong(), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         verify(mThreadCallbacks, never()).prepareSyncedVibration(anyLong(), any());
         verify(mThreadCallbacks, never()).triggerSyncedVibration(anyLong());
         verify(mThreadCallbacks, never()).cancelSyncedVibration();
@@ -571,7 +570,7 @@ public class VibrationThreadTest {
         verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         verify(mControllerCallbacks, never()).onComplete(eq(2), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_TICK)),
@@ -596,7 +595,7 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks).onComplete(eq(1), eq(vibrationId));
         verify(mControllerCallbacks).onComplete(eq(2), eq(vibrationId));
         verify(mControllerCallbacks).onComplete(eq(3), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(1).isVibrating());
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
@@ -635,7 +634,7 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks).onComplete(eq(2), eq(vibrationId));
         verify(mControllerCallbacks).onComplete(eq(3), eq(vibrationId));
         verify(mControllerCallbacks).onComplete(eq(4), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(1).isVibrating());
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
@@ -686,7 +685,7 @@ public class VibrationThreadTest {
         batterVerifier.verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(20L));
         batterVerifier.verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(1).isVibrating());
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
@@ -727,7 +726,7 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks).prepareSyncedVibration(eq(expectedCap), eq(vibratorIds));
         verify(mThreadCallbacks).triggerSyncedVibration(eq(vibrationId));
         verify(mThreadCallbacks, never()).cancelSyncedVibration();
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
 
         VibrationEffectSegment expected = expectedPrimitive(
                 VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100);
@@ -767,7 +766,7 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks).prepareSyncedVibration(eq(expectedCap), eq(vibratorIds));
         verify(mThreadCallbacks).triggerSyncedVibration(eq(vibrationId));
         verify(mThreadCallbacks, never()).cancelSyncedVibration();
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
     }
 
     @Test
@@ -858,7 +857,7 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks).onComplete(eq(1), eq(vibrationId));
         verify(mControllerCallbacks).onComplete(eq(2), eq(vibrationId));
         verify(mControllerCallbacks).onComplete(eq(3), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(1).isVibrating());
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
@@ -935,7 +934,7 @@ public class VibrationThreadTest {
 
         // After the vibrator call ends the vibration is cancelled and the vibrator is turned off.
         waitForCompletion(vibrationThread, /* timeout= */ latency + TEST_TIMEOUT_MILLIS);
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
     }
 
@@ -968,7 +967,7 @@ public class VibrationThreadTest {
         waitForCompletion(vibrationThread, /* timeout= */ 50);
         waitForCompletion(cancellingThread);
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(vibrationThread.getVibrators().get(1).isVibrating());
         assertFalse(vibrationThread.getVibrators().get(2).isVibrating());
     }
@@ -1000,7 +999,7 @@ public class VibrationThreadTest {
         waitForCompletion(vibrationThread, /* timeout= */ 50);
         waitForCompletion(cancellingThread);
 
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(vibrationThread.getVibrators().get(1).isVibrating());
         assertFalse(vibrationThread.getVibrators().get(2).isVibrating());
     }
@@ -1020,9 +1019,177 @@ public class VibrationThreadTest {
 
         verify(mVibrationToken).linkToDeath(same(thread), eq(0));
         verify(mVibrationToken).unlinkToDeath(same(thread), eq(0));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+    }
+
+    @Test
+    public void vibrate_waveformWithRampDown_addsRampDownAfterVibrationCompleted() {
+        int rampDownDuration = 15;
+        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
+                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{5, 5, 5}, new int[]{60, 120, 240}, -1);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+
+        // Duration extended for 5 + 5 + 5 + 15.
+        assertEquals(Arrays.asList(expectedOneShot(30)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        List<Float> amplitudes = mVibratorProviders.get(VIBRATOR_ID).getAmplitudes();
+        assertTrue(amplitudes.size() > 3);
+        assertEquals(expectedAmplitudes(60, 120, 240), amplitudes.subList(0, 3));
+        for (int i = 3; i < amplitudes.size(); i++) {
+            assertTrue(amplitudes.get(i) < amplitudes.get(i - 1));
+        }
+    }
+
+    @Test
+    public void vibrate_waveformWithRampDown_triggersCallbackWhenOriginalVibrationEnds() {
+        int rampDownDuration = 10_000;
+        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
+                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.createOneShot(10, 200);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+
+        // Vibration completed but vibrator not yet released.
+        verify(mThreadCallbacks, timeout(TEST_TIMEOUT_MILLIS)).onVibrationCompleted(eq(vibrationId),
+                eq(Vibration.Status.FINISHED));
+        verify(mThreadCallbacks, never()).onVibratorsReleased();
+
+        // Thread still running ramp down.
+        assertTrue(thread.isAlive());
+
+        // Duration extended for 10 + 10000.
+        assertEquals(Arrays.asList(expectedOneShot(10_010)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+
+        // Will stop the ramp down right away.
+        thread.cancelImmediately();
+        waitForCompletion(thread);
+
+        // Does not cancel already finished vibration, but releases vibrator.
+        verify(mThreadCallbacks, never()).onVibrationCompleted(eq(vibrationId),
+                eq(Vibration.Status.CANCELLED));
+        verify(mThreadCallbacks).onVibratorsReleased();
+    }
+
+    @Test
+    public void vibrate_waveformCancelledWithRampDown_addsRampDownAfterVibrationCancelled()
+            throws Exception {
+        int rampDownDuration = 15;
+        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
+                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.createOneShot(10_000, 240);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        assertTrue(waitUntil(t -> t.getVibrators().get(VIBRATOR_ID).isVibrating(), thread,
+                TEST_TIMEOUT_MILLIS));
+        thread.cancel();
+        waitForCompletion(thread);
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
+
+        // Duration extended for 10000 + 15.
+        assertEquals(Arrays.asList(expectedOneShot(10_015)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        List<Float> amplitudes = mVibratorProviders.get(VIBRATOR_ID).getAmplitudes();
+        assertTrue(amplitudes.size() > 1);
+        for (int i = 1; i < amplitudes.size(); i++) {
+            assertTrue(amplitudes.get(i) < amplitudes.get(i - 1));
+        }
+    }
+
+    @Test
+    public void vibrate_predefinedWithRampDown_doesNotAddRampDown() {
+        int rampDownDuration = 15;
+        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
+                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+
+        assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getAmplitudes().isEmpty());
+    }
+
+    @Test
+    public void vibrate_composedWithRampDown_doesNotAddRampDown() {
+        int rampDownDuration = 15;
+        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
+                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,
+                IVibrator.CAP_COMPOSE_EFFECTS);
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .compose();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+
+        assertEquals(
+                Arrays.asList(expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getAmplitudes().isEmpty());
+    }
+
+    @Test
+    public void vibrate_pwleWithRampDown_doesNotAddRampDown() {
+        int rampDownDuration = 15;
+        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
+                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,
+                IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        fakeVibrator.setMinFrequency(100);
+        fakeVibrator.setResonantFrequency(150);
+        fakeVibrator.setFrequencyResolution(50);
+        fakeVibrator.setMaxAmplitudes(1, 1, 1);
+        fakeVibrator.setPwleSizeMax(2);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startWaveform().addRamp(1, 1).build();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+
+        assertEquals(Arrays.asList(expectedRamp(0, 1, 150, 150, 1)),
+                fakeVibrator.getEffectSegments());
+        assertTrue(fakeVibrator.getAmplitudes().isEmpty());
     }
 
     private void mockVibrators(int... vibratorIds) {
@@ -1042,7 +1209,7 @@ public class VibrationThreadTest {
     }
 
     private VibrationThread startThreadAndDispatcher(Vibration vib) {
-        VibrationThread thread = new VibrationThread(vib, mEffectAdapter,
+        VibrationThread thread = new VibrationThread(vib, mVibrationSettings, mEffectAdapter,
                 createVibratorControllers(), mWakeLock, mIBatteryStatsMock, mThreadCallbacks);
         doAnswer(answer -> {
             thread.vibratorComplete(answer.getArgument(0));
@@ -1116,5 +1283,10 @@ public class VibrationThreadTest {
         return Arrays.stream(amplitudes)
                 .mapToObj(amplitude -> amplitude / 255f)
                 .collect(Collectors.toList());
+    }
+
+    private void verifyCallbacksTriggered(long vibrationId, Vibration.Status expectedStatus) {
+        verify(mThreadCallbacks).onVibrationCompleted(eq(vibrationId), eq(expectedStatus));
+        verify(mThreadCallbacks).onVibratorsReleased();
     }
 }
