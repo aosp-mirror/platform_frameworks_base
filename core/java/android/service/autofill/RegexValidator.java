@@ -25,8 +25,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.autofill.AutofillId;
 
-import com.android.internal.util.Preconditions;
-
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -50,8 +49,8 @@ public final class RegexValidator extends InternalValidator implements Validator
      * otherwise, it returns {@code false}.
       */
     public RegexValidator(@NonNull AutofillId id, @NonNull Pattern regex) {
-        mId = Preconditions.checkNotNull(id);
-        mRegex = Preconditions.checkNotNull(regex);
+        mId = Objects.requireNonNull(id);
+        mRegex = Objects.requireNonNull(regex);
     }
 
     /** @hide */

@@ -26,8 +26,7 @@ import android.os.Parcelable;
 import android.util.Slog;
 import android.view.autofill.AutofillValue;
 
-import com.android.internal.util.Preconditions;
-
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,8 +56,8 @@ public final class TextValueSanitizer extends InternalSanitizer implements
      * group substitution ({@code $1} for 1st group match, {@code $2} for 2nd, etc).
      */
     public TextValueSanitizer(@NonNull Pattern regex, @NonNull String subst) {
-        mRegex = Preconditions.checkNotNull(regex);
-        mSubst = Preconditions.checkNotNull(subst);
+        mRegex = Objects.requireNonNull(regex);
+        mSubst = Objects.requireNonNull(subst);
     }
 
     /** @hide */
