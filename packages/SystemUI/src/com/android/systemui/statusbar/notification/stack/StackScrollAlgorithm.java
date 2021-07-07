@@ -399,12 +399,15 @@ public class StackScrollAlgorithm {
         if (view instanceof FooterView) {
             final boolean shadeClosed = !ambientState.isShadeExpanded();
             final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
-
-            final float footerEnd = algorithmState.mCurrentExpandedYPosition
-                    + view.getIntrinsicHeight();
-            final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
-            ((FooterView.FooterViewState) viewState).hideContent =
-                    shadeClosed || isShelfShowing || noSpaceForFooter;
+            if (shadeClosed) {
+                viewState.hidden = true;
+            } else {
+                final float footerEnd = algorithmState.mCurrentExpandedYPosition
+                        + view.getIntrinsicHeight();
+                final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
+                ((FooterView.FooterViewState) viewState).hideContent =
+                        isShelfShowing || noSpaceForFooter;
+            }
         } else {
             if (view != ambientState.getTrackedHeadsUpRow()) {
                 if (ambientState.isExpansionChanging()) {
