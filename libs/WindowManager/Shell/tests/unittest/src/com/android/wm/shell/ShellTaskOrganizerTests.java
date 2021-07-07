@@ -306,9 +306,22 @@ public class ShellTaskOrganizerTests {
         taskInfo2.displayId = taskInfo1.displayId;
         taskInfo2.topActivityToken = taskInfo1.topActivityToken;
         taskInfo2.topActivityInSizeCompat = true;
+        taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
                 taskInfo1.configuration, taskInfo1.topActivityToken, taskListener);
+
+        // Not show size compat UI if task is not visible.
+        clearInvocations(mSizeCompatUI);
+        final RunningTaskInfo taskInfo3 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo3.displayId = taskInfo1.displayId;
+        taskInfo3.topActivityToken = taskInfo1.topActivityToken;
+        taskInfo3.topActivityInSizeCompat = true;
+        taskInfo3.isVisible = false;
+        mOrganizer.onTaskInfoChanged(taskInfo3);
+        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+                null /* taskConfig */, null /* sizeCompatActivity*/, null /* taskListener */);
 
         clearInvocations(mSizeCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
