@@ -361,8 +361,7 @@ public class TaskInfo {
                 && (!topActivityInSizeCompat || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
                 && (!topActivityInSizeCompat || configuration.getLayoutDirection()
-                    == that.configuration.getLayoutDirection())
-                && (!topActivityInSizeCompat || isVisible == that.isVisible);
+                    == that.configuration.getLayoutDirection());
     }
 
     /**
