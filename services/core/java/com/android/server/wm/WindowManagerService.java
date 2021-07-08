@@ -7453,20 +7453,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean setWindowsForAccessibilityCallback(int displayId,
+        public void setWindowsForAccessibilityCallback(int displayId,
                 WindowsForAccessibilityCallback callback) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController == null) {
                     mAccessibilityController = new AccessibilityController(
                             WindowManagerService.this);
                 }
-                final boolean result =
-                        mAccessibilityController.setWindowsForAccessibilityCallback(
+                mAccessibilityController.setWindowsForAccessibilityCallback(
                         displayId, callback);
                 if (!mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController = null;
                 }
-                return result;
             }
         }
 

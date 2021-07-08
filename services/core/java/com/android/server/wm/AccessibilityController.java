@@ -74,7 +74,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -94,7 +93,6 @@ import android.view.animation.Interpolator;
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.TraceBuffer;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal;
@@ -177,17 +175,12 @@ final class AccessibilityController {
 
     /**
      * Sets a callback for observing which windows are touchable for the purposes
-     * of accessibility on specified display. When a display is reparented and becomes
-     * an embedded one, the {@link WindowsForAccessibilityCallback#onDisplayReparented(int)}
-     * will notify the accessibility framework to remove the un-used window observer of
-     * this embedded display.
+     * of accessibility on specified display.
      *
      * @param displayId The logical display id.
      * @param callback The callback.
-     * @return {@code false} if display id is not valid or an embedded display when the callback
-     * isn't null.
      */
-    boolean setWindowsForAccessibilityCallback(int displayId,
+    void setWindowsForAccessibilityCallback(int displayId,
             WindowsForAccessibilityCallback callback) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
             mAccessibilityTracing.logTrace(
@@ -197,30 +190,15 @@ final class AccessibilityController {
         }
 
         if (callback != null) {
-            final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-            if (dc == null) {
-                return false;
-            }
-
             WindowsForAccessibilityObserver observer =
                     mWindowsForAccessibilityObserver.get(displayId);
-            if (isEmbeddedDisplay(dc)) {
-                // If this display is an embedded one, its window observer should have been set from
-                // window manager after setting its parent window. But if its window observer is
-                // empty, that means this mapping didn't be set, and needs to do this again.
-                // This happened when accessibility window observer is disabled and enabled again.
-                if (observer == null) {
-                    handleWindowObserverOfEmbeddedDisplay(displayId, dc.getParentWindow());
-                }
-                return false;
-            } else if (observer != null) {
+            if (observer != null) {
                 final String errorMessage = "Windows for accessibility callback of display "
                         + displayId + " already set!";
                 Slog.e(TAG, errorMessage);
                 if (Build.IS_DEBUGGABLE) {
                     throw new IllegalStateException(errorMessage);
                 }
-                removeObserversForEmbeddedChildDisplays(observer);
                 mWindowsForAccessibilityObserver.remove(displayId);
             }
             observer = new WindowsForAccessibilityObserver(mService, displayId, callback);
@@ -237,10 +215,8 @@ final class AccessibilityController {
                     throw new IllegalStateException(errorMessage);
                 }
             }
-            removeObserversForEmbeddedChildDisplays(windowsForA11yObserver);
             mWindowsForAccessibilityObserver.remove(displayId);
         }
-        return true;
     }
 
     void performComputeChangedWindowsNot(int displayId, boolean forceSend) {
@@ -507,54 +483,6 @@ final class AccessibilityController {
         }
     }
 
-    void handleWindowObserverOfEmbeddedDisplay(int embeddedDisplayId,
-            WindowState parentWindow) {
-        handleWindowObserverOfEmbeddedDisplay(
-                embeddedDisplayId, parentWindow, Binder.getCallingUid());
-    }
-
-    void handleWindowObserverOfEmbeddedDisplay(
-            int embeddedDisplayId, WindowState parentWindow, int callingUid) {
-        if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".handleWindowObserverOfEmbeddedDisplay",
-                    FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
-                    "embeddedDisplayId=" + embeddedDisplayId + "; parentWindowState={"
-                    + parentWindow + "}", "".getBytes(), callingUid);
-        }
-        if (embeddedDisplayId == Display.DEFAULT_DISPLAY || parentWindow == null) {
-            return;
-        }
-        mService.mH.sendMessage(PooledLambda.obtainMessage(
-                AccessibilityController::updateWindowObserverOfEmbeddedDisplay,
-                this, embeddedDisplayId, parentWindow));
-    }
-
-    private void updateWindowObserverOfEmbeddedDisplay(int embeddedDisplayId,
-            WindowState parentWindow) {
-        final WindowsForAccessibilityObserver windowsForA11yObserver;
-
-        synchronized (mService.mGlobalLock) {
-            // Finds the parent display of this embedded display
-            WindowState candidate = parentWindow;
-            while (candidate != null) {
-                parentWindow = candidate;
-                candidate = parentWindow.getDisplayContent().getParentWindow();
-            }
-            final int parentDisplayId = parentWindow.getDisplayId();
-            // Uses the observer of parent display
-            windowsForA11yObserver = mWindowsForAccessibilityObserver.get(parentDisplayId);
-        }
-
-        if (windowsForA11yObserver != null) {
-            windowsForA11yObserver.notifyDisplayReparented(embeddedDisplayId);
-            windowsForA11yObserver.addEmbeddedDisplay(embeddedDisplayId);
-            synchronized (mService.mGlobalLock) {
-                // Replaces the observer of embedded display to the one of parent display
-                mWindowsForAccessibilityObserver.put(embeddedDisplayId, windowsForA11yObserver);
-            }
-        }
-    }
-
     void onImeSurfaceShownChanged(WindowState windowState, boolean shown) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
             mAccessibilityTracing.logTrace(TAG + ".onImeSurfaceShownChanged",
@@ -582,23 +510,6 @@ final class AccessibilityController {
         }
         pw.println(prefix
                 + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
-    }
-
-    private void removeObserversForEmbeddedChildDisplays(WindowsForAccessibilityObserver
-            observerOfParentDisplay) {
-        final IntArray embeddedDisplayIdList =
-                observerOfParentDisplay.getAndClearEmbeddedDisplayIdList();
-
-        for (int index = 0; index < embeddedDisplayIdList.size(); index++) {
-            final int embeddedDisplayId = embeddedDisplayIdList.get(index);
-            mWindowsForAccessibilityObserver.remove(embeddedDisplayId);
-        }
-    }
-
-    private static boolean isEmbeddedDisplay(DisplayContent dc) {
-        final Display display = dc.getDisplay();
-
-        return display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null;
     }
 
     /**
@@ -1534,8 +1445,6 @@ final class AccessibilityController {
 
         private final long mRecurringAccessibilityEventsIntervalMillis;
 
-        private final IntArray mEmbeddedDisplayIdList = new IntArray(0);
-
         // Set to true if initializing window population complete.
         private boolean mInitialized;
 
@@ -1571,28 +1480,6 @@ final class AccessibilityController {
                 mHandler.sendEmptyMessageDelayed(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS,
                         mRecurringAccessibilityEventsIntervalMillis);
             }
-        }
-
-        IntArray getAndClearEmbeddedDisplayIdList() {
-            final IntArray returnedArray = new IntArray(mEmbeddedDisplayIdList.size());
-            returnedArray.addAll(mEmbeddedDisplayIdList);
-            mEmbeddedDisplayIdList.clear();
-
-            return returnedArray;
-        }
-
-        void addEmbeddedDisplay(int displayId) {
-            if (displayId == mDisplayId) {
-                return;
-            }
-            mEmbeddedDisplayIdList.add(displayId);
-        }
-
-        void notifyDisplayReparented(int embeddedDisplayId) {
-            // Notifies the A11y framework the display is reparented and
-            // becomes an embedded display for removing the un-used
-            // displayWindowObserver of this embedded one.
-            mCallback.onDisplayReparented(embeddedDisplayId);
         }
 
         boolean shellRootIsAbove(WindowState windowState, ShellRoot shellRoot) {
@@ -1761,12 +1648,7 @@ final class AccessibilityController {
                 addedWindows.clear();
 
                 // Gets the top focused display Id and window token for supporting multi-display.
-                // If this top focused display is an embedded one, using its parent display as the
-                // top focused display.
-                final DisplayContent topFocusedDisplayContent =
-                        mService.mRoot.getTopFocusedDisplayContent();
-                topFocusedDisplayId = isEmbeddedDisplay(topFocusedDisplayContent) ? mDisplayId
-                        : topFocusedDisplayContent.getDisplayId();
+                topFocusedDisplayId = mService.mRoot.getTopFocusedDisplayContent().getDisplayId();
                 topFocusedWindowToken = topFocusedWindowState.mClient.asBinder();
             }
             mCallback.onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
@@ -1970,8 +1852,6 @@ final class AccessibilityController {
         public String toString() {
             return "WindowsForAccessibilityObserver{"
                     + "mDisplayId=" + mDisplayId
-                    + ", mEmbeddedDisplayIdList="
-                    + Arrays.toString(mEmbeddedDisplayIdList.toArray())
                     + ", mInitialized=" + mInitialized
                     + '}';
         }

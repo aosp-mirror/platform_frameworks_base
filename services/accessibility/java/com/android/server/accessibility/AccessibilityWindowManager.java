@@ -143,12 +143,8 @@ public class AccessibilityWindowManager {
 
         /**
          * Starts tracking windows changes from window manager by registering callback.
-         *
-         * @return true if callback registers successful.
          */
-        boolean startTrackingWindowsLocked() {
-            boolean result = true;
-
+        void startTrackingWindowsLocked() {
             if (!mTrackingWindows) {
                 // Turns on the flag before setup the callback.
                 // In some cases, onWindowsForAccessibilityChanged will be called immediately in
@@ -158,15 +154,9 @@ public class AccessibilityWindowManager {
                     logTraceWM("setWindowsForAccessibilityCallback",
                             "displayId=" + mDisplayId + ";callback=" + this);
                 }
-                result = mWindowManagerInternal.setWindowsForAccessibilityCallback(
+                mWindowManagerInternal.setWindowsForAccessibilityCallback(
                         mDisplayId, this);
-                if (!result) {
-                    mTrackingWindows = false;
-                    Slog.w(LOG_TAG, "set windowsObserver callbacks fail, displayId:"
-                            + mDisplayId);
-                }
             }
-            return result;
         }
 
         /**
@@ -381,20 +371,6 @@ public class AccessibilityWindowManager {
                     // Someone may be waiting for the windows - advertise it.
                     mLock.notifyAll();
                 }
-            }
-        }
-
-        /**
-         * Called when the display is reparented and becomes an embedded
-         * display.
-         *
-         * @param embeddedDisplayId The embedded display Id.
-         */
-        @Override
-        public void onDisplayReparented(int embeddedDisplayId) {
-            // Removes the un-used window observer for the embedded display.
-            synchronized (mLock) {
-                mDisplayWindowsObservers.remove(embeddedDisplayId);
             }
         }
 
@@ -900,9 +876,8 @@ public class AccessibilityWindowManager {
             if (observer.isTrackingWindowsLocked()) {
                 return;
             }
-            if (observer.startTrackingWindowsLocked()) {
-                mDisplayWindowsObservers.put(displayId, observer);
-            }
+            observer.startTrackingWindowsLocked();
+            mDisplayWindowsObservers.put(displayId, observer);
         }
     }
 
