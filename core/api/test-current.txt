@@ -2414,6 +2414,7 @@ package android.service.watchdog {
 package android.speech {
 
   public class SpeechRecognizer {
+    method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceTestingSpeechRecognizer(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SPEECH_RECOGNITION) public void setTemporaryOnDeviceRecognizer(@Nullable android.content.ComponentName);
   }
 
