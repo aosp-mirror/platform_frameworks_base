@@ -1785,6 +1785,14 @@ static void nativeSetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfac
             ui::Transform::toRotationFlags(static_cast<ui::Rotation>(transformHint)));
 }
 
+static jint nativeGetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl*>(nativeSurfaceControl));
+    ui::Transform::RotationFlags transformHintRotationFlags =
+            static_cast<ui::Transform::RotationFlags>(surface->getTransformHint());
+
+    return toRotationInt(ui::Transform::toRotation((transformHintRotationFlags)));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1974,6 +1982,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetGPUContextPriority },
     {"nativeSetTransformHint", "(JI)V",
             (void*)nativeSetTransformHint },
+    {"nativeGetTransformHint", "(J)I",
+            (void*)nativeGetTransformHint },
         // clang-format on
 };
 
