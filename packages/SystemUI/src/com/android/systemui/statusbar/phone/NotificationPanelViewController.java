@@ -1625,7 +1625,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     mView.getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 if (mQsExpansionAnimator != null) {
-                    onQsExpansionStarted();
                     mInitialHeightOnTouch = mQsExpansionHeight;
                     mQsTracking = true;
                     traceQsJank(true /* startTracing */, false /* wasCancelled */);
