@@ -644,6 +644,7 @@ void CanvasContext::reportMetricsWithPresentTime() {
     if (mNativeSurface == nullptr) {
         return;
     }
+    ATRACE_CALL();
     FrameInfo* forthBehind;
     int64_t frameNumber;
     {  // acquire lock
