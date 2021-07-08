@@ -5690,8 +5690,10 @@ public class DevicePolicyManager {
 
     /**
      * Disable text entry into notifications on secure keyguard screens (e.g. PIN/Pattern/Password).
-     * This flag has no effect starting from version {@link android.os.Build.VERSION_CODES#N}
+     * @deprecated This flag was added in version {@link android.os.Build.VERSION_CODES#N}, but it
+     * never had any effect.
      */
+    @Deprecated
     public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 1 << 6;
 
     /**

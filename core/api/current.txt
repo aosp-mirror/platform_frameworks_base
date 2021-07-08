@@ -7455,7 +7455,7 @@ package android.app.admin {
     field public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0; // 0x0
     field public static final int KEYGUARD_DISABLE_FINGERPRINT = 32; // 0x20
     field public static final int KEYGUARD_DISABLE_IRIS = 256; // 0x100
-    field public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 64; // 0x40
+    field @Deprecated public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 64; // 0x40
     field public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 2; // 0x2
     field public static final int KEYGUARD_DISABLE_SECURE_NOTIFICATIONS = 4; // 0x4
     field public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 16; // 0x10
