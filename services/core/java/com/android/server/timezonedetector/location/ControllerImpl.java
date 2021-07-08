@@ -33,7 +33,6 @@ import android.annotation.DurationMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteCallback;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -590,41 +589,14 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     }
 
     /**
-     * Passes a test command to the specified provider. If the provider name does not match a
-     * known provider, then the command is logged and discarded.
+     * Clears recorded provider state changes (for use during tests).
      */
-    void handleProviderTestCommand(
-            @IntRange(from = 0, to = 1) int providerIndex, @NonNull TestCommand testCommand,
-            @Nullable RemoteCallback callback) {
-        mThreadingDomain.assertCurrentThread();
-
-        LocationTimeZoneProvider targetProvider = getLocationTimeZoneProvider(providerIndex);
-        if (targetProvider == null) {
-            warnLog("Unable to process test command:"
-                    + " providerIndex=" + providerIndex + ", testCommand=" + testCommand);
-            return;
-        }
-
-        synchronized (mSharedLock) {
-            try {
-                targetProvider.handleTestCommand(testCommand, callback);
-            } catch (Exception e) {
-                warnLog("Unable to process test command:"
-                        + " providerIndex=" + providerIndex + ", testCommand=" + testCommand, e);
-            }
-        }
-    }
-
-    /**
-     * Sets whether the controller should record provider state changes for later dumping via
-     * {@link #getStateForTests()}.
-     */
-    void setProviderStateRecordingEnabled(boolean enabled) {
+    void clearRecordedProviderStates() {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
-            mPrimaryProvider.setStateChangeRecordingEnabled(enabled);
-            mSecondaryProvider.setStateChangeRecordingEnabled(enabled);
+            mPrimaryProvider.clearRecordedStates();
+            mSecondaryProvider.clearRecordedStates();
         }
     }
 

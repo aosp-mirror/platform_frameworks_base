@@ -1006,24 +1006,25 @@ public class ControllerImplTest {
 
     @Test
     public void stateRecording() {
+        // The test provider enables state recording by default.
         ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
                 mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controllerImpl, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
-        // Initialize and check initial state.
+        // Initialize and check initial states.
         controllerImpl.initialize(testEnvironment, mTestCallback);
 
         {
             LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
             assertNull(state.getLastSuggestion());
-            assertTrue(state.getPrimaryProviderStates().isEmpty());
-            assertTrue(state.getSecondaryProviderStates().isEmpty());
+            assertProviderStates(state.getPrimaryProviderStates(),
+                    PROVIDER_STATE_STOPPED, PROVIDER_STATE_STARTED_INITIALIZING);
+            assertProviderStates(state.getSecondaryProviderStates(), PROVIDER_STATE_STOPPED);
         }
+        controllerImpl.clearRecordedProviderStates();
 
-        // State recording and simulate some provider behavior that will show up in the state
-        // recording.
-        controllerImpl.setProviderStateRecordingEnabled(true);
+        // Simulate some provider behavior that will show up in the state recording.
 
         // Simulate an uncertain event from the primary. This will start the secondary.
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
@@ -1032,19 +1033,14 @@ public class ControllerImplTest {
         {
             LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
             assertNull(state.getLastSuggestion());
-            List<LocationTimeZoneProvider.ProviderState> primaryProviderStates =
-                    state.getPrimaryProviderStates();
-            assertEquals(1, primaryProviderStates.size());
-            assertEquals(PROVIDER_STATE_STARTED_UNCERTAIN,
-                    primaryProviderStates.get(0).stateEnum);
-            List<LocationTimeZoneProvider.ProviderState> secondaryProviderStates =
-                    state.getSecondaryProviderStates();
-            assertEquals(1, secondaryProviderStates.size());
-            assertEquals(PROVIDER_STATE_STARTED_INITIALIZING,
-                    secondaryProviderStates.get(0).stateEnum);
+            assertProviderStates(
+                    state.getPrimaryProviderStates(), PROVIDER_STATE_STARTED_UNCERTAIN);
+            assertProviderStates(
+                    state.getSecondaryProviderStates(), PROVIDER_STATE_STARTED_INITIALIZING);
         }
+        controllerImpl.clearRecordedProviderStates();
 
-        // Simulate an uncertain event from the primary. This will start the secondary.
+        // Simulate a certain event from the secondary.
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
@@ -1052,23 +1048,27 @@ public class ControllerImplTest {
             LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
             assertEquals(USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds(),
                     state.getLastSuggestion().getZoneIds());
-            List<LocationTimeZoneProvider.ProviderState> primaryProviderStates =
-                    state.getPrimaryProviderStates();
-            assertEquals(1, primaryProviderStates.size());
-            assertEquals(PROVIDER_STATE_STARTED_UNCERTAIN, primaryProviderStates.get(0).stateEnum);
-            List<LocationTimeZoneProvider.ProviderState> secondaryProviderStates =
-                    state.getSecondaryProviderStates();
-            assertEquals(2, secondaryProviderStates.size());
-            assertEquals(PROVIDER_STATE_STARTED_CERTAIN, secondaryProviderStates.get(1).stateEnum);
+            assertProviderStates(state.getPrimaryProviderStates());
+            assertProviderStates(
+                    state.getSecondaryProviderStates(), PROVIDER_STATE_STARTED_CERTAIN);
         }
 
-        controllerImpl.setProviderStateRecordingEnabled(false);
+        controllerImpl.clearRecordedProviderStates();
         {
             LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
             assertEquals(USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds(),
                     state.getLastSuggestion().getZoneIds());
-            assertTrue(state.getPrimaryProviderStates().isEmpty());
-            assertTrue(state.getSecondaryProviderStates().isEmpty());
+            assertProviderStates(state.getPrimaryProviderStates());
+            assertProviderStates(state.getSecondaryProviderStates());
+        }
+    }
+
+    private static void assertProviderStates(
+            List<LocationTimeZoneProvider.ProviderState> providerStates,
+            int... expectedStates) {
+        assertEquals(expectedStates.length, providerStates.size());
+        for (int i = 0; i < expectedStates.length; i++) {
+            assertEquals(expectedStates[i], providerStates.get(i).stateEnum);
         }
     }
 
@@ -1228,7 +1228,7 @@ public class ControllerImplTest {
         TestLocationTimeZoneProvider(ProviderMetricsLogger providerMetricsLogger,
                 ThreadingDomain threadingDomain, String providerName) {
             super(providerMetricsLogger, threadingDomain, providerName,
-                    new FakeTimeZoneProviderEventPreProcessor());
+                    new FakeTimeZoneProviderEventPreProcessor(), true /* recordStateChanges */);
         }
 
         public void setFailDuringInitialization(boolean failInitialization) {
