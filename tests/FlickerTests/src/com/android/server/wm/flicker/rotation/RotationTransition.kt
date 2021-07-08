@@ -17,20 +17,20 @@
 package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Test
@@ -89,9 +89,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                    WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
-                    "SecondaryHomeHandle"
+                ignoreLayers = listOf(WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+                    WindowManagerStateHelper.SNAPSHOT_COMPONENT,
+                    ComponentName("", "SecondaryHomeHandle")
                 )
             )
         }
@@ -107,22 +107,24 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun noUncoveredRegions() {
-        testSpec.noUncoveredRegions(testSpec.config.startRotation,
+    open fun entireScreenCovered() {
+        testSpec.entireScreenCovered(testSpec.config.startRotation,
             testSpec.config.endRotation, allStates = false)
     }
 
     @Presubmit
     @Test
     open fun focusDoesNotChange() {
-        testSpec.focusDoesNotChange()
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
     }
 
     @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
-            this.visibleRegion(testApp.getPackage()).coversExactly(startingPos)
+            this.visibleRegion(testApp.component).coversExactly(startingPos)
         }
     }
 
@@ -130,7 +132,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
-            this.visibleRegion(testApp.getPackage()).coversExactly(endingPos)
+            this.visibleRegion(testApp.component).coversExactly(endingPos)
         }
     }
 }

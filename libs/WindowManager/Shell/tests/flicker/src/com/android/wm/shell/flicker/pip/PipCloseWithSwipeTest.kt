@@ -85,7 +85,7 @@ class PipCloseWithSwipeTest(testSpec: FlickerTestParameter) : PipCloseTransition
 
     @Presubmit
     @Test
-    override fun noUncoveredRegions() = super.noUncoveredRegions()
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     @Presubmit
     @Test

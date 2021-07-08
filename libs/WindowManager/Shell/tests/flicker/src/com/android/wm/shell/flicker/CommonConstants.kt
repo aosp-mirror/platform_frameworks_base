@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+@file:JvmName("CommonConstants")
 package com.android.wm.shell.flicker
 
-const val IME_WINDOW_NAME = "InputMethod"
+import android.content.ComponentName
+
 const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
-const val APP_PAIR_SPLIT_DIVIDER = "AppPairSplitDivider"
-const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
+val APP_PAIR_SPLIT_DIVIDER_COMPONENT = ComponentName("", "AppPairSplitDivider#")
+val DOCKED_STACK_DIVIDER_COMPONENT = ComponentName("", "DockedStackDivider#")

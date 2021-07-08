@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -26,6 +27,7 @@ import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
@@ -33,16 +35,13 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.launcherWindowBecomesInvisible
-import com.android.server.wm.flicker.appLayerReplacesLauncher
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -62,7 +61,6 @@ import org.junit.runners.Parameterized
 class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
-    private val testAppComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -74,14 +72,14 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 }
                 eachRun {
                     device.pressRecentApps()
-                    wmHelper.waitImeWindowGone()
+                    wmHelper.waitImeGone()
                     wmHelper.waitForAppTransitionIdle()
                     this.setRotation(testSpec.config.startRotation)
                 }
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
-                wmHelper.waitImeWindowShown()
+                wmHelper.waitImeShown()
             }
             teardown {
                 test {
@@ -102,18 +100,25 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        val component = ComponentName("", "RecentTaskScreenshotSurface")
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
-                    ignoreWindows = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
-                            "RecentTaskScreenshotSurface#0")
+                    ignoreWindows = listOf(WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+                            WindowManagerStateHelper.SNAPSHOT_COMPONENT,
+                            component)
             )
         }
     }
 
     @Presubmit
     @Test
-    fun launcherWindowBecomesInvisible() = testSpec.launcherWindowBecomesInvisible()
+    fun launcherWindowBecomesInvisible() {
+        testSpec.assertWm {
+            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+                    .then()
+                    .isAppWindowInvisible(LAUNCHER_COMPONENT)
+        }
+    }
 
     @Presubmit
     @Test
@@ -121,12 +126,24 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(testApp, true)
+    fun imeAppWindowVisibility() {
+        // the app starts visible in live tile, then becomes invisible during animation and
+        // is again launched. Since we log 1x per frame, sometimes the activity visibility and
+        // the app visibility are updated together, sometimes not, thus ignore activity check
+        // at the start
+        testSpec.assertWm {
+            this.isAppWindowVisible(testApp.component, ignoreActivity = true)
+                    .then()
+                    .isAppWindowInvisible(testApp.component, ignoreActivity = true)
+                    .then()
+                    .isAppWindowVisible(testApp.component)
+        }
+    }
 
     @Presubmit
     @Test
     // During testing the launcher is always in portrait mode
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
+    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation,
         testSpec.config.endRotation)
 
     @Presubmit
@@ -139,12 +156,27 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeLayerIsAlwaysVisible() = testSpec.imeLayerIsAlwaysVisible(true)
+    fun imeLayerIsBecomesVisible() {
+        testSpec.assertLayers {
+            this.isVisible(WindowManagerStateHelper.IME_COMPONENT)
+                    .then()
+                    .isInvisible(WindowManagerStateHelper.IME_COMPONENT)
+                    .then()
+                    .isVisible(WindowManagerStateHelper.IME_COMPONENT)
+        }
+    }
 
     @Presubmit
     @Test
-    fun appLayerReplacesLauncher() =
-        testSpec.appLayerReplacesLauncher(testAppComponentName.className)
+    fun appLayerReplacesLauncher() {
+        testSpec.assertLayers {
+            this.isVisible(LAUNCHER_COMPONENT)
+                .then()
+                .isVisible(WindowManagerStateHelper.SNAPSHOT_COMPONENT, isOptional = true)
+                .then()
+                .isVisible(testApp.component)
+        }
+    }
 
     @Presubmit
     @Test
@@ -161,8 +193,14 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        // depends on how much of the animation transactions are sent to SF at once
+        // sometimes this layer appears for 2-3 frames, sometimes for only 1
+        val recentTaskComponent = ComponentName("", "RecentTaskScreenshotSurface")
         testSpec.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry()
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                    listOf(WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+                    WindowManagerStateHelper.SNAPSHOT_COMPONENT, recentTaskComponent)
+            )
         }
     }
 
