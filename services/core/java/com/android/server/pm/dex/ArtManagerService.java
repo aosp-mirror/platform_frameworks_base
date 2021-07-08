@@ -608,6 +608,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_REASON_BOOT_AFTER_OTA = 20;
     private static final int TRON_COMPILATION_REASON_POST_BOOT = 21;
     private static final int TRON_COMPILATION_REASON_CMDLINE = 22;
+    private static final int TRON_COMPILATION_REASON_PREBUILT = 23;
+    private static final int TRON_COMPILATION_REASON_VDEX = 24;
 
     // The annotation to add as a suffix to the compilation reason when dexopt was
     // performed with dex metadata.
@@ -628,6 +630,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             case "ab-ota" : return TRON_COMPILATION_REASON_AB_OTA;
             case "inactive" : return TRON_COMPILATION_REASON_INACTIVE;
             case "shared" : return TRON_COMPILATION_REASON_SHARED;
+            case "prebuilt" : return TRON_COMPILATION_REASON_PREBUILT;
+            case "vdex" : return TRON_COMPILATION_REASON_VDEX;
             case "install-fast" :
                 return TRON_COMPILATION_REASON_INSTALL_FAST;
             case "install-bulk" :
