@@ -62,7 +62,8 @@ import java.util.function.Consumer;
  * Unified task organizer for all components in the shell.
  * TODO(b/167582004): may consider consolidating this class and TaskOrganizer
  */
-public class ShellTaskOrganizer extends TaskOrganizer {
+public class ShellTaskOrganizer extends TaskOrganizer implements
+        SizeCompatUIController.SizeCompatUICallback {
 
     // Intentionally using negative numbers here so the positive numbers can be used
     // for task id specific listeners that will be added later.
@@ -158,6 +159,9 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             Context context, @Nullable SizeCompatUIController sizeCompatUI) {
         super(taskOrganizerController, mainExecutor);
         mSizeCompatUI = sizeCompatUI;
+        if (sizeCompatUI != null) {
+            sizeCompatUI.setSizeCompatUICallback(this);
+        }
     }
 
     @Override
@@ -481,6 +485,17 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         }
     }
 
+    @Override
+    public void onSizeCompatRestartButtonClicked(int taskId) {
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info != null) {
+            restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
+        }
+    }
+
     /**
      * Notifies {@link SizeCompatUIController} about the size compat info changed on the give Task
      * to update the UI accordingly.
@@ -499,13 +514,12 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         if (taskListener == null || !taskListener.supportSizeCompatUI()
                 || !taskInfo.topActivityInSizeCompat) {
             mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                    null /* taskConfig */, null /* sizeCompatActivity*/,
-                    null /* taskListener */);
+                    null /* taskConfig */, null /* taskListener */);
             return;
         }
 
         mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                taskInfo.configuration, taskInfo.topActivityToken, taskListener);
+                taskInfo.configuration, taskListener);
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {
