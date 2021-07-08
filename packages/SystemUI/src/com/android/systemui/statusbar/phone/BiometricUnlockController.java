@@ -39,6 +39,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -165,6 +166,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private BiometricModeListener mBiometricModeListener;
 
     private final MetricsLogger mMetricsLogger;
+    private final AuthController mAuthController;
 
     private static final class PendingAuthenticated {
         public final int userId;
@@ -254,7 +256,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             PowerManager powerManager,
             NotificationMediaManager notificationMediaManager,
             WakefulnessLifecycle wakefulnessLifecycle,
-            ScreenLifecycle screenLifecycle) {
+            ScreenLifecycle screenLifecycle,
+            AuthController authController) {
         mContext = context;
         mPowerManager = powerManager;
         mShadeController = shadeController;
@@ -275,6 +278,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardBypassController.setUnlockController(this);
         mMetricsLogger = metricsLogger;
+        mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
     }
 
@@ -596,7 +600,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     return MODE_DISMISS_BOUNCER;
                 }
             } else if (unlockingAllowed) {
-                return bypass ? MODE_UNLOCK_FADING : MODE_NONE;
+                return bypass || mAuthController.isUdfpsFingerDown()
+                        ? MODE_UNLOCK_FADING : MODE_NONE;
             } else {
                 return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
             }
