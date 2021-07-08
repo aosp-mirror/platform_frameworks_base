@@ -2771,6 +2771,7 @@ public final class ViewRootImpl implements ViewParent,
                 mView.onSystemBarAppearanceChanged(mDispatchedSystemBarAppearance);
             }
         }
+        final boolean wasReportNextDraw = mReportNextDraw;
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
@@ -2817,6 +2818,16 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean dockedResizing = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
                 final boolean dragResizing = freeformResizing || dockedResizing;
+                if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
+                    if (DEBUG_BLAST) {
+                        Log.d(mTag, "Relayout called with blastSync");
+                    }
+                    reportNextDraw();
+                    if (isHardwareEnabled()) {
+                        mNextDrawUseBlastSync = true;
+                    }
+                }
+
                 if (mSurfaceControl.isValid()) {
                     updateOpacity(mWindowAttributes, dragResizing);
                 }
@@ -3035,7 +3046,16 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            if (!mStopped || mReportNextDraw) {
+            // TODO: In the CL "ViewRootImpl: Fix issue with early draw report in
+            // seamless rotation". We moved processing of RELAYOUT_RES_BLAST_SYNC
+            // earlier in the function, potentially triggering a call to
+            // reportNextDraw(). That same CL changed this and the next reference
+            // to wasReportNextDraw, such that this logic would remain undisturbed
+            // (it continues to operate as if the code was never moved). This was
+            // done to achieve a more hermetic fix for S, but it's entirely
+            // possible that checking the most recent value is actually more
+            // correct here.
+            if (!mStopped || wasReportNextDraw) {
                 boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                         (relayoutResult&WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
@@ -3105,7 +3125,7 @@ public final class ViewRootImpl implements ViewParent,
             prepareSurfaces();
         }
 
-        final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
+        final boolean didLayout = layoutRequested && (!mStopped || wasReportNextDraw);
         boolean triggerGlobalLayoutListener = didLayout
                 || mAttachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
@@ -3261,20 +3281,9 @@ public final class ViewRootImpl implements ViewParent,
 
         mImeFocusController.onTraversal(hasWindowFocus, mWindowAttributes);
 
-        final boolean wasReportNextDraw = mReportNextDraw;
-
         // Remember if we must report the next draw.
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             reportNextDraw();
-        }
-        if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Relayout called with blastSync");
-            }
-            reportNextDraw();
-            if (isHardwareEnabled()) {
-                mNextDrawUseBlastSync = true;
-            }
         }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
@@ -3286,7 +3295,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-
             performDraw();
         } else {
             if (isViewVisible) {
