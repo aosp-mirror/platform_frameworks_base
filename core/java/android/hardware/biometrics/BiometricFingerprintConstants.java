@@ -61,7 +61,7 @@ public interface BiometricFingerprintConstants {
             BIOMETRIC_ERROR_RE_ENROLL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             FINGERPRINT_ERROR_UNKNOWN,
-            FINGERPRINT_ERROR_BAD_CALIBARTION})
+            FINGERPRINT_ERROR_BAD_CALIBRATION})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintError {}
 
@@ -185,7 +185,7 @@ public interface BiometricFingerprintConstants {
      * Error indicating that the fingerprint sensor has bad calibration.
      * @hide
      */
-    int FINGERPRINT_ERROR_BAD_CALIBARTION = 18;
+    int FINGERPRINT_ERROR_BAD_CALIBRATION = 18;
 
     /**
      * @hide

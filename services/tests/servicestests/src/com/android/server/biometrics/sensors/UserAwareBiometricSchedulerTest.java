@@ -17,6 +17,8 @@
 package com.android.server.biometrics.sensors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -133,6 +135,28 @@ public class UserAwareBiometricSchedulerTest {
     }
 
     @Test
+    public void testScheduleOperation_whenNoUser_notStarted_andReset() {
+        mCurrentUserId = UserHandle.USER_NULL;
+        mStartOperationsFinish = false;
+
+        final BaseClientMonitor client = mock(BaseClientMonitor.class);
+        when(client.getTargetUserId()).thenReturn(5);
+        mScheduler.scheduleClientMonitor(client);
+        waitForIdle();
+
+        final TestStartUserClient startUserClient =
+                (TestStartUserClient) mScheduler.mCurrentOperation.mClientMonitor;
+        mScheduler.reset();
+        assertNull(mScheduler.mCurrentOperation);
+
+        final BiometricScheduler.Operation fakeOperation = new BiometricScheduler.Operation(
+                mock(BaseClientMonitor.class), new BaseClientMonitor.Callback() {});
+        mScheduler.mCurrentOperation = fakeOperation;
+        startUserClient.mCallback.onClientFinished(startUserClient, true);
+        assertSame(fakeOperation, mScheduler.mCurrentOperation);
+    }
+
+    @Test
     public void testScheduleOperation_whenSameUser() {
         mCurrentUserId = 10;
 
@@ -173,7 +197,6 @@ public class UserAwareBiometricSchedulerTest {
     }
 
     private class TestUserStoppedCallback implements StopUserClient.UserStoppedCallback {
-
         int numInvocations;
 
         @Override
@@ -184,7 +207,6 @@ public class UserAwareBiometricSchedulerTest {
     }
 
     private class TestUserStartedCallback implements StartUserClient.UserStartedCallback<Object> {
-
         int numInvocations;
 
         @Override
@@ -221,6 +243,8 @@ public class UserAwareBiometricSchedulerTest {
     private static class TestStartUserClient extends StartUserClient<Object, Object> {
         private final boolean mShouldFinish;
 
+        Callback mCallback;
+
         public TestStartUserClient(@NonNull Context context,
                 @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
                 int sensorId, @NonNull UserStartedCallback<Object> callback, boolean shouldFinish) {
@@ -236,6 +260,8 @@ public class UserAwareBiometricSchedulerTest {
         @Override
         public void start(@NonNull Callback callback) {
             super.start(callback);
+
+            mCallback = callback;
             if (mShouldFinish) {
                 mUserStartedCallback.onUserStarted(getTargetUserId(), new Object());
                 callback.onClientFinished(this, true /* success */);

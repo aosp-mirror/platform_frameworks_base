@@ -1515,16 +1515,10 @@ final class AutofillManagerServiceImpl
             final int intDuration = duration > Integer.MAX_VALUE
                     ? Integer.MAX_VALUE
                     : (int) duration;
-            // NOTE: not using Helper.newLogMaker() because we're setting the componentName instead
-            // of package name
-            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
-                    .setComponentName(componentName)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
-            if (compatMode) {
-                log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
-            }
+
+            final LogMaker log = Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY,
+                    componentName, getServicePackageName(), sessionId, compatMode)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration);
             mMetricsLogger.write(log);
         }
     }

@@ -2120,10 +2120,10 @@ public class ChooserActivity extends ResolverActivity implements
                     + " resultList.size()=" + resultList.size()
                     + " appTargets.size()=" + appTargets.size());
         }
-
+        Context selectedProfileContext = createContextAsUser(userHandle, 0 /* flags */);
         for (int i = resultList.size() - 1; i >= 0; i--) {
             final String packageName = resultList.get(i).getTargetComponent().getPackageName();
-            if (!isPackageEnabled(packageName)) {
+            if (!isPackageEnabled(selectedProfileContext, packageName)) {
                 resultList.remove(i);
                 if (appTargets != null) {
                     appTargets.remove(i);
@@ -2175,13 +2175,13 @@ public class ChooserActivity extends ResolverActivity implements
         mChooserHandler.sendMessage(msg);
     }
 
-    private boolean isPackageEnabled(String packageName) {
+    private boolean isPackageEnabled(Context context, String packageName) {
         if (TextUtils.isEmpty(packageName)) {
             return false;
         }
         ApplicationInfo appInfo;
         try {
-            appInfo = getPackageManager().getApplicationInfo(packageName, 0);
+            appInfo = context.getPackageManager().getApplicationInfo(packageName, 0);
         } catch (NameNotFoundException e) {
             return false;
         }

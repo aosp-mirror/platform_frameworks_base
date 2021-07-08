@@ -523,8 +523,12 @@
      -->
     <string name="config_rounded_mask" translatable="false">"M8,0C3.6,0,0,3.6,0,8"</string>
 
-    <!-- Preferred refresh rate at keyguard, if supported by the display -->
+    <!-- Preferred refresh rate at keyguard, if supported by the display. Overrides
+         keyguardMaxRefreshRate. -->
     <integer name="config_keyguardRefreshRate">-1</integer>
+
+    <!-- Preferred max refresh rate at keyguard, if supported by the display. -->
+    <integer name="config_keyguardMaxRefreshRate">-1</integer>
 
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
@@ -657,13 +661,6 @@
         <!-- sensorLocationX -->
         <!-- sensorLocationY -->
         <!--sensorRadius -->
-    </integer-array>
-
-    <!-- The properties of the lock icon in pixels. -->
-    <integer-array name="config_lock_icon_props">
-        <!-- X -->
-        <!-- Y -->
-        <!-- radius -->
     </integer-array>
 
     <!-- Overrides the behavior of the face unlock keyguard bypass setting:

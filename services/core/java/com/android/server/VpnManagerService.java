@@ -357,7 +357,8 @@ public class VpnManagerService extends IVpnManager.Stub {
     @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
     @Override
     public void startLegacyVpn(VpnProfile profile) {
-        if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.S
+                && VpnProfile.isLegacyType(profile.type)) {
             throw new UnsupportedOperationException("Legacy VPN is deprecated");
         }
         int user = UserHandle.getUserId(mDeps.getCallingUid());

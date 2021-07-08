@@ -32,6 +32,7 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
@@ -90,6 +91,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     private lateinit var mockView: View
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var context: Context
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
 
     private val qsExpansionPathInterpolator = QSExpansionPathInterpolator()
 
@@ -117,7 +120,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 privacyLogger,
                 colorExtractor,
                 privacyDialogController,
-                qsExpansionPathInterpolator
+                qsExpansionPathInterpolator,
+                featureFlags
         )
     }
 

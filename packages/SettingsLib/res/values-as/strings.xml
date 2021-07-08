@@ -79,7 +79,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"সংযোগ কৰা হ’ল (কোনো ফ\'ন বা মিডিয়া নাই), বেটাৰিৰ স্তৰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"সক্ৰিয়, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰি"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"সক্ৰিয়, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> বেটাৰি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰি"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰি"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰী"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> বেটাৰি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰি"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"সক্ৰিয়"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়াৰ অডিঅ’"</string>
@@ -568,12 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি আঁতৰাওক"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"অতিথিৰ ছেশ্বন ৰিছেট কৰক"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8047270010895437534) -->
-    <skip />
-    <!-- no translation found for guest_reset_guest_confirm_button (2989915693215617237) -->
-    <skip />
-    <!-- no translation found for guest_resetting (7822120170191509566) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"অতিথিৰ ছেশ্বন ৰিছেট কৰিবনে?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ৰিছেট কৰক"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"অতিথিৰ ছেশ্বন ৰিছেট কৰি থকা হৈছে…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"এখন ফট’ তোলক"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"এখন প্ৰতিচ্ছবি বাছনি কৰক"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ফট’ বাছনি কৰক"</string>

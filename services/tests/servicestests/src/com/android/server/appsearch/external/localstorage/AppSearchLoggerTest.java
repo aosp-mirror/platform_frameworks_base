@@ -67,7 +67,10 @@ public class AppSearchLoggerTest {
     public void setUp() throws Exception {
         mAppSearchImpl =
                 AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                        mTemporaryFolder.newFolder(),
+                        new UnlimitedLimitConfig(),
+                        /*initStatsBuilder=*/ null,
+                        ALWAYS_OPTIMIZE);
         mLogger = new TestLogger();
     }
 
@@ -290,7 +293,11 @@ public class AppSearchLoggerTest {
     public void testLoggingStats_initializeWithoutDocuments_success() throws Exception {
         // Create an unused AppSearchImpl to generated an InitializeStats.
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
-        AppSearchImpl.create(mTemporaryFolder.newFolder(), initStatsBuilder, ALWAYS_OPTIMIZE);
+        AppSearchImpl.create(
+                mTemporaryFolder.newFolder(),
+                new UnlimitedLimitConfig(),
+                initStatsBuilder,
+                ALWAYS_OPTIMIZE);
         InitializeStats iStats = initStatsBuilder.build();
 
         assertThat(iStats).isNotNull();
@@ -314,7 +321,11 @@ public class AppSearchLoggerTest {
         final File folder = mTemporaryFolder.newFolder();
 
         AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(folder, /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                AppSearchImpl.create(
+                        folder,
+                        new UnlimitedLimitConfig(),
+                        /*initStatsBuilder=*/ null,
+                        ALWAYS_OPTIMIZE);
         List<AppSearchSchema> schemas =
                 ImmutableList.of(
                         new AppSearchSchema.Builder("Type1").build(),
@@ -336,7 +347,7 @@ public class AppSearchLoggerTest {
 
         // Create another appsearchImpl on the same folder
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
-        AppSearchImpl.create(folder, initStatsBuilder, ALWAYS_OPTIMIZE);
+        AppSearchImpl.create(folder, new UnlimitedLimitConfig(), initStatsBuilder, ALWAYS_OPTIMIZE);
         InitializeStats iStats = initStatsBuilder.build();
 
         assertThat(iStats).isNotNull();
@@ -360,7 +371,11 @@ public class AppSearchLoggerTest {
         final File folder = mTemporaryFolder.newFolder();
 
         AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(folder, /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                AppSearchImpl.create(
+                        folder,
+                        new UnlimitedLimitConfig(),
+                        /*initStatsBuilder=*/ null,
+                        ALWAYS_OPTIMIZE);
 
         List<AppSearchSchema> schemas =
                 ImmutableList.of(
@@ -393,7 +408,7 @@ public class AppSearchLoggerTest {
 
         // Create another appsearchImpl on the same folder
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
-        AppSearchImpl.create(folder, initStatsBuilder, ALWAYS_OPTIMIZE);
+        AppSearchImpl.create(folder, new UnlimitedLimitConfig(), initStatsBuilder, ALWAYS_OPTIMIZE);
         InitializeStats iStats = initStatsBuilder.build();
 
         // Some of other fields are already covered by AppSearchImplTest#testReset()
@@ -484,11 +499,13 @@ public class AppSearchLoggerTest {
                         .setPropertyString("nonExist", "testPut example1")
                         .build();
 
-        // We mainly want to check the status code in stats. So we don't need to inspect the
-        // exception here.
-        Assert.assertThrows(
-                AppSearchException.class,
-                () -> mAppSearchImpl.putDocument(testPackageName, testDatabase, document, mLogger));
+        AppSearchException exception =
+                Assert.assertThrows(
+                        AppSearchException.class,
+                        () ->
+                                mAppSearchImpl.putDocument(
+                                        testPackageName, testDatabase, document, mLogger));
+        assertThat(exception.getResultCode()).isEqualTo(AppSearchResult.RESULT_NOT_FOUND);
 
         PutDocumentStats pStats = mLogger.mPutDocumentStats;
         assertThat(pStats).isNotNull();
@@ -676,17 +693,17 @@ public class AppSearchLoggerTest {
 
         RemoveStats.Builder rStatsBuilder = new RemoveStats.Builder(testPackageName, testDatabase);
 
-        // We mainly want to check the status code in stats. So we don't need to inspect the
-        // exception here.
-        Assert.assertThrows(
-                AppSearchException.class,
-                () ->
-                        mAppSearchImpl.remove(
-                                testPackageName,
-                                testDatabase,
-                                testNamespace,
-                                "invalidId",
-                                rStatsBuilder));
+        AppSearchException exception =
+                Assert.assertThrows(
+                        AppSearchException.class,
+                        () ->
+                                mAppSearchImpl.remove(
+                                        testPackageName,
+                                        testDatabase,
+                                        testNamespace,
+                                        "invalidId",
+                                        rStatsBuilder));
+        assertThat(exception.getResultCode()).isEqualTo(AppSearchResult.RESULT_NOT_FOUND);
 
         RemoveStats rStats = rStatsBuilder.build();
         assertThat(rStats.getPackageName()).isEqualTo(testPackageName);

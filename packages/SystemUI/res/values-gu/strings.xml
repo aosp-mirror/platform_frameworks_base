@@ -669,9 +669,9 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"તમારા ફોન વડે વધુ ઝડપી તેમજ સુરક્ષિત ખરીદીઓ કરવાની રીત સેટઅપ કરી લો"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ચુકવણી કરવા માટે અનલૉક કરો"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"કોઈ સેટઅપ કર્યું નથી"</string>
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
     <skip />
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"અપડેટ કરી રહ્યાં છીએ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"તમારા કાર્ડની માહિતી મેળવવામાં સમસ્યા આવી હતી, કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"લૉક સ્ક્રીનના સેટિંગ"</string>
@@ -1147,8 +1147,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના સંદેશા, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"વાતચીત"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\'ખલેલ પાડશો નહીં\'ની સુવિધા દ્વારા થોભાવેલું"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ સંદેશ મોકલવામાં આવ્યો"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ છબી મોકલવામાં આવી"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"તમારું બૅટરી મીટર વાંચવામાં સમસ્યા આવી"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"વધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"કોઈ અલાર્મ સેટ નથી"</string>

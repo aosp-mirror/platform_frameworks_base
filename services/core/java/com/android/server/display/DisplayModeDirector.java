@@ -913,10 +913,12 @@ public class DisplayModeDirector {
         // It votes [MIN_REFRESH_RATE, Float.POSITIVE_INFINITY]
         public static final int PRIORITY_USER_SETTING_MIN_REFRESH_RATE = 2;
 
-        // APP_REQUEST_MAX_REFRESH_RATE is used to for internal apps to limit the refresh
+        // APP_REQUEST_REFRESH_RATE_RANGE is used to for internal apps to limit the refresh
         // rate in certain cases, mostly to preserve power.
-        // It votes to [0, APP_REQUEST_MAX_REFRESH_RATE].
-        public static final int PRIORITY_APP_REQUEST_MAX_REFRESH_RATE = 3;
+        // @see android.view.WindowManager.LayoutParams#preferredMinRefreshRate
+        // @see android.view.WindowManager.LayoutParams#preferredMaxRefreshRate
+        // It votes to [preferredMinRefreshRate, preferredMaxRefreshRate].
+        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE = 3;
 
         // We split the app request into different priorities in case we can satisfy one desire
         // without the other.
@@ -967,7 +969,7 @@ public class DisplayModeDirector {
         // The cutoff for the app request refresh rate range. Votes with priorities lower than this
         // value will not be considered when constructing the app request refresh rate range.
         public static final int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
-                PRIORITY_APP_REQUEST_MAX_REFRESH_RATE;
+                PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE;
 
         /**
          * A value signifying an invalid width or height in a vote.
@@ -1035,8 +1037,8 @@ public class DisplayModeDirector {
             switch (priority) {
                 case PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE:
                     return "PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE";
-                case PRIORITY_APP_REQUEST_MAX_REFRESH_RATE:
-                    return "PRIORITY_APP_REQUEST_MAX_REFRESH_RATE";
+                case PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE:
+                    return "PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE";
                 case PRIORITY_APP_REQUEST_SIZE:
                     return "PRIORITY_APP_REQUEST_SIZE";
                 case PRIORITY_DEFAULT_REFRESH_RATE:
@@ -1233,17 +1235,19 @@ public class DisplayModeDirector {
 
     final class AppRequestObserver {
         private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
-        private final SparseArray<Float> mAppPreferredMaxRefreshRateByDisplay;
+        private final SparseArray<RefreshRateRange> mAppPreferredRefreshRateRangeByDisplay;
 
         AppRequestObserver() {
             mAppRequestedModeByDisplay = new SparseArray<>();
-            mAppPreferredMaxRefreshRateByDisplay = new SparseArray<>();
+            mAppPreferredRefreshRateRangeByDisplay = new SparseArray<>();
         }
 
-        public void setAppRequest(int displayId, int modeId, float requestedMaxRefreshRate) {
+        public void setAppRequest(int displayId, int modeId, float requestedMinRefreshRateRange,
+                float requestedMaxRefreshRateRange) {
             synchronized (mLock) {
                 setAppRequestedModeLocked(displayId, modeId);
-                setAppPreferredMaxRefreshRateLocked(displayId, requestedMaxRefreshRate);
+                setAppPreferredRefreshRateRangeLocked(displayId, requestedMinRefreshRateRange,
+                        requestedMaxRefreshRateRange);
             }
         }
 
@@ -1272,26 +1276,36 @@ public class DisplayModeDirector {
             updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
         }
 
-        private void setAppPreferredMaxRefreshRateLocked(int displayId,
-                float requestedMaxRefreshRate) {
+        private void setAppPreferredRefreshRateRangeLocked(int displayId,
+                float requestedMinRefreshRateRange, float requestedMaxRefreshRateRange) {
             final Vote vote;
-            final Float requestedMaxRefreshRateVote =
-                    requestedMaxRefreshRate > 0
-                            ? new Float(requestedMaxRefreshRate) : null;
-            if (Objects.equals(requestedMaxRefreshRateVote,
-                    mAppPreferredMaxRefreshRateByDisplay.get(displayId))) {
+
+            RefreshRateRange refreshRateRange = null;
+            if (requestedMinRefreshRateRange > 0 || requestedMaxRefreshRateRange > 0) {
+                float min = requestedMinRefreshRateRange;
+                float max = requestedMaxRefreshRateRange > 0
+                        ? requestedMaxRefreshRateRange : Float.POSITIVE_INFINITY;
+                refreshRateRange = new RefreshRateRange(min, max);
+                if (refreshRateRange.min == 0 && refreshRateRange.max == 0) {
+                    // requestedMinRefreshRateRange/requestedMaxRefreshRateRange were invalid
+                    refreshRateRange = null;
+                }
+            }
+
+            if (Objects.equals(refreshRateRange,
+                    mAppPreferredRefreshRateRangeByDisplay.get(displayId))) {
                 return;
             }
 
-            if (requestedMaxRefreshRate > 0) {
-                mAppPreferredMaxRefreshRateByDisplay.put(displayId, requestedMaxRefreshRateVote);
-                vote = Vote.forRefreshRates(0, requestedMaxRefreshRate);
+            if (refreshRateRange != null) {
+                mAppPreferredRefreshRateRangeByDisplay.put(displayId, refreshRateRange);
+                vote = Vote.forRefreshRates(refreshRateRange.min, refreshRateRange.max);
             } else {
-                mAppPreferredMaxRefreshRateByDisplay.remove(displayId);
+                mAppPreferredRefreshRateRangeByDisplay.remove(displayId);
                 vote = null;
             }
             synchronized (mLock) {
-                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE, vote);
+                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE, vote);
             }
         }
 
@@ -1316,11 +1330,12 @@ public class DisplayModeDirector {
                 final Display.Mode mode = mAppRequestedModeByDisplay.valueAt(i);
                 pw.println("    " + id + " -> " + mode);
             }
-            pw.println("    mAppPreferredMaxRefreshRateByDisplay:");
-            for (int i = 0; i < mAppPreferredMaxRefreshRateByDisplay.size(); i++) {
-                final int id = mAppPreferredMaxRefreshRateByDisplay.keyAt(i);
-                final Float refreshRate = mAppPreferredMaxRefreshRateByDisplay.valueAt(i);
-                pw.println("    " + id + " -> " + refreshRate);
+            pw.println("    mAppPreferredRefreshRateRangeByDisplay:");
+            for (int i = 0; i < mAppPreferredRefreshRateRangeByDisplay.size(); i++) {
+                final int id = mAppPreferredRefreshRateRangeByDisplay.keyAt(i);
+                final RefreshRateRange refreshRateRange =
+                        mAppPreferredRefreshRateRangeByDisplay.valueAt(i);
+                pw.println("    " + id + " -> " + refreshRateRange);
             }
         }
     }

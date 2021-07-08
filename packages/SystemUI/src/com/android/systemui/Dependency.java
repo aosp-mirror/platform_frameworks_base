@@ -73,6 +73,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -360,6 +361,7 @@ public class Dependency {
     @Inject Lazy<PrivacyDotViewController> mPrivacyDotViewControllerLazy;
     @Inject Lazy<EdgeBackGestureHandler> mEdgeBackGestureHandler;
     @Inject Lazy<UiEventLogger> mUiEventLogger;
+    @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
 
     @Inject
     public Dependency() {
@@ -574,6 +576,7 @@ public class Dependency {
         mProviders.put(PrivacyDotViewController.class, mPrivacyDotViewControllerLazy::get);
         mProviders.put(EdgeBackGestureHandler.class, mEdgeBackGestureHandler::get);
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
+        mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
 
         Dependency.setInstance(this);
     }

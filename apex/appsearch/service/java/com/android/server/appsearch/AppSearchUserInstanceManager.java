@@ -173,8 +173,11 @@ public final class AppSearchUserInstanceManager {
         File appSearchDir = getAppSearchDir(userHandle);
         File icingDir = new File(appSearchDir, "icing");
         Log.i(TAG, "Creating new AppSearch instance at: " + icingDir);
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(icingDir, initStatsBuilder, new FrameworkOptimizeStrategy());
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(
+                icingDir,
+                new FrameworkLimitConfig(config),
+                initStatsBuilder,
+                new FrameworkOptimizeStrategy());
 
         long prepareVisibilityStoreLatencyStartMillis = SystemClock.elapsedRealtime();
         VisibilityStoreImpl visibilityStore =

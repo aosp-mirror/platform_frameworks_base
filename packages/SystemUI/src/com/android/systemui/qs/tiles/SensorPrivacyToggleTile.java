@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.hardware.SensorPrivacyManager.Sources.QS_TILE;
+
 import android.content.Intent;
 import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
@@ -87,12 +89,12 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     protected void handleClick(@Nullable View view) {
         if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                mSensorPrivacyController.setSensorBlocked(getSensorId(),
+                mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(),
                         !mSensorPrivacyController.isSensorBlocked(getSensorId()));
             });
             return;
         }
-        mSensorPrivacyController.setSensorBlocked(getSensorId(),
+        mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(),
                 !mSensorPrivacyController.isSensorBlocked(getSensorId()));
     }
 

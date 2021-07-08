@@ -2159,6 +2159,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (!quotaEnabled) continue;
             if (snapshot.getNetwork() == null) continue;
             final int subId = getSubIdLocked(snapshot.getNetwork());
+            if (subId == INVALID_SUBSCRIPTION_ID) continue;
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
             if (plan == null) continue;
 
@@ -2181,9 +2182,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final long startOfDay = ZonedDateTime.ofInstant(now, cycle.getLower().getZone())
                         .truncatedTo(ChronoUnit.DAYS)
                         .toInstant().toEpochMilli();
-                final long totalBytes = getTotalBytes(
-                        buildTemplateCarrierMetered(snapshot.getSubscriberId()),
-                        start, startOfDay);
+                final String subscriberId = snapshot.getSubscriberId();
+                final long totalBytes = subscriberId == null
+                        ? 0 : getTotalBytes(
+                                buildTemplateCarrierMetered(subscriberId), start, startOfDay);
                 final long remainingBytes = limitBytes - totalBytes;
                 // Number of remaining days including current day
                 final long remainingDays =
@@ -2706,6 +2708,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // write all known subscription plans
             for (int i = 0; i < mSubscriptionPlans.size(); i++) {
                 final int subId = mSubscriptionPlans.keyAt(i);
+                if (subId == INVALID_SUBSCRIPTION_ID) continue;
                 final String ownerPackage = mSubscriptionPlansOwner.get(subId);
                 final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
                 if (ArrayUtils.isEmpty(plans)) continue;
@@ -5619,7 +5622,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // Turn carrier/mobile data limit off
         NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
-        NetworkTemplate templateCarrier = buildTemplateCarrierMetered(subscriber);
+        NetworkTemplate templateCarrier = subscriber != null
+                ? buildTemplateCarrierMetered(subscriber) : null;
         NetworkTemplate templateMobile = buildTemplateMobileAll(subscriber);
         for (NetworkPolicy policy : policies) {
             //  All policies loaded from disk will be carrier templates, and setting will also only

@@ -311,7 +311,7 @@ public class StagingManagerTest {
         assertThat(apexSession1.getErrorCode())
                 .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
         assertThat(apexSession1.getErrorMessage()).isEqualTo("APEX activation failed. "
-                + "Failed for test");
+                + "Error: Failed for test");
 
         assertThat(apexSession2.getErrorCode())
                 .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);

@@ -26,6 +26,7 @@
         android:id="@android:id/background"
         android:orientation="horizontal"
         android:gravity="center"
+        android:contentDescription="@string/status_before_loading"
         android:layout_gravity="top"
         android:paddingVertical="16dp"
         android:paddingHorizontal="16dp"

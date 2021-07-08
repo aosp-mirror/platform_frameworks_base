@@ -308,7 +308,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         }
 
-        if (DEBUG) Slog.w(TAG, "Requesting auth for " + getOwnerString());
+        Slog.d(TAG, "Requesting auth for " + getOwnerString());
 
         mStartTimeMs = System.currentTimeMillis();
         mAuthAttempted = true;

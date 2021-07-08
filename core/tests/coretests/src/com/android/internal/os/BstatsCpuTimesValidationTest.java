@@ -584,7 +584,7 @@ public class BstatsCpuTimesValidationTest {
                 actualCpuTimeMs += cpuTimesMs[i];
             }
             assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
-                    2 * WORK_DURATION_MS, actualCpuTimeMs);
+                    WORK_DURATION_MS, actualCpuTimeMs);
 
             batteryOffScreenOn();
         } finally {
@@ -656,8 +656,14 @@ public class BstatsCpuTimesValidationTest {
         }
     }
 
-    private void assertApproximateValue(String errorPrefix, long expectedValue, long actualValue) {
-        assertValueRange(errorPrefix, actualValue, expectedValue * 0.5, expectedValue * 1.5);
+    private void assertApproximateValue(String errorPrefix, long expectedValueMs,
+            long actualValueMs) {
+        // Allow the actual value to be 1 second smaller than the expected.
+        // Also allow it to be up to 5 seconds larger, to accommodate the arbitrary
+        // latency introduced by BatteryExternalStatsWorker.scheduleReadProcStateCpuTimes
+        assertValueRange(errorPrefix, actualValueMs,
+                expectedValueMs - 1000,
+                expectedValueMs + 5000);
     }
 
     private void assertValueRange(String errorPrefix,

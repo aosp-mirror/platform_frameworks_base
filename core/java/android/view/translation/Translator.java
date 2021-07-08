@@ -102,19 +102,19 @@ public class Translator {
 
     static class ServiceBinderReceiver extends IResultReceiver.Stub {
         // TODO: refactor how translator is instantiated after removing deprecated createTranslator.
-        private final WeakReference<Translator> mTranslator;
+        private final Translator mTranslator;
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private int mSessionId;
 
         private Consumer<Translator> mCallback;
 
         ServiceBinderReceiver(Translator translator, Consumer<Translator> callback) {
-            mTranslator = new WeakReference<>(translator);
+            mTranslator = translator;
             mCallback = callback;
         }
 
         ServiceBinderReceiver(Translator translator) {
-            mTranslator = new WeakReference<>(translator);
+            mTranslator = translator;
         }
 
         int getSessionStateResult() throws TimeoutException {
@@ -139,14 +139,9 @@ public class Translator {
                 }
                 return;
             }
-            mSessionId = resultData.getInt(EXTRA_SESSION_ID);
-            final Translator translator = mTranslator.get();
-            if (translator == null) {
-                Log.w(TAG, "received result after session is finished");
-                return;
-            }
             final IBinder binder;
             if (resultData != null) {
+                mSessionId = resultData.getInt(EXTRA_SESSION_ID);
                 binder = resultData.getBinder(EXTRA_SERVICE_BINDER);
                 if (binder == null) {
                     Log.wtf(TAG, "No " + EXTRA_SERVICE_BINDER + " extra result");
@@ -155,10 +150,10 @@ public class Translator {
             } else {
                 binder = null;
             }
-            translator.setServiceBinder(binder);
+            mTranslator.setServiceBinder(binder);
             mLatch.countDown();
             if (mCallback != null) {
-                mCallback.accept(translator);
+                mCallback.accept(mTranslator);
             }
         }
 

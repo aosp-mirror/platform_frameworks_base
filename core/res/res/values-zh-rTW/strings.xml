@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 服務"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"感應器通知服務"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight 服務"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"時區偵測器 (不必連上網路)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 時間更新服務"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"音樂辨識管理員服務"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"你的裝置資料將遭到清除"</string>
@@ -1483,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出\n權限要求。"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"「<xliff:g id="APP">%1$s</xliff:g>」要求授予\n<xliff:g id="ACCOUNT">%2$s</xliff:g> 帳戶的權限。"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"你目前並非透過工作資料夾使用這個應用程式"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"你目前透過工作設定檔使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"輸入法"</string>
@@ -2095,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"這則通知的重要性順序已調高。輕觸即可提供意見。"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"這則通知的重要性順序已調降。輕觸即可提供意見。"</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"加強型通知"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"建議的操作和回覆內容目前是由加強型通知功能提供。系統已不再支援 Android 自動調整通知功能。"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"目前是由加強型通知功能提供建議的操作和回覆內容。系統已不再支援 Android 自動調整通知功能。"</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>

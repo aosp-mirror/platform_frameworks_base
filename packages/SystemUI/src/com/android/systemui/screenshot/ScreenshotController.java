@@ -264,6 +264,7 @@ public class ScreenshotController {
 
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
+    private Uri mLatestUriSaved;
 
     private final Handler mScreenshotHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -546,7 +547,6 @@ public class ScreenshotController {
             mAccessibilityManager.sendAccessibilityEvent(event);
         }
 
-
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
             if (!mScreenshotView.isDismissing()) {
@@ -563,6 +563,7 @@ public class ScreenshotController {
                 .getWindowInsets().getDisplayCutout());
 
         mScreenBitmap = screenshot;
+        mLatestUriSaved = null;
 
         if (!isUserSetupComplete()) {
             Log.w(TAG, "User setup not complete, displaying toast only");
@@ -676,12 +677,19 @@ public class ScreenshotController {
                             mScrollCaptureController.run(response);
                     future.addListener(() -> {
                         ScrollCaptureController.LongScreenshot longScreenshot;
+
                         try {
                             longScreenshot = future.get();
                         } catch (CancellationException
                                 | InterruptedException
                                 | ExecutionException e) {
                             Log.e(TAG, "Exception", e);
+                            mScreenshotView.restoreNonScrollingUi();
+                            return;
+                        }
+
+                        if (longScreenshot.getHeight() == 0) {
+                            mScreenshotView.restoreNonScrollingUi();
                             return;
                         }
 
@@ -693,6 +701,7 @@ public class ScreenshotController {
                                                 longScreenshot));
 
                         final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
+                        intent.setData(mLatestUriSaved);
                         intent.setFlags(
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -882,6 +891,8 @@ public class ScreenshotController {
 
         resetTimeout();
 
+        mLatestUriSaved = imageData.uri;
+
         if (imageData.uri != null) {
             mScreenshotHandler.post(() -> {
                 if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
@@ -929,10 +940,12 @@ public class ScreenshotController {
      */
     private Supplier<ActionTransition> getActionTransitionSupplier() {
         return () -> {
+            View preview = mScreenshotView.getTransitionView();
+            preview.setX(preview.getX() - mScreenshotView.getStaticLeftMargin());
             Pair<ActivityOptions, ExitTransitionCoordinator> transition =
                     ActivityOptions.startSharedElementAnimation(
                             mWindow, new ScreenshotExitTransitionCallbacksSupplier(true).get(),
-                            null, Pair.create(mScreenshotView.getScreenshotPreview(),
+                            null, Pair.create(mScreenshotView.getTransitionView(),
                                     ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
             transition.second.startExit();
 

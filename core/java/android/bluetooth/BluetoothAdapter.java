@@ -120,6 +120,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
+    private static final String DESCRIPTOR = "android.bluetooth.BluetoothAdapter";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -805,7 +806,7 @@ public final class BluetoothAdapter {
         mManagerService = Objects.requireNonNull(managerService);
         mAttributionSource = Objects.requireNonNull(attributionSource);
         mLeScanClients = new HashMap<LeScanCallback, ScanCallback>();
-        mToken = new Binder();
+        mToken = new Binder(DESCRIPTOR);
     }
 
     /**
@@ -1799,9 +1800,10 @@ public final class BluetoothAdapter {
      * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
      * not discoverable by default, and need to be entered into a special mode.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
-     * will return false. After turning on Bluetooth,
-     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
-     * to get the updated value.
+     * will return false. After turning on Bluetooth, wait for {@link #ACTION_STATE_CHANGED}
+     * with {@link #STATE_ON} to get the updated value.
+     * <p>If a device is currently bonding, this request will be queued and executed once that
+     * device has finished bonding. If a request is already queued, this request will be ignored.
      *
      * @return true on success, false on error
      */

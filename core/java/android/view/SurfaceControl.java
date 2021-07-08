@@ -234,6 +234,7 @@ public final class SurfaceControl implements Parcelable {
     private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
     private static native int nativeGetGPUContextPriority();
     private static native void nativeSetTransformHint(long nativeObject, int transformHint);
+    private static native int nativeGetTransformHint(long nativeObject);
 
     @Nullable
     @GuardedBy("mLock")
@@ -608,7 +609,6 @@ public final class SurfaceControl implements Parcelable {
         mName = other.mName;
         mWidth = other.mWidth;
         mHeight = other.mHeight;
-        mTransformHint = other.mTransformHint;
         mLocalOwnerView = other.mLocalOwnerView;
         assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject), callsite);
     }
@@ -1471,7 +1471,6 @@ public final class SurfaceControl implements Parcelable {
         mName = in.readString8();
         mWidth = in.readInt();
         mHeight = in.readInt();
-        mTransformHint = in.readInt();
 
         long object = 0;
         if (in.readInt() != 0) {
@@ -1490,7 +1489,6 @@ public final class SurfaceControl implements Parcelable {
         dest.writeString8(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
-        dest.writeInt(mTransformHint);
         if (mNativeObject == 0) {
             dest.writeInt(0);
         } else {
@@ -3603,7 +3601,8 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public int getTransformHint() {
-        return mTransformHint;
+        checkNotReleased();
+        return nativeGetTransformHint(mNativeObject);
     }
 
     /**
@@ -3616,9 +3615,6 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public void setTransformHint(@Surface.Rotation int transformHint) {
-        if (mTransformHint != transformHint) {
-            mTransformHint = transformHint;
-            nativeSetTransformHint(mNativeObject, transformHint);
-        }
+        nativeSetTransformHint(mNativeObject, transformHint);
     }
 }

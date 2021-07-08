@@ -2512,14 +2512,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
-        if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
-            decor.setSystemUiVisibility(
-                    decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
-        if (a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)) {
-            decor.setSystemUiVisibility(
-                    decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
+        final int sysUiVis = decor.getSystemUiVisibility();
+        final int statusLightFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        final int statusFlag = a.getBoolean(R.styleable.Window_windowLightStatusBar, false)
+                ? statusLightFlag : 0;
+        final int navLightFlag = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        final int navFlag = a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)
+                ? navLightFlag : 0;
+        decor.setSystemUiVisibility(
+                (sysUiVis & ~(statusLightFlag | navLightFlag)) | (statusFlag | navFlag));
         if (a.hasValue(R.styleable.Window_windowLayoutInDisplayCutoutMode)) {
             int mode = a.getInt(R.styleable.Window_windowLayoutInDisplayCutoutMode, -1);
             if (mode < LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT

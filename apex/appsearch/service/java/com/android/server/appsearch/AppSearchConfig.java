@@ -60,6 +60,11 @@ public final class AppSearchConfig implements AutoCloseable {
     @VisibleForTesting
     static final int DEFAULT_SAMPLING_INTERVAL = 10;
 
+    @VisibleForTesting
+    static final int DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES = 512 * 1024; // 512KiB
+    @VisibleForTesting
+    static final int DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT = 20_000;
+
     /*
      * Keys for ALL the flags stored in DeviceConfig.
      */
@@ -70,13 +75,19 @@ public final class AppSearchConfig implements AutoCloseable {
             "sampling_interval_for_batch_call_stats";
     public static final String KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS =
             "sampling_interval_for_put_document_stats";
+    public static final String KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES =
+            "limit_config_max_document_size_bytes";
+    public static final String KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT =
+            "limit_config_max_document_docunt";
 
     // Array contains all the corresponding keys for the cached values.
     private static final String[] KEYS_TO_ALL_CACHED_VALUES = {
             KEY_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
             KEY_SAMPLING_INTERVAL_DEFAULT,
             KEY_SAMPLING_INTERVAL_FOR_BATCH_CALL_STATS,
-            KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS
+            KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS,
+            KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES,
+            KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT,
     };
 
     // Lock needed for all the operations in this class.
@@ -222,6 +233,24 @@ public final class AppSearchConfig implements AutoCloseable {
         }
     }
 
+    /** Returns the maximum serialized size an indexed document can be, in bytes. */
+    public int getCachedLimitConfigMaxDocumentSizeBytes() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES,
+                    DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES);
+        }
+    }
+
+    /** Returns the maximum number of active docs allowed per package. */
+    public int getCachedLimitConfigMaxDocumentCount() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT,
+                    DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT);
+        }
+    }
+
     @GuardedBy("mLock")
     private void throwIfClosedLocked() {
         if (mIsClosedLocked) {
@@ -262,6 +291,20 @@ public final class AppSearchConfig implements AutoCloseable {
             case KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS:
                 synchronized (mLock) {
                     mBundleLocked.putInt(key, properties.getInt(key, DEFAULT_SAMPLING_INTERVAL));
+                }
+                break;
+            case KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES:
+                synchronized (mLock) {
+                    mBundleLocked.putInt(
+                            key,
+                            properties.getInt(key, DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES));
+                }
+                break;
+            case KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT:
+                synchronized (mLock) {
+                    mBundleLocked.putInt(
+                            key,
+                            properties.getInt(key, DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT));
                 }
                 break;
             default:

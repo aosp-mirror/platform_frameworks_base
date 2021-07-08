@@ -39,7 +39,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,6 +72,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -236,6 +236,8 @@ public class BubblesTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock
+    private AuthController mAuthController;
 
     private TestableBubblePositioner mPositioner;
 
@@ -259,7 +261,7 @@ public class BubblesTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

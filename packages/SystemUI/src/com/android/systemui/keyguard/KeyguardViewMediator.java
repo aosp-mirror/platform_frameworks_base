@@ -175,7 +175,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
 
     private final static String TAG = "KeyguardViewMediator";
@@ -975,12 +975,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mPowerGestureIntercepted = false;
             mGoingToSleep = true;
 
-            // Reset keyguard going away state so we can start listening for fingerprint. We
-            // explicitly DO NOT want to call
-            // mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(false)
-            // here, since that will mess with the device lock state.
-            mUpdateMonitor.dispatchKeyguardGoingAway(false);
-
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
             // camera while preventing unwanted input.
@@ -1018,7 +1012,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 playSounds(true);
             }
         }
+
         mUpdateMonitor.dispatchStartedGoingToSleep(offReason);
+
+        // Reset keyguard going away state so we can start listening for fingerprint. We
+        // explicitly DO NOT want to call
+        // mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(false)
+        // here, since that will mess with the device lock state.
+        mUpdateMonitor.dispatchKeyguardGoingAway(false);
+
         notifyStartedGoingToSleep();
     }
 

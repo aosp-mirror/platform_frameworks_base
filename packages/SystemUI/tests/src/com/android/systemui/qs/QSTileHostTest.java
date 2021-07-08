@@ -39,7 +39,6 @@ import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.FeatureFlagUtils;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -65,6 +64,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -140,9 +140,9 @@ public class QSTileHostTest extends SysuiTestCase {
         // TODO(b/174753536): Remove the mMockingSession when
         // FeatureFlagUtils.SETTINGS_PROVIDER_MODEL is removed.
         mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
-                .mockStatic(FeatureFlagUtils.class).startMocking();
-        ExtendedMockito.doReturn(false).when(() -> FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_PROVIDER_MODEL));
+                .mockStatic(FeatureFlags.class).startMocking();
+        ExtendedMockito.doReturn(false)
+                .when(() -> FeatureFlags.isProviderModelSettingEnabled(mContext));
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());

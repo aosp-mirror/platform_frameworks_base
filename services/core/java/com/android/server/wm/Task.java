@@ -1464,12 +1464,6 @@ class Task extends WindowContainer<WindowContainer> {
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
-
-        // Resume next focusable root task after reparenting to another display if we aren't
-        // removing the prevous display.
-        if (oldDisplay != null && oldDisplay.isRemoving()) {
-            postReparent();
-        }
     }
 
     void cleanUpActivityReferences(ActivityRecord r) {
@@ -5462,8 +5456,7 @@ class Task extends WindowContainer<WindowContainer> {
         mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
-    /** Resume next focusable root task after reparenting to another display. */
-    void postReparent() {
+    void resumeNextFocusAfterReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
                 true /* moveDisplayToTop */);
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -7653,9 +7646,9 @@ class Task extends WindowContainer<WindowContainer> {
         mLastRecentsAnimationTransaction = null;
         mLastRecentsAnimationOverlay = null;
         // reset also the crop and transform introduced by mLastRecentsAnimationTransaction
-        Rect bounds = getBounds();
         getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9])
-                .setWindowCrop(mSurfaceControl, bounds.width(), bounds.height());
+                .setWindowCrop(mSurfaceControl, null)
+                .setCornerRadius(mSurfaceControl, 0);
     }
 
     void maybeApplyLastRecentsAnimationTransaction() {

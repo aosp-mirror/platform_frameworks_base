@@ -286,9 +286,11 @@ public class ApexManagerTest {
         mApexManager.scanApexPackagesTraced(mPackageParser2,
                 ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isTrue();
-        mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath());
-        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isFalse();
+        assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName)).isNull();
+        mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath(),
+                "Some random error");
+        assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName))
+            .isEqualTo("Some random error");
     }
 
     /**

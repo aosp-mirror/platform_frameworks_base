@@ -92,7 +92,10 @@ public class AppSearchImplPlatformTest {
 
         // Give ourselves global query permissions
         mAppSearchImpl = AppSearchImpl.create(
-                mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                mTemporaryFolder.newFolder(),
+                new UnlimitedLimitConfig(),
+                /*initStatsBuilder=*/ null,
+                ALWAYS_OPTIMIZE);
         mVisibilityStore = VisibilityStoreImpl.create(mAppSearchImpl, mContext);
         mGlobalQuerierUid =
                 mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);

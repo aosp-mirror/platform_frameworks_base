@@ -37,6 +37,7 @@ import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
@@ -69,6 +70,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyLogger mPrivacyLogger;
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
+    private final FeatureFlags mFeatureFlags;
 
     private boolean mListening;
     private boolean mMicCameraIndicatorsEnabled;
@@ -130,7 +132,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             PrivacyLogger privacyLogger,
             SysuiColorExtractor colorExtractor,
             PrivacyDialogController privacyDialogController,
-            QSExpansionPathInterpolator qsExpansionPathInterpolator) {
+            QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            FeatureFlags featureFlags) {
         super(view);
         mPrivacyItemController = privacyItemController;
         mActivityStarter = activityStarter;
@@ -141,6 +144,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyLogger = privacyLogger;
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
+        mFeatureFlags = featureFlags;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
@@ -150,7 +154,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mClockView = mView.findViewById(R.id.clock);
         mIconContainer = mView.findViewById(R.id.statusIcons);
 
-        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer);
+        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, mFeatureFlags);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mColorExtractor = colorExtractor;
         mOnColorsChangedListener = (extractor, which) -> {
@@ -174,7 +178,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
         setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
 
-        mView.onAttach(mIconManager, mQSExpansionPathInterpolator);
+        mView.onAttach(mIconManager, mQSExpansionPathInterpolator,
+                mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
 
         mDemoModeController.addCallback(mDemoModeReceiver);
     }

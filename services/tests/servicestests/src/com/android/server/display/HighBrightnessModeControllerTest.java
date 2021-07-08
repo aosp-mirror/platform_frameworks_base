@@ -20,22 +20,43 @@ import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.Temperature;
+import android.os.Temperature.ThrottlingStatus;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.test.mock.MockContentResolver;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
+import com.android.server.display.HighBrightnessModeController.Injector;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @Presubmit
@@ -47,6 +68,8 @@ public class HighBrightnessModeControllerTest {
     private static final long TIME_WINDOW_MILLIS = 55 * 1000;
     private static final long TIME_ALLOWED_IN_WINDOW_MILLIS = 12 * 1000;
     private static final long TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS = 5 * 1000;
+    private static final int THERMAL_STATUS_LIMIT = PowerManager.THERMAL_STATUS_SEVERE;
+    private static final boolean ALLOW_IN_LOW_POWER_MODE = false;
 
     private static final float DEFAULT_MIN = 0.01f;
     private static final float DEFAULT_MAX = 0.80f;
@@ -57,22 +80,30 @@ public class HighBrightnessModeControllerTest {
     private TestLooper mTestLooper;
     private Handler mHandler;
     private Binder mDisplayToken;
+    private Context mContextSpy;
+
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    @Mock IThermalService mThermalServiceMock;
+    @Mock Injector mInjectorMock;
+
+    @Captor ArgumentCaptor<IThermalEventListener> mThermalEventListenerCaptor;
 
     private static final HighBrightnessModeData DEFAULT_HBM_DATA =
             new HighBrightnessModeData(MINIMUM_LUX, TRANSITION_POINT, TIME_WINDOW_MILLIS,
-                    TIME_ALLOWED_IN_WINDOW_MILLIS, TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS);
+                    TIME_ALLOWED_IN_WINDOW_MILLIS, TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS,
+                    THERMAL_STATUS_LIMIT, ALLOW_IN_LOW_POWER_MODE);
 
     @Before
     public void setUp() {
-        mClock = new OffsettableClock.Stopped();
-        mTestLooper = new TestLooper(mClock::now);
+        MockitoAnnotations.initMocks(this);
         mDisplayToken = null;
-        mHandler = new Handler(mTestLooper.getLooper(), new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message msg) {
-                return true;
-            }
-        });
+        mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
+        final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
+        when(mContextSpy.getContentResolver()).thenReturn(resolver);
+
+        when(mInjectorMock.getThermalService()).thenReturn(mThermalServiceMock);
     }
 
     /////////////////
@@ -81,15 +112,19 @@ public class HighBrightnessModeControllerTest {
 
     @Test
     public void testNoHbmData() {
+        initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
-                mClock::now, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null, () -> {});
+                mInjectorMock, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null,
+                () -> {}, mContextSpy);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
     }
 
     @Test
     public void testNoHbmData_Enabled() {
+        initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
-                mClock::now, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null, () -> {});
+                mInjectorMock, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null,
+                () -> {}, mContextSpy);
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
@@ -258,6 +293,54 @@ public class HighBrightnessModeControllerTest {
         assertState(hbmc, DEFAULT_MIN, TRANSITION_POINT, HIGH_BRIGHTNESS_MODE_OFF);
     }
 
+    @Test
+    public void testNoHbmInHighThermalState() throws Exception {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+
+        verify(mThermalServiceMock).registerThermalEventListenerWithType(
+                mThermalEventListenerCaptor.capture(), eq(Temperature.TYPE_SKIN));
+        final IThermalEventListener listener = mThermalEventListenerCaptor.getValue();
+
+        // Set the thermal status too high.
+        listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_CRITICAL));
+
+        // Try to go into HBM mode but fail
+        hbmc.setAutoBrightnessEnabled(true);
+        hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
+        advanceTime(10);
+
+        assertEquals(HIGH_BRIGHTNESS_MODE_OFF, hbmc.getHighBrightnessMode());
+    }
+
+    @Test
+    public void testHbmTurnsOffInHighThermalState() throws Exception {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+
+        verify(mThermalServiceMock).registerThermalEventListenerWithType(
+                mThermalEventListenerCaptor.capture(), eq(Temperature.TYPE_SKIN));
+        final IThermalEventListener listener = mThermalEventListenerCaptor.getValue();
+
+        // Set the thermal status tolerable
+        listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_LIGHT));
+
+        // Try to go into HBM mode
+        hbmc.setAutoBrightnessEnabled(true);
+        hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
+        advanceTime(1);
+
+        assertEquals(HIGH_BRIGHTNESS_MODE_SUNLIGHT, hbmc.getHighBrightnessMode());
+
+        // Set the thermal status too high and verify we're off.
+        listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_CRITICAL));
+        advanceTime(10);
+        assertEquals(HIGH_BRIGHTNESS_MODE_OFF, hbmc.getHighBrightnessMode());
+
+        // Set the thermal status low again and verify we're back on.
+        listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_SEVERE));
+        advanceTime(1);
+        assertEquals(HIGH_BRIGHTNESS_MODE_SUNLIGHT, hbmc.getHighBrightnessMode());
+    }
+
     private void assertState(HighBrightnessModeController hbmc,
             float brightnessMin, float brightnessMax, int hbmMode) {
         assertEquals(brightnessMin, hbmc.getCurrentBrightnessMin(), EPSILON);
@@ -265,14 +348,35 @@ public class HighBrightnessModeControllerTest {
         assertEquals(hbmMode, hbmc.getHighBrightnessMode());
     }
 
-    // Creates instance with standard initialization values.
     private HighBrightnessModeController createDefaultHbm() {
-        return new HighBrightnessModeController(mClock::now, mHandler, mDisplayToken, DEFAULT_MIN,
-                DEFAULT_MAX, DEFAULT_HBM_DATA, () -> {});
+        return createDefaultHbm(null);
+    }
+
+    // Creates instance with standard initialization values.
+    private HighBrightnessModeController createDefaultHbm(OffsettableClock clock) {
+        initHandler(clock);
+        return new HighBrightnessModeController(mInjectorMock, mHandler, mDisplayToken, DEFAULT_MIN,
+                DEFAULT_MAX, DEFAULT_HBM_DATA, () -> {}, mContextSpy);
+    }
+
+    private void initHandler(OffsettableClock clock) {
+        mClock = clock != null ? clock : new OffsettableClock.Stopped();
+        when(mInjectorMock.getClock()).thenReturn(mClock::now);
+        mTestLooper = new TestLooper(mClock::now);
+        mHandler = new Handler(mTestLooper.getLooper(), new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                return true;
+            }
+        });
     }
 
     private void advanceTime(long timeMs) {
         mClock.fastForward(timeMs);
         mTestLooper.dispatchAll();
+    }
+
+    private Temperature getSkinTemp(@ThrottlingStatus int status) {
+        return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
     }
 }

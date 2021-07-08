@@ -42,8 +42,6 @@ import android.view.animation.PathInterpolator;
 import androidx.annotation.BinderThread;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.inputmethod.Completable;
-import com.android.internal.inputmethod.ResultCallbacks;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
@@ -540,9 +538,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             try {
                 // Remove the IME surface to make the insets invisible for
                 // non-client controlled insets.
-                final Completable.Void value = Completable.createVoid();
-                imms.removeImeSurface(ResultCallbacks.of(value));
-                Completable.getResult(value);
+                imms.removeImeSurface();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to remove IME surface.", e);
             }

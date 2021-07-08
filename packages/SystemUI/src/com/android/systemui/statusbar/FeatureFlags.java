@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import android.content.Context;
+import android.util.FeatureFlagUtils;
+
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlagReader;
@@ -30,10 +33,12 @@ import javax.inject.Inject;
 @SysUISingleton
 public class FeatureFlags {
     private final FeatureFlagReader mFlagReader;
+    private final Context mContext;
 
     @Inject
-    public FeatureFlags(FeatureFlagReader flagReader) {
+    public FeatureFlags(FeatureFlagReader flagReader, Context context) {
         mFlagReader = flagReader;
+        mContext = context;
     }
 
     public boolean isNewNotifPipelineEnabled() {
@@ -91,5 +96,20 @@ public class FeatureFlags {
 
     public boolean isSmartSpaceSharedElementTransitionEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_smartspace_shared_element_transition);
+    }
+
+    /** Whether or not to use the provider model behavior for the status bar icons */
+    public boolean isCombinedStatusBarSignalIconsEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_combined_status_bar_signal_icons);
+    }
+
+    /** System setting for provider model behavior */
+    public boolean isProviderModelSettingEnabled() {
+        return FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
+    }
+
+    /** static method for the system setting */
+    public static boolean isProviderModelSettingEnabled(Context context) {
+        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 }
