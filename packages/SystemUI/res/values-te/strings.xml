@@ -1146,11 +1146,9 @@
     <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్డ్ కాల్‌లు, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"సంభాషణ"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"అంతరాయం కలిగించవద్దు ద్వారా పాజ్ చేయబడింది"</string>
-    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> మెసేజ్‌ను పంపారు: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ఇమేజ్‌ను పంపారు"</string>
-    <!-- no translation found for new_status_content_description (6046637888641308327) -->
-    <skip />
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g>, స్టేటస్‌ను గురించిన అప్‌డేట్‌ను కలిగి ఉన్నారు: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"మీ బ్యాటరీ మీటర్‌ను చదవడంలో సమస్య"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"మరింత సమాచారం కోసం ట్యాప్ చేయండి"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"అలారం సెట్ చేయలేదు"</string>

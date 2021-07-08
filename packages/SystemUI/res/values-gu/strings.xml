@@ -669,8 +669,7 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"તમારા ફોન વડે વધુ ઝડપી તેમજ સુરક્ષિત ખરીદીઓ કરવાની રીત સેટઅપ કરી લો"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ચુકવણી કરવા માટે અનલૉક કરો"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"કોઈ કાર્ડ ઉમેરો"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"અપડેટ કરી રહ્યાં છીએ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"તમારા કાર્ડની માહિતી મેળવવામાં સમસ્યા આવી હતી, કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો"</string>
