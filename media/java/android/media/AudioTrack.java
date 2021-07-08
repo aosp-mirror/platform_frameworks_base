@@ -2082,8 +2082,9 @@ public class AudioTrack extends PlayerBase
      * It may also be adjusted slightly for internal reasons.
      * If bufferSizeInFrames is less than zero then {@link #ERROR_BAD_VALUE}
      * will be returned.
-     * <p>This method is only supported for PCM audio.
-     * It is not supported for compressed audio tracks.
+     * <p>This method is supported for PCM audio at all API levels.
+     * Compressed audio is supported in API levels 33 and above.
+     * For compressed streams the size of a frame is considered to be exactly one byte.
      *
      * @param bufferSizeInFrames requested buffer size in frames
      * @return the actual buffer size in frames or an error code,
