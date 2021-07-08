@@ -2728,7 +2728,7 @@
 
     <!-- Device Controls strings -->
     <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Home controls</string>
+    <string name="quick_controls_title">Device controls</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
