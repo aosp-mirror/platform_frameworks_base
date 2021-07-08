@@ -113,7 +113,7 @@ def get_variation_sequences_cmap(font):
 def get_emoji_map(font):
     # Add normal characters
     emoji_map = copy.copy(get_best_cmap(font))
-    reverse_cmap = {glyph: code for code, glyph in emoji_map.items()}
+    reverse_cmap = {glyph: code for code, glyph in emoji_map.items() if not contains_pua(code) }
 
     # Add variation sequences
     vs_dict = get_variation_sequences_cmap(font).uvsDict
@@ -251,6 +251,7 @@ def parse_fonts_xml(fonts_xml_path):
             assert child.tag == 'font', (
                 'Unknown tag <%s>' % child.tag)
             font_file = child.text.rstrip()
+
             weight = int(child.get('weight'))
             assert weight % 100 == 0, (
                 'Font weight "%d" is not a multiple of 100.' % weight)
@@ -314,27 +315,54 @@ def get_emoji_font():
     return emoji_fonts[0]
 
 
+def is_pua(x):
+    return 0xE000 <= x <= 0xF8FF or 0xF0000 <= x <= 0xFFFFD or 0x100000 <= x <= 0x10FFFD
+
+def contains_pua(sequence):
+  if type(sequence) is tuple:
+    return any([is_pua(x) for x in sequence])
+  else:
+    return is_pua(sequence)
+
+
+def check_emoji_compat():
+    ttf = open_font(get_emoji_font())
+    meta = ttf['meta']
+    assert meta, 'Compat font must have meta table'
+    assert 'Emji' in meta.data, 'meta table should have \'Emji\' data.'
+
 def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
     coverage = get_emoji_map(emoji_font)
+
+    errors = []
+
     for sequence in all_emoji:
-        assert sequence in coverage, (
-            '%s is not supported in the emoji font.' % printable(sequence))
+        if not sequence in coverage:
+          errors.append('%s is not supported in the emoji font.' % printable(sequence))
 
     for sequence in coverage:
         if sequence in {0x0000, 0x000D, 0x0020}:
             # The font needs to support a few extra characters, which is OK
             continue
-        assert sequence in all_emoji, (
-            'Emoji font should not support %s.' % printable(sequence))
+
+        if contains_pua(sequence):
+            # The font needs to have some PUA for EmojiCompat library.
+            continue
+
+        if sequence not in all_emoji:
+          errors.append('%s support unexpected in the emoji font.' % printable(sequence))
 
     for first, second in equivalent_emoji.items():
-        assert coverage[first] == coverage[second], (
-            '%s and %s should map to the same glyph.' % (
+        if first not in coverage or second not in coverage:
+            continue  # sequence will be reported missing
+        if coverage[first] != coverage[second]:
+            errors.append('%s and %s should map to the same glyph.' % (
                 printable(first),
                 printable(second)))
 
     for glyph in set(coverage.values()):
-        maps_to_glyph = [seq for seq in coverage if coverage[seq] == glyph]
+        maps_to_glyph = [
+            seq for seq in coverage if coverage[seq] == glyph and not contains_pua(seq) ]
         if len(maps_to_glyph) > 1:
             # There are more than one sequences mapping to the same glyph. We
             # need to make sure they were expected to be equivalent.
@@ -344,10 +372,12 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
                 while equivalent_seq in equivalent_emoji:
                     equivalent_seq = equivalent_emoji[equivalent_seq]
                 equivalent_seqs.add(equivalent_seq)
-            assert len(equivalent_seqs) == 1, (
-                'The sequences %s should not result in the same glyph %s' % (
+            if len(equivalent_seqs) != 1:
+                errors.append('The sequences %s should not result in the same glyph %s' % (
                     printable(equivalent_seqs),
                     glyph))
+
+    assert not errors, '%d emoji font errors:\n%s\n%d emoji font coverage errors' % (len(errors), '\n'.join(errors), len(errors))
 
 
 def check_emoji_defaults(default_emoji):
@@ -680,6 +710,7 @@ def main():
         ucd_path = sys.argv[3]
         parse_ucd(ucd_path)
         all_emoji, default_emoji, equivalent_emoji = compute_expected_emoji()
+        check_emoji_compat()
         check_emoji_coverage(all_emoji, equivalent_emoji)
         check_emoji_defaults(default_emoji)
 

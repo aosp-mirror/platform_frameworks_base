@@ -44,7 +44,7 @@
     <string name="mmiComplete" msgid="6341884570892520140">"MMIが完了しました。"</string>
     <string name="badPin" msgid="888372071306274355">"入力した古いPINは正しくありません。"</string>
     <string name="badPuk" msgid="4232069163733147376">"入力したPUKは正しくありません。"</string>
-    <string name="mismatchPin" msgid="2929611853228707473">"入力したPINが一致しません。"</string>
+    <string name="mismatchPin" msgid="2929611853228707473">"入力した PIN が一致しません。"</string>
     <string name="invalidPin" msgid="7542498253319440408">"4～8桁の数字のPINを入力してください。"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"PUKは8桁以上で入力してください。"</string>
     <string name="needPuk" msgid="7321876090152422918">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
@@ -287,7 +287,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップして電池やデータの使用量を確認"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップしてバッテリーやデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"セーフモード"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android システム"</string>
@@ -424,7 +424,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、電池使用量が増えることがあります。"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
@@ -499,9 +499,9 @@
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"Wi-Fiからの接続と切断"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fiアクセスポイントへの接続/切断、Wi-Fiネットワークのデバイス設定の変更をアプリに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fiマルチキャストの受信を許可する"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"マルチキャスト アドレスを使用して、この Android TV デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"マルチキャストアドレスを使用して、このモバイル デバイスだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"マルチキャスト アドレスを使用して、このタブレットだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりもバッテリーの消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"マルチキャスト アドレスを使用して、この Android TV デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりもバッテリーの消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"マルチキャスト アドレスを使用して、このモバイル デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりもバッテリーの消費量が大きくなります。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"ローカルのBluetoothタブレットを設定することと、リモートデバイスを検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Android TV デバイスで Bluetooth を設定することと、リモート デバイスを検出してペアに設定することをアプリに許可します。"</string>
@@ -685,9 +685,9 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"画面のロック"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"画面をロックする方法とタイミングを制御します。"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"すべてのデータを消去"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"警告せずにデータの初期化を実行してタブレット内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"警告せずにタブレットを初期化して内部のデータを消去します。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"警告せずに出荷時設定へのリセットを実行して Android TV デバイスのデータを消去します。"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"警告せずにデータの初期化を実行してデバイス内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"警告せずにデバイスを初期化して内部のデータを消去します。"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ユーザーデータの消去"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"このタブレットのこのユーザーのデータを警告なく消去します。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"この Android TV デバイスでこのユーザーのデータを警告なく消去します。"</string>
@@ -1567,7 +1567,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ワイヤレス ディスプレイ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"キャスト"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"デバイスに接続"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"デバイスへの画面のキャスト"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"デバイスに画面をキャスト"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"デバイスを検索しています…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"接続を解除"</string>
@@ -1638,7 +1638,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能が必要な場合には適していますが、その他の多くのアプリには不要です。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"モナーク"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"クォート"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"フールスキャップ"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"角2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"洋4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"縦向き不明"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"横向き不明"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"キャンセルされました"</string>
@@ -1769,7 +1781,7 @@
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"新しいPIN"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINが一致しません。もう一度お試しください。"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN が一致しません。もう一度お試しください。"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
@@ -1797,8 +1809,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n• ダークテーマを ON にする\n• バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n• ダークテーマを ON にする\n• バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n• ダークモードを ON にする\n• バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n• ダークモードを ON にする\n• バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1990,7 +2002,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"着信や通知をバイブレーションで知らせます"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音をミュートします"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音が鳴りません"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"システムの変更"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"サイレント モード"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新機能: サイレント モードでは通知が非表示になります"</string>

@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Draadlose ontfouting"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Skakel draadlose ontfouting aan om beskikbare toestelle te sien en te gebruik"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Gebruik QR-kode om toestel saam te bind"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Gebruik QR-kodeskandeerder om nuwe toestelle saam te bind"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Gebruik QR-kodeskandeerder om nuwe toestelle saam te bind"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Gebruik saambindkode om toestel saam te bind"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Gebruik \'n sessyferkode om nuwe toestelle saam te bind"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Saamgebinde toestelle"</string>
@@ -231,7 +231,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Kon nie die toestel saambind nie. Óf die QR-kode is verkeerd, óf die toestel is nie aan dieselfde netwerk gekoppel nie."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adres en -poort"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skandeer QR-kode"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Bind toestel oor Wi-Fi saam deur \'n QR-kode te skandeer"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Bind toestel oor Wi-Fi saam deur \'n QR-kode te skandeer"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Koppel asseblief aan \'n Wi-Fi-netwerk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Kortpad na foutverslag"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Wys \'n knoppie in die kragkieslys om \'n foutverslag te doen"</string>
@@ -250,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktiveer Wi-Fi-woordryke aanmelding"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Regulering van Wi-Fi-opsporing"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑verbeterde MAC-verewekansiging"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiele data is altyd aktief"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardewareversnelling vir verbinding"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Wys Bluetooth-toestelle sonder name"</string>
@@ -281,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag batteryverbruik en verbeter netwerk se werkverrigting"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wanneer hierdie modus geaktiveer is, kan hierdie toestel se MAC-adres verander elke keer wanneer dit aan \'n netwerk koppel waarvoor MAC-verewekansiging geaktiveer is."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Beperk"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Onbeperk"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Loggerbuffer se groottes"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-toestelle sonder name (net MAC-adresse) sal gewys word"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Deaktiveer die Bluetooth-kenmerk vir absolute volume indien daar volumeprobleme met afgeleë toestelle is, soos onaanvaarbare harde klank of geen beheer nie."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Aktiveer die Bluetooth Gabeldorsche-kenmerkstapel."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktiveer die Verbeterde Konnektiwiteit-kenmerk."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Plaaslike terminaal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktiveer terminaalprogram wat plaaslike skermtoegang bied"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrolering"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profiel-HWUI-lewering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktiveer GPU-ontfoutlae"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Laat laai van GPU-ontfoutlae vir ontfoutprogramme toe"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktiveer woordryke verkoperloginskrywing"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sluit bykomende toestelspesifieke verkoperloglêers by foutverslae in, wat privaat inligting kan bevat, meer batterykrag kan gebruik, en/of meer berging kan gebruik."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Vensteranimasieskaal"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Oorganganimasieskaal"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator-tydsduurskaal"</string>
@@ -370,8 +376,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Dwing aktiwiteite om verstelbaar te wees"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye-Windows"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktiveer steun vir eksperimentele vormvrye-Windows."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye vensters"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktiveer steun vir eksperimentele vormvrye vensters."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Werkskerm-rugsteunwagwoord"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Volle rekenaarrugsteune word nie tans beskerm nie"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tik om die wagwoord vir volledige rekenaarrugsteune te verander of te verwyder"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rooi-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blou-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurregstelling"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Kleurregstelling help mense met kleurblindheid om akkurater kleure te sien"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Kleurregstelling stel jou in staat om te verstel hoe kleure op jou toestel vertoon word"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Geneutraliseer deur <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
@@ -426,11 +432,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Sal waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Sal waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Tot <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Verleng batterylewe verby <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Battery kan teen <xliff:g id="TIME">%1$s</xliff:g> afloop"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Foon sal dalk binnekort afgaan"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet sal dalk binnekort afgaan"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Toestel sal dalk binnekort afgaan"</string>
@@ -440,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> oor tot battery gelaai is"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> tot battery gelaai is"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimeer tans vir batterygesondheid"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laai"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laai tans vinnig"</string>
@@ -451,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Gedeaktiveer"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegelaat"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nie toegelaat nie"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende apps"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende programme"</string>
     <string name="home" msgid="973834627243661438">"Instellingstuisblad"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -501,6 +508,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vra elke keer"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat jy dit afskakel"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sopas"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Hierdie toestel"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Foonluidspreker"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kan nie koppel nie. Skakel toestel af en weer aan"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedrade oudiotoestel"</string>
+    <string name="help_label" msgid="3528360748637781274">"Hulp en terugvoer"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Berging"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Gedeelde data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Bekyk en wysig gedeelde data"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Daar is geen gedeelde data vir hierdie gebruiker nie."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Kon nie gedeelde data gaan haal nie. Probeer weer."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Gedeelde data-ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Verval op <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Kon nie die gedeelde data uitvee nie."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Daar is geen huurkontrakte vir hierdie gedeelde data verkry nie. Wil jy dit uitvee?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Programme wat data deel"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Geen beskrywing is deur die program voorsien nie."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Huurkontrak verval op <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Vee gedeelde data uit?"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Is jy seker jy wil hierdie gedeelde data uitvee?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Gebruikers het hul eie programme en inhoud"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Jy kan toegang tot programme en inhoud op jou rekening beperk"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Gebruiker"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkte profiel"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Voeg nuwe gebruiker by?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het sy eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos Wi-Fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Moet die gebruiker nou opgestel word?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Maak seker die persoon is beskikbaar om die toestel te vat en hul spasie op te stel"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Stel profiel nou op?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Stel nou op"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Nie nou nie"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Voeg by"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Nuwe gebruiker"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Nuwe profiel"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Gebruikerinligting"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profiel-inligting"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Voordat jy \'n beperkte profiel kan skep, moet jy \'n skermslot opstel om jou programme en persoonlike data te beskerm."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Stel slot op"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Skakel oor na <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Voeg gas by"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Verwyder gas"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Gas"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Toestelverstek"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Gedeaktiveer"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Geaktiveer"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Jou toestel moet herselflaai om hierdie verandering toe te pas. Herselflaai nou of kanselleer."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedraade oorfoon"</string>
 </resources>

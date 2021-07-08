@@ -30,11 +30,19 @@ cc_binary_host {
         "libcutils",
         "liblog",
     ],
+    target: {
+        linux_glibc: {
+            static_libs: [
+                // libbinder is only available for linux
+                "libbinder",
+            ],
+        },
+    },
 
     // This tool is prebuilt if we're doing an app-only build.
     product_variables: {
         unbundled_build: {
-          enabled: false,
+            enabled: false,
         },
     },
 }

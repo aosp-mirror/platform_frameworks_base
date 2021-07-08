@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Niveau de batterie : moyen"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Niveau de batterie : bon"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batterie pleine"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Pourcentage de la pile inconnu."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Aucun signal"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Signal : faible"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Signal : moyen"</string>
@@ -362,7 +363,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Portrait"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Paysage"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Mode de saisie"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Position"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Localisation désactivée"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Appareil multimédia"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -600,7 +601,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'application épinglée peut ouvrir d\'autres applications."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour annuler l\'épinglage de cette application, maintenez un doigt sur les touches Retour et Aperçu"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Pour annuler l\'épinglage de cette application, maintenez un doigt sur les touches Retour et Accueil"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pour annuler l\'épinglage de cette application, balayez-la vers le haut et gardez le doigt dessus"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pour annuler l\'épinglage de cette application, balayez-la vers le haut et maintenez-la"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Non, merci"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Application épinglée"</string>
@@ -854,7 +855,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Icône à gauche"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les tuiles pour les ajouter"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Maint. doigt sur l\'écran, puis glissez-le pour réorg. tuiles"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Faites glisser les tuiles pour les réorganiser"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Vous avez besoin d\'au moins <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifier"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (déconnecté)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Impossible de se connecter. Réessayez."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Associer un autre appareil"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Un problème est survenu lors de la lecture du niveau de charge de la pile"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Touchez pour en savoir plus"</string>
 </resources>

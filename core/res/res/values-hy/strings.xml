@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Թույլ է տալիս հավելվածին կարգավիճակի գոտին լինել:"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ընդլայնել կամ հետ ծալել կարգավիճակի գոտին"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Թույլ է տալիս ծրագրին ընդլայնել կամ հետ ծալել կարգավիճակի գոտին:"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"տեղադրել դյուրանցումներ"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Դյուրանցումների տեղադրում"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Հավելվածին թույլ է տալիս ավելացնել գլխավոր էկրանի դյուրանցումներ՝ առանց օգտագործողի միջամտության:"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ապատեղադրել դյուրանցումները"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Հավելվածին թույլ է տալիս հեռացնել գլխավոր էկրանի դյուրանցումները՝ առանց օգտագործողի միջամտության:"</string>
@@ -375,10 +375,10 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"Թույլ է տալիս հավելվածին վերջ տալ այլ հավելվածների հետնաշերտի գործընթացները: Սա կարող է պատճառ դառնալ, որ այլ հավելվածները դադարեն աշխատել:"</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վրայից"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների կամ էկրանի այլ հատվածների վերևում: Դա կարող է խոչընդոտել հավելվածի նորմալ օգտագործմանը և փոխել այլ հավելվածների տեսքը:"</string>
-    <string name="permlab_runInBackground" msgid="541863968571682785">"աշխատել ֆոնում"</string>
+    <string name="permlab_runInBackground" msgid="541863968571682785">"աշխատել հետին պլանում"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Այս հավելվածը կարող է աշխատել ֆոնային ռեժիմում և ավելի արագ սպառել մարտկոցի լիցքը։"</string>
-    <string name="permlab_useDataInBackground" msgid="783415807623038947">"տվյալներ օգտագործել ֆոնում"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Այս հավելվածը կարող է տվյալներ օգտագործել ֆոնում և ավելացնել տվյալների օգտագործման ծավալը։"</string>
+    <string name="permlab_useDataInBackground" msgid="783415807623038947">"տվյալներ օգտագործել հետին պլանում"</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Այս հավելվածը կարող է տվյալներ օգտագործել հետին պլանում և ավելացնել տվյալների օգտագործման ծավալը։"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"միշտ աշխատեցնել հավելվածը"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Թույլ է տալիս հավելվածին մնայուն դարձնել իր մասերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը` դանդաղեցնելով պլանշետի աշխատանքը:"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Թույլ է տալիս հավելվածին իր տարրերը մշտապես հիշողության մեջ։ Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը և դանդաղեցնել Android TV սարքի աշխատանքը:"</string>
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Կրկին փորձեք"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Կրկին փորձեք"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Ապակողպեք՝ բոլոր գործառույթներն ու տվյալներն օգտագործելու համար"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Առավելագույն Դեմքով ապակողպման փորձերը գերազանցված են"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Դեմքով ապակողպման փորձերի առավելագույն քանակը գերազանցված են"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM քարտ չկա"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Գրասալիկում SIM քարտ չկա:"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ձեր Android սարքում SIM քարտ չկա։"</string>
@@ -1640,7 +1640,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Եթե միացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, ձեր սարքը չի օգտագործի էկրանի կողպումը՝ տվյալների գաղտնագրումը բարելավելու համար:"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ամբողջական վերահսկումն անհրաժեշտ է միայն այն հավելվածներին, որոնք օգնում են ձեզ հատուկ գործառույթներից օգտվելիս։"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Դիտել և կառավարել էկրանը"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Կարող է կարդալ էկրանի բովանդակությունն ու ցուցադրել այլ հավելվածներում։"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Կարող է կարդալ էկրանի ողջ բովանդակությունը և ցուցադրել բովանդակություն այլ հավելվածների վրայից։"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Դիտել և համակարգել գործողությունները"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Կարող է հետագծել ձեր գործողությունները հավելվածներում և սարքակազմի սենսորների վրա, ինչպես նաև հավելվածներում կատարել գործողություններ ձեր անունից։"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Թույլատրել"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Անհայտ դիմանկար"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Անհայտ բնապատկեր"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Չեղարկված է"</string>
@@ -1922,7 +1934,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"Լուսանկարներ և պատկերներ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Սոցցանցեր և հաղորդակցություն"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Նորություններ և ամսագրեր"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավարկում"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավիգացիա"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Արդյունավետություն"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Սարքի հիշողություն"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-ով վրիպազերծում"</string>
@@ -1990,7 +2002,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Զանգերի և ծանուցումների համար թրթռոցը միացված է"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատած է"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատված է"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Համակարգի փոփոխություններ"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Չանհանգստացնել"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Այժմ «Չանհանգստացնել» ռեժիմում ծանուցումները թաքցվում են"</string>

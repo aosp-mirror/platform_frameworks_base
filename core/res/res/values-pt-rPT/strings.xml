@@ -700,7 +700,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Solicitar encriptação dos dados da app armazenados."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Desativar câmaras"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Evitar a utilização de todas as câmaras do dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desat. funcionalid. bloq. ecrã"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desativar funcionalidades do bloqueio de ecrã"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Impede a utilização de algumas funcionalidades de bloqueio de ecrã."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>
@@ -1567,7 +1567,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Visualização sem fios"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Transmitir"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Ligar ao dispositivo"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmitir ecrã para o dispositivo"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmitir ecrã para dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"A pesquisar dispositivos…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Definições"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Desligar"</string>
@@ -1638,11 +1638,11 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESATIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permitir que o serviço <xliff:g id="SERVICE">%1$s</xliff:g> tenha controlo total sobre o seu dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se ativar o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, o dispositivo não utilizará o bloqueio de ecrã para otimizar a encriptação de dados."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para aplicações que ajudam nas necessidades de acessibilidade, mas não para a maioria das aplicações."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para aplicações que ajudam nas necessidades de acessibilidade, mas não para a maioria das apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar o ecrã"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo do ecrã e sobrepor conteúdo a outras aplicações."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Veja e execute ações"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorizar as suas interações com uma app ou um sensor de hardware e interagir com aplicações em seu nome."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorizar as suas interações com uma app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Recusar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque numa funcionalidade para começar a utilizá-la:"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Vertical desconhecido"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Horizontal desconhecido"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancelada"</string>
@@ -1799,7 +1811,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n\n•Ativa o tema escuro.\n•Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\".\n\n"<annotation id="url">"Saiba mais"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n\n• Ativa o tema escuro.\n•·Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas aplicações enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Pretende ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando grabación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar a grabar?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema de Android puede capturar la información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar la información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonidos del dispositivo, como música, llamadas y tonos"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Dos barras de batería"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tres barras de batería"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batería completa"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Se desconoce el porcentaje de la batería."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sin teléfono"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Una barra de teléfono"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dos barras de teléfono"</string>
@@ -232,7 +233,7 @@
     <string name="not_default_data_content_description" msgid="6757881730711522517">"No se configuró para usar datos"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Conexión Bluetooth"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo avión"</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo de avión"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN activada"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Sin tarjeta SIM"</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"Cambio de proveedor de red"</string>
@@ -355,7 +356,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audífonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activando…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brillo"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotación automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Girar automáticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar la pantalla automáticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Modo de <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotación bloqueada"</string>
@@ -466,7 +467,7 @@
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Solo\nalarmas"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando de manera inalámbrica (tiempo restante para completar: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para completar)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando rápido (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para completar)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para completar)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando lento (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para completar)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Cambiar de usuario (usuario actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
@@ -474,9 +475,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Agregar usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuario nuevo"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Eliminar invitado?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Eliminar"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
@@ -1012,7 +1013,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Ubicar abajo a la izquierda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Ubicar abajo a la derecha"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Descartar burbuja"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No mostrar la conversación en burbujas"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No mostrar la conversación en burbuja"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chat con burbujas"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como elementos flotantes o burbujas. Presiona para abrir la burbuja. Arrástrala para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla las burbujas"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"No se pudo establecer la conexión. Vuelve a intentarlo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincular dispositivo nuevo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema al leer el medidor de batería"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Presiona para obtener más información"</string>
 </resources>
