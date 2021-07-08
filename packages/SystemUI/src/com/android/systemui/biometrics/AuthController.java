@@ -667,6 +667,17 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     /**
+     * Whether the user's finger is currently on udfps attempting to authenticate.
+     */
+    public boolean isUdfpsFingerDown() {
+        if (mUdfpsController == null)  {
+            return false;
+        }
+
+        return mUdfpsController.isFingerDown();
+    }
+
+    /**
      * Whether the passed userId has enrolled face auth.
      */
     public boolean isFaceAuthEnrolled(int userId) {
