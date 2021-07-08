@@ -66,6 +66,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private boolean mHintShown;
     private int mStatusBarState;
     private float mTransitionToFullShadeProgress;
+    private float mLastDozeAmount;
 
     /**
      * hidden amount of pin/pattern/password bouncer
@@ -108,6 +109,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         updateFaceDetectRunning(mKeyguardUpdateMonitor.isFaceDetectionRunning());
 
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
+        mLastDozeAmount = dozeAmount;
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
         mStatusBarStateController.addCallback(mStateListener);
 
@@ -287,8 +289,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             new StatusBarStateController.StateListener() {
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
-            if (linear != 0) showUdfpsBouncer(false);
+            if (mLastDozeAmount < linear) {
+                showUdfpsBouncer(false);
+            }
             mView.onDozeAmountChanged(linear, eased);
+            mLastDozeAmount = linear;
             updatePauseAuth();
         }
 
