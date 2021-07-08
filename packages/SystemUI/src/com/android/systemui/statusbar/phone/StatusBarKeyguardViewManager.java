@@ -42,6 +42,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardMessageArea;
+import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
@@ -107,6 +109,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
+    private KeyguardMessageAreaController mKeyguardMessageAreaController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -238,7 +242,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             NotificationMediaManager notificationMediaManager,
             KeyguardBouncer.Factory keyguardBouncerFactory,
             WakefulnessLifecycle wakefulnessLifecycle,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            KeyguardMessageAreaController.Factory keyguardMessageAreaFactory) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -254,6 +259,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardBouncerFactory = keyguardBouncerFactory;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mKeyguardMessageAreaFactory = keyguardMessageAreaFactory;
     }
 
     @Override
@@ -271,6 +277,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         notificationPanelViewController.addExpansionListener(this);
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
+        mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
+            KeyguardMessageArea.findSecurityMessageDisplay(container));
         mFaceAuthScreenBrightnessController.ifPresent((it) -> {
             View overlay = new View(mContext);
             container.addView(overlay);
@@ -412,9 +420,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void showGenericBouncer(boolean scrimmed) {
         if (mAlternateAuthInterceptor != null) {
-            if (mAlternateAuthInterceptor.showAlternateAuthBouncer()) {
-                mStatusBar.updateScrimController();
-            }
+            updateAlternateAuthShowing(mAlternateAuthInterceptor.showAlternateAuthBouncer());
             return;
         }
 
@@ -481,9 +487,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     mKeyguardGoneCancelAction = null;
                 }
 
-                if (mAlternateAuthInterceptor.showAlternateAuthBouncer()) {
-                    mStatusBar.updateScrimController();
-                }
+                updateAlternateAuthShowing(mAlternateAuthInterceptor.showAlternateAuthBouncer());
                 return;
             }
 
@@ -536,9 +540,19 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Stop showing any alternate auth methods
      */
     public void resetAlternateAuth(boolean forceUpdateScrim) {
-        if ((mAlternateAuthInterceptor != null
+        final boolean updateScrim = (mAlternateAuthInterceptor != null
                 && mAlternateAuthInterceptor.hideAlternateAuthBouncer())
-                || forceUpdateScrim) {
+                || forceUpdateScrim;
+        updateAlternateAuthShowing(updateScrim);
+    }
+
+    private void updateAlternateAuthShowing(boolean updateScrim) {
+        if (mKeyguardMessageAreaController != null) {
+            mKeyguardMessageAreaController.setAltBouncerShowing(isShowingAlternateAuth());
+        }
+        mBypassController.setAltBouncerShowing(isShowingAlternateAuth());
+
+        if (updateScrim) {
             mStatusBar.updateScrimController();
         }
     }
@@ -875,7 +889,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public boolean isBouncerShowing() {
-        return mBouncer.isShowing();
+        return mBouncer.isShowing() || isShowingAlternateAuth();
     }
 
     @Override
@@ -1089,7 +1103,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void showBouncerMessage(String message, ColorStateList colorState) {
-        mBouncer.showMessage(message, colorState);
+        if (isShowingAlternateAuth()) {
+            if (mKeyguardMessageAreaController != null) {
+                mKeyguardMessageAreaController.setNextMessageColor(colorState);
+                mKeyguardMessageAreaController.setMessage(message);
+            }
+        } else {
+            mBouncer.showMessage(message, colorState);
+        }
     }
 
     @Override
