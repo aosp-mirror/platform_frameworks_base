@@ -3339,9 +3339,6 @@ class Task extends TaskFragment {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
-        info.topActivityToken = mReuseActivitiesReport.top != null
-                ? mReuseActivitiesReport.top.appToken
-                : null;
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
                 && mReuseActivitiesReport.top.getOrganizedTask() == this
