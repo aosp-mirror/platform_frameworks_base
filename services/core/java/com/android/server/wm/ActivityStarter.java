@@ -177,6 +177,7 @@ class ActivityStarter {
     private int mPreferredWindowingMode;
 
     private Task mInTask;
+    private TaskFragment mInTaskFragment;
     @VisibleForTesting
     boolean mAddingToTask;
     private Task mReuseTask;
@@ -342,6 +343,7 @@ class ActivityStarter {
         boolean avoidMoveToFront;
         ActivityRecord[] outActivity;
         Task inTask;
+        TaskFragment inTaskFragment;
         String reason;
         ProfilerInfo profilerInfo;
         Configuration globalConfig;
@@ -392,6 +394,7 @@ class ActivityStarter {
             componentSpecified = false;
             outActivity = null;
             inTask = null;
+            inTaskFragment = null;
             reason = null;
             profilerInfo = null;
             globalConfig = null;
@@ -407,7 +410,7 @@ class ActivityStarter {
         /**
          * Adopts all values from passed in request.
          */
-        void set(Request request) {
+        void set(@NonNull Request request) {
             caller = request.caller;
             intent = request.intent;
             intentGrants = request.intentGrants;
@@ -432,6 +435,7 @@ class ActivityStarter {
             componentSpecified = request.componentSpecified;
             outActivity = request.outActivity;
             inTask = request.inTask;
+            inTaskFragment = request.inTaskFragment;
             reason = request.reason;
             profilerInfo = request.profilerInfo;
             globalConfig = request.globalConfig;
@@ -574,6 +578,7 @@ class ActivityStarter {
         mPreferredWindowingMode = starter.mPreferredWindowingMode;
 
         mInTask = starter.mInTask;
+        mInTaskFragment = starter.mInTaskFragment;
         mAddingToTask = starter.mAddingToTask;
         mReuseTask = starter.mReuseTask;
 
@@ -835,6 +840,7 @@ class ActivityStarter {
         final int startFlags = request.startFlags;
         final SafeActivityOptions options = request.activityOptions;
         Task inTask = request.inTask;
+        mInTaskFragment = request.inTaskFragment;
 
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
@@ -2204,6 +2210,7 @@ class ActivityStarter {
         mPreferredWindowingMode = WINDOWING_MODE_UNDEFINED;
 
         mInTask = null;
+        mInTaskFragment = null;
         mAddingToTask = false;
         mReuseTask = null;
 
@@ -2691,11 +2698,23 @@ class ActivityStarter {
         mIntentDelivered = true;
     }
 
-    private void addOrReparentStartingActivity(Task parent, String reason) {
-        if (mStartActivity.getTask() == null || mStartActivity.getTask() == parent) {
-            parent.addChild(mStartActivity);
+    private void addOrReparentStartingActivity(@NonNull Task task, String reason) {
+        TaskFragment newParent = task;
+        if (mInTaskFragment != null) {
+            // mInTaskFragment is created and added to the leaf task by task fragment organizer's
+            // request. If the task was resolved and different than mInTaskFragment, reparent the
+            // task to mInTaskFragment for embedding.
+            if (mInTaskFragment.getTask() != task) {
+                task.reparent(mInTaskFragment, POSITION_TOP);
+            } else {
+                newParent = mInTaskFragment;
+            }
+        }
+        if (mStartActivity.getTaskFragment() == null
+                || mStartActivity.getTaskFragment() == newParent) {
+            newParent.addChild(mStartActivity, POSITION_TOP);
         } else {
-            mStartActivity.reparent(parent, parent.getChildCount() /* top */, reason);
+            mStartActivity.reparent(newParent, newParent.getChildCount() /* top */, reason);
         }
     }
 
@@ -2927,6 +2946,11 @@ class ActivityStarter {
         return this;
     }
 
+    ActivityStarter setInTaskFragment(TaskFragment taskFragment) {
+        mRequest.inTaskFragment = taskFragment;
+        return this;
+    }
+
     ActivityStarter setWaitResult(WaitResult result) {
         mRequest.waitResult = result;
         return this;
@@ -3010,5 +3034,7 @@ class ActivityStarter {
         pw.print(mDoResume);
         pw.print(" mAddingToTask=");
         pw.println(mAddingToTask);
+        pw.print(" mInTaskFragment=");
+        pw.println(mInTaskFragment);
     }
 }
