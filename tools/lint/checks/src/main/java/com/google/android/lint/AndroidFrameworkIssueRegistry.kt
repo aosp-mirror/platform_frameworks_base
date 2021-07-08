@@ -30,7 +30,8 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
             CallingIdentityTokenDetector.ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
             CallingIdentityTokenDetector.ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
             CallingIdentityTokenDetector.ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
-            CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY
+            CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
+            CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED
     )
 
     override val api: Int
