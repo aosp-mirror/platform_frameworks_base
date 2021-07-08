@@ -107,7 +107,8 @@ public class SizeCompatTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mInitialConstrainDisplayApisFlags = DeviceConfig.getProperties(
                 NAMESPACE_CONSTRAIN_DISPLAY_APIS);
-        clearConstrainDisplayApisFlags();
+        DeviceConfig.setProperties(
+                new Properties.Builder(NAMESPACE_CONSTRAIN_DISPLAY_APIS).build());
     }
 
     @After
@@ -921,7 +922,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     @DisableCompatChanges({ActivityInfo.ALWAYS_SANDBOX_DISPLAY_APIS})
-    public void testAlwaysSandboxDisplayApis_configDisabled_sandboxingNotApplied() {
+    public void testAlwaysSandboxDisplayApis_configDisabled_sandboxingApplied() {
         setUpDisplaySizeWithApp(1000, 1200);
 
         // Make the task root resizable.
@@ -933,7 +934,7 @@ public class SizeCompatTests extends WindowTestsBase {
         activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         prepareUnresizable(activity, /* maxAspect=*/ 1.5f, SCREEN_ORIENTATION_LANDSCAPE);
 
-        // Activity max bounds be sandboxed due to letterbox and the config being disabled.
+        // Activity max bounds should be sandboxed due to letterbox and the config being disabled.
         assertActivityMaxBoundsSandboxed(activity);
     }
 
@@ -959,6 +960,27 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, activity.getWindowingMode());
 
         // Resizable activity is sandboxed due to config being enabled.
+        assertActivityMaxBoundsSandboxed(activity);
+    }
+
+    @Test
+    public void testAlwaysConstrainDisplayApisDeviceConfig_packageInRange_sandboxingApplied() {
+        setUpDisplaySizeWithApp(1000, 1200);
+
+        setAlwaysConstrainDisplayApisFlag(
+                "com.android.frameworks.wmtests:20:,com.android.other::,"
+                        + "com.android.frameworks.wmtests:0:10");
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity with a max aspect ratio on the same task.
+        final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
+                RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        prepareUnresizable(activity, /* maxAspect=*/ 1.5f, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Resizable activity is sandboxed due to match with flag.
         assertActivityMaxBoundsSandboxed(activity);
     }
 
@@ -2142,8 +2164,8 @@ public class SizeCompatTests extends WindowTestsBase {
                 value, /* makeDefault= */ false);
     }
 
-    private static void clearConstrainDisplayApisFlags() {
-        setNeverConstrainDisplayApisFlag(null);
-        setNeverConstrainDisplayApisAllPackagesFlag(null);
+    private static void setAlwaysConstrainDisplayApisFlag(@Nullable String value) {
+        DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS, "always_constrain_display_apis",
+                value, /* makeDefault= */ false);
     }
 }
