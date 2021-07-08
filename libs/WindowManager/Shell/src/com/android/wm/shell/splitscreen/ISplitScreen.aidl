@@ -20,6 +20,8 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 import android.window.IRemoteTransition;
 
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
@@ -77,9 +79,15 @@ interface ISplitScreen {
             int position, in Bundle options) = 9;
 
     /**
-     * Starts tasks simultaneously in one transition. The first task in the list will be in the
-     * main-stage and on the left/top.
+     * Starts tasks simultaneously in one transition.
      */
     oneway void startTasks(int mainTaskId, in Bundle mainOptions, int sideTaskId,
             in Bundle sideOptions, int sidePosition, in IRemoteTransition remoteTransition) = 10;
+
+    /**
+     * Version of startTasks using legacy transition system.
+     */
+     oneway void startTasksWithLegacyTransition(int mainTaskId, in Bundle mainOptions,
+                            int sideTaskId, in Bundle sideOptions, int sidePosition,
+                            in RemoteAnimationAdapter adapter) = 11;
 }

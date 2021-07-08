@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
@@ -142,10 +143,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (t == null) {
             throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
         }
+        final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                applyTransaction(t, -1 /*syncId*/, null /*transition*/);
+                applyTransaction(t, -1 /*syncId*/, null /*transition*/, caller);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -159,6 +161,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (t == null) {
             throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
         }
+        final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -178,7 +181,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (callback != null) {
                     syncId = startSyncWithOrganizer(callback);
                 }
-                applyTransaction(t, syncId, null /*transition*/);
+                applyTransaction(t, syncId, null /*transition*/, caller);
                 if (syncId >= 0) {
                     setSyncReady(syncId);
                 }
@@ -193,6 +196,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     public IBinder startTransition(int type, @Nullable IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
         enforceTaskPermission("startTransition()");
+        final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -212,7 +216,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             throw new IllegalArgumentException("Can't use legacy transitions in"
                                     + " compatibility mode with no WCT.");
                         }
-                        applyTransaction(t, -1 /* syncId */, null);
+                        applyTransaction(t, -1 /* syncId */, null, caller);
                         return null;
                     }
                     transition = mTransitionController.createTransition(type);
@@ -221,7 +225,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (t == null) {
                     t = new WindowContainerTransaction();
                 }
-                applyTransaction(t, -1 /*syncId*/, transition);
+                applyTransaction(t, -1 /*syncId*/, transition, caller);
                 if (needsSetReady) {
                     transition.setReady();
                 }
@@ -237,6 +241,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             @Nullable WindowContainerTransaction t,
             @Nullable IWindowContainerTransactionCallback callback) {
         enforceTaskPermission("finishTransition()");
+        final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -247,7 +252,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // apply the incoming transaction before finish in case it alters the visibility
                 // of the participants.
                 if (t != null) {
-                    applyTransaction(t, syncId, null /*transition*/);
+                    applyTransaction(t, syncId, null /*transition*/, caller);
                 }
                 getTransitionController().finishTransition(transitionToken);
                 if (syncId >= 0) {
@@ -263,9 +268,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     /**
      * @param syncId If non-null, this will be a sync-transaction.
      * @param transition A transition to collect changes into.
+     * @param caller Info about the calling process.
      */
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
-            @Nullable Transition transition) {
+            @Nullable Transition transition, @Nullable CallerInfo caller) {
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
@@ -319,7 +325,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final boolean isInLockTaskMode = mService.isInLockTaskMode();
                 for (int i = 0; i < hopSize; ++i) {
                     effects |= applyHierarchyOp(hops.get(i), effects, syncId, transition,
-                            isInLockTaskMode);
+                            isInLockTaskMode, caller);
                 }
             }
             // Queue-up bounds-change transactions for tasks which are now organized. Do
@@ -474,7 +480,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyHierarchyOp(WindowContainerTransaction.HierarchyOp hop, int effects,
-            int syncId, @Nullable Transition transition, boolean isInLockTaskMode) {
+            int syncId, @Nullable Transition transition, boolean isInLockTaskMode,
+            @Nullable CallerInfo caller) {
         final int type = hop.getType();
         switch (type) {
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
@@ -555,11 +562,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 effects |= sanitizeAndApplyHierarchyOp(wc, hop);
                 break;
             case HIERARCHY_OP_TYPE_LAUNCH_TASK:
+                mService.mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
+                        "launchTask HierarchyOp");
                 final Bundle launchOpts = hop.getLaunchOptions();
                 final int taskId = launchOpts.getInt(
                         WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
-                mService.startActivityFromRecents(taskId, launchOpts);
+                final SafeActivityOptions safeOptions = caller != null
+                        ? SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid)
+                        : SafeActivityOptions.fromBundle(launchOpts);
+                mService.mTaskSupervisor.startActivityFromRecents(caller.mPid, caller.mUid,
+                        taskId, safeOptions);
                 break;
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
@@ -935,5 +948,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         mLaunchTaskFragments.removeAt(index);
         taskFragment.removeImmediately();
+    }
+
+    static class CallerInfo {
+        final int mPid;
+        final int mUid;
+
+        CallerInfo() {
+            mPid = Binder.getCallingPid();
+            mUid = Binder.getCallingUid();
+        }
     }
 }
