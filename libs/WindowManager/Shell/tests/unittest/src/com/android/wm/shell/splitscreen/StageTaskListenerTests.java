@@ -21,11 +21,13 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.os.SystemProperties;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -52,6 +54,9 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class StageTaskListenerTests {
+    private static final boolean ENABLE_SHELL_TRANSITIONS =
+            SystemProperties.getBoolean("persist.debug.shell_transit", false);
+
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private StageTaskListener.StageListenerCallbacks mCallbacks;
     @Mock private SyncTransactionQueue mSyncQueue;
@@ -93,6 +98,8 @@ public final class StageTaskListenerTests {
 
     @Test
     public void testChildTaskAppeared() {
+        // With shell transitions, the transition manages status changes, so skip this test.
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
 
@@ -110,6 +117,8 @@ public final class StageTaskListenerTests {
 
     @Test
     public void testTaskVanished() {
+        // With shell transitions, the transition manages status changes, so skip this test.
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
         mStageTaskListener.mRootTaskInfo = mRootTask;
