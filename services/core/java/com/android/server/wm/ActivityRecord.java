@@ -665,6 +665,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean allDrawn;
     private boolean mLastAllDrawn;
 
+    /**
+     * Solely for reporting to ActivityMetricsLogger. Just tracks whether, the last time this
+     * Actiivty was part of a syncset, all windows were ready by the time the sync was ready (vs.
+     * only the top-occluding ones). The assumption here is if some were not ready, they were
+     * covered with starting-window/splash-screen.
+     */
+    boolean mLastAllReadyAtSync = false;
+
     private boolean mLastContainsShowWhenLockedWindow;
     private boolean mLastContainsDismissKeyguardWindow;
     private boolean mLastContainsTurnScreenOnWindow;
@@ -9019,6 +9027,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return false;
+    }
+
+    @Override
+    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+        // This override is just for getting metrics. allFinished needs to be checked before
+        // finish because finish resets all the states.
+        mLastAllReadyAtSync = allSyncFinished();
+        super.finishSync(outMergedTransaction, cancel);
     }
 
     static class Builder {

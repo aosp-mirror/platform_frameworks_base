@@ -696,6 +696,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // well and thus won't change the top resumed / focused record
     boolean mDontMoveToTop;
 
+    private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
@@ -2485,7 +2487,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean isVisibleRequested() {
-        return isVisible();
+        return isVisible() && !mRemoved && !mRemoving;
     }
 
     @Override
@@ -3100,7 +3102,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
         }
         mDisplayFrames.dumpDebug(proto, DISPLAY_FRAMES);
-        mAppTransition.dumpDebug(proto, APP_TRANSITION);
+        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            mAtmService.getTransitionController().dumpDebugLegacy(proto, APP_TRANSITION);
+        } else {
+            mAppTransition.dumpDebug(proto, APP_TRANSITION);
+        }
         if (mFocusedApp != null) {
             mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
         }
@@ -4504,6 +4510,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
+        // clear first just in case.
+        mTmpActivityList.clear();
         // Time to remove any exiting applications?
         forAllRootTasks(task -> {
             final ArrayList<ActivityRecord> activities = task.mExitingActivities;
@@ -4511,16 +4519,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 final ActivityRecord activity = activities.get(j);
                 if (!activity.hasVisible && !mDisplayContent.mClosingApps.contains(activity)
                         && (!activity.mIsExiting || activity.isEmpty())) {
-                    // Make sure there is no animation running on this activity, so any windows
-                    // associated with it will be removed as soon as their animations are
-                    // complete.
-                    cancelAnimation();
-                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
-                            "performLayout: Activity exiting now removed %s", activity);
-                    activity.removeIfPossible();
+                    mTmpActivityList.add(activity);
                 }
             }
         });
+        if (!mTmpActivityList.isEmpty()) {
+            // Make sure there is no animation running on this activity, so any windows
+            // associated with it will be removed as soon as their animations are
+            // complete.
+            cancelAnimation();
+        }
+        for (int i = 0; i < mTmpActivityList.size(); ++i) {
+            final ActivityRecord activity = mTmpActivityList.get(i);
+            ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                    "performLayout: Activity exiting now removed %s", activity);
+            activity.removeIfPossible();
+        }
+        // Clear afterwards so we don't hold references.
+        mTmpActivityList.clear();
     }
 
     @Override
@@ -5022,6 +5038,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Check if pending app transition is for activity / task launch. */
     boolean isNextTransitionForward() {
+        // TODO(b/191375840): decouple "forwardness" from transition system.
+        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            @WindowManager.TransitionType int type =
+                    mAtmService.getTransitionController().getCollectingTransitionType();
+            return type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT;
+        }
         return mAppTransition.containsTransitRequest(TRANSIT_OPEN)
                 || mAppTransition.containsTransitRequest(TRANSIT_TO_FRONT);
     }

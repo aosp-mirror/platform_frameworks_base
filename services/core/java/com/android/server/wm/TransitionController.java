@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.ITransitionPlayer;
@@ -50,6 +52,11 @@ import java.util.ArrayList;
  */
 class TransitionController {
     private static final String TAG = "TransitionController";
+
+    // State constants to line-up with legacy app-transition proto expectations.
+    private static final int LEGACY_STATE_IDLE = 0;
+    private static final int LEGACY_STATE_READY = 1;
+    private static final int LEGACY_STATE_RUNNING = 2;
 
     private ITransitionPlayer mTransitionPlayer;
     final ActivityTaskManagerService mAtm;
@@ -96,7 +103,7 @@ class TransitionController {
      * Creates a transition. It can immediately collect participants.
      */
     @NonNull
-    Transition createTransition(@WindowManager.TransitionType int type,
+    private Transition createTransition(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
         if (mTransitionPlayer == null) {
             throw new IllegalStateException("Shell Transitions not enabled");
@@ -173,6 +180,11 @@ class TransitionController {
             }
         }
         return false;
+    }
+
+    @WindowManager.TransitionType
+    int getCollectingTransitionType() {
+        return mCollectingTransition != null ? mCollectingTransition.mType : TRANSIT_NONE;
     }
 
     /**
@@ -360,6 +372,18 @@ class TransitionController {
             mLegacyListeners.get(i).onAppTransitionCancelledLocked(
                     false /* keyguardGoingAway */);
         }
+    }
+
+    void dumpDebugLegacy(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        int state = LEGACY_STATE_IDLE;
+        if (!mPlayingTransitions.isEmpty()) {
+            state = LEGACY_STATE_RUNNING;
+        } else if (mCollectingTransition != null && mCollectingTransition.getLegacyIsReady()) {
+            state = LEGACY_STATE_READY;
+        }
+        proto.write(AppTransitionProto.APP_TRANSITION_STATE, state);
+        proto.end(token);
     }
 
     class Lock {

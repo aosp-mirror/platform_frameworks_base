@@ -140,9 +140,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         updateAnimators();
     }
 
-
-    public void onQsScrollingChanged() {
-        // Lazily update animators whenever the scrolling changes
+    /**
+     * Request an update to the animators. This will update them lazily next time the position
+     * is changed.
+     */
+    public void requestAnimatorUpdate() {
         mNeedsAnimatorUpdate = true;
     }
 
