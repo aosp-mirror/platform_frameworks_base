@@ -47,7 +47,6 @@ import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
-import com.android.internal.view.InputConnectionWrapper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -86,7 +85,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     /**
      * This is not {@null} only between {@link #bindInput(InputBinding)} and {@link #unbindInput()}
-     * so that {@link InputConnectionWrapper} can query if {@link #unbindInput()} has already been
+     * so that {@link RemoteInputConnection} can query if {@link #unbindInput()} has already been
      * called or not, mainly to avoid unnecessary blocking operations.
      *
      * <p>This field must be set and cleared only from the binder thread(s), where the system
@@ -192,7 +191,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
                 SomeArgs moreArgs = (SomeArgs) args.arg5;
                 final InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(
+                        ? new RemoteInputConnection(
                                 mTarget, inputContext, moreArgs.argi3, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
@@ -302,7 +301,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mCancellationGroup = new CancellationGroup();
         // This IInputContext is guaranteed to implement all the methods.
         final int missingMethodFlags = 0;
-        InputConnection ic = new InputConnectionWrapper(mTarget,
+        InputConnection ic = new RemoteInputConnection(mTarget,
                 IInputContext.Stub.asInterface(binding.getConnectionToken()), missingMethodFlags,
                 mCancellationGroup);
         InputBinding nu = new InputBinding(ic, binding);

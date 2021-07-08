@@ -11622,9 +11622,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return resolveContentProviderInternal(name, flags, userId);
     }
 
+    public ProviderInfo resolveContentProvider(String name, int flags, int userId, int callingUid) {
+        return resolveContentProviderInternal(name, flags, userId, callingUid);
+    }
+
     private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
+        return resolveContentProviderInternal(name, flags, userId, Binder.getCallingUid());
+    }
+
+    private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId,
+            int callingUid) {
         if (!mUserManager.exists(userId)) return null;
-        final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId);
         final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
         boolean checkedGrants = false;
@@ -27788,6 +27796,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
             return PackageManagerService.this.resolveContentProviderInternal(
                     name, flags, userId);
+        }
+
+        @Override
+        public ProviderInfo resolveContentProvider(String name, int flags, int userId,
+                int callingUid) {
+            return PackageManagerService.this.resolveContentProviderInternal(
+                    name, flags, userId, callingUid);
         }
 
         @Override

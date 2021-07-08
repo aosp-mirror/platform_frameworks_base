@@ -166,6 +166,10 @@ class BLASTSyncEngine {
         setReady(id, true);
     }
 
+    boolean isReady(int id) {
+        return mActiveSyncs.get(id).mReady;
+    }
+
     /**
      * Aborts the sync (ie. it doesn't wait for ready or anything to finish)
      */

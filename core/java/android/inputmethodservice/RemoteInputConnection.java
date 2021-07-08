@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package android.inputmethodservice;
 
 import android.annotation.AnyThread;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.imetracing.ImeTracing;
@@ -40,11 +39,13 @@ import android.view.inputmethod.SurroundingText;
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.IInputContextInvoker;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethod;
 
 import java.lang.ref.WeakReference;
 
-public class InputConnectionWrapper implements InputConnection {
-    private static final String TAG = "InputConnectionWrapper";
+final class RemoteInputConnection implements InputConnection {
+    private static final String TAG = "RemoteInputConnection";
 
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
 
@@ -66,7 +67,7 @@ public class InputConnectionWrapper implements InputConnection {
     @NonNull
     private final CancellationGroup mCancellationGroup;
 
-    public InputConnectionWrapper(
+    RemoteInputConnection(
             @NonNull WeakReference<AbstractInputMethodService> inputMethodService,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             @NonNull CancellationGroup cancellationGroup) {
@@ -424,7 +425,7 @@ public class InputConnectionWrapper implements InputConnection {
     @AnyThread
     @Override
     public String toString() {
-        return "InputConnectionWrapper{idHash=#"
+        return "RemoteInputConnection{idHash=#"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " mMissingMethods="
                 + InputConnectionInspector.getMissingMethodFlagsAsString(mMissingMethods) + "}";
