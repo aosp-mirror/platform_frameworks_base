@@ -74,7 +74,6 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
-import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -155,6 +154,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
+    /** Avoid reentrant of {@link #removeImmediately()}. */
+    private boolean mRemoving;
+
     // The TaskFragment that adjacent to this one.
     private TaskFragment mAdjacentTaskFragment;
 
@@ -196,22 +198,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean mCreatedByOrganizer;
 
     /** Organizer that organizing this TaskFragment. */
-    // TODO(b/190433129) set the value when creating TaskFragment from WCT.
     @Nullable
     private ITaskFragmentOrganizer mTaskFragmentOrganizer;
 
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
-    // TODO(b/190433129) set the value when creating TaskFragment from WCT.
     @Nullable
     private IBinder mFragmentToken;
-
-    /**
-     * The component name of the root activity that initiated this TaskFragment, which will be used
-     * to configure the relationships for TaskFragments.
-     */
-    // TODO(b/190433129) set the value when creating TaskFragment from WCT.
-    @Nullable
-    private ComponentName mInitialComponentName;
 
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpBounds = new Rect();
@@ -260,20 +252,27 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    TaskFragment(ActivityTaskManagerService atmService, boolean createdByOrganizer) {
+    TaskFragment(ActivityTaskManagerService atmService, IBinder fragmentToken,
+            boolean createdByOrganizer) {
         super(atmService.mWindowManager);
 
         mAtmService = atmService;
-        mTaskSupervisor = atmService.mTaskSupervisor;
+        mTaskSupervisor = mAtmService.mTaskSupervisor;
         mRootWindowContainer = mAtmService.mRootWindowContainer;
         mCreatedByOrganizer = createdByOrganizer;
         mTaskFragmentOrganizerController =
                 mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
+        mFragmentToken = fragmentToken;
+        mRemoteToken = new RemoteToken(this);
     }
 
     void setAdjacentTaskFragment(TaskFragment taskFragment) {
         mAdjacentTaskFragment = taskFragment;
         taskFragment.mAdjacentTaskFragment = this;
+    }
+
+    void setTaskFragmentOrganizer(ITaskFragmentOrganizer organizer) {
+        mTaskFragmentOrganizer = organizer;
     }
 
     TaskFragment getAdjacentTaskFragment() {
@@ -1981,7 +1980,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    // TODO(b/190433129) call when TaskFragment is removed from WCT#deleteTaskFragment
     private void sendTaskFragmentVanished() {
         if (mTaskFragmentOrganizer != null) {
             mTaskFragmentOrganizerController.onTaskFragmentVanished(mTaskFragmentOrganizer, this);
@@ -1995,7 +1993,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     TaskFragmentInfo getTaskFragmentInfo() {
         return new TaskFragmentInfo(
                 mFragmentToken,
-                mInitialComponentName,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getChildCount() == 0,
@@ -2024,6 +2021,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
         mMinWidth = minWidth;
         mMinHeight = minHeight;
+    }
+
+    @Override
+    void removeImmediately() {
+        if (mRemoving) {
+            return;
+        }
+        mRemoving = true;
+        super.removeImmediately();
+        sendTaskFragmentVanished();
+        mRemoving = false;
     }
 
     boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,
