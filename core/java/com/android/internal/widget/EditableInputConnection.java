@@ -55,7 +55,10 @@ public class EditableInputConnection extends BaseInputConnection
     // A negative value means that this connection has been finished by the InputMethodManager.
     private int mBatchEditNesting;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 192969370,
+            publicAlternatives = "Use {@link android.view.inputmethod.InputConnectionWrapper} to "
+                    + "intercept method calls. Or directly implement "
+                    + "{@link android.view.inputmethod.InputConnection} for your own editor.")
     public EditableInputConnection(TextView textview) {
         super(textview, true);
         mTextView = textview;
