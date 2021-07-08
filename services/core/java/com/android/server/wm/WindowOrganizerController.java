@@ -48,6 +48,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
@@ -106,6 +107,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
     final TransitionController mTransitionController;
+    /**
+     * A Map which manages the relationship between
+     * {@link TaskFragmentCreationParams.mFragmentToken fragmentToken} and {@link TaskFragment}
+     */
+    private final ArrayMap<IBinder, TaskFragment> mLaunchTaskFragments = new ArrayMap<>();
 
     WindowOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
@@ -558,12 +564,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
                         hop.getTaskFragmentCreationOptions();
-                // TODO(b/190433129) add actual implementation on WM Core
+                createTaskFragment(taskFragmentCreationOptions);
                 break;
             case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT:
                 wc = WindowContainer.fromBinder(hop.getContainer());
                 if (wc == null || !wc.isAttached()) {
-                    Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: " + wc);
                     break;
                 }
                 final TaskFragment taskFragment = wc.asTaskFragment();
@@ -571,23 +577,40 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     throw new IllegalArgumentException(
                             "Can only delete organized TaskFragment, but not Task.");
                 }
-                // TODO(b/190433129) add actual implementation on WM Core
+                deleteTaskFragment(taskFragment);
                 break;
             case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 fragmentToken = hop.getContainer();
+                if (!mLaunchTaskFragments.containsKey(fragmentToken)) {
+                    throw new IllegalArgumentException(
+                            "Not allowed to operate with invalid fragment token");
+                }
                 final Intent activityIntent = hop.getActivityIntent();
                 final Bundle activityOptions = hop.getLaunchOptions();
-                // TODO(b/190433129) add actual implementation on WM Core
+                mService.getActivityStartController()
+                        .startActivityInTaskFragment(mLaunchTaskFragments.get(fragmentToken),
+                                activityIntent, activityOptions);
+                // TODO(b/189385246) : report the failure back to the organizer if the activity
+                // start failed
                 break;
             case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
                 fragmentToken = hop.getNewParent();
                 final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
-                // TODO(b/190433129) add actual implementation on WM Core
+                if (!mLaunchTaskFragments.containsKey(fragmentToken) || activity == null) {
+                    throw new IllegalArgumentException(
+                            "Not allowed to operate with invalid fragment token or activity.");
+                }
+                activity.reparent(mLaunchTaskFragments.get(fragmentToken), POSITION_TOP);
                 break;
             case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
                 final WindowContainer oldParent = WindowContainer.fromBinder(hop.getContainer());
                 final WindowContainer newParent = WindowContainer.fromBinder(hop.getNewParent());
-                // TODO(b/190433129) add actual implementation on WM Core
+                if (oldParent == null || !oldParent.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + oldParent);
+                    break;
+                }
+                reparentTaskFragment(oldParent, newParent);
                 break;
         }
         return effects;
@@ -865,5 +888,52 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private void enforceTaskPermission(String func) {
         mService.enforceTaskPermission(func);
+    }
+
+    void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams) {
+        final ActivityRecord ownerActivity =
+                ActivityRecord.forTokenLocked(creationParams.getOwnerToken());
+        if (ownerActivity == null || ownerActivity.getTask() == null) {
+            // TODO(b/189385246)  : report the failure back to the organizer
+            return;
+        }
+        // The ownerActivity has to belong to the same app as the root Activity of the target Task.
+        final ActivityRecord rootActivity = ownerActivity.getTask().getRootActivity();
+        if (rootActivity.getUid() != ownerActivity.getUid()) {
+            // TODO(b/189385246) : report the failure back to the organizer
+            return;
+        }
+        final TaskFragment taskFragment = new TaskFragment(mService,
+                creationParams.getFragmentToken(), true /* createdByOrganizer */);
+        ownerActivity.getTask().addChild(taskFragment, POSITION_TOP);
+        taskFragment.setWindowingMode(creationParams.getWindowingMode());
+        taskFragment.setBounds(creationParams.getInitialBounds());
+        taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer());
+        mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
+    }
+
+    void reparentTaskFragment(@NonNull WindowContainer oldParent,
+            @Nullable WindowContainer newParent) {
+        WindowContainer parent = newParent;
+        if (parent == null && oldParent.asTaskFragment() != null) {
+            parent = oldParent.asTaskFragment().getTask();
+        }
+        if (parent == null) {
+            // TODO(b/189385246)  : report the failure back to the organizer
+            return;
+        }
+        while (oldParent.hasChild()) {
+            oldParent.getChildAt(0).reparent(parent, POSITION_TOP);
+        }
+    }
+
+    void deleteTaskFragment(@NonNull TaskFragment taskFragment) {
+        final int index = mLaunchTaskFragments.indexOfValue(taskFragment);
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "Not allowed to operate with invalid taskFragment");
+        }
+        mLaunchTaskFragments.removeAt(index);
+        taskFragment.removeImmediately();
     }
 }
