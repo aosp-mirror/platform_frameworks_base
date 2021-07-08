@@ -59,6 +59,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
@@ -96,6 +97,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private CommandQueue mCommandQueue;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
+    @Mock
+    private WindowManager mWindowManager;
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
@@ -149,7 +152,7 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
 
         mAuthController = new TestableAuthController(context, mCommandQueue,
-                mActivityTaskManager, mFingerprintManager, mFaceManager,
+                mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
                 () -> mUdfpsController, () -> mSidefpsController);
 
         mAuthController.start();
@@ -576,13 +579,15 @@ public class AuthControllerTest extends SysuiTestCase {
         private int mBuildCount = 0;
         private PromptInfo mLastBiometricPromptInfo;
 
-        TestableAuthController(Context context, CommandQueue commandQueue,
+        TestableAuthController(Context context,
+                CommandQueue commandQueue,
                 ActivityTaskManager activityTaskManager,
+                WindowManager windowManager,
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
                 Provider<SidefpsController> sidefpsControllerFactory) {
-            super(context, commandQueue, activityTaskManager,
+            super(context, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory);
         }

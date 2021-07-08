@@ -19,14 +19,20 @@ package com.android.systemui.shared.recents.utilities;
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.view.Surface;
 
 /* Common code */
 public class Utilities {
+
+    private static final float TABLET_MIN_DPS = 600;
 
     /**
      * Posts a runnable on a handler at the front of the queue ignoring any sync barriers.
@@ -109,5 +115,23 @@ public class Utilities {
         }
 
         return hints;
+    }
+
+    /** See {@link #isTablet(Configuration, Context)} */
+    public static boolean isTablet(Context context) {
+        Configuration newConfig = context.getResources().getConfiguration();
+        return isTablet(newConfig, context);
+    }
+
+    /**
+     * @return whether or not {@param newConfig} represents that of a large screen device or not
+     */
+    public static boolean isTablet(Configuration newConfig, Context context) {
+        float density = Resources.getSystem().getDisplayMetrics().density;
+        int size = Math.min((int) (density * newConfig.screenWidthDp),
+                (int) (density* newConfig.screenHeightDp));
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        float densityRatio = (float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+        return (size / densityRatio) >= TABLET_MIN_DPS;
     }
 }
