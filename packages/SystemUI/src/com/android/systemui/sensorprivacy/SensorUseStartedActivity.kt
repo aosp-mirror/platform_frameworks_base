@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.hardware.SensorPrivacyManager
 import android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS
 import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
+import android.hardware.SensorPrivacyManager.Sources.DIALOG
 import android.os.Bundle
 import android.os.Handler
 import android.text.Html
@@ -225,10 +226,10 @@ class SensorUseStartedActivity @Inject constructor(
 
     private fun disableSensorPrivacy() {
         if (sensor == ALL_SENSORS) {
-            sensorPrivacyController.setSensorBlocked(MICROPHONE, false)
-            sensorPrivacyController.setSensorBlocked(CAMERA, false)
+            sensorPrivacyController.setSensorBlocked(DIALOG, MICROPHONE, false)
+            sensorPrivacyController.setSensorBlocked(DIALOG, CAMERA, false)
         } else {
-            sensorPrivacyController.setSensorBlocked(sensor, false)
+            sensorPrivacyController.setSensorBlocked(DIALOG, sensor, false)
         }
         unsuppressImmediately = true
         setResult(RESULT_OK)
