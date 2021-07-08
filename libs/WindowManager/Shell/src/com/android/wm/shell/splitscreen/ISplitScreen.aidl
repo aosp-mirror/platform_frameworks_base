@@ -90,4 +90,11 @@ interface ISplitScreen {
      oneway void startTasksWithLegacyTransition(int mainTaskId, in Bundle mainOptions,
                             int sideTaskId, in Bundle sideOptions, int sidePosition,
                             in RemoteAnimationAdapter adapter) = 11;
+
+    /**
+     * Blocking call that notifies and gets additional split-screen targets when entering
+     * recents (for example: the dividerBar).
+     * @param cancel is true if leaving recents back to split (eg. the gesture was cancelled).
+     */
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) = 12;
 }
