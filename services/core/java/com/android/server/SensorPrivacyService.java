@@ -121,6 +121,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FunctionalUtils;
@@ -576,6 +577,7 @@ public final class SensorPrivacyService extends SystemService {
                 @NonNull String packageName, int sensor) {
             int iconRes;
             int messageRes;
+            int notificationId;
 
             CharSequence packageLabel;
             try {
@@ -590,9 +592,11 @@ public final class SensorPrivacyService extends SystemService {
             if (sensor == MICROPHONE) {
                 iconRes = R.drawable.ic_mic_blocked;
                 messageRes = R.string.sensor_privacy_start_use_mic_notification_content_title;
+                notificationId = SystemMessage.NOTE_UNBLOCK_MIC_TOGGLE;
             } else {
                 iconRes = R.drawable.ic_camera_blocked;
                 messageRes = R.string.sensor_privacy_start_use_camera_notification_content_title;
+                notificationId = SystemMessage.NOTE_UNBLOCK_CAM_TOGGLE;
             }
 
             NotificationManager notificationManager =
@@ -609,7 +613,7 @@ public final class SensorPrivacyService extends SystemService {
             notificationManager.createNotificationChannel(channel);
 
             Icon icon = Icon.createWithResource(getUiContext().getResources(), iconRes);
-            notificationManager.notify(sensor,
+            notificationManager.notify(notificationId,
                     new Notification.Builder(mContext, SENSOR_PRIVACY_CHANNEL_ID)
                             .setContentTitle(getUiContext().getString(messageRes))
                             .setContentText(Html.fromHtml(getUiContext().getString(
