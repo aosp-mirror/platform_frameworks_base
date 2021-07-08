@@ -22,6 +22,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -66,12 +67,12 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <pre>
  * public class UserBirthdayServiceImpl implements IUserBirthdayService {
- *   private final HashMap<Integer, Birthday> mUidToBirthday;
- *   @Override
+ *   private final HashMap&lt;Integer, Birthday%&gt; mUidToBirthday;
+ *   {@literal @}Override
  *   public synchronized Birthday getUserBirthday(int userId) {
  *     return mUidToBirthday.get(userId);
  *   }
- *   private synchronized void updateBirthdays(Map<Integer, Birthday> uidToBirthday) {
+ *   private synchronized void updateBirthdays(Map&lt;Integer, Birthday%&gt; uidToBirthday) {
  *     mUidToBirthday.clear();
  *     mUidToBirthday.putAll(uidToBirthday);
  *   }
@@ -105,9 +106,9 @@ import java.util.concurrent.atomic.AtomicLong;
  *   ...
  *   private static final int BDAY_CACHE_MAX = 8;  // Maximum birthdays to cache
  *   private static final String BDAY_CACHE_KEY = "cache_key.birthdayd";
- *   private final PropertyInvalidatedCache<Integer, Birthday> mBirthdayCache = new
- *     PropertyInvalidatedCache<Integer, Birthday>(BDAY_CACHE_MAX, BDAY_CACHE_KEY) {
- *       @Override
+ *   private final PropertyInvalidatedCache&lt;Integer, Birthday%&gt; mBirthdayCache = new
+ *     PropertyInvalidatedCache&lt;Integer, Birthday%&gt;(BDAY_CACHE_MAX, BDAY_CACHE_KEY) {
+ *       {@literal @}Override
  *       protected Birthday recompute(Integer userId) {
  *         return GetService("birthdayd").getUserBirthday(userId);
  *       }
@@ -140,7 +141,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *     ActivityThread.currentActivityThread().invalidateUserBirthdayCache();
  *   }
  *
- *   private synchronized void updateBirthdays(Map<Integer, Birthday> uidToBirthday) {
+ *   private synchronized void updateBirthdays(Map&lt;Integer, Birthday%&gt; uidToBirthday) {
  *     mUidToBirthday.clear();
  *     mUidToBirthday.putAll(uidToBirthday);
  *     ActivityThread.currentActivityThread().invalidateUserBirthdayCache();
@@ -169,6 +170,41 @@ import java.util.concurrent.atomic.AtomicLong;
  * this local case, there's no IPC, so use of the cache is (depending on exact
  * circumstance) unnecessary.
  *
+ * There may be queries for which it is more efficient to bypass the cache than to cache
+ * the result.  This would be true, for example, if some queries would require frequent
+ * cache invalidation while other queries require infrequent invalidation.  To expand on
+ * the birthday example, suppose that there is a userId that signifies "the next
+ * birthday".  When passed this userId, the server returns the next birthday among all
+ * users - this value changes as time advances.  The userId value can be cached, but the
+ * cache must be invalidated whenever a birthday occurs, and this invalidates all
+ * birthdays.  If there is a large number of users, invalidation will happen so often that
+ * the cache provides no value.
+ *
+ * The class provides a bypass mechanism to handle this situation.
+ * <pre>
+ * public class ActivityThread {
+ *   ...
+ *   private static final int BDAY_CACHE_MAX = 8;  // Maximum birthdays to cache
+ *   private static final String BDAY_CACHE_KEY = "cache_key.birthdayd";
+ *   private final PropertyInvalidatedCache&lt;Integer, Birthday%&gt; mBirthdayCache = new
+ *     PropertyInvalidatedCache&lt;Integer, Birthday%&gt;(BDAY_CACHE_MAX, BDAY_CACHE_KEY) {
+ *       {@literal @}Override
+ *       protected Birthday recompute(Integer userId) {
+ *         return GetService("birthdayd").getUserBirthday(userId);
+ *       }
+ *       {@literal @}Override
+ *       protected boolean bypass(Integer userId) {
+ *         return userId == NEXT_BIRTHDAY;
+ *       }
+ *     };
+ *   ...
+ * }
+ * </pre>
+ *
+ * If the {@code bypass()} method returns true then the cache is not used for that
+ * particular query.  The {@code bypass()} method is not abstract and the default
+ * implementation returns false.
+ *
  * For security, there is a allowlist of processes that are allowed to invalidate a cache.
  * The allowlist includes normal runtime processes but does not include test processes.
  * Test processes must call {@code PropertyInvalidatedCache.disableForTestMode()} to disable
@@ -190,19 +226,23 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class PropertyInvalidatedCache<Query, Result> {
     /**
-     * Reserved nonce values.  The code is written assuming that these
-     * values are contiguous.
+     * Reserved nonce values.  Use isReservedNonce() to test for a reserved value.  Note
+     * that all values cause the cache to be skipped.
      */
     private static final int NONCE_UNSET = 0;
     private static final int NONCE_DISABLED = 1;
     private static final int NONCE_CORKED = 2;
-    private static final int NONCE_RESERVED = NONCE_CORKED + 1;
+    private static final int NONCE_BYPASS = 3;
+
+    private static boolean isReservedNonce(long n) {
+        return n >= NONCE_UNSET && n <= NONCE_BYPASS;
+    }
 
     /**
      * The names of the nonces
      */
     private static final String[] sNonceName =
-            new String[]{ "unset", "disabled", "corked" };
+            new String[]{ "unset", "disabled", "corked", "bypass" };
 
     private static final String TAG = "PropertyInvalidatedCache";
     private static final boolean DEBUG = false;
@@ -220,7 +260,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private long mMisses = 0;
 
     @GuardedBy("mLock")
-    private long mSkips[] = new long[]{ 0, 0, 0 };
+    private long[] mSkips = new long[]{ 0, 0, 0, 0 };
 
     @GuardedBy("mLock")
     private long mMissOverflow = 0;
@@ -363,6 +403,91 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
+     * SystemProperties are protected and cannot be written (or read, usually) by random
+     * processes.  So, for testing purposes, the methods have a bypass mode that reads and
+     * writes to a HashMap and does not go out to the SystemProperties at all.
+     */
+
+    // If true, the cache might be under test.  If false, there is no testing in progress.
+    private static volatile boolean sTesting = false;
+
+    // If sTesting is true then keys that are under test are in this map.
+    private static final HashMap<String, Long> sTestingPropertyMap = new HashMap<>();
+
+    /**
+     * Enable or disable testing.  The testing property map is cleared every time this
+     * method is called.
+     */
+    @VisibleForTesting
+    public static void setTestMode(boolean mode) {
+        sTesting = mode;
+        synchronized (sTestingPropertyMap) {
+            sTestingPropertyMap.clear();
+        }
+    }
+
+  /**
+   * Enable testing the specific cache key.  Only keys in the map are subject to testing.
+   * There is no method to stop testing a property name.  Just disable the test mode.
+   */
+    @VisibleForTesting
+    public static void testPropertyName(String name) {
+        synchronized (sTestingPropertyMap) {
+            sTestingPropertyMap.put(name, (long) NONCE_UNSET);
+        }
+    }
+
+    // Read the system property associated with the current cache.  This method uses the
+    // handle for faster reading.
+    private long getCurrentNonce() {
+        if (sTesting) {
+            synchronized (sTestingPropertyMap) {
+                Long n = sTestingPropertyMap.get(mPropertyName);
+                if (n != null) {
+                    return n;
+                }
+            }
+        }
+
+        SystemProperties.Handle handle = mPropertyHandle;
+        if (handle == null) {
+            handle = SystemProperties.find(mPropertyName);
+            if (handle == null) {
+                return NONCE_UNSET;
+            }
+            mPropertyHandle = handle;
+        }
+        return handle.getLong(NONCE_UNSET);
+    }
+
+    // Write the nonce in a static context.  No handle is available.
+    private static void setNonce(String name, long val) {
+        if (sTesting) {
+            synchronized (sTestingPropertyMap) {
+                Long n = sTestingPropertyMap.get(name);
+                if (n != null) {
+                    sTestingPropertyMap.put(name, val);
+                    return;
+                }
+            }
+        }
+        SystemProperties.set(name, Long.toString(val));
+    }
+
+    // Set the nonce in a static context.  No handle is available.
+    private static long getNonce(String name) {
+        if (sTesting) {
+            synchronized (sTestingPropertyMap) {
+                Long n = sTestingPropertyMap.get(name);
+                if (n != null) {
+                    return n;
+                }
+            }
+        }
+        return SystemProperties.getLong(name, NONCE_UNSET);
+    }
+
+    /**
      * Forget all cached values.
      */
     public final void clear() {
@@ -418,18 +543,6 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         return oldResult;
     }
 
-    private long getCurrentNonce() {
-        SystemProperties.Handle handle = mPropertyHandle;
-        if (handle == null) {
-            handle = SystemProperties.find(mPropertyName);
-            if (handle == null) {
-                return NONCE_UNSET;
-            }
-            mPropertyHandle = handle;
-        }
-        return handle.getLong(NONCE_UNSET);
-    }
-
     /**
      * Disable the use of this cache in this process.
      */
@@ -477,9 +590,11 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public Result query(Query query) {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabledLocal()) ? getCurrentNonce() : NONCE_DISABLED;
+        if (bypass(query)) {
+            currentNonce = NONCE_BYPASS;
+        }
         for (;;) {
-            if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET
-                    || currentNonce == NONCE_CORKED || bypass(query)) {
+            if (isReservedNonce(currentNonce)) {
                 if (!mDisabled) {
                     // Do not bother collecting statistics if the cache is
                     // locally disabled.
@@ -490,7 +605,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
 
                 if (DEBUG) {
                     if (!mDisabled) {
-                        Log.d(TAG, String.format(
+                        Log.d(TAG, TextUtils.formatSimple(
                             "cache %s %s for %s",
                             cacheName(), sNonceName[(int) currentNonce], queryToString(query)));
                     }
@@ -505,7 +620,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     if (cachedResult != null) mHits++;
                 } else {
                     if (DEBUG) {
-                        Log.d(TAG, String.format(
+                        Log.d(TAG, TextUtils.formatSimple(
                             "clearing cache %s of %d entries because nonce changed [%s] -> [%s]",
                             cacheName(), mCache.size(),
                             mLastSeenNonce, currentNonce));
@@ -531,9 +646,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     if (currentNonce != afterRefreshNonce) {
                         currentNonce = afterRefreshNonce;
                         if (DEBUG) {
-                            Log.d(TAG, String.format("restarting %s %s because nonce changed in refresh",
-                                                     cacheName(),
-                                                     queryToString(query)));
+                            Log.d(TAG, TextUtils.formatSimple(
+                                    "restarting %s %s because nonce changed in refresh",
+                                    cacheName(),
+                                    queryToString(query)));
                         }
                         continue;
                     }
@@ -602,7 +718,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         if (!sEnabled) {
             return;
         }
-        SystemProperties.set(name, Long.toString(NONCE_DISABLED));
+        setNonce(name, NONCE_DISABLED);
     }
 
     /**
@@ -622,7 +738,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void invalidateCache(@NonNull String name) {
         if (!sEnabled) {
             if (DEBUG) {
-                Log.w(TAG, String.format(
+                Log.w(TAG, TextUtils.formatSimple(
                     "cache invalidate %s suppressed", name));
             }
             return;
@@ -651,7 +767,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private static void invalidateCacheLocked(@NonNull String name) {
         // There's no race here: we don't require that values strictly increase, but instead
         // only that each is unique in a single runtime-restart session.
-        final long nonce = SystemProperties.getLong(name, NONCE_UNSET);
+        final long nonce = getNonce(name);
         if (nonce == NONCE_DISABLED) {
             if (DEBUG) {
                 Log.d(TAG, "refusing to invalidate disabled cache: " + name);
@@ -662,18 +778,15 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         long newValue;
         do {
             newValue = NoPreloadHolder.next();
-        } while (newValue >= 0 && newValue < NONCE_RESERVED);
-        final String newValueString = Long.toString(newValue);
+        } while (isReservedNonce(newValue));
         if (DEBUG) {
-            Log.d(TAG,
-                    String.format("invalidating cache [%s]: [%s] -> [%s]",
-                            name,
-                            nonce,
-                            newValueString));
+            Log.d(TAG, TextUtils.formatSimple(
+                    "invalidating cache [%s]: [%s] -> [%s]",
+                    name, nonce, Long.toString(newValue)));
         }
         // TODO(dancol): add an atomic compare and exchange property set operation to avoid a
         // small race with concurrent disable here.
-        SystemProperties.set(name, newValueString);
+        setNonce(name, newValue);
         long invalidateCount = sInvalidates.getOrDefault(name, (long) 0);
         sInvalidates.put(name, ++invalidateCount);
     }
@@ -693,7 +806,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void corkInvalidations(@NonNull String name) {
         if (!sEnabled) {
             if (DEBUG) {
-                Log.w(TAG, String.format(
+                Log.w(TAG, TextUtils.formatSimple(
                     "cache cork %s suppressed", name));
             }
             return;
@@ -702,7 +815,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         synchronized (sCorkLock) {
             int numberCorks = sCorks.getOrDefault(name, 0);
             if (DEBUG) {
-                Log.d(TAG, String.format("corking %s: numberCorks=%s", name, numberCorks));
+                Log.d(TAG, TextUtils.formatSimple(
+                        "corking %s: numberCorks=%s", name, numberCorks));
             }
 
             // If we're the first ones to cork this cache, set the cache to the corked state so
@@ -714,9 +828,9 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             // uncorking the cache, e.g., by holding a read lock across the cork-uncork pair.
             // Implement this more dangerous mode of operation if necessary.
             if (numberCorks == 0) {
-                final long nonce = SystemProperties.getLong(name, NONCE_UNSET);
+                final long nonce = getNonce(name);
                 if (nonce != NONCE_UNSET && nonce != NONCE_DISABLED) {
-                    SystemProperties.set(name, Long.toString(NONCE_CORKED));
+                    setNonce(name, NONCE_CORKED);
                 }
             } else {
                 final long count = sCorkedInvalidates.getOrDefault(name, (long) 0);
@@ -739,8 +853,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void uncorkInvalidations(@NonNull String name) {
         if (!sEnabled) {
             if (DEBUG) {
-                Log.w(TAG, String.format(
-                    "cache uncork %s suppressed", name));
+                Log.w(TAG, TextUtils.formatSimple(
+                        "cache uncork %s suppressed", name));
             }
             return;
         }
@@ -748,7 +862,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         synchronized (sCorkLock) {
             int numberCorks = sCorks.getOrDefault(name, 0);
             if (DEBUG) {
-                Log.d(TAG, String.format("uncorking %s: numberCorks=%s", name, numberCorks));
+                Log.d(TAG, TextUtils.formatSimple(
+                        "uncorking %s: numberCorks=%s", name, numberCorks));
             }
 
             if (numberCorks < 1) {
@@ -816,7 +931,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             synchronized (mLock) {
                 boolean alreadyQueued = mUncorkDeadlineMs >= 0;
                 if (DEBUG) {
-                    Log.w(TAG, String.format(
+                    Log.w(TAG, TextUtils.formatSimple(
                             "autoCork %s mUncorkDeadlineMs=%s", mPropertyName,
                             mUncorkDeadlineMs));
                 }
@@ -834,7 +949,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         private void handleMessage(Message msg) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Log.w(TAG, String.format(
+                    Log.w(TAG, TextUtils.formatSimple(
                             "handleMsesage %s mUncorkDeadlineMs=%s",
                             mPropertyName, mUncorkDeadlineMs));
                 }
@@ -846,7 +961,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                 if (mUncorkDeadlineMs > nowMs) {
                     mUncorkDeadlineMs = nowMs + mAutoCorkDelayMs;
                     if (DEBUG) {
-                        Log.w(TAG, String.format(
+                        Log.w(TAG, TextUtils.formatSimple(
                                         "scheduling uncork at %s",
                                         mUncorkDeadlineMs));
                     }
@@ -880,10 +995,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             Result resultToCompare = recompute(query);
             boolean nonceChanged = (getCurrentNonce() != mLastSeenNonce);
             if (!nonceChanged && !debugCompareQueryResults(proposedResult, resultToCompare)) {
-                Log.e(TAG, String.format(
-                    "cache %s inconsistent for %s is %s should be %s",
-                    cacheName(), queryToString(query),
-                    proposedResult, resultToCompare));
+                Log.e(TAG, TextUtils.formatSimple(
+                        "cache %s inconsistent for %s is %s should be %s",
+                        cacheName(), queryToString(query),
+                        proposedResult, resultToCompare));
             }
             // Always return the "true" result in verification mode.
             return resultToCompare;
@@ -953,21 +1068,24 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         }
 
         synchronized (mLock) {
-            pw.println(String.format("  Cache Name: %s", cacheName()));
-            pw.println(String.format("    Property: %s", mPropertyName));
-            final long skips = mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED];
-            pw.println(String.format("    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
+            pw.println(TextUtils.formatSimple("  Cache Name: %s", cacheName()));
+            pw.println(TextUtils.formatSimple("    Property: %s", mPropertyName));
+            final long skips = mSkips[NONCE_CORKED] + mSkips[NONCE_UNSET] + mSkips[NONCE_DISABLED]
+                    + mSkips[NONCE_BYPASS];
+            pw.println(TextUtils.formatSimple(
+                    "    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
                     mHits, mMisses, skips, mClears));
-            pw.println(String.format("    Skip-corked: %d, Skip-unset: %d, Skip-other: %d",
+            pw.println(TextUtils.formatSimple(
+                    "    Skip-corked: %d, Skip-unset: %d, Skip-bypass: %d, Skip-other: %d",
                     mSkips[NONCE_CORKED], mSkips[NONCE_UNSET],
-                    mSkips[NONCE_DISABLED]));
-            pw.println(String.format(
+                    mSkips[NONCE_BYPASS], mSkips[NONCE_DISABLED]));
+            pw.println(TextUtils.formatSimple(
                     "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
                     mLastSeenNonce, invalidateCount, corkedInvalidates));
-            pw.println(String.format(
+            pw.println(TextUtils.formatSimple(
                     "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
                     mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
-            pw.println(String.format("    Enabled: %s", mDisabled ? "false" : "true"));
+            pw.println(TextUtils.formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
             pw.println("");
 
             Set<Map.Entry<Query, Result>> cacheEntries = mCache.entrySet();
@@ -980,7 +1098,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                 String key = Objects.toString(entry.getKey());
                 String value = Objects.toString(entry.getValue());
 
-                pw.println(String.format("      Key: %s\n      Value: %s\n", key, value));
+                pw.println(TextUtils.formatSimple("      Key: %s\n      Value: %s\n", key, value));
             }
         }
     }
@@ -1009,7 +1127,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     pw.println("  Corking Status:");
                     for (int i = 0; i < activeCorks.size(); i++) {
                         Map.Entry<String, Integer> entry = activeCorks.get(i);
-                        pw.println(String.format("    Property Name: %s Count: %d",
+                        pw.println(TextUtils.formatSimple("    Property Name: %s Count: %d",
                                 entry.getKey(), entry.getValue()));
                     }
                 }
