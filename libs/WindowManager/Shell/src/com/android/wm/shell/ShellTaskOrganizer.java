@@ -512,7 +512,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // The task is vanished or doesn't support size compat UI, notify to remove size compat UI
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportSizeCompatUI()
-                || !taskInfo.topActivityInSizeCompat) {
+                || !taskInfo.topActivityInSizeCompat || !taskInfo.isVisible) {
             mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
                     null /* taskConfig */, null /* taskListener */);
             return;
