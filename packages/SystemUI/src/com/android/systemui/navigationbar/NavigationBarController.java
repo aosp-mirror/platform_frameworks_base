@@ -17,7 +17,6 @@
 package com.android.systemui.navigationbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
@@ -350,7 +349,9 @@ public class NavigationBarController implements Callbacks,
             Log.w(TAG, "Cannot get WindowManager.");
             return;
         }
-        final Context context = mContext.createWindowContext(display, TYPE_NAVIGATION_BAR, null);
+        final Context context = isOnDefaultDisplay
+                ? mContext
+                : mContext.createDisplayContext(display);
         NavigationBar navBar = new NavigationBar(context,
                 mWindowManager,
                 mAssistManagerLazy,
