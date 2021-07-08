@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
+import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -96,6 +97,56 @@ public final class SensorPrivacyManager {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Sensor {}
+    }
+
+    /**
+     * Source through which Privacy Sensor was toggled.
+     * @hide
+     */
+    @TestApi
+    public static class Sources {
+        private Sources() {}
+
+        /**
+         * Constant for the Quick Setting Tile.
+         */
+        public static final int QS_TILE = SensorPrivacyToggleSourceProto.QS_TILE;
+
+        /**
+         * Constant for the Settings.
+         */
+        public static final int SETTINGS = SensorPrivacyToggleSourceProto.SETTINGS;
+
+        /**
+         * Constant for Dialog.
+         */
+        public static final int DIALOG = SensorPrivacyToggleSourceProto.DIALOG;
+
+        /**
+         * Constant for SHELL.
+         */
+        public static final int SHELL = SensorPrivacyToggleSourceProto.SHELL;
+
+        /**
+         * Constant for OTHER.
+         */
+        public static final int OTHER = SensorPrivacyToggleSourceProto.OTHER;
+
+        /**
+         * Source for toggling sensors
+         *
+         * @hide
+         */
+        @IntDef(value = {
+                QS_TILE,
+                SETTINGS,
+                DIALOG,
+                SHELL,
+                OTHER
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Source {}
+
     }
 
     /**
@@ -339,8 +390,9 @@ public final class SensorPrivacyManager {
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void setSensorPrivacy(@Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacy(sensor, enable, mContext.getUserId());
+    public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
+            boolean enable) {
+        setSensorPrivacy(source, sensor, enable, mContext.getUserId());
     }
 
     /**
@@ -353,10 +405,10 @@ public final class SensorPrivacyManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void setSensorPrivacy(@Sensors.Sensor int sensor, boolean enable,
-            @UserIdInt int userId) {
+    public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
+            boolean enable, @UserIdInt int userId) {
         try {
-            mService.setIndividualSensorPrivacy(userId, sensor, enable);
+            mService.setIndividualSensorPrivacy(userId, source, sensor, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -366,6 +418,7 @@ public final class SensorPrivacyManager {
      * Sets sensor privacy to the specified state for an individual sensor for the profile group of
      * context's user.
      *
+     * @param source the source using which the sensor is toggled.
      * @param sensor the sensor which to change the state for
      * @param enable the state to which sensor privacy should be set.
      *
@@ -373,15 +426,16 @@ public final class SensorPrivacyManager {
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void setSensorPrivacyForProfileGroup(@Sensors.Sensor int sensor,
-            boolean enable) {
-        setSensorPrivacyForProfileGroup(sensor, enable, mContext.getUserId());
+    public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
+            @Sensors.Sensor int sensor, boolean enable) {
+        setSensorPrivacyForProfileGroup(source , sensor, enable, mContext.getUserId());
     }
 
     /**
      * Sets sensor privacy to the specified state for an individual sensor for the profile group of
      * context's user.
      *
+     * @param source the source using which the sensor is toggled.
      * @param sensor the sensor which to change the state for
      * @param enable the state to which sensor privacy should be set.
      * @param userId the user's id
@@ -389,11 +443,10 @@ public final class SensorPrivacyManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void setSensorPrivacyForProfileGroup(@Sensors.Sensor int sensor,
-            boolean enable, @UserIdInt int userId) {
+    public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
+            @Sensors.Sensor int sensor, boolean enable, @UserIdInt int userId) {
         try {
-            mService.setIndividualSensorPrivacyForProfileGroup(userId, sensor,
-                    enable);
+            mService.setIndividualSensorPrivacyForProfileGroup(userId, source, sensor, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
