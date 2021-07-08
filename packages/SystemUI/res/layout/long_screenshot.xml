@@ -38,20 +38,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/preview" />
 
-    <Button
-        android:id="@+id/cancel"
-        style="@android:style/Widget.DeviceDefault.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:text="@android:string/cancel"
-        android:layout_marginStart="6dp"
+    <ImageButton
+        android:id="@+id/delete"
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:tint="?android:textColorPrimary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginTop="4dp"
-        android:background="@drawable/screenshot_button_background"
-        android:textColor="?android:textColorSecondary"
-        app:layout_constraintStart_toEndOf="@id/save"
+        android:padding="12dp"
+        android:src="@drawable/ic_screenshot_delete"
+        android:scaleType="fitCenter"
+        android:contentDescription="@*android:string/delete"
+        android:tooltipText="@*android:string/delete"
+        app:layout_constraintEnd_toStartOf="@id/share"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/preview"
-    />
+        app:layout_constraintBottom_toTopOf="@id/preview" />
 
     <ImageButton
         android:id="@+id/share"

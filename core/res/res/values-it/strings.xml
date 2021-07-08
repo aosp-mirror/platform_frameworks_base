@@ -2285,7 +2285,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nuove impostazioni per l\'ingrandimento"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Ora puoi ingrandire parte dello schermo"</string>
-    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Attiva nelle Impostazioni"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Attiva in Impostazioni"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Sblocca il microfono del dispositivo"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Sblocca la fotocamera del dispositivo"</string>

@@ -650,7 +650,7 @@ public class UdfpsController implements DozeReceiver {
         return mCoreLayoutParams;
     }
 
-    void onConfigurationChanged() {
+    void onOrientationChanged() {
         // When the configuration changes it's almost always necessary to destroy and re-create
         // the overlay's window to pass it the new LayoutParams.
         // Hiding the overlay will destroy its window. It's safe to hide the overlay regardless
@@ -663,6 +663,7 @@ public class UdfpsController implements DozeReceiver {
 
     private void showUdfpsOverlay(@NonNull ServerRequest request) {
         mExecution.assertIsMainThread();
+
         final int reason = request.mRequestReason;
         if (mView == null) {
             try {
@@ -751,22 +752,22 @@ public class UdfpsController implements DozeReceiver {
     }
 
     private void hideUdfpsOverlay() {
-        mFgExecutor.execute(() -> {
-            if (mView != null) {
-                Log.v(TAG, "hideUdfpsOverlay | removing window");
-                // Reset the controller back to its starting state.
-                onFingerUp();
-                mWindowManager.removeView(mView);
-                mView.setOnTouchListener(null);
-                mView.setOnHoverListener(null);
-                mView.setAnimationViewController(null);
-                mAccessibilityManager.removeTouchExplorationStateChangeListener(
-                        mTouchExplorationStateChangeListener);
-                mView = null;
-            } else {
-                Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
-            }
-        });
+        mExecution.assertIsMainThread();
+
+        if (mView != null) {
+            Log.v(TAG, "hideUdfpsOverlay | removing window");
+            // Reset the controller back to its starting state.
+            onFingerUp();
+            mWindowManager.removeView(mView);
+            mView.setOnTouchListener(null);
+            mView.setOnHoverListener(null);
+            mView.setAnimationViewController(null);
+            mAccessibilityManager.removeTouchExplorationStateChangeListener(
+                    mTouchExplorationStateChangeListener);
+            mView = null;
+        } else {
+            Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
+        }
     }
 
     /**
