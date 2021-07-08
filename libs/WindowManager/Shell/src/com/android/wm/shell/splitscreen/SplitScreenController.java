@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 import android.window.IRemoteTransition;
 
 import androidx.annotation.BinderThread;
@@ -267,6 +268,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return options;
     }
 
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) {
+        if (!isSplitScreenVisible()) return null;
+        return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
+    }
+
     public void dump(@NonNull PrintWriter pw, String prefix) {
         pw.println(prefix + TAG);
         if (mStageCoordinator != null) {
@@ -465,6 +471,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     (controller) -> {
                         controller.startIntent(intent, fillInIntent, stage, position, options);
                     });
+        }
+
+        @Override
+        public RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) {
+            final RemoteAnimationTarget[][] out = new RemoteAnimationTarget[][]{null};
+            executeRemoteCallWithTaskPermission(mController, "onGoingToRecentsLegacy",
+                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(cancel),
+                    true /* blocking */);
+            return out[0];
         }
     }
 }

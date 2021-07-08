@@ -970,7 +970,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    private RemoteAnimationTarget getDividerBarLegacyTarget() {
+    RemoteAnimationTarget getDividerBarLegacyTarget() {
         final Rect bounds = mSplitLayout.getDividerBounds();
         return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
                 mSplitLayout.getDividerLeash(), false /* isTranslucent */, null /* clipRect */,
