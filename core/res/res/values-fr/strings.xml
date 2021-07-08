@@ -613,7 +613,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problème lié au déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Appuyez pour supprimer votre empreinte faciale, puis ajoutez de nouveau votre visage"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage facial"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Appuyez pour ajouter une empreinte digitale"</string>
@@ -1071,7 +1071,7 @@
     <string name="weeks" msgid="3516247214269821391">"semaines"</string>
     <string name="year" msgid="5182610307741238982">"année"</string>
     <string name="years" msgid="5797714729103773425">"années"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"mainten."</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"maintenant"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
