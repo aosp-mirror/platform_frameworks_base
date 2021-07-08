@@ -333,8 +333,10 @@ package android.app {
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void handleSystemKey(int);
     method public void sendNotificationFeedback(@Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
   public final class SyncNotedAppOp implements android.os.Parcelable {
