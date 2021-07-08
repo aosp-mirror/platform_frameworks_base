@@ -41,11 +41,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
 /**
- * This class provides access to the sensor privacy services; sensor privacy allows the
- * user to disable access to all sensors on the device. This class provides methods to query the
- * current state of sensor privacy as well as to register / unregister for notification when
- * the sensor privacy state changes.
- *
+ * This class provides information about the microphone and camera toggles.
  */
 @SystemService(Context.SENSOR_PRIVACY_SERVICE)
 public final class SensorPrivacyManager {
