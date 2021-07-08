@@ -5063,6 +5063,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         process.registerDisplayAreaConfigurationListener(imeContainer);
     }
 
+    @Override
+    public void setRunningRemoteTransitionDelegate(IApplicationThread caller) {
+        mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "setRunningRemoteTransition");
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        synchronized (mGlobalLock) {
+            // Also only allow a process which is already runningRemoteAnimation to mark another
+            // process.
+            final WindowProcessController callingProc = getProcessController(callingPid,
+                    callingUid);
+            if (callingProc == null || !callingProc.isRunningRemoteTransition()) {
+                final String msg = "Can't call setRunningRemoteTransition from a process (pid="
+                        + callingPid + " uid=" + callingUid + ") which isn't itself running a "
+                        + "remote transition.";
+                Slog.e(TAG, msg);
+                throw new SecurityException(msg);
+            }
+            final WindowProcessController wpc = getProcessController(caller);
+            if (wpc == null) {
+                Slog.w(TAG, "Unable to find process for application " + caller);
+                return;
+            }
+            wpc.setRunningRemoteAnimation(true /* running */);
+            callingProc.addRemoteAnimationDelegate(wpc);
+        }
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
         static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
