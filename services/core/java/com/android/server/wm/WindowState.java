@@ -875,6 +875,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
+     * Returns all the requested visibilities.
+     *
+     * @return an {@link InsetsState} as the requested visibilities.
+     */
+    InsetsState getRequestedState() {
+        return mRequestedInsetsState;
+    }
+
+    /**
      * @see #getRequestedVisibility(int)
      */
     void updateRequestedVisibility(InsetsState state) {
