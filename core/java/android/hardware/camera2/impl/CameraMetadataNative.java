@@ -1869,26 +1869,38 @@ public class CameraMetadataNative implements Parcelable {
 
     @FastNative
     private static native void nativeUpdate(long dst, long src);
-    private static synchronized native void nativeWriteToParcel(Parcel dest, long ptr);
-    private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
-    private static synchronized native void nativeSwap(long ptr, long otherPtr)
+    @FastNative
+    private static native void nativeWriteToParcel(Parcel dest, long ptr);
+    @FastNative
+    private static native void nativeReadFromParcel(Parcel source, long ptr);
+    @FastNative
+    private static native void nativeSwap(long ptr, long otherPtr)
             throws NullPointerException;
-    private static synchronized native void nativeClose(long ptr);
-    private static synchronized native boolean nativeIsEmpty(long ptr);
-    private static synchronized native int nativeGetEntryCount(long ptr);
-    private static synchronized native long nativeGetBufferSize(long ptr);
+    @FastNative
+    private static native void nativeClose(long ptr);
+    @FastNative
+    private static native boolean nativeIsEmpty(long ptr);
+    @FastNative
+    private static native int nativeGetEntryCount(long ptr);
+    @FastNative
+    private static native long nativeGetBufferSize(long ptr);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static synchronized native byte[] nativeReadValues(int tag, long ptr);
-    private static synchronized native void nativeWriteValues(int tag, byte[] src, long ptr);
+    @FastNative
+    private static native byte[] nativeReadValues(int tag, long ptr);
+    @FastNative
+    private static native void nativeWriteValues(int tag, byte[] src, long ptr);
     private static synchronized native void nativeDump(long ptr) throws IOException; // dump to LOGD
 
-    private static synchronized native ArrayList nativeGetAllVendorKeys(long ptr, Class keyClass);
+    @FastNative
+    private static native ArrayList nativeGetAllVendorKeys(long ptr, Class keyClass);
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static synchronized native int nativeGetTagFromKeyLocal(long ptr, String keyName)
+    @FastNative
+    private static native int nativeGetTagFromKeyLocal(long ptr, String keyName)
             throws IllegalArgumentException;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static synchronized native int nativeGetTypeFromTagLocal(long ptr, int tag)
+    @FastNative
+    private static native int nativeGetTypeFromTagLocal(long ptr, int tag)
             throws IllegalArgumentException;
     @FastNative
     private static native int nativeGetTagFromKey(String keyName, long vendorId)
