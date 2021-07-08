@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ច្រានចោល​រូបថត​អេក្រង់"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ការមើល​រូបថត​អេក្រង់​សាកល្បង"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​អេក្រង់"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ចាប់ផ្តើម​ថត​ឬ?"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ថ្ម​ពីរ​កាំ។"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ថ្ម​ទាំង​បី​​កាំ​។"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ថ្ម​ពេញ​ហើយ។"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"មិនដឹងអំពី​ភាគរយថ្មទេ។"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"គ្មាន​ទូរស័ព្ទ។"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"សេវា​ទូរស័ព្ទ​មួយ​កាំ។"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"សេវា​ទូរស័ព្ទ​ពីរ​កាំ។"</string>
@@ -427,14 +428,14 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"បាន​បិទ NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"បាន​បើក NFC"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ការថត​អេក្រង់"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ការថត​វីដេអូអេក្រង់"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ឧបករណ៍"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"អូស​ឡើង​លើ​ដើម្បី​ប្តូរ​កម្មវិធី"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"អូសទៅស្ដាំដើម្បីប្ដូរកម្មវិធីបានរហ័ស"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"បាន​បញ្ចូល​ថ្ម​​"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"បាន​សាក​ថ្មពេញ"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"កំពុងសាក​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
@@ -593,14 +594,14 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"កម្មវិធី​ត្រូវបានខ្ទាស់"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកខ្ទាស់ចេញ។ អូសឡើងលើ​ឱ្យជាប់ ដើម្បី​ដក​ខ្ទាស់។"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកខ្ទាស់។ អូសឡើងលើ និងសង្កត់​ឱ្យជាប់ ដើម្បី​ដក​ខ្ទាស់។"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការ​ដៅ។ សូម​សង្កត់​ប៊ូតុង​ទិដ្ឋភាពរួម​​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុច​ប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"អាចចូលប្រើ​ទិន្នន័យផ្ទាល់ខ្លួន​បាន (ដូចជា ទំនាក់ទំនង និងខ្លឹមសារ​អ៊ីមែលជាដើម)។"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"កម្មវិធីដែលបានខ្ទាស់​អាចបើកកម្មវិធី​ផ្សេងទៀតបាន។"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ដើម្បីដកខ្ទាស់​កម្មវិធីនេះ សូមចុច​ប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យជាប់"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ដើម្បី​ដកខ្ទាស់​កម្មវិធីនេះ សូម​ចុចប៊ូតុង​ថយក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យជាប់"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ដើម្បីដកខ្ទាស់កម្មវិធី​នេះ សូមអូសឡើងលើ​ឱ្យជាប់"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ដើម្បីដកខ្ទាស់កម្មវិធី​នេះ សូមអូសឡើងលើ និងសង្កត់​ឱ្យជាប់"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ទេ អរគុណ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"បានខ្ទាស់​កម្មវិធី"</string>
@@ -652,7 +653,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"អ៊ីសឺរណិត"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ម៉ោងរោទ៍"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ប្រវត្តិរូបការងារ"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"របៀបក្នុងយន្តហោះ"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"ពេលជិះយន្តហោះ"</string>
     <string name="add_tile" msgid="6239678623873086686">"បន្ថែមក្រឡាល្អិត"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"ការផ្សាយជាក្រឡាល្អិត"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ ប្រសិនបើអ្នកមិនបិទរបៀបនេះមុនពេលនោះទេ"</string>
@@ -710,7 +711,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"លំនាំដើម"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ពពុះ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"គ្មាន​សំឡេង ឬការញ័រទេ"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង ឬការញ័រ និងការបង្ហាញ​កម្រិតទាបជាង​នេះនៅក្នុង​ផ្នែកសន្ទនាទេ"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង​ឬការញ័រ និងបង្ហាញ​ទាបជាង​នៅក្នុង​ផ្នែកសន្ទនា"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ។ ការសន្ទនា​ពី​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g> តាម​លំនាំដើម​។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>
@@ -723,7 +724,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ការជូនដំណឹង​ជា​ប្រូកស៊ី"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"ការជូន​ដំណឹងទាំងអស់​របស់ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"ការជូន​ដំណឹងទាំងអស់​ពី <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"មើលច្រើនទៀត"</string>
     <string name="appops_camera" msgid="5215967620896725715">"កម្មវិធីនេះ​កំពុងប្រើ​កាមេរ៉ា។"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"កម្មវិធីនេះ​កំពុងប្រើ​មីក្រូហ្វូន។"</string>
@@ -820,7 +821,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"បើកការកំណត់"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"បានភ្ជាប់កាស"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"បានភ្ជាប់កាស"</string>
-    <string name="data_saver" msgid="3484013368530820763">"កម្មវិធីសន្សំសំចៃទិន្នន័យ"</string>
+    <string name="data_saver" msgid="3484013368530820763">"មុខងារសន្សំទិន្នន័យ"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបើក"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបិទ"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"បើក"</string>
@@ -988,7 +989,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"មុខងារ​សន្សំ​ថ្មនឹង​បើក​ដោយ​ស្វ័យ​ប្រវត្តិ​ នៅពេល​ថ្ម​នៅ​សល់​តិច​ជាង <xliff:g id="PERCENTAGE">%d</xliff:g>%%។"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ការកំណត់"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"យល់ហើយ"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"ចម្លង SysUI Heap"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> កំពុងប្រើ <xliff:g id="TYPES_LIST">%2$s</xliff:g> របស់អ្នក។"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"កម្មវិធី​កំពុងប្រើ <xliff:g id="TYPES_LIST">%s</xliff:g> របស់អ្នក។"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (បាន​ផ្ដាច់)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"មិន​អាច​ភ្ជាប់​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"មានបញ្ហាក្នុង​ការអាន​ឧបករណ៍រង្វាស់កម្រិតថ្មរបស់អ្នក"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ចុចដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
 </resources>

@@ -87,7 +87,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"વાઇ-ફાઇ પરથી કટોકટીના કૉલ કરી શકાતા નથી"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"ચેતવણીઓ"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"મોબાઇલ ડેટાની સ્થિતિ"</string>
@@ -280,7 +280,7 @@
     <string name="notification_channel_network_available" msgid="6083697929214165169">"નેટવર્ક ઉપલબ્ધ છે"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN સ્થિતિ"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"તમારા IT વ્યવસ્થાપક તરફથી અલર્ટ"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"ચેતવણીઓ"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"અલર્ટ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"રિટેલ ડેમો"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB કનેક્શન"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ઍપ ચાલી રહ્યું છે"</string>
@@ -293,7 +293,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android સિસ્ટમ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"વ્યક્તિગત પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"કાર્યાલયની પ્રોફાઇલ પર સ્વિચ કરો"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"સંપર્કો"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"ઍપ્લિકેશનને સ્ટેટસ બારમાં બતાવવાની મંજૂરી આપે છે."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"સ્ટેટસ બાર વિસ્તૃત કરો/સંકુકિત કરો"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"ઍપ્લિકેશનને સ્ટેટસ બાર વિસ્તૃત કરવાની અને સંકુચિત કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"શોર્ટકટ્સ ઇન્સ્ટોલ કરો"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"શૉર્ટકટ ઇન્સ્ટૉલ કરો"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"એપ્લિકેશનને વપરાશકર્તા હસ્તક્ષેપ વગર હોમસ્ક્રીન શોર્ટકટ્સ ઉમેરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"શોર્ટકટ્સ અનઇન્સ્ટોલ કરો"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"એપ્લિકેશનને વપરાશકર્તા હસ્તક્ષેપ વગર હોમસ્ક્રીન શોર્ટકટ્સ દૂર કરવાની મંજૂરી આપે છે."</string>
@@ -700,7 +700,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"જરૂરી છે કે સંગ્રહિત ઍપ્લિકેશન એન્ક્રિપ્ટ થાય."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"કૅમેરા અક્ષમ કરો"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"તમામ ઉપકરણ કૅમેરાનો ઉપયોગ અટકાવો."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"અમુક સ્ક્રીનલૉક સુવિધા અક્ષમ કરો"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"અમુક સ્ક્રીનલૉક સુવિધા બંધ કરો"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"કેટલીક સ્ક્રીન લૉક સુવિધાઓના ઉપયોગને અટકાવો."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ઘર"</item>
@@ -1623,7 +1623,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા Android TV ડિવાઇસને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી. હજી <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને ફોનને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"દૂર કરો"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"કાઢી નાખો"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
@@ -1664,7 +1664,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, ઍક્સેસિબિલિટી બટનને ટચ કરીને થોડીવાર દબાવી રાખો."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, બે આંગળીઓ વડે સ્ક્રીનની ઉપરની તરફ સ્વાઇપ કરીને દબાવી રાખો."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, ત્રણ આંગળીઓ વડે સ્ક્રીનની ઉપરની તરફ સ્વાઇપ કરીને દબાવી રાખો."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"વિસ્તૃતીકરણ"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"મોટું કરવું"</string>
     <string name="user_switched" msgid="7249833311585228097">"વર્તમાન વપરાશકર્તા <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> પર સ્વિચ કરી રહ્યાં છે…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> લોગ આઉટ થઈ રહ્યાં છે…"</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"મોનાર્ક"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ક્વાર્ટો"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"ફૂલસ્કેપ"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"રૉક 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"કહુ"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"કાકુ2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"અજાણ્યું પોર્ટ્રેટ"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"અજાણ્યું લેન્ડસ્કેપ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"રદ થઈ"</string>
@@ -1799,7 +1811,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n• ઘેરી થીમ ચાલુ કરે છે\n• બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “Ok Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n• ઘેરી થીમ ચાલુ કરે છે\n• બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેમને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1961,7 +1973,7 @@
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"ડેબિટ કાર્ડ"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"ચુકવણી કાર્ડ"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"કાર્ડ"</string>
-    <string name="autofill_save_type_username" msgid="1018816929884640882">"વપરાશકર્તાનામ"</string>
+    <string name="autofill_save_type_username" msgid="1018816929884640882">"વપરાશકર્તાનું નામ"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ઇમેઇલ સરનામું"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"શાંત રહો અને નજીકમાં આશ્રય લો."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"દરિયાકિનારાના પ્રદેશો તથા નદીકાંઠાના વિસ્તારો ખાલી કરીને તાત્કાલિક સુરક્ષિત ઊંચા સ્થાન પર જાઓ."</string>

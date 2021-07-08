@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Закрити знімок екрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Перегляд знімка екрана"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Відеозапис екрана"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Запис відео з екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обробка записування екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Сповіщення про сеанс запису екрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Почати запис?"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Заряд акумулятора: дві смужки."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Заряд акумулятора: три смужки."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Акумулятор заряджений."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Відсоток заряду акумулятора невідомий."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Немає сигналу телефону."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Одна смужка сигналу телефону."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Дві смужки сигналу телефону."</string>
@@ -364,7 +365,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Книжкова орієнтація"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Альбомна орієнтація"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Метод введення"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Місцезнаходження"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Геодані"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Місцезнаходження вимкнено"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Носій"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -544,7 +545,7 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Відстеження профілю"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Відстеження дій у мережі"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"Мережа VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Реєстрація в мережі"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Журнал мережі"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертифікати центру сертифікації"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Вимкнути VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Від’єднатися від мережі VPN"</string>
@@ -554,7 +555,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Адміністратор організації встановив центр сертифікації на цьому пристрої. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Адміністратор організації встановив центр сертифікації у вашому робочому профілі. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На цьому пристрої встановлено центр сертифікації. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Під’єднано додатки <xliff:g id="VPN_APP_1">%2$s</xliff:g> та <xliff:g id="VPN_APP_0">%1$s</xliff:g>, які можуть відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ваш робочий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
@@ -569,7 +570,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Відкрити налаштування мережі VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Відкрити надійні облікові дані"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Ви дозволили додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nВін може відстежувати ваші дії в мережі, зокрема електронні листи, додатки та веб-сайти.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором.\n\nВаш пристрій також під’єднано до мережі VPN, у якій можна відстежувати ваші дії в мережі."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
@@ -834,7 +835,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Заощадження трафіку ввімкнено"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Заощадження трафіку вимкнено"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Увімкнено"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Вимкнути"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Вимкнено"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недоступно"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Панель навігації"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Макет"</string>
@@ -1003,7 +1004,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Додатки використовують <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" і "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"камеру"</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"місце"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"мікрофон"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Датчики вимкнено"</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (відключено)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не вдалося підключитися. Повторіть спробу."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Підключити новий пристрій"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не вдалось отримати дані лічильника акумулятора"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Натисніть, щоб дізнатися більше"</string>
 </resources>

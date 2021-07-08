@@ -1579,7 +1579,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     if (is_system_server) {
         // Prefetch the classloader for the system server. This is done early to
         // allow a tie-down of the proper system server selinux domain.
-        env->CallStaticVoidMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
+        env->CallStaticObjectMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
         if (env->ExceptionCheck()) {
             // Be robust here. The Java code will attempt to create the classloader
             // at a later point (but may not have rights to use AoT artifacts).
@@ -2549,6 +2549,7 @@ static jint com_android_internal_os_Zygote_nativeCurrentTaggingLevel(JNIEnv* env
     case PR_MTE_TCF_SYNC:
       return MEMORY_TAG_LEVEL_SYNC;
     case PR_MTE_TCF_ASYNC:
+    case PR_MTE_TCF_ASYNC | PR_MTE_TCF_SYNC:
       return MEMORY_TAG_LEVEL_ASYNC;
     default:
       ALOGE("Unknown memory tagging level: %i", level);

@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-sõnumid"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Kõnepostisõnumid"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"WiFi-kõned"</string>
-    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM-kaardi olek"</string>
+    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM-i olek"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Kõrge prioriteediga SIM-i olek"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Partner taotles TTY-režiimi TÄIELIK"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"Partner taotles TTY-režiimi HCO"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Võimaldab rakendusel olla olekuriba."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"laienda/ahenda olekuriba"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Võimaldab rakendusel laiendada või ahendada olekuriba."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"otseteede installimine"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Otseteede installimine"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Lubab rakendusel lisada avakuva otseteid ilma kasutaja sekkumiseta."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"otseteede desinstallimine"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Lubab rakendusel eemaldada avakuva otseteid ilma kasutaja sekkumiseta."</string>
@@ -569,11 +569,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sõrmejälje ikoon"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"hallata Face Unlocki riistvara"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"hallata näoga avamise riistvara"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Lubab rakendusel tühistada meetodid kasutatavate näomallide lisamiseks ja kustutamiseks."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"kasutada Face Unlocki riistvara"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Võimaldab rakendusel autentimiseks kasutada Face Unlocki riistvara"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"kasutada näoga avamise riistvara"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Võimaldab rakendusel autentimiseks kasutada näoga avamise riistvara"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Näoga avamine"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registreerige oma nägu uuesti"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Tuvastamise parandamiseks registreerige oma nägu uuesti"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Näoandmeid ei saanud jäädvustada. Proovige uuesti."</string>
@@ -599,15 +599,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Proovige Face Unlocki uuesti."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Proovige näoga avamist uuesti."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Uue näo andmeid ei saa salvestada. Kustutage enne vanad."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Näotuvastuse toiming tühistati."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kasutaja tühistas Face Unlocki."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kasutaja tühistas näoga avamise."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Liiga palju katseid. Face Unlock on keelatud."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Liiga palju katseid. Näoga avamine on keelatud."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nägu ei saa kinnitada. Proovige uuesti."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Face Unlocki ei ole seadistatud."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Seade ei toeta Face Unlocki."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Näoga avamine ei ole seadistatud."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Seade ei toeta näoga avamist."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Andur on ajutiselt keelatud."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Nägu <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Proovige uuesti"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Proovige uuesti"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Ava kõigi funktsioonide ja andmete nägemiseks"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maksimaalne teenusega Face Unlock avamise katsete arv on ületatud"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maksimaalne näoga avamise katsete arv on ületatud"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM-kaarti pole"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tahvelarvutis pole SIM-kaarti."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Teie Android TV seadmes pole SIM-kaarti."</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Tundmatu vertikaalpaigutuses"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Tundmatu horisontaalpaigutuses"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Tühistatud"</string>
@@ -1838,7 +1850,7 @@
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (järgmine äratus)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kuni välja lülitate"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Kuni lülitate välja valiku Mitte segada"</string>
-    <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
+    <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Ahendamine"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"Mitte segada"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Puhkeaeg"</string>
@@ -1909,7 +1921,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"PIN-kood <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Vabasta"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Vabasta <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Rakenduste teave"</string>
+    <string name="app_info" msgid="6113278084877079851">"Rakenduse teave"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo käivitamine …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Seadme lähtestamine …"</string>

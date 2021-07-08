@@ -76,7 +76,7 @@
     <string name="learn_more" msgid="4690632085667273811">"瞭解詳情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"放大為全螢幕"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"擷取螢幕畫面"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"螢幕截圖"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"傳送了一張圖片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在儲存螢幕截圖…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在儲存螢幕截圖…"</string>
@@ -118,7 +118,7 @@
     <string name="use_ptp_button_title" msgid="7676427598943446826">"掛接為相機 (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"安裝 Mac 版 Android 檔案傳輸應用程式"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"返回"</string>
-    <string name="accessibility_home" msgid="5430449841237966217">"主螢幕"</string>
+    <string name="accessibility_home" msgid="5430449841237966217">"主畫面"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"選單"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"無障礙設定"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"旋轉螢幕"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"電池電量兩格。"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"電池電量三格。"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"電池電量已滿。"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電池電量不明。"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"沒有電話訊號。"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"電話訊號強度一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"電話訊號強度兩格。"</string>
@@ -592,11 +593,11 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"應用程式已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主畫面按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人資料 (例如聯絡人和電子郵件內容) 可能會遭存取。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主畫面按鈕即可取消固定。"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"該應用程式或許可存取個人資料 (例如聯絡人和電子郵件內容)。"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"已設為固定的應用程式仍可開啟其他應用程式。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"如要取消固定這個應用程式，請按住「返回」按鈕和「總覽」按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"如要取消固定這個應用程式，請按住「返回」按鈕和主畫面按鈕"</string>
@@ -710,7 +711,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"預設"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"泡泡"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不震動或發出聲音"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並調整排序到其他對話下方"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並顯示在對話區的下方"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機的設定響鈴或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"利用浮動式捷徑快速存取這項內容。"</string>
@@ -748,7 +749,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"解除略過"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"以泡泡形式顯示"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除對話框"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"新增至主螢幕"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"新增至主畫面"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知控制項"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延後選項"</string>
@@ -795,7 +796,7 @@
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock 鍵"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"數字鍵 <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"系統"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"主螢幕"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"主畫面"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"最近"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"返回"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"通知"</string>
@@ -853,10 +854,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"向右按鍵碼"</string>
     <string name="left_icon" msgid="5036278531966897006">"向左圖示"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右圖示"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住並拖曳即可新增圖塊"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住並拖曳即可重新排列圖塊"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住並拖曳即可新增設定方塊"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住並拖曳即可重新排列設定方塊"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖曳到這裡即可移除"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"你至少必須要有 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 個資訊方塊"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"你至少必須要有 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 個設定方塊"</string>
     <string name="qs_edit" msgid="5583565172803472437">"編輯"</string>
     <string name="tuner_time" msgid="2450785840990529997">"時間"</string>
   <string-array name="clock_options">
@@ -1050,7 +1051,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"從收藏中移除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移到位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制項"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"選擇要從電源選單存取的控制項"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"選擇要在電源選單中顯示哪些控制項"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住並拖曳即可重新排列控制項"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"所有控制項都已移除"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未儲存變更"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (已中斷連線)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"無法連線，請再試一次。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"配對新裝置"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕觸即可瞭解詳情"</string>
 </resources>

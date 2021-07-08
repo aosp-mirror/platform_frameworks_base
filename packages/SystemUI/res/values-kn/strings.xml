@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ಬ್ಯಾಟರಿ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ಬ್ಯಾಟರಿ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ಬ್ಯಾಟರಿ ಭರ್ತಿಯಾಗಿದೆ."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ಬ್ಯಾಟರಿ ಶೇಕಡಾವಾರು ತಿಳಿದಿಲ್ಲ."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ಯಾವುದೇ ಫೋನ್ ಇಲ್ಲ."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ಪೋನ್ ಒಂದು ಪಟ್ಟಿ."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ಫೋನ್ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
@@ -387,7 +388,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ವೈ-ಫೈ ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ಪ್ರಕಾಶಮಾನ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ಸ್ವಯಂ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣಗಳನ್ನು ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣ ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ ಮೋಡ್"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ಮುಗಿದಿದೆ"</string>
@@ -517,7 +518,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"ಪ್ರೊಫೈಲ್ ಅನ್ನು ಪರಿವೀಕ್ಷಿಸಬಹುದಾಗಿದೆ"</string>
-    <string name="vpn_footer" msgid="3457155078010607471">"ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದಾಗಿ"</string>
+    <string name="vpn_footer" msgid="3457155078010607471">"ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಿಸಬಹುದಾದ ಸಾಧ್ಯತೆಯಿದೆ"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದಾಗಿರುತ್ತದೆ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನದ ಮಾಲೀಕತ್ವವನ್ನು ಹೊಂದಿದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಈ ಸಾಧನದ ಮಾಲೀಕತ್ವವನ್ನು ಹೊಂದಿದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
@@ -577,7 +578,7 @@
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"ವೇಗವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"ನೀವು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಮೊದಲೇ ಅವುಗಳನ್ನು ನೋಡಿ"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ಧನ್ಯವಾದಗಳು"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ಬೇಡ"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"ಹೊಂದಿಸು"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"ಈಗ ಆಫ್ ಮಾಡಿ"</string>
@@ -602,7 +603,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಮುಖಪುಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ತಿಳಿಯಿತು"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"ಧನ್ಯವಾದಗಳು"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"ಬೇಡ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ಆ್ಯಪ್ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ಆ್ಯಪ್ ಅನ್‌ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ಮರೆಮಾಡುವುದೇ?"</string>
@@ -1034,7 +1035,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಕನೆಕ್ಟ್ ಆಗಿರುವ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ನಿಮ್ಮ ನಿಯಂತ್ರಣಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಪವರ್ ಬಟನ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಮೀಟರ್ ಓದುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
 </resources>
