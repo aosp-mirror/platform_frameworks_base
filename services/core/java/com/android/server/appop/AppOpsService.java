@@ -7290,6 +7290,30 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
+
+        @Override
+        public int getOpRestrictionCount(int code, UserHandle user, String pkg,
+                String attributionTag) {
+            int number = 0;
+            synchronized (AppOpsService.this) {
+                int numRestrictions = mOpUserRestrictions.size();
+                for (int i = 0; i < numRestrictions; i++) {
+                    if (mOpUserRestrictions.valueAt(i)
+                            .hasRestriction(code, pkg, attributionTag, user.getIdentifier())) {
+                        number++;
+                    }
+                }
+
+                numRestrictions = mOpGlobalRestrictions.size();
+                for (int i = 0; i < numRestrictions; i++) {
+                    if (mOpGlobalRestrictions.valueAt(i).hasRestriction(code)) {
+                        number++;
+                    }
+                }
+            }
+
+            return number;
+        }
     }
 
     /**
