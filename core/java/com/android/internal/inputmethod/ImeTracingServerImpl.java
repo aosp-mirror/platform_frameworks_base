@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util.imetracing;
+package com.android.internal.inputmethod;
 
 import static android.os.Build.IS_USER;
 
@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * @hide
+ * An implementation of {@link ImeTracing} for the system_server process.
  */
 class ImeTracingServerImpl extends ImeTracing {
     private static final String TRACE_DIRNAME = "/data/misc/wmtrace/";

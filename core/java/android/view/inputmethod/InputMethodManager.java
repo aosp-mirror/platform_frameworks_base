@@ -18,7 +18,6 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-import static android.util.imetracing.ImeTracing.PROTO_ARG;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.EDITOR_INFO;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_INSETS_SOURCE_CONSUMER;
@@ -73,7 +72,6 @@ import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.ImeFocusController;
@@ -88,6 +86,7 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -3192,7 +3191,7 @@ public final class InputMethodManager {
         }
 
         for (String arg : args) {
-            if (arg.equals(PROTO_ARG)) {
+            if (arg.equals(ImeTracing.PROTO_ARG)) {
                 final ProtoOutputStream proto = new ProtoOutputStream(fd);
                 dumpDebug(proto, null /* icProto */);
                 proto.flush();
