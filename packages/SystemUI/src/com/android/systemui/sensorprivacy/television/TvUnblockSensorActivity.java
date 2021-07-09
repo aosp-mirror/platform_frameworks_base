@@ -18,6 +18,7 @@ package com.android.systemui.sensorprivacy.television;
 
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
+import static android.hardware.SensorPrivacyManager.Sources.OTHER;
 
 import android.hardware.SensorPrivacyManager;
 import android.os.Bundle;
@@ -119,10 +120,10 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
                 com.android.internal.R.string.sensor_privacy_start_use_dialog_turn_on_button);
         unblockButton.setOnClickListener(v -> {
             if (mSensor == ALL_SENSORS) {
-                mSensorPrivacyController.setSensorBlocked(CAMERA, false);
-                mSensorPrivacyController.setSensorBlocked(MICROPHONE, false);
+                mSensorPrivacyController.setSensorBlocked(OTHER, CAMERA, false);
+                mSensorPrivacyController.setSensorBlocked(OTHER, MICROPHONE, false);
             } else {
-                mSensorPrivacyController.setSensorBlocked(mSensor, false);
+                mSensorPrivacyController.setSensorBlocked(OTHER, mSensor, false);
             }
         });
 

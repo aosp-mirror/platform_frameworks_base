@@ -253,6 +253,13 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
+     * Whether or not to report end-to-end input latency. Disabled temporarily as a
+     * risk mitigation against potential jank caused by acquiring a weak reference
+     * per frame
+     */
+    private static final boolean ENABLE_INPUT_LATENCY_TRACKING = false;
+
+    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -1207,7 +1214,7 @@ public final class ViewRootImpl implements ViewParent,
                     mInputEventReceiver = new WindowInputEventReceiver(inputChannel,
                             Looper.myLooper());
 
-                    if (mAttachInfo.mThreadedRenderer != null) {
+                    if (ENABLE_INPUT_LATENCY_TRACKING && mAttachInfo.mThreadedRenderer != null) {
                         InputMetricsListener listener = new InputMetricsListener();
                         mHardwareRendererObserver = new HardwareRendererObserver(
                                 listener, listener.data, mHandler, true /*waitForPresentTime*/);
