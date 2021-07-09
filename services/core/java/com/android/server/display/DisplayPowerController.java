@@ -511,7 +511,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 
-        mHbmController = createHbmController();
+        mHbmController = createHbmControllerLocked();
 
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
@@ -717,6 +717,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final String uniqueId = device.getUniqueId();
         final DisplayDeviceConfig config = device.getDisplayDeviceConfig();
         final IBinder token = device.getDisplayTokenLocked();
+        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         mHandler.post(() -> {
             if (mDisplayDevice == device) {
                 return;
@@ -724,7 +725,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mDisplayDevice = device;
             mUniqueDisplayId = uniqueId;
             mDisplayDeviceConfig = config;
-            loadFromDisplayDeviceConfig(token);
+            loadFromDisplayDeviceConfig(token, info);
         });
     }
 
@@ -765,7 +766,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private void loadFromDisplayDeviceConfig(IBinder token) {
+    private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
         loadAmbientLightSensor();
@@ -774,7 +775,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
-        mHbmController.resetHbmData(token, mDisplayDeviceConfig.getHighBrightnessModeData());
+        mHbmController.resetHbmData(info.width, info.height, token,
+                mDisplayDeviceConfig.getHighBrightnessModeData(), mBrightnessSetting);
     }
 
     private void sendUpdatePowerState() {
@@ -1343,6 +1345,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (mHbmController.getHighBrightnessMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
                     && ((mBrightnessReason.modifier & BrightnessReason.MODIFIER_DIMMED) == 0
                     || (mBrightnessReason.modifier & BrightnessReason.MODIFIER_LOW_POWER) == 0)) {
+                // We want to scale HDR brightness level with the SDR level
                 animateValue = mHbmController.getHdrBrightnessValue();
             }
 
@@ -1514,21 +1517,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private HighBrightnessModeController createHbmController() {
-        final DisplayDeviceConfig ddConfig =
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig();
+    private HighBrightnessModeController createHbmControllerLocked() {
+        final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
+        final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
         final IBinder displayToken =
                 mLogicalDisplay.getPrimaryDisplayDeviceLocked().getDisplayTokenLocked();
         final DisplayDeviceConfig.HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
-        return new HighBrightnessModeController(mHandler, displayToken, PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX, hbmData,
+        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        return new HighBrightnessModeController(mHandler, info.width, info.height, displayToken,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, hbmData,
                 () -> {
                     sendUpdatePowerStateLocked();
                     mHandler.post(mOnBrightnessChangeRunnable);
                     // TODO(b/192258832): Switch the HBMChangeCallback to a listener pattern.
                     mAutomaticBrightnessController.update();
-                }, mContext);
+                }, mContext, mBrightnessSetting);
     }
 
     private void blockScreenOn() {
