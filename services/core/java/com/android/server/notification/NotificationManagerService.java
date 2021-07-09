@@ -6196,8 +6196,10 @@ public class NotificationManagerService extends SystemService {
         // Fix the notification as best we can.
         try {
             fixNotification(notification, pkg, tag, id, userId);
-
         } catch (Exception e) {
+            if (notification.isForegroundService()) {
+                throw new SecurityException("Invalid FGS notification", e);
+            }
             Slog.e(TAG, "Cannot fix notification", e);
             return;
         }
