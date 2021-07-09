@@ -6179,6 +6179,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (succeeded) {
+            // Clear the uid cache after we installed a new package.
+            mPerUidReadTimeoutsCache = null;
+
             // Send the removed broadcasts
             if (res.removedInfo != null) {
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
