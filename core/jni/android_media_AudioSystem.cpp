@@ -28,6 +28,7 @@
 
 #include <android/media/AudioVibratorInfo.h>
 #include <audiomanager/AudioManager.h>
+#include <media/AudioContainers.h>
 #include <media/AudioPolicy.h>
 #include <media/AudioSystem.h>
 #include <media/MicrophoneInfo.h>
@@ -812,7 +813,8 @@ android_media_AudioSystem_getMasterBalance(JNIEnv *env, jobject thiz)
 static jint
 android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
 {
-    return (jint) AudioSystem::getDevicesForStream(static_cast <audio_stream_type_t>(stream));
+    return (jint)deviceTypesToBitMask(
+            AudioSystem::getDevicesForStream(static_cast<audio_stream_type_t>(stream)));
 }
 
 static jint
