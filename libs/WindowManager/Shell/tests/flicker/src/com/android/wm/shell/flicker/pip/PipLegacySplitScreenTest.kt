@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -87,7 +87,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
@@ -105,7 +105,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
@@ -113,22 +113,6 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
             visibleRegion(imeApp.component).coversAtMost(displayBounds)
         }
     }
-
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @FlakyTest(bugId = 161435597)
     @Test

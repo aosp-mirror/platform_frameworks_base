@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -61,14 +60,6 @@ class PipShelfHeightTest(testSpec: FlickerTestParameter) : PipTransition(testSpe
                 testApp.launchViaIntent(wmHelper)
             }
         }
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @Presubmit
     @Test

@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.content.ComponentName
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -93,12 +93,12 @@ class EnterSplitScreenDockActivity(
         }
     }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()

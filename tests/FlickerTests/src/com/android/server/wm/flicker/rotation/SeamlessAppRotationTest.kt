@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManager
 import androidx.test.filters.FlakyTest
@@ -98,7 +99,7 @@ class SeamlessAppRotationTest(
         }
     }
 
-    @FlakyTest(bugId = 185400889)
+    @Postsubmit
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
@@ -130,13 +131,13 @@ class SeamlessAppRotationTest(
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarWindowIsVisible() {
         super.navBarWindowIsVisible()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarLayerIsVisible() {
         super.navBarLayerIsVisible()

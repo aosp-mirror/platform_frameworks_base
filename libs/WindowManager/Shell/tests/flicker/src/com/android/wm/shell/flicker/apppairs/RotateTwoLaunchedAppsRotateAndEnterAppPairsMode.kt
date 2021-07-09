@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -70,7 +69,7 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
@@ -78,7 +77,7 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     @Test
     override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 

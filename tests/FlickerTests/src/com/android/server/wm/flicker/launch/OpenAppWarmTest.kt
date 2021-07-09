@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -65,12 +64,6 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
                 wmHelper.waitForFullScreenApp(testApp.component)
             }
         }
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() {
-        super.navBarLayerIsVisible()
-    }
 
     @FlakyTest
     @Test

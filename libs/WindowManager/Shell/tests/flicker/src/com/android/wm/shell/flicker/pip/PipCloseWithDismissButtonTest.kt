@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -54,12 +53,4 @@ class PipCloseWithDismissButtonTest(testSpec: FlickerTestParameter) : PipCloseTr
     @FlakyTest
     @Test
     override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 }

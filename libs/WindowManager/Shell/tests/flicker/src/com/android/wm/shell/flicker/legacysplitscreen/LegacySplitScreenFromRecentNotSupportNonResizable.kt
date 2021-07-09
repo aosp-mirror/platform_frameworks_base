@@ -125,7 +125,7 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
         }
     }
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun nonResizableAppWindowBecomesVisible() {
         testSpec.assertWm {
@@ -148,12 +148,12 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
             super.visibleWindowsShownMoreThanOneConsecutiveEntry()
