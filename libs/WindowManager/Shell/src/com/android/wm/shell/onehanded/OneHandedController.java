@@ -601,6 +601,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     void onShortcutEnabledChanged() {
         mIsShortcutEnabled = mOneHandedSettingsUtil.getShortcutEnabled(
                 mContext.getContentResolver(), mUserId);
+
+        mOneHandedUiEventLogger.writeEvent(mIsShortcutEnabled
+                ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHORTCUT_ENABLED_ON
+                : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHORTCUT_ENABLED_OFF);
     }
 
     private void setupTimeoutListener() {
