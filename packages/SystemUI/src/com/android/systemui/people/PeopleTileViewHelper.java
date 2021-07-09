@@ -501,6 +501,8 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.availability, View.VISIBLE);
                 startPadding = mContext.getResources().getDimensionPixelSize(
                         R.dimen.availability_dot_shown_padding);
+                views.setContentDescription(R.id.availability,
+                        mContext.getString(R.string.person_available));
             } else {
                 views.setViewVisibility(R.id.availability, View.GONE);
                 startPadding = mContext.getResources().getDimensionPixelSize(
