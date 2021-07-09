@@ -1343,8 +1343,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
         boolean success = mHandler.post(() -> {
-            runnable.run();
-            mWakeLock.release();
+            try {
+                runnable.run();
+            } finally {
+                mWakeLock.release();
+            }
         });
         if (!success) {
             mWakeLock.release();
