@@ -79,6 +79,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import kotlin.Unit;
+
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
  * and coordinates triggering of the high-brightness mode (HBM).
@@ -118,6 +120,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Nullable private final UdfpsHbmProvider mHbmProvider;
+    @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -511,6 +514,10 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
+        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
+            onOrientationChanged();
+            return Unit.INSTANCE;
+        });
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -650,7 +657,7 @@ public class UdfpsController implements DozeReceiver {
         return mCoreLayoutParams;
     }
 
-    void onOrientationChanged() {
+    private void onOrientationChanged() {
         // When the configuration changes it's almost always necessary to destroy and re-create
         // the overlay's window to pass it the new LayoutParams.
         // Hiding the overlay will destroy its window. It's safe to hide the overlay regardless
@@ -668,6 +675,7 @@ public class UdfpsController implements DozeReceiver {
         if (mView == null) {
             try {
                 Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
+
                 mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
                 mOnFingerDown = false;
                 mView.setSensorProperties(mSensorProps);
@@ -675,6 +683,7 @@ public class UdfpsController implements DozeReceiver {
                 UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
                 animation.init();
                 mView.setAnimationViewController(animation);
+                mOrientationListener.enable();
 
                 // This view overlaps the sensor area, so prevent it from being selectable
                 // during a11y.
@@ -768,6 +777,8 @@ public class UdfpsController implements DozeReceiver {
         } else {
             Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
         }
+
+        mOrientationListener.disable();
     }
 
     /**
