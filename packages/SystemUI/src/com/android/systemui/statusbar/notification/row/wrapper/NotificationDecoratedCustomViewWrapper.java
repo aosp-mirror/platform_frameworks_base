@@ -62,10 +62,6 @@ public class NotificationDecoratedCustomViewWrapper extends NotificationTemplate
     public void onContentUpdated(ExpandableNotificationRow row) {
         mWrappedView = getWrappedCustomView(mView);
 
-        // Custom views will most likely use just white or black as their text color.
-        // We need to scan through and replace these colors by Material NEXT colors.
-        ensureThemeOnChildren(mWrappedView);
-
         if (needsInversion(resolveBackgroundColor(), mWrappedView)) {
             invertViewLuminosity(mWrappedView);
         }
