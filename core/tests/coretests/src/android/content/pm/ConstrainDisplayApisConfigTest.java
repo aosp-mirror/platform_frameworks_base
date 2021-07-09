@@ -48,7 +48,8 @@ public final class ConstrainDisplayApisConfigTest {
     public void setUp() throws Exception {
         mInitialConstrainDisplayApisFlags = DeviceConfig.getProperties(
                 NAMESPACE_CONSTRAIN_DISPLAY_APIS);
-        clearConstrainDisplayApisFlags();
+        DeviceConfig.setProperties(
+                new Properties.Builder(NAMESPACE_CONSTRAIN_DISPLAY_APIS).build());
     }
 
     @After
@@ -120,9 +121,43 @@ public final class ConstrainDisplayApisConfigTest {
         testNeverConstrainDisplayApis("com.android.test5", /* version= */ 5, /* expected= */ true);
     }
 
+    @Test
+    public void alwaysConstrainDisplayApis_flagsNoSet_returnsFalse() {
+        testAlwaysConstrainDisplayApis("com.android.test", /* version= */ 1, /* expected= */ false);
+    }
+
+    @Test
+    public void alwaysConstrainDisplayApis_flagHasEntries_returnsTrueForPackagesWithinRange() {
+        setAlwaysConstrainDisplayApisFlag("com.android.test1::,com.android.test2:1:2");
+
+        // Package 'com.android.other'
+        testAlwaysConstrainDisplayApis("com.android.other", /* version= */ 5, /* expected= */
+                false);
+        // Package 'com.android.test1'
+        testAlwaysConstrainDisplayApis("com.android.test1", /* version= */ 5, /* expected= */ true);
+        // Package 'com.android.test2'
+        testAlwaysConstrainDisplayApis("com.android.test2", /* version= */ 0, /* expected= */
+                false);
+        testAlwaysConstrainDisplayApis("com.android.test2", /* version= */ 1, /* expected= */ true);
+        testAlwaysConstrainDisplayApis("com.android.test2", /* version= */ 2, /* expected= */ true);
+        testAlwaysConstrainDisplayApis("com.android.test2", /* version= */ 3, /* expected= */
+                false);
+    }
+
     private static void testNeverConstrainDisplayApis(String packageName, long version,
             boolean expected) {
         boolean result = ConstrainDisplayApisConfig.neverConstrainDisplayApis(
+                buildApplicationInfo(packageName, version));
+        if (expected) {
+            assertTrue(result);
+        } else {
+            assertFalse(result);
+        }
+    }
+
+    private static void testAlwaysConstrainDisplayApis(String packageName, long version,
+            boolean expected) {
+        boolean result = ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(
                 buildApplicationInfo(packageName, version));
         if (expected) {
             assertTrue(result);
@@ -149,8 +184,8 @@ public final class ConstrainDisplayApisConfigTest {
                 value, /* makeDefault= */ false);
     }
 
-    private static void clearConstrainDisplayApisFlags() {
-        setNeverConstrainDisplayApisFlag(null);
-        setNeverConstrainDisplayApisAllPackagesFlag(null);
+    private static void setAlwaysConstrainDisplayApisFlag(@Nullable String value) {
+        DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS, "always_constrain_display_apis",
+                value, /* makeDefault= */ false);
     }
 }

@@ -19,9 +19,11 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -123,9 +125,15 @@ public class StagingManagerTest {
         mStagingManager.createSession(session2);
         // Session1 should not fail in spite of the overlapping packages
         mStagingManager.checkNonOverlappingWithStagedSessions(session1);
-        // Session2 should fail due to overlapping packages
+        // setSessionFailed() should've been called when doing overlapping checks on session1
+        verify(session2, times(1)).setSessionFailed(anyInt(), anyString());
+
+        // Yet another session with overlapping packages
+        StagingManager.StagedSession session3 = createSession(333, "com.foo", 3);
+        mStagingManager.createSession(session3);
         assertThrows(PackageManagerException.class,
-                () -> mStagingManager.checkNonOverlappingWithStagedSessions(session2));
+                () -> mStagingManager.checkNonOverlappingWithStagedSessions(session3));
+        verify(session3, never()).setSessionFailed(anyInt(), anyString());
     }
 
     @Test
@@ -505,6 +513,7 @@ public class StagingManagerTest {
             Predicate<StagingManager.StagedSession> filter = invocation.getArgument(0);
             return filter.test(stagedSession);
         }).when(stagedSession).sessionContains(any());
+        doNothing().when(stagedSession).setSessionFailed(anyInt(), anyString());
         return stagedSession;
     }
 

@@ -41,6 +41,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Response for an {@link
@@ -598,7 +599,7 @@ public final class FillResponse implements Parcelable {
         public Builder setHeader(@NonNull RemoteViews header) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
-            mHeader = Preconditions.checkNotNull(header);
+            mHeader = Objects.requireNonNull(header);
             return this;
         }
 
@@ -630,7 +631,7 @@ public final class FillResponse implements Parcelable {
         public Builder setFooter(@NonNull RemoteViews footer) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
-            mFooter = Preconditions.checkNotNull(footer);
+            mFooter = Objects.requireNonNull(footer);
             return this;
         }
 
@@ -649,7 +650,7 @@ public final class FillResponse implements Parcelable {
         public Builder setUserData(@NonNull UserData userData) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
-            mUserData = Preconditions.checkNotNull(userData);
+            mUserData = Objects.requireNonNull(userData);
             return this;
         }
 

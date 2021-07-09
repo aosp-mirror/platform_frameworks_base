@@ -352,6 +352,12 @@ public final class PowerManagerService extends SystemService
     // requested because it is updated asynchronously by the display power controller.
     private DisplayGroupPowerStateMapper mDisplayGroupPowerStateMapper;
 
+    // The suspend blocker used to keep the CPU alive while the device is booting.
+    private final SuspendBlocker mBootingSuspendBlocker;
+
+    // True if the wake lock suspend blocker has been acquired.
+    private boolean mHoldingBootingSuspendBlocker;
+
     // The suspend blocker used to keep the CPU alive when an application has acquired
     // a wake lock.
     private final SuspendBlocker mWakeLockSuspendBlocker;
@@ -1036,10 +1042,16 @@ public final class PowerManagerService extends SystemService
         }
 
         synchronized (mLock) {
+            mBootingSuspendBlocker =
+                    mInjector.createSuspendBlocker(this, "PowerManagerService.Booting");
             mWakeLockSuspendBlocker =
                     mInjector.createSuspendBlocker(this, "PowerManagerService.WakeLocks");
             mDisplaySuspendBlocker =
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Display");
+            if (mBootingSuspendBlocker != null) {
+                mBootingSuspendBlocker.acquire();
+                mHoldingBootingSuspendBlocker = true;
+            }
             if (mDisplaySuspendBlocker != null) {
                 mDisplaySuspendBlocker.acquire();
                 mHoldingDisplaySuspendBlocker = true;
@@ -3385,6 +3397,10 @@ public final class PowerManagerService extends SystemService
         }
 
         // First acquire suspend blockers if needed.
+        if (!mBootCompleted && !mHoldingBootingSuspendBlocker) {
+            mBootingSuspendBlocker.acquire();
+            mHoldingBootingSuspendBlocker = true;
+        }
         if (needWakeLockSuspendBlocker && !mHoldingWakeLockSuspendBlocker) {
             mWakeLockSuspendBlocker.acquire();
             mHoldingWakeLockSuspendBlocker = true;
@@ -3411,6 +3427,10 @@ public final class PowerManagerService extends SystemService
         }
 
         // Then release suspend blockers if needed.
+        if (mBootCompleted && mHoldingBootingSuspendBlocker) {
+            mBootingSuspendBlocker.release();
+            mHoldingBootingSuspendBlocker = false;
+        }
         if (!needWakeLockSuspendBlocker && mHoldingWakeLockSuspendBlocker) {
             mWakeLockSuspendBlocker.release();
             mHoldingWakeLockSuspendBlocker = false;

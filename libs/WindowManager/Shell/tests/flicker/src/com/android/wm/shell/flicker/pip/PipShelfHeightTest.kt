@@ -72,13 +72,13 @@ class PipShelfHeightTest(testSpec: FlickerTestParameter) : PipTransition(testSpe
 
     @Presubmit
     @Test
-    fun pipAlwaysVisible() = testSpec.assertWm { this.showsAppWindow(pipApp.windowName) }
+    fun pipAlwaysVisible() = testSpec.assertWm { this.isAppWindowVisible(pipApp.component) }
 
     @Presubmit
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.defaultWindowName).coversAtMost(displayBounds)
+            visibleRegion(pipApp.component).coversAtMost(displayBounds)
         }
     }
 

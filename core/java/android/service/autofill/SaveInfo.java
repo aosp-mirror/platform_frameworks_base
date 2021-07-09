@@ -39,6 +39,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Information used to indicate that an {@link AutofillService} is interested on saving the
@@ -769,7 +770,7 @@ public final class SaveInfo implements Parcelable {
          */
         public @NonNull Builder setTriggerId(@NonNull AutofillId id) {
             throwIfDestroyed();
-            mTriggerId = Preconditions.checkNotNull(id);
+            mTriggerId = Objects.requireNonNull(id);
             return this;
         }
 

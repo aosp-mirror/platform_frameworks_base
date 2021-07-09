@@ -49,7 +49,6 @@ import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
@@ -59,6 +58,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -398,9 +398,9 @@ public final class ContentCaptureManager {
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
             @NonNull IContentCaptureManager service, @NonNull ContentCaptureOptions options) {
-        mContext = Preconditions.checkNotNull(context, "context cannot be null");
-        mService = Preconditions.checkNotNull(service, "service cannot be null");
-        mOptions = Preconditions.checkNotNull(options, "options cannot be null");
+        mContext = Objects.requireNonNull(context, "context cannot be null");
+        mService = Objects.requireNonNull(service, "service cannot be null");
+        mOptions = Objects.requireNonNull(options, "options cannot be null");
 
         ContentCaptureHelper.setLoggingLevel(mOptions.loggingLevel);
 
@@ -679,7 +679,7 @@ public final class ContentCaptureManager {
      * @param request object specifying what user data should be removed.
      */
     public void removeData(@NonNull DataRemovalRequest request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
 
         try {
             mService.removeData(request);
@@ -703,9 +703,9 @@ public final class ContentCaptureManager {
     public void shareData(@NonNull DataShareRequest request,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull DataShareWriteAdapter dataShareWriteAdapter) {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkNotNull(dataShareWriteAdapter);
-        Preconditions.checkNotNull(executor);
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(dataShareWriteAdapter);
+        Objects.requireNonNull(executor);
 
         try {
             mService.shareData(request,
@@ -840,9 +840,9 @@ public final class ContentCaptureManager {
 
         private DataShareAdapterDelegate(Executor executor, DataShareWriteAdapter adapter,
                 LocalDataShareAdapterResourceManager resourceManager) {
-            Preconditions.checkNotNull(executor);
-            Preconditions.checkNotNull(adapter);
-            Preconditions.checkNotNull(resourceManager);
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(adapter);
+            Objects.requireNonNull(resourceManager);
 
             resourceManager.initializeForDelegate(this, adapter, executor);
             mResourceManagerReference = new WeakReference<>(resourceManager);
