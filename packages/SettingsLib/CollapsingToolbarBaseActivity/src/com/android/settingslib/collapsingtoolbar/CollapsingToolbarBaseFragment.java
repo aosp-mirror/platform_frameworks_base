@@ -16,6 +16,7 @@
 
 package com.android.settingslib.collapsingtoolbar;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +56,9 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
             @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.collapsing_toolbar_base_layout, container,
                 false);
-        mCoordinatorLayout = view.findViewById(R.id.content_parent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            mCoordinatorLayout = view.findViewById(R.id.content_parent);
+        }
         mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = view.findViewById(R.id.app_bar);
         if (mCollapsingToolbarLayout != null) {

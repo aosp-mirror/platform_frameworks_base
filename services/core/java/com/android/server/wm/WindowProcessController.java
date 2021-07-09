@@ -812,7 +812,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     void updateNightModeForAllActivities(int nightMode) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            r.setOverrideNightMode(nightMode);
+            if (r.setOverrideNightMode(nightMode) && r.mVisibleRequested) {
+                r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
+            }
         }
     }
 
