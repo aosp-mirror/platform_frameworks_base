@@ -592,9 +592,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                     PROVIDER_STATE_STOPPED, null, null, "stopUpdates() called");
             setCurrentState(newState, false);
 
-            if (mInitializationTimeoutQueue.hasQueued()) {
-                mInitializationTimeoutQueue.cancel();
-            }
+            cancelInitializationTimeoutIfSet();
 
             onStopUpdates();
         }
@@ -656,9 +654,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                             ProviderState newState = currentState.newState(
                                     PROVIDER_STATE_PERM_FAILED, null, null, msg);
                             setCurrentState(newState, true);
-                            if (mInitializationTimeoutQueue.hasQueued()) {
-                                mInitializationTimeoutQueue.cancel();
-                            }
+                            cancelInitializationTimeoutIfSet();
                             return;
                         }
                         case EVENT_TYPE_SUGGESTION:
@@ -691,9 +687,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                             ProviderState newState = currentState.newState(
                                     PROVIDER_STATE_PERM_FAILED, null, null, msg);
                             setCurrentState(newState, true);
-                            if (mInitializationTimeoutQueue.hasQueued()) {
-                                mInitializationTimeoutQueue.cancel();
-                            }
+                            cancelInitializationTimeoutIfSet();
 
                             return;
                         }
@@ -709,9 +703,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                                     timeZoneProviderEvent, currentState.currentUserConfiguration,
                                     "handleTimeZoneProviderEvent() when started");
                             setCurrentState(newState, true);
-                            if (mInitializationTimeoutQueue.hasQueued()) {
-                                mInitializationTimeoutQueue.cancel();
-                            }
+                            cancelInitializationTimeoutIfSet();
                             return;
                         }
                         default: {
@@ -722,6 +714,52 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                 }
                 default: {
                     throw new IllegalStateException("Unknown providerType=" + currentState);
+                }
+            }
+        }
+    }
+
+    /** For subclasses to invoke when needing to report a temporary failure. */
+    final void handleTemporaryFailure(String reason) {
+        mThreadingDomain.assertCurrentThread();
+
+        synchronized (mSharedLock) {
+            ProviderState currentState = mCurrentState.get();
+            switch (currentState.stateEnum) {
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                case PROVIDER_STATE_STARTED_UNCERTAIN:
+                case PROVIDER_STATE_STARTED_CERTAIN: {
+                    // A temporary failure is treated as becoming uncertain.
+                    String msg = "handleProviderLost reason=" + reason
+                            + ", mProviderName=" + mProviderName
+                            + ", currentState=" + currentState;
+                    debugLog(msg);
+                    // This is an unusual PROVIDER_STATE_STARTED_UNCERTAIN state because
+                    // event == null
+                    ProviderState newState = currentState.newState(
+                            PROVIDER_STATE_STARTED_UNCERTAIN, null,
+                            currentState.currentUserConfiguration, msg);
+                    setCurrentState(newState, true);
+                    cancelInitializationTimeoutIfSet();
+                    break;
+                }
+                case PROVIDER_STATE_STOPPED: {
+                    debugLog("handleProviderLost reason=" + reason
+                            + ", mProviderName=" + mProviderName
+                            + ", currentState=" + currentState
+                            + ": No state change required, provider is stopped.");
+                    break;
+                }
+                case PROVIDER_STATE_PERM_FAILED:
+                case PROVIDER_STATE_DESTROYED: {
+                    debugLog("handleProviderLost reason=" + reason
+                            + ", mProviderName=" + mProviderName
+                            + ", currentState=" + currentState
+                            + ": No state change required, provider is terminated.");
+                    break;
+                }
+                default: {
+                    throw new IllegalStateException("Unknown currentState=" + currentState);
                 }
             }
         }
@@ -748,6 +786,13 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     boolean isInitializationTimeoutSet() {
         synchronized (mSharedLock) {
             return mInitializationTimeoutQueue.hasQueued();
+        }
+    }
+
+    @GuardedBy("mSharedLock")
+    private void cancelInitializationTimeoutIfSet() {
+        if (mInitializationTimeoutQueue.hasQueued()) {
+            mInitializationTimeoutQueue.cancel();
         }
     }
 
