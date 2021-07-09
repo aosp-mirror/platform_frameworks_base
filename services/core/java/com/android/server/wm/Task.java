@@ -629,7 +629,7 @@ class Task extends TaskFragment {
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
             boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
             boolean _removeWithTaskOrganizer) {
-        super(atmService, _createdByOrganizer);
+        super(atmService, null /* fragmentToken */, _createdByOrganizer);
 
         mTaskId = _taskId;
         mUserId = _userId;
@@ -643,7 +643,6 @@ class Task extends TaskFragment {
                 : new PersistedTaskSnapshotData();
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
         setOrientation(SCREEN_ORIENTATION_UNSET);
-        mRemoteToken = new RemoteToken(this);
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -3339,9 +3338,6 @@ class Task extends TaskFragment {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
-        info.topActivityToken = mReuseActivitiesReport.top != null
-                ? mReuseActivitiesReport.top.appToken
-                : null;
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
                 && mReuseActivitiesReport.top.getOrganizedTask() == this
@@ -4979,7 +4975,6 @@ class Task extends TaskFragment {
         // Slot the activity into the history root task and proceed
         ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s "
                         + "callers: %s", r, task, new RuntimeException("here").fillInStackTrace());
-        task.positionChildAtTop(r);
 
         // The transition animation and starting window are not needed if {@code allowMoveToFront}
         // is false, because the activity won't be visible.

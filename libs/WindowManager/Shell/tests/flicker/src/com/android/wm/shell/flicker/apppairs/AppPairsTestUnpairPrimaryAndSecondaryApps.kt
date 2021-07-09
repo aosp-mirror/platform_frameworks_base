@@ -26,9 +26,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
-import com.android.wm.shell.flicker.appPairsDividerIsInvisible
+import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.appPairsDividerIsInvisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
@@ -77,14 +76,14 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
+    fun appPairsDividerIsInvisibleAtEnd() = testSpec.appPairsDividerIsInvisibleAtEnd()
 
     @Presubmit
     @Test
     fun bothAppWindowsInvisible() {
         testSpec.assertWmEnd {
-            isInvisible(primaryApp.defaultWindowName)
-            isInvisible(secondaryApp.defaultWindowName)
+            isInvisible(primaryApp.component)
+            isInvisible(secondaryApp.component)
         }
     }
 
@@ -92,10 +91,10 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun appsStartingBounds() {
         testSpec.assertLayersStart {
-            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-            visibleRegion(primaryApp.defaultWindowName)
+            val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+            visibleRegion(primaryApp.component)
                 .coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion))
-            visibleRegion(secondaryApp.defaultWindowName)
+            visibleRegion(secondaryApp.component)
                 .coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion))
         }
     }
@@ -104,8 +103,8 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun appsEndingBounds() {
         testSpec.assertLayersEnd {
-            notContains(primaryApp.defaultWindowName)
-            notContains(secondaryApp.defaultWindowName)
+            notContains(primaryApp.component)
+            notContains(secondaryApp.component)
         }
     }
 

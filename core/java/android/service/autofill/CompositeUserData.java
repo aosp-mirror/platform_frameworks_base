@@ -25,10 +25,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Holds both a generic and package-specific userData used for
@@ -103,7 +102,7 @@ public final class CompositeUserData implements FieldClassificationUserData, Par
     @Nullable
     @Override
     public String getFieldClassificationAlgorithmForCategory(@NonNull String categoryId) {
-        Preconditions.checkNotNull(categoryId);
+        Objects.requireNonNull(categoryId);
         final ArrayMap<String, String> categoryAlgorithms = getFieldClassificationAlgorithms();
         if (categoryAlgorithms == null || !categoryAlgorithms.containsKey(categoryId)) {
             return null;

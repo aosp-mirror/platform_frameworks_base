@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.content.ComponentName
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -25,15 +26,13 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesInVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.exitSplitScreenFromBottom
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -72,19 +71,30 @@ class ExitLegacySplitScreenFromBottom(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            splitScreenApp.defaultWindowName, secondaryApp.defaultWindowName,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<ComponentName>
+        get() = listOf(LAUNCHER_COMPONENT, WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+            splitScreenApp.component, secondaryApp.component,
+            WindowManagerStateHelper.SNAPSHOT_COMPONENT)
 
     @Presubmit
     @Test
-    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(DOCKED_STACK_DIVIDER)
+    fun layerBecomesInvisible() {
+        testSpec.assertLayers {
+            this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
+                    .then()
+                    .isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
+        }
+    }
 
     @FlakyTest
     @Test
-    fun appWindowBecomesInVisible() =
-        testSpec.appWindowBecomesInVisible(secondaryApp.defaultWindowName)
+    fun appWindowBecomesInVisible() {
+        testSpec.assertWm {
+            this.isAppWindowVisible(secondaryApp.component)
+                    .then()
+                    .isAppWindowInvisible(secondaryApp.component)
+        }
+    }
 
     @Presubmit
     @Test

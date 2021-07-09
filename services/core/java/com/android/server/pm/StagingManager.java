@@ -652,6 +652,7 @@ public class StagingManager {
      * </ul>
      * @throws PackageManagerException if session fails the check
      */
+    // TODO(b/192625695): Rename this method which checks rollbacks in addition to overlapping
     @VisibleForTesting
     void checkNonOverlappingWithStagedSessions(@NonNull StagedSession session)
             throws PackageManagerException {
@@ -685,13 +686,6 @@ public class StagingManager {
                     continue;
                 }
 
-                if (stagedSession.getCommittedMillis() > session.getCommittedMillis()) {
-                    // Ignore sessions that are committed after the provided session. When there are
-                    // overlaps between sessions, we will fail the one committed later instead of
-                    // the earlier one.
-                    continue;
-                }
-
                 // From here on, stagedSession is a parent active staged session
 
                 // Check if session is one of the active sessions
@@ -716,15 +710,28 @@ public class StagingManager {
                             "Session was failed by rollback session: " + session.sessionId());
                     Slog.i(TAG, "Session " + root.sessionId() + " is marked failed due to "
                             + "rollback session: " + session.sessionId());
+                } else if (!isRollback && isRollback(stagedSession)) {
+                    throw new PackageManagerException(
+                            SessionInfo.STAGED_SESSION_CONFLICT,
+                            "Session was failed by rollback session: " + stagedSession.sessionId());
                 } else if (stagedSession.sessionContains(
                         s -> s.getPackageName().equals(packageName))) {
-                    // New session cannot have same package name as one of the active sessions
-                    throw new PackageManagerException(
-                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "Package: " + session.getPackageName() + " in session: "
-                                    + session.sessionId()
-                                    + " has been staged already by session: "
-                                    + stagedSession.sessionId(), null);
+                    // Fail the session committed later when there are overlapping packages
+                    if (stagedSession.getCommittedMillis() < session.getCommittedMillis()) {
+                        throw new PackageManagerException(
+                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                                "Package: " + session.getPackageName() + " in session: "
+                                        + session.sessionId()
+                                        + " has been staged already by session: "
+                                        + stagedSession.sessionId(), null);
+                    } else {
+                        stagedSession.setSessionFailed(
+                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                                "Package: " + packageName + " in session: "
+                                        + stagedSession.sessionId()
+                                        + " has been staged already by session: "
+                                        + session.sessionId());
+                    }
                 }
 
                 // Staging multiple root sessions is not allowed if device doesn't support

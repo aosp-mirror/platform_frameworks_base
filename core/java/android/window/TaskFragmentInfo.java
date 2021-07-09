@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WindowingMode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -39,13 +38,6 @@ public final class TaskFragmentInfo implements Parcelable {
     @NonNull
     private final IBinder mFragmentToken;
 
-    /**
-     * The component name of the initial root activity of this TaskFragment, which will be used
-     * to configure the relationships for TaskFragments.
-     */
-    @NonNull
-    private final ComponentName mInitialComponentName;
-
     @NonNull
     private final WindowContainerToken mToken;
 
@@ -59,14 +51,12 @@ public final class TaskFragmentInfo implements Parcelable {
     private final boolean mIsVisible;
 
     public TaskFragmentInfo(
-            @NonNull IBinder fragmentToken, @NonNull ComponentName initialComponentName,
-            @NonNull WindowContainerToken token, @NonNull Configuration configuration,
-            boolean isEmpty, boolean isVisible) {
-        if (fragmentToken == null || initialComponentName == null) {
+            @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
+            @NonNull Configuration configuration, boolean isEmpty, boolean isVisible) {
+        if (fragmentToken == null) {
             throw new IllegalArgumentException("Invalid TaskFragmentInfo.");
         }
         mFragmentToken = fragmentToken;
-        mInitialComponentName = initialComponentName;
         mToken = token;
         mConfiguration.setTo(configuration);
         mIsEmpty = isEmpty;
@@ -75,10 +65,6 @@ public final class TaskFragmentInfo implements Parcelable {
 
     public IBinder getFragmentToken() {
         return mFragmentToken;
-    }
-
-    public ComponentName getInitialComponentName() {
-        return mInitialComponentName;
     }
 
     public WindowContainerToken getToken() {
@@ -112,7 +98,6 @@ public final class TaskFragmentInfo implements Parcelable {
         }
 
         return mFragmentToken.equals(that.mFragmentToken)
-                && mInitialComponentName.equals(that.mInitialComponentName)
                 && mToken.equals(that.mToken)
                 && mIsEmpty == that.mIsEmpty
                 && mIsVisible == that.mIsVisible
@@ -121,7 +106,6 @@ public final class TaskFragmentInfo implements Parcelable {
 
     private TaskFragmentInfo(Parcel in) {
         mFragmentToken = in.readStrongBinder();
-        mInitialComponentName = in.readTypedObject(ComponentName.CREATOR);
         mToken = in.readTypedObject(WindowContainerToken.CREATOR);
         mConfiguration.readFromParcel(in);
         mIsEmpty = in.readBoolean();
@@ -131,7 +115,6 @@ public final class TaskFragmentInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mFragmentToken);
-        dest.writeTypedObject(mInitialComponentName, flags);
         dest.writeTypedObject(mToken, flags);
         mConfiguration.writeToParcel(dest, flags);
         dest.writeBoolean(mIsEmpty);
@@ -156,7 +139,6 @@ public final class TaskFragmentInfo implements Parcelable {
     public String toString() {
         return "TaskFragmentInfo{"
                 + " fragmentToken=" + mFragmentToken
-                + " initialComponentName=" + mInitialComponentName
                 + " token=" + mToken
                 + " isEmpty=" + mIsEmpty
                 + " isVisible=" + mIsVisible

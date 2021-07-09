@@ -24,7 +24,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.ArraySet;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
@@ -33,8 +33,8 @@ import android.window.TaskFragmentInfo;
 
 import com.android.internal.protolog.common.ProtoLog;
 
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -45,104 +45,112 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     private final ActivityTaskManagerService mAtmService;
     private final WindowManagerGlobalLock mGlobalLock;
-    private final Set<ITaskFragmentOrganizer> mOrganizers = new ArraySet<>();
-    private final Map<ITaskFragmentOrganizer, DeathRecipient> mDeathRecipients = new ArrayMap<>();
     private final Map<TaskFragment, TaskFragmentInfo> mLastSentTaskFragmentInfos =
             new WeakHashMap<>();
     private final Map<TaskFragment, Configuration> mLastSentTaskFragmentParentConfigs =
             new WeakHashMap<>();
-
-    private class DeathRecipient implements IBinder.DeathRecipient {
-        final ITaskFragmentOrganizer mOrganizer;
-
-        DeathRecipient(ITaskFragmentOrganizer organizer) {
-            mOrganizer = organizer;
-        }
-
-        @Override
-        public void binderDied() {
-            removeOrganizer(mOrganizer);
-        }
-    }
+    /**
+     * A Map which manages the relationship between
+     * {@link ITaskFragmentOrganizer} and {@link TaskFragmentOrganizerState}
+     */
+    private final ArrayMap<IBinder, TaskFragmentController> mTaskFragmentOrganizerControllers =
+            new ArrayMap<>();
 
     TaskFragmentOrganizerController(ActivityTaskManagerService atm) {
         mAtmService = atm;
         mGlobalLock = atm.mGlobalLock;
     }
 
+    /**
+     * A class to manage {@link ITaskFragmentOrganizer} and its organized
+     * {@link TaskFragment TaskFragments}.
+     */
+    private class TaskFragmentController implements IBinder.DeathRecipient {
+        private final ArrayList<TaskFragment> mOrganizedTaskFragments = new ArrayList<>();
+        private final ITaskFragmentOrganizer mOrganizer;
+
+        TaskFragmentController(ITaskFragmentOrganizer organizer) {
+            mOrganizer = organizer;
+            try {
+                mOrganizer.asBinder().linkToDeath(this, 0 /*flags*/);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "TaskFragmentOrganizer failed to register death recipient");
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mGlobalLock) {
+                removeOrganizer(mOrganizer);
+            }
+        }
+
+        void addTaskFragment(TaskFragment taskFragment) {
+            if (!mOrganizedTaskFragments.contains(taskFragment)) {
+                mOrganizedTaskFragments.add(taskFragment);
+            }
+        }
+
+        void removeTaskFragment(TaskFragment taskFragment) {
+            mOrganizedTaskFragments.remove(taskFragment);
+        }
+
+        void dispose() {
+            mOrganizedTaskFragments.forEach(TaskFragment::removeImmediately);
+            mOrganizedTaskFragments.clear();
+            mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
+        }
+    }
+
     @Override
     public void registerOrganizer(ITaskFragmentOrganizer organizer) {
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
-                        "Register task fragment organizer=%s uid=%d pid=%d",
-                        organizer.asBinder(), uid, pid);
-                if (mOrganizers.contains(organizer)) {
-                    throw new IllegalStateException(
-                            "Replacing existing organizer currently unsupported");
-                }
-
-                final DeathRecipient dr = new DeathRecipient(organizer);
-                try {
-                    organizer.asBinder().linkToDeath(dr, 0);
-                } catch (RemoteException e) {
-                    // Oh well...
-                }
-
-                mOrganizers.add(organizer);
-                mDeathRecipients.put(organizer, dr);
+        synchronized (mGlobalLock) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                    "Register task fragment organizer=%s uid=%d pid=%d",
+                    organizer.asBinder(), uid, pid);
+            if (mTaskFragmentOrganizerControllers.containsKey(organizer.asBinder())) {
+                throw new IllegalStateException(
+                        "Replacing existing organizer currently unsupported");
             }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
+            mTaskFragmentOrganizerControllers.put(organizer.asBinder(),
+                    new TaskFragmentController(organizer));
         }
     }
 
     @Override
     public void unregisterOrganizer(ITaskFragmentOrganizer organizer) {
+        validateAndGetController(organizer);
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
-                        "Unregister task fragment organizer=%s uid=%d pid=%d",
-                        organizer.asBinder(), uid, pid);
-                if (!mOrganizers.contains(organizer)) {
-                    throw new IllegalStateException(
-                            "The task fragment organizer hasn't been registered.");
-                }
-
-                final DeathRecipient dr = mDeathRecipients.get(organizer);
-                organizer.asBinder().unlinkToDeath(dr, 0);
-
-                removeOrganizer(organizer);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
+        synchronized (mGlobalLock) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                    "Unregister task fragment organizer=%s uid=%d pid=%d",
+                    organizer.asBinder(), uid, pid);
+            removeOrganizer(organizer);
         }
     }
 
     void onTaskFragmentAppeared(ITaskFragmentOrganizer organizer, TaskFragment tf) {
-        validateOrganizer(organizer);
+        final TaskFragmentController controller = validateAndGetController(organizer);
 
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment appeared name=%s", tf.getName());
         final TaskFragmentInfo info = tf.getTaskFragmentInfo();
         final SurfaceControl outSurfaceControl = new SurfaceControl(tf.getSurfaceControl(),
                 "TaskFragmentOrganizerController.onTaskFragmentInfoAppeared");
+        controller.addTaskFragment(tf);
         try {
             organizer.onTaskFragmentAppeared(
                     new TaskFragmentAppearedInfo(info, outSurfaceControl));
             mLastSentTaskFragmentInfos.put(tf, info);
         } catch (RemoteException e) {
-            // Oh well...
+            Slog.e(TAG, "Exception sending onTaskFragmentAppeared callback", e);
         }
     }
 
     void onTaskFragmentInfoChanged(ITaskFragmentOrganizer organizer, TaskFragment tf) {
-        validateOrganizer(organizer);
+        validateAndGetController(organizer);
 
         // Check if the info is different from the last reported info.
         final TaskFragmentInfo info = tf.getTaskFragmentInfo();
@@ -157,25 +165,26 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             organizer.onTaskFragmentInfoChanged(tf.getTaskFragmentInfo());
             mLastSentTaskFragmentInfos.put(tf, info);
         } catch (RemoteException e) {
-            // Oh well...
+            Slog.e(TAG, "Exception sending onTaskFragmentInfoChanged callback", e);
         }
     }
 
     void onTaskFragmentVanished(ITaskFragmentOrganizer organizer, TaskFragment tf) {
-        validateOrganizer(organizer);
+        final TaskFragmentController controller = validateAndGetController(organizer);
 
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment vanished name=%s", tf.getName());
         try {
             organizer.onTaskFragmentVanished(tf.getTaskFragmentInfo());
         } catch (RemoteException e) {
-            // Oh well...
+            Slog.e(TAG, "Exception sending onTaskFragmentVanished callback", e);
         }
         mLastSentTaskFragmentInfos.remove(tf);
         mLastSentTaskFragmentParentConfigs.remove(tf);
+        controller.removeTaskFragment(tf);
     }
 
     void onTaskFragmentParentInfoChanged(ITaskFragmentOrganizer organizer, TaskFragment tf) {
-        validateOrganizer(organizer);
+        validateAndGetController(organizer);
 
         // Check if the parent info is different from the last reported parent info.
         if (tf.getParent() == null || tf.getParent().asTask() == null) {
@@ -196,16 +205,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             organizer.onTaskFragmentParentInfoChanged(tf.getFragmentToken(), parentConfig);
             mLastSentTaskFragmentParentConfigs.put(tf, parentConfig);
         } catch (RemoteException e) {
-            // Oh well...
+            Slog.e(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
         }
     }
 
     private void removeOrganizer(ITaskFragmentOrganizer organizer) {
-        synchronized (mGlobalLock) {
-            mOrganizers.remove(organizer);
-            mDeathRecipients.remove(organizer);
-        }
-        // TODO(b/190432728) move child activities of organized TaskFragment to leaf Task
+        final TaskFragmentController controller = validateAndGetController(organizer);
+        // remove all of the children of the organized TaskFragment
+        controller.dispose();
+        mTaskFragmentOrganizerControllers.remove(organizer.asBinder());
     }
 
     /**
@@ -214,10 +222,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
      * we wouldn't register {@link DeathRecipient} for the organizer, and might not remove the
      * {@link TaskFragment} after the organizer process died.
      */
-    private void validateOrganizer(ITaskFragmentOrganizer organizer) {
-        if (!mOrganizers.contains(organizer)) {
+    private TaskFragmentController validateAndGetController(ITaskFragmentOrganizer organizer) {
+        final TaskFragmentController controller =
+                mTaskFragmentOrganizerControllers.get(organizer.asBinder());
+        if (controller == null) {
             throw new IllegalArgumentException(
                     "TaskFragmentOrganizer has not been registered. Organizer=" + organizer);
         }
+        return controller;
     }
 }

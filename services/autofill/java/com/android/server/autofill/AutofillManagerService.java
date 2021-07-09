@@ -618,7 +618,7 @@ public final class AutofillManagerService
                 + " for " + durationMs + "ms");
         enforceCallingPermissionForManagement();
 
-        Preconditions.checkNotNull(serviceName);
+        Objects.requireNonNull(serviceName);
         if (durationMs > MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS) {
             throw new IllegalArgumentException("Max duration is "
                     + MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS + " (called with " + durationMs + ")");
@@ -929,7 +929,7 @@ public final class AutofillManagerService
 
         void addDisabledAppLocked(@UserIdInt int userId, @NonNull String packageName,
                 long expiration) {
-            Preconditions.checkNotNull(packageName);
+            Objects.requireNonNull(packageName);
             synchronized (mLock) {
                 AutofillDisabledInfo info =
                         getOrCreateAutofillDisabledInfoByUserIdLocked(userId);
@@ -939,7 +939,7 @@ public final class AutofillManagerService
 
         void addDisabledActivityLocked(@UserIdInt int userId, @NonNull ComponentName componentName,
                 long expiration) {
-            Preconditions.checkNotNull(componentName);
+            Objects.requireNonNull(componentName);
             synchronized (mLock) {
                 AutofillDisabledInfo info =
                         getOrCreateAutofillDisabledInfoByUserIdLocked(userId);
@@ -949,7 +949,7 @@ public final class AutofillManagerService
 
         boolean isAutofillDisabledLocked(@UserIdInt int userId,
                 @NonNull ComponentName componentName) {
-            Preconditions.checkNotNull(componentName);
+            Objects.requireNonNull(componentName);
             final boolean disabled;
             synchronized (mLock) {
                 final AutofillDisabledInfo info = mCache.get(userId);
@@ -959,7 +959,7 @@ public final class AutofillManagerService
         }
 
         long getAppDisabledExpiration(@UserIdInt int userId, @NonNull String packageName) {
-            Preconditions.checkNotNull(packageName);
+            Objects.requireNonNull(packageName);
             final Long expiration;
             synchronized (mLock) {
                 final AutofillDisabledInfo info = mCache.get(userId);
@@ -971,7 +971,7 @@ public final class AutofillManagerService
         @Nullable
         ArrayMap<String, Long> getAppDisabledActivities(@UserIdInt int userId,
                 @NonNull String packageName) {
-            Preconditions.checkNotNull(packageName);
+            Objects.requireNonNull(packageName);
             final ArrayMap<String, Long> disabledList;
             synchronized (mLock) {
                 final AutofillDisabledInfo info = mCache.get(userId);
@@ -1593,8 +1593,8 @@ public final class AutofillManagerService
                 @NonNull IBinder appCallback, @NonNull IResultReceiver receiver)
                 throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
-            activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
-            appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
+            activityToken = Objects.requireNonNull(activityToken, "activityToken");
+            appCallback = Objects.requireNonNull(appCallback, "appCallback");
 
             boolean restored = false;
             synchronized (mLock) {
@@ -1693,7 +1693,7 @@ public final class AutofillManagerService
 
         @Override
         public void onPendingSaveUi(int operation, IBinder token) {
-            Preconditions.checkNotNull(token, "token");
+            Objects.requireNonNull(token, "token");
             Preconditions.checkArgument(operation == AutofillManager.PENDING_UI_OPERATION_CANCEL
                     || operation == AutofillManager.PENDING_UI_OPERATION_RESTORE,
                     "invalid operation: %d", operation);

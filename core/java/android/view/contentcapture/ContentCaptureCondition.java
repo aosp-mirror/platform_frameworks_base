@@ -23,10 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DebugUtils;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Defines a condition for when content capture should be allowed.
@@ -61,7 +60,7 @@ public final class ContentCaptureCondition implements Parcelable {
      * the {@code LocusId} used in the {@link ContentCaptureContext}).
      */
     public ContentCaptureCondition(@NonNull LocusId locusId, @Flags int flags) {
-        this.mLocusId = Preconditions.checkNotNull(locusId);
+        this.mLocusId = Objects.requireNonNull(locusId);
         this.mFlags = flags;
     }
 
