@@ -5003,7 +5003,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
                     res.key.type);
         } else {
-            throw new IllegalArgumentException();
+            return new PendingIntentInfo(null, -1, false, ActivityManager.INTENT_SENDER_UNKNOWN);
         }
     }
 
