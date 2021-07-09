@@ -104,7 +104,7 @@ public abstract class ImeTracing {
      * @param icProto {@link android.view.inputmethod.InputConnection} call data in proto format.
      */
     public abstract void triggerClientDump(String where, InputMethodManager immInstance,
-            ProtoOutputStream icProto);
+            @Nullable byte[] icProto);
 
     /**
      * Starts a proto dump of the currently connected InputMethodService information.
@@ -114,7 +114,7 @@ public abstract class ImeTracing {
      * @param icProto {@link android.view.inputmethod.InputConnection} call data in proto format.
      */
     public abstract void triggerServiceDump(String where, AbstractInputMethodService service,
-            ProtoOutputStream icProto);
+            @Nullable byte[] icProto);
 
     /**
      * Starts a proto dump of the InputMethodManagerService information.

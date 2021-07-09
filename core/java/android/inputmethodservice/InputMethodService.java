@@ -3415,7 +3415,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @hide
      */
     @Override
-    public final void dumpProtoInternal(ProtoOutputStream proto, ProtoOutputStream icProto) {
+    public final void dumpProtoInternal(ProtoOutputStream proto, byte[] icProto) {
         final long token = proto.start(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE);
         mWindow.dumpDebug(proto, SOFT_INPUT_WINDOW);
         proto.write(VIEWS_CREATED, mViewsCreated);
@@ -3445,7 +3445,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mTmpInsets.dumpDebug(proto, LAST_COMPUTED_INSETS);
         proto.write(SETTINGS_OBSERVER, Objects.toString(mSettingsObserver));
         if (icProto != null) {
-            proto.write(INPUT_CONNECTION_CALL, icProto.getBytes());
+            proto.write(INPUT_CONNECTION_CALL, icProto);
         }
         proto.end(token);
     }

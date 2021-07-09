@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -93,8 +92,8 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(
-                    length, flags, result);
+            final byte[] icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(length,
+                    flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextAfterCursor",
                     inputMethodService, icProto);
         }
@@ -118,8 +117,8 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(
-                    length, flags, result);
+            final byte[] icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(length,
+                    flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextBeforeCursor",
                     inputMethodService, icProto);
         }
@@ -143,7 +142,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(flags,
+            final byte[] icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(flags,
                     result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getSelectedText",
                     inputMethodService, icProto);
@@ -182,7 +181,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetSurroundingTextProto(
+            final byte[] icProto = InputConnectionProtoDumper.buildGetSurroundingTextProto(
                     beforeLength, afterLength, flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getSurroundingText",
                     inputMethodService, icProto);
@@ -203,7 +202,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(
+            final byte[] icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(
                     reqModes, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getCursorCapsMode",
                     inputMethodService, icProto);
@@ -224,7 +223,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(
+            final byte[] icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(
                     request, flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getExtractedText",
                     inputMethodService, icProto);

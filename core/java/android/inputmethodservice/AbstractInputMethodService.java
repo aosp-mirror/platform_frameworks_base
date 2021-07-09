@@ -223,7 +223,7 @@ public abstract class AbstractInputMethodService extends WindowProviderService
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void dumpProtoInternal(ProtoOutputStream proto, ProtoOutputStream icProto);
+    public abstract void dumpProtoInternal(ProtoOutputStream proto, @Nullable byte[] icProto);
 
     /**
      * Implement this to handle {@link android.os.Binder#dump Binder.dump()}
