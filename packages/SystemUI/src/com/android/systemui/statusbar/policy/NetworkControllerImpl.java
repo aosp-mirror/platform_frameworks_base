@@ -707,7 +707,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         cb.setIsAirplaneMode(new IconState(mAirplaneMode,
                 TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
         cb.setNoSims(mHasNoSubs, mSimDetected);
-        if (mProviderModelBehavior) {
+        if (mProviderModelSetting) {
             cb.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition, mNoNetworksAvailable);
         }
         mWifiSignalController.notifyListeners(cb);
