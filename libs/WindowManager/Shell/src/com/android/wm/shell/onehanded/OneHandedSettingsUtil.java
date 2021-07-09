@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
@@ -170,7 +171,7 @@ public final class OneHandedSettingsUtil {
     public boolean getShortcutEnabled(ContentResolver resolver, int userId) {
         final String targets = Settings.Secure.getStringForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
-        return targets != null ? targets.contains(ONE_HANDED_MODE_TARGET_NAME) : false;
+        return TextUtils.isEmpty(targets) ? false : targets.contains(ONE_HANDED_MODE_TARGET_NAME);
     }
 
     /**

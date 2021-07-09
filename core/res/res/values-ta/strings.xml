@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"நிராகரி"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"அனுமதிக் கோரப்பட்டது"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> கணக்கிற்கான அனுமதி\nகோரப்பட்டது."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ்\n<xliff:g id="ACCOUNT">%2$s</xliff:g> கணக்கிற்கான அனுமதியைக் கோருகிறது."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"இந்தப் பயன்பாட்டைப் பணிக் கணக்கிற்கு வெளியே பயன்படுத்துகிறீர்கள்"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"பணிக் கணக்கில் பயன்பாட்டைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"உள்ளீட்டு முறை"</string>
@@ -1991,7 +1990,7 @@
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"பணிக் கணக்கு பூட்டியுள்ளது"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"பணிக் கணக்கை அன்லாக் செய்யத் தட்டுக"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> உடன் இணைக்கப்பட்டது"</string>
-    <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ஃபைல்களைப் பார்க்க, தட்டவும்"</string>
     <string name="pin_target" msgid="8036028973110156895">"பின் செய்"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> ஐப் பின் செய்"</string>
     <string name="unpin_target" msgid="3963318576590204447">"பின்னை அகற்று"</string>

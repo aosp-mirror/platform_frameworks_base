@@ -399,9 +399,6 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
-    // Received notifications of the device-state action (such as "fold", "unfold")
-    private DeviceStateManager mDeviceStateManager;
-
     private final boolean mAllowNonNativeRefreshRateOverride;
 
     private final BrightnessSynchronizer mBrightnessSynchronizer;
@@ -1236,13 +1233,6 @@ public final class DisplayManagerService extends SystemService {
         adapter.registerLocked();
     }
 
-    @VisibleForTesting
-    void handleLogicalDisplayAdded(LogicalDisplay display) {
-        synchronized (mSyncRoot) {
-            handleLogicalDisplayAddedLocked(display);
-        }
-    }
-
     private void handleLogicalDisplayAddedLocked(LogicalDisplay display) {
         final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
         final int displayId = display.getDisplayIdLocked();
@@ -1291,6 +1281,11 @@ public final class DisplayManagerService extends SystemService {
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         scheduleTraversalLocked(false);
         mPersistentDataStore.saveIfNeeded();
+
+        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+        if (dpc != null) {
+            dpc.onDisplayChanged();
+        }
     }
 
     private void handleLogicalDisplayFrameRateOverridesChangedLocked(
@@ -1321,11 +1316,6 @@ public final class DisplayManagerService extends SystemService {
         final Runnable work = updateDisplayStateLocked(device);
         if (work != null) {
             mHandler.post(work);
-        }
-        final int displayId = display.getDisplayIdLocked();
-        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
-        if (dpc != null) {
-            dpc.onDisplayChanged();
         }
         handleLogicalDisplayChangedLocked(display);
     }
@@ -2107,7 +2097,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
-                display, mContext);
+                display, mSyncRoot);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
                 mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,

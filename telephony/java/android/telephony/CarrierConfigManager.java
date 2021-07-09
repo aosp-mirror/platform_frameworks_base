@@ -3523,6 +3523,30 @@ public class CarrierConfigManager {
             "nr_advanced_capable_pco_id_int";
 
     /**
+     * This configuration allows the framework to use user data communication to detect RRC state,
+     * and this is used on the 5G icon.
+     *
+     * There is a new way for for RRC state detection at Android 12. If
+     * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}(
+     * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}) returns true,
+     * then framework can use PHYSICAL_CHANNEL_CONFIG for RRC state detection. Based on this
+     * condition, some carriers want to use the legacy behavior that way is using user data
+     * communication to detect the RRC state. Therefore, this configuration allows the framework
+     * to use user data communication to detect RRC state.
+     *
+     * The precondition is
+     * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}(
+     * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}) returns true,
+     * otherwise this config is not working.
+     * If this is true, framework uses the user data communication for RRC state detection.
+     * If this is false, framework uses the PHYSICAL_CHANNEL_CONFIG for RRC state detection.
+     *
+     * @hide
+     */
+    public static final String KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL =
+            "lte_endc_using_user_data_for_rrc_detection_bool";
+
+    /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
      * @hide
      */
@@ -5500,6 +5524,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);
         sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
+        sDefaults.putBoolean(KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
