@@ -332,6 +332,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
     private boolean mShouldUseSplitNotificationShade;
+    // The bottom padding reserved for elements of the keyguard measuring notifications
+    private float mKeyguardNotificationBottomPadding;
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
 
@@ -1189,9 +1191,12 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardShowing && !mKeyguardBypassController.getBypassEnabled()) {
             mNotificationStackScrollLayoutController.setMaxDisplayedNotifications(
                     mMaxAllowedKeyguardNotifications);
+            mNotificationStackScrollLayoutController.setKeyguardBottomPadding(
+                    mKeyguardNotificationBottomPadding);
         } else {
             // no max when not on the keyguard
             mNotificationStackScrollLayoutController.setMaxDisplayedNotifications(-1);
+            mNotificationStackScrollLayoutController.setKeyguardBottomPadding(-1f);
         }
     }
 
@@ -1393,6 +1398,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         float bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
         bottomPadding = Math.max(lockIconPadding, bottomPadding);
+        mKeyguardNotificationBottomPadding = bottomPadding;
 
         float availableSpace =
                 mNotificationStackScrollLayoutController.getHeight()
