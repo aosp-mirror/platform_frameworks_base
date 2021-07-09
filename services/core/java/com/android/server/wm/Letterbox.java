@@ -58,10 +58,12 @@ public class Letterbox {
     private final LetterboxSurface mLeft = new LetterboxSurface("left");
     private final LetterboxSurface mBottom = new LetterboxSurface("bottom");
     private final LetterboxSurface mRight = new LetterboxSurface("right");
-    // Prevents wallpaper from peeking through near rounded corners. It's not included in
-    // mSurfaces array since it isn't needed in methods like notIntersectsOrFullyContains
-    // or attachInput.
-    private final LetterboxSurface mBehind = new LetterboxSurface("behind");
+    // One surface that fills the whole window is used over multiple surfaces to:
+    // - Prevents wallpaper from peeking through near rounded corners.
+    // - For "blurred wallpaper" background, to avoid having visible border between surfaces.
+    // One surface approach isn't always preferred over multiple surfaces due to rendering cost
+    // for overlaping an app window and letterbox surfaces.
+    private final LetterboxSurface mFullWindowSurface = new LetterboxSurface("fullWindow");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
 
     /**
@@ -104,7 +106,7 @@ public class Letterbox {
         mLeft.layout(outer.left, outer.top, inner.left, outer.bottom, surfaceOrigin);
         mBottom.layout(outer.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
         mRight.layout(inner.right, outer.top, outer.right, outer.bottom, surfaceOrigin);
-        mBehind.layout(inner.left, inner.top, inner.right, inner.bottom, surfaceOrigin);
+        mFullWindowSurface.layout(outer.left, outer.top, outer.right, outer.bottom, surfaceOrigin);
     }
 
 
@@ -168,37 +170,46 @@ public class Letterbox {
         for (LetterboxSurface surface : mSurfaces) {
             surface.remove();
         }
-        mBehind.remove();
+        mFullWindowSurface.remove();
     }
 
     /** Returns whether a call to {@link #applySurfaceChanges} would change the surface. */
     public boolean needsApplySurfaceChanges() {
+        if (useFullWindowSurface()) {
+            return mFullWindowSurface.needsApplySurfaceChanges();
+        }
         for (LetterboxSurface surface : mSurfaces) {
             if (surface.needsApplySurfaceChanges()) {
                 return true;
             }
         }
-        if (mAreCornersRounded.get() && mBehind.needsApplySurfaceChanges()) {
-            return true;
-        }
         return false;
     }
 
     public void applySurfaceChanges(SurfaceControl.Transaction t) {
-        for (LetterboxSurface surface : mSurfaces) {
-            surface.applySurfaceChanges(t);
-        }
-        if (mAreCornersRounded.get()) {
-            mBehind.applySurfaceChanges(t);
+        if (useFullWindowSurface()) {
+            mFullWindowSurface.applySurfaceChanges(t);
+
+            for (LetterboxSurface surface : mSurfaces) {
+                surface.remove();
+            }
         } else {
-            mBehind.remove();
+            for (LetterboxSurface surface : mSurfaces) {
+                surface.applySurfaceChanges(t);
+            }
+
+            mFullWindowSurface.remove();
         }
     }
 
     /** Enables touches to slide into other neighboring surfaces. */
     void attachInput(WindowState win) {
-        for (LetterboxSurface surface : mSurfaces) {
-            surface.attachInput(win);
+        if (useFullWindowSurface()) {
+            mFullWindowSurface.attachInput(win);
+        } else {
+            for (LetterboxSurface surface : mSurfaces) {
+                surface.attachInput(win);
+            }
         }
     }
 
@@ -208,6 +219,16 @@ public class Letterbox {
                 surface.mInputInterceptor.mWindowHandle.displayId = displayId;
             }
         }
+        if (mFullWindowSurface.mInputInterceptor != null) {
+            mFullWindowSurface.mInputInterceptor.mWindowHandle.displayId = displayId;
+        }
+    }
+
+    /**
+     * Returns {@code true} when using {@link #mFullWindowSurface} instead of {@link mSurfaces}.
+     */
+    private boolean useFullWindowSurface() {
+        return mAreCornersRounded.get() || mHasWallpaperBackgroundSupplier.get();
     }
 
     private static class InputInterceptor {
@@ -306,6 +327,10 @@ public class Letterbox {
                 mInputInterceptor.dispose();
             }
             mInputInterceptor = new InputInterceptor("Letterbox_" + mType + "_", win);
+        }
+
+        boolean isRemoved() {
+            return mSurface != null || mInputInterceptor != null;
         }
 
         public void remove() {

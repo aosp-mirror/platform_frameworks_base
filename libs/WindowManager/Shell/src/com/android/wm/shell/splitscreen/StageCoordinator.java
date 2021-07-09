@@ -432,7 +432,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             exitSplitScreen(toTop);
         }
 
-        if (mainStageVisible) {
+        // When both stage's visibility changed to visible, main stage might receives visibility
+        // changed before side stage if it has higher z-order than side stage. Make sure we only
+        // update main stage's windowing mode with the visibility changed of side stage to prevent
+        // stacking multiple windowing mode transactions which result to flicker issue.
+        if (mainStageVisible && stageListener == mSideStageListener) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             if (sideStageVisible) {
                 // The main stage configuration should to follow split layout when side stage is
@@ -510,10 +514,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Make sure the main stage is active.
             mMainStage.activate(getMainStageBounds(), wct);
             mSideStage.setBounds(getSideStageBounds(), wct);
-            // Reorder side stage to the top whenever there's a new child task appeared in side
-            // stage. This is needed to prevent main stage occludes side stage and makes main stage
-            // flipping between fullscreen and multi-window windowing mode.
-            wct.reorder(mSideStage.mRootTaskInfo.token, true);
             mTaskOrganizer.applyTransaction(wct);
         }
     }

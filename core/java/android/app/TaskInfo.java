@@ -194,13 +194,6 @@ public class TaskInfo {
     public ActivityInfo topActivityInfo;
 
     /**
-     * The top activity in this task.
-     * @hide
-     */
-    @Nullable
-    public IBinder topActivityToken;
-
-    /**
      * Whether the direct top activity is in size compat mode on foreground.
      * @hide
      */
@@ -370,8 +363,7 @@ public class TaskInfo {
         return displayId == that.displayId
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
-                // TopActivityToken and bounds are important if top activity is in size compat
-                && (!topActivityInSizeCompat || topActivityToken.equals(that.topActivityToken))
+                // Bounds are important if top activity is in size compat
                 && (!topActivityInSizeCompat || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
                 && (!topActivityInSizeCompat || configuration.getLayoutDirection()
@@ -411,7 +403,6 @@ public class TaskInfo {
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
         isSleeping = source.readBoolean();
-        topActivityToken = source.readStrongBinder();
         topActivityInSizeCompat = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
@@ -451,7 +442,6 @@ public class TaskInfo {
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
         dest.writeBoolean(isSleeping);
-        dest.writeStrongBinder(topActivityToken);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
@@ -481,7 +471,6 @@ public class TaskInfo {
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
                 + " isSleeping=" + isSleeping
-                + " topActivityToken=" + topActivityToken
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId

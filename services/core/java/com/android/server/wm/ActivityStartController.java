@@ -27,6 +27,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -38,6 +39,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -486,6 +488,16 @@ public class ActivityStartController {
         }
 
         return START_SUCCESS;
+    }
+
+    void startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
+            @NonNull Intent activityIntent, @Nullable Bundle activityOptions) {
+        obtainStarter(activityIntent, "startActivityInTaskFragment")
+                .setActivityOptions(activityOptions)
+                .setInTaskFragment(taskFragment)
+                .setCallingUid(Binder.getCallingUid())
+                .setCallingPid(Binder.getCallingPid())
+                .execute();
     }
 
     void registerRemoteAnimationForNextActivityStart(String packageName,

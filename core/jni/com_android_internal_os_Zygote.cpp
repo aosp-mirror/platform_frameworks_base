@@ -2602,6 +2602,7 @@ static jint com_android_internal_os_Zygote_nativeCurrentTaggingLevel(JNIEnv* env
     case PR_MTE_TCF_SYNC:
       return MEMORY_TAG_LEVEL_SYNC;
     case PR_MTE_TCF_ASYNC:
+    case PR_MTE_TCF_ASYNC | PR_MTE_TCF_SYNC:
       return MEMORY_TAG_LEVEL_ASYNC;
     default:
       ALOGE("Unknown memory tagging level: %i", level);
