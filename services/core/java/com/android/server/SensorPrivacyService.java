@@ -256,7 +256,7 @@ public final class SensorPrivacyService extends SystemService {
          * <Package, User> -> list of suppressor tokens
          */
         @GuardedBy("mLock")
-        private ArrayMap<Pair<String, UserHandle>, ArrayList<IBinder>> mSuppressReminders =
+        private ArrayMap<Pair<Integer, UserHandle>, ArrayList<IBinder>> mSuppressReminders =
                 new ArrayMap<>();
 
         private final ArrayMap<SensorUseReminderDialogInfo, ArraySet<Integer>>
@@ -391,7 +391,7 @@ public final class SensorPrivacyService extends SystemService {
             }
 
             synchronized (mLock) {
-                if (mSuppressReminders.containsKey(new Pair<>(packageName, user))) {
+                if (mSuppressReminders.containsKey(new Pair<>(sensor, user))) {
                     Log.d(TAG,
                             "Suppressed sensor privacy reminder for " + packageName + "/" + user);
                     return;
@@ -418,14 +418,22 @@ public final class SensorPrivacyService extends SystemService {
             for (int taskNum = 0; taskNum < numTasks; taskNum++) {
                 RunningTaskInfo task = tasks.get(taskNum);
 
-                if (task.isVisible && task.topActivity.getPackageName().equals(packageName)) {
-                    if (task.isFocused) {
-                        // There is the one focused activity
-                        enqueueSensorUseReminderDialogAsync(task.taskId, user, packageName, sensor);
-                        return;
-                    }
+                if (task.isVisible) {
+                    if (task.topActivity.getPackageName().equals(packageName)) {
+                        if (task.isFocused) {
+                            // There is the one focused activity
+                            enqueueSensorUseReminderDialogAsync(task.taskId, user, packageName,
+                                    sensor);
+                            return;
+                        }
 
-                    tasksOfPackageUsingSensor.add(task);
+                        tasksOfPackageUsingSensor.add(task);
+                    } else if (task.topActivity.flattenToString().equals(mContext.getResources()
+                            .getString(R.string.config_sensorUseStartedActivity))
+                            && task.isFocused) {
+                        enqueueSensorUseReminderDialogAsync(task.taskId, user, packageName,
+                                sensor);
+                    }
                 }
             }
 
@@ -518,8 +526,15 @@ public final class SensorPrivacyService extends SystemService {
             SensorUseReminderDialogInfo info =
                     new SensorUseReminderDialogInfo(taskId, user, packageName);
             if (!mQueuedSensorUseReminderDialogs.containsKey(info)) {
-                ArraySet<Integer> sensors = new ArraySet<Integer>();
-                sensors.add(sensor);
+                ArraySet<Integer> sensors = new ArraySet<>();
+                if (sensor == MICROPHONE && mSuppressReminders.containsKey(new Pair<>(CAMERA, user))
+                        || sensor == CAMERA && mSuppressReminders
+                        .containsKey(new Pair<>(MICROPHONE, user))) {
+                    sensors.add(MICROPHONE);
+                    sensors.add(CAMERA);
+                } else {
+                    sensors.add(sensor);
+                }
                 mQueuedSensorUseReminderDialogs.put(info, sensors);
                 mHandler.sendMessageDelayed(
                         PooledLambda.obtainMessage(this::showSensorUserReminderDialog, info),
@@ -1100,13 +1115,12 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         @Override
-        public void suppressIndividualSensorPrivacyReminders(int userId, String packageName,
+        public void suppressIndividualSensorPrivacyReminders(int userId, int sensor,
                 IBinder token, boolean suppress) {
             enforceManageSensorPrivacyPermission();
-            Objects.requireNonNull(packageName);
             Objects.requireNonNull(token);
 
-            Pair<String, UserHandle> key = new Pair<>(packageName, UserHandle.of(userId));
+            Pair<Integer, UserHandle> key = new Pair<>(sensor, UserHandle.of(userId));
 
             synchronized (mLock) {
                 if (suppress) {
@@ -1136,7 +1150,7 @@ public final class SensorPrivacyService extends SystemService {
          * @param key Key the token is in
          * @param token The token to remove
          */
-        private void removeSuppressPackageReminderToken(@NonNull Pair<String, UserHandle> key,
+        private void removeSuppressPackageReminderToken(@NonNull Pair<Integer, UserHandle> key,
                 @NonNull IBinder token) {
             synchronized (mLock) {
                 ArrayList<IBinder> suppressPackageReminderTokens =
@@ -1168,7 +1182,7 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void binderDied(@NonNull IBinder token) {
             synchronized (mLock) {
-                for (Pair<String, UserHandle> key : mSuppressReminders.keySet()) {
+                for (Pair<Integer, UserHandle> key : mSuppressReminders.keySet()) {
                     removeSuppressPackageReminderToken(key, token);
                 }
             }
@@ -1495,7 +1509,7 @@ public final class SensorPrivacyService extends SystemService {
             listeners.finishBroadcast();
         }
 
-        public void removeSuppressPackageReminderToken(Pair<String, UserHandle> key,
+        public void removeSuppressPackageReminderToken(Pair<Integer, UserHandle> key,
                 IBinder token) {
             sendMessage(PooledLambda.obtainMessage(
                     SensorPrivacyServiceImpl::removeSuppressPackageReminderToken,

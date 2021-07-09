@@ -17,6 +17,7 @@
 package com.android.systemui.sensorprivacy
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.Intent.EXTRA_PACKAGE_NAME
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -174,7 +175,7 @@ class SensorUseStartedActivity @Inject constructor(
     override fun onStart() {
         super.onStart()
 
-        sensorPrivacyController.suppressSensorPrivacyReminders(sensorUsePackageName, true)
+        setSuppressed(true)
         unsuppressImmediately = false
     }
 
@@ -205,12 +206,10 @@ class SensorUseStartedActivity @Inject constructor(
         super.onStop()
 
         if (unsuppressImmediately) {
-            sensorPrivacyController
-                    .suppressSensorPrivacyReminders(sensorUsePackageName, false)
+            setSuppressed(false)
         } else {
             bgHandler.postDelayed({
-                sensorPrivacyController
-                        .suppressSensorPrivacyReminders(sensorUsePackageName, false)
+                setSuppressed(false)
             }, SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS)
         }
     }
@@ -224,6 +223,11 @@ class SensorUseStartedActivity @Inject constructor(
         // do not allow backing out
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        setIntent(intent)
+        recreate()
+    }
+
     private fun disableSensorPrivacy() {
         if (sensor == ALL_SENSORS) {
             sensorPrivacyController.setSensorBlocked(DIALOG, MICROPHONE, false)
@@ -233,5 +237,17 @@ class SensorUseStartedActivity @Inject constructor(
         }
         unsuppressImmediately = true
         setResult(RESULT_OK)
+    }
+
+    private fun setSuppressed(suppressed: Boolean) {
+        if (sensor == ALL_SENSORS) {
+            sensorPrivacyController
+                    .suppressSensorPrivacyReminders(MICROPHONE, suppressed)
+            sensorPrivacyController
+                    .suppressSensorPrivacyReminders(CAMERA, suppressed)
+        } else {
+            sensorPrivacyController
+                    .suppressSensorPrivacyReminders(sensor, suppressed)
+        }
     }
 }
