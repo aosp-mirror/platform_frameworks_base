@@ -588,7 +588,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             return MODE_UNLOCK_COLLAPSING;
         }
         if (mKeyguardViewController.isShowing()) {
-            if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+            if ((mKeyguardViewController.bouncerIsOrWillBeShowing()
+                    || mKeyguardBypassController.getAltBouncerShowing()) && unlockingAllowed) {
                 if (bypass && mKeyguardBypassController.canPlaySubtleWindowAnimations()) {
                     return MODE_UNLOCK_FADING;
                 } else {
