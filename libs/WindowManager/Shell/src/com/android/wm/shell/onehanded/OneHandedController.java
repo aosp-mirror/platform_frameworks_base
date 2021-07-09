@@ -43,7 +43,6 @@ import android.util.Slog;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -79,6 +78,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     private volatile boolean mIsOneHandedEnabled;
     private volatile boolean mIsSwipeToNotificationEnabled;
+    private boolean mIsShortcutEnabled;
     private boolean mTaskChangeToExit;
     private boolean mLockedDisabled;
     private boolean mKeyguardShowing;
@@ -143,6 +143,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private final ContentObserver mTimeoutObserver;
     private final ContentObserver mTaskChangeExitObserver;
     private final ContentObserver mSwipeToNotificationEnabledObserver;
+    private final ContentObserver mShortcutEnabledObserver;
 
     private AccessibilityManager.AccessibilityStateChangeListener
             mAccessibilityStateChangeListener =
@@ -174,13 +175,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 @Override
                 public void onStartFinished(Rect bounds) {
                     mState.setState(STATE_ACTIVE);
-                    notifyShortcutState(STATE_ACTIVE);
+                    notifyShortcutStateChanged(STATE_ACTIVE);
                 }
 
                 @Override
                 public void onStopFinished(Rect bounds) {
                     mState.setState(STATE_NONE);
-                    notifyShortcutState(STATE_NONE);
+                    notifyShortcutStateChanged(STATE_NONE);
                 }
             };
 
@@ -295,6 +296,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mTaskChangeExitObserver = getObserver(this::onTaskChangeExitSettingChanged);
         mSwipeToNotificationEnabledObserver =
                 getObserver(this::onSwipeToNotificationEnabledChanged);
+        mShortcutEnabledObserver = getObserver(this::onShortcutEnabledChanged);
 
         mDisplayController.addDisplayChangingController(mRotationController);
         setupCallback();
@@ -349,11 +351,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
      */
     void setSwipeToNotificationEnabled(boolean enabled) {
         mIsSwipeToNotificationEnabled = enabled;
-        updateOneHandedEnabled();
     }
 
     @VisibleForTesting
-    void notifyShortcutState(@OneHandedState.State int state) {
+    void notifyShortcutStateChanged(@OneHandedState.State int state) {
+        if (!isShortcutEnabled()) {
+            return;
+        }
         mOneHandedSettingsUtil.setOneHandedModeActivated(
                 mContext.getContentResolver(), state == STATE_ACTIVE ? 1 : 0, mUserId);
     }
@@ -443,6 +447,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mOneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 mContext.getContentResolver(), mSwipeToNotificationEnabledObserver, newUserId);
+        mOneHandedSettingsUtil.registerSettingsKeyObserver(
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                mContext.getContentResolver(), mShortcutEnabledObserver, newUserId);
     }
 
     private void unregisterSettingObservers() {
@@ -454,6 +461,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 mTaskChangeExitObserver);
         mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
                 mSwipeToNotificationEnabledObserver);
+        mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
+                mShortcutEnabledObserver);
     }
 
     private void updateSettings() {
@@ -490,15 +499,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     @VisibleForTesting
-    void notifyUserConfigChanged(boolean success) {
-        if (!success) {
-            return;
-        }
-        // TODO Check UX if popup Toast to notify user when auto-enabled one-handed is good option.
-        Toast.makeText(mContext, R.string.one_handed_tutorial_title, Toast.LENGTH_LONG).show();
-    }
-
-    @VisibleForTesting
     void onActivatedActionChanged() {
         if (!isShortcutEnabled()) {
             Slog.w(TAG, "Shortcut not enabled, skip onActivatedActionChanged()");
@@ -508,7 +508,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         if (!isOneHandedEnabled()) {
             final boolean success = mOneHandedSettingsUtil.setOneHandedModeEnabled(
                     mContext.getContentResolver(), 1 /* Enabled for shortcut */, mUserId);
-            notifyUserConfigChanged(success);
+            Slog.d(TAG, "Auto enabled One-handed mode by shortcut trigger, success=" + success);
         }
 
         if (isSwipeToNotificationEnabled()) {
@@ -596,11 +596,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mOneHandedUiEventLogger.writeEvent(enabled
                 ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_ON
                 : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_OFF);
+    }
 
-        // Also checks one handed mode settings since they all need gesture overlay.
-        setEnabledGesturalOverlay(
-                enabled || mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                        mContext.getContentResolver(), mUserId), true /* DelayExecute */);
+    void onShortcutEnabledChanged() {
+        mIsShortcutEnabled = mOneHandedSettingsUtil.getShortcutEnabled(
+                mContext.getContentResolver(), mUserId);
     }
 
     private void setupTimeoutListener() {
@@ -620,7 +620,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     boolean isShortcutEnabled() {
-        return mOneHandedSettingsUtil.getShortcutEnabled(mContext.getContentResolver(), mUserId);
+        return mIsShortcutEnabled;
     }
 
     @VisibleForTesting
@@ -634,9 +634,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         }
 
         // If setting is pull screen, notify shortcut one_handed_mode_activated to reset
-        // and align status with current mState when function enabled.
+        // and align status with current mState when one-handed gesture enabled.
         if (isOneHandedEnabled() && !isSwipeToNotificationEnabled()) {
-            notifyShortcutState(mState.getState());
+            notifyShortcutStateChanged(mState.getState());
         }
 
         mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
