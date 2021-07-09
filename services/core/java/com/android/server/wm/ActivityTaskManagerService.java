@@ -1881,22 +1881,39 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void setFocusedTask(int taskId) {
         enforceTaskPermission("setFocusedTask()");
-        ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedTask: taskId=%d", taskId);
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_ATTACHED_TASK_ONLY);
-                if (task == null) {
-                    return;
-                }
-                final ActivityRecord r = task.topRunningActivityLocked();
-                if (r != null && r.moveFocusableActivityToTop("setFocusedTask")) {
-                    mRootWindowContainer.resumeFocusedTasksTopActivities();
-                }
+                setFocusedTask(taskId, null /* touchedActivity */);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    void setFocusedTask(int taskId, ActivityRecord touchedActivity) {
+        ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedTask: taskId=%d touchedActivity=%s", taskId,
+                touchedActivity);
+        final Task task = mRootWindowContainer.anyTaskForId(taskId, MATCH_ATTACHED_TASK_ONLY);
+        if (task == null) {
+            return;
+        }
+        final ActivityRecord r = task.topRunningActivityLocked();
+        if (r == null) {
+            return;
+        }
+
+        if (r.moveFocusableActivityToTop("setFocusedTask")) {
+            mRootWindowContainer.resumeFocusedTasksTopActivities();
+        } else if (touchedActivity != null && touchedActivity != r
+                && touchedActivity.getTask() == r.getTask()
+                && touchedActivity.getTaskFragment() != r.getTaskFragment()) {
+            // Set the focused app directly since the focused window is not on the
+            // top-most TaskFragment of the top-most Task
+            final DisplayContent displayContent = touchedActivity.getDisplayContent();
+            displayContent.setFocusedApp(touchedActivity);
+            mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                    true /* updateInputWindows */);
         }
     }
 
