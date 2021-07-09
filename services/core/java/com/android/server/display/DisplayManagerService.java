@@ -1281,6 +1281,11 @@ public final class DisplayManagerService extends SystemService {
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         scheduleTraversalLocked(false);
         mPersistentDataStore.saveIfNeeded();
+
+        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+        if (dpc != null) {
+            dpc.onDisplayChanged();
+        }
     }
 
     private void handleLogicalDisplayFrameRateOverridesChangedLocked(
@@ -1311,11 +1316,6 @@ public final class DisplayManagerService extends SystemService {
         final Runnable work = updateDisplayStateLocked(device);
         if (work != null) {
             mHandler.post(work);
-        }
-        final int displayId = display.getDisplayIdLocked();
-        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
-        if (dpc != null) {
-            dpc.onDisplayChanged();
         }
         handleLogicalDisplayChangedLocked(display);
     }
