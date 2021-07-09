@@ -64,7 +64,7 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <include layout="@layout/quick_qs_status_icons"/>
+        <include layout="@layout/split_shade_header"/>
 
         <include
             layout="@layout/keyguard_status_view"
