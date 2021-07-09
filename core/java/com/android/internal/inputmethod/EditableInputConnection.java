@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2007-2008 The Android Open Source Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.android.internal.widget;
+package com.android.internal.inputmethod;
 
 import static android.view.inputmethod.InputConnectionProto.CURSOR_CAPS_MODE;
 import static android.view.inputmethod.InputConnectionProto.EDITABLE_TEXT;
@@ -40,9 +40,9 @@ import android.widget.TextView;
 
 /**
  * Base class for an editable InputConnection instance. This is created by {@link TextView} or
- * {@link EditText}.
+ * {@link android.widget.EditText}.
  */
-public class EditableInputConnection extends BaseInputConnection
+public final class EditableInputConnection extends BaseInputConnection
         implements DumpableInputConnection {
     private static final boolean DEBUG = false;
     private static final String TAG = "EditableInputConnection";
@@ -70,7 +70,7 @@ public class EditableInputConnection extends BaseInputConnection
 
     @Override
     public boolean beginBatchEdit() {
-        synchronized(this) {
+        synchronized (this) {
             if (mBatchEditNesting >= 0) {
                 mTextView.beginBatchEdit();
                 mBatchEditNesting++;
@@ -82,7 +82,7 @@ public class EditableInputConnection extends BaseInputConnection
 
     @Override
     public boolean endBatchEdit() {
-        synchronized(this) {
+        synchronized (this) {
             if (mBatchEditNesting > 0) {
                 // When the connection is reset by the InputMethodManager and reportFinish
                 // is called, some endBatchEdit calls may still be asynchronously received from the
@@ -105,7 +105,7 @@ public class EditableInputConnection extends BaseInputConnection
     @Override
     public void closeConnection() {
         super.closeConnection();
-        synchronized(this) {
+        synchronized (this) {
             while (mBatchEditNesting > 0) {
                 endBatchEdit();
             }
@@ -157,7 +157,7 @@ public class EditableInputConnection extends BaseInputConnection
         mTextView.onEditorAction(actionCode);
         return true;
     }
-    
+
     @Override
     public boolean performContextMenuAction(int id) {
         if (DEBUG) Log.v(TAG, "performContextMenuAction " + id);
@@ -166,13 +166,13 @@ public class EditableInputConnection extends BaseInputConnection
         mTextView.endBatchEdit();
         return true;
     }
-    
+
     @Override
     public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
         if (mTextView != null) {
             ExtractedText et = new ExtractedText();
             if (mTextView.extractText(request, et)) {
-                if ((flags&GET_EXTRACTED_TEXT_MONITOR) != 0) {
+                if ((flags & GET_EXTRACTED_TEXT_MONITOR) != 0) {
                     mTextView.setExtracting(request);
                 }
                 return et;
@@ -211,14 +211,13 @@ public class EditableInputConnection extends BaseInputConnection
 
         // It is possible that any other bit is used as a valid flag in a future release.
         // We should reject the entire request in such a case.
-        final int KNOWN_FLAGS_MASK = InputConnection.CURSOR_UPDATE_IMMEDIATE |
-                InputConnection.CURSOR_UPDATE_MONITOR;
-        final int unknownFlags = cursorUpdateMode & ~KNOWN_FLAGS_MASK;
+        final int knownFlagMask = InputConnection.CURSOR_UPDATE_IMMEDIATE
+                | InputConnection.CURSOR_UPDATE_MONITOR;
+        final int unknownFlags = cursorUpdateMode & ~knownFlagMask;
         if (unknownFlags != 0) {
             if (DEBUG) {
-                Log.d(TAG, "Rejecting requestUpdateCursorAnchorInfo due to unknown flags." +
-                        " cursorUpdateMode=" + cursorUpdateMode +
-                        " unknownFlags=" + unknownFlags);
+                Log.d(TAG, "Rejecting requestUpdateCursorAnchorInfo due to unknown flags. "
+                        + "cursorUpdateMode=" + cursorUpdateMode + " unknownFlags=" + unknownFlags);
             }
             return false;
         }
