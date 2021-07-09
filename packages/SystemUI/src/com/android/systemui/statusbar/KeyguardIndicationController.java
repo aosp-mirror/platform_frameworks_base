@@ -797,8 +797,12 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         }
 
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-            String message = mContext.getString(R.string.keyguard_retry);
-            mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
+            if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+                return; // udfps affordance is highlighted, no need to surface face auth error
+            } else {
+                String message = mContext.getString(R.string.keyguard_retry);
+                mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
+            }
         } else if (mKeyguardUpdateMonitor.isScreenOn()) {
             showTransientIndication(mContext.getString(R.string.keyguard_unlock),
                     false /* isError */, true /* hideOnScreenOff */);
@@ -922,6 +926,11 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                         && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
                     // suggest trying fingerprint
                     showTransientIndication(R.string.keyguard_try_fingerprint);
+                } else if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+                    mStatusBarKeyguardViewManager.showBouncerMessage(
+                            mContext.getResources().getString(R.string.keyguard_try_fingerprint),
+                            mInitialTextColorState
+                    );
                 } else {
                     // suggest swiping up to unlock (try face auth again or swipe up to bouncer)
                     showSwipeUpToUnlock();

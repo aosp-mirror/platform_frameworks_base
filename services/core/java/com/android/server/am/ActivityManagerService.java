@@ -16153,10 +16153,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public ServiceNotificationPolicy applyForegroundServiceNotification(
-                Notification notification, int id, String pkg, int userId) {
+                Notification notification, String tag, int id, String pkg, int userId) {
             synchronized (ActivityManagerService.this) {
                 return mServices.applyForegroundServiceNotificationLocked(notification,
-                        id, pkg, userId);
+                        tag, id, pkg, userId);
             }
         }
 

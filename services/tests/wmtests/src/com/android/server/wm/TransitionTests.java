@@ -339,6 +339,44 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTargets_noIntermediatesToWallpaper() {
+        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        // Make DA organized so we can check that they don't get included.
+        WindowContainer parent = wallpaperWindowToken.getParent();
+        while (parent != null && parent != mDisplayContent) {
+            if (parent.asDisplayArea() != null) {
+                parent.asDisplayArea().setOrganizer(
+                        mock(android.window.IDisplayAreaOrganizer.class), true /* skipAppear */);
+            }
+            parent = parent.getParent();
+        }
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
+                "wallpaperWindow");
+        wallpaperWindowToken.setVisibleRequested(false);
+        transition.collect(wallpaperWindowToken);
+        wallpaperWindowToken.setVisibleRequested(true);
+        wallpaperWindow.mHasSurface = true;
+        doReturn(true).when(mDisplayContent).isAttached();
+        transition.collect(mDisplayContent);
+        mDisplayContent.getWindowConfiguration().setRotation(
+                (mDisplayContent.getWindowConfiguration().getRotation() + 1) % 4);
+
+        ArraySet<WindowContainer> targets = Transition.calculateTargets(
+                transition.mParticipants, transition.mChanges);
+        TransitionInfo info = Transition.calculateTransitionInfo(
+                0, 0, targets, transition.mChanges);
+        // The wallpaper is not organized, so it won't have a token; however, it will be marked
+        // as IS_WALLPAPER
+        assertEquals(FLAG_IS_WALLPAPER, info.getChanges().get(0).getFlags());
+        // Make sure no intermediate display areas were pulled in between wallpaper and display.
+        assertEquals(mDisplayContent.mRemoteToken.toWindowContainerToken(),
+                info.getChanges().get(0).getParent());
+    }
+
+    @Test
     public void testIndependent() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
