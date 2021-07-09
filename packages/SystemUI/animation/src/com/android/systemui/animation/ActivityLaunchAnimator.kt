@@ -35,6 +35,8 @@ import com.android.wm.shell.startingsurface.SplashscreenContentDrawer
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer.SplashScreenWindowAttrs
 import kotlin.math.roundToInt
 
+private const val TAG = "ActivityLaunchAnimator"
+
 /**
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
@@ -43,8 +45,6 @@ class ActivityLaunchAnimator(
     private val keyguardHandler: KeyguardHandler,
     context: Context
 ) {
-    private val TAG = this::class.java.simpleName
-
     companion object {
         const val ANIMATION_DURATION = 500L
         private const val ANIMATION_DURATION_FADE_OUT_CONTENT = 150L
@@ -233,11 +233,21 @@ class ActivityLaunchAnimator(
             /**
              * Return a [Controller] that will animate and expand [view] into the opening window.
              *
-             * Important: The view must be attached to the window when calling this function and
-             * during the animation.
+             * Important: The view must be attached to a [ViewGroup] when calling this function and
+             * during the animation. For safety, this method will return null when it is not.
              */
             @JvmStatic
-            fun fromView(view: View, cujType: Int? = null): Controller {
+            fun fromView(view: View, cujType: Int? = null): Controller? {
+                if (view.parent !is ViewGroup) {
+                    // TODO(b/192194319): Throw instead of just logging.
+                    Log.wtf(
+                        TAG,
+                        "Skipping animation as view $view is not attached to a ViewGroup",
+                        Exception()
+                    )
+                    return null
+                }
+
                 return GhostedViewLaunchAnimatorController(view, cujType)
             }
         }
