@@ -34,7 +34,7 @@ public class ScrollCaptureInternal {
     private static final String TAG = "ScrollCaptureInternal";
 
     // Log found scrolling views
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // Log all investigated views, as well as heuristic checks
     private static final boolean DEBUG_VERBOSE = false;
