@@ -6208,7 +6208,7 @@ public class NotificationManagerService extends SystemService {
         // FGS-related situation up front, outside of any locks so it's safe to call into
         // the Activity Manager.
         final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
-                notification, id, pkg, userId);
+                notification, tag, id, pkg, userId);
         if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
             // Proceed if the notification is already showing/known, otherwise ignore
             // because the service lifecycle logic has retained responsibility for its

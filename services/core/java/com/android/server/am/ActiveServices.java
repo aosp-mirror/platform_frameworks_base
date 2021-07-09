@@ -32,11 +32,11 @@ import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_FGS_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
+import static android.os.PowerExemptionManager.REASON_CURRENT_INPUT_METHOD;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
 import static android.os.PowerExemptionManager.REASON_FGS_BINDING;
-import static android.os.PowerExemptionManager.REASON_CURRENT_INPUT_METHOD;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
@@ -1997,11 +1997,17 @@ public final class ActiveServices {
     }
 
     ServiceNotificationPolicy applyForegroundServiceNotificationLocked(Notification notification,
-            final int id, final String pkg, final int userId) {
+            final String tag, final int id, final String pkg, final int userId) {
+        // By nature of the FGS API, all FGS notifications have a null tag
+        if (tag != null) {
+            return ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
+        }
+
         if (DEBUG_FOREGROUND_SERVICE) {
             Slog.d(TAG_SERVICE, "Evaluating FGS policy for id=" + id
                     + " pkg=" + pkg + " not=" + notification);
         }
+
         // Is there an FGS using this notification?
         final ServiceMap smap = mServiceMap.get(userId);
         if (smap == null) {
@@ -2483,7 +2489,7 @@ public final class ActiveServices {
     }
 
     private void cancelForegroundNotificationLocked(ServiceRecord r) {
-        if (r.foregroundId != 0) {
+        if (r.foregroundNoti != null) {
             // First check to see if this app has any other active foreground services
             // with the same notification ID.  If so, we shouldn't actually cancel it,
             // because that would wipe away the notification that still needs to be shown
@@ -2492,9 +2498,16 @@ public final class ActiveServices {
             if (sm != null) {
                 for (int i = sm.mServicesByInstanceName.size() - 1; i >= 0; i--) {
                     ServiceRecord other = sm.mServicesByInstanceName.valueAt(i);
-                    if (other != r && other.foregroundId == r.foregroundId
+                    if (other != r
+                            && other.isForeground
+                            && other.foregroundId == r.foregroundId
                             && other.packageName.equals(r.packageName)) {
-                        // Found one!  Abort the cancel.
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.i(TAG_SERVICE, "FGS notification for " + r
+                                    + " shared by " + other
+                                    + " (isForeground=" + other.isForeground + ")"
+                                    + " - NOT cancelling");
+                        }
                         return;
                     }
                 }
@@ -4282,6 +4295,10 @@ public final class ActiveServices {
     }
 
     private void dropFgsNotificationStateLocked(ServiceRecord r) {
+        if (r.foregroundNoti == null) {
+            return;
+        }
+
         // If this is the only FGS using this notification, clear its FGS flag
         boolean shared = false;
         final ServiceMap smap = mServiceMap.get(r.userId);
