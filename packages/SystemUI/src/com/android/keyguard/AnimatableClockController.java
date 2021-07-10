@@ -212,6 +212,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
             } else {
                 mView.setLineSpacingScale(mDefaultLineSpacing);
             }
+            mView.refreshFormat();
         }
     }
 

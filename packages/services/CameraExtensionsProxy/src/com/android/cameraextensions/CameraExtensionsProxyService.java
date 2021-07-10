@@ -134,6 +134,7 @@ public class CameraExtensionsProxyService extends Service {
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
 
     private HashMap<String, CameraCharacteristics> mCharacteristicsHashMap = new HashMap<>();
+    private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
 
     private static boolean checkForAdvancedAPI() {
         if (EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
@@ -464,8 +465,16 @@ public class CameraExtensionsProxyService extends Service {
             String [] cameraIds = manager.getCameraIdListNoLazy();
             if (cameraIds != null) {
                 for (String cameraId : cameraIds) {
-                    mCharacteristicsHashMap.put(cameraId,
-                            manager.getCameraCharacteristics(cameraId));
+                    CameraCharacteristics chars = manager.getCameraCharacteristics(cameraId);
+                    mCharacteristicsHashMap.put(cameraId, chars);
+                    Object thisClass = CameraCharacteristics.Key.class;
+                    Class<CameraCharacteristics.Key<?>> keyClass =
+                            (Class<CameraCharacteristics.Key<?>>)thisClass;
+                    ArrayList<CameraCharacteristics.Key<?>> vendorKeys =
+                            chars.getNativeMetadata().getAllVendorKeys(keyClass);
+                    if ((vendorKeys != null) && !vendorKeys.isEmpty()) {
+                        mMetadataVendorIdMap.put(cameraId, vendorKeys.get(0).getVendorId());
+                    }
                 }
             }
         } catch (CameraAccessException e) {
@@ -529,13 +538,16 @@ public class CameraExtensionsProxyService extends Service {
         return ret;
     }
 
-    private static CameraMetadataNative initializeParcelableMetadata(
-            List<Pair<CaptureRequest.Key, Object>> paramList) {
+    private CameraMetadataNative initializeParcelableMetadata(
+            List<Pair<CaptureRequest.Key, Object>> paramList, String cameraId) {
         if (paramList == null) {
             return null;
         }
 
         CameraMetadataNative ret = new CameraMetadataNative();
+        if (mMetadataVendorIdMap.containsKey(cameraId)) {
+            ret.setVendorId(mMetadataVendorIdMap.get(cameraId));
+        }
         for (Pair<CaptureRequest.Key, Object> param : paramList) {
             ret.set(param.first, param.second);
         }
@@ -543,13 +555,16 @@ public class CameraExtensionsProxyService extends Service {
         return ret;
     }
 
-    private static CameraMetadataNative initializeParcelableMetadata(
-            Map<CaptureRequest.Key<?>, Object> paramMap) {
+    private CameraMetadataNative initializeParcelableMetadata(
+            Map<CaptureRequest.Key<?>, Object> paramMap, String cameraId) {
         if (paramMap == null) {
             return null;
         }
 
         CameraMetadataNative ret = new CameraMetadataNative();
+        if (mMetadataVendorIdMap.containsKey(cameraId)) {
+            ret.setVendorId(mMetadataVendorIdMap.get(cameraId));
+        }
         for (Map.Entry<CaptureRequest.Key<?>, Object> param : paramMap.entrySet()) {
             ret.set(((CaptureRequest.Key) param.getKey()), param.getValue());
         }
@@ -557,8 +572,8 @@ public class CameraExtensionsProxyService extends Service {
         return ret;
     }
 
-    private static android.hardware.camera2.extension.CaptureStageImpl initializeParcelable(
-            androidx.camera.extensions.impl.CaptureStageImpl captureStage) {
+    private android.hardware.camera2.extension.CaptureStageImpl initializeParcelable(
+            androidx.camera.extensions.impl.CaptureStageImpl captureStage, String cameraId) {
         if (captureStage == null) {
             return null;
         }
@@ -566,12 +581,13 @@ public class CameraExtensionsProxyService extends Service {
         android.hardware.camera2.extension.CaptureStageImpl ret =
                 new android.hardware.camera2.extension.CaptureStageImpl();
         ret.id = captureStage.getId();
-        ret.parameters = initializeParcelableMetadata(captureStage.getParameters());
+        ret.parameters = initializeParcelableMetadata(captureStage.getParameters(), cameraId);
 
         return ret;
     }
 
-    private Request initializeParcelable(RequestProcessorImpl.Request request, int requestId) {
+    private Request initializeParcelable(RequestProcessorImpl.Request request, int requestId,
+            String cameraId) {
         Request ret = new Request();
         ret.targetOutputConfigIds = new ArrayList<>();
         for (int id : request.getTargetOutputConfigIds()) {
@@ -580,7 +596,7 @@ public class CameraExtensionsProxyService extends Service {
             ret.targetOutputConfigIds.add(configId);
         }
         ret.templateId = request.getTemplateId();
-        ret.parameters = initializeParcelableMetadata(request.getParameters());
+        ret.parameters = initializeParcelableMetadata(request.getParameters(), cameraId);
         ret.requestId = requestId;
         return ret;
     }
@@ -933,9 +949,11 @@ public class CameraExtensionsProxyService extends Service {
 
     private class RequestProcessorStub implements RequestProcessorImpl {
         private final IRequestProcessorImpl mRequestProcessor;
+        private final String mCameraId;
 
-        public RequestProcessorStub(IRequestProcessorImpl requestProcessor) {
+        public RequestProcessorStub(IRequestProcessorImpl requestProcessor, String cameraId) {
             mRequestProcessor = requestProcessor;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -964,7 +982,7 @@ public class CameraExtensionsProxyService extends Service {
                     new ArrayList<>();
             int requestId = 0;
             for (Request request : requests) {
-                captureRequests.add(initializeParcelable(request, requestId));
+                captureRequests.add(initializeParcelable(request, requestId, mCameraId));
                 requestId++;
             }
 
@@ -982,7 +1000,8 @@ public class CameraExtensionsProxyService extends Service {
             try {
                 ArrayList<Request> requests = new ArrayList<>();
                 requests.add(request);
-                return mRequestProcessor.setRepeating(initializeParcelable(request, 0),
+                return mRequestProcessor.setRepeating(
+                        initializeParcelable(request, 0, mCameraId),
                         new RequestCallbackStub(requests, callback));
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to submit repeating request due to remote exception!");
@@ -1012,6 +1031,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private class SessionProcessorImplStub extends ISessionProcessorImpl.Stub {
         private final SessionProcessorImpl mSessionProcessor;
+        private String mCameraId = null;
 
         public SessionProcessorImplStub(SessionProcessorImpl sessionProcessor) {
             mSessionProcessor = sessionProcessor;
@@ -1074,7 +1094,8 @@ public class CameraExtensionsProxyService extends Service {
             }
             ret.sessionTemplateId = sessionConfig.getSessionTemplateId();
             ret.sessionParameter = initializeParcelableMetadata(
-                    sessionConfig.getSessionParameters());
+                    sessionConfig.getSessionParameters(), cameraId);
+            mCameraId = cameraId;
 
             return ret;
         }
@@ -1086,7 +1107,8 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void onCaptureSessionStart(IRequestProcessorImpl requestProcessor) {
-            mSessionProcessor.onCaptureSessionStart(new RequestProcessorStub(requestProcessor));
+            mSessionProcessor.onCaptureSessionStart(
+                    new RequestProcessorStub(requestProcessor, mCameraId));
         }
 
         @Override
@@ -1143,6 +1165,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private class PreviewExtenderImplStub extends IPreviewExtenderImpl.Stub {
         private final PreviewExtenderImpl mPreviewExtender;
+        private String mCameraId = null;
 
         public PreviewExtenderImplStub(PreviewExtenderImpl previewExtender) {
             mPreviewExtender = previewExtender;
@@ -1150,6 +1173,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void onInit(String cameraId, CameraMetadataNative cameraCharacteristics) {
+            mCameraId = cameraId;
             mPreviewExtender.onInit(cameraId, new CameraCharacteristics(cameraCharacteristics),
                     CameraExtensionsProxyService.this);
         }
@@ -1161,17 +1185,17 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CaptureStageImpl onPresetSession() {
-            return initializeParcelable(mPreviewExtender.onPresetSession());
+            return initializeParcelable(mPreviewExtender.onPresetSession(), mCameraId);
         }
 
         @Override
         public CaptureStageImpl onEnableSession() {
-            return initializeParcelable(mPreviewExtender.onEnableSession());
+            return initializeParcelable(mPreviewExtender.onEnableSession(), mCameraId);
         }
 
         @Override
         public CaptureStageImpl onDisableSession() {
-            return initializeParcelable(mPreviewExtender.onDisableSession());
+            return initializeParcelable(mPreviewExtender.onDisableSession(), mCameraId);
         }
 
         @Override
@@ -1187,7 +1211,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CaptureStageImpl getCaptureStage() {
-            return initializeParcelable(mPreviewExtender.getCaptureStage());
+            return initializeParcelable(mPreviewExtender.getCaptureStage(), mCameraId);
         }
 
         @Override
@@ -1230,7 +1254,7 @@ public class CameraExtensionsProxyService extends Service {
             }
 
             if (processor != null) {
-                return new RequestUpdateProcessorImplStub(processor);
+                return new RequestUpdateProcessorImplStub(processor, mCameraId);
             }
 
             return null;
@@ -1251,6 +1275,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private class ImageCaptureExtenderImplStub extends IImageCaptureExtenderImpl.Stub {
         private final ImageCaptureExtenderImpl mImageExtender;
+        private String mCameraId = null;
 
         public ImageCaptureExtenderImplStub(ImageCaptureExtenderImpl imageExtender) {
             mImageExtender = imageExtender;
@@ -1260,6 +1285,7 @@ public class CameraExtensionsProxyService extends Service {
         public void onInit(String cameraId, CameraMetadataNative cameraCharacteristics) {
             mImageExtender.onInit(cameraId, new CameraCharacteristics(cameraCharacteristics),
                     CameraExtensionsProxyService.this);
+            mCameraId = cameraId;
         }
 
         @Override
@@ -1269,17 +1295,17 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CaptureStageImpl onPresetSession() {
-            return initializeParcelable(mImageExtender.onPresetSession());
+            return initializeParcelable(mImageExtender.onPresetSession(), mCameraId);
         }
 
         @Override
         public CaptureStageImpl onEnableSession() {
-            return initializeParcelable(mImageExtender.onEnableSession());
+            return initializeParcelable(mImageExtender.onEnableSession(), mCameraId);
         }
 
         @Override
         public CaptureStageImpl onDisableSession() {
-            return initializeParcelable(mImageExtender.onDisableSession());
+            return initializeParcelable(mImageExtender.onDisableSession(), mCameraId);
         }
 
         @Override
@@ -1312,7 +1338,7 @@ public class CameraExtensionsProxyService extends Service {
                 ArrayList<android.hardware.camera2.extension.CaptureStageImpl> ret =
                         new ArrayList<>();
                 for (androidx.camera.extensions.impl.CaptureStageImpl stage : captureStages) {
-                    ret.add(initializeParcelable(stage));
+                    ret.add(initializeParcelable(stage, mCameraId));
                 }
 
                 return ret;
@@ -1428,9 +1454,12 @@ public class CameraExtensionsProxyService extends Service {
 
     private class RequestUpdateProcessorImplStub extends IRequestUpdateProcessorImpl.Stub {
         private final RequestUpdateProcessorImpl mProcessor;
+        private final String mCameraId;
 
-        public RequestUpdateProcessorImplStub(RequestUpdateProcessorImpl processor) {
+        public RequestUpdateProcessorImplStub(RequestUpdateProcessorImpl processor,
+                String cameraId) {
             mProcessor = processor;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -1451,7 +1480,7 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public CaptureStageImpl process(CameraMetadataNative result, int sequenceId) {
             return initializeParcelable(
-                    mProcessor.process(new TotalCaptureResult(result, sequenceId)));
+                    mProcessor.process(new TotalCaptureResult(result, sequenceId)), mCameraId);
         }
     }
 

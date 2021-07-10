@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.hardware.SensorPrivacyManager
 import android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS
 import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
+import android.hardware.SensorPrivacyManager.Sources.DIALOG
 import android.os.Bundle
 import android.os.Handler
 import android.text.Html
@@ -37,6 +38,10 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL
+import com.android.internal.util.FrameworkStatsLog.write
 
 /**
  * Dialog to be shown on top of apps that are attempting to use a sensor (e.g. microphone) which is
@@ -184,16 +189,25 @@ class SensorUseStartedActivity @Inject constructor(
                     keyguardDismissUtil.executeWhenUnlocked({
                         bgHandler.postDelayed({
                             disableSensorPrivacy()
+                            write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                                    PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE,
+                                    sensorUsePackageName)
                         }, UNLOCK_DELAY_MILLIS)
 
                         false
                     }, false, true)
                 } else {
                     disableSensorPrivacy()
+                    write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                            PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE,
+                            sensorUsePackageName)
                 }
             }
             BUTTON_NEGATIVE -> {
                 unsuppressImmediately = false
+                write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                        PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL,
+                        sensorUsePackageName)
             }
         }
 
@@ -225,10 +239,10 @@ class SensorUseStartedActivity @Inject constructor(
 
     private fun disableSensorPrivacy() {
         if (sensor == ALL_SENSORS) {
-            sensorPrivacyController.setSensorBlocked(MICROPHONE, false)
-            sensorPrivacyController.setSensorBlocked(CAMERA, false)
+            sensorPrivacyController.setSensorBlocked(DIALOG, MICROPHONE, false)
+            sensorPrivacyController.setSensorBlocked(DIALOG, CAMERA, false)
         } else {
-            sensorPrivacyController.setSensorBlocked(sensor, false)
+            sensorPrivacyController.setSensorBlocked(DIALOG, sensor, false)
         }
         unsuppressImmediately = true
         setResult(RESULT_OK)

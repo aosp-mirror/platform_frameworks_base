@@ -1873,6 +1873,8 @@ public class CameraMetadataNative implements Parcelable {
     private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
     private static synchronized native void nativeSwap(long ptr, long otherPtr)
             throws NullPointerException;
+    @FastNative
+    private static native void nativeSetVendorId(long ptr, long vendorId);
     private static synchronized native void nativeClose(long ptr);
     private static synchronized native boolean nativeIsEmpty(long ptr);
     private static synchronized native int nativeGetEntryCount(long ptr);
@@ -1914,6 +1916,15 @@ public class CameraMetadataNative implements Parcelable {
         mMultiResolutionStreamConfigurationMap = other.mMultiResolutionStreamConfigurationMap;
         updateNativeAllocation();
         other.updateNativeAllocation();
+    }
+
+    /**
+     * Set the native metadata vendor id.
+     *
+     * @hide
+     */
+    public void setVendorId(long vendorId) {
+        nativeSetVendorId(mMetadataPtr, vendorId);
     }
 
     /**

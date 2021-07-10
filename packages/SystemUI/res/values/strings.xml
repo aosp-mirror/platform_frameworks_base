@@ -2728,7 +2728,7 @@
 
     <!-- Device Controls strings -->
     <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Home controls</string>
+    <string name="quick_controls_title">Device controls</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
@@ -2956,6 +2956,8 @@
     <string name="new_notification_image_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent an image</string>
     <!-- Content description text on the Conversation widget when a person has a new status posted [CHAR LIMIT=150] -->
     <string name="new_status_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> has a status update: <xliff:g id="status" example="Listening to music">%2$s</xliff:g></string>
+    <!-- Content description text on the Conversation widget when a person is  available, meaning online on an application [CHAR LIMIT=150] -->
+    <string name="person_available">Available</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->

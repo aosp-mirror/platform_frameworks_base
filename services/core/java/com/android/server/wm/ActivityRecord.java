@@ -257,6 +257,7 @@ import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -1929,11 +1930,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final TaskSnapshot snapshot =
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
                         false /* restoreFromDisk */, false /* isLowResolution */);
-        final int typeParameter = mWmService.mStartingSurfaceController
-                .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated, useEmpty);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, snapshot);
+
+        //TODO(191787740) Remove for T
+        final boolean useLegacy = type == STARTING_WINDOW_TYPE_SPLASH_SCREEN
+                && mWmService.mStartingSurfaceController.isExceptionApp(packageName, mTargetSdk,
+                    () -> {
+                        ActivityInfo activityInfo = intent.resolveActivityInfo(
+                                mAtmService.mContext.getPackageManager(),
+                                PackageManager.GET_META_DATA);
+                        return activityInfo != null ? activityInfo.applicationInfo : null;
+                    });
+
+        final int typeParameter = mWmService.mStartingSurfaceController
+                .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
+                        allowTaskSnapshot, activityCreated, useEmpty, useLegacy);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
             if (isActivityTypeHome()) {

@@ -114,12 +114,10 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     @Override
     void onIlluminationStarting() {
-        setVisibility(View.INVISIBLE);
     }
 
     @Override
     void onIlluminationStopped() {
-        setVisibility(View.VISIBLE);
     }
 
     @Override
