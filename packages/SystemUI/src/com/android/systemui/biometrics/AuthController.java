@@ -121,15 +121,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     private class BiometricOrientationEventListener extends OrientationEventListener {
-        @Surface.Rotation private int mLastRotation = ORIENTATION_UNKNOWN;
+        @Surface.Rotation private int mLastRotation;
 
         BiometricOrientationEventListener(Context context) {
             super(context);
-
-            final Display display = context.getDisplay();
-            if (display != null) {
-                mLastRotation = display.getRotation();
-            }
+            mLastRotation = context.getDisplay().getRotation();
         }
 
         @Override
@@ -204,6 +200,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 Log.w(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
                 mCurrentDialog.dismissWithoutCallback(true /* animate */);
                 mCurrentDialog = null;
+                mOrientationListener.disable();
 
                 try {
                     if (mReceiver != null) {
@@ -232,6 +229,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                         Log.w(TAG, "Evicting client due to: " + topPackage);
                         mCurrentDialog.dismissWithoutCallback(true /* animate */);
                         mCurrentDialog = null;
+                        mOrientationListener.disable();
 
                         if (mReceiver != null) {
                             mReceiver.onDialogDismissed(
@@ -471,7 +469,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
         mOrientationListener = new BiometricOrientationEventListener(context);
-        mOrientationListener.enable();
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
@@ -666,6 +663,18 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         // BiometricService will have already sent the callback to the client in this case.
         // This avoids a round trip to SystemUI. So, just dismiss the dialog and we're done.
         mCurrentDialog = null;
+        mOrientationListener.disable();
+    }
+
+    /**
+     * Whether the user's finger is currently on udfps attempting to authenticate.
+     */
+    public boolean isUdfpsFingerDown() {
+        if (mUdfpsController == null)  {
+            return false;
+        }
+
+        return mUdfpsController.isFingerDown();
     }
 
     /**
@@ -737,6 +746,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mReceiver = (IBiometricSysuiReceiver) args.arg2;
         mCurrentDialog = newDialog;
         mCurrentDialog.show(mWindowManager, savedState);
+        mOrientationListener.enable();
     }
 
     private void onDialogDismissed(@DismissedReason int reason) {
@@ -746,6 +756,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
         mReceiver = null;
         mCurrentDialog = null;
+        mOrientationListener.disable();
     }
 
     @Override
@@ -758,6 +769,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             mCurrentDialog.onSaveState(savedState);
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
             mCurrentDialog = null;
+            mOrientationListener.disable();
 
             // Only show the dialog if necessary. If it was animating out, the dialog is supposed
             // to send its pending callback immediately.

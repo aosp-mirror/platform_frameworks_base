@@ -27,7 +27,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
-import com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.stats.PlatformLogger;
 import com.android.server.appsearch.visibilitystore.VisibilityStoreImpl;
@@ -177,7 +176,7 @@ public final class AppSearchUserInstanceManager {
                 icingDir,
                 new FrameworkLimitConfig(config),
                 initStatsBuilder,
-                new FrameworkOptimizeStrategy());
+                new FrameworkOptimizeStrategy(config));
 
         long prepareVisibilityStoreLatencyStartMillis = SystemClock.elapsedRealtime();
         VisibilityStoreImpl visibilityStore =

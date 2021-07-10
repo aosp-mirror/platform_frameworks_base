@@ -8747,8 +8747,6 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        @TestApi
-        @Readable
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
         /**
