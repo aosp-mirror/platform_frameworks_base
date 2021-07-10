@@ -120,6 +120,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
+    private static final String DESCRIPTOR = "android.bluetooth.BluetoothAdapter";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -805,7 +806,7 @@ public final class BluetoothAdapter {
         mManagerService = Objects.requireNonNull(managerService);
         mAttributionSource = Objects.requireNonNull(attributionSource);
         mLeScanClients = new HashMap<LeScanCallback, ScanCallback>();
-        mToken = new Binder();
+        mToken = new Binder(DESCRIPTOR);
     }
 
     /**

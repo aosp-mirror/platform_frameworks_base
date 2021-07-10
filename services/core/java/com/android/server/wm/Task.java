@@ -1464,12 +1464,6 @@ class Task extends WindowContainer<WindowContainer> {
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
-
-        // Resume next focusable root task after reparenting to another display if we aren't
-        // removing the prevous display.
-        if (oldDisplay != null && oldDisplay.isRemoving()) {
-            postReparent();
-        }
     }
 
     void cleanUpActivityReferences(ActivityRecord r) {
@@ -4114,9 +4108,6 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
-        info.topActivityToken = mReuseActivitiesReport.top != null
-                ? mReuseActivitiesReport.top.appToken
-                : null;
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
                 && mReuseActivitiesReport.top.getOrganizedTask() == this
@@ -5462,8 +5453,7 @@ class Task extends WindowContainer<WindowContainer> {
         mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
-    /** Resume next focusable root task after reparenting to another display. */
-    void postReparent() {
+    void resumeNextFocusAfterReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
                 true /* moveDisplayToTop */);
         mRootWindowContainer.resumeFocusedTasksTopActivities();

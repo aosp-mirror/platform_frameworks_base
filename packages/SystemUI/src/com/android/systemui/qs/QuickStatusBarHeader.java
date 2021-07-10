@@ -78,7 +78,6 @@ public class QuickStatusBarHeader extends FrameLayout {
     private TintedIconManager mTintedIconManager;
     private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
 
-    private int mStatusBarPaddingTop = 0;
     private int mRoundedCornerPadding = 0;
     private int mWaterfallTopInset;
     private int mCutOutPaddingLeft;
@@ -205,7 +204,6 @@ public class QuickStatusBarHeader extends FrameLayout {
 
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
-        mStatusBarPaddingTop = resources.getDimensionPixelSize(R.dimen.status_bar_padding_top);
 
         int qsOffsetHeight = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
@@ -465,11 +463,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
 
         mDatePrivacyView.setPadding(paddingLeft,
-                mWaterfallTopInset + mStatusBarPaddingTop,
+                mWaterfallTopInset,
                 paddingRight,
                 0);
         mClockIconsView.setPadding(paddingLeft,
-                mWaterfallTopInset + mStatusBarPaddingTop,
+                mWaterfallTopInset,
                 paddingRight,
                 0);
     }

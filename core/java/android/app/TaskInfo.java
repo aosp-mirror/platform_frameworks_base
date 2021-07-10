@@ -187,13 +187,6 @@ public class TaskInfo {
     public ActivityInfo topActivityInfo;
 
     /**
-     * The top activity in this task.
-     * @hide
-     */
-    @Nullable
-    public IBinder topActivityToken;
-
-    /**
      * Whether the direct top activity is in size compat mode on foreground.
      * @hide
      */
@@ -356,12 +349,12 @@ public class TaskInfo {
         return displayId == that.displayId
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
-                // TopActivityToken and bounds are important if top activity is in size compat
-                && (!topActivityInSizeCompat || topActivityToken.equals(that.topActivityToken))
+                // Bounds are important if top activity is in size compat
                 && (!topActivityInSizeCompat || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
                 && (!topActivityInSizeCompat || configuration.getLayoutDirection()
-                    == that.configuration.getLayoutDirection());
+                    == that.configuration.getLayoutDirection())
+                && (!topActivityInSizeCompat || isVisible == that.isVisible);
     }
 
     /**
@@ -396,7 +389,6 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
-        topActivityToken = source.readStrongBinder();
         topActivityInSizeCompat = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
     }
@@ -434,7 +426,6 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
-        dest.writeStrongBinder(topActivityToken);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeTypedObject(mTopActivityLocusId, flags);
     }
@@ -462,7 +453,6 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
-                + " topActivityToken=" + topActivityToken
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " locusId= " + mTopActivityLocusId
                 + "}";

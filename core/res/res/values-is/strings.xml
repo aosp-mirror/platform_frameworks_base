@@ -617,7 +617,7 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Taktu símann úr lás með því að horfa á hann"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Settu upp fleiri leiðir til að taka úr lás"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ýttu til að bæta við fingrafari"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingrafarskenni"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingrafarsopnun"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ekki er hægt að nota fingrafaralesara"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Þú verður að fara á verkstæði."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nákvæm andlitsgögn fengust ekki. Reyndu aftur."</string>
@@ -1482,8 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Hafna"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Beðið um heimild"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Beðið um heimild\nfyrir reikninginn <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
-    <skip />
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Beiðni um heimild frá <xliff:g id="APP">%1$s</xliff:g>\nfyrir reikninginn <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Þú ert að nota þetta forrit utan vinnusniðsins"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Þú ert að nota þetta forrit á vinnusniðinu þínu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Innsláttaraðferð"</string>
