@@ -864,7 +864,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         Set<String> sameOemPackageCerts = new HashSet<>();
 
         // Assume OEM may enter same package name in the parallel string array with
-        // multiple ADK certs corresponding to it
+        // multiple APK certs corresponding to it
         for (int i = 0; i < oemPackages.length; i++) {
             if (oemPackages[i].equals(packageName)) {
                 sameOemPackageCerts.add(sameOemCerts[i].replaceAll(":", ""));
