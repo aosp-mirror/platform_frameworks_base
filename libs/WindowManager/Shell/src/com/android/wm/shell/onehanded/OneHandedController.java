@@ -140,8 +140,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     private final ContentObserver mActivatedObserver;
     private final ContentObserver mEnabledObserver;
-    private final ContentObserver mTimeoutObserver;
-    private final ContentObserver mTaskChangeExitObserver;
     private final ContentObserver mSwipeToNotificationEnabledObserver;
     private final ContentObserver mShortcutEnabledObserver;
 
@@ -225,7 +223,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState transitionState = new OneHandedState();
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                displayLayout, windowManager, settingsUtil, mainExecutor);
+                windowManager);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
@@ -292,8 +290,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
         mActivatedObserver = getObserver(this::onActivatedActionChanged);
         mEnabledObserver = getObserver(this::onEnabledSettingChanged);
-        mTimeoutObserver = getObserver(this::onTimeoutSettingChanged);
-        mTaskChangeExitObserver = getObserver(this::onTaskChangeExitSettingChanged);
         mSwipeToNotificationEnabledObserver =
                 getObserver(this::onSwipeToNotificationEnabledChanged);
         mShortcutEnabledObserver = getObserver(this::onShortcutEnabledChanged);
@@ -440,10 +436,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 mContext.getContentResolver(), mActivatedObserver, newUserId);
         mOneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_ENABLED,
                 mContext.getContentResolver(), mEnabledObserver, newUserId);
-        mOneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
-                mContext.getContentResolver(), mTimeoutObserver, newUserId);
-        mOneHandedSettingsUtil.registerSettingsKeyObserver(Settings.Secure.TAPS_APP_TO_EXIT,
-                mContext.getContentResolver(), mTaskChangeExitObserver, newUserId);
         mOneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 mContext.getContentResolver(), mSwipeToNotificationEnabledObserver, newUserId);
@@ -455,10 +447,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private void unregisterSettingObservers() {
         mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
                 mEnabledObserver);
-        mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
-                mTimeoutObserver);
-        mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
-                mTaskChangeExitObserver);
         mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
                 mSwipeToNotificationEnabledObserver);
         mOneHandedSettingsUtil.unregisterSettingsKeyObserver(mContext.getContentResolver(),
@@ -474,6 +462,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 .getSettingsTapsAppToExit(mContext.getContentResolver(), mUserId));
         setSwipeToNotificationEnabled(mOneHandedSettingsUtil
                 .getSettingsSwipeToNotificationEnabled(mContext.getContentResolver(), mUserId));
+        onShortcutEnabledChanged();
     }
 
     private void updateDisplayLayout(int displayId) {
@@ -544,46 +533,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         setEnabledGesturalOverlay(
                 enabled || mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                         mContext.getContentResolver(), mUserId), true /* DelayExecute */);
-    }
-
-    @VisibleForTesting
-    void onTimeoutSettingChanged() {
-        final int newTimeout = mOneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
-                mContext.getContentResolver(), mUserId);
-        int metricsId = OneHandedUiEventLogger.OneHandedSettingsTogglesEvent.INVALID.getId();
-        switch (newTimeout) {
-            case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER:
-                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER;
-                break;
-            case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS:
-                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4;
-                break;
-            case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS:
-                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8;
-                break;
-            case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS:
-                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12;
-                break;
-            default:
-                // do nothing
-                break;
-        }
-        mOneHandedUiEventLogger.writeEvent(metricsId);
-
-        if (mTimeoutHandler != null) {
-            mTimeoutHandler.setTimeout(newTimeout);
-        }
-    }
-
-    @VisibleForTesting
-    void onTaskChangeExitSettingChanged() {
-        final boolean enabled = mOneHandedSettingsUtil.getSettingsTapsAppToExit(
-                mContext.getContentResolver(), mUserId);
-        mOneHandedUiEventLogger.writeEvent(enabled
-                ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON
-                : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF);
-
-        setTaskChangeToExit(enabled);
     }
 
     @VisibleForTesting

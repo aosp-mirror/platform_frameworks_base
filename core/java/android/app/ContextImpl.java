@@ -3149,7 +3149,8 @@ class ContextImpl extends Context {
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {
-            getSystemService(PermissionManager.class).registerAttributionSource(attributionSource);
+            attributionSource = getSystemService(PermissionManager.class)
+                    .registerAttributionSource(attributionSource);
         }
         return attributionSource;
     }

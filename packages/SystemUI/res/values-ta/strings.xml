@@ -1149,6 +1149,8 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு மெசேஜ் அனுப்பியுள்ளார்: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு படம் அனுப்பியுள்ளார்"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> புதிய ஸ்டேட்டஸ் வைத்துள்ளார்: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <!-- no translation found for person_available (2318599327472755472) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"பேட்டரி அளவை அறிவதில் சிக்கல்"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"மேலும் தகவல்களுக்கு தட்டவும்"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"அலாரம் எதுவுமில்லை"</string>
