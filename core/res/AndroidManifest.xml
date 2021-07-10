@@ -4053,6 +4053,9 @@
          For more details, see <a
          href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
          Exact alarm permission</a>.
+         <p>Apps who hold this permission and target API level 31 or above, always stay in the
+         {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET WORKING_SET} or
+         lower standby bucket.
          Applications targeting API level 30 or below do not need this permission to use
          exact alarm APIs.
      -->

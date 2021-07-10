@@ -1044,7 +1044,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"किनारामा सार्नुहोस् र नदेखिने पार्नु…"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"किनाराबाट सार्नुहोस् र देखिने पार्नु…"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"टगल गर्नुहोस्"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"घरायसी उपकरणका नियन्त्रणहरू"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"डिभाइस नियन्त्रण गर्ने विजेटहरू"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"कन्ट्रोल थप्नु पर्ने एप छान्नुहोस्"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> वटा नियन्त्र थपियो।</item>
