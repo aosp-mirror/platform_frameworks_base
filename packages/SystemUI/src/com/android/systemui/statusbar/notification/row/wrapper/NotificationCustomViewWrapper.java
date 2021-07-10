@@ -47,10 +47,6 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     public void onContentUpdated(ExpandableNotificationRow row) {
         super.onContentUpdated(row);
 
-        // Custom views will most likely use just white or black as their text color.
-        // We need to scan through and replace these colors by Material NEXT colors.
-        ensureThemeOnChildren(mView);
-
         // Let's invert the notification colors when we're in night mode and
         // the notification background isn't colorized.
         if (needsInversion(mBackgroundColor, mView)) {

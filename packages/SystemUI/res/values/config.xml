@@ -442,9 +442,6 @@
      vibrator is capable of subtle vibrations -->
     <bool name="config_vibrateOnIconAnimation">false</bool>
 
-    <!-- Adjust the theme on fully custom and decorated custom view notifications -->
-    <bool name="config_adjustThemeOnNotificationCustomViews">false</bool>
-
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">true</bool>
 

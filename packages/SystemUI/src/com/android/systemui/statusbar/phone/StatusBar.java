@@ -104,6 +104,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -984,7 +985,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             showTransientUnchecked();
         }
         onSystemBarAttributesChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
-                result.mNavbarColorManagedByIme, result.mBehavior, result.mAppFullscreen);
+                result.mNavbarColorManagedByIme, result.mBehavior, result.mRequestedState,
+                result.mPackageName);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
@@ -2477,7 +2479,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, boolean isFullscreen) {
+            @Behavior int behavior, InsetsState requestedState, String packageName) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -2490,7 +2492,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarMode, navbarColorManagedByIme);
 
         updateBubblesVisibility();
-        mStatusBarStateController.setFullscreenState(isFullscreen);
+        mStatusBarStateController.setSystemBarAttributes(
+                appearance, behavior, requestedState, packageName);
     }
 
     @Override

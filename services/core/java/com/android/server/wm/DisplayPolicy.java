@@ -175,6 +175,7 @@ import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.InputMonitor.EventReceiverInputConsumer;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -322,17 +323,19 @@ public class DisplayPolicy {
     // needs to be opaque.
     private WindowState mNavBarBackgroundWindow;
 
+    private String mFocusedApp;
     private int mLastDisableFlags;
     private int mLastAppearance;
     private int mLastFullscreenAppearance;
     private int mLastDockedAppearance;
     private int mLastBehavior;
+    private final InsetsState mRequestedState = new InsetsState();
     private final Rect mNonDockedRootTaskBounds = new Rect();
     private final Rect mDockedRootTaskBounds = new Rect();
     private final Rect mLastNonDockedRootTaskBounds = new Rect();
     private final Rect mLastDockedRootTaskBounds = new Rect();
 
-    // What we last reported to system UI about whether the focused window is fullscreen/immersive.
+    // What we last reported to input dispatcher about whether the focused window is fullscreen.
     private boolean mLastFocusIsFullscreen = false;
 
     // If nonzero, a panic gesture was performed at that time in uptime millis and is still pending.
@@ -2683,6 +2686,8 @@ public class DisplayPolicy {
                 && mLastFullscreenAppearance == fullscreenAppearance
                 && mLastDockedAppearance == dockedAppearance
                 && mLastBehavior == behavior
+                && mRequestedState.equals(win.getRequestedState())
+                && Objects.equals(mFocusedApp, win.mAttrs.packageName)
                 && mLastFocusIsFullscreen == isFullscreen
                 && mLastNonDockedRootTaskBounds.equals(mNonDockedRootTaskBounds)
                 && mLastDockedRootTaskBounds.equals(mDockedRootTaskBounds)) {
@@ -2698,6 +2703,8 @@ public class DisplayPolicy {
         mLastFullscreenAppearance = fullscreenAppearance;
         mLastDockedAppearance = dockedAppearance;
         mLastBehavior = behavior;
+        mRequestedState.set(win.getRequestedState(), true /* copySources */);
+        mFocusedApp = win.mAttrs.packageName;
         mLastFocusIsFullscreen = isFullscreen;
         mLastNonDockedRootTaskBounds.set(mNonDockedRootTaskBounds);
         mLastDockedRootTaskBounds.set(mDockedRootTaskBounds);
@@ -2716,7 +2723,7 @@ public class DisplayPolicy {
                 final int displayId = getDisplayId();
                 statusBar.setDisableFlags(displayId, disableFlags, cause);
                 statusBar.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                        isNavbarColorManagedByIme, behavior, isFullscreen);
+                        isNavbarColorManagedByIme, behavior, mRequestedState, mFocusedApp);
 
             }
         });

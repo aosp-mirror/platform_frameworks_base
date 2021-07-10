@@ -20,6 +20,7 @@ import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -42,12 +43,21 @@ import static com.android.wm.shell.transition.Transitions.isOpeningType;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -246,6 +256,75 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         mSplitTransitions.startEnterTransition(
                 TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this);
+    }
+
+    /** Starts 2 tasks in one legacy transition. */
+    void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
+            int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
+            RemoteAnimationAdapter adapter) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        // Need to add another wrapper here in shell so that we can inject the divider bar
+        // and also manage the process elevation via setRunningRemote
+        IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
+            @Override
+            public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                    RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers,
+                    RemoteAnimationTarget[] nonApps,
+                    final IRemoteAnimationFinishedCallback finishedCallback) {
+                RemoteAnimationTarget[] augmentedNonApps =
+                        new RemoteAnimationTarget[nonApps.length + 1];
+                for (int i = 0; i < nonApps.length; ++i) {
+                    augmentedNonApps[i] = nonApps[i];
+                }
+                augmentedNonApps[augmentedNonApps.length - 1] = getDividerBarLegacyTarget();
+                try {
+                    ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
+                            adapter.getCallingApplication());
+                    adapter.getRunner().onAnimationStart(transit, apps, wallpapers, nonApps,
+                            finishedCallback);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error starting remote animation", e);
+                }
+            }
+
+            @Override
+            public void onAnimationCancelled() {
+                try {
+                    adapter.getRunner().onAnimationCancelled();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error starting remote animation", e);
+                }
+            }
+        };
+        RemoteAnimationAdapter wrappedAdapter = new RemoteAnimationAdapter(
+                wrapper, adapter.getDuration(), adapter.getStatusBarTransitionDelay());
+
+        if (mainOptions == null) {
+            mainOptions = ActivityOptions.makeRemoteAnimation(wrappedAdapter).toBundle();
+        } else {
+            ActivityOptions mainActivityOptions = ActivityOptions.fromBundle(mainOptions);
+            mainActivityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
+        }
+
+        sideOptions = sideOptions != null ? sideOptions : new Bundle();
+        setSideStagePosition(sidePosition);
+
+        // Build a request WCT that will launch both apps such that task 0 is on the main stage
+        // while task 1 is on the side stage.
+        mMainStage.activate(getMainStageBounds(), wct);
+        mSideStage.setBounds(getSideStageBounds(), wct);
+
+        // Make sure the launch options will put tasks in the corresponding split roots
+        addActivityOptions(mainOptions, mMainStage);
+        addActivityOptions(sideOptions, mSideStage);
+
+        // Add task launch requests
+        wct.startTask(mainTaskId, mainOptions);
+        wct.startTask(sideTaskId, sideOptions);
+
+        // Using legacy transitions, so we can't use blast sync since it conflicts.
+        mTaskOrganizer.applyTransaction(wct);
     }
 
     @SplitLayout.SplitPosition
@@ -889,6 +968,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             t.setPosition(leash, bounds.left, bounds.top);
             t.show(leash);
         }
+    }
+
+    RemoteAnimationTarget getDividerBarLegacyTarget() {
+        final Rect bounds = mSplitLayout.getDividerBounds();
+        return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
+                mSplitLayout.getDividerLeash(), false /* isTranslucent */, null /* clipRect */,
+                null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
+                new android.graphics.Point(0, 0) /* position */, bounds, bounds,
+                new WindowConfiguration(), true, null /* startLeash */, null /* startBounds */,
+                null /* taskInfo */, TYPE_DOCK_DIVIDER);
     }
 
     @Override

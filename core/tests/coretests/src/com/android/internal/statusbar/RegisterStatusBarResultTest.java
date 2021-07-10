@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.view.InsetsState;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -59,7 +60,8 @@ public class RegisterStatusBarResultTest {
                 new Binder() /* imeToken */,
                 true /* navbarColorManagedByIme */,
                 BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                true /* appFullscreen */,
+                new InsetsState() /* requestedState */,
+                "test" /* packageName */,
                 new int[0] /* transientBarTypes */);
 
         final RegisterStatusBarResult copy = clone(original);
@@ -79,7 +81,8 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeToken).isSameInstanceAs(original.mImeToken);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
         assertThat(copy.mBehavior).isEqualTo(original.mBehavior);
-        assertThat(copy.mAppFullscreen).isEqualTo(original.mAppFullscreen);
+        assertThat(copy.mRequestedState).isEqualTo(original.mRequestedState);
+        assertThat(copy.mPackageName).isEqualTo(original.mPackageName);
         assertThat(copy.mTransientBarTypes).isEqualTo(original.mTransientBarTypes);
     }
 
