@@ -44,6 +44,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.CustomTileStatePersister;
@@ -92,6 +93,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     private MediaHost mQQSMediaHost;
     @Mock
     private FeatureFlags mFeatureFlags;
+    @Mock
+    private FalsingManager mFalsingManager;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -182,6 +185,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mQSMediaHost,
                 mQQSMediaHost,
                 mQsComponentFactory,
-                mFeatureFlags);
+                mFeatureFlags,
+                mFalsingManager);
     }
 }
