@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -29,6 +30,21 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public class TaskFragmentOrganizer extends WindowOrganizer {
+
+    /**
+     * Key to the exception in {@link Bundle} in {@link ITaskFragmentOrganizer#onTaskFragmentError}.
+     */
+    private static final String KEY_ERROR_CALLBACK_EXCEPTION = "fragment_exception";
+
+    /**
+     * Creates a {@link Bundle} with an exception that can be passed to
+     * {@link ITaskFragmentOrganizer#onTaskFragmentError}.
+     */
+    public static Bundle putExceptionInBundle(@NonNull Throwable exception) {
+        final Bundle exceptionBundle = new Bundle();
+        exceptionBundle.putSerializable(KEY_ERROR_CALLBACK_EXCEPTION, exception);
+        return exceptionBundle;
+    }
 
     /**
      * Callbacks from WM Core are posted on this executor.
@@ -93,6 +109,17 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public void onTaskFragmentParentInfoChanged(
             @NonNull IBinder fragmentToken, @NonNull Configuration parentConfig) {}
 
+    /**
+     * Called when the {@link WindowContainerTransaction} created with
+     * {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)} failed on the server side.
+     *
+     * @param errorCallbackToken    token set in
+     *                             {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)}
+     * @param exception             exception from the server side.
+     */
+    public void onTaskFragmentError(
+            @NonNull IBinder errorCallbackToken, @NonNull Throwable exception) {}
+
     private final ITaskFragmentOrganizer mInterface = new ITaskFragmentOrganizer.Stub() {
         @Override
         public void onTaskFragmentAppeared(@NonNull TaskFragmentAppearedInfo taskFragmentInfo) {
@@ -118,6 +145,14 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
             mExecutor.execute(
                     () -> TaskFragmentOrganizer.this.onTaskFragmentParentInfoChanged(
                             fragmentToken, parentConfig));
+        }
+
+        @Override
+        public void onTaskFragmentError(
+                @NonNull IBinder errorCallbackToken, @NonNull Bundle exceptionBundle) {
+            mExecutor.execute(() -> TaskFragmentOrganizer.this.onTaskFragmentError(
+                    errorCallbackToken,
+                    (Throwable) exceptionBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION)));
         }
     };
 
