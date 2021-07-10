@@ -48,7 +48,7 @@ public:
         }
 
         // Only let simple srcOver / src blending modes declare opaque, since behavior is clear.
-        SkBlendMode mode = paint->getBlendMode();
+        const auto mode = paint->asBlendMode();
         return mode == SkBlendMode::kSrcOver || mode == SkBlendMode::kSrc;
     }
 
@@ -59,7 +59,7 @@ public:
     }
 
     static inline SkBlendMode getBlendModeDirect(const SkPaint* paint) {
-        return paint ? paint->getBlendMode() : SkBlendMode::kSrcOver;
+        return paint ? paint->getBlendMode_or(SkBlendMode::kSrcOver) : SkBlendMode::kSrcOver;
     }
 
     static inline int getAlphaDirect(const SkPaint* paint) {
