@@ -51,6 +51,7 @@ java_library {
     ],
     libs: [
         "framework-appsearch.impl",
+        "framework-statsd.stubs.module_lib",
         "unsupportedappusage", // TODO(b/181887768) should be removed
     ],
     defaults: ["framework-system-server-module-defaults"],
