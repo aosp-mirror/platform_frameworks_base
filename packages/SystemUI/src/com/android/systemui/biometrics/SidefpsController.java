@@ -41,6 +41,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
 
+import kotlin.Unit;
+
 /**
  * Shows and hides the side fingerprint sensor (side-fps) overlay and handles side fps touch events.
  */
@@ -52,6 +54,8 @@ public class SidefpsController {
     private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
+    @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
+
     // TODO: update mDisplayHeight and mDisplayWidth for multi-display devices
     private final int mDisplayHeight;
     private final int mDisplayWidth;
@@ -95,6 +99,10 @@ public class SidefpsController {
         mFingerprintManager = checkNotNull(fingerprintManager);
         mWindowManager = windowManager;
         mFgExecutor = fgExecutor;
+        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
+            onOrientationChanged();
+            return Unit.INSTANCE;
+        });
 
         mSensorProps = findFirstSidefps();
         checkArgument(mSensorProps != null);
@@ -119,14 +127,15 @@ public class SidefpsController {
         mFingerprintManager.setSidefpsController(mSidefpsControllerImpl);
     }
 
-    void show() {
+    private void show() {
         mView = (SidefpsView) mInflater.inflate(R.layout.sidefps_view, null, false);
         mView.setSensorProperties(mSensorProps);
         mWindowManager.addView(mView, computeLayoutParams());
 
+        mOrientationListener.enable();
     }
 
-    void hide() {
+    private void hide() {
         if (mView != null) {
             mWindowManager.removeView(mView);
             mView.setOnTouchListener(null);
@@ -135,13 +144,16 @@ public class SidefpsController {
         } else {
             Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
         }
+
+        mOrientationListener.disable();
     }
 
-    void onOrientationChanged() {
+    private void onOrientationChanged() {
         // If mView is null or if view is hidden, then return.
         if (mView == null || !mIsVisible) {
             return;
         }
+
         // If the overlay needs to be displayed with a new configuration, destroy the current
         // overlay, and re-create and show the overlay with the updated LayoutParams.
         hide();
