@@ -48,10 +48,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
-import android.view.Surface;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -71,6 +68,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import kotlin.Unit;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -107,7 +106,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     TaskStackListener mTaskStackListener;
     @VisibleForTesting
     IBiometricSysuiReceiver mReceiver;
-    @NonNull private final BiometricOrientationEventListener mOrientationListener;
+    @VisibleForTesting
+    @NonNull final BiometricOrientationEventListener mOrientationListener;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mFpProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
@@ -117,42 +117,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         @Override
         public void onTaskStackChanged() {
             mHandler.post(AuthController.this::handleTaskStackChanged);
-        }
-    }
-
-    private class BiometricOrientationEventListener extends OrientationEventListener {
-        @Surface.Rotation private int mLastRotation;
-
-        BiometricOrientationEventListener(Context context) {
-            super(context);
-            mLastRotation = context.getDisplay().getRotation();
-        }
-
-        @Override
-        public void onOrientationChanged(int orientation) {
-            if (orientation == ORIENTATION_UNKNOWN) {
-                return;
-            }
-
-            final Display display = mContext.getDisplay();
-            if (display == null) {
-                return;
-            }
-
-            final int rotation = display.getRotation();
-            if (mLastRotation != rotation) {
-                mLastRotation = rotation;
-
-                if (mCurrentDialog != null) {
-                    mCurrentDialog.onOrientationChanged();
-                }
-                if (mUdfpsController != null) {
-                    mUdfpsController.onOrientationChanged();
-                }
-                if (mSidefpsController != null) {
-                    mSidefpsController.onOrientationChanged();
-                }
-            }
         }
     }
 
@@ -468,7 +432,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mUdfpsControllerFactory = udfpsControllerFactory;
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
-        mOrientationListener = new BiometricOrientationEventListener(context);
+        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
+            onOrientationChanged();
+            return Unit.INSTANCE;
+        });
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
@@ -787,6 +754,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
             }
+        }
+    }
+
+    private void onOrientationChanged() {
+        if (mCurrentDialog != null) {
+            mCurrentDialog.onOrientationChanged();
         }
     }
 
