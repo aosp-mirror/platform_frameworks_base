@@ -15,6 +15,7 @@
  */
 
 #include "RecordingCanvas.h"
+#include <hwui/Paint.h>
 
 #include <GrRecordingContext.h>
 
@@ -495,7 +496,7 @@ struct DrawVectorDrawable final : Op {
 
     sp<VectorDrawableRoot> mRoot;
     SkRect mBounds;
-    SkPaint paint;
+    Paint paint;
     BitmapPalette palette;
 };
 
@@ -833,7 +834,8 @@ constexpr color_transform_fn colorTransformForOp() {
                 // TODO: We should be const. Or not. Or just use a different map
                 // Unclear, but this is the quick fix
                 const T* op = reinterpret_cast<const T*>(opRaw);
-                transformPaint(transform, const_cast<SkPaint*>(&(op->paint)), op->palette);
+                const SkPaint* paint = &op->paint;
+                transformPaint(transform, const_cast<SkPaint*>(paint), op->palette);
             };
         }
     else if
@@ -842,7 +844,8 @@ constexpr color_transform_fn colorTransformForOp() {
                 // TODO: We should be const. Or not. Or just use a different map
                 // Unclear, but this is the quick fix
                 const T* op = reinterpret_cast<const T*>(opRaw);
-                transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
+                const SkPaint* paint = &op->paint;
+                transformPaint(transform, const_cast<SkPaint*>(paint));
             };
         }
     else {

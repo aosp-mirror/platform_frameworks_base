@@ -24,7 +24,7 @@ BlurDrawLooper::BlurDrawLooper(SkColor4f color, float blurSigma, SkPoint offset)
 
 BlurDrawLooper::~BlurDrawLooper() = default;
 
-SkPoint BlurDrawLooper::apply(SkPaint* paint) const {
+SkPoint BlurDrawLooper::apply(Paint* paint) const {
     paint->setColor(mColor);
     if (mBlurSigma > 0) {
         paint->setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, mBlurSigma, true));

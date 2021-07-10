@@ -192,23 +192,13 @@ void SkiaRecordingCanvas::FilterForImage(SkPaint& paint) {
     }
 }
 
-static SkFilterMode Paint_to_filter(const SkPaint& paint) {
-    return paint.getFilterQuality() != kNone_SkFilterQuality ? SkFilterMode::kLinear
-                                                             : SkFilterMode::kNearest;
-}
-
-static SkSamplingOptions Paint_to_sampling(const SkPaint& paint) {
-    // Android only has 1-bit for "filter", so we don't try to cons-up mipmaps or cubics
-    return SkSamplingOptions(Paint_to_filter(paint), SkMipmapMode::kNone);
-}
-
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     sk_sp<SkImage> image = bitmap.makeImage();
 
     applyLooper(
             paint,
-            [&](const SkPaint& p) {
-                mRecorder.drawImage(image, left, top, Paint_to_sampling(p), &p, bitmap.palette());
+            [&](const Paint& p) {
+                mRecorder.drawImage(image, left, top, p.sampling(), &p, bitmap.palette());
             },
             FilterForImage);
 
@@ -228,8 +218,8 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, con
 
     applyLooper(
             paint,
-            [&](const SkPaint& p) {
-                mRecorder.drawImage(image, 0, 0, Paint_to_sampling(p), &p, bitmap.palette());
+            [&](const Paint& p) {
+                mRecorder.drawImage(image, 0, 0, p.sampling(), &p, bitmap.palette());
             },
             FilterForImage);
 
@@ -248,8 +238,8 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
 
     applyLooper(
             paint,
-            [&](const SkPaint& p) {
-                mRecorder.drawImageRect(image, srcRect, dstRect, Paint_to_sampling(p), &p,
+            [&](const Paint& p) {
+                mRecorder.drawImageRect(image, srcRect, dstRect, p.sampling(), &p,
                                         SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
             },
             FilterForImage);

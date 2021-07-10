@@ -233,7 +233,7 @@ static void drawColorLong(JNIEnv* env, jobject, jlong canvasHandle, jlong colorS
         jlong colorLong, jint modeHandle) {
     SkColor4f color = GraphicsJNI::convertColorLong(colorLong);
     sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
-    SkPaint p;
+    Paint p;
     p.setColor4f(color, cs.get());
 
     SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
@@ -421,7 +421,7 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+        filteredPaint.setFilterBitmap(true);
 
         canvas->drawNinePatch(bitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
                 &filteredPaint);
@@ -443,7 +443,7 @@ static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHan
             if (paint) {
                 filteredPaint = *paint;
             }
-            filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+            filteredPaint.setFilterBitmap(true);
             canvas->drawBitmap(bitmap, left, top, &filteredPaint);
         } else {
             canvas->drawBitmap(bitmap, left, top, paint);
@@ -458,7 +458,7 @@ static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHan
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+        filteredPaint.setFilterBitmap(true);
 
         canvas->drawBitmap(bitmap, 0, 0, &filteredPaint);
         canvas->restore();
@@ -486,7 +486,7 @@ static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jlong bitma
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+        filteredPaint.setFilterBitmap(true);
         canvas->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
                            dstLeft, dstTop, dstRight, dstBottom, &filteredPaint);
     } else {
