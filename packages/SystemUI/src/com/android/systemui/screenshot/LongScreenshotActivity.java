@@ -63,7 +63,7 @@ import javax.inject.Inject;
  * and bottom before saving/sharing/editing.
  */
 public class LongScreenshotActivity extends Activity {
-    private static final String TAG = "LongScreenshotActivity";
+    private static final String TAG = LogConfig.logTag(LongScreenshotActivity.class);
 
     public static final String EXTRA_CAPTURE_RESPONSE = "capture-response";
     private static final String KEY_SAVED_IMAGE_PATH = "saved-image-path";
@@ -113,7 +113,6 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate(savedInstanceState = " + savedInstanceState + ")");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.long_screenshot);
 
@@ -161,8 +160,12 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     public void onStart() {
-        Log.d(TAG, "onStart");
         super.onStart();
+
+        if (mPreview.getDrawable() != null) {
+            // We already have an image, so no need to try to load again.
+            return;
+        }
 
         if (mCacheLoadFuture != null) {
             Log.d(TAG, "mCacheLoadFuture != null");
@@ -194,7 +197,7 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void onLongScreenshotReceived(LongScreenshot longScreenshot) {
-        Log.d(TAG, "onLongScreenshotReceived(longScreenshot=" + longScreenshot + ")");
+        Log.i(TAG, "Completed: " + longScreenshot);
         mLongScreenshot = longScreenshot;
         Drawable drawable = mLongScreenshot.getDrawable();
         mPreview.setImageDrawable(drawable);
@@ -249,7 +252,6 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void onCachedImageLoaded(ImageLoader.Result imageResult) {
-        Log.d(TAG, "onCachedImageLoaded(imageResult=" + imageResult + ")");
         BitmapDrawable drawable = new BitmapDrawable(getResources(), imageResult.bitmap);
         mPreview.setImageDrawable(drawable);
         mPreview.setAlpha(1f);
@@ -274,7 +276,6 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG, "onSaveInstanceState");
         super.onSaveInstanceState(outState);
         if (mSavedImagePath != null) {
             outState.putString(KEY_SAVED_IMAGE_PATH, mSavedImagePath.getPath());
@@ -282,14 +283,7 @@ public class LongScreenshotActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        Log.d(TAG, "onPause");
-        super.onPause();
-    }
-
-    @Override
     protected void onStop() {
-        Log.d(TAG, "onStop finishing=" + isFinishing());
         super.onStop();
         if (mTransitionStarted) {
             finish();
@@ -311,17 +305,10 @@ public class LongScreenshotActivity extends Activity {
             mCacheSaveFuture.cancel(true);
         }
         if (mSavedImagePath != null) {
-            Log.d(TAG, "Deleting " + mSavedImagePath);
             //noinspection ResultOfMethodCallIgnored
             mSavedImagePath.delete();
             mSavedImagePath = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        super.onDestroy();
     }
 
     private void setButtonsEnabled(boolean enabled) {
@@ -392,7 +379,6 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void startExport(PendingAction action) {
-        Log.d(TAG, "startExport(action = " + action + ")");
         Drawable drawable = mPreview.getDrawable();
         if (drawable == null) {
             Log.e(TAG, "No drawable, skipping export!");

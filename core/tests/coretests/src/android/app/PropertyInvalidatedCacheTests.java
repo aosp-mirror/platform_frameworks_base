@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.After;
 import org.junit.Test;
 
 /**
@@ -57,8 +58,70 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
+    // Clear the test mode after every test, in case this process is used for other tests.
+    @After
+    public void tearDown() throws Exception {
+        PropertyInvalidatedCache.setTestMode(false);
+    }
+
+    // This test is disabled pending an sepolicy change that allows any app to set the
+    // test property.
     @Test
-    public void testDisableCache1() {
+    public void testBasicCache() {
+
+        // A stand-in for the binder.  The test verifies that calls are passed through to
+        // this class properly.
+        ServerProxy tester = new ServerProxy();
+
+        // Create a cache that uses simple arithmetic to computer its values.
+        PropertyInvalidatedCache<Integer, Boolean> testCache =
+                new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
+                    @Override
+                    protected Boolean recompute(Integer x) {
+                        return tester.query(x);
+                    }
+                    @Override
+                    protected boolean bypass(Integer x) {
+                        return x % 13 == 0;
+                    }
+                };
+
+        PropertyInvalidatedCache.setTestMode(true);
+        PropertyInvalidatedCache.testPropertyName(CACHE_PROPERTY);
+
+        tester.verify(0);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(1);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(2);
+        testCache.invalidateCache();
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(3);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(4);
+
+        // Invalidate the cache, and verify that the next read on 3 goes to the server.
+        testCache.invalidateCache();
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(5);
+
+        // Test bypass.  The query for 13 always bypasses the cache.
+        assertEquals(tester.value(12), testCache.query(12));
+        assertEquals(tester.value(13), testCache.query(13));
+        assertEquals(tester.value(14), testCache.query(14));
+        tester.verify(8);
+        assertEquals(tester.value(12), testCache.query(12));
+        assertEquals(tester.value(13), testCache.query(13));
+        assertEquals(tester.value(14), testCache.query(14));
+        tester.verify(9);
+    }
+
+    @Test
+    public void testDisableCache() {
 
         // A stand-in for the binder.  The test verifies that calls are passed through to
         // this class properly.

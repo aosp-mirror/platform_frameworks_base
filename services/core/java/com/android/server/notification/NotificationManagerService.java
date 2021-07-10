@@ -6196,8 +6196,10 @@ public class NotificationManagerService extends SystemService {
         // Fix the notification as best we can.
         try {
             fixNotification(notification, pkg, tag, id, userId);
-
         } catch (Exception e) {
+            if (notification.isForegroundService()) {
+                throw new SecurityException("Invalid FGS notification", e);
+            }
             Slog.e(TAG, "Cannot fix notification", e);
             return;
         }
@@ -6208,7 +6210,7 @@ public class NotificationManagerService extends SystemService {
         // FGS-related situation up front, outside of any locks so it's safe to call into
         // the Activity Manager.
         final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
-                notification, id, pkg, userId);
+                notification, tag, id, pkg, userId);
         if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
             // Proceed if the notification is already showing/known, otherwise ignore
             // because the service lifecycle logic has retained responsibility for its

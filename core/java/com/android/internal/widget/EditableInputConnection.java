@@ -22,7 +22,6 @@ import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_END;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_START;
 
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Selection;
@@ -55,7 +54,6 @@ public class EditableInputConnection extends BaseInputConnection
     // A negative value means that this connection has been finished by the InputMethodManager.
     private int mBatchEditNesting;
 
-    @UnsupportedAppUsage
     public EditableInputConnection(TextView textview) {
         super(textview, true);
         mTextView = textview;

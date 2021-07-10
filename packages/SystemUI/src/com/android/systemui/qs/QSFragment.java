@@ -39,6 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -67,6 +68,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final Rect mQsBounds = new Rect();
     private final StatusBarStateController mStatusBarStateController;
+    private final FalsingManager mFalsingManager;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
     private boolean mStackScrollerOverscrolling;
@@ -133,7 +135,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
             QSDetailDisplayer qsDetailDisplayer, @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
-            QSFragmentComponent.Factory qsComponentFactory, FeatureFlags featureFlags) {
+            QSFragmentComponent.Factory qsComponentFactory, FeatureFlags featureFlags,
+            FalsingManager falsingManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
         mCommandQueue = commandQueue;
@@ -144,6 +147,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
         mFeatureFlags = featureFlags;
+        mFalsingManager = falsingManager;
         mStatusBarStateController = statusBarStateController;
     }
 
@@ -190,7 +194,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
 
-        mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter);
+        mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter, mFalsingManager);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
 
         mQSCustomizerController = qsFragmentComponent.getQSCustomizerController();
