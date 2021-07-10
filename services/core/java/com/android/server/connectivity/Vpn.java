@@ -24,8 +24,7 @@ import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 import static android.os.PowerWhitelistManager.REASON_VPN;
 import static android.os.UserHandle.PER_USER_RANGE;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1098,13 +1097,14 @@ public class Vpn {
             return Process.myUid();
         }
         PackageManager pm = mContext.getPackageManager();
-        return Binder.withCleanCallingIdentity(() -> {
-            try {
-                return pm.getPackageUidAsUser(app, userId);
-            } catch (NameNotFoundException e) {
-                return -1;
-            }
-        });
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return pm.getPackageUidAsUser(app, userId);
+        } catch (NameNotFoundException e) {
+            return -1;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private boolean doesPackageTargetAtLeastQ(String packageName) {
@@ -1280,15 +1280,16 @@ public class Vpn {
                 // We are user controlled, not driven by NetworkRequest.
             }
         };
-        Binder.withCleanCallingIdentity(() -> {
-            try {
-                mNetworkAgent.register();
-            } catch (final Exception e) {
-                // If register() throws, don't keep an unregistered agent.
-                mNetworkAgent = null;
-                throw e;
-            }
-        });
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mNetworkAgent.register();
+        } catch (final Exception e) {
+            // If register() throws, don't keep an unregistered agent.
+            mNetworkAgent = null;
+            throw e;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
         updateState(DetailedState.CONNECTED, "agentConnect");
@@ -2026,13 +2027,16 @@ public class Vpn {
     }
 
     private void enforceNotRestrictedUser() {
-        Binder.withCleanCallingIdentity(() -> {
+        final long token = Binder.clearCallingIdentity();
+        try {
             final UserInfo user = mUserManager.getUserInfo(mUserId);
 
             if (user.isRestricted()) {
                 throw new SecurityException("Restricted users cannot configure VPNs");
             }
-        });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -2825,8 +2829,10 @@ public class Vpn {
 
         LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd, VpnProfile profile) {
             super(TAG);
-            checkArgument(racoon != null || mtpd != null, "Arguments to racoon and mtpd "
-                    + "must not both be null");
+            if (racoon == null && mtpd == null) {
+                throw new IllegalArgumentException(
+                        "Arguments to racoon and mtpd must not both be null");
+            }
             mConfig = config;
             mDaemons = new String[] {"racoon", "mtpd"};
             // TODO: clear arguments from memory once launched
@@ -3151,8 +3157,8 @@ public class Vpn {
      */
     public synchronized boolean provisionVpnProfile(
             @NonNull String packageName, @NonNull VpnProfile profile) {
-        checkNotNull(packageName, "No package name provided");
-        checkNotNull(profile, "No profile provided");
+        requireNonNull(packageName, "No package name provided");
+        requireNonNull(profile, "No profile provided");
 
         verifyCallingUidAndPackage(packageName);
         enforceNotRestrictedUser();
@@ -3169,12 +3175,12 @@ public class Vpn {
         }
 
         // Permissions checked during startVpnProfile()
-        Binder.withCleanCallingIdentity(
-                () -> {
-                    getVpnProfileStore().put(
-                            getProfileNameForPackage(packageName),
-                            encodedProfile);
-                });
+        final long token = Binder.clearCallingIdentity();
+        try {
+            getVpnProfileStore().put(getProfileNameForPackage(packageName), encodedProfile);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         // TODO: if package has CONTROL_VPN, grant the ACTIVATE_PLATFORM_VPN appop.
         // This mirrors the prepareAndAuthorize that is used by VpnService.
@@ -3194,26 +3200,28 @@ public class Vpn {
      */
     public synchronized void deleteVpnProfile(
             @NonNull String packageName) {
-        checkNotNull(packageName, "No package name provided");
+        requireNonNull(packageName, "No package name provided");
 
         verifyCallingUidAndPackage(packageName);
         enforceNotRestrictedUser();
 
-        Binder.withCleanCallingIdentity(
-                () -> {
-                    // If this profile is providing the current VPN, turn it off, disabling
-                    // always-on as well if enabled.
-                    if (isCurrentIkev2VpnLocked(packageName)) {
-                        if (mAlwaysOn) {
-                            // Will transitively call prepareInternal(VpnConfig.LEGACY_VPN).
-                            setAlwaysOnPackage(null, false, null);
-                        } else {
-                            prepareInternal(VpnConfig.LEGACY_VPN);
-                        }
-                    }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // If this profile is providing the current VPN, turn it off, disabling
+            // always-on as well if enabled.
+            if (isCurrentIkev2VpnLocked(packageName)) {
+                if (mAlwaysOn) {
+                    // Will transitively call prepareInternal(VpnConfig.LEGACY_VPN).
+                    setAlwaysOnPackage(null, false, null);
+                } else {
+                    prepareInternal(VpnConfig.LEGACY_VPN);
+                }
+            }
 
-                    getVpnProfileStore().remove(getProfileNameForPackage(packageName));
-                });
+            getVpnProfileStore().remove(getProfileNameForPackage(packageName));
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -3247,7 +3255,7 @@ public class Vpn {
      */
     public synchronized void startVpnProfile(
             @NonNull String packageName) {
-        checkNotNull(packageName, "No package name provided");
+        requireNonNull(packageName, "No package name provided");
 
         enforceNotRestrictedUser();
 
@@ -3256,15 +3264,17 @@ public class Vpn {
             throw new SecurityException("User consent not granted for package " + packageName);
         }
 
-        Binder.withCleanCallingIdentity(
-                () -> {
-                    final VpnProfile profile = getVpnProfilePrivileged(packageName);
-                    if (profile == null) {
-                        throw new IllegalArgumentException("No profile found for " + packageName);
-                    }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final VpnProfile profile = getVpnProfilePrivileged(packageName);
+            if (profile == null) {
+                throw new IllegalArgumentException("No profile found for " + packageName);
+            }
 
-                    startVpnProfilePrivileged(profile, packageName);
-                });
+            startVpnProfilePrivileged(profile, packageName);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private synchronized void startVpnProfilePrivileged(
@@ -3325,7 +3335,7 @@ public class Vpn {
      * @param packageName the package name of the app provisioning this profile
      */
     public synchronized void stopVpnProfile(@NonNull String packageName) {
-        checkNotNull(packageName, "No package name provided");
+        requireNonNull(packageName, "No package name provided");
 
         enforceNotRestrictedUser();
 

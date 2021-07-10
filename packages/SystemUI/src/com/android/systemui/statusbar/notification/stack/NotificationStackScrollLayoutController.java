@@ -1204,6 +1204,16 @@ public class NotificationStackScrollLayoutController {
         mNotificationListContainer.setMaxDisplayedNotifications(maxNotifications);
     }
 
+    /**
+     * This is used for debugging only; it will be used to draw the otherwise invisible line which
+     * NotificationPanelViewController treats as the bottom when calculating how many notifications
+     * appear on the keyguard.
+     * Setting a negative number will disable rendering this line.
+     */
+    public void setKeyguardBottomPadding(float keyguardBottomPadding) {
+        mView.setKeyguardBottomPadding(keyguardBottomPadding);
+    }
+
     public RemoteInputController.Delegate createDelegate() {
         return new RemoteInputController.Delegate() {
             public void setRemoteInputActive(NotificationEntry entry,

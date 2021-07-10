@@ -26,8 +26,6 @@ import android.util.Slog;
 import android.view.Choreographer;
 import android.view.Display;
 
-import com.android.internal.display.BrightnessSynchronizer;
-
 import java.io.PrintWriter;
 
 /**
@@ -166,10 +164,11 @@ final class DisplayPowerState {
     /**
      * Sets the display's SDR brightness.
      *
-     * @param brightness The brightness, ranges from 0.0f (minimum / off) to 1.0f (brightest).
+     * @param brightness The brightness, ranges from 0.0f (minimum) to 1.0f (brightest), or is -1f
+     *                   (off).
      */
     public void setSdrScreenBrightness(float brightness) {
-        if (!BrightnessSynchronizer.floatEquals(mSdrScreenBrightness, brightness)) {
+        if (mSdrScreenBrightness != brightness) {
             if (DEBUG) {
                 Slog.d(TAG, "setSdrScreenBrightness: brightness=" + brightness);
             }
@@ -192,10 +191,11 @@ final class DisplayPowerState {
     /**
      * Sets the display brightness.
      *
-     * @param brightness The brightness, ranges from 0.0f (minimum / off) to 1.0f (brightest).
+     * @param brightness The brightness, ranges from 0.0f (minimum) to 1.0f (brightest), or is -1f
+     *                   (off).
      */
     public void setScreenBrightness(float brightness) {
-        if (!BrightnessSynchronizer.floatEquals(mScreenBrightness, brightness)) {
+        if (mScreenBrightness != brightness) {
             if (DEBUG) {
                 Slog.d(TAG, "setScreenBrightness: brightness=" + brightness);
             }
@@ -432,10 +432,8 @@ final class DisplayPowerState {
         public boolean setState(int state, float brightnessState, float sdrBrightnessState) {
             synchronized (mLock) {
                 boolean stateChanged = state != mPendingState;
-                boolean backlightChanged =
-                        !BrightnessSynchronizer.floatEquals(brightnessState, mPendingBacklight)
-                        || !BrightnessSynchronizer.floatEquals(
-                                sdrBrightnessState, mPendingSdrBacklight);
+                boolean backlightChanged = brightnessState != mPendingBacklight
+                        || sdrBrightnessState != mPendingSdrBacklight;
                 if (stateChanged || backlightChanged) {
                     if (DEBUG) {
                         Slog.d(TAG, "Requesting new screen state: state="
@@ -486,10 +484,8 @@ final class DisplayPowerState {
                     stateChanged = (state != mActualState);
                     brightnessState = mPendingBacklight;
                     sdrBrightnessState = mPendingSdrBacklight;
-                    backlightChanged =
-                            !BrightnessSynchronizer.floatEquals(brightnessState, mActualBacklight)
-                            || !BrightnessSynchronizer.floatEquals(
-                                    sdrBrightnessState, mActualSdrBacklight);
+                    backlightChanged = brightnessState != mActualBacklight
+                            || sdrBrightnessState != mActualSdrBacklight;
                     if (!stateChanged) {
                         // State changed applied, notify outer class.
                         postScreenUpdateThreadSafe();
