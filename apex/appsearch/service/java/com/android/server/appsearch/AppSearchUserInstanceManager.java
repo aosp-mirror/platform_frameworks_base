@@ -32,6 +32,8 @@ import com.android.server.appsearch.stats.PlatformLogger;
 import com.android.server.appsearch.visibilitystore.VisibilityStoreImpl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -154,6 +156,18 @@ public final class AppSearchUserInstanceManager {
                         "AppSearchUserInstance has never been created for: " + userHandle);
             }
             return instance;
+        }
+    }
+
+    /**
+     * Returns the list of all {@link UserHandle}s.
+     *
+     * <p>It can return an empty list if there is no {@link AppSearchUserInstance} created yet.
+     */
+    @NonNull
+    public List<UserHandle> getAllUserHandles() {
+        synchronized (mInstancesLocked) {
+            return new ArrayList<>(mInstancesLocked.keySet());
         }
     }
 

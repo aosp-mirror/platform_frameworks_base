@@ -45,7 +45,7 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Logger Implementation to log to statsd.
+ * Logger Implementation for pushed atoms.
  *
  * <p>This class is thread-safe.
  *

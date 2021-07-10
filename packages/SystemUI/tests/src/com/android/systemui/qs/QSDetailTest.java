@@ -41,6 +41,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
 import org.junit.After;
@@ -76,7 +77,8 @@ public class QSDetailTest extends SysuiTestCase {
 
         mQsPanelController = mock(QSPanelController.class);
         mQuickHeader = mock(QuickStatusBarHeader.class);
-        mQsDetail.setQsPanel(mQsPanelController, mQuickHeader, mock(QSFooter.class));
+        mQsDetail.setQsPanel(mQsPanelController, mQuickHeader, mock(QSFooter.class),
+                mock(FalsingManager.class));
         mQsDetail.mClipper = mock(QSDetailClipper.class);
 
         mMockDetailAdapter = mock(DetailAdapter.class);

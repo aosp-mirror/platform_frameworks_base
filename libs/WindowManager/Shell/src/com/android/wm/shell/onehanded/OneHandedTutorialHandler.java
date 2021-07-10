@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.onehanded;
 
-import static android.os.UserHandle.myUserId;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
@@ -24,7 +24,6 @@ import static com.android.wm.shell.onehanded.OneHandedState.STATE_EXITING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
 
 import android.annotation.Nullable;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -41,7 +40,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 
@@ -56,57 +54,44 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     private static final String TAG = "OneHandedTutorialHandler";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
             "persist.debug.one_handed_offset_percentage";
-    private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
 
     private final float mTutorialHeightRatio;
     private final WindowManager mWindowManager;
-    private final OneHandedSettingsUtil mSettingsUtil;
-    private final ShellExecutor mShellExecutor;
 
-    private boolean mCanShow;
+    private boolean mIsShowing;
     private @OneHandedState.State int mCurrentState;
-    private int mShownCounts;
     private int mTutorialAreaHeight;
 
     private Context mContext;
-    private ContentResolver mContentResolver;
     private Rect mDisplayBounds;
     private @Nullable View mTutorialView;
     private @Nullable ViewGroup mTargetViewContainer;
 
-    private final OneHandedAnimationCallback mAnimationCallback = new OneHandedAnimationCallback() {
-        @Override
-        public void onAnimationUpdate(float xPos, float yPos) {
-            if (!canShowTutorial()) {
-                return;
-            }
-            mTargetViewContainer.setTransitionGroup(true);
-            mTargetViewContainer.setTranslationY(yPos - mTargetViewContainer.getHeight());
-        }
-    };
+    private final OneHandedAnimationCallback mAnimationCallback;
 
-    public OneHandedTutorialHandler(Context context, DisplayLayout displayLayout,
-            WindowManager windowManager, OneHandedSettingsUtil settingsUtil,
-            ShellExecutor mainExecutor) {
+    public OneHandedTutorialHandler(Context context, WindowManager windowManager) {
         mContext = context;
-        mContentResolver = context.getContentResolver();
         mWindowManager = windowManager;
-        mSettingsUtil = settingsUtil;
-        mShellExecutor = mainExecutor;
         final float offsetPercentageConfig = context.getResources().getFraction(
                 R.fraction.config_one_handed_offset, 1, 1);
         final int sysPropPercentageConfig = SystemProperties.getInt(
                 ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
         mTutorialHeightRatio = sysPropPercentageConfig / 100.0f;
-        mShownCounts = mSettingsUtil.getTutorialShownCounts(mContentResolver, myUserId());
+        mAnimationCallback = new OneHandedAnimationCallback() {
+            @Override
+            public void onAnimationUpdate(float xPos, float yPos) {
+                if (!isShowing()) {
+                    return;
+                }
+                mTargetViewContainer.setTransitionGroup(true);
+                mTargetViewContainer.setTranslationY(yPos - mTargetViewContainer.getHeight());
+            }
+        };
     }
 
     @Override
     public void onStateChanged(int newState) {
         mCurrentState = newState;
-        if (!canShowTutorial()) {
-            return;
-        }
         switch (newState) {
             case STATE_ENTERING:
                 createViewAndAttachToWindow(mContext);
@@ -139,7 +124,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
 
     @VisibleForTesting
     void createViewAndAttachToWindow(Context context) {
-        if (!canShowTutorial()) {
+        if (isShowing()) {
             return;
         }
         mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial, null);
@@ -150,15 +135,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         attachTargetToWindow();
     }
 
-    @VisibleForTesting
-    boolean setTutorialShownCountIncrement() {
-        if (!canShowTutorial()) {
-            return false;
-        }
-        mShownCounts += 1;
-        return mSettingsUtil.setTutorialShownCounts(mContentResolver, mShownCounts, myUserId());
-    }
-
     /**
      * Adds the tutorial target view to the WindowManager and update its layout.
      */
@@ -166,6 +142,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         if (!mTargetViewContainer.isAttachedToWindow()) {
             try {
                 mWindowManager.addView(mTargetViewContainer, getTutorialTargetLayoutParams());
+                mIsShowing = true;
             } catch (IllegalStateException e) {
                 // This shouldn't happen, but if the target is already added, just update its
                 // layout params.
@@ -179,14 +156,12 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     void removeTutorialFromWindowManager(boolean increment) {
         if (mTargetViewContainer != null && mTargetViewContainer.isAttachedToWindow()) {
             mWindowManager.removeViewImmediate(mTargetViewContainer);
-            if (increment) {
-                setTutorialShownCountIncrement();
-            }
+            mIsShowing = false;
         }
     }
 
     @Nullable OneHandedAnimationCallback getAnimationCallback() {
-        return canShowTutorial() ? mAnimationCallback : null /* Disabled */;
+        return isShowing() ? mAnimationCallback : null /* Disabled */;
     }
 
     /**
@@ -200,6 +175,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.LEFT;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setFitInsetsTypes(0 /* types */);
         lp.setTitle("one-handed-tutorial-overlay");
@@ -207,17 +183,14 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     }
 
     @VisibleForTesting
-    boolean canShowTutorial() {
-        return mCanShow = mShownCounts < MAX_TUTORIAL_SHOW_COUNT;
+    boolean isShowing() {
+        return mIsShowing;
     }
 
     /**
      * onConfigurationChanged events for updating tutorial text.
      */
     public void onConfigurationChanged() {
-        if (!canShowTutorial()) {
-            return;
-        }
         removeTutorialFromWindowManager(false /* increment */);
         if (mCurrentState == STATE_ENTERING || mCurrentState == STATE_ACTIVE) {
             createViewAndAttachToWindow(mContext);
@@ -227,14 +200,12 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG);
-        pw.print(innerPrefix + "mCanShow=");
-        pw.println(mCanShow);
+        pw.print(innerPrefix + "mIsShowing=");
+        pw.println(mIsShowing);
         pw.print(innerPrefix + "mCurrentState=");
         pw.println(mCurrentState);
         pw.print(innerPrefix + "mDisplayBounds=");
         pw.println(mDisplayBounds);
-        pw.print(innerPrefix + "mShownCounts=");
-        pw.println(mShownCounts);
         pw.print(innerPrefix + "mTutorialAreaHeight=");
         pw.println(mTutorialAreaHeight);
     }
