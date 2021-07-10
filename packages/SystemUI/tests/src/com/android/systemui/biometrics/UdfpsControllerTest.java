@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -233,6 +235,22 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
         verify(mWindowManager).removeView(eq(mUdfpsView));
+    }
+
+    @Test
+    public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
+        assertFalse(mUdfpsController.mOrientationListener.getEnabled());
+
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        assertTrue(mUdfpsController.mOrientationListener.getEnabled());
+
+        mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mFgExecutor.runAllReady();
+
+        assertFalse(mUdfpsController.mOrientationListener.getEnabled());
     }
 
     @Test

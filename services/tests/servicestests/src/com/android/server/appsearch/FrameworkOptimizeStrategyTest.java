@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.server.appsearch;
 
-package com.android.server.appsearch.external.localstorage;
-
-import static com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy.BYTES_OPTIMIZE_THRESHOLD;
-import static com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy.DOC_COUNT_OPTIMIZE_THRESHOLD;
-import static com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy.TIME_OPTIMIZE_THRESHOLD_MILLIS;
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -28,26 +25,17 @@ import com.android.server.appsearch.icing.proto.StatusProto;
 import org.junit.Test;
 
 public class FrameworkOptimizeStrategyTest {
-    FrameworkOptimizeStrategy mFrameworkOptimizeStrategy = new FrameworkOptimizeStrategy();
-
-    @Test
-    public void testShouldOptimize_docCountThreshold() {
-        GetOptimizeInfoResultProto optimizeInfo =
-                GetOptimizeInfoResultProto.newBuilder()
-                        .setTimeSinceLastOptimizeMs(0)
-                        .setEstimatedOptimizableBytes(BYTES_OPTIMIZE_THRESHOLD)
-                        .setOptimizableDocs(0)
-                        .setStatus(StatusProto.newBuilder().setCode(StatusProto.Code.OK).build())
-                        .build();
-        assertThat(mFrameworkOptimizeStrategy.shouldOptimize(optimizeInfo)).isTrue();
-    }
+    AppSearchConfig mAppSearchConfig = AppSearchConfig.create(DIRECT_EXECUTOR);
+    FrameworkOptimizeStrategy mFrameworkOptimizeStrategy =
+            new FrameworkOptimizeStrategy(mAppSearchConfig);
 
     @Test
     public void testShouldOptimize_byteThreshold() {
         GetOptimizeInfoResultProto optimizeInfo =
                 GetOptimizeInfoResultProto.newBuilder()
-                        .setTimeSinceLastOptimizeMs(TIME_OPTIMIZE_THRESHOLD_MILLIS)
-                        .setEstimatedOptimizableBytes(0)
+                        .setTimeSinceLastOptimizeMs(0)
+                        .setEstimatedOptimizableBytes(
+                                mAppSearchConfig.getCachedBytesOptimizeThreshold())
                         .setOptimizableDocs(0)
                         .setStatus(StatusProto.newBuilder().setCode(StatusProto.Code.OK).build())
                         .build();
@@ -58,9 +46,23 @@ public class FrameworkOptimizeStrategyTest {
     public void testShouldNotOptimize_timeThreshold() {
         GetOptimizeInfoResultProto optimizeInfo =
                 GetOptimizeInfoResultProto.newBuilder()
+                        .setTimeSinceLastOptimizeMs(
+                                mAppSearchConfig.getCachedTimeOptimizeThresholdMs())
+                        .setEstimatedOptimizableBytes(0)
+                        .setOptimizableDocs(0)
+                        .setStatus(StatusProto.newBuilder().setCode(StatusProto.Code.OK).build())
+                        .build();
+        assertThat(mFrameworkOptimizeStrategy.shouldOptimize(optimizeInfo)).isTrue();
+    }
+
+    @Test
+    public void testShouldOptimize_docCountThreshold() {
+        GetOptimizeInfoResultProto optimizeInfo =
+                GetOptimizeInfoResultProto.newBuilder()
                         .setTimeSinceLastOptimizeMs(0)
                         .setEstimatedOptimizableBytes(0)
-                        .setOptimizableDocs(DOC_COUNT_OPTIMIZE_THRESHOLD)
+                        .setOptimizableDocs(
+                                mAppSearchConfig.getCachedDocCountOptimizeThreshold())
                         .setStatus(StatusProto.newBuilder().setCode(StatusProto.Code.OK).build())
                         .build();
         assertThat(mFrameworkOptimizeStrategy.shouldOptimize(optimizeInfo)).isTrue();

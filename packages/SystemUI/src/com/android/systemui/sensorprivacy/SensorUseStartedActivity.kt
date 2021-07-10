@@ -38,6 +38,10 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL
+import com.android.internal.util.FrameworkStatsLog.write
 
 /**
  * Dialog to be shown on top of apps that are attempting to use a sensor (e.g. microphone) which is
@@ -185,16 +189,25 @@ class SensorUseStartedActivity @Inject constructor(
                     keyguardDismissUtil.executeWhenUnlocked({
                         bgHandler.postDelayed({
                             disableSensorPrivacy()
+                            write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                                    PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE,
+                                    sensorUsePackageName)
                         }, UNLOCK_DELAY_MILLIS)
 
                         false
                     }, false, true)
                 } else {
                     disableSensorPrivacy()
+                    write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                            PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE,
+                            sensorUsePackageName)
                 }
             }
             BUTTON_NEGATIVE -> {
                 unsuppressImmediately = false
+                write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                        PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL,
+                        sensorUsePackageName)
             }
         }
 

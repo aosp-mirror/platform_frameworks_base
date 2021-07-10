@@ -162,6 +162,11 @@ public class LongScreenshotActivity extends Activity {
     public void onStart() {
         super.onStart();
 
+        if (mPreview.getDrawable() != null) {
+            // We already have an image, so no need to try to load again.
+            return;
+        }
+
         if (mCacheLoadFuture != null) {
             Log.d(TAG, "mCacheLoadFuture != null");
             final ListenableFuture<ImageLoader.Result> future = mCacheLoadFuture;

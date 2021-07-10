@@ -146,7 +146,7 @@ public class UserDetailView extends PseudoGridView {
 
         @Override
         public void onClick(View view) {
-            if (mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                 return;
             }
 

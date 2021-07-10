@@ -153,9 +153,25 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         });
     }
 
+    @Nullable
+    private CharSequence getServiceLabelSafe() {
+        try {
+            return mController.getWalletClient().getServiceLabel();
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Failed to get the service label safely, recreating wallet client", e);
+            mController.reCreateWalletClient();
+            try {
+                return mController.getWalletClient().getServiceLabel();
+            } catch (RuntimeException e2) {
+                Log.e(TAG, "The QAW service label is broken.", e2);
+                return null;
+            }
+        }
+    }
+
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        CharSequence label = mController.getWalletClient().getServiceLabel();
+        CharSequence label = getServiceLabelSafe();
         state.label = label == null ? mLabel : label;
         state.contentDescription = state.label;
         Drawable tileIcon = mController.getWalletClient().getTileIcon();
