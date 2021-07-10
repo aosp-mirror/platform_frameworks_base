@@ -74,6 +74,9 @@ public class HighBrightnessModeControllerTest {
     private static final float DEFAULT_MIN = 0.01f;
     private static final float DEFAULT_MAX = 0.80f;
 
+    private static final int DISPLAY_WIDTH = 900;
+    private static final int DISPLAY_HEIGHT = 1600;
+
     private static final float EPSILON = 0.000001f;
 
     private OffsettableClock mClock;
@@ -90,6 +93,8 @@ public class HighBrightnessModeControllerTest {
 
     @Captor ArgumentCaptor<IThermalEventListener> mThermalEventListenerCaptor;
 
+    @Mock private BrightnessSetting mBrightnessSetting;
+
     private static final HighBrightnessModeData DEFAULT_HBM_DATA =
             new HighBrightnessModeData(MINIMUM_LUX, TRANSITION_POINT, TIME_WINDOW_MILLIS,
                     TIME_ALLOWED_IN_WINDOW_MILLIS, TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS,
@@ -98,6 +103,8 @@ public class HighBrightnessModeControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mClock = new OffsettableClock.Stopped();
+        mTestLooper = new TestLooper(mClock::now);
         mDisplayToken = null;
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
@@ -114,8 +121,8 @@ public class HighBrightnessModeControllerTest {
     public void testNoHbmData() {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
-                mInjectorMock, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null,
-                () -> {}, mContextSpy);
+                mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN,
+                DEFAULT_MAX, null, () -> {}, mContextSpy, mBrightnessSetting);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
     }
 
@@ -123,8 +130,8 @@ public class HighBrightnessModeControllerTest {
     public void testNoHbmData_Enabled() {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
-                mInjectorMock, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null,
-                () -> {}, mContextSpy);
+                mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN,
+                DEFAULT_MAX, null, () -> {}, mContextSpy, mBrightnessSetting);
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
@@ -180,7 +187,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
 
         // Verify we are in HBM
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -212,7 +219,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
 
         // Verify we are in HBM
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -237,18 +244,18 @@ public class HighBrightnessModeControllerTest {
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
 
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
         advanceTime(TIME_ALLOWED_IN_WINDOW_MILLIS / 2);
 
         // Verify we are in HBM
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
 
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT - 0.01f);
+        hbmc.onBrightnessChanged(TRANSITION_POINT - 0.01f);
         advanceTime(1);
 
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
 
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
         advanceTime(TIME_ALLOWED_IN_WINDOW_MILLIS / 2);
 
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -267,13 +274,13 @@ public class HighBrightnessModeControllerTest {
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
 
         // Go into HBM for half the allowed window
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
         advanceTime(TIME_ALLOWED_IN_WINDOW_MILLIS / 2);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
 
         // Move lux below threshold (ending first event);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1);
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT);
+        hbmc.onBrightnessChanged(TRANSITION_POINT);
         assertState(hbmc, DEFAULT_MIN, TRANSITION_POINT, HIGH_BRIGHTNESS_MODE_OFF);
 
         // Move up some amount of time so that there's still time in the window even after a
@@ -283,7 +290,7 @@ public class HighBrightnessModeControllerTest {
 
         // Go into HBM for just under the second half of allowed window
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onAutoBrightnessChanged(TRANSITION_POINT + 1);
+        hbmc.onBrightnessChanged(TRANSITION_POINT + 1);
         advanceTime((TIME_ALLOWED_IN_WINDOW_MILLIS / 2) - 1);
 
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -355,8 +362,9 @@ public class HighBrightnessModeControllerTest {
     // Creates instance with standard initialization values.
     private HighBrightnessModeController createDefaultHbm(OffsettableClock clock) {
         initHandler(clock);
-        return new HighBrightnessModeController(mInjectorMock, mHandler, mDisplayToken, DEFAULT_MIN,
-                DEFAULT_MAX, DEFAULT_HBM_DATA, () -> {}, mContextSpy);
+        return new HighBrightnessModeController(mInjectorMock, mHandler, DISPLAY_WIDTH,
+                DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, DEFAULT_HBM_DATA, () -> {},
+                mContextSpy, mBrightnessSetting);
     }
 
     private void initHandler(OffsettableClock clock) {

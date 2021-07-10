@@ -778,7 +778,6 @@ class AutomaticBrightnessController {
                     mScreenBrightnessThresholds.getBrighteningThreshold(newScreenAutoBrightness));
             mScreenDarkeningThreshold = clampScreenBrightness(
                     mScreenBrightnessThresholds.getDarkeningThreshold(newScreenAutoBrightness));
-            mHbmController.onAutoBrightnessChanged(mScreenAutoBrightness);
 
             if (sendUpdate) {
                 mCallbacks.updateBrightness();

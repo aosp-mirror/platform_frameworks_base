@@ -822,6 +822,10 @@ public class UdfpsController implements DozeReceiver {
         mIsAodInterruptActive = false;
     }
 
+    public boolean isFingerDown() {
+        return mOnFingerDown;
+    }
+
     private void onFingerDown(int x, int y, float minor, float major) {
         mExecution.assertIsMainThread();
         if (mView == null) {

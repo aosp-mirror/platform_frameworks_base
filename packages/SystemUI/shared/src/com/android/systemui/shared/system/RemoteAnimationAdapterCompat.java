@@ -69,7 +69,8 @@ public class RemoteAnimationAdapterCompat {
         return mRemoteTransition;
     }
 
-    private static IRemoteAnimationRunner.Stub wrapRemoteAnimationRunner(
+    /** Wraps a RemoteAnimationRunnerCompat in an IRemoteAnimationRunner. */
+    public static IRemoteAnimationRunner.Stub wrapRemoteAnimationRunner(
             final RemoteAnimationRunnerCompat remoteAnimationAdapter) {
         return new IRemoteAnimationRunner.Stub() {
             @Override
