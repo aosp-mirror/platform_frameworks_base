@@ -73,6 +73,7 @@ import com.android.internal.util.Preconditions;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -103,7 +104,7 @@ public class AudioManager {
     private static final AudioVolumeGroupChangeHandler sAudioAudioVolumeGroupChangedHandler =
             new AudioVolumeGroupChangeHandler();
 
-    private static Context sContext;
+    private static WeakReference<Context> sContext;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -812,7 +813,7 @@ public class AudioManager {
         } else {
             mOriginalContext = context;
         }
-        sContext = context;
+        sContext = new WeakReference<>(context);
     }
 
     @UnsupportedAppUsage
@@ -7273,23 +7274,27 @@ public class AudioManager {
      */
     public static boolean hasHapticChannels(@Nullable Context context, @NonNull Uri uri) {
         Objects.requireNonNull(uri);
+
         if (context != null) {
             return hasHapticChannelsImpl(context, uri);
-        } else if (sContext != null) {
+        }
+
+        Context cachedContext = sContext.get();
+        if (cachedContext != null) {
             if (DEBUG) {
                 Log.d(TAG, "Try to use static context to query if having haptic channels");
             }
-            return hasHapticChannelsImpl(sContext, uri);
-        } else {
-            // Try with audio service context, this may fail to get correct result.
-            if (DEBUG) {
-                Log.d(TAG, "Try to use audio service context to query if having haptic channels");
-            }
-            try {
-                return getService().hasHapticChannels(uri);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            return hasHapticChannelsImpl(cachedContext, uri);
+        }
+
+        // Try with audio service context, this may fail to get correct result.
+        if (DEBUG) {
+            Log.d(TAG, "Try to use audio service context to query if having haptic channels");
+        }
+        try {
+            return getService().hasHapticChannels(uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
