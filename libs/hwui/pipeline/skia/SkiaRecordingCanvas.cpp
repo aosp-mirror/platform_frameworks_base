@@ -187,7 +187,7 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 void SkiaRecordingCanvas::FilterForImage(SkPaint& paint) {
     // kClear blend mode is drawn as kDstOut on HW for compatibility with Android O and
     // older.
-    if (sApiLevel <= 27 && paint.getBlendMode() == SkBlendMode::kClear) {
+    if (sApiLevel <= 27 && paint.asBlendMode() == SkBlendMode::kClear) {
         paint.setBlendMode(SkBlendMode::kDstOut);
     }
 }

@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -150,7 +149,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
@@ -166,7 +165,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 

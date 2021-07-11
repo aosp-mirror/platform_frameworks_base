@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -88,13 +87,13 @@ class RotateTwoLaunchedAppInSplitScreenMode(
         testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
             secondaryApp.component)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() =
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
             testSpec.config.endRotation)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
@@ -118,12 +117,12 @@ class RotateTwoLaunchedAppInSplitScreenMode(
     @Test
     fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
             super.visibleWindowsShownMoreThanOneConsecutiveEntry()

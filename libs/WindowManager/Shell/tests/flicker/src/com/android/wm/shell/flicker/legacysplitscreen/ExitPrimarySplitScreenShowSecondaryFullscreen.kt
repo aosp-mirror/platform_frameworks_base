@@ -76,7 +76,7 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
             splitScreenApp.component, secondaryApp.component,
             WindowManagerStateHelper.SNAPSHOT_COMPONENT)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun dockedStackDividerNotExistsAtEnd() = testSpec.dockedStackDividerNotExistsAtEnd()
 
@@ -108,7 +108,7 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
     @Test
     fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
