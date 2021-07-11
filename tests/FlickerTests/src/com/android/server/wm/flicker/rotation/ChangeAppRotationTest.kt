@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -84,7 +85,7 @@ class ChangeAppRotationTest(
         testSpec.statusBarWindowIsVisible()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun statusBarLayerIsVisible() {
         testSpec.statusBarLayerIsVisible()
@@ -103,7 +104,7 @@ class ChangeAppRotationTest(
         super.navBarWindowIsVisible()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarLayerIsVisible() {
         super.navBarLayerIsVisible()
@@ -115,7 +116,7 @@ class ChangeAppRotationTest(
         super.navBarLayerRotatesAndScales()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()

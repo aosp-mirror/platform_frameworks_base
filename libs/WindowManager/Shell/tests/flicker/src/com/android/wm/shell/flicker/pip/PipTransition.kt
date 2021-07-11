@@ -20,7 +20,6 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -168,11 +167,11 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     @Test
     open fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 

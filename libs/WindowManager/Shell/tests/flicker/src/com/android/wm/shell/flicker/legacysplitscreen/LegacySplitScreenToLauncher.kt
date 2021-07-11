@@ -120,11 +120,11 @@ class LegacySplitScreenToLauncher(
     @Test
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun dockedStackDividerBecomesInvisible() = testSpec.dockedStackDividerBecomesInvisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun layerBecomesInvisible() {
         testSpec.assertLayers {
@@ -142,12 +142,12 @@ class LegacySplitScreenToLauncher(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
             super.visibleWindowsShownMoreThanOneConsecutiveEntry()
