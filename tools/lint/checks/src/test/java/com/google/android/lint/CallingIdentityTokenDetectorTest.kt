@@ -26,13 +26,12 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
     override fun getDetector(): Detector = CallingIdentityTokenDetector()
 
     override fun getIssues(): List<Issue> = listOf(
-            CallingIdentityTokenIssueRegistry.ISSUE_UNUSED_TOKEN,
-            CallingIdentityTokenIssueRegistry.ISSUE_NON_FINAL_TOKEN,
-            CallingIdentityTokenIssueRegistry.ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
-            CallingIdentityTokenIssueRegistry.ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
-            CallingIdentityTokenIssueRegistry
-                    .ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
-            CallingIdentityTokenIssueRegistry.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY
+            CallingIdentityTokenDetector.ISSUE_UNUSED_TOKEN,
+            CallingIdentityTokenDetector.ISSUE_NON_FINAL_TOKEN,
+            CallingIdentityTokenDetector.ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
+            CallingIdentityTokenDetector.ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
+            CallingIdentityTokenDetector.ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
+            CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY
     )
 
     /** No issue scenario */
