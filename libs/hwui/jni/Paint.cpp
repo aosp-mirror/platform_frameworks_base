@@ -663,8 +663,7 @@ namespace PaintGlue {
     }
 
     static void setFilterBitmap(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean filterBitmap) {
-        reinterpret_cast<Paint*>(paintHandle)->setFilterQuality(
-                filterBitmap ? kLow_SkFilterQuality : kNone_SkFilterQuality);
+        reinterpret_cast<Paint*>(paintHandle)->setFilterBitmap(filterBitmap);
     }
 
     static void setDither(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean dither) {

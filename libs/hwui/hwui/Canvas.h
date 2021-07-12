@@ -162,7 +162,7 @@ public:
     virtual int save(SaveFlags::Flags flags) = 0;
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
-    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) = 0;
+    virtual void restoreUnclippedLayer(int saveCount, const Paint& paint) = 0;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint) = 0;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) = 0;
@@ -197,7 +197,7 @@ public:
     // Canvas draw operations
     // ----------------------------------------------------------------------------
     virtual void drawColor(int color, SkBlendMode mode) = 0;
-    virtual void drawPaint(const SkPaint& paint) = 0;
+    virtual void drawPaint(const Paint& paint) = 0;
 
     // Geometry
     virtual void drawPoint(float x, float y, const Paint& paint) = 0;

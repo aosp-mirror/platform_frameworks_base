@@ -32,13 +32,6 @@ namespace uirenderer {
  */
 class PaintUtils {
 public:
-    static inline GLenum getFilter(const SkPaint* paint) {
-        if (!paint || paint->getFilterQuality() != kNone_SkFilterQuality) {
-            return GL_LINEAR;
-        }
-        return GL_NEAREST;
-    }
-
     static bool isOpaquePaint(const SkPaint* paint) {
         if (!paint) return true;  // default (paintless) behavior is SrcOver, black
 
