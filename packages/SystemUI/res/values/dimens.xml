@@ -681,6 +681,9 @@
     <!-- The height of the divider between the individual notifications. -->
     <dimen name="notification_divider_height">2dp</dimen>
 
+    <!-- The min distance the notifications should be from the lock icon on the lock screen. -->
+    <dimen name="min_lock_icon_padding">48dp</dimen>
+
     <!-- The corner radius of the shadow behind the notification. -->
     <dimen name="notification_shadow_radius">0dp</dimen>
 
