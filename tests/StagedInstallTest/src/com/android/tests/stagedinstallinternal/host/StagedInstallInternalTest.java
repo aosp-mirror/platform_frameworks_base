@@ -85,7 +85,9 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
         deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
-                "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex");
+                "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex",
+                "/system/apex/test.rebootless_apex_v1.apex",
+                "/data/apex/active/test.apex.rebootless*.apex");
     }
 
     @Before
@@ -124,9 +126,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
     }
 
-    private void pushTestApex() throws Exception {
+    private void pushTestApex(String fileName) throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
-        final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
         final File apex = buildHelper.getTestFile(fileName);
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
@@ -142,7 +143,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Test
     @LargeTest
     public void testDuplicateApkInApexShouldFail() throws Exception {
-        pushTestApex();
+        pushTestApex(APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
         runPhase("testDuplicateApkInApexShouldFail_Commit");
         getDevice().reboot();
         runPhase("testDuplicateApkInApexShouldFail_Verify");
@@ -342,6 +343,12 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         getDevice().reboot();
 
         runPhase("testApexActivationFailureIsCapturedInSession_Verify");
+    }
+
+    @Test
+    public void testRebootlessUpdates() throws Exception {
+        pushTestApex("test.rebootless_apex_v1.apex");
+        runPhase("testRebootlessUpdates");
     }
 
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {
