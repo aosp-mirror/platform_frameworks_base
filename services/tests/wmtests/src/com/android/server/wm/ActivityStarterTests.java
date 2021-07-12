@@ -1135,6 +1135,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 /* doResume */true,
                 /* options */null,
                 /* inTask */null,
+                /* inTaskFragment */ null,
                 /* restrictedBgActivity */false,
                 /* intentGrants */null);
 
@@ -1142,6 +1143,31 @@ public class ActivityStarterTests extends WindowTestsBase {
         verify(stack).ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         verify(targetRecord).makeVisibleIfNeeded(null, true);
         assertTrue(targetRecord.mVisibleRequested);
+    }
+
+    @Test
+    public void testStartActivityInner_inTaskFragment() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
+                true /* createdByOrganizer */);
+        sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
+
+        starter.startActivityInner(
+                /* r */targetRecord,
+                /* sourceRecord */ sourceRecord,
+                /* voiceSession */null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */true,
+                /* options */null,
+                /* inTask */null,
+                /* inTaskFragment */ taskFragment,
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
+
+        assertTrue(taskFragment.hasChild());
     }
 
     @Test

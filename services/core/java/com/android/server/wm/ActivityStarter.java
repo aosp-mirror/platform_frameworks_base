@@ -840,7 +840,7 @@ class ActivityStarter {
         final int startFlags = request.startFlags;
         final SafeActivityOptions options = request.activityOptions;
         Task inTask = request.inTask;
-        mInTaskFragment = request.inTaskFragment;
+        TaskFragment inTaskFragment = request.inTaskFragment;
 
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
@@ -1181,8 +1181,8 @@ class ActivityStarter {
         }
 
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
-                request.voiceInteractor, startFlags, true /* doResume */, checkedOptions, inTask,
-                restrictedBgActivity, intentGrants);
+                request.voiceInteractor, startFlags, true /* doResume */, checkedOptions,
+                inTask, inTaskFragment, restrictedBgActivity, intentGrants);
 
         if (request.outActivity != null) {
             request.outActivity[0] = mLastStartActivityRecord;
@@ -1538,9 +1538,10 @@ class ActivityStarter {
      * Here also ensures that the starting activity is removed if the start wasn't successful.
      */
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
-                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-                int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-                boolean restrictedBgActivity, NeededUriGrants intentGrants) {
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            int startFlags, boolean doResume, ActivityOptions options, Task inTask,
+            TaskFragment inTaskFragment, boolean restrictedBgActivity,
+            NeededUriGrants intentGrants) {
         int result = START_CANCELED;
         final Task startedActivityRootTask;
 
@@ -1565,7 +1566,8 @@ class ActivityStarter {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
             result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask, restrictedBgActivity, intentGrants);
+                    startFlags, doResume, options, inTask, inTaskFragment, restrictedBgActivity,
+                    intentGrants);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityRootTask = handleStartResult(r, result);
@@ -1668,9 +1670,10 @@ class ActivityStarter {
     int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-            boolean restrictedBgActivity, NeededUriGrants intentGrants) {
-        setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
-                voiceInteractor, restrictedBgActivity);
+            TaskFragment inTaskFragment, boolean restrictedBgActivity,
+            NeededUriGrants intentGrants) {
+        setInitialState(r, options, inTask, inTaskFragment, doResume, startFlags, sourceRecord,
+                voiceSession, voiceInteractor, restrictedBgActivity);
 
         computeLaunchingTaskFlags();
 
@@ -2238,9 +2241,9 @@ class ActivityStarter {
     }
 
     private void setInitialState(ActivityRecord r, ActivityOptions options, Task inTask,
-            boolean doResume, int startFlags, ActivityRecord sourceRecord,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            boolean restrictedBgActivity) {
+            TaskFragment inTaskFragment, boolean doResume, int startFlags,
+            ActivityRecord sourceRecord, IVoiceInteractionSession voiceSession,
+            IVoiceInteractor voiceInteractor, boolean restrictedBgActivity) {
         reset(false /* clearRequest */);
 
         mStartActivity = r;
@@ -2343,6 +2346,7 @@ class ActivityStarter {
             Slog.w(TAG, "Starting activity in task not in recents: " + inTask);
             mInTask = null;
         }
+        mInTaskFragment = inTaskFragment;
 
         mStartFlags = startFlags;
         // If the onlyIfNeeded flag is set, then we can do this if the activity being launched
