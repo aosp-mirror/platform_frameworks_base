@@ -643,7 +643,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ezin da egiaztatu aurpegia. Hardwarea ez dago erabilgarri."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Saiatu berriro aurpegiaren bidez desblokeatzen"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Saiatu berriro aurpegi bidez desblokeatzen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Utzi da aurpegiaren bidezko eragiketa."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Erabiltzaileak aurpegi bidez desblokeatzeko aukera utzi du"</string>

@@ -617,7 +617,7 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Поставете уште начини за отклучување"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Допрете за да додадете отпечаток"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток на прст"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не може да се користи сензорот за отпечатоци"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Однесете го на поправка."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не се сними прецизна слика. Обидете се повторно."</string>
