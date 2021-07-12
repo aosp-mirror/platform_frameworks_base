@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -64,34 +63,10 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
             }
         }
 
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() {
-        super.navBarLayerIsVisible()
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisible() {
-        super.statusBarLayerIsVisible()
-    }
-
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerRotatesScales() {
-        super.statusBarLayerRotatesScales()
-    }
-
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {

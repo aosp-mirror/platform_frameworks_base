@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -118,7 +117,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation)
 
@@ -150,13 +149,13 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)

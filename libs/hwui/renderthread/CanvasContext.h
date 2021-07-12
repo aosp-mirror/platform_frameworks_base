@@ -160,6 +160,7 @@ public:
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
+        std::scoped_lock lock(mFrameMetricsReporterMutex);
         if (mFrameMetricsReporter.get() == nullptr) {
             mFrameMetricsReporter.reset(new FrameMetricsReporter());
         }
@@ -168,10 +169,10 @@ public:
     }
 
     void removeFrameMetricsObserver(FrameMetricsObserver* observer) {
+        std::scoped_lock lock(mFrameMetricsReporterMutex);
         if (mFrameMetricsReporter.get() != nullptr) {
             mFrameMetricsReporter->removeObserver(observer);
             if (!mFrameMetricsReporter->hasObservers()) {
-                std::lock_guard lock(mFrameMetricsReporterMutex);
                 mFrameMetricsReporter.reset(nullptr);
             }
         }
@@ -245,6 +246,8 @@ private:
      */
     void reportMetricsWithPresentTime();
 
+    FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber);
+
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;
     int32_t mLastFrameHeight = 0;
@@ -305,7 +308,8 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
-    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter;
+    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter
+            GUARDED_BY(mFrameMetricsReporterMutex);
     std::mutex mFrameMetricsReporterMutex;
 
     std::set<RenderNode*> mPrefetchedLayers;
