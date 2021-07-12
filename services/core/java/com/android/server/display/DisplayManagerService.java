@@ -705,10 +705,8 @@ public final class DisplayManagerService extends SystemService {
             final BrightnessPair brightnessPair =
                     index < 0 ? null : mDisplayBrightnesses.valueAt(index);
             if (index < 0 || (mDisplayStates.valueAt(index) == state
-                    && BrightnessSynchronizer.floatEquals(
-                            brightnessPair.brightness, brightnessState)
-                    && BrightnessSynchronizer.floatEquals(
-                            brightnessPair.sdrBrightness, sdrBrightnessState))) {
+                    && brightnessPair.brightness == brightnessState
+                    && brightnessPair.sdrBrightness == sdrBrightnessState)) {
                 return; // Display no longer exists or no change.
             }
 
