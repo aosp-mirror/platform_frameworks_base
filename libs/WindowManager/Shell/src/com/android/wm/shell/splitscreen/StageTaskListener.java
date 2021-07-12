@@ -71,8 +71,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     private final StageListenerCallbacks mCallbacks;
-    private final SyncTransactionQueue mSyncQueue;
     private final SurfaceSession mSurfaceSession;
+    protected final SyncTransactionQueue mSyncQueue;
 
     protected ActivityManager.RunningTaskInfo mRootTaskInfo;
     protected SurfaceControl mRootLeash;
