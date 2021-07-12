@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.appsearch.external.localstorage;
+package com.android.server.appsearch;
 
 import android.annotation.NonNull;
 
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.appsearch.external.localstorage.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.OptimizeStrategy;
 
 import com.google.android.icing.proto.GetOptimizeInfoResultProto;
+
+import java.util.Objects;
 
 /**
  * An implementation of {@link OptimizeStrategy} will determine when to trigger {@link
@@ -28,17 +31,18 @@ import com.google.android.icing.proto.GetOptimizeInfoResultProto;
  * @hide
  */
 public class FrameworkOptimizeStrategy implements OptimizeStrategy {
-
-    @VisibleForTesting static final int DOC_COUNT_OPTIMIZE_THRESHOLD = 100_000;
-    @VisibleForTesting static final int BYTES_OPTIMIZE_THRESHOLD = 1 * 1024 * 1024 * 1024; // 1GB
-
-    @VisibleForTesting
-    static final long TIME_OPTIMIZE_THRESHOLD_MILLIS = 7 * 24 * 60 * 60 * 1000; // 1 week
+    private final AppSearchConfig mAppSearchConfig;
+    FrameworkOptimizeStrategy(@NonNull AppSearchConfig config) {
+        mAppSearchConfig = Objects.requireNonNull(config);
+    }
 
     @Override
     public boolean shouldOptimize(@NonNull GetOptimizeInfoResultProto optimizeInfo) {
-        return optimizeInfo.getOptimizableDocs() >= DOC_COUNT_OPTIMIZE_THRESHOLD
-                || optimizeInfo.getEstimatedOptimizableBytes() >= BYTES_OPTIMIZE_THRESHOLD
-                || optimizeInfo.getTimeSinceLastOptimizeMs() >= TIME_OPTIMIZE_THRESHOLD_MILLIS;
+        return optimizeInfo.getOptimizableDocs()
+                    >= mAppSearchConfig.getCachedDocCountOptimizeThreshold()
+                || optimizeInfo.getEstimatedOptimizableBytes()
+                    >= mAppSearchConfig.getCachedBytesOptimizeThreshold()
+                || optimizeInfo.getTimeSinceLastOptimizeMs()
+                    >= mAppSearchConfig.getCachedTimeOptimizeThresholdMs();
     }
 }
