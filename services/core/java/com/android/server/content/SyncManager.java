@@ -1246,6 +1246,26 @@ public class SyncManager {
         return filteredResult.toArray(new String[] {});
     }
 
+    public String getSyncAdapterPackageAsUser(String accountType, String authority,
+            int callingUid, int userId) {
+        if (accountType == null || authority == null) {
+            return null;
+        }
+        final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                mSyncAdapters.getServiceInfo(
+                        SyncAdapterType.newKey(authority, accountType),
+                        userId);
+        if (syncAdapterInfo == null) {
+            return null;
+        }
+        final String packageName = syncAdapterInfo.type.getPackageName();
+        if (TextUtils.isEmpty(packageName) || mPackageManagerInternal.filterAppAccess(
+                packageName, callingUid, userId)) {
+            return null;
+        }
+        return packageName;
+    }
+
     private void sendSyncFinishedOrCanceledMessage(ActiveSyncContext syncContext,
             SyncResult syncResult) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) Slog.v(TAG, "sending MESSAGE_SYNC_FINISHED");
@@ -3403,7 +3423,7 @@ public class SyncManager {
 
             scheduleSyncOperationH(op);
             mSyncStorageEngine.reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS,
-                    target.userId);
+                    op.owningPackage, target.userId);
         }
 
         /**
@@ -3922,7 +3942,7 @@ public class SyncManager {
                     syncOperation.toEventLog(SyncStorageEngine.EVENT_STOP));
             mSyncStorageEngine.stopSyncEvent(rowId, elapsedTime,
                     resultMessage, downstreamActivity, upstreamActivity,
-                    syncOperation.target.userId);
+                    syncOperation.owningPackage, syncOperation.target.userId);
         }
     }
 
