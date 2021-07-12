@@ -42,4 +42,10 @@
         <item name="android:textColorPrimary">?android:attr/textColorPrimaryInverse</item>
     </style>
 
+    <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
 </resources>
