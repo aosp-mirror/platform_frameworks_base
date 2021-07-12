@@ -341,7 +341,7 @@
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"\'ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ\' ತೋರಿಸಿ"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ಬರೆದಾಗ ವಿಂಡೊದೊಳಗೆ ವೀಕ್ಷಣೆ ಫ್ಲ್ಯಾಶ್‌ ಮಾಡುತ್ತದೆ"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"ಹಾರ್ಡ್‌ವೇರ್‌ ಲೇಯರ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"ಅವುಗಳು ನವೀಕರಿಸಿದಾಗ ಹಾರ್ಡ್‌ವೇರ್‌‌ ಲೇಯರ್‌ಗಳು ಹಸಿರು ಫ್ಲ್ಯಾಶ್‌‌ ಆಗುತ್ತದೆ"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"ಅಪ್‍ಡೇಟ್ ಆದಾಗ ಹಾರ್ಡ್‌ವೇರ್‌‌ ಲೇಯರ್‌ಗಳು ಹಸಿರು ಬಣ್ಣದಲ್ಲಿ ಫ್ಲ್ಯಾಶ್‌‌ ಆಗುತ್ತದೆ"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ಓವರ್‌ಡ್ರಾ ಡೀಬಗ್"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW ಓವರ್‌ಲೇ ನಿಷ್ಕ್ರಿಯ"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"ಸ್ಕ್ರೀನ್ ಸಂಯೋಜನೆಗಾಗಿ ಯಾವಾಗಲೂ GPU ಬಳಸಿ"</string>
