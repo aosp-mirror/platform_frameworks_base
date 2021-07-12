@@ -1090,8 +1090,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          */
         private void finishOrPause(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded,
                 boolean isPausing) {
-            int indexOfToken = mInProgressEvents != null
-                    ? mInProgressEvents.indexOfKey(clientId) : -1;
+            int indexOfToken = isRunning() ? mInProgressEvents.indexOfKey(clientId) : -1;
             if (indexOfToken < 0) {
                 finishPossiblyPaused(clientId, isPausing);
                 return;
@@ -1145,7 +1144,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         // Finish or pause (no-op) an already paused op
         private void finishPossiblyPaused(@NonNull IBinder clientId, boolean isPausing) {
-            if (mPausedInProgressEvents == null) {
+            if (!isPaused()) {
                 Slog.wtf(TAG, "No ops running or paused");
                 return;
             }
@@ -1186,7 +1185,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          * Pause all currently started ops. This will create a HistoricalRegistry
          */
         public void pause() {
-            if (mInProgressEvents == null) {
+            if (!isRunning()) {
                 return;
             }
 
@@ -1211,7 +1210,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          * times, but keep all other values the same
          */
         public void resume() {
-            if (mPausedInProgressEvents == null) {
+            if (!isPaused()) {
                 return;
             }
 
@@ -1245,7 +1244,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          */
         void onClientDeath(@NonNull IBinder clientId) {
             synchronized (AppOpsService.this) {
-                if (mInProgressEvents == null && mPausedInProgressEvents == null) {
+                if (!isPaused() && !isRunning()) {
                     return;
                 }
 
@@ -1266,7 +1265,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          * @param newState The new state
          */
         public void onUidStateChanged(@AppOpsManager.UidState int newState) {
-            if (mInProgressEvents == null && mPausedInProgressEvents == null) {
+            if (!isPaused() && !isRunning()) {
                 return;
             }
 
@@ -1350,12 +1349,15 @@ public class AppOpsService extends IAppOpsService.Stub {
          * @param opToAdd The op to add
          */
         public void add(@NonNull AttributedOp opToAdd) {
-            if (opToAdd.mInProgressEvents != null) {
-                Slog.w(TAG, "Ignoring " + opToAdd.mInProgressEvents.size() + " running app-ops");
+            if (opToAdd.isRunning() || opToAdd.isPaused()) {
+                ArrayMap<IBinder, InProgressStartOpEvent> ignoredEvents = opToAdd.isRunning()
+                        ? opToAdd.mInProgressEvents : opToAdd.mPausedInProgressEvents;
+                Slog.w(TAG, "Ignoring " + ignoredEvents.size() + " app-ops, running: "
+                        + opToAdd.isRunning());
 
-                int numInProgressEvents = opToAdd.mInProgressEvents.size();
+                int numInProgressEvents = ignoredEvents.size();
                 for (int i = 0; i < numInProgressEvents; i++) {
-                    InProgressStartOpEvent event = opToAdd.mInProgressEvents.valueAt(i);
+                    InProgressStartOpEvent event = ignoredEvents.valueAt(i);
 
                     event.finish();
                     mInProgressStartOpEventPool.release(event);
@@ -1367,11 +1369,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public boolean isRunning() {
-            return mInProgressEvents != null;
+            return mInProgressEvents != null && !mInProgressEvents.isEmpty();
         }
 
         public boolean isPaused() {
-            return mPausedInProgressEvents != null;
+            return mPausedInProgressEvents != null && !mPausedInProgressEvents.isEmpty();
         }
 
         boolean hasAnyTime() {
@@ -1401,7 +1403,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             LongSparseArray<NoteOpEvent> accessEvents = deepClone(mAccessEvents);
 
             // Add in progress events as access events
-            if (mInProgressEvents != null) {
+            if (isRunning()) {
                 long now = SystemClock.elapsedRealtime();
                 int numInProgressEvents = mInProgressEvents.size();
 
@@ -2041,8 +2043,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                             attributionNum++) {
                         AttributedOp attributedOp = op.mAttributions.valueAt(attributionNum);
 
-                        while (attributedOp.mInProgressEvents != null) {
+                        while (attributedOp.isRunning()) {
                             attributedOp.finished(attributedOp.mInProgressEvents.keyAt(0));
+                        }
+                        while (attributedOp.isPaused()) {
+                            attributedOp.finished(attributedOp.mPausedInProgressEvents.keyAt(0));
                         }
                     }
                 }
