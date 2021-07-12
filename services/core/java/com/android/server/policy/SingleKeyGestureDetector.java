@@ -272,8 +272,10 @@ public final class SingleKeyGestureDetector {
                 if (DEBUG) {
                     Log.i(TAG, "press key " + KeyEvent.keyCodeToString(event.getKeyCode()));
                 }
-                mActiveRule.onPress(downTime);
-                reset();
+                Message msg = mHandler.obtainMessage(MSG_KEY_DELAYED_PRESS, mActiveRule.mKeyCode,
+                        1, downTime);
+                msg.setAsynchronous(true);
+                mHandler.sendMessage(msg);
                 return true;
             }
 
@@ -316,10 +318,7 @@ public final class SingleKeyGestureDetector {
     }
 
     boolean isKeyIntercepted(int keyCode) {
-        if (mActiveRule != null && mActiveRule.shouldInterceptKey(keyCode)) {
-            return mHandledByLongPress;
-        }
-        return false;
+        return mActiveRule != null && mActiveRule.shouldInterceptKey(keyCode);
     }
 
     boolean beganFromNonInteractive() {

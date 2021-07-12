@@ -20,7 +20,9 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -55,11 +57,12 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.WindowManager;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
@@ -537,6 +540,17 @@ public class AuthControllerTest extends SysuiTestCase {
         final float majorMinor = 5f;
         mAuthController.onAodInterrupt(pos, pos, majorMinor, majorMinor);
         verify(mUdfpsController).onAodInterrupt(eq(pos), eq(pos), eq(majorMinor), eq(majorMinor));
+    }
+
+    @Test
+    public void testSubscribesToOrientationChangesWhenShowingDialog() {
+        assertFalse(mAuthController.mOrientationListener.getEnabled());
+
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        assertTrue(mAuthController.mOrientationListener.getEnabled());
+
+        mAuthController.hideAuthenticationDialog();
+        assertFalse(mAuthController.mOrientationListener.getEnabled());
     }
 
     // Helpers

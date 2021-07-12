@@ -47,6 +47,7 @@ cc_defaults {
         "-DATRACE_TAG=ATRACE_TAG_VIEW",
         "-DLOG_TAG=\"OpenGLRenderer\"",
         "-Wall",
+        "-Wthread-safety",
         "-Wno-unused-parameter",
         "-Wunreachable-code",
         "-Werror",

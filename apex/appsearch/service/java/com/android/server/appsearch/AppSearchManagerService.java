@@ -61,6 +61,7 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
+import com.android.server.appsearch.stats.StatsCollector;
 import com.android.server.appsearch.util.PackageUtil;
 import com.android.server.usage.StorageStatsManagerLocal;
 import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
@@ -121,6 +122,13 @@ public class AppSearchManagerService extends SystemService {
         registerReceivers();
         LocalManagerRegistry.getManager(StorageStatsManagerLocal.class)
                 .registerStorageStatsAugmenter(new AppSearchStorageStatsAugmenter(), TAG);
+    }
+
+    @Override
+    public void onBootPhase(/* @BootPhase */ int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            StatsCollector.getInstance(mContext, EXECUTOR);
+        }
     }
 
     private void registerReceivers() {
@@ -364,6 +372,12 @@ public class AppSearchManagerService extends SystemService {
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback,
                             AppSearchResult.newSuccessfulResult(setSchemaResponse.getBundle()));
+
+                    // setSchema will sync the schemas in the request to AppSearch, any existing
+                    // schemas which  is not included in the request will be delete if we force
+                    // override incompatible schemas. And all documents of these types will be
+                    // deleted as well. We should checkForOptimize for these deletion.
+                    checkForOptimize(instance);
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -505,6 +519,10 @@ public class AppSearchManagerService extends SystemService {
                     // Now that the batch has been written. Persist the newly written data.
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, resultBuilder.build());
+
+                    // The existing documents with same ID will be deleted, so there may be some
+                    // resources that could be released after optimize().
+                    checkForOptimize(instance, /*mutateBatchSize=*/ documentBundles.size());
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -1023,6 +1041,8 @@ public class AppSearchManagerService extends SystemService {
                     // Now that the batch has been written. Persist the newly written data.
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, resultBuilder.build());
+
+                    checkForOptimize(instance, ids.size());
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -1092,6 +1112,8 @@ public class AppSearchManagerService extends SystemService {
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.LITE);
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
+
+                    checkForOptimize(instance);
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -1471,5 +1493,25 @@ public class AppSearchManagerService extends SystemService {
                 Log.e(TAG, "Unable to augment storage stats for " + userHandle, t);
             }
         }
+    }
+
+    private void checkForOptimize(AppSearchUserInstance instance, int mutateBatchSize) {
+        EXECUTOR.execute(() -> {
+            try {
+                instance.getAppSearchImpl().checkForOptimize(mutateBatchSize);
+            } catch (AppSearchException e) {
+                Log.w(TAG, "Error occurred when check for optimize", e);
+            }
+        });
+    }
+
+    private void checkForOptimize(AppSearchUserInstance instance) {
+        EXECUTOR.execute(() -> {
+            try {
+                instance.getAppSearchImpl().checkForOptimize();
+            } catch (AppSearchException e) {
+                Log.w(TAG, "Error occurred when check for optimize", e);
+            }
+        });
     }
 }

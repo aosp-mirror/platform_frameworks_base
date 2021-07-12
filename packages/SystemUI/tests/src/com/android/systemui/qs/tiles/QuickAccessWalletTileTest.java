@@ -30,6 +30,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -253,6 +254,19 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         assertNotNull(nextStartedIntent);
         assertThat(nextStartedIntent.getComponent().getClassName()).isEqualTo(walletClassName);
+    }
+
+    @Test
+    public void testGetServiceLabelUnsafe_recreateWalletClient() {
+        doAnswer(invocation -> {
+            throw new Exception("Bad service label.");
+        }).when(mQuickAccessWalletClient).getServiceLabel();
+
+        QSTile.State state = new QSTile.State();
+
+        mTile.handleUpdateState(state, null);
+
+        verify(mController).reCreateWalletClient();
     }
 
     @Test
