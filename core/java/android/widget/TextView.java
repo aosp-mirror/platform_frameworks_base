@@ -202,12 +202,12 @@ import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.EditableInputConnection;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.EditableInputConnection;
 
 import libcore.util.EmptyArray;
 
