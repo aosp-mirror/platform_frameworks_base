@@ -16,7 +16,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:paddingTop="?attr/dialogPreferredPadding"
-        android:paddingBottom="?attr/dialogPreferredPadding"
+        android:showDividers="middle"
+        android:divider="@drawable/global_action_item_divider"
         android:orientation="vertical"/>
