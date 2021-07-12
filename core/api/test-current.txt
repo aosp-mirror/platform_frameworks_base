@@ -2173,7 +2173,6 @@ package android.provider {
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
     field public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
-    field public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
     field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String POWER_MENU_LOCKED_SHOW_CONTENT = "power_menu_locked_show_content";
