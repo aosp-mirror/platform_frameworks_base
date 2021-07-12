@@ -67,6 +67,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.tiles.UserDetailView;
@@ -131,6 +132,7 @@ public class UserSwitcherController implements Dumpable {
     private final Executor mUiBgExecutor;
     private final boolean mGuestUserAutoCreated;
     private final AtomicBoolean mGuestCreationScheduled;
+    private FalsingManager mFalsingManager;
 
     @Inject
     public UserSwitcherController(Context context,
@@ -139,6 +141,7 @@ public class UserSwitcherController implements Dumpable {
             ActivityStarter activityStarter,
             BroadcastDispatcher broadcastDispatcher,
             UiEventLogger uiEventLogger,
+            FalsingManager falsingManager,
             TelephonyListenerManager telephonyListenerManager,
             IActivityTaskManager activityTaskManager,
             UserDetailAdapter userDetailAdapter,
@@ -148,6 +151,7 @@ public class UserSwitcherController implements Dumpable {
         mTelephonyListenerManager = telephonyListenerManager;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
+        mFalsingManager = falsingManager;
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(this, mUiEventLogger);
         mUserDetailAdapter = userDetailAdapter;
         mUiBgExecutor = uiBgExecutor;
@@ -1031,6 +1035,11 @@ public class UserSwitcherController implements Dumpable {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
+            int penalty = which == BUTTON_NEGATIVE ? FalsingManager.NO_PENALTY
+                    : FalsingManager.HIGH_PENALTY;
+            if (mFalsingManager.isFalseTap(penalty)) {
+                return;
+            }
             if (which == BUTTON_NEGATIVE) {
                 cancel();
             } else {
@@ -1057,6 +1066,11 @@ public class UserSwitcherController implements Dumpable {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
+            int penalty = which == BUTTON_NEGATIVE ? FalsingManager.NO_PENALTY
+                    : FalsingManager.MODERATE_PENALTY;
+            if (mFalsingManager.isFalseTap(penalty)) {
+                return;
+            }
             if (which == BUTTON_NEGATIVE) {
                 cancel();
             } else {

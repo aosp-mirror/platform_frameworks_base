@@ -44,6 +44,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
@@ -57,6 +58,7 @@ public class QSDetail extends LinearLayout {
     private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
 
     private ViewGroup mDetailContent;
+    private FalsingManager mFalsingManager;
     protected TextView mDetailSettingsButton;
     protected TextView mDetailDoneButton;
     @VisibleForTesting
@@ -124,12 +126,13 @@ public class QSDetail extends LinearLayout {
 
     /** */
     public void setQsPanel(QSPanelController panelController, QuickStatusBarHeader header,
-            QSFooter footer) {
+            QSFooter footer, FalsingManager falsingManager) {
         mQsPanelController = panelController;
         mHeader = header;
         mFooter = footer;
         mHeader.setCallback(mQsPanelCallback);
         mQsPanelController.setCallback(mQsPanelCallback);
+        mFalsingManager = falsingManager;
     }
 
     public void setHost(QSTileHost host) {
@@ -273,6 +276,9 @@ public class QSDetail extends LinearLayout {
         final Intent settingsIntent = adapter.getSettingsIntent();
         mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
         mDetailSettingsButton.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
             Dependency.get(MetricsLogger.class).action(ACTION_QS_MORE_SETTINGS,
                     adapter.getMetricsCategory());
             mUiEventLogger.log(adapter.moreSettingsEvent());
@@ -280,6 +286,9 @@ public class QSDetail extends LinearLayout {
                     .postStartActivityDismissingKeyguard(settingsIntent, 0);
         });
         mDetailDoneButton.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
             announceForAccessibility(
                     mContext.getString(R.string.accessibility_desc_quick_settings));
             if (!adapter.onDoneButtonClicked()) {
@@ -301,13 +310,13 @@ public class QSDetail extends LinearLayout {
             mQsDetailHeaderSwitch.setVisibility(VISIBLE);
             handleToggleStateChanged(toggleState, adapter.getToggleEnabled());
             mQsDetailHeader.setClickable(true);
-            mQsDetailHeader.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean checked = !mQsDetailHeaderSwitch.isChecked();
-                    mQsDetailHeaderSwitch.setChecked(checked);
-                    adapter.setToggleState(checked);
+            mQsDetailHeader.setOnClickListener(v -> {
+                if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    return;
                 }
+                boolean checked = !mQsDetailHeaderSwitch.isChecked();
+                mQsDetailHeaderSwitch.setChecked(checked);
+                adapter.setToggleState(checked);
             });
         }
     }
