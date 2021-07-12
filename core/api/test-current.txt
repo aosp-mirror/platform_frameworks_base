@@ -2074,7 +2074,7 @@ package android.permission {
   public final class PermissionManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
-    method public void registerAttributionSource(@NonNull android.content.AttributionSource);
+    method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
   }
 
 }
