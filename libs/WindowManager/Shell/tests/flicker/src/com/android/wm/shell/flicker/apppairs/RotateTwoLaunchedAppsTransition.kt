@@ -22,7 +22,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.Assume.assumeFalse
+import org.junit.Before
 import org.junit.Test
 
 abstract class RotateTwoLaunchedAppsTransition(
@@ -51,6 +54,13 @@ abstract class RotateTwoLaunchedAppsTransition(
                 }
             }
         }
+
+    @Before
+    override fun setup() {
+        // AppPairs hasn't been updated to Shell Transition. There will be conflict on rotation.
+        assumeFalse(isShellTransitionsEnabled())
+        super.setup()
+    }
 
     @FlakyTest
     @Test
