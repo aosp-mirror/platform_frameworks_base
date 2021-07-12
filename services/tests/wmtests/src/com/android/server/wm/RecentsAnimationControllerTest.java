@@ -701,6 +701,12 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Continue the animation (simulating a call to cleanupScreenshot())
         mController.continueDeferredCancelAnimation();
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_TOP, false);
+
+        // Assume home was moved to front so will-be-top callback should not be called.
+        homeActivity.moveFocusableActivityToTop("test");
+        spyOn(mDefaultDisplay.mFixedRotationTransitionListener);
+        mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+        verify(mDefaultDisplay.mFixedRotationTransitionListener, never()).notifyRecentsWillBeTop();
     }
 
     private ActivityRecord createHomeActivity() {
