@@ -924,7 +924,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         ownerActivity.getTask().addChild(taskFragment, POSITION_TOP);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
-        taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer());
+        taskFragment.setTaskFragmentOrganizer(
+                creationParams.getOrganizer(), ownerActivity.getPid());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
     }
 
