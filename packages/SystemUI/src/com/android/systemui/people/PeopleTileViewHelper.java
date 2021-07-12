@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.text.LineBreaker;
@@ -59,6 +60,7 @@ import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -79,6 +81,7 @@ import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.people.widget.PeopleTileKey;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -677,15 +680,24 @@ public class PeopleTileViewHelper {
         RemoteViews views = setViewForContentLayout(new RemoteViews(mContext.getPackageName(),
                 getLayoutForNotificationContent()));
         CharSequence sender = mTile.getNotificationSender();
-        Uri image = mTile.getNotificationDataUri();
-        if (image != null) {
-            // TODO: Use NotificationInlineImageCache
-            views.setImageViewUri(R.id.image, image);
+        Uri imageUri = mTile.getNotificationDataUri();
+        if (imageUri != null) {
             String newImageDescription = mContext.getString(
                     R.string.new_notification_image_content_description, mTile.getUserName());
             views.setContentDescription(R.id.image, newImageDescription);
             views.setViewVisibility(R.id.image, View.VISIBLE);
             views.setViewVisibility(R.id.text_content, View.GONE);
+            try {
+                Drawable drawable = resolveImage(imageUri, mContext);
+                Bitmap bitmap = convertDrawableToBitmap(drawable);
+                views.setImageViewBitmap(R.id.image, bitmap);
+            } catch (IOException e) {
+                Log.e(TAG, "Could not decode image: " + e);
+                // If we couldn't load the image, show text that we have a new image.
+                views.setTextViewText(R.id.text_content, newImageDescription);
+                views.setViewVisibility(R.id.text_content, View.VISIBLE);
+                views.setViewVisibility(R.id.image, View.GONE);
+            }
         } else {
             setMaxLines(views, !TextUtils.isEmpty(sender));
             CharSequence content = mTile.getNotificationContent();
@@ -718,6 +730,40 @@ public class PeopleTileViewHelper {
         }
         setAvailabilityDotPadding(views, R.dimen.availability_dot_notification_padding);
         return views;
+    }
+
+    private Drawable resolveImage(Uri uri, Context context) throws IOException {
+        final ImageDecoder.Source source =
+                ImageDecoder.createSource(context.getContentResolver(), uri);
+        final Drawable drawable =
+                ImageDecoder.decodeDrawable(source, (decoder, info, s) -> {
+                    onHeaderDecoded(decoder, info, s);
+                });
+        return drawable;
+    }
+
+    private static int getPowerOfTwoForSampleRatio(double ratio) {
+        final int k = Integer.highestOneBit((int) Math.floor(ratio));
+        return Math.max(1, k);
+    }
+
+    private void onHeaderDecoded(ImageDecoder decoder, ImageDecoder.ImageInfo info,
+            ImageDecoder.Source source) {
+        int widthInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mWidth,
+                mContext.getResources().getDisplayMetrics());
+        int heightInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mHeight,
+                mContext.getResources().getDisplayMetrics());
+        int maxIconSizeInPx = Math.max(widthInPx, heightInPx);
+        int minDimen = (int) (1.5 * Math.min(widthInPx, heightInPx));
+        if (minDimen < maxIconSizeInPx) {
+            maxIconSizeInPx = minDimen;
+        }
+        final Size size = info.getSize();
+        final int originalSize = Math.max(size.getHeight(), size.getWidth());
+        final double ratio = (originalSize > maxIconSizeInPx)
+                ? originalSize * 1f / maxIconSizeInPx
+                : 1.0;
+        decoder.setTargetSampleSize(getPowerOfTwoForSampleRatio(ratio));
     }
 
     private void setContentDescriptionForNotificationTextContent(RemoteViews views,
