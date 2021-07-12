@@ -203,7 +203,7 @@ public final class PlatformLogger implements AppSearchLogger {
                     stats.getNumOperationsSucceeded(),
                     stats.getNumOperationsFailed());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // TODO(b/184204720) report hashing error to Westworld
+            // TODO(b/184204720) report hashing error to statsd
             //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
             //  so in the dashboard we know there is some error for hashing.
             //
@@ -240,7 +240,7 @@ public final class PlatformLogger implements AppSearchLogger {
                     stats.getNativeNumTokensIndexed(),
                     stats.getNativeExceededMaxNumTokens());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // TODO(b/184204720) report hashing error to Westworld
+            // TODO(b/184204720) report hashing error to statsd
             //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
             //  so in the dashboard we know there is some error for hashing.
             //
@@ -286,7 +286,7 @@ public final class PlatformLogger implements AppSearchLogger {
                     stats.getDocumentRetrievingLatencyMillis(),
                     stats.getResultWithSnippetsCount());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // TODO(b/184204720) report hashing error to Westworld
+            // TODO(b/184204720) report hashing error to statsd
             //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
             //  so in the dashboard we know there is some error for hashing.
             //
@@ -363,7 +363,7 @@ public final class PlatformLogger implements AppSearchLogger {
     /**
      * Creates {@link ExtraStats} to hold additional information generated for logging.
      *
-     * <p>This method is called by most of logToWestworldLocked functions to reduce code
+     * <p>This method is called by most of logStatsImplLocked functions to reduce code
      * duplication.
      */
     // TODO(b/173532925) Once we add CTS test for logging atoms and can inspect the result, we can
