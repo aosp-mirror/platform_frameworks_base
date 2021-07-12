@@ -347,7 +347,6 @@ public class Tuner implements AutoCloseable  {
             mHandler = createEventHandler();
         }
 
-        mHandler = createEventHandler();
         int[] clientId = new int[1];
         ResourceClientProfile profile = new ResourceClientProfile();
         profile.tvInputSessionId = tvInputSessionId;
@@ -515,6 +514,8 @@ public class Tuner implements AutoCloseable  {
             mTunerResourceManager.releaseDemux(mDemuxHandle, mClientId);
             mDemuxHandle = null;
         }
+
+        mTunerResourceManager.unregisterClientProfile(mClientId);
 
     }
 
