@@ -1541,17 +1541,19 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
+            if (!mStorageSessionController.supportsExternalStorage(vol.mountUserId)) {
+                Slog.d(TAG, "Ignoring volume " + vol.getId() + " because user "
+                        + Integer.toString(vol.mountUserId)
+                        + " does not support external storage.");
+                return;
+            }
+
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             final VolumeInfo privateVol = storage.findPrivateForEmulated(vol);
 
-            if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, mPrimaryStorageUuid)
-                    && VolumeInfo.ID_PRIVATE_INTERNAL.equals(privateVol.id)) {
-                Slog.v(TAG, "Found primary storage at " + vol);
-                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
-                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
-                mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
-
-            } else if (Objects.equals(privateVol.fsUuid, mPrimaryStorageUuid)) {
+            if ((Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, mPrimaryStorageUuid)
+                    && VolumeInfo.ID_PRIVATE_INTERNAL.equals(privateVol.id))
+                    || Objects.equals(privateVol.fsUuid, mPrimaryStorageUuid)) {
                 Slog.v(TAG, "Found primary storage at " + vol);
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
