@@ -777,6 +777,7 @@
     <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="TextAppearance.Control">
