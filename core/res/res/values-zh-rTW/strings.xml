@@ -318,7 +318,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"存取你的體能活動記錄"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"相機"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"拍照及錄製影片"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"附近的裝置"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"鄰近裝置"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"探索附近的裝置並進行連線"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"通話記錄"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"讀取及寫入通話記錄"</string>
