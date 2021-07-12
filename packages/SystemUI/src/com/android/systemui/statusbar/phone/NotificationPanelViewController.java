@@ -1350,7 +1350,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         float lockIconPadding = 0;
         if (mLockIconViewController.getTop() != 0) {
-            lockIconPadding = mStatusBar.getDisplayHeight() - mLockIconViewController.getTop();
+            lockIconPadding = mStatusBar.getDisplayHeight() - mLockIconViewController.getTop()
+                + mResources.getDimensionPixelSize(R.dimen.min_lock_icon_padding);
         }
 
         float bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
@@ -3627,6 +3628,8 @@ public class NotificationPanelViewController extends PanelViewController {
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
         if (mAmbientIndicationBottomPadding != ambientIndicationBottomPadding) {
             mAmbientIndicationBottomPadding = ambientIndicationBottomPadding;
+            mLockIconViewController.setAmbientIndicationBottomPadding(
+                    mAmbientIndicationBottomPadding);
             updateMaxDisplayedNotifications(true);
         }
     }
