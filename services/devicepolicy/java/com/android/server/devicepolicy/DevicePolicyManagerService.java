@@ -17557,9 +17557,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         final boolean usbEnabled;
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            usbEnabled = admin != null && admin.mUsbDataSignalingEnabled;
+            usbEnabled = isUsbDataSignalingEnabledInternalLocked();
         }
         if (!mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getUsbManager().enableUsbDataSignal(usbEnabled))) {
