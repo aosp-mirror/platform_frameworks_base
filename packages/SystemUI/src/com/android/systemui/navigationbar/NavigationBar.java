@@ -92,6 +92,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -954,7 +955,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, boolean isFullscreen) {
+            @Behavior int behavior, InsetsState requestedState, String packageName) {
         if (displayId != mDisplayId) {
             return;
         }
