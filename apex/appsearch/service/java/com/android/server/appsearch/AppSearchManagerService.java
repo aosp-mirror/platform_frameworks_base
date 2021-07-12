@@ -60,6 +60,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 import com.android.server.appsearch.stats.StatsCollector;
 import com.android.server.appsearch.util.PackageUtil;
@@ -1497,20 +1498,42 @@ public class AppSearchManagerService extends SystemService {
 
     private void checkForOptimize(AppSearchUserInstance instance, int mutateBatchSize) {
         EXECUTOR.execute(() -> {
+            long totalLatencyStartMillis = SystemClock.elapsedRealtime();
+            OptimizeStats.Builder builder = new OptimizeStats.Builder();
             try {
-                instance.getAppSearchImpl().checkForOptimize(mutateBatchSize);
+                instance.getAppSearchImpl().checkForOptimize(mutateBatchSize, builder);
             } catch (AppSearchException e) {
                 Log.w(TAG, "Error occurred when check for optimize", e);
+            } finally {
+                OptimizeStats oStats = builder
+                        .setTotalLatencyMillis(
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis))
+                        .build();
+                if (oStats.getOriginalDocumentCount() > 0) {
+                    // see if optimize has been run by checking originalDocumentCount
+                    instance.getLogger().logStats(oStats);
+                }
             }
         });
     }
 
     private void checkForOptimize(AppSearchUserInstance instance) {
         EXECUTOR.execute(() -> {
+            long totalLatencyStartMillis = SystemClock.elapsedRealtime();
+            OptimizeStats.Builder builder = new OptimizeStats.Builder();
             try {
-                instance.getAppSearchImpl().checkForOptimize();
+                instance.getAppSearchImpl().checkForOptimize(builder);
             } catch (AppSearchException e) {
                 Log.w(TAG, "Error occurred when check for optimize", e);
+            } finally {
+                OptimizeStats oStats = builder
+                        .setTotalLatencyMillis(
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis))
+                        .build();
+                if (oStats.getOriginalDocumentCount() > 0) {
+                    // see if optimize has been run by checking originalDocumentCount
+                    instance.getLogger().logStats(oStats);
+                }
             }
         });
     }
