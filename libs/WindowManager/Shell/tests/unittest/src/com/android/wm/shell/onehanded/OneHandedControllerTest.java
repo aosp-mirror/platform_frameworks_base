@@ -238,13 +238,6 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testSettingsObserverUpdateTimeout() {
-        mSpiedOneHandedController.onTimeoutSettingChanged();
-
-        verify(mSpiedTimeoutHandler, atLeastOnce()).setTimeout(anyInt());
-    }
-
-    @Test
     public void testSettingsObserverUpdateSwipeToNotification() {
         mSpiedOneHandedController.onSwipeToNotificationEnabledChanged();
 
