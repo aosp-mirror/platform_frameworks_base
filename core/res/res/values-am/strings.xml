@@ -567,10 +567,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"የጣት አሻራ አዶ"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"በመልክ መክፈቻ ሃርድዌርን ማስተዳደር"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"በመልክ መክፈት ሃርድዌርን ማስተዳደር"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"መተግበሪያው ጥቅም ላይ እንዲውሉ የፊት ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"በመልክ መክፈት ሃርድዌርን መጠቀም"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"መተግበሪያው የመልክ መክፈቻ ሃርድዌርን ለማረጋገጥ እንዲጠቀም ያስችለዋል"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"መተግበሪያው የበመልክ መክፈት ሃርድዌርን ለማረጋገጥ እንዲጠቀም ያስችለዋል"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"በመልክ መክፈት"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"የእርስዎን ፊት ዳግመኛ ያስመዝግቡ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ማንነትን ለይቶ ማወቅን ለማሻሻል፣ እባክዎ የእርስዎን ፊት ዳግም ያስመዝግቡ"</string>
