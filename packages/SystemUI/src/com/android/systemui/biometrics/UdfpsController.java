@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.fingerprint.IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
 
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -317,8 +318,10 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mServerRequest != null
+                    && mServerRequest.mRequestReason != REASON_AUTH_FPM_KEYGUARD
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
+                        + mServerRequest.mRequestReason);
                 mServerRequest.onUserCanceled();
                 mServerRequest = null;
                 updateOverlay();
