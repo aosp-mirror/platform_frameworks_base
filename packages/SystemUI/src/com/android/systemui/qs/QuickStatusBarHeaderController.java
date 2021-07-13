@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.VariableDateViewController;
 import com.android.systemui.util.ViewController;
 
 import java.util.List;
@@ -70,6 +71,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private final FeatureFlags mFeatureFlags;
+
+    private final VariableDateViewController mVariableDateViewControllerDateView;
+    private final VariableDateViewController mVariableDateViewControllerClockDateView;
 
     private boolean mListening;
     private boolean mMicCameraIndicatorsEnabled;
@@ -134,7 +138,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             SysuiColorExtractor colorExtractor,
             PrivacyDialogController privacyDialogController,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            VariableDateViewController.Factory variableDateViewControllerFactory) {
         super(view);
         mPrivacyItemController = privacyItemController;
         mActivityStarter = activityStarter;
@@ -154,6 +159,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyChip = mView.findViewById(R.id.privacy_chip);
         mClockView = mView.findViewById(R.id.clock);
         mIconContainer = mView.findViewById(R.id.statusIcons);
+        mVariableDateViewControllerDateView = variableDateViewControllerFactory.create(
+                mView.requireViewById(R.id.date)
+        );
+        mVariableDateViewControllerClockDateView = variableDateViewControllerFactory.create(
+                mView.requireViewById(R.id.date_clock)
+        );
 
         mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, featureFlags);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
@@ -203,6 +214,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mView.onAttach(mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots);
 
         mDemoModeController.addCallback(mDemoModeReceiver);
+
+        mVariableDateViewControllerDateView.init();
+        mVariableDateViewControllerClockDateView.init();
     }
 
     @Override
