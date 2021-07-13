@@ -205,6 +205,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Nullable
     private IBinder mFragmentToken;
 
+    /**
+     * The PID of the organizer that created this TaskFragment. It should be the same as the PID
+     * of {@link android.window.TaskFragmentCreationParams#getOwnerToken()}.
+     * {@link ActivityRecord#INVALID_PID} if this is not an organizer-created TaskFragment.
+     */
+    private int mTaskFragmentOrganizerPid = ActivityRecord.INVALID_PID;
+
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpFullBounds = new Rect();
@@ -271,8 +278,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         taskFragment.mAdjacentTaskFragment = this;
     }
 
-    void setTaskFragmentOrganizer(ITaskFragmentOrganizer organizer) {
+    void setTaskFragmentOrganizer(ITaskFragmentOrganizer organizer, int pid) {
         mTaskFragmentOrganizer = organizer;
+        mTaskFragmentOrganizerPid = pid;
     }
 
     TaskFragment getAdjacentTaskFragment() {
@@ -1991,12 +1999,23 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * called from {@link Task}.
      */
     TaskFragmentInfo getTaskFragmentInfo() {
+        List<IBinder> childActivities = new ArrayList<>();
+        for (int i = 0; i < getChildCount(); i++) {
+            WindowContainer wc = getChildAt(i);
+            if (mTaskFragmentOrganizerPid != ActivityRecord.INVALID_PID
+                    && wc.asActivityRecord() != null
+                    && wc.asActivityRecord().getPid() == mTaskFragmentOrganizerPid) {
+                // Only includes Activities that belong to the organizer process for security.
+                childActivities.add(wc.asActivityRecord().appToken);
+            }
+        }
         return new TaskFragmentInfo(
                 mFragmentToken,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getChildCount() == 0,
-                isVisible());
+                isVisible(),
+                childActivities);
     }
 
     @Nullable
