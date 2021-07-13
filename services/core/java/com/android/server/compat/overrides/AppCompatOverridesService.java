@@ -16,6 +16,9 @@
 
 package com.android.server.compat.overrides;
 
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
+import static android.content.Intent.ACTION_PACKAGE_CHANGED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.provider.DeviceConfig.NAMESPACE_APP_COMPAT_OVERRIDES;
 
@@ -24,11 +27,16 @@ import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_
 
 import static java.util.Collections.emptySet;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.PackageOverride;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.DeviceConfig;
@@ -67,8 +75,9 @@ public final class AppCompatOverridesService {
     private final PackageManager mPackageManager;
     private final IPlatformCompat mPlatformCompat;
     private final List<String> mSupportedNamespaces;
-    private final List<DeviceConfigListener> mDeviceConfigListeners;
     private final AppCompatOverridesParser mOverridesParser;
+    private final PackageReceiver mPackageReceiver;
+    private final List<DeviceConfigListener> mDeviceConfigListeners;
 
     private AppCompatOverridesService(Context context) {
         this(context, IPlatformCompat.Stub.asInterface(
@@ -82,29 +91,40 @@ public final class AppCompatOverridesService {
         mPackageManager = mContext.getPackageManager();
         mPlatformCompat = platformCompat;
         mSupportedNamespaces = supportedNamespaces;
-        mDeviceConfigListeners = new ArrayList<>();
         mOverridesParser = new AppCompatOverridesParser(mPackageManager);
+        mPackageReceiver = new PackageReceiver(mContext);
+        mDeviceConfigListeners = new ArrayList<>();
+        for (String namespace : mSupportedNamespaces) {
+            mDeviceConfigListeners.add(new DeviceConfigListener(mContext, namespace));
+        }
     }
 
     @Override
     public void finalize() {
         unregisterDeviceConfigListeners();
+        unregisterPackageReceiver();
     }
 
     @VisibleForTesting
     void registerDeviceConfigListeners() {
-        for (String namespace : mSupportedNamespaces) {
-            DeviceConfigListener listener = new DeviceConfigListener(namespace);
-            DeviceConfig.addOnPropertiesChangedListener(namespace, mContext.getMainExecutor(),
-                    listener);
-            mDeviceConfigListeners.add(listener);
+        for (DeviceConfigListener listener : mDeviceConfigListeners) {
+            listener.register();
         }
     }
 
     private void unregisterDeviceConfigListeners() {
         for (DeviceConfigListener listener : mDeviceConfigListeners) {
-            DeviceConfig.removeOnPropertiesChangedListener(listener);
+            listener.unregister();
         }
+    }
+
+    @VisibleForTesting
+    void registerPackageReceiver() {
+        mPackageReceiver.register();
+    }
+
+    private void unregisterPackageReceiver() {
+        mPackageReceiver.unregister();
     }
 
     /**
@@ -140,6 +160,25 @@ public final class AppCompatOverridesService {
     }
 
     /**
+     * Applies all overrides in all supported namespaces for the given {@code packageName}.
+     */
+    private void applyAllPackageOverrides(String packageName) {
+        Long versionCode = getVersionCodeOrNull(packageName);
+        if (versionCode == null) {
+            return;
+        }
+
+        for (String namespace : mSupportedNamespaces) {
+            // We apply overrides for each namespace separately so that if there is a failure for
+            // one namespace, the other namespaces won't be affected.
+            applyPackageOverrides(
+                    DeviceConfig.getString(namespace, packageName, /* defaultValue= */ ""),
+                    packageName, versionCode,
+                    getOverridesToRemove(namespace).getOrDefault(packageName, emptySet()));
+        }
+    }
+
+    /**
      * Calls {@link AppCompatOverridesParser#parsePackageOverrides} on the given arguments, adds the
      * resulting {@link PackageOverrides#overridesToAdd} via {@link
      * IPlatformCompat#putOverridesOnReleaseBuilds}, and removes the resulting {@link
@@ -152,6 +191,24 @@ public final class AppCompatOverridesService {
                 configStr, versionCode, changeIdsToSkip);
         putPackageOverrides(packageName, packageOverrides.overridesToAdd);
         removePackageOverrides(packageName, packageOverrides.overridesToRemove);
+    }
+
+    /**
+     * Removes all owned overrides in all supported namespaces for the given {@code packageName}.
+     *
+     * <p>If a certain namespace doesn't have a package override flag for the given {@code
+     * packageName}, that namespace is skipped.</p>
+     */
+    private void removeAllPackageOverrides(String packageName) {
+        for (String namespace : mSupportedNamespaces) {
+            if (DeviceConfig.getString(namespace, packageName, /* defaultValue= */ "").isEmpty()) {
+                // No overrides for this package in this namespace.
+                continue;
+            }
+            // We remove overrides for each namespace separately so that if there is a failure for
+            // one namespace, the other namespaces won't be affected.
+            removePackageOverrides(packageName, getOwnedChangeIds(namespace));
+        }
     }
 
     /**
@@ -211,6 +268,10 @@ public final class AppCompatOverridesService {
         }
     }
 
+    private boolean isInstalledForAnyUser(String packageName) {
+        return getVersionCodeOrNull(packageName) != null;
+    }
+
     @Nullable
     private Long getVersionCodeOrNull(String packageName) {
         try {
@@ -218,7 +279,7 @@ public final class AppCompatOverridesService {
                     MATCH_ANY_USER);
             return applicationInfo.longVersionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            // Package isn't installed yet.
+            // Package isn't installed for any user.
             return null;
         }
     }
@@ -239,6 +300,7 @@ public final class AppCompatOverridesService {
         public void onStart() {
             mService = new AppCompatOverridesService(getContext());
             mService.registerDeviceConfigListeners();
+            mService.registerPackageReceiver();
         }
     }
 
@@ -247,10 +309,21 @@ public final class AppCompatOverridesService {
      * namespace and adds/removes overrides according to the changed flags.
      */
     private final class DeviceConfigListener implements DeviceConfig.OnPropertiesChangedListener {
+        private final Context mContext;
         private final String mNamespace;
 
-        private DeviceConfigListener(String namespace) {
+        private DeviceConfigListener(Context context, String namespace) {
+            mContext = context;
             mNamespace = namespace;
+        }
+
+        private void register() {
+            DeviceConfig.addOnPropertiesChangedListener(mNamespace, mContext.getMainExecutor(),
+                    this);
+        }
+
+        private void unregister() {
+            DeviceConfig.removeOnPropertiesChangedListener(this);
         }
 
         @Override
@@ -276,4 +349,60 @@ public final class AppCompatOverridesService {
             }
         }
     }
+
+    /**
+     * A {@link BroadcastReceiver} that listens on package added/changed/removed events and
+     * adds/removes overrides according to the corresponding Device Config flags.
+     */
+    private final class PackageReceiver extends BroadcastReceiver {
+        private final Context mContext;
+        private final IntentFilter mIntentFilter;
+
+        private PackageReceiver(Context context) {
+            mContext = context;
+            mIntentFilter = new IntentFilter();
+            mIntentFilter.addAction(ACTION_PACKAGE_ADDED);
+            mIntentFilter.addAction(ACTION_PACKAGE_CHANGED);
+            mIntentFilter.addAction(ACTION_PACKAGE_REMOVED);
+            mIntentFilter.addDataScheme("package");
+        }
+
+        private void register() {
+            mContext.registerReceiverForAllUsers(this, mIntentFilter, /* broadcastPermission= */
+                    null, /* scheduler= */ null);
+        }
+
+        private void unregister() {
+            mContext.unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
+            Uri data = intent.getData();
+            if (data == null) {
+                Slog.w(TAG, "Failed to get package name in package receiver");
+                return;
+            }
+            String packageName = data.getSchemeSpecificPart();
+            String action = intent.getAction();
+            if (action == null) {
+                Slog.w(TAG, "Failed to get action in package receiver");
+                return;
+            }
+            switch (action) {
+                case ACTION_PACKAGE_ADDED:
+                case ACTION_PACKAGE_CHANGED:
+                    applyAllPackageOverrides(packageName);
+                    break;
+                case ACTION_PACKAGE_REMOVED:
+                    if (!isInstalledForAnyUser(packageName)) {
+                        removeAllPackageOverrides(packageName);
+                    }
+                    break;
+                default:
+                    Slog.w(TAG, "Unsupported action in package receiver: " + action);
+                    break;
+            }
+        }
+    };
 }
