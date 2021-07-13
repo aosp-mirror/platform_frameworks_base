@@ -37,6 +37,7 @@ import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IIntegerConsumer;
@@ -447,8 +448,9 @@ public class ImsMmTelManager implements RegistrationManager {
                     executor.execute(() -> stateCallback.accept(result));
                 }
             });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w("ImsMmTelManager", "Error getting registration state: " + e);
+            executor.execute(() -> stateCallback.accept(REGISTRATION_STATE_NOT_REGISTERED));
         }
     }
 
@@ -488,8 +490,10 @@ public class ImsMmTelManager implements RegistrationManager {
                             executor.execute(() -> transportTypeCallback.accept(result));
                         }
                     });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w("ImsMmTelManager", "Error getting transport type: " + e);
+            executor.execute(() -> transportTypeCallback.accept(
+                    AccessNetworkConstants.TRANSPORT_TYPE_INVALID));
         }
     }
 
