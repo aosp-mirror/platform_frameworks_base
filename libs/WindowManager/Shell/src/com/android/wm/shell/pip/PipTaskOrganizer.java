@@ -614,6 +614,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void onEndOfSwipePipToHomeTransition() {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mInSwipePipToHomeTransition = false;
+            mSwipePipToHomeOverlay = null;
+            return;
+        }
+
         final Rect destinationBounds = mPipBoundsState.getBounds();
         final SurfaceControl swipeToHomeOverlay = mSwipePipToHomeOverlay;
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
