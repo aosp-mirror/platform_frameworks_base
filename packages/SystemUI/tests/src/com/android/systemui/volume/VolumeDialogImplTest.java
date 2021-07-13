@@ -99,6 +99,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         Prefs.putInt(mContext,
                 Prefs.Key.SEEN_RINGER_GUIDANCE_COUNT,
                 VolumePrefs.SHOW_RINGER_TOAST_COUNT + 1);
+
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
     }
 
     private State createShellState() {
