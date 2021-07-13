@@ -17,6 +17,7 @@
 package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -40,7 +41,7 @@ class ImeTracingClientImpl extends ImeTracing {
 
     @Override
     public void triggerClientDump(String where, @NonNull InputMethodManager immInstance,
-            ProtoOutputStream icProto) {
+            @Nullable byte[] icProto) {
         if (!isEnabled() || !isAvailable()) {
             return;
         }
@@ -65,7 +66,7 @@ class ImeTracingClientImpl extends ImeTracing {
 
     @Override
     public void triggerServiceDump(String where, @NonNull AbstractInputMethodService service,
-            ProtoOutputStream icProto) {
+            @Nullable byte[] icProto) {
         if (!isEnabled() || !isAvailable()) {
             return;
         }

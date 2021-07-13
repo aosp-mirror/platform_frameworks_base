@@ -350,7 +350,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     void executeMessage(Message msg) {
-        ProtoOutputStream icProto;
+        byte[] icProto;
         switch (msg.what) {
             case DO_GET_TEXT_AFTER_CURSOR: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextAfterCursor");

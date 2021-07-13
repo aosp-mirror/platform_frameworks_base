@@ -107,13 +107,13 @@ class ImeTracingServerImpl extends ImeTracing {
 
     @Override
     public void triggerClientDump(String where, InputMethodManager immInstance,
-            ProtoOutputStream icProto) {
+            @Nullable byte[] icProto) {
         // Intentionally left empty, this is implemented in ImeTracingClientImpl
     }
 
     @Override
     public void triggerServiceDump(String where, AbstractInputMethodService service,
-            ProtoOutputStream icProto) {
+            @Nullable byte[] icProto) {
         // Intentionally left empty, this is implemented in ImeTracingClientImpl
     }
 

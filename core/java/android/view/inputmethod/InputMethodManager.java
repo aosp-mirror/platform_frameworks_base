@@ -3210,7 +3210,7 @@ public final class InputMethodManager {
      * @hide
      */
     @GuardedBy("mH")
-    public void dumpDebug(ProtoOutputStream proto, ProtoOutputStream icProto) {
+    public void dumpDebug(ProtoOutputStream proto, @Nullable byte[] icProto) {
         if (mCurrentInputMethodSession == null) {
             return;
         }
@@ -3236,7 +3236,7 @@ public final class InputMethodManager {
                 mServedInputConnectionWrapper.dumpDebug(proto, INPUT_CONNECTION);
             }
             if (icProto != null) {
-                proto.write(INPUT_CONNECTION_CALL, icProto.getBytes());
+                proto.write(INPUT_CONNECTION_CALL, icProto);
             }
         }
     }
