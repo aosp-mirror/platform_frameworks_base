@@ -152,6 +152,10 @@ public final class AttributionSource implements Parcelable {
 
     AttributionSource(@NonNull Parcel in) {
         this(AttributionSourceState.CREATOR.createFromParcel(in));
+
+        // Since we just unpacked this object as part of it transiting a Binder
+        // call, this is the perfect time to enforce that its UID can be trusted
+        enforceCallingUid();
     }
 
     /** @hide */
