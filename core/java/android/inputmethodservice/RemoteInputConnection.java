@@ -22,8 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.imetracing.ImeTracing;
-import android.util.imetracing.InputConnectionHelper;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -39,6 +37,8 @@ import android.view.inputmethod.SurroundingText;
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.IInputContextInvoker;
+import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.InputConnectionProtoDumper;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 
@@ -93,8 +93,8 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionHelper.buildGetTextAfterCursorProto(length,
-                    flags, result);
+            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(
+                    length, flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextAfterCursor",
                     inputMethodService, icProto);
         }
@@ -118,8 +118,8 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionHelper.buildGetTextBeforeCursorProto(length,
-                    flags, result);
+            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(
+                    length, flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextBeforeCursor",
                     inputMethodService, icProto);
         }
@@ -143,7 +143,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionHelper.buildGetSelectedTextProto(flags,
+            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(flags,
                     result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getSelectedText",
                     inputMethodService, icProto);
@@ -182,7 +182,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionHelper.buildGetSurroundingTextProto(
+            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetSurroundingTextProto(
                     beforeLength, afterLength, flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getSurroundingText",
                     inputMethodService, icProto);
@@ -203,7 +203,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionHelper.buildGetCursorCapsModeProto(
+            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(
                     reqModes, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getCursorCapsMode",
                     inputMethodService, icProto);
@@ -224,7 +224,7 @@ final class RemoteInputConnection implements InputConnection {
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
         if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
-            ProtoOutputStream icProto = InputConnectionHelper.buildGetExtractedTextProto(
+            ProtoOutputStream icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(
                     request, flags, result);
             ImeTracing.getInstance().triggerServiceDump(TAG + "#getExtractedText",
                     inputMethodService, icProto);

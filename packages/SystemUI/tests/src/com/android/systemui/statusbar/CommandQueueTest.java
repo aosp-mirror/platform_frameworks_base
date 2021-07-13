@@ -33,6 +33,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
+import android.view.InsetsState;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -124,24 +125,25 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testOnSystemBarAttributesChanged() {
         doTestOnSystemBarAttributesChanged(DEFAULT_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, false);
+                BEHAVIOR_DEFAULT, new InsetsState(), "test");
     }
 
     @Test
     public void testOnSystemBarAttributesChangedForSecondaryDisplay() {
         doTestOnSystemBarAttributesChanged(SECONDARY_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, false);
+                BEHAVIOR_DEFAULT, new InsetsState(), "test");
     }
 
     private void doTestOnSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, boolean isFullscreen) {
+            @Behavior int behavior, InsetsState requestedState, String packageName) {
         mCommandQueue.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                navbarColorManagedByIme, behavior, isFullscreen);
+                navbarColorManagedByIme, behavior, requestedState, packageName);
         waitForIdleSync();
         verify(mCallbacks).onSystemBarAttributesChanged(eq(displayId), eq(appearance),
-                eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior), eq(isFullscreen));
+                eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior),
+                eq(requestedState), eq(packageName));
     }
 
     @Test

@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -73,7 +72,7 @@ public class WindowContext extends ContextWrapper {
         mType = type;
         mOptions = options;
         mWindowManager = createWindowContextWindowManager(this);
-        IBinder token = getWindowContextToken();
+        WindowTokenClient token = (WindowTokenClient) getWindowContextToken();
         mController = new WindowContextController(token);
 
         Reference.reachabilityFence(this);

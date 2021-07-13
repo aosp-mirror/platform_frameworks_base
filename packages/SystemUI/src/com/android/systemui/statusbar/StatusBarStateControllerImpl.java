@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar;
 
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
 
@@ -23,10 +27,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.os.SystemProperties;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.view.InsetsFlags;
+import android.view.InsetsState;
 import android.view.View;
+import android.view.ViewDebug;
+import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
@@ -56,6 +66,9 @@ import javax.inject.Inject;
 public class StatusBarStateControllerImpl implements SysuiStatusBarStateController,
         CallbackController<StateListener>, Dumpable {
     private static final String TAG = "SbStateController";
+    private static final boolean DEBUG_IMMERSIVE_APPS =
+            SystemProperties.getBoolean("persist.debug.immersive_apps", false);
+
     // Must be a power of 2
     private static final int HISTORY_SIZE = 32;
 
@@ -420,7 +433,10 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public void setFullscreenState(boolean isFullscreen) {
+    public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
+            InsetsState requestedState, String packageName) {
+        boolean isFullscreen = !requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
+                || !requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR);
         if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
             synchronized (mListeners) {
@@ -428,6 +444,19 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
                     rl.mListener.onFullscreenStateChanged(isFullscreen, true /* isImmersive */);
                 }
             }
+        }
+
+        // TODO (b/190543382): Finish the logging logic.
+        // This section can be removed if we don't need to print it on logcat.
+        if (DEBUG_IMMERSIVE_APPS) {
+            boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
+            String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
+            String requestedVisibilityString = requestedState.toSourceVisibilityString();
+            if (requestedVisibilityString.isEmpty()) {
+                requestedVisibilityString = "none";
+            }
+            Log.d(TAG, packageName + " dim=" + dim + " behavior=" + behaviorName
+                    + " requested visibilities: " + requestedVisibilityString);
         }
     }
 

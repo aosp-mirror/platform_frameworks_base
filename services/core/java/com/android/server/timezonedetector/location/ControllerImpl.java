@@ -166,12 +166,6 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             stopProviders();
             mPrimaryProvider.destroy();
             mSecondaryProvider.destroy();
-
-            // If the controller has made a "certain" suggestion, it should make an uncertain
-            // suggestion to cancel it.
-            if (mLastSuggestion != null && mLastSuggestion.getZoneIds() != null) {
-                makeSuggestion(createUncertainSuggestion("Controller is destroyed"));
-            }
         }
     }
 
@@ -182,6 +176,16 @@ class ControllerImpl extends LocationTimeZoneProviderController {
 
         // By definition, if both providers are stopped, the controller is uncertain.
         cancelUncertaintyTimeout();
+
+        // If a previous "certain" suggestion has been made, then a new "uncertain"
+        // suggestion must now be made to indicate the controller {does not / no longer has}
+        // an opinion and will not be sending further updates (until at least the providers are
+        // re-started).
+        if (mLastSuggestion != null && mLastSuggestion.getZoneIds() != null) {
+            GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
+                    "Providers are stopping");
+            makeSuggestion(suggestion);
+        }
     }
 
     @GuardedBy("mSharedLock")
@@ -275,21 +279,6 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             }
         } else {
             stopProviders();
-
-            // There can be an uncertainty timeout set if the controller most recently received
-            // an uncertain event. This is a no-op if there isn't a timeout set.
-            cancelUncertaintyTimeout();
-
-            // If a previous "certain" suggestion has been made, then a new "uncertain"
-            // suggestion must now be made to indicate the controller {does not / no longer has}
-            // an opinion and will not be sending further updates (until at least the config
-            // changes again and providers are re-started).
-            if (mLastSuggestion != null && mLastSuggestion.getZoneIds() != null) {
-                GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                        "Provider is stopped:"
-                                + " primary=" + mPrimaryProvider.getCurrentState());
-                makeSuggestion(suggestion);
-            }
         }
     }
 

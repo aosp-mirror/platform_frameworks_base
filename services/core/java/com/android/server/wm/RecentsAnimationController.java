@@ -952,7 +952,8 @@ public class RecentsAnimationController implements DeathRecipient {
                         "cleanupAnimation(): Notify animation finished mPendingAnimations=%d "
                                 + "reorderMode=%d",
                         mPendingAnimations.size(), reorderMode);
-        if (reorderMode != REORDER_MOVE_TO_ORIGINAL_POSITION) {
+        if (reorderMode != REORDER_MOVE_TO_ORIGINAL_POSITION
+                && mTargetActivityRecord != mDisplayContent.topRunningActivity()) {
             // Notify the state at the beginning because the removeAnimation may notify the
             // transition is finished. This is a signal that there will be a next transition.
             mDisplayContent.mFixedRotationTransitionListener.notifyRecentsWillBeTop();
@@ -1029,7 +1030,13 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+        if (!mCanceled) {
+            cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+        } else {
+            // If we are already canceled but with a screenshot, and are waiting for the
+            // cleanupScreenshot() callback, then force-finish the animation now
+            continueDeferredCancelAnimation();
+        }
 
         synchronized (mService.getWindowManagerLock()) {
             // Clear associated input consumers on runner death

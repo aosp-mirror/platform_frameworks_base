@@ -17379,6 +17379,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } catch (PackageManagerException e) {
             request.installResult.setError("APEX installation failed", e);
         }
+        invalidatePackageInfoCache();
         notifyInstallObserver(request.installResult, request.args.observer);
     }
 

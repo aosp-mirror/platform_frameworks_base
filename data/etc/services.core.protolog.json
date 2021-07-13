@@ -79,12 +79,6 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
-    "-2029985709": {
-      "message": "setFocusedTask: taskId=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
     "-2024464438": {
       "message": "app-onAnimationFinished(): mOuter=%s",
       "level": "DEBUG",
@@ -1782,6 +1776,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-55185509": {
+      "message": "setFocusedTask: taskId=%d touchedActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-50336993": {
       "message": "moveFocusableActivityToTop: activity=%s",

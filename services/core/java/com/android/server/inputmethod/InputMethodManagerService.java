@@ -44,7 +44,6 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FOR
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_IME_WITH_HARD_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_REQUESTED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_READY;
-import static android.util.imetracing.ImeTracing.IME_TRACING_FROM_IMMS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
@@ -124,7 +123,6 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.IWindowManager;
 import android.view.InputChannel;
@@ -160,6 +158,7 @@ import com.android.internal.inputmethod.IIInputContentUriTokenResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IVoidResultCallback;
+import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
@@ -3927,7 +3926,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @Override
     public void startProtoDump(byte[] protoDump, int source, String where) {
-        if (protoDump == null && source != IME_TRACING_FROM_IMMS) {
+        if (protoDump == null && source != ImeTracing.IME_TRACING_FROM_IMMS) {
             // Dump not triggered from IMMS, but no proto information provided.
             return;
         }
@@ -3954,7 +3953,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 proto.write(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE, protoDump);
                 proto.end(service_token);
                 break;
-            case IME_TRACING_FROM_IMMS:
+            case ImeTracing.IME_TRACING_FROM_IMMS:
                 final long managerservice_token =
                         proto.start(InputMethodManagerServiceTraceFileProto.ENTRY);
                 proto.write(InputMethodManagerServiceTraceProto.ELAPSED_REALTIME_NANOS,

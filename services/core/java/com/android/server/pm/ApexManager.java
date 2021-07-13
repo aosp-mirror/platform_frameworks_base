@@ -1051,13 +1051,18 @@ public abstract class ApexManager {
                 final ParsedPackage parsedPackage2 = packageParser.parsePackage(
                         new File(apexInfo.modulePath), flags, /* useCaches= */ false);
                 final PackageInfo finalApexPkg = PackageInfoWithoutStateUtils.generate(
-                        parsedPackage, apexInfo, flags);
+                        parsedPackage2, apexInfo, flags);
                 // Installation was successful, time to update mAllPackagesCache
                 synchronized (mLock) {
-                    for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                        if (mAllPackagesCache.get(i).equals(existingApexPkg)) {
-                            mAllPackagesCache.set(i, finalApexPkg);
-                            break;
+                    if (isFactory(existingApexPkg)) {
+                        existingApexPkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+                        mAllPackagesCache.add(finalApexPkg);
+                    } else {
+                        for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
+                            if (mAllPackagesCache.get(i).equals(existingApexPkg)) {
+                                mAllPackagesCache.set(i, finalApexPkg);
+                                break;
+                            }
                         }
                     }
                 }
