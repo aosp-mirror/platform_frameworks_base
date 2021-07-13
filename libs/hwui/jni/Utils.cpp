@@ -18,6 +18,7 @@
 #include "SkUtils.h"
 #include "SkData.h"
 
+#include <inttypes.h>
 #include <log/log.h>
 
 using namespace android;
@@ -76,7 +77,7 @@ bool AssetStreamAdaptor::seek(size_t position) {
 
 bool AssetStreamAdaptor::move(long offset) {
     if (fAsset->seek(offset, SEEK_CUR) == -1) {
-        SkDebugf("---- fAsset->seek(%i, SEEK_CUR) failed\n", offset);
+        SkDebugf("---- fAsset->seek(%li, SEEK_CUR) failed\n", offset);
         return false;
     }
 
@@ -100,7 +101,7 @@ size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
         }
         off64_t newOffset = fAsset->seek(size, SEEK_CUR);
         if (-1 == newOffset) {
-            SkDebugf("---- fAsset->seek(%d) failed\n", size);
+            SkDebugf("---- fAsset->seek(%zu) failed\n", size);
             return 0;
         }
         amount = newOffset - oldOffset;
@@ -127,14 +128,14 @@ sk_sp<SkData> android::CopyAssetToData(Asset* asset) {
 
     const off64_t size = asset->getLength();
     if (size <= 0) {
-        SkDebugf("---- copyAsset: asset->getLength() returned %d\n", size);
+        SkDebugf("---- copyAsset: asset->getLength() returned %" PRId64 "\n", size);
         return NULL;
     }
 
     sk_sp<SkData> data(SkData::MakeUninitialized(size));
     const off64_t len = asset->read(data->writable_data(), size);
     if (len != size) {
-        SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
+        SkDebugf("---- copyAsset: asset->read(%" PRId64 ") returned %" PRId64 "\n", size, len);
         return NULL;
     }
 
