@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -125,7 +126,8 @@ import java.util.function.Consumer;
  * the group summary (which contains 1 or more child notifications).
  */
 public class ExpandableNotificationRow extends ActivatableNotificationView
-        implements PluginListener<NotificationMenuRowPlugin>, SwipeableView {
+        implements PluginListener<NotificationMenuRowPlugin>, SwipeableView,
+        NotificationFadeAware.FadeOptimizedNotification {
 
     private static final boolean DEBUG = false;
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
@@ -138,6 +140,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mUpdateBackgroundOnUpdate;
     private boolean mNotificationTranslationFinished = false;
     private boolean mIsSnoozed;
+    private boolean mIsFaded;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -2753,15 +2756,110 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // alphas are reset
             if (mChildrenContainer != null) {
                 mChildrenContainer.setAlpha(1.0f);
-                mChildrenContainer.setLayerType(LAYER_TYPE_NONE, null);
             }
             for (NotificationContentView l : mLayouts) {
                 l.setAlpha(1.0f);
-                l.setLayerType(LAYER_TYPE_NONE, null);
+            }
+            if (FADE_LAYER_OPTIMIZATION_ENABLED) {
+                setNotificationFaded(false);
+            } else {
+                setNotificationFadedOnChildren(false);
             }
         } else {
             setHeadsUpAnimatingAway(false);
         }
+    }
+
+    /** Gets the last value set with {@link #setNotificationFaded(boolean)} */
+    @Override
+    public boolean isNotificationFaded() {
+        return mIsFaded;
+    }
+
+    /**
+     * This class needs to delegate the faded state set on it by
+     * {@link com.android.systemui.statusbar.notification.stack.ViewState} to its children.
+     * Having each notification use layerType of HARDWARE anytime it fades in/out can result in
+     * extremely large layers (in the case of groups, it can even exceed the device height).
+     * Because these large renders can cause serious jank when rendering, we instead have
+     * notifications return false from {@link #hasOverlappingRendering()} and delegate the
+     * layerType to child views which really need it in order to render correctly, such as icon
+     * views or the conversation face pile.
+     *
+     * Another compounding factor for notifications is that we change clipping on each frame of the
+     * animation, so the hardware layer isn't able to do any caching at the top level, but the
+     * individual elements we render with hardware layers (e.g. icons) cache wonderfully because we
+     * never invalidate them.
+     */
+    @Override
+    public void setNotificationFaded(boolean faded) {
+        mIsFaded = faded;
+        if (childrenRequireOverlappingRendering()) {
+            // == Simple Scenario ==
+            // If a child (like remote input) needs this to have overlapping rendering, then set
+            // the layerType of this view and reset the children to render as if the notification is
+            // not fading.
+            NotificationFadeAware.setLayerTypeForFaded(this, faded);
+            setNotificationFadedOnChildren(false);
+        } else {
+            // == Delegating Scenario ==
+            // This is the new normal for alpha: Explicitly reset this view's layer type to NONE,
+            // and require that all children use their own hardware layer if they have bad
+            // overlapping rendering.
+            NotificationFadeAware.setLayerTypeForFaded(this, false);
+            setNotificationFadedOnChildren(faded);
+        }
+    }
+
+    /** Private helper for iterating over the layouts and children containers to set faded state */
+    private void setNotificationFadedOnChildren(boolean faded) {
+        delegateNotificationFaded(mChildrenContainer, faded);
+        for (NotificationContentView layout : mLayouts) {
+            delegateNotificationFaded(layout, faded);
+        }
+    }
+
+    private static void delegateNotificationFaded(@Nullable View view, boolean faded) {
+        if (FADE_LAYER_OPTIMIZATION_ENABLED && view instanceof NotificationFadeAware) {
+            ((NotificationFadeAware) view).setNotificationFaded(faded);
+        } else {
+            NotificationFadeAware.setLayerTypeForFaded(view, faded);
+        }
+    }
+
+    /**
+     * Only declare overlapping rendering if independent children of the view require it.
+     */
+    @Override
+    public boolean hasOverlappingRendering() {
+        return super.hasOverlappingRendering() && childrenRequireOverlappingRendering();
+    }
+
+    /**
+     * Because RemoteInputView is designed to be an opaque view that overlaps the Actions row, the
+     * row should require overlapping rendering to ensure that the overlapped view doesn't bleed
+     * through when alpha fading.
+     *
+     * Note that this currently works for top-level notifications which squish their height down
+     * while collapsing the shade, but does not work for children inside groups, because the
+     * accordion affect does not apply to those views, so super.hasOverlappingRendering() will
+     * always return false to avoid the clipping caused when the view's measured height is less than
+     * the 'actual height'.
+     */
+    private boolean childrenRequireOverlappingRendering() {
+        if (!FADE_LAYER_OPTIMIZATION_ENABLED) {
+            return true;
+        }
+        // The colorized background is another layer with which all other elements overlap
+        if (getEntry().getSbn().getNotification().isColorized()) {
+            return true;
+        }
+        // Check if the showing layout has a need for overlapping rendering.
+        // NOTE: We could check both public and private layouts here, but becuause these states
+        //  don't animate well, there are bigger visual artifacts if we start changing the shown
+        //  layout during shade expansion.
+        NotificationContentView showingLayout = getShowingLayout();
+        return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
     }
 
     @Override
