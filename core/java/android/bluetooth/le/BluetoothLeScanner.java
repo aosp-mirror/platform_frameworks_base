@@ -356,8 +356,11 @@ public final class BluetoothLeScanner {
     /**
      * Start truncated scan.
      *
+     * @deprecated this is not used anywhere
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresBluetoothScanPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
