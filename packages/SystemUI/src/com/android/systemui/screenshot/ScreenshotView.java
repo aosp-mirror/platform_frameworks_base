@@ -137,13 +137,11 @@ public class ScreenshotView extends FrameLayout implements
     private int mNavMode;
     private boolean mOrientationPortrait;
     private boolean mDirectionLTR;
-    private int mStaticLeftMargin;
 
     private ScreenshotSelectorView mScreenshotSelectorView;
     private ImageView mScrollingScrim;
     private View mScreenshotStatic;
     private ImageView mScreenshotPreview;
-    private View mTransitionView;
     private View mScreenshotPreviewBorder;
     private ImageView mScrollablePreview;
     private ImageView mScreenshotFlash;
@@ -341,7 +339,6 @@ public class ScreenshotView extends FrameLayout implements
         mScrollingScrim = requireNonNull(findViewById(R.id.screenshot_scrolling_scrim));
         mScreenshotStatic = requireNonNull(findViewById(R.id.global_screenshot_static));
         mScreenshotPreview = requireNonNull(findViewById(R.id.global_screenshot_preview));
-        mTransitionView = requireNonNull(findViewById(R.id.screenshot_transition_view));
         mScreenshotPreviewBorder = requireNonNull(
                 findViewById(R.id.global_screenshot_preview_border));
         mScreenshotPreview.setClipToOutline(true);
@@ -387,12 +384,8 @@ public class ScreenshotView extends FrameLayout implements
         requestFocus();
     }
 
-    View getTransitionView() {
-        return mTransitionView;
-    }
-
-    int getStaticLeftMargin() {
-        return mStaticLeftMargin;
+    View getScreenshotPreview() {
+        return mScreenshotPreview;
     }
 
     /**
@@ -433,7 +426,6 @@ public class ScreenshotView extends FrameLayout implements
                         Math.max(cutout.getSafeInsetRight(), waterfall.right), waterfall.bottom);
             }
         }
-        mStaticLeftMargin = p.leftMargin;
         mScreenshotStatic.setLayoutParams(p);
         mScreenshotStatic.requestLayout();
     }
