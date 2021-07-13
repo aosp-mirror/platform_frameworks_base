@@ -452,13 +452,13 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"टॅबलेट लवकरच बंद होऊ शकतो (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिव्हाइस लवकरच बंद होऊ शकते (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहे"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • चार्जिंग तात्पुरते मर्यादित आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळूहळू चार्ज होत आहे"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळू चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेसने चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
