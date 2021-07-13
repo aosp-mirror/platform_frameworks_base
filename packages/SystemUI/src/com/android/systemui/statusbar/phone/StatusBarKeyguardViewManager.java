@@ -521,7 +521,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void reset(boolean hideBouncerWhenShowing) {
         if (mShowing) {
-            mNotificationPanelViewController.closeQs();
+            // Hide quick settings.
+            mNotificationPanelViewController.resetViews(/* animate= */ true);
+            // Hide bouncer and quick-quick settings.
             if (mOccluded && !mDozing) {
                 mStatusBar.hideKeyguard();
                 if (hideBouncerWhenShowing || mBouncer.needsFullscreenBouncer()) {
