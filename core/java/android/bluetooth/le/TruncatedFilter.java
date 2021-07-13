@@ -24,8 +24,11 @@ import java.util.List;
 /**
  * A special scan filter that lets the client decide how the scan record should be stored.
  *
+ * @deprecated this is not used anywhere
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 @SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class TruncatedFilter {
