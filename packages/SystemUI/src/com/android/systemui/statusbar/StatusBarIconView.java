@@ -416,10 +416,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         return mIcon.icon;
     }
 
-    private Drawable getIcon(StatusBarIcon icon) {
-        Context notifContext = mNotification != null ?
-                mNotification.getPackageContext(getContext()) : getContext();
-        return getIcon(getContext(), notifContext, icon);
+    Drawable getIcon(StatusBarIcon icon) {
+        Context notifContext = getContext();
+        if (mNotification != null) {
+            notifContext = mNotification.getPackageContext(getContext());
+        }
+        return getIcon(getContext(), notifContext != null ? notifContext : getContext(), icon);
     }
 
     /**
