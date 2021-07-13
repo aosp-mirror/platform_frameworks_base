@@ -53,6 +53,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -69,6 +70,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
 
     protected final NetworkController mController;
+    private final AccessPointController mAccessPointController;
     private final DataUsageController mDataController;
     // The last updated tile state, 0: mobile, 1: wifi, 2: ethernet.
     private int mLastTileState = -1;
@@ -88,6 +90,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             NetworkController networkController,
+            AccessPointController accessPointController,
             InternetDialogFactory internetDialogFactory
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
@@ -95,6 +98,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         mInternetDialogFactory = internetDialogFactory;
         mHandler = mainHandler;
         mController = networkController;
+        mAccessPointController = accessPointController;
         mDataController = mController.getMobileDataController();
         mController.observe(getLifecycle(), mSignalCallback);
     }
@@ -118,9 +122,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        mHandler.post(() -> {
-            mInternetDialogFactory.create(true);
-        });
+        boolean canConfigMobileData = mAccessPointController.canConfigMobileData();
+        mHandler.post(() -> mInternetDialogFactory.create(true, canConfigMobileData));
     }
 
     @Override
