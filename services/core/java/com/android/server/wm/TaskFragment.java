@@ -283,6 +283,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTaskFragmentOrganizerPid = pid;
     }
 
+    /** Whether this TaskFragment is organized by the given {@code organizer}. */
+    boolean hasTaskFragmentOrganizer(ITaskFragmentOrganizer organizer) {
+        return organizer != null && mTaskFragmentOrganizer != null
+                && organizer.asBinder().equals(mTaskFragmentOrganizer.asBinder());
+    }
+
     TaskFragment getAdjacentTaskFragment() {
         return mAdjacentTaskFragment;
     }

@@ -22,6 +22,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.testing.Assert.assertThrows;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -29,7 +31,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -37,8 +41,12 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
+import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransactionCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -61,18 +69,24 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private TaskFragment mTaskFragment;
     private TaskFragmentInfo mTaskFragmentInfo;
     private IBinder mFragmentToken;
+    private WindowContainerTransaction mTransaction;
+    private WindowContainerToken mFragmentWindowToken;
 
     @Before
     public void setup() {
         mController = mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
         mIOrganizer = mOrganizer.getIOrganizer();
-        mTaskFragment = mock(TaskFragment.class);
         mTaskFragmentInfo = mock(TaskFragmentInfo.class);
         mFragmentToken = new Binder();
+        mTaskFragment =
+                new TaskFragment(mAtm, mFragmentToken, true /* createdByOrganizer */);
+        mTransaction = new WindowContainerTransaction();
+        mFragmentWindowToken = mTaskFragment.mRemoteToken.toWindowContainerToken();
 
         spyOn(mController);
         spyOn(mOrganizer);
+        spyOn(mTaskFragment);
         doReturn(mIOrganizer).when(mTaskFragment).getTaskFragmentOrganizer();
         doReturn(mTaskFragmentInfo).when(mTaskFragment).getTaskFragmentInfo();
         doReturn(new SurfaceControl()).when(mTaskFragment).getSurfaceControl();
@@ -179,5 +193,157 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mIOrganizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
 
         verify(mOrganizer).onTaskFragmentError(eq(errorCallbackToken), eq(exception));
+    }
+
+    @Test
+    public void testWindowContainerTransaction_setTaskFragmentOrganizer() {
+        mOrganizer.applyTransaction(mTransaction);
+
+        assertEquals(mIOrganizer, mTransaction.getTaskFragmentOrganizer());
+
+        mTransaction = new WindowContainerTransaction();
+        mOrganizer.applySyncTransaction(
+                mTransaction, mock(WindowContainerTransactionCallback.class));
+
+        assertEquals(mIOrganizer, mTransaction.getTaskFragmentOrganizer());
+    }
+
+    @Test
+    public void testApplyTransaction_enforceConfigurationChangeOnOrganizedTaskFragment()
+            throws RemoteException {
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Throw exception if the transaction is trying to change a window that is not organized by
+        // the organizer.
+        mTransaction.setBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
+
+        assertThrows(SecurityException.class, () -> {
+            try {
+                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+            } catch (RemoteException e) {
+                fail();
+            }
+        });
+
+        // Allow transaction to change a TaskFragment created by the organizer.
+        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceHierarchyChange_reorder() throws RemoteException {
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Throw exception if the transaction is trying to change a window that is not organized by
+        // the organizer.
+        mTransaction.reorder(mFragmentWindowToken, true /* onTop */);
+
+        assertThrows(SecurityException.class, () -> {
+            try {
+                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+            } catch (RemoteException e) {
+                fail();
+            }
+        });
+
+        // Allow transaction to change a TaskFragment created by the organizer.
+        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceHierarchyChange_deleteTaskFragment()
+            throws RemoteException {
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Throw exception if the transaction is trying to change a window that is not organized by
+        // the organizer.
+        mTransaction.deleteTaskFragment(mFragmentWindowToken);
+
+        assertThrows(SecurityException.class, () -> {
+            try {
+                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+            } catch (RemoteException e) {
+                fail();
+            }
+        });
+
+        // Allow transaction to change a TaskFragment created by the organizer.
+        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceHierarchyChange_setAdjacentRoots()
+            throws RemoteException {
+        final TaskFragment taskFragment2 =
+                new TaskFragment(mAtm, new Binder(), true /* createdByOrganizer */);
+        final WindowContainerToken token2 = taskFragment2.mRemoteToken.toWindowContainerToken();
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Throw exception if the transaction is trying to change a window that is not organized by
+        // the organizer.
+        mTransaction.setAdjacentRoots(mFragmentWindowToken, token2);
+
+        assertThrows(SecurityException.class, () -> {
+            try {
+                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+            } catch (RemoteException e) {
+                fail();
+            }
+        });
+
+        // Allow transaction to change a TaskFragment created by the organizer.
+        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+        taskFragment2.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceHierarchyChange_createTaskFragment() {
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
+        mTransaction.createTaskFragment(mock(TaskFragmentCreationParams.class));
+        mTransaction.startActivityInTaskFragment(
+                mFragmentToken, new Intent(), null /* activityOptions */);
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
+
+        // It is expected to fail for the mock TaskFragmentCreationParams. It is ok as we are
+        // testing the security check here.
+        assertThrows(IllegalArgumentException.class, () -> {
+            try {
+                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+            } catch (RemoteException e) {
+                fail();
+            }
+        });
+    }
+
+    @Test
+    public void testApplyTransaction_enforceHierarchyChange_reparentChildren()
+            throws RemoteException {
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Throw exception if the transaction is trying to change a window that is not organized by
+        // the organizer.
+        mTransaction.reparentChildren(mFragmentWindowToken, null /* newParent */);
+
+        assertThrows(SecurityException.class, () -> {
+            try {
+                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+            } catch (RemoteException e) {
+                fail();
+            }
+        });
+
+        // Allow transaction to change a TaskFragment created by the organizer.
+        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
     }
 }
