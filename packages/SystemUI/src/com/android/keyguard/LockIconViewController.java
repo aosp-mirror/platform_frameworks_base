@@ -98,7 +98,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private float mHeightPixels;
     private float mWidthPixels;
     private float mDensity;
-    private int mKgBottomAreaHeight;
+    private int mAmbientIndicationHeight; // in pixels
+    private int mKgIndicationHeight; // in pixels
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -280,7 +281,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mWidthPixels = metrics.widthPixels;
         mHeightPixels = metrics.heightPixels;
         mDensity = metrics.density;
-        mKgBottomAreaHeight = mView.getContext().getResources().getDimensionPixelSize(
+        mKgIndicationHeight = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom)
             + mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
@@ -295,13 +296,22 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         } else {
             final float distAboveKgBottomArea = 12 * mDensity;
             final float radius = 36 * mDensity;
+            final int kgBottomAreaHeight = Math.max(mKgIndicationHeight, mAmbientIndicationHeight);
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - mKgBottomAreaHeight - distAboveKgBottomArea
+                        mHeightPixels - kgBottomAreaHeight - distAboveKgBottomArea
                             - radius / 2), (int) radius);
         }
 
         mView.getHitRect(mSensorTouchLocation);
+    }
+
+    /**
+     * Set the location of ambient indication if showing (ie: now playing)
+     */
+    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
+        mAmbientIndicationHeight = ambientIndicationBottomPadding;
+        updateLockIconLocation();
     }
 
     @Override

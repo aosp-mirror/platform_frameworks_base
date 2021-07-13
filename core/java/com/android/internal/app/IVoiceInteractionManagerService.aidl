@@ -231,6 +231,9 @@ interface IVoiceInteractionManagerService {
 
     /**
      * Set configuration and pass read-only data to hotword detection service.
+     * Caller must provide an identity, used for permission tracking purposes.
+     * The uid/pid elements of the identity will be ignored by the server and replaced with the ones
+     * provided by binder.
      *
      * @param options Application configuration data to provide to the
      * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
@@ -241,6 +244,7 @@ interface IVoiceInteractionManagerService {
      * @param callback Use this to report {@link HotwordDetectionService} status.
      */
     void updateState(
+            in Identity originatorIdentity,
             in PersistableBundle options,
             in SharedMemory sharedMemory,
             in IHotwordRecognitionStatusCallback callback);
