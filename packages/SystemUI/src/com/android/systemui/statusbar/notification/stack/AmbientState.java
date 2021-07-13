@@ -70,7 +70,6 @@ public class AmbientState {
     private boolean mPanelFullWidth;
     private boolean mPulsing;
     private boolean mUnlockHintRunning;
-    private boolean mQsCustomizerShowing;
     private int mIntrinsicPadding;
     private float mHideAmount;
     private boolean mAppearing;
@@ -481,14 +480,6 @@ public class AmbientState {
 
     public boolean isUnlockHintRunning() {
         return mUnlockHintRunning;
-    }
-
-    public boolean isQsCustomizerShowing() {
-        return mQsCustomizerShowing;
-    }
-
-    public void setQsCustomizerShowing(boolean qsCustomizerShowing) {
-        mQsCustomizerShowing = qsCustomizerShowing;
     }
 
     public void setIntrinsicPadding(int intrinsicPadding) {

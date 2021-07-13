@@ -183,7 +183,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
 
             viewState.hidden = !mAmbientState.isShadeExpanded()
-                    || mAmbientState.isQsCustomizerShowing()
                     || algorithmState.firstViewInShelf == null;
 
             final int indexOfFirstViewInShelf = algorithmState.visibleChildren.indexOf(
