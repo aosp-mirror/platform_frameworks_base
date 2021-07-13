@@ -708,8 +708,10 @@ public class NotificationStackScrollLayoutController {
             });
         }
 
-        mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled,
-                mSwipeHelper);
+        mView.initView(mView.getContext(), mSwipeHelper);
+        mView.setKeyguardBypassEnabled(mKeyguardBypassController.getBypassEnabled());
+        mKeyguardBypassController
+                .registerOnBypassStateChangedListener(mView::setKeyguardBypassEnabled);
 
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
