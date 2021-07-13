@@ -203,7 +203,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 tf.getName(), parent.mTaskId);
         try {
             organizer.onTaskFragmentParentInfoChanged(tf.getFragmentToken(), parentConfig);
-            mLastSentTaskFragmentParentConfigs.put(tf, parentConfig);
+            mLastSentTaskFragmentParentConfigs.put(tf, new Configuration(parentConfig));
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
         }
