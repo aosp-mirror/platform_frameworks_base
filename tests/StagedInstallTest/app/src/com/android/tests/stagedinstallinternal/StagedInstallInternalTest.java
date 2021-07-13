@@ -212,6 +212,28 @@ public class StagedInstallInternalTest {
             assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
         }
 
+        TestApp apex1 = new TestApp("TestRebootlessApexV1", "test.apex.rebootless", 1,
+                /* isApex= */ true, "test.rebootless_apex_v1.apex");
+        Install.single(apex1).commit();
+
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
+        }
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless",
+                    PackageManager.MATCH_APEX | PackageManager.MATCH_FACTORY_ONLY);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                    .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
+        }
+
         TestApp apex2 = new TestApp("TestRebootlessApexV1", "test.apex.rebootless", 2,
                 /* isApex= */ true, "test.rebootless_apex_v2.apex");
         Install.single(apex2).commit();
@@ -223,6 +245,15 @@ public class StagedInstallInternalTest {
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
                     .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
+        }
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless",
+                    PackageManager.MATCH_APEX | PackageManager.MATCH_FACTORY_ONLY);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                    .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
         }
     }
 
