@@ -62,6 +62,7 @@ public final class AccessNetworkConstants {
         switch (transportType) {
             case TRANSPORT_TYPE_WWAN: return "WWAN";
             case TRANSPORT_TYPE_WLAN: return "WLAN";
+            case TRANSPORT_TYPE_INVALID: return "INVALID";
             default: return Integer.toString(transportType);
         }
     }
