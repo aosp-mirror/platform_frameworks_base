@@ -19,7 +19,6 @@ package com.android.internal.inputmethod;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
-import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -107,13 +106,29 @@ public abstract class ImeTracing {
             @Nullable byte[] icProto);
 
     /**
+     * A delegate for {@link #triggerServiceDump(String, ServiceDumper, byte[])}.
+     */
+    @FunctionalInterface
+    public interface ServiceDumper {
+        /**
+         * Dumps internal data into {@link ProtoOutputStream}.
+         *
+         * @param proto {@link ProtoOutputStream} to be dumped into.
+         * @param icProto {@link android.view.inputmethod.InputConnection} call data in proto
+         *                format.
+         */
+        void dumpToProto(ProtoOutputStream proto, @Nullable byte[] icProto);
+    }
+
+    /**
      * Starts a proto dump of the currently connected InputMethodService information.
      *
      * @param where Place where the trace was triggered.
-     * @param service The {@link android.inputmethodservice.InputMethodService} to be dumped.
+     * @param dumper {@link ServiceDumper} to be used to dump
+     *               {@link android.inputmethodservice.InputMethodService}.
      * @param icProto {@link android.view.inputmethod.InputConnection} call data in proto format.
      */
-    public abstract void triggerServiceDump(String where, AbstractInputMethodService service,
+    public abstract void triggerServiceDump(String where, ServiceDumper dumper,
             @Nullable byte[] icProto);
 
     /**
