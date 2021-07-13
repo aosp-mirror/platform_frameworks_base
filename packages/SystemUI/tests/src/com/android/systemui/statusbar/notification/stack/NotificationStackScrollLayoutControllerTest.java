@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -128,7 +129,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private ForegroundServiceDungeonView mForegroundServiceDungeonView;
     @Mock private LayoutInflater mLayoutInflater;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private RemoteInputController mRemoteInputController;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private ShadeController mShadeController;
 
@@ -145,7 +145,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         when(mFgServicesSectionController.createView(mLayoutInflater))
                 .thenReturn(mForegroundServiceDungeonView);
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -400,6 +399,19 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.attach(mNotificationStackScrollLayout);
         verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection(
                 any(ForegroundServiceDungeonView.class));
+    }
+
+    @Test
+    public void testUpdateFooter_remoteInput() {
+        ArgumentCaptor<RemoteInputController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(RemoteInputController.Callback.class);
+        doNothing().when(mRemoteInputManager).addControllerCallback(callbackCaptor.capture());
+        when(mRemoteInputManager.isRemoteInputActive()).thenReturn(false);
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(false);
+        RemoteInputController.Callback callback = callbackCaptor.getValue();
+        callback.onRemoteInputActive(true);
+        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(true);
     }
 
     private LogMaker logMatcher(int category, int type) {

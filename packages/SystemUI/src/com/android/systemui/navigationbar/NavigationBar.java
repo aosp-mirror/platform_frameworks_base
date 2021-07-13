@@ -290,7 +290,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         @Override
         public boolean shouldHideOnTouch() {
-            return !mNotificationRemoteInputManager.getController().isRemoteInputActive();
+            return !mNotificationRemoteInputManager.isRemoteInputActive();
         }
 
         @Override

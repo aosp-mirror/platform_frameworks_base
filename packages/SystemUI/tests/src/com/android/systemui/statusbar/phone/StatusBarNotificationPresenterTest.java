@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -89,8 +88,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     public void setup() {
         NotificationRemoteInputManager notificationRemoteInputManager =
                 mock(NotificationRemoteInputManager.class);
-        when(notificationRemoteInputManager.getController())
-                .thenReturn(mock(RemoteInputController.class));
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mCommandQueue = new CommandQueue(mContext);
