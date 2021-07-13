@@ -740,8 +740,22 @@ public class AnalogClock extends View {
         }
     }
 
-    private void onTimeChanged() {
-        Instant now = mClock.instant();
+    /**
+     * Return the current Instant to be used for drawing the clockface. Protected to allow
+     * subclasses to override this to show a different time from the system clock.
+     *
+     * @return the Instant to be shown on the clockface
+     * @hide
+     */
+    protected Instant now() {
+        return mClock.instant();
+    }
+
+    /**
+     * @hide
+     */
+    protected void onTimeChanged() {
+        Instant now = now();
         onTimeChanged(now.atZone(mClock.getZone()).toLocalTime(), now.toEpochMilli());
     }
 
@@ -789,7 +803,7 @@ public class AnalogClock extends View {
                 return;
             }
 
-            Instant now = mClock.instant();
+            Instant now = now();
             ZonedDateTime zonedDateTime = now.atZone(mClock.getZone());
             LocalTime localTime = zonedDateTime.toLocalTime();
 
