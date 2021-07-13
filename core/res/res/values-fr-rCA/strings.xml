@@ -541,10 +541,10 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permet à l\'application d\'envoyer des annonces aux appareils Bluetooth à proximité"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Autorisez l\'application à déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information sur le service préféré de paiement NFC"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir de l\'information sur le service préféré de paiement NFC comme les aides enregistrées et la route de destination."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information sur le service préféré de paiement CCP"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir de l\'information sur le service préféré de paiement CCP comme les aides enregistrées et la route de destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"gérer la communication en champ proche"</string>
-    <string name="permdesc_nfc" msgid="8352737680695296741">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie NFC (communication en champ proche)."</string>
+    <string name="permdesc_nfc" msgid="8352737680695296741">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie CCP (communication en champ proche)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"demander la complexité du verrouillage d\'écran"</string>
@@ -1512,7 +1512,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Touchez pour quitter l\'application de conduite."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Précédent"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Suivante"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"Passer"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"Ignorer"</string>
     <string name="no_matches" msgid="6472699895759164599">"Aucune partie"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Rechercher sur la page"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">

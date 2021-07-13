@@ -611,7 +611,7 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Бет тану"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Face Unlock функциясына қатысты мәселе шықты"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Бет тану функциясына қатысты мәселе шықты"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Бет үлгісін жою үшін түртіңіз, содан соң жаңа бет үлгісін қосыңыз."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Бет тану функциясын реттеу"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефоныңызға қарап, оның құлпын ашыңыз."</string>

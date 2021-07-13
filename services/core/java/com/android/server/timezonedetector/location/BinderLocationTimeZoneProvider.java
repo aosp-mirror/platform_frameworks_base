@@ -67,7 +67,7 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
 
             @Override
             public void onProviderUnbound() {
-                handleProviderLost("onProviderUnbound()");
+                handleTemporaryFailure("onProviderUnbound()");
             }
         });
     }
@@ -75,50 +75,6 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     @Override
     void onDestroy() {
         mProxy.destroy();
-    }
-
-    private void handleProviderLost(String reason) {
-        mThreadingDomain.assertCurrentThread();
-
-        synchronized (mSharedLock) {
-            ProviderState currentState = mCurrentState.get();
-            switch (currentState.stateEnum) {
-                case PROVIDER_STATE_STARTED_INITIALIZING:
-                case PROVIDER_STATE_STARTED_UNCERTAIN:
-                case PROVIDER_STATE_STARTED_CERTAIN: {
-                    // Losing a remote provider is treated as becoming uncertain.
-                    String msg = "handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState;
-                    debugLog(msg);
-                    // This is an unusual PROVIDER_STATE_STARTED_UNCERTAIN state because
-                    // event == null
-                    ProviderState newState = currentState.newState(
-                            PROVIDER_STATE_STARTED_UNCERTAIN, null,
-                            currentState.currentUserConfiguration, msg);
-                    setCurrentState(newState, true);
-                    break;
-                }
-                case PROVIDER_STATE_STOPPED: {
-                    debugLog("handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState
-                            + ": No state change required, provider is stopped.");
-                    break;
-                }
-                case PROVIDER_STATE_PERM_FAILED:
-                case PROVIDER_STATE_DESTROYED: {
-                    debugLog("handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState
-                            + ": No state change required, provider is terminated.");
-                    break;
-                }
-                default: {
-                    throw new IllegalStateException("Unknown currentState=" + currentState);
-                }
-            }
-        }
     }
 
     private void handleOnProviderBound() {

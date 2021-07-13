@@ -1991,7 +1991,7 @@
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"பணிக் கணக்கு பூட்டியுள்ளது"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"பணிக் கணக்கை அன்லாக் செய்யத் தட்டுக"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> உடன் இணைக்கப்பட்டது"</string>
-    <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ஃபைல்களைப் பார்க்க, தட்டவும்"</string>
     <string name="pin_target" msgid="8036028973110156895">"பின் செய்"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> ஐப் பின் செய்"</string>
     <string name="unpin_target" msgid="3963318576590204447">"பின்னை அகற்று"</string>
