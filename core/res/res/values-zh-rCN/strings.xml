@@ -2287,10 +2287,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"现在您可以放大屏幕上的部分内容"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"在“设置”中开启"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"关闭"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"取消禁用设备麦克风"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"取消禁用设备摄像头"</string>
-    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"针对&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;及所有应用和服务"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"取消禁用"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"解锁设备麦克风"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"解锁设备摄像头"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"允许“&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;”及所有应用和服务使用"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"解锁"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"传感器隐私权"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"应用图标"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"应用品牌图片"</string>
