@@ -103,6 +103,20 @@ public class TestableDeviceConfigTest {
     }
 
     @Test
+    public void deleteProperty() {
+        DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
+        assertThat(DeviceConfig.getProperty(sNamespace, sKey)).isEqualTo(sValue);
+        DeviceConfig.deleteProperty(sNamespace, sKey);
+        assertThat(DeviceConfig.getProperty(sNamespace, sKey)).isNull();
+        String newNamespace = "namespace2";
+        String newValue = "value2";
+        DeviceConfig.setProperty(newNamespace, sKey, newValue, false);
+        assertThat(DeviceConfig.getProperty(newNamespace, sKey)).isEqualTo(newValue);
+        DeviceConfig.deleteProperty(newNamespace, sKey);
+        assertThat(DeviceConfig.getProperty(newNamespace, sKey)).isNull();
+    }
+
+    @Test
     public void getProperties_empty() {
         String newKey = "key2";
         String newValue = "value2";
@@ -189,6 +203,27 @@ public class TestableDeviceConfigTest {
         }
     }
 
+    @Test
+    public void testListener_deleteProperty() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        OnPropertiesChangedListener changeListener = (properties) -> {
+            assertThat(properties.getNamespace()).isEqualTo(sNamespace);
+            assertThat(properties.getKeyset()).containsExactly(sKey);
+            assertThat(properties.getString(sKey, "bogus_value")).isEqualTo("bogus_value");
+            assertThat(properties.getString("bogus_key", "bogus_value")).isEqualTo("bogus_value");
+            countDownLatch.countDown();
+        };
+        try {
+            DeviceConfig.addOnPropertiesChangedListener(sNamespace,
+                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
+            DeviceConfig.deleteProperty(sNamespace, sKey);
+            assertThat(countDownLatch.await(
+                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+        } finally {
+            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
+        }
+    }
 }
 
 
