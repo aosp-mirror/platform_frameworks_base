@@ -310,7 +310,8 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     void onConfigurationChanged(int configDiff) {
-        if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+        if ((configDiff & (ActivityInfo.CONFIG_ORIENTATION | ActivityInfo.CONFIG_SCREEN_SIZE))
+                != 0) {
             final Rect previousDraggableBounds = new Rect(mDraggableWindowBounds);
             mDraggableWindowBounds.set(getDraggableWindowBounds());
             // Keep the Y position with the same height ratio before the window bounds and
