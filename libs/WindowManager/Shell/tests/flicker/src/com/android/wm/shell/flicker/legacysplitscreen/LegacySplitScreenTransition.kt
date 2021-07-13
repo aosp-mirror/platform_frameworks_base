@@ -32,10 +32,12 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.getDevEnableNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setDevEnableNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.After
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 
@@ -52,6 +54,8 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
 
     @Before
     open fun setup() {
+        // Legacy split is having some issue with Shell transition, and will be deprecated soon.
+        assumeFalse(isShellTransitionsEnabled())
         prevDevEnableNonResizableMultiWindow = getDevEnableNonResizableMultiWindow(context)
         if (prevDevEnableNonResizableMultiWindow != 0) {
             // Turn off the development option

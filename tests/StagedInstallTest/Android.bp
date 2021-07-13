@@ -33,6 +33,8 @@ android_test_helper_app {
     java_resources: [
         ":com.android.apex.apkrollback.test_v2",
         ":StagedInstallTestApexV2_WrongSha",
+        ":test.rebootless_apex_v1",
+        ":test.rebootless_apex_v2",
     ],
 }
 
@@ -54,6 +56,7 @@ java_test_host {
         ":com.android.apex.cts.shim.v2_prebuilt",
         ":StagedInstallTestApexV2_WrongSha",
         ":TestAppAv1",
+        ":test.rebootless_apex_v1",
     ],
     test_suites: ["general-tests"],
     test_config: "StagedInstallInternalTest.xml",

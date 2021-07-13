@@ -5142,6 +5142,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        if (isClientVisible()) {
+            // Though this is usually unlikely to happen, still make sure the client is invisible.
+            setClientVisible(false);
+        }
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -5270,7 +5274,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            if (deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
+                    && deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
                 // Go ahead and just put the activity in pip if it supports auto-pip.
                 mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
                 return;

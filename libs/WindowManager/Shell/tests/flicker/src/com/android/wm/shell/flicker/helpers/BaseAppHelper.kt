@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.content.ComponentName
 import android.content.pm.PackageManager.FEATURE_LEANBACK
 import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
+import android.os.SystemProperties
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.util.Log
 import androidx.test.uiautomator.By
@@ -59,6 +60,9 @@ abstract class BaseAppHelper(
 
     companion object {
         private const val APP_CLOSE_WAIT_TIME_MS = 3_000L
+
+        fun isShellTransitionsEnabled() =
+                SystemProperties.getBoolean("persist.debug.shell_transit", false)
 
         fun executeShellCommand(instrumentation: Instrumentation, cmd: String) {
             try {

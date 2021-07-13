@@ -82,6 +82,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private TransactionPool mTransactionPool;
     @Mock private Transitions mTransitions;
     @Mock private SurfaceSession mSurfaceSession;
+    @Mock private OutlineManager mOutlineManager;
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -103,7 +104,8 @@ public class SplitTransitionTests extends ShellTestCase {
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession);
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
-                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession);
+                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
+                mOutlineManager);
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                     mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,

@@ -26,6 +26,7 @@ import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -45,6 +46,14 @@ class SideStage extends StageTaskListener {
             SurfaceSession surfaceSession) {
         super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
         mContext = context;
+    }
+
+    @VisibleForTesting
+    SideStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
+            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
+            SurfaceSession surfaceSession, OutlineManager outlineManager) {
+        this(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
+        mOutlineManager = outlineManager;
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
@@ -82,10 +91,16 @@ class SideStage extends StageTaskListener {
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         super.onTaskAppeared(taskInfo, leash);
-        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId) {
+        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId
+                && mOutlineManager == null) {
             mOutlineManager = new OutlineManager(mContext, mRootTaskInfo.configuration,
                     () -> mRootLeash,
                     Color.YELLOW);
+            if (mOutlineManager.getLeash() != null) {
+                mSyncQueue.runInSync(t -> {
+                    t.setLayer(mOutlineManager.getLeash(), Integer.MAX_VALUE);
+                });
+            }
         }
     }
 
