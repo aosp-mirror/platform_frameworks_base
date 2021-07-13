@@ -23,7 +23,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.Manifest;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -190,6 +193,37 @@ public class StagedInstallInternalTest {
     public void testApexActivationFailureIsCapturedInSession_Verify() throws Exception {
         int sessionId = retrieveLastSessionId();
         assertSessionFailedWithMessage(sessionId, "has unexpected SHA512 hash");
+    }
+
+    @Test
+    public void testRebootlessUpdates() throws Exception {
+        InstallUtils.dropShellPermissionIdentity();
+        InstallUtils.adoptShellPermissionIdentity(Manifest.permission.INSTALL_PACKAGE_UPDATES);
+
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                    .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
+        }
+
+        TestApp apex2 = new TestApp("TestRebootlessApexV1", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        Install.single(apex2).commit();
+
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
+            assertThat(apex.getLongVersionCode()).isEqualTo(2);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
+        }
     }
 
     private static void assertSessionFailedWithMessage(int sessionId, String msg) {
