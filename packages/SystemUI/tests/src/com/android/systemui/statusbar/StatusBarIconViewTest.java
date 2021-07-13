@@ -39,6 +39,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -130,5 +131,20 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
                 icon, 0, 0, "");
         assertFalse(mIconView.set(largeIcon));
+    }
+
+    @Test
+    public void testNullNotifInfo() {
+        Bitmap bitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888);
+        Icon icon = Icon.createWithBitmap(bitmap);
+        StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
+                icon, 0, 0, "");
+        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.getIcon(largeIcon);
+        // no crash? good
+
+        mIconView.setNotification(null);
+        mIconView.getIcon(largeIcon);
+        // no crash? good
     }
 }
