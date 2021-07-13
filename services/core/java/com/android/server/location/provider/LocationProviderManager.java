@@ -155,7 +155,7 @@ public class LocationProviderManager extends
     private static final float FASTEST_INTERVAL_JITTER_PERCENTAGE = .10f;
 
     // max absolute jitter allowed for min update interval evaluation
-    private static final int MAX_FASTEST_INTERVAL_JITTER_MS = 5 * 1000;
+    private static final int MAX_FASTEST_INTERVAL_JITTER_MS = 30 * 1000;
 
     // minimum amount of request delay in order to respect the delay, below this value the request
     // will just be scheduled immediately
