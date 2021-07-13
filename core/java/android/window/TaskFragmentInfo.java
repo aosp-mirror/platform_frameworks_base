@@ -25,6 +25,9 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Stores information about a particular TaskFragment.
  * @hide
@@ -50,9 +53,16 @@ public final class TaskFragmentInfo implements Parcelable {
     /** Whether this TaskFragment is visible on the window hierarchy. */
     private final boolean mIsVisible;
 
+    /**
+     * List of Activity tokens that are children of this TaskFragment. It only contains Activities
+     * that belong to the organizer process for security.
+     */
+    private final List<IBinder> mActivities = new ArrayList<>();
+
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
-            @NonNull Configuration configuration, boolean isEmpty, boolean isVisible) {
+            @NonNull Configuration configuration, boolean isEmpty, boolean isVisible,
+            List<IBinder> activities) {
         if (fragmentToken == null) {
             throw new IllegalArgumentException("Invalid TaskFragmentInfo.");
         }
@@ -61,6 +71,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mConfiguration.setTo(configuration);
         mIsEmpty = isEmpty;
         mIsVisible = isVisible;
+        mActivities.addAll(activities);
     }
 
     public IBinder getFragmentToken() {
@@ -83,6 +94,10 @@ public final class TaskFragmentInfo implements Parcelable {
         return mIsVisible;
     }
 
+    public List<IBinder> getActivities() {
+        return mActivities;
+    }
+
     @WindowingMode
     public int getWindowingMode() {
         return mConfiguration.windowConfiguration.getWindowingMode();
@@ -101,7 +116,8 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mToken.equals(that.mToken)
                 && mIsEmpty == that.mIsEmpty
                 && mIsVisible == that.mIsVisible
-                && getWindowingMode() == that.getWindowingMode();
+                && getWindowingMode() == that.getWindowingMode()
+                && mActivities.equals(that.mActivities);
     }
 
     private TaskFragmentInfo(Parcel in) {
@@ -110,6 +126,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mConfiguration.readFromParcel(in);
         mIsEmpty = in.readBoolean();
         mIsVisible = in.readBoolean();
+        in.readBinderList(mActivities);
     }
 
     @Override
@@ -119,6 +136,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mConfiguration.writeToParcel(dest, flags);
         dest.writeBoolean(mIsEmpty);
         dest.writeBoolean(mIsVisible);
+        dest.writeBinderList(mActivities);
     }
 
     @NonNull
