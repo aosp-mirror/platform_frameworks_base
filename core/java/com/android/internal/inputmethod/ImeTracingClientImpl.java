@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util.imetracing;
+package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
 import android.inputmethodservice.AbstractInputMethodService;
@@ -27,7 +27,7 @@ import android.view.inputmethod.InputMethodManager;
 import java.io.PrintWriter;
 
 /**
- * @hide
+ * An implementation of {@link ImeTracing} for non system_server processes.
  */
 class ImeTracingClientImpl extends ImeTracing {
     ImeTracingClientImpl() throws ServiceNotFoundException, RemoteException {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util.imetracing;
+package com.android.internal.inputmethod;
 
 import static android.view.inputmethod.InputConnectionCallProto.GET_CURSOR_CAPS_MODE;
 import static android.view.inputmethod.InputConnectionCallProto.GET_EXTRACTED_TEXT;
@@ -41,13 +41,12 @@ import android.view.inputmethod.SurroundingText;
 /**
  * Helper class for constructing {@link android.view.inputmethod.InputConnection} dumps, which are
  * integrated into {@link ImeTracing}.
- * @hide
  */
-public class InputConnectionHelper {
-    static final String TAG = "InputConnectionHelper";
+public final class InputConnectionProtoDumper {
+    static final String TAG = "InputConnectionProtoDumper";
     public static final boolean DUMP_TEXT = false;
 
-    private InputConnectionHelper() {}
+    private InputConnectionProtoDumper() {}
 
     /**
      * Builder for InputConnectionCallProto to hold
@@ -139,7 +138,7 @@ public class InputConnectionHelper {
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either {@code 0} or
      * {@link android.view.inputmethod.InputConnection#GET_TEXT_WITH_STYLES}.
-     * @param result an {@link android.view.inputmethod.SurroundingText} object describing the
+     * @param result an {@link SurroundingText} object describing the
      * surrounding text and state of selection, or null if the input connection is no longer valid,
      * or the editor can't comply with the request for some reason, or the application does not
      * implement this method. The length of the returned text might be less than the sum of
@@ -199,10 +198,10 @@ public class InputConnectionHelper {
      * data.
      *
      * @param request Description of how the text should be returned.
-     * {@link android.view.inputmethod.ExtractedTextRequest}
+     * {@link ExtractedTextRequest}
      * @param flags Additional options to control the client, either {@code 0} or
      * {@link android.view.inputmethod.InputConnection#GET_EXTRACTED_TEXT_MONITOR}.
-     * @param result an {@link android.view.inputmethod.ExtractedText}
+     * @param result an {@link ExtractedText}
      * object describing the state of the text view and containing the
      * extracted text itself, or null if the input connection is no
      * longer valid of the editor can't comply with the request for

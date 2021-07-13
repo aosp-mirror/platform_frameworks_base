@@ -27,8 +27,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
-import android.util.imetracing.ImeTracing;
-import android.util.imetracing.InputConnectionHelper;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.View;
@@ -49,6 +47,8 @@ import com.android.internal.inputmethod.ICharSequenceResultCallback;
 import com.android.internal.inputmethod.IExtractedTextResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
 import com.android.internal.inputmethod.ISurroundingTextResultCallback;
+import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.InputConnectionProtoDumper;
 import com.android.internal.os.SomeArgs;
 
 import java.lang.ref.WeakReference;
@@ -366,7 +366,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.getTextAfterCursor(msg.arg1, msg.arg2);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionHelper.buildGetTextAfterCursorProto(msg.arg1,
+                        icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(msg.arg1,
                                 msg.arg2, result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getTextAfterCursor", mParentInputMethodManager, icProto);
@@ -396,7 +396,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.getTextBeforeCursor(msg.arg1, msg.arg2);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionHelper.buildGetTextBeforeCursorProto(msg.arg1,
+                        icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(msg.arg1,
                                 msg.arg2, result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getTextBeforeCursor", mParentInputMethodManager, icProto);
@@ -426,7 +426,8 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.getSelectedText(msg.arg1);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionHelper.buildGetSelectedTextProto(msg.arg1, result);
+                        icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(msg.arg1,
+                                result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getSelectedText", mParentInputMethodManager, icProto);
                     }
@@ -459,8 +460,8 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.getSurroundingText(beforeLength, afterLength, flags);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionHelper.buildGetSurroundingTextProto(beforeLength,
-                                afterLength, flags, result);
+                        icProto = InputConnectionProtoDumper.buildGetSurroundingTextProto(
+                                beforeLength, afterLength, flags, result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getSurroundingText", mParentInputMethodManager, icProto);
                     }
@@ -489,7 +490,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.getCursorCapsMode(msg.arg1);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionHelper.buildGetCursorCapsModeProto(msg.arg1,
+                        icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(msg.arg1,
                                 result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getCursorCapsMode", mParentInputMethodManager, icProto);
@@ -521,7 +522,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.getExtractedText(request, msg.arg1);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionHelper.buildGetExtractedTextProto(request,
+                        icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(request,
                                 msg.arg1, result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getExtractedText", mParentInputMethodManager, icProto);

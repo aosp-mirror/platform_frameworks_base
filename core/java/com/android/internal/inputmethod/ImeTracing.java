@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util.imetracing;
+package com.android.internal.inputmethod;
 
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -36,8 +36,6 @@ import java.io.PrintWriter;
  * An abstract class that declares the methods for ime trace related operations - enable trace,
  * schedule trace and add new trace to buffer. Both the client and server side classes can use
  * it by getting an implementation through {@link ImeTracing#getInstance()}.
- *
- * @hide
  */
 public abstract class ImeTracing {
 
