@@ -698,7 +698,8 @@ public class UdfpsController implements DozeReceiver {
                 // This view overlaps the sensor area, so prevent it from being selectable
                 // during a11y.
                 if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING
+                        || reason == IUdfpsOverlayController.REASON_AUTH_BP) {
                     mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }
 
