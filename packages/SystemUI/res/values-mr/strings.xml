@@ -275,7 +275,7 @@
     <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"स्थान अहवाल बंद."</string>
     <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"स्थान अहवाल सुरू."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"स्थान अहवाल बंद केला."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"स्थान अहवाल सुरू केला."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"स्थान अहवाल देणे सुरू केले."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> साठी अलार्म सेट केला."</string>
     <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"पॅनल बंद करा."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"अधिक वेळ."</string>
