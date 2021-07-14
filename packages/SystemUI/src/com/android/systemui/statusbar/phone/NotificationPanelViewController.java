@@ -120,6 +120,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qs.QSDetailDisplayer;
+import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -335,6 +336,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
     private final SplitShadeHeaderController mSplitShadeHeaderController;
+    private final RecordingController mRecordingController;
     private boolean mShouldUseSplitNotificationShade;
     // The bottom padding reserved for elements of the keyguard measuring notifications
     private float mKeyguardNotificationBottomPadding;
@@ -723,6 +725,7 @@ public class NotificationPanelViewController extends PanelViewController {
             FragmentService fragmentService,
             ContentResolver contentResolver,
             QuickAccessWalletController quickAccessWalletController,
+            RecordingController recordingController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
             SplitShadeHeaderController splitShadeHeaderController,
@@ -769,6 +772,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         setPanelAlpha(255, false /* animate */);
         mCommandQueue = commandQueue;
+        mRecordingController = recordingController;
         mDisplayId = displayId;
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
@@ -2420,7 +2424,8 @@ public class NotificationPanelViewController extends PanelViewController {
             // The padding on this area is large enough that we can use a cheaper clipping strategy
             mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
             clipStatusView = qsVisible;
-            radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
+            float screenCornerRadius = mRecordingController.isRecording() ? 0 : mScreenCornerRadius;
+            radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
             statusBarClipTop = top - mKeyguardStatusBar.getTop();
         }
