@@ -20,48 +20,72 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.navigationbar.RotationButton;
 import com.android.systemui.navigationbar.RotationButtonController;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.gestural.FloatingRotationButtonPositionCalculator.Position;
 
-import java.util.function.Consumer;
-
-/** Containing logic for the rotation button on the physical left bottom corner of the screen. */
+/**
+ * Containing logic for the rotation button on the physical left bottom corner of the screen.
+ */
 public class FloatingRotationButton implements RotationButton {
 
     private static final float BACKGROUND_ALPHA = 0.92f;
+    private static final int MARGIN_ANIMATION_DURATION_MILLIS = 300;
 
-    private final Context mContext;
     private final WindowManager mWindowManager;
+    private final ViewGroup mKeyButtonContainer;
     private final KeyButtonView mKeyButtonView;
-    private final int mDiameter;
-    private final int mMargin;
+
+    private final int mContainerSize;
+
     private KeyButtonDrawable mKeyButtonDrawable;
     private boolean mIsShowing;
     private boolean mCanShow = true;
+    private int mDisplayRotation;
+
+    private boolean mIsTaskbarVisible = false;
+    private boolean mIsTaskbarStashed = false;
+
+    private final FloatingRotationButtonPositionCalculator mPositionCalculator;
 
     private RotationButtonController mRotationButtonController;
-    private Consumer<Boolean> mVisibilityChangedCallback;
+    private RotationButtonUpdatesCallback mUpdatesCallback;
+    private Position mPosition;
 
     public FloatingRotationButton(Context context) {
-        mContext = context;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mKeyButtonView = (KeyButtonView) LayoutInflater.from(mContext).inflate(
+        mWindowManager = context.getSystemService(WindowManager.class);
+        mKeyButtonContainer = (ViewGroup) LayoutInflater.from(context).inflate(
                 R.layout.rotate_suggestion, null);
+        mKeyButtonView = mKeyButtonContainer.findViewById(R.id.rotate_suggestion);
         mKeyButtonView.setVisibility(View.VISIBLE);
 
-        Resources res = mContext.getResources();
-        mDiameter = res.getDimensionPixelSize(R.dimen.floating_rotation_button_diameter);
-        mMargin = Math.max(res.getDimensionPixelSize(R.dimen.floating_rotation_button_min_margin),
+        Resources res = context.getResources();
+
+        int defaultMargin = Math.max(
+                res.getDimensionPixelSize(R.dimen.floating_rotation_button_min_margin),
                 res.getDimensionPixelSize(R.dimen.rounded_corner_content_padding));
+
+        int taskbarMarginLeft =
+                res.getDimensionPixelSize(R.dimen.floating_rotation_button_taskbar_left_margin);
+        int taskbarMarginBottom =
+                res.getDimensionPixelSize(R.dimen.floating_rotation_button_taskbar_bottom_margin);
+
+        mPositionCalculator = new FloatingRotationButtonPositionCalculator(defaultMargin,
+                taskbarMarginLeft, taskbarMarginBottom);
+
+        final int diameter = res.getDimensionPixelSize(R.dimen.floating_rotation_button_diameter);
+        mContainerSize = diameter + Math.max(defaultMargin, Math.max(taskbarMarginLeft,
+                taskbarMarginBottom));
     }
 
     @Override
@@ -72,8 +96,8 @@ public class FloatingRotationButton implements RotationButton {
     }
 
     @Override
-    public void setVisibilityChangedCallback(Consumer<Boolean> visibilityChangedCallback) {
-        mVisibilityChangedCallback = visibilityChangedCallback;
+    public void setUpdatesCallback(RotationButtonUpdatesCallback updatesCallback) {
+        mUpdatesCallback = updatesCallback;
     }
 
     @Override
@@ -86,45 +110,39 @@ public class FloatingRotationButton implements RotationButton {
         if (!mCanShow || mIsShowing) {
             return false;
         }
+
         mIsShowing = true;
         int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(mDiameter, mDiameter,
-                mMargin, mMargin, WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, flags,
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                mContainerSize,
+                mContainerSize,
+                0, 0, WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, flags,
                 PixelFormat.TRANSLUCENT);
+
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("FloatingRotationButton");
         lp.setFitInsetsTypes(0 /*types */);
-        switch (mWindowManager.getDefaultDisplay().getRotation()) {
-            case Surface.ROTATION_0:
-                lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
-                break;
-            case Surface.ROTATION_90:
-                lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-                break;
-            case Surface.ROTATION_180:
-                lp.gravity = Gravity.TOP | Gravity.RIGHT;
-                break;
-            case Surface.ROTATION_270:
-                lp.gravity = Gravity.TOP | Gravity.LEFT;
-                break;
-            default:
-                break;
-        }
-        mWindowManager.addView(mKeyButtonView, lp);
+
+        mDisplayRotation = mWindowManager.getDefaultDisplay().getRotation();
+        mPosition = mPositionCalculator
+                .calculatePosition(mDisplayRotation, mIsTaskbarVisible, mIsTaskbarStashed);
+
+        lp.gravity = mPosition.getGravity();
+        ((FrameLayout.LayoutParams) mKeyButtonView.getLayoutParams()).gravity =
+                mPosition.getGravity();
+
+        updateTranslation(mPosition, /* animate */ false);
+
+        mWindowManager.addView(mKeyButtonContainer, lp);
         if (mKeyButtonDrawable != null && mKeyButtonDrawable.canAnimate()) {
             mKeyButtonDrawable.resetAnimation();
             mKeyButtonDrawable.startAnimation();
         }
-        mKeyButtonView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5,
-                    int i6, int i7) {
-                if (mIsShowing && mVisibilityChangedCallback != null) {
-                    mVisibilityChangedCallback.accept(true);
-                }
-                mKeyButtonView.removeOnLayoutChangeListener(this);
-            }
-        });
+
+        if (mUpdatesCallback != null) {
+            mUpdatesCallback.onVisibilityChanged(true);
+        }
+
         return true;
     }
 
@@ -133,10 +151,10 @@ public class FloatingRotationButton implements RotationButton {
         if (!mIsShowing) {
             return false;
         }
-        mWindowManager.removeViewImmediate(mKeyButtonView);
+        mWindowManager.removeViewImmediate(mKeyButtonContainer);
         mIsShowing = false;
-        if (mVisibilityChangedCallback != null) {
-            mVisibilityChangedCallback.accept(false);
+        if (mUpdatesCallback != null) {
+            mUpdatesCallback.onVisibilityChanged(false);
         }
         return true;
     }
@@ -181,6 +199,45 @@ public class FloatingRotationButton implements RotationButton {
         mCanShow = canShow;
         if (!mCanShow) {
             hide();
+        }
+    }
+
+    public void onTaskbarStateChanged(boolean taskbarVisible, boolean taskbarStashed) {
+        mIsTaskbarVisible = taskbarVisible;
+        mIsTaskbarStashed = taskbarStashed;
+
+        if (!mIsShowing) return;
+
+        final Position newPosition = mPositionCalculator
+                .calculatePosition(mDisplayRotation, mIsTaskbarVisible, mIsTaskbarStashed);
+
+        if (newPosition.getTranslationX() != mPosition.getTranslationX()
+                || newPosition.getTranslationY() != mPosition.getTranslationY()) {
+            updateTranslation(newPosition, /* animate */ true);
+            mPosition = newPosition;
+        }
+    }
+
+    private void updateTranslation(Position position, boolean animate) {
+        final int translationX = position.getTranslationX();
+        final int translationY = position.getTranslationY();
+
+        if (animate) {
+            mKeyButtonView
+                    .animate()
+                    .translationX(translationX)
+                    .translationY(translationY)
+                    .setDuration(MARGIN_ANIMATION_DURATION_MILLIS)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .withEndAction(() -> {
+                        if (mUpdatesCallback != null && mIsShowing) {
+                            mUpdatesCallback.onPositionChanged();
+                        }
+                    })
+                    .start();
+        } else {
+            mKeyButtonView.setTranslationX(translationX);
+            mKeyButtonView.setTranslationY(translationY);
         }
     }
 }
