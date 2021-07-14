@@ -48,6 +48,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -183,6 +185,9 @@ public class NotificationStackScrollLayoutController {
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
+
+    @Nullable
+    private NotificationActivityStarter mNotificationActivityStarter;
 
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
 
@@ -712,6 +717,11 @@ public class NotificationStackScrollLayoutController {
         mView.setKeyguardBypassEnabled(mKeyguardBypassController.getBypassEnabled());
         mKeyguardBypassController
                 .registerOnBypassStateChangedListener(mView::setKeyguardBypassEnabled);
+        mView.setManageButtonClickListener(v -> {
+            if (mNotificationActivityStarter != null) {
+                mNotificationActivityStarter.startHistoryIntent(v, mView.isHistoryShown());
+            }
+        });
 
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
@@ -1482,6 +1492,10 @@ public class NotificationStackScrollLayoutController {
         mView.animateNextTopPaddingChange();
     }
 
+    public void setNotificationActivityStarter(NotificationActivityStarter activityStarter) {
+        mNotificationActivityStarter = activityStarter;
+    }
+
     /**
      * Enum for UiEvent logged from this class
      */
@@ -1553,7 +1567,8 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setNotificationActivityStarter(
                 NotificationActivityStarter notificationActivityStarter) {
-            mView.setNotificationActivityStarter(notificationActivityStarter);
+            NotificationStackScrollLayoutController.this
+                    .setNotificationActivityStarter(notificationActivityStarter);
         }
 
         @Override
