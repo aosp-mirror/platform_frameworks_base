@@ -327,8 +327,11 @@ public final class BluetoothLeScanner {
     /**
      * Start truncated scan.
      *
+     * @deprecated this is not used anywhere
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public void startTruncatedScan(List<TruncatedFilter> truncatedFilters, ScanSettings settings,
             final ScanCallback callback) {
