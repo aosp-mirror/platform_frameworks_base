@@ -91,7 +91,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex",
-                "/system/apex/test.rebootless_apex_v1.apex",
+                "/system/apex/test.rebootless_apex_v*.apex",
                 "/data/apex/active/test.apex.rebootless*.apex",
                 TEST_VENDOR_APEX_ALLOW_LIST);
     }
@@ -491,6 +491,13 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Test
     public void testStagedApexObserver() throws Exception {
         runPhase("testStagedApexObserver");
+    }
+
+    @Test
+    public void testRebootlessDowngrade() throws Exception {
+        pushTestApex("test.rebootless_apex_v2.apex");
+        getDevice().reboot();
+        runPhase("testRebootlessDowngrade");
     }
 
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {
