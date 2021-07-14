@@ -15,7 +15,7 @@
 -->
 
 <Chronometer android:id="@+id/chronometer" xmlns:android="http://schemas.android.com/apk/res/android"
-    android:textAppearance="@style/TextAppearance.Material.Notification.Time"
+    android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Time"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginEnd="4dp"

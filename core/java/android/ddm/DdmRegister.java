@@ -16,8 +16,9 @@
 
 package android.ddm;
 
-import org.apache.harmony.dalvik.ddmc.DdmServer;
 import android.util.Log;
+
+import org.apache.harmony.dalvik.ddmc.DdmServer;
 
 /**
  * Just a place to stick handler registrations, instead of scattering
@@ -46,7 +47,6 @@ public class DdmRegister {
         if (false)
             Log.v("ddm", "Registering DDM message handlers");
         DdmHandleHello.register();
-        DdmHandleThread.register();
         DdmHandleHeap.register();
         DdmHandleNativeHeap.register();
         DdmHandleProfiling.register();

@@ -16,19 +16,30 @@ package com.android.systemui.qs.tiles;
 
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.NetworkController;
 
 import javax.inject.Inject;
 
@@ -38,9 +49,20 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     private final DataSaverController mDataSaverController;
 
     @Inject
-    public DataSaverTile(QSHost host, NetworkController networkController) {
-        super(host);
-        mDataSaverController = networkController.getDataSaverController();
+    public DataSaverTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            FalsingManager falsingManager,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            DataSaverController dataSaverController
+    ) {
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
+        mDataSaverController = dataSaverController;
         mDataSaverController.observe(getLifecycle(), this);
     }
 
@@ -54,7 +76,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         return new Intent(Settings.ACTION_DATA_SAVER_SETTINGS);
     }
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mState.value
                 || Prefs.getBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, false)) {
             // Do it right away.
@@ -66,11 +88,13 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
         dialog.setMessage(com.android.internal.R.string.data_saver_description);
         dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
-                (OnClickListener) (dialogInterface, which) -> toggleDataSaver());
+                (OnClickListener) (dialogInterface, which) -> {
+                    toggleDataSaver();
+                    Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
+                });
         dialog.setNegativeButton(com.android.internal.R.string.cancel, null);
         dialog.setShowForAllUsers(true);
         dialog.show();
-        Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
     }
 
     private void toggleDataSaver() {

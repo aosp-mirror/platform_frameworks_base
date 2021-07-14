@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
@@ -92,7 +93,6 @@ public class BitmapDrawable extends Drawable {
     private BitmapState mBitmapState;
     private BlendModeColorFilter mBlendModeFilter;
 
-    @UnsupportedAppUsage
     private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
     private boolean mDstRectAndInsetsDirty = true;
@@ -239,9 +239,10 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public void setBitmap(Bitmap bitmap) {
+    /**
+     * Switch to a new Bitmap object.
+     */
+    public void setBitmap(@Nullable Bitmap bitmap) {
         if (mBitmapState.mBitmap != bitmap) {
             mBitmapState.mBitmap = bitmap;
             computeBitmapSize();
@@ -696,18 +697,18 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
-     * @hide only needed by a hack within ProgressBar
+     * No longer needed by ProgressBar, but still here due to UnsupportedAppUsage.
      */
     @UnsupportedAppUsage
-    public ColorStateList getTint() {
+    private ColorStateList getTint() {
         return mBitmapState.mTint;
     }
 
     /**
-     * @hide only needed by a hack within ProgressBar
+     * No longer needed by ProgressBar, but still here due to UnsupportedAppUsage.
      */
     @UnsupportedAppUsage
-    public Mode getTintMode() {
+    private Mode getTintMode() {
         return BlendMode.blendModeToPorterDuffMode(mBitmapState.mBlendMode);
     }
 
@@ -760,7 +761,6 @@ public class BitmapDrawable extends Drawable {
                 || super.isStateful();
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mBitmapState.mTint != null && mBitmapState.mTint.hasFocusStateSpecified();

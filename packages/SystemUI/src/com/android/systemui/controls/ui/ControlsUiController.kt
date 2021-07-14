@@ -17,19 +17,19 @@
 package com.android.systemui.controls.ui
 
 import android.content.ComponentName
+import android.content.Context
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.view.ViewGroup
+import com.android.systemui.controls.controller.StructureInfo
 
 interface ControlsUiController {
-    val available: Boolean
-
     companion object {
         public const val TAG = "ControlsUiController"
         public const val EXTRA_ANIMATE = "extra_animate"
     }
 
-    fun show(parent: ViewGroup, dismissGlobalActions: Runnable)
+    fun show(parent: ViewGroup, onDismiss: Runnable, activityContext: Context)
     fun hide()
 
     /**
@@ -44,4 +44,11 @@ interface ControlsUiController {
         controlId: String,
         @ControlAction.ResponseResult response: Int
     )
+
+    /**
+     * Returns the structure that is currently preferred by the user.
+     *
+     * This structure will be the one that appears when the user first opens the controls activity.
+     */
+    fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo
 }

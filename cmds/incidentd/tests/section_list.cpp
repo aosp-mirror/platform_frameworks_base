@@ -1,4 +1,4 @@
-// This file is a dummy section_list.cpp used for test only.
+// This file is a stub section_list.cpp used for test only.
 #include "section_list.h"
 
 #include "frameworks/base/cmds/incidentd/tests/test_proto.pb.h"

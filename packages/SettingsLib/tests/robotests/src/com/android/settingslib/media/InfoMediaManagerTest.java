@@ -27,7 +27,10 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +39,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
+import android.media.session.MediaSessionManager;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -68,6 +72,8 @@ public class InfoMediaManagerTest {
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
     private MediaManager.MediaDeviceCallback mCallback;
+    @Mock
+    private MediaSessionManager mMediaSessionManager;
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
@@ -76,8 +82,10 @@ public class InfoMediaManagerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
+        mContext = spy(RuntimeEnvironment.application);
 
+        doReturn(mMediaSessionManager).when(mContext).getSystemService(
+                Context.MEDIA_SESSION_SERVICE);
         mInfoMediaManager =
                 new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
         mShadowRouter2Manager = ShadowRouter2Manager.getShadow();
@@ -713,5 +721,48 @@ public class InfoMediaManagerTest {
         mInfoMediaManager.addMediaDevice(route2Info);
 
         assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void shouldDisableMediaOutput_infosSizeEqual1_returnsTrue() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        final List<MediaRoute2Info> infos = new ArrayList<>();
+        infos.add(info);
+        mShadowRouter2Manager.setAvailableRoutes(infos);
+
+        when(mRouterManager.getAvailableRoutes(anyString())).thenReturn(infos);
+        when(info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
+
+        assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isTrue();
+    }
+
+    @Test
+    public void shouldDisableMediaOutput_infosSizeEqual1AndNotCastDevice_returnsFalse() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        final List<MediaRoute2Info> infos = new ArrayList<>();
+        infos.add(info);
+        mShadowRouter2Manager.setAvailableRoutes(infos);
+
+        when(mRouterManager.getAvailableRoutes(anyString())).thenReturn(infos);
+        when(info.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isFalse();
+    }
+
+
+    @Test
+    public void shouldDisableMediaOutput_infosSizeOverThan1_returnsFalse() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        final MediaRoute2Info info2 = mock(MediaRoute2Info.class);
+        final List<MediaRoute2Info> infos = new ArrayList<>();
+        infos.add(info);
+        infos.add(info2);
+        mShadowRouter2Manager.setAvailableRoutes(infos);
+
+        when(mRouterManager.getAvailableRoutes(anyString())).thenReturn(infos);
+        when(info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
+        when(info2.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
+
+        assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isFalse();
     }
 }

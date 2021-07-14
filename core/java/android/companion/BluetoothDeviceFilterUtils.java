@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanFilter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.wifi.ScanResult;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.util.Log;
@@ -120,17 +121,17 @@ public class BluetoothDeviceFilterUtils {
         Log.i(LOG_TAG, getDeviceDisplayNameInternal(device) + (result ? " ~ " : " !~ ") + criteria);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String getDeviceDisplayNameInternal(@NonNull BluetoothDevice device) {
         return firstNotEmpty(device.getAlias(), device.getAddress());
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String getDeviceDisplayNameInternal(@NonNull ScanResult device) {
         return firstNotEmpty(device.SSID, device.BSSID);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String getDeviceMacAddress(@NonNull Parcelable device) {
         if (device instanceof BluetoothDevice) {
             return ((BluetoothDevice) device).getAddress();

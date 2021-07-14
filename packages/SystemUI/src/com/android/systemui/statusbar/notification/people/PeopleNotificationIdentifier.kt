@@ -19,14 +19,15 @@ package com.android.systemui.statusbar.notification.people
 import android.annotation.IntDef
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.StatusBarNotification
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.PeopleNotificationType
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_FULL_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
-import com.android.systemui.statusbar.phone.NotificationGroupManager
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.max
 
 interface PeopleNotificationIdentifier {
@@ -40,10 +41,12 @@ interface PeopleNotificationIdentifier {
      *  that users shortcuts.
      */
     @PeopleNotificationType
-    fun getPeopleNotificationType(sbn: StatusBarNotification, ranking: Ranking): Int
+    fun getPeopleNotificationType(entry: NotificationEntry): Int
 
-    fun compareTo(@PeopleNotificationType a: Int,
-                  @PeopleNotificationType b: Int): Int
+    fun compareTo(
+        @PeopleNotificationType a: Int,
+        @PeopleNotificationType b: Int
+    ): Int
 
     companion object {
 
@@ -59,27 +62,30 @@ interface PeopleNotificationIdentifier {
     }
 }
 
-@Singleton
+@SysUISingleton
 class PeopleNotificationIdentifierImpl @Inject constructor(
     private val personExtractor: NotificationPersonExtractor,
-    private val groupManager: NotificationGroupManager
+    private val groupManager: GroupMembershipManager
 ) : PeopleNotificationIdentifier {
 
     @PeopleNotificationType
-    override fun getPeopleNotificationType(sbn: StatusBarNotification, ranking: Ranking): Int =
-            when (val type = ranking.personTypeInfo) {
+    override fun getPeopleNotificationType(entry: NotificationEntry): Int =
+            when (val type = entry.ranking.personTypeInfo) {
                 TYPE_IMPORTANT_PERSON -> TYPE_IMPORTANT_PERSON
                 else -> {
-                    when (val type = upperBound(type, extractPersonTypeInfo(sbn))) {
+                    when (val type = upperBound(type, extractPersonTypeInfo(entry.sbn))) {
                         TYPE_IMPORTANT_PERSON -> TYPE_IMPORTANT_PERSON
-                        else -> upperBound(type, getPeopleTypeOfSummary(sbn))
+                        else -> upperBound(type, getPeopleTypeOfSummary(entry))
                     }
                 }
             }
 
-    override fun compareTo(@PeopleNotificationType a: Int,
-                  @PeopleNotificationType b: Int): Int {
-        return b.compareTo(a);
+    override fun compareTo(
+        @PeopleNotificationType a: Int,
+        @PeopleNotificationType b: Int
+    ): Int
+    {
+        return b.compareTo(a)
     }
 
     /**
@@ -97,7 +103,7 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
     private val Ranking.personTypeInfo
         get() = when {
             !isConversation -> TYPE_NON_PERSON
-            shortcutInfo == null -> TYPE_PERSON
+            conversationShortcutInfo == null -> TYPE_PERSON
             channel?.isImportantConversation == true -> TYPE_IMPORTANT_PERSON
             else -> TYPE_FULL_PERSON
         }
@@ -105,14 +111,14 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
     private fun extractPersonTypeInfo(sbn: StatusBarNotification) =
             if (personExtractor.isPersonNotification(sbn)) TYPE_PERSON else TYPE_NON_PERSON
 
-    private fun getPeopleTypeOfSummary(statusBarNotification: StatusBarNotification): Int {
-        if (!groupManager.isSummaryOfGroup(statusBarNotification)) {
+    private fun getPeopleTypeOfSummary(entry: NotificationEntry): Int {
+        if (!groupManager.isGroupSummary(entry)) {
             return TYPE_NON_PERSON
         }
 
-        val childTypes = groupManager.getChildren(statusBarNotification)
+        val childTypes = groupManager.getChildren(entry)
                 ?.asSequence()
-                ?.map { getPeopleNotificationType(it.sbn, it.ranking) }
+                ?.map { getPeopleNotificationType(it) }
                 ?: return TYPE_NON_PERSON
 
         var groupType = TYPE_NON_PERSON

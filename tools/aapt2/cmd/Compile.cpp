@@ -75,8 +75,10 @@ struct ResourcePathData {
 };
 
 // Resource file paths are expected to look like: [--/res/]type[-config]/name
-static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path, const char dir_sep,
-                                                       std::string* out_error) {
+static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
+                                                       const char dir_sep,
+                                                       std::string* out_error,
+                                                       const CompileOptions& options) {
   std::vector<std::string> parts = util::Split(path, dir_sep);
   if (parts.size() < 2) {
     if (out_error) *out_error = "bad resource path";
@@ -121,7 +123,11 @@ static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path, 
     }
   }
 
-  return ResourcePathData{Source(path),          dir_str.to_string(),    name.to_string(),
+  const Source res_path = options.source_path
+      ? StringPiece(options.source_path.value())
+      : StringPiece(path);
+
+  return ResourcePathData{res_path, dir_str.to_string(), name.to_string(),
                           extension.to_string(), config_str.to_string(), config};
 }
 
@@ -181,17 +187,6 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     PseudolocaleGenerator pseudolocale_generator;
     if (!pseudolocale_generator.Consume(context, &table)) {
       return false;
-    }
-  }
-
-  // Ensure we have the compilation package at least.
-  table.CreatePackage(context->GetCompilationPackage());
-
-  // Assign an ID to any package that has resources.
-  for (auto& pkg : table.packages) {
-    if (!pkg->id) {
-      // If no package ID was set while parsing (public identifiers), auto assign an ID.
-      pkg->id = context->GetPackageId();
     }
   }
 
@@ -667,7 +662,8 @@ int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* 
     // Extract resource type information from the full path
     std::string err_str;
     ResourcePathData path_data;
-    if (auto maybe_path_data = ExtractResourcePathData(path, inputs->GetDirSeparator(), &err_str)) {
+    if (auto maybe_path_data = ExtractResourcePathData(
+        path, inputs->GetDirSeparator(), &err_str, options)) {
       path_data = maybe_path_data.value();
     } else {
       context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << err_str);
@@ -747,6 +743,11 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
     context.GetDiagnostics()->Error(DiagMessage()
                                       << "only one of --dir and --zip can be specified");
     return 1;
+  } else if ((options_.res_dir || options_.res_zip) &&
+              options_.source_path && args.size() > 1) {
+      context.GetDiagnostics()->Error(DiagMessage(kPath)
+      << "Cannot use an overriding source path with multiple files.");
+      return 1;
   } else if (options_.res_dir) {
     if (!args.empty()) {
       context.GetDiagnostics()->Error(DiagMessage() << "files given but --dir specified");

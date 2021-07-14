@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Installer ng package"</string>
     <string name="install" msgid="711829760615509273">"I-install"</string>
+    <string name="update" msgid="3932142540719227615">"I-update"</string>
     <string name="done" msgid="6632441120016885253">"Tapos na"</string>
     <string name="cancel" msgid="1018267193425558088">"Kanselahin"</string>
     <string name="installing" msgid="4921993079741206516">"Nag-i-install…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Ini-install ang <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Na-install na ang app."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Gusto mo bang i-install ang application na ito?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Gusto mo bang mag-install ng update sa dati nang application na ito? Hindi mawawala ang iyong dati nang data."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Gusto mo bang mag-install ng update sa built-in na application na ito? Hindi mawawala ang iyong dati nang data."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Gusto mo bang i-install ang app na ito?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Gusto mo bang i-update ang app na ito?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Hindi na-install ang app."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Na-block ang pag-install sa package."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Hindi na-install ang app dahil nagkakaproblema ang package sa isang dati nang package."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Ang mga pagkilos na I-install/I-uninstall ay hindi sinusuportahan sa Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Inihahanda ang app…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Hindi Kilala"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Para sa iyong seguridad, hindi pinapayagan ang iyong tablet na mag-install ng mga hindi kilalang app mula sa source na ito."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Para sa iyong seguridad, hindi pinapayagan ang iyong TV na mag-install ng mga hindi kilalang app mula sa source na ito."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Para sa iyong seguridad, hindi pinapayagan ang iyong telepono na mag-install ng mga hindi kilalang app mula sa source na ito."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Para sa iyong seguridad, kasalukuyang hindi pinapayagan ang tablet mo na mag-install ng mga hindi kilalang app mula sa source na ito. Mababago mo ito sa Mga Setting."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Para sa iyong seguridad, kasalukuyang hindi pinapayagan ang TV mo na mag-install ng mga hindi kilalang app mula sa source na ito. Mababago mo ito sa Mga Setting."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Para sa iyong seguridad, kasalukuyang hindi pinapayagan ang telepono mo na mag-install ng mga hindi kilalang app mula sa source na ito. Mababago mo ito sa Mga Setting."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Mas nanganganib ang iyong telepono at personal na data sa mga pag-atake mula sa mga hindi kilalang app. Sa pamamagitan ng pag-install ng app na ito, sumasang-ayon kang ikaw ang responsable sa anumang pinsala sa iyong telepono o pagkawala ng data na maaaring magresulta mula sa paggamit nito."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Mas nanganganib ang iyong tablet at personal na data sa mga pag-atake mula sa mga hindi kilalang app. Sa pamamagitan ng pag-install ng app na ito, sumasang-ayon kang ikaw ang responsable sa anumang pinsala sa iyong tablet o pagkawala ng data na maaaring magresulta mula sa paggamit nito."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Mas nanganganib ang iyong TV at personal na data sa mga pag-atake mula sa mga hindi kilalang app. Sa pamamagitan ng pag-install ng app na ito, sumasang-ayon kang ikaw ang responsable sa anumang pinsala sa iyong TV o pagkawala ng data na maaaring magresulta mula sa paggamit nito."</string>

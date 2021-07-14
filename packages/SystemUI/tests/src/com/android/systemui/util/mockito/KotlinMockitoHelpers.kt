@@ -41,6 +41,7 @@ fun <T> eq(obj: T): T = Mockito.eq<T>(obj)
  * Generic T is nullable because implicitly bounded by Any?.
  */
 fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+inline fun <reified T> any(): T = any(T::class.java)
 
 /**
  * Returns ArgumentCaptor.capture() as nullable type to avoid java.lang.IllegalStateException

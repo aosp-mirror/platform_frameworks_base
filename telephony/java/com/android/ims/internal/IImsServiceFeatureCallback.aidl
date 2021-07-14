@@ -16,13 +16,18 @@
 
 package com.android.ims.internal;
 
+import com.android.ims.ImsFeatureContainer;
 /**
- *  Interface from ImsResolver to ImsServiceProxy in ImsManager.
- * Callback to ImsManager when a feature changes in the ImsServiceController.
+ *  Interface from ImsResolver to FeatureConnections.
+ * Callback to FeatureConnections when a feature's status changes.
  * {@hide}
  */
 oneway interface IImsServiceFeatureCallback {
-    void imsFeatureCreated(int slotId, int feature);
-    void imsFeatureRemoved(int slotId, int feature);
-    void imsStatusChanged(int slotId, int feature, int status);
+    void imsFeatureCreated(in ImsFeatureContainer feature);
+    // Reason defined in FeatureConnector.UnavailableReason
+    void imsFeatureRemoved(int reason);
+    // Status defined in ImsFeature.ImsState.
+    void imsStatusChanged(int status);
+    //Capabilities defined in ImsService.ImsServiceCapability
+    void updateCapabilities(long capabilities);
 }

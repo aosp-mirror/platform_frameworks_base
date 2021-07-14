@@ -23,26 +23,31 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Animatable;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 
 public class QSDetail extends LinearLayout {
 
@@ -53,11 +58,13 @@ public class QSDetail extends LinearLayout {
     private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
 
     private ViewGroup mDetailContent;
+    private FalsingManager mFalsingManager;
     protected TextView mDetailSettingsButton;
     protected TextView mDetailDoneButton;
-    private QSDetailClipper mClipper;
+    @VisibleForTesting
+    QSDetailClipper mClipper;
     private DetailAdapter mDetailAdapter;
-    private QSPanel mQsPanel;
+    private QSPanelController mQsPanelController;
 
     protected View mQsDetailHeader;
     protected TextView mQsDetailHeaderTitle;
@@ -72,11 +79,14 @@ public class QSDetail extends LinearLayout {
     private boolean mFullyExpanded;
     private QuickStatusBarHeader mHeader;
     private boolean mTriggeredExpand;
+    private boolean mShouldAnimate;
     private int mOpenX;
     private int mOpenY;
     private boolean mAnimatingOpen;
     private boolean mSwitchState;
-    private View mFooter;
+    private QSFooter mFooter;
+
+    private NotificationsQuickSettingsContainer mContainer;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -108,24 +118,21 @@ public class QSDetail extends LinearLayout {
         updateDetailText();
 
         mClipper = new QSDetailClipper(this);
-
-        final OnClickListener doneListener = new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                announceForAccessibility(
-                        mContext.getString(R.string.accessibility_desc_quick_settings));
-                mQsPanel.closeDetail();
-            }
-        };
-        mDetailDoneButton.setOnClickListener(doneListener);
     }
 
-    public void setQsPanel(QSPanel panel, QuickStatusBarHeader header, View footer) {
-        mQsPanel = panel;
+    public void setContainer(NotificationsQuickSettingsContainer container) {
+        mContainer = container;
+    }
+
+    /** */
+    public void setQsPanel(QSPanelController panelController, QuickStatusBarHeader header,
+            QSFooter footer, FalsingManager falsingManager) {
+        mQsPanelController = panelController;
         mHeader = header;
         mFooter = footer;
         mHeader.setCallback(mQsPanelCallback);
-        mQsPanel.setCallback(mQsPanelCallback);
+        mQsPanelController.setCallback(mQsPanelCallback);
+        mFalsingManager = falsingManager;
     }
 
     public void setHost(QSTileHost host) {
@@ -146,12 +153,29 @@ public class QSDetail extends LinearLayout {
     }
 
     private void updateDetailText() {
-        mDetailDoneButton.setText(R.string.quick_settings_done);
-        mDetailSettingsButton.setText(R.string.quick_settings_more_settings);
+        int resId = mDetailAdapter != null ? mDetailAdapter.getDoneText() : Resources.ID_NULL;
+        mDetailDoneButton.setText(
+                (resId != Resources.ID_NULL) ? resId : R.string.quick_settings_done);
+        resId = mDetailAdapter != null ? mDetailAdapter.getSettingsText() : Resources.ID_NULL;
+        mDetailSettingsButton.setText(
+                (resId != Resources.ID_NULL) ? resId : R.string.quick_settings_more_settings);
     }
 
     public void updateResources() {
         updateDetailText();
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height);
+        setLayoutParams(lp);
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        int bottomNavBar = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.bottomMargin = bottomNavBar;
+        setLayoutParams(lp);
+        return super.onApplyWindowInsets(insets);
     }
 
     public boolean isClosingDetail() {
@@ -167,6 +191,7 @@ public class QSDetail extends LinearLayout {
     public void handleShowingDetail(final DetailAdapter adapter, int x, int y,
             boolean toggleQs) {
         final boolean showingDetail = adapter != null;
+        final boolean wasShowingDetail = mDetailAdapter != null;
         setClickable(showingDetail);
         if (showingDetail) {
             setupDetailHeader(adapter);
@@ -176,6 +201,7 @@ public class QSDetail extends LinearLayout {
             } else {
                 mTriggeredExpand = false;
             }
+            mShouldAnimate = adapter.shouldAnimate();
             mOpenX = x;
             mOpenY = y;
         } else {
@@ -188,10 +214,10 @@ public class QSDetail extends LinearLayout {
             }
         }
 
-        boolean visibleDiff = (mDetailAdapter != null) != (adapter != null);
-        if (!visibleDiff && mDetailAdapter == adapter) return;  // already in right state
-        AnimatorListener listener = null;
-        if (adapter != null) {
+        boolean visibleDiff = wasShowingDetail != showingDetail;
+        if (!visibleDiff && !wasShowingDetail) return;  // already in right state
+        AnimatorListener listener;
+        if (showingDetail) {
             int viewCacheIndex = adapter.getMetricsCategory();
             View detailView = adapter.createDetailView(mContext, mDetailViews.get(viewCacheIndex),
                     mDetailContent);
@@ -210,8 +236,9 @@ public class QSDetail extends LinearLayout {
             mDetailAdapter = adapter;
             listener = mHideGridContentWhenDone;
             setVisibility(View.VISIBLE);
+            updateDetailText();
         } else {
-            if (mDetailAdapter != null) {
+            if (wasShowingDetail) {
                 Dependency.get(MetricsLogger.class).hidden(mDetailAdapter.getMetricsCategory());
                 mUiEventLogger.log(mDetailAdapter.closeDetailEvent());
             }
@@ -220,12 +247,14 @@ public class QSDetail extends LinearLayout {
             listener = mTeardownDetailWhenDone;
             mHeader.setVisibility(View.VISIBLE);
             mFooter.setVisibility(View.VISIBLE);
-            mQsPanel.setGridContentVisibility(true);
+            mQsPanelController.setGridContentVisibility(true);
             mQsPanelCallback.onScanStateChanged(false);
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-
         animateDetailVisibleDiff(x, y, visibleDiff, listener);
+        if (mContainer != null) {
+            mContainer.setDetailShowing(showingDetail);
+        }
     }
 
     protected void animateDetailVisibleDiff(int x, int y, boolean visibleDiff, AnimatorListener listener) {
@@ -233,10 +262,10 @@ public class QSDetail extends LinearLayout {
             mAnimatingOpen = mDetailAdapter != null;
             if (mFullyExpanded || mDetailAdapter != null) {
                 setAlpha(1);
-                mClipper.animateCircularClip(x, y, mDetailAdapter != null, listener);
+                mClipper.updateCircularClip(mShouldAnimate, x, y, mDetailAdapter != null, listener);
             } else {
                 animate().alpha(0)
-                        .setDuration(FADE_DURATION)
+                        .setDuration(mShouldAnimate ? FADE_DURATION : 0)
                         .setListener(listener)
                         .start();
             }
@@ -247,11 +276,24 @@ public class QSDetail extends LinearLayout {
         final Intent settingsIntent = adapter.getSettingsIntent();
         mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
         mDetailSettingsButton.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
             Dependency.get(MetricsLogger.class).action(ACTION_QS_MORE_SETTINGS,
                     adapter.getMetricsCategory());
             mUiEventLogger.log(adapter.moreSettingsEvent());
             Dependency.get(ActivityStarter.class)
                     .postStartActivityDismissingKeyguard(settingsIntent, 0);
+        });
+        mDetailDoneButton.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
+            announceForAccessibility(
+                    mContext.getString(R.string.accessibility_desc_quick_settings));
+            if (!adapter.onDoneButtonClicked()) {
+                mQsPanelController.closeDetail();
+            }
         });
     }
 
@@ -268,13 +310,13 @@ public class QSDetail extends LinearLayout {
             mQsDetailHeaderSwitch.setVisibility(VISIBLE);
             handleToggleStateChanged(toggleState, adapter.getToggleEnabled());
             mQsDetailHeader.setClickable(true);
-            mQsDetailHeader.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean checked = !mQsDetailHeaderSwitch.isChecked();
-                    mQsDetailHeaderSwitch.setChecked(checked);
-                    adapter.setToggleState(checked);
+            mQsDetailHeader.setOnClickListener(v -> {
+                if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    return;
                 }
+                boolean checked = !mQsDetailHeaderSwitch.isChecked();
+                mQsDetailHeaderSwitch.setChecked(checked);
+                adapter.setToggleState(checked);
             });
         }
     }
@@ -361,7 +403,7 @@ public class QSDetail extends LinearLayout {
         public void onAnimationEnd(Animator animation) {
             // Only hide content if still in detail state.
             if (mDetailAdapter != null) {
-                mQsPanel.setGridContentVisibility(false);
+                mQsPanelController.setGridContentVisibility(false);
                 mHeader.setVisibility(View.INVISIBLE);
                 mFooter.setVisibility(View.INVISIBLE);
             }

@@ -16,20 +16,21 @@
 
 #define LOG_TAG "InputWindowHandle"
 
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
-#include "jni.h"
-#include <android_runtime/AndroidRuntime.h>
-#include <utils/threads.h>
+#include "android_hardware_input_InputWindowHandle.h"
 
 #include <android/graphics/region.h>
+#include <android_runtime/AndroidRuntime.h>
+#include <binder/IPCThreadState.h>
 #include <gui/SurfaceControl.h>
+#include <nativehelper/JNIHelp.h>
 #include <ui/Region.h>
+#include <utils/threads.h>
 
-#include "android_hardware_input_InputWindowHandle.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_util_Binder.h"
-#include <binder/IPCThreadState.h>
+#include "core_jni_helpers.h"
+#include "input/InputWindow.h"
+#include "jni.h"
 
 namespace android {
 
@@ -46,7 +47,7 @@ static struct {
     jfieldID name;
     jfieldID layoutParamsFlags;
     jfieldID layoutParamsType;
-    jfieldID dispatchingTimeoutNanos;
+    jfieldID dispatchingTimeoutMillis;
     jfieldID frameLeft;
     jfieldID frameTop;
     jfieldID frameRight;
@@ -55,12 +56,14 @@ static struct {
     jfieldID scaleFactor;
     jfieldID touchableRegion;
     jfieldID visible;
-    jfieldID canReceiveKeys;
-    jfieldID hasFocus;
+    jfieldID focusable;
     jfieldID hasWallpaper;
     jfieldID paused;
+    jfieldID trustedOverlay;
+    jfieldID touchOcclusionMode;
     jfieldID ownerPid;
     jfieldID ownerUid;
+    jfieldID packageName;
     jfieldID inputFeatures;
     jfieldID displayId;
     jfieldID portalToDisplayId;
@@ -112,12 +115,12 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.name = getStringField(env, obj, gInputWindowHandleClassInfo.name, "<null>");
 
-    mInfo.layoutParamsFlags = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.layoutParamsFlags);
-    mInfo.layoutParamsType = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.layoutParamsType);
-    mInfo.dispatchingTimeout = env->GetLongField(obj,
-            gInputWindowHandleClassInfo.dispatchingTimeoutNanos);
+    mInfo.flags = Flags<InputWindowInfo::Flag>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
+    mInfo.type = static_cast<InputWindowInfo::Type>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
+    mInfo.dispatchingTimeout = std::chrono::milliseconds(
+            env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutMillis));
     mInfo.frameLeft = env->GetIntField(obj,
             gInputWindowHandleClassInfo.frameLeft);
     mInfo.frameTop = env->GetIntField(obj,
@@ -143,20 +146,21 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.visible = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.visible);
-    mInfo.canReceiveKeys = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.canReceiveKeys);
-    mInfo.hasFocus = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.hasFocus);
+    mInfo.focusable = env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable);
     mInfo.hasWallpaper = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.hasWallpaper);
     mInfo.paused = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.paused);
+    mInfo.trustedOverlay = env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay);
+    mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
     mInfo.ownerPid = env->GetIntField(obj,
             gInputWindowHandleClassInfo.ownerPid);
     mInfo.ownerUid = env->GetIntField(obj,
             gInputWindowHandleClassInfo.ownerUid);
-    mInfo.inputFeatures = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.inputFeatures);
+    mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
+    mInfo.inputFeatures = static_cast<InputWindowInfo::Feature>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
     mInfo.portalToDisplayId = env->GetIntField(obj,
@@ -165,8 +169,8 @@ bool NativeInputWindowHandle::updateInfo() {
     jobject inputApplicationHandleObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.inputApplicationHandle);
     if (inputApplicationHandleObj) {
-        sp<InputApplicationHandle> inputApplicationHandle =
-            android_view_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
+        std::shared_ptr<InputApplicationHandle> inputApplicationHandle =
+                android_view_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
         if (inputApplicationHandle != nullptr) {
             inputApplicationHandle->updateInfo();
             mInfo.applicationInfo = *(inputApplicationHandle->getInfo());
@@ -290,8 +294,8 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsType, clazz,
             "layoutParamsType", "I");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.dispatchingTimeoutNanos, clazz,
-            "dispatchingTimeoutNanos", "J");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.dispatchingTimeoutMillis, clazz,
+                 "dispatchingTimeoutMillis", "J");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.frameLeft, clazz,
             "frameLeft", "I");
@@ -317,11 +321,7 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.visible, clazz,
             "visible", "Z");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.canReceiveKeys, clazz,
-            "canReceiveKeys", "Z");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.hasFocus, clazz,
-            "hasFocus", "Z");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.focusable, clazz, "focusable", "Z");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.hasWallpaper, clazz,
             "hasWallpaper", "Z");
@@ -329,11 +329,18 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.paused, clazz,
             "paused", "Z");
 
+    GET_FIELD_ID(gInputWindowHandleClassInfo.trustedOverlay, clazz, "trustedOverlay", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.touchOcclusionMode, clazz, "touchOcclusionMode", "I");
+
     GET_FIELD_ID(gInputWindowHandleClassInfo.ownerPid, clazz,
             "ownerPid", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ownerUid, clazz,
             "ownerUid", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.packageName, clazz, "packageName",
+                 "Ljava/lang/String;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputFeatures, clazz,
             "inputFeatures", "I");

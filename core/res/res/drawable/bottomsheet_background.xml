@@ -18,5 +18,5 @@
     <corners
         android:topLeftRadius="@dimen/config_bottomDialogCornerRadius"
         android:topRightRadius="@dimen/config_bottomDialogCornerRadius"/>
-    <solid android:color="?attr/colorBackgroundFloating" />
+    <solid android:color="?attr/colorBackground" />
 </shape>

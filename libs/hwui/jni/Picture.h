@@ -38,6 +38,7 @@ class Picture {
 public:
     explicit Picture(const Picture* src = NULL);
     explicit Picture(sk_sp<SkPicture>&& src);
+    virtual ~Picture() = default;
 
     Canvas* beginRecording(int width, int height);
 
@@ -49,7 +50,7 @@ public:
 
     static Picture* CreateFromStream(SkStream* stream);
 
-    void serialize(SkWStream* stream) const;
+    virtual void serialize(SkWStream* stream) const;
 
     void draw(Canvas* canvas);
 

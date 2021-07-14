@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2020 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+
+    <!-- Size of layout margin -->
+    <dimen name="settingslib_switchbar_margin">16dp</dimen>
+
+    <!-- Size of layout margin left -->
+    <dimen name="settingslib_switchbar_padding_left">24dp</dimen>
+
+    <!-- Size of layout margin right -->
+    <dimen name="settingslib_switchbar_padding_right">16dp</dimen>
+
+    <!-- Minimum width of switch -->
+    <dimen name="settingslib_min_switch_width">52dp</dimen>
+
+    <!-- Minimum width of switch bar -->
+    <dimen name="settingslib_min_switch_bar_height">72dp</dimen>
+
+    <!-- Restricted icon size in switch bar -->
+    <dimen name="settingslib_restricted_icon_size">@*android:dimen/config_restrictedIconSize</dimen>
+
+    <!-- Restricted icon in switch bar -->
+    <dimen name="settingslib_restricted_icon_margin_end">16dp</dimen>
+
+    <!-- Radius of switch bar -->
+    <dimen name="settingslib_switch_bar_radius">28dp</dimen>
+
+    <!-- Size of title margin -->
+    <dimen name="settingslib_switch_title_margin">16dp</dimen>
+
+    <!-- SwitchBar sub settings margin start / end -->
+    <dimen name="settingslib_switchbar_subsettings_margin_start">72dp</dimen>
+    <dimen name="settingslib_switchbar_subsettings_margin_end">16dp</dimen>
+</resources>

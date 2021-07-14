@@ -19,6 +19,9 @@ my_package_prefix := com.android.server.om.hosttest.signature_overlay
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_NonPlatformSignatureOverlay
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_bad
@@ -27,6 +30,9 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureStaticOverlay
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
@@ -37,6 +43,9 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureOverlay
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform

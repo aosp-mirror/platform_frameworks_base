@@ -17,7 +17,7 @@ package android.media.session;
 
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
-import android.media.IRemoteVolumeController;
+import android.media.IRemoteSessionCallback;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.IOnMediaKeyEventDispatchedListener;
@@ -38,17 +38,17 @@ import android.view.KeyEvent;
 interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback sessionCb, String tag,
             in Bundle sessionInfo, int userId);
-    void notifySession2Created(in Session2Token sessionToken);
     List<MediaSession.Token> getSessions(in ComponentName compName, int userId);
-    ParceledListSlice getSession2Tokens(int userId);
+    MediaSession.Token getMediaKeyEventSession();
+    String getMediaKeyEventSessionPackageName();
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
     boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
-            in MediaSession.Token sessionToken, in KeyEvent keyEvent);
+            in KeyEvent keyEvent, in MediaSession.Token sessionToken);
     void dispatchVolumeKeyEvent(String packageName, String opPackageName, boolean asSystemService,
             in KeyEvent keyEvent, int stream, boolean musicOnly);
     void dispatchVolumeKeyEventToSessionAsSystemService(String packageName, String opPackageName,
-            in MediaSession.Token sessionToken, in KeyEvent keyEvent);
+            in KeyEvent keyEvent, in MediaSession.Token sessionToken);
     void dispatchAdjustVolume(String packageName, String opPackageName, int suggestedStream,
             int delta, int flags);
     void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,
@@ -57,8 +57,8 @@ interface ISessionManager {
     void addSession2TokensListener(in ISession2TokensListener listener, int userId);
     void removeSession2TokensListener(in ISession2TokensListener listener);
 
-    void registerRemoteVolumeController(in IRemoteVolumeController rvc);
-    void unregisterRemoteVolumeController(in IRemoteVolumeController rvc);
+    void registerRemoteSessionCallback(in IRemoteSessionCallback rvc);
+    void unregisterRemoteSessionCallback(in IRemoteSessionCallback rvc);
 
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
@@ -73,8 +73,10 @@ interface ISessionManager {
     void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 
     boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid);
-    void setCustomMediaKeyDispatcherForTesting(String name);
-    void setCustomSessionPolicyProviderForTesting(String name);
+    void setCustomMediaKeyDispatcher(String name);
+    void setCustomMediaSessionPolicyProvider(String name);
+    boolean hasCustomMediaKeyDispatcher(String componentName);
+    boolean hasCustomMediaSessionPolicyProvider(String componentName);
     int getSessionPolicies(in MediaSession.Token token);
     void setSessionPolicies(in MediaSession.Token token, int policies);
 }

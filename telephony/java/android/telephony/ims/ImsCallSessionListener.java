@@ -28,6 +28,10 @@ import android.telephony.ims.stub.ImsCallSessionImplBase;
 
 import com.android.ims.internal.IImsCallSession;
 
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * Listener interface for notifying the Framework's {@link ImsCallSession} for updates to an ongoing
  * IMS call.
@@ -49,8 +53,45 @@ public class ImsCallSessionListener {
     }
 
     /**
-     * A request has been sent out to initiate a new IMS call session and a 1xx response has been
-     * received from the network.
+     * Called when the network first begins to establish the call session and is now connecting
+     * to the remote party. This must be called once after {@link ImsCallSessionImplBase#start} and
+     * before any other method on this listener.  After this is called,
+     * {@link #callSessionProgressing(ImsStreamMediaProfile)} must be called to communicate any
+     * further updates.
+     * <p/>
+     * Once this is called, {@link #callSessionTerminated} must be called
+     * to end the call session.  In the event that the session failed before the remote party
+     * was contacted, {@link #callSessionInitiatingFailed} must be called.
+     *
+     * @param profile the associated {@link ImsCallProfile}.
+     */
+    public void callSessionInitiating(@NonNull ImsCallProfile profile) {
+        try {
+            mListener.callSessionInitiating(profile);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * The IMS call session establishment has failed while initiating.
+     *
+     * @param reasonInfo {@link ImsReasonInfo} detailing the reason of the IMS call session
+     * establishment failure.
+     */
+    public void callSessionInitiatingFailed(@NonNull ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionInitiatingFailed(reasonInfo);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called after the network has contacted the remote party and the call state should move to
+     * ALERTING.
+     *
+     * @param profile the associated {@link ImsCallProfile}.
      */
     public void callSessionProgressing(ImsStreamMediaProfile profile) {
         try {
@@ -61,7 +102,8 @@ public class ImsCallSessionListener {
     }
 
     /**
-     * The IMS call session has been initiated.
+     * Called once the outgoing IMS call session has been begun between the local and remote party.
+     * The call state should move to ACTIVE.
      *
      * @param profile the associated {@link ImsCallProfile}.
      */
@@ -78,7 +120,12 @@ public class ImsCallSessionListener {
      *
      * @param reasonInfo {@link ImsReasonInfo} detailing the reason of the IMS call session
      * establishment failure.
+     * @deprecated {@link #callSessionInitiated(ImsCallProfile)} is called immediately after
+     * the session is first started which meant that there was no time in which a call to this
+     * method was technically valid.  This method is replaced starting Android S in favor of
+     * {@link #callSessionInitiatingFailed(ImsReasonInfo)}.
      */
+    @Deprecated
     public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {
         try {
             mListener.callSessionInitiatedFailed(reasonInfo);
@@ -677,6 +724,86 @@ public class ImsCallSessionListener {
     public void callQualityChanged(@NonNull CallQuality callQuality) {
         try {
             mListener.callQualityChanged(callQuality);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * The {@link ImsService} calls this method to inform the framework of a DTMF digit which was
+     * received from the network.
+     * <p>
+     * According to <a href="http://tools.ietf.org/html/rfc2833">RFC 2833 sec 3.10</a>,
+     * event 0 ~ 9 maps to decimal value 0 ~ 9, '*' to 10, '#' to 11, event 'A' ~ 'D' to 12 ~ 15.
+     * <p>
+     * <em>Note:</em> Alpha DTMF digits are converted from lower-case to upper-case.
+     *
+     * @param dtmf The DTMF digit received, '0'-'9', *, #, A, B, C, or D.
+     * @throws IllegalArgumentException If an invalid DTMF character is provided.
+     */
+    public void callSessionDtmfReceived(char dtmf) {
+        if (!(dtmf >= '0' && dtmf <= '9'
+                || dtmf >= 'A' && dtmf <= 'D'
+                || dtmf >= 'a' && dtmf <= 'd'
+                || dtmf == '*'
+                || dtmf == '#')) {
+            throw new IllegalArgumentException("DTMF digit must be 0-9, *, #, A, B, C, D");
+        }
+        try {
+            mListener.callSessionDtmfReceived(Character.toUpperCase(dtmf));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * The {@link ImsService} calls this method to inform the framework of RTP header extension data
+     * which was received from the network.
+     * <p>
+     * The set of {@link RtpHeaderExtension} data are identified by local identifiers which were
+     * negotiated during SDP signalling.  See RFC8285,
+     * {@link ImsCallProfile#getAcceptedRtpHeaderExtensionTypes()} and
+     * {@link RtpHeaderExtensionType} for more information.
+     * <p>
+     * By specification, the RTP header extension is an unacknowledged transmission and there is no
+     * guarantee that the header extension will be delivered by the network to the other end of the
+     * call.
+     *
+     * @param extensions The RTP header extension data received.
+     */
+    public void callSessionRtpHeaderExtensionsReceived(
+            @NonNull Set<RtpHeaderExtension> extensions) {
+        Objects.requireNonNull(extensions, "extensions are required.");
+        try {
+            mListener.callSessionRtpHeaderExtensionsReceived(
+                    new ArrayList<RtpHeaderExtension>(extensions));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the result of transfer request.
+     * @hide
+     */
+    public void callSessionTransferred() {
+        try {
+            mListener.callSessionTransferred();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the result of transfer request.
+     *
+     * @param reasonInfo {@link ImsReasonInfo} containing a reason for the
+     * session transfer failure
+     * @hide
+     */
+    public void callSessionTransferFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionTransferFailed(reasonInfo);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

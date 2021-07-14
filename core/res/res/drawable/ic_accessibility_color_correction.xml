@@ -1,5 +1,5 @@
 <!--
-    Copyright (C) 2020 The Android Open Source Project
+    Copyright (C) 2021 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,40 +13,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector android:height="24dp" android:viewportHeight="192"
-    android:viewportWidth="192" android:width="24dp"
-    xmlns:aapt="http://schemas.android.com/aapt" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#00BCD4" android:pathData="M37.14,173.74L8.61,83.77c-1.72,-5.75 0.26,-11.97 4.97,-15.63L87.15,11c5.2,-4.04 12.46,-3.99 17.61,0.12l73.81,58.94c4.63,3.7 6.53,9.88 4.8,15.57l-28.48,88.18c-1.85,6.06 -7.39,10.19 -13.67,10.19H50.84C44.53,184 38.97,179.83 37.14,173.74z"/>
-    <path android:fillAlpha="0.2" android:fillColor="#FFFFFF"
-        android:pathData="M13.58,69.14L87.15,12c5.2,-4.04 12.46,-3.99 17.61,0.12l73.81,58.94c3.36,2.68 5.27,6.67 5.41,10.82c0.15,-4.51 -1.79,-8.93 -5.41,-11.82l-73.81,-58.94C99.61,7.01 92.35,6.96 87.15,11L13.58,68.14c-3.71,2.88 -5.72,7.36 -5.56,11.94C8.17,75.85 10.14,71.81 13.58,69.14z" android:strokeAlpha="0.2"/>
-    <path android:fillAlpha="0.2" android:fillColor="#263238"
-        android:pathData="M183.35,84.63l-28.48,88.18c-1.85,6.06 -7.39,10.19 -13.67,10.19H50.84c-6.31,0 -11.87,-4.17 -13.7,-10.26L8.61,82.77c-0.36,-1.22 -0.55,-2.46 -0.59,-3.69c-0.06,1.56 0.13,3.14 0.59,4.69l28.53,89.97c1.83,6.09 7.39,10.26 13.7,10.26h90.37c6.28,0 11.82,-4.13 13.67,-10.19l28.48,-88.18c0.48,-1.57 0.67,-3.17 0.61,-4.75C183.92,82.13 183.73,83.39 183.35,84.63z" android:strokeAlpha="0.2"/>
-    <path android:pathData="M60.01,135L60.01,135H60l48.04,49h33.17c6.28,0 11.82,-4.13 13.67,-10.19l18.68,-57.84L129.51,72.2l-0.01,0c0.27,0.27 0.52,0.5 0.77,0.77l0.55,0.55c1.57,1.56 1.57,4.08 -0.04,5.68l-12.56,12.49l6.36,6.3l1.38,1.37l-5.67,5.64l-5.71,-5.68L79.15,135H60.42H60.01z">
-        <aapt:attr name="android:fillColor">
-            <gradient android:endX="155.9627" android:endY="165.1493"
-                android:startX="98.4649" android:startY="107.6516" android:type="linear">
-                <item android:color="#19263238" android:offset="0"/>
-                <item android:color="#00212121" android:offset="1"/>
-            </gradient>
-        </aapt:attr>
-    </path>
-    <path android:fillColor="#0097A7" android:pathData="M68.55,120.35l32.173,-32.173l7.658,7.658l-32.173,32.173z"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M130.83,73.52l-9.42,-9.36c-1.57,-1.56 -4.1,-1.56 -5.67,0l-12.56,12.48L95.42,69l-5.67,5.64l5.71,5.68L60,116.97V135h19.15l35.42,-35.68l5.71,5.68l5.67,-5.64l-7.73,-7.68l12.56,-12.48C132.4,77.6 132.4,75.08 130.83,73.52zM74.98,126.77l-6.43,-6.43l32.17,-32.17l6.43,6.43L74.98,126.77z"/>
-    <path android:fillAlpha="0.1" android:fillColor="#263238"
-        android:pathData="M120.28,105l-5.71,-5.68l-35.42,35.68l-19.15,0l1,1l19.15,0l35.42,-35.68l5.71,5.68l5.68,-5.64l-1,-1z" android:strokeAlpha="0.1"/>
-    <path android:fillAlpha="0.1" android:fillColor="#263238"
-        android:pathData="M90.75,75.64l-0.01,0l4.71,4.68l0.01,0z" android:strokeAlpha="0.1"/>
-    <path android:fillAlpha="0.1" android:fillColor="#263238"
-        android:pathData="M131.83,74.52l-0.97,-0.97c1.54,1.56 1.53,4.06 -0.07,5.65l-12.56,12.48l1,1l12.55,-12.48C133.4,78.6 133.4,76.08 131.83,74.52z" android:strokeAlpha="0.1"/>
-    <path android:fillAlpha="0.1" android:fillColor="#263238"
-        android:pathData="M101.72,89.17l6.67,6.66l0,0l-7.67,-7.66l-32.17,32.17l1,1z" android:strokeAlpha="0.1"/>
-    <path android:pathData="M37.13,173.7L8.62,83.69c-1.7,-5.8 0.3,-12 5,-15.6l73.52,-57.1c5.2,-4 12.5,-4 17.6,0.1l73.82,58.9c4.6,3.7 6.5,9.9 4.8,15.6l-28.51,88.21c-1.8,6.1 -7.4,10.2 -13.7,10.2H50.83C44.53,184 38.93,179.8 37.13,173.7z">
-        <aapt:attr name="android:fillColor">
-            <gradient android:centerX="21.977" android:centerY="23.8809"
-                android:gradientRadius="158.0384" android:type="radial">
-                <item android:color="#19FFFFFF" android:offset="0"/>
-                <item android:color="#00FFFFFF" android:offset="1"/>
-            </gradient>
-        </aapt:attr>
-    </path>
-</vector>
+
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/accessibility_daltonizer_background" />
+    <foreground>
+        <inset
+            android:drawable="@drawable/ic_accessibility_color_correction_foreground"
+            android:inset="@dimen/accessibility_icon_foreground_padding_ratio" />
+    </foreground>
+</adaptive-icon>

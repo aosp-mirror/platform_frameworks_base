@@ -61,7 +61,7 @@ public class ShortcutBitmapSaver {
      * Before saving shortcuts.xml, and returning icons to the launcher, we wait for all pending
      * saves to finish.  However if it takes more than this long, we just give up and proceed.
      */
-    private final long SAVE_WAIT_TIMEOUT_MS = 30 * 1000;
+    private final long SAVE_WAIT_TIMEOUT_MS = 5 * 1000;
 
     private final ShortcutService mService;
 
@@ -280,7 +280,8 @@ public class ShortcutBitmapSaver {
                     IoUtils.closeQuietly(out);
                 }
 
-                shortcut.setBitmapPath(file.getAbsolutePath());
+                final String path = file.getAbsolutePath();
+                shortcut.setBitmapPath(path);
 
             } catch (IOException | RuntimeException e) {
                 Slog.e(ShortcutService.TAG, "Unable to write bitmap to file", e);

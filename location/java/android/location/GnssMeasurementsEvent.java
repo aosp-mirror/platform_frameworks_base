@@ -16,9 +16,9 @@
 
 package android.location;
 
-import android.annotation.TestApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -46,8 +46,10 @@ public final class GnssMeasurementsEvent implements Parcelable {
     public static abstract class Callback {
         /**
          * The status of the GNSS measurements event.
+         * @deprecated Do not use.
          * @hide
          */
+        @Deprecated
         @Retention(RetentionPolicy.SOURCE)
         @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED, STATUS_NOT_ALLOWED})
         public @interface GnssMeasurementsStatus {}
@@ -56,19 +58,28 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * The system does not support tracking of GNSS Measurements.
          *
          * <p>This status will not change in the future.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_NOT_SUPPORTED = 0;
 
         /**
          * GNSS Measurements are successfully being tracked, it will receive updates once they are
          * available.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_READY = 1;
 
         /**
          * GPS provider or Location is disabled, updates will not be received until they are
          * enabled.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_LOCATION_DISABLED = 2;
 
         /**
@@ -81,7 +92,10 @@ public final class GnssMeasurementsEvent implements Parcelable {
          *
          * <p>If such a status is received, one would try again at a later time point where no
          * other client is having a conflicting request.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_NOT_ALLOWED = 3;
 
         /**
@@ -91,7 +105,13 @@ public final class GnssMeasurementsEvent implements Parcelable {
 
         /**
          * Reports the latest status of the GNSS Measurements sub-system.
+         *
+         * @deprecated Do not rely on this callback. From Android S onwards this callback will be
+         * invoked once with {@link #STATUS_READY} in all cases for backwards compatibility, and
+         * then never invoked again. Use LocationManager APIs if you need to determine if
+         * GNSS measurements are supported or if location is off, etc...
          */
+        @Deprecated
         public void onStatusChanged(@GnssMeasurementsStatus int status) {}
     }
 

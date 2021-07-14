@@ -218,29 +218,30 @@ public class TransactionExecutor {
                             null /* customIntent */);
                     break;
                 case ON_START:
-                    mTransactionHandler.handleStartActivity(r.token, mPendingActions);
+                    mTransactionHandler.handleStartActivity(r, mPendingActions,
+                            null /* activityOptions */);
                     break;
                 case ON_RESUME:
-                    mTransactionHandler.handleResumeActivity(r.token, false /* finalStateRequest */,
+                    mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,
                             r.isForward, "LIFECYCLER_RESUME_ACTIVITY");
                     break;
                 case ON_PAUSE:
-                    mTransactionHandler.handlePauseActivity(r.token, false /* finished */,
+                    mTransactionHandler.handlePauseActivity(r, false /* finished */,
                             false /* userLeaving */, 0 /* configChanges */, mPendingActions,
                             "LIFECYCLER_PAUSE_ACTIVITY");
                     break;
                 case ON_STOP:
-                    mTransactionHandler.handleStopActivity(r.token, 0 /* configChanges */,
+                    mTransactionHandler.handleStopActivity(r, 0 /* configChanges */,
                             mPendingActions, false /* finalStateRequest */,
                             "LIFECYCLER_STOP_ACTIVITY");
                     break;
                 case ON_DESTROY:
-                    mTransactionHandler.handleDestroyActivity(r.token, false /* finishing */,
+                    mTransactionHandler.handleDestroyActivity(r, false /* finishing */,
                             0 /* configChanges */, false /* getNonConfigInstance */,
                             "performLifecycleSequence. cycling to:" + path.get(size - 1));
                     break;
                 case ON_RESTART:
-                    mTransactionHandler.performRestartActivity(r.token, false /* start */);
+                    mTransactionHandler.performRestartActivity(r, false /* start */);
                     break;
                 default:
                     throw new IllegalArgumentException("Unexpected lifecycle state: " + state);

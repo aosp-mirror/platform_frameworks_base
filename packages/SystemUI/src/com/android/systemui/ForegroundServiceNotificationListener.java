@@ -21,10 +21,10 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -33,10 +33,9 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.util.time.SystemClock;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Updates foreground service notification state in response to notification data events. */
-@Singleton
+@SysUISingleton
 public class ForegroundServiceNotificationListener {
 
     private static final String TAG = "FgServiceController";
@@ -51,7 +50,6 @@ public class ForegroundServiceNotificationListener {
             ForegroundServiceController foregroundServiceController,
             NotificationEntryManager notificationEntryManager,
             NotifPipeline notifPipeline,
-            ForegroundServiceLifetimeExtender fgsLifetimeExtender,
             SystemClock systemClock) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
@@ -79,7 +77,6 @@ public class ForegroundServiceNotificationListener {
                 removeNotification(entry.getSbn());
             }
         });
-        mEntryManager.addNotificationLifetimeExtender(fgsLifetimeExtender);
 
         notifPipeline.addCollectionListener(new NotifCollectionListener() {
             @Override
@@ -172,24 +169,8 @@ public class ForegroundServiceNotificationListener {
                                     sbn.getPackageName(), sbn.getKey());
                         }
                     }
-                    tagAppOps(entry);
                     return true;
                 },
                 true /* create if not found */);
-    }
-
-    // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
-    //  AppOpsCoordinator
-    private void tagAppOps(NotificationEntry entry) {
-        final StatusBarNotification sbn = entry.getSbn();
-        ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
-                sbn.getUserId(),
-                sbn.getPackageName());
-        synchronized (entry.mActiveAppOps) {
-            entry.mActiveAppOps.clear();
-            if (activeOps != null) {
-                entry.mActiveAppOps.addAll(activeOps);
-            }
-        }
     }
 }

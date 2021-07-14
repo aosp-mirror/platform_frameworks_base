@@ -152,7 +152,7 @@ class InlineSuggestionSession {
         try {
             mCallback.onInlineSuggestionsSessionInvalidated();
         } catch (RemoteException e) {
-            Log.w(TAG, "onInlineSuggestionsSessionInvalidated() remote exception:" + e);
+            Log.w(TAG, "onInlineSuggestionsSessionInvalidated() remote exception", e);
         }
         if (mResponseCallback != null) {
             consumeInlineSuggestionsResponse(EMPTY_RESPONSE);

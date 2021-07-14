@@ -17,6 +17,9 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
+
+import java.util.List;
 
 /**
  * The AudioMixPort is a specialized type of AudioPort
@@ -32,12 +35,18 @@ public class AudioMixPort extends AudioPort {
 
     private final int mIoHandle;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     AudioMixPort(AudioHandle handle, int ioHandle, int role, String deviceName,
             int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains) {
         super(handle, role, deviceName, samplingRates, channelMasks, channelIndexMasks,
                 formats, gains);
+        mIoHandle = ioHandle;
+    }
+
+    AudioMixPort(AudioHandle handle, int ioHandle, int role, String deviceName,
+            List<AudioProfile> profiles, AudioGain[] gains) {
+        super(handle, role, deviceName, profiles, gains, null);
         mIoHandle = ioHandle;
     }
 
@@ -53,7 +62,7 @@ public class AudioMixPort extends AudioPort {
     /**
      * Get the device type (e.g AudioManager.DEVICE_OUT_SPEAKER)
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int ioHandle() {
         return mIoHandle;
     }

@@ -47,6 +47,7 @@ class ToolbarView : FrameLayout {
     ) : super(context, attrs, defStyle) {
     }
 
+    @Suppress("DEPRECATION")
     override fun onApplyWindowInsets(insets: WindowInsets?): WindowInsets {
         var lp = layoutParams as FrameLayout.LayoutParams?
         if (lp != null && insets != null) {

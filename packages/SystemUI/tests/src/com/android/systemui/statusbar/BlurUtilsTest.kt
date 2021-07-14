@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar
 
 import android.content.res.Resources
+import android.view.CrossWindowBlurListeners
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
@@ -37,17 +38,19 @@ class BlurUtilsTest : SysuiTestCase() {
     @Mock lateinit var resources: Resources
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var transaction: SurfaceControl.Transaction
+    @Mock lateinit var corssWindowBlurListeners: CrossWindowBlurListeners
     lateinit var blurUtils: BlurUtils
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        `when`(corssWindowBlurListeners.isCrossWindowBlurEnabled).thenReturn(true)
         blurUtils = TestableBlurUtils()
     }
 
     @Test
     fun testApplyBlur_noViewRoot_doesntCrash() {
-        blurUtils.applyBlur(null /* viewRootImple */, 10 /* radius */)
+        blurUtils.applyBlur(null /* viewRootImple */, 10 /* radius */, false /* opaque */)
     }
 
     @Test
@@ -55,7 +58,7 @@ class BlurUtilsTest : SysuiTestCase() {
         val surfaceControl = mock(SurfaceControl::class.java)
         val viewRootImpl = mock(ViewRootImpl::class.java)
         `when`(viewRootImpl.surfaceControl).thenReturn(surfaceControl)
-        blurUtils.applyBlur(viewRootImpl, 10 /* radius */)
+        blurUtils.applyBlur(viewRootImpl, 10 /* radius */, false /* opaque */)
     }
 
     @Test
@@ -65,12 +68,13 @@ class BlurUtilsTest : SysuiTestCase() {
         val viewRootImpl = mock(ViewRootImpl::class.java)
         `when`(viewRootImpl.surfaceControl).thenReturn(surfaceControl)
         `when`(surfaceControl.isValid).thenReturn(true)
-        blurUtils.applyBlur(viewRootImpl, radius)
+        blurUtils.applyBlur(viewRootImpl, radius, true /* opaque */)
         verify(transaction).setBackgroundBlurRadius(eq(surfaceControl), eq(radius))
+        verify(transaction).setOpaque(eq(surfaceControl), eq(true))
         verify(transaction).apply()
     }
 
-    inner class TestableBlurUtils() : BlurUtils(resources, dumpManager) {
+    inner class TestableBlurUtils() : BlurUtils(resources, corssWindowBlurListeners, dumpManager) {
         override fun supportsBlursOnWindows(): Boolean {
             return true
         }

@@ -21,8 +21,8 @@ import android.util.Pools;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;

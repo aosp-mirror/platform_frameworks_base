@@ -256,7 +256,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     /**
-     * Sanity warning: this wipes out mScoreCache, so use with extreme caution
+     * Validity warning: this wipes out mScoreCache, so use with extreme caution
      * @param workThread substitute Handler thread, for testing purposes only
      */
     @VisibleForTesting

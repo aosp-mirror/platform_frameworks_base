@@ -16,8 +16,10 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 
 /**
  * A helper to show a system "Device Picker" activity to the user.
@@ -39,6 +41,8 @@ public interface BluetoothDevicePicker {
      * Selected {@link BluetoothDevice} is returned in extra data named
      * {@link BluetoothDevice#EXTRA_DEVICE}.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_SELECTED =
             "android.bluetooth.devicepicker.action.DEVICE_SELECTED";
@@ -54,6 +58,8 @@ public interface BluetoothDevicePicker {
      * - {@link #EXTRA_LAUNCH_CLASS} (string): where(which class) this intent
      * come from
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LAUNCH =
             "android.bluetooth.devicepicker.action.LAUNCH";

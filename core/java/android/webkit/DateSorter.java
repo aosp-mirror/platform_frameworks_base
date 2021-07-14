@@ -19,10 +19,10 @@ package android.webkit;
 import android.content.Context;
 import android.content.res.Resources;
 
+import com.android.icu.text.DateSorterBridge;
+
 import java.util.Calendar;
 import java.util.Locale;
-
-import libcore.icu.LocaleData;
 
 /**
  * Sorts dates into the following groups:
@@ -69,9 +69,9 @@ public class DateSorter {
         if (locale == null) {
             locale = Locale.getDefault();
         }
-        LocaleData localeData = LocaleData.get(locale);
-        mLabels[0] = localeData.today;
-        mLabels[1] = localeData.yesterday;
+        DateSorterBridge dateSorterBridge = DateSorterBridge.createInstance(locale);
+        mLabels[0] = dateSorterBridge.getToday();
+        mLabels[1] = dateSorterBridge.getYesterday();
 
         int resId = com.android.internal.R.plurals.last_num_days;
         String format = resources.getQuantityString(resId, NUM_DAYS_AGO);

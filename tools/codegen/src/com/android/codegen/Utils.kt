@@ -103,6 +103,10 @@ val TypeDeclaration<*>.nestedTypes get() = childNodes.filterIsInstance<TypeDecla
 val TypeDeclaration<*>.nestedDataClasses get()
         = nestedTypes.filterIsInstance<ClassOrInterfaceDeclaration>()
             .filter { it.annotations.any { it.nameAsString.endsWith("DataClass") } }
+val TypeDeclaration<*>.nestedNonDataClasses get()
+        = nestedTypes.filterIsInstance<ClassOrInterfaceDeclaration>()
+            .filter { it.annotations.none { it.nameAsString.endsWith("DataClass") } }
+            .filterNot { it.isInterface }
 val TypeDeclaration<*>.startLine get() = range.get()!!.begin.line
 
 inline fun <T> List<T>.forEachSequentialPair(action: (T, T?) -> Unit) {

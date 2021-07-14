@@ -138,6 +138,24 @@ import java.util.List;
  *     }
  * }
  * }
+ *
+ * </pre>
+ * <p id="companionInCallService">
+ * <h3>Access to InCallService for Wearable Devices</h3>
+ * <ol>
+ * If your app is a third-party companion app and wants to access InCallService APIs, what your
+ * app could do are:
+ * <p>
+ *   <ol>
+ *     <li> Declare MANAGE_ONGOING_CALLS permission in your manifest
+ *     <li> Associate with a physical wearable device via the
+ *          {@link android.companion.CompanionDeviceManager} API as a companion app. See:
+ *          https://developer.android.com/guide/topics/connectivity/companion-device-pairing
+ *     <li> Implement this InCallService with BIND_INCALL_SERVICE permission
+ *   </ol>
+ * </ol>
+ * <p>
+ *
  * </pre>
  * <p id="incomingCallNotification">
  * <h3>Showing the Incoming Call Notification</h3>
@@ -179,7 +197,7 @@ import java.util.List;
  * Intent intent = new Intent(Intent.ACTION_MAIN, null);
  * intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
  * intent.setClass(context, YourIncomingCallActivity.class);
- * PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+ * PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
  *
  * // Build the notification as an ongoing high priority item; this ensures it will show as
  * // a heads up notification which slides down over top of the current content.
@@ -680,6 +698,7 @@ public abstract class InCallService extends Service {
     public static abstract class VideoCall {
 
         /** @hide */
+        @SuppressWarnings("HiddenAbstractMethod")
         public abstract void destroy();
 
         /**

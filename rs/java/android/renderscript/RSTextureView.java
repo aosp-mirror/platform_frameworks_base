@@ -28,6 +28,7 @@ import android.view.TextureView;
  * to draw on.
  *
  */
+@Deprecated
 public class RSTextureView extends TextureView implements TextureView.SurfaceTextureListener {
     private RenderScriptGL mRS;
     private SurfaceTexture mSurfaceTexture;

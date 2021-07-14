@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
@@ -29,14 +31,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Surface;
-import android.view.View;
 
 import androidx.test.filters.MediumTest;
 
@@ -362,17 +363,16 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     }
 
     @Test
-    public void testSystemUiVisibilityPersistAndLoadSnapshot() {
-        final int lightBarFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+    public void testAppearancePersistAndLoadSnapshot() {
+        final int lightBarFlags = APPEARANCE_LIGHT_STATUS_BARS | APPEARANCE_LIGHT_NAVIGATION_BARS;
         TaskSnapshot a = new TaskSnapshotBuilder()
                 .setSystemUiVisibility(0)
                 .build();
         TaskSnapshot b = new TaskSnapshotBuilder()
                 .setSystemUiVisibility(lightBarFlags)
                 .build();
-        assertEquals(0, a.getSystemUiVisibility());
-        assertEquals(lightBarFlags, b.getSystemUiVisibility());
+        assertEquals(0, a.getAppearance());
+        assertEquals(lightBarFlags, b.getAppearance());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
         mPersister.waitForQueueEmpty();
@@ -382,8 +382,8 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 false /* isLowResolution */);
         assertNotNull(snapshotA);
         assertNotNull(snapshotB);
-        assertEquals(0, snapshotA.getSystemUiVisibility());
-        assertEquals(lightBarFlags, snapshotB.getSystemUiVisibility());
+        assertEquals(0, snapshotA.getAppearance());
+        assertEquals(lightBarFlags, snapshotB.getAppearance());
     }
 
     @Test
