@@ -16,7 +16,6 @@ import android.graphics.RectF
 import android.graphics.drawable.GradientDrawable
 import android.os.Looper
 import android.os.RemoteException
-import android.os.UserHandle
 import android.util.Log
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
@@ -32,7 +31,7 @@ import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer
-import com.android.wm.shell.startingsurface.SplashscreenContentDrawer.SplashScreenWindowAttrs
+import com.android.wm.shell.startingsurface.StartingSurface
 import kotlin.math.roundToInt
 
 /**
@@ -41,6 +40,7 @@ import kotlin.math.roundToInt
  */
 class ActivityLaunchAnimator(
     private val keyguardHandler: KeyguardHandler,
+    private val startingSurface: StartingSurface?,
     context: Context
 ) {
     private val TAG = this::class.java.simpleName
@@ -474,7 +474,12 @@ class ActivityLaunchAnimator(
             // which is usually the same color of the app background. We first fade in this layer
             // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
             // launch container and reveal the opening window.
-            val windowBackgroundColor = extractSplashScreenBackgroundColor(window)
+            val windowBackgroundColor = if (startingSurface != null) {
+                startingSurface.getBackgroundColor(window.taskInfo)
+            } else {
+                Log.w(TAG, "No starting surface, defaulting to SystemBGColor")
+                SplashscreenContentDrawer.getSystemBGColor()
+            }
             val windowBackgroundLayer = GradientDrawable().apply {
                 setColor(windowBackgroundColor)
                 alpha = 0
@@ -551,36 +556,6 @@ class ActivityLaunchAnimator(
             }
 
             animator.start()
-        }
-
-        /** Extract the background color of the app splash screen. */
-        private fun extractSplashScreenBackgroundColor(window: RemoteAnimationTarget): Int {
-            val taskInfo = window.taskInfo
-            val windowPackage = taskInfo.topActivity.packageName
-            val userId = taskInfo.userId
-            val windowContext = context.createPackageContextAsUser(
-                    windowPackage, Context.CONTEXT_RESTRICTED, UserHandle.of(userId))
-            val activityInfo = taskInfo.topActivityInfo
-            val splashScreenThemeName = packageManager.getSplashScreenTheme(windowPackage, userId)
-            val splashScreenThemeId = if (splashScreenThemeName != null) {
-                windowContext.resources.getIdentifier(splashScreenThemeName, null, null)
-            } else {
-                0
-            }
-
-            val themeResId = when {
-                splashScreenThemeId != 0 -> splashScreenThemeId
-                activityInfo.themeResource != 0 -> activityInfo.themeResource
-                else -> com.android.internal.R.style.Theme_DeviceDefault_DayNight
-            }
-
-            if (themeResId != windowContext.themeResId) {
-                windowContext.setTheme(themeResId)
-            }
-
-            val windowAttrs = SplashScreenWindowAttrs()
-            SplashscreenContentDrawer.getWindowAttrs(windowContext, windowAttrs)
-            return SplashscreenContentDrawer.peekWindowBGColor(windowContext, windowAttrs)
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: State) {
