@@ -207,6 +207,7 @@ static struct {
     jmethodID getId;
     jmethodID getResonantFrequency;
     jmethodID getQFactor;
+    jmethodID getMaxAmplitude;
 } gVibratorMethods;
 
 static Mutex gLock;
@@ -2677,6 +2678,8 @@ static jint android_media_AudioSystem_setVibratorInfos(JNIEnv *env, jobject thiz
         vibratorInfo.resonantFrequency =
                 env->CallFloatMethod(jVibrator.get(), gVibratorMethods.getResonantFrequency);
         vibratorInfo.qFactor = env->CallFloatMethod(jVibrator.get(), gVibratorMethods.getQFactor);
+        vibratorInfo.maxAmplitude =
+                env->CallFloatMethod(jVibrator.get(), gVibratorMethods.getMaxAmplitude);
         vibratorInfos.push_back(vibratorInfo);
     }
     return (jint)check_AudioSystem_Command(AudioSystem::setVibratorInfos(vibratorInfos));
@@ -3041,6 +3044,8 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gVibratorMethods.getResonantFrequency =
             GetMethodIDOrDie(env, vibratorClass, "getResonantFrequency", "()F");
     gVibratorMethods.getQFactor = GetMethodIDOrDie(env, vibratorClass, "getQFactor", "()F");
+    gVibratorMethods.getMaxAmplitude =
+            GetMethodIDOrDie(env, vibratorClass, "getHapticChannelMaximumAmplitude", "()F");
 
     AudioSystem::addErrorCallback(android_media_AudioSystem_error_callback);
 

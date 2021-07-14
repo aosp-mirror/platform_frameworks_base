@@ -16,6 +16,11 @@
 
 package com.android.server.compat.overrides;
 
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
+import static android.content.Intent.ACTION_PACKAGE_CHANGED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.ACTION_USER_SWITCHED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_OWNED_CHANGE_IDS;
 import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_REMOVE_OVERRIDES;
@@ -24,17 +29,25 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.compat.PackageOverride;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -73,7 +86,10 @@ import java.util.concurrent.Executor;
 @Presubmit
 public class AppCompatOverridesServiceTest {
     private static final String NAMESPACE_1 = "namespace_1";
-    private static final List<String> SUPPORTED_NAMESPACES = Arrays.asList(NAMESPACE_1);
+    private static final String NAMESPACE_2 = "namespace_2";
+    private static final String NAMESPACE_3 = "namespace_3";
+    private static final List<String> SUPPORTED_NAMESPACES = Arrays.asList(NAMESPACE_1,
+            NAMESPACE_2, NAMESPACE_3);
 
     private static final String PACKAGE_1 = "com.android.test1";
     private static final String PACKAGE_2 = "com.android.test2";
@@ -82,6 +98,7 @@ public class AppCompatOverridesServiceTest {
     private static final String PACKAGE_5 = "com.android.test5";
 
     private MockContext mMockContext;
+    private BroadcastReceiver mPackageReceiver;
     private AppCompatOverridesService mService;
 
     @Mock
@@ -112,6 +129,15 @@ public class AppCompatOverridesServiceTest {
             // Run on current thread
             return Runnable::run;
         }
+
+        @Override
+        @Nullable
+        public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+                @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+                @Nullable Handler scheduler) {
+            mPackageReceiver = receiver;
+            return null;
+        }
     }
 
     @Before
@@ -120,6 +146,8 @@ public class AppCompatOverridesServiceTest {
                 InstrumentationRegistry.getInstrumentation().getTargetContext());
         mService = new AppCompatOverridesService(mMockContext, mPlatformCompat,
                 SUPPORTED_NAMESPACES);
+        mService.registerPackageReceiver();
+        assertThat(mPackageReceiver).isNotNull();
     }
 
     @Test
@@ -361,6 +389,282 @@ public class AppCompatOverridesServiceTest {
                 any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_4));
     }
 
+    @Test
+    public void packageReceiver_packageAddedIntentDataIsNull_doesNothing() throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::true").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext, new Intent(ACTION_PACKAGE_ADDED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_actionIsNull_doesNothing() throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::true").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, /* action= */ null));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_unsupportedAction_doesNothing() throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::true").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_USER_SWITCHED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_packageAddedIntentPackageNotInstalled_doesNothing()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::true").build());
+        mockGetApplicationInfoNotInstalled(PACKAGE_1);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_ADDED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_packageAddedIntentNoOverridesForPackage_doesNothing()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_2, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_3, "201:::true").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_ADDED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_packageAddedIntent_appliesOverridesFromAllNamespaces()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true,103:::")
+                .setString(PACKAGE_2, "102:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_3, "201:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
+                .setString(PACKAGE_1, "301:::true,302:::false")
+                .setString(PACKAGE_2, "302:::false").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_ADDED));
+
+        verify(mPlatformCompat, times(2)).putOverridesOnReleaseBuilds(
+                mOverridesToAddConfigCaptor.capture(), eq(PACKAGE_1));
+        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        List<CompatibilityOverrideConfig> configs = mOverridesToAddConfigCaptor.getAllValues();
+        assertThat(configs.get(0).overrides.keySet()).containsExactly(101L);
+        assertThat(configs.get(1).overrides.keySet()).containsExactly(301L, 302L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(103L);
+    }
+
+    @Test
+    public void packageReceiver_packageChangedIntent_appliesOverrides()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true,103:::").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_CHANGED));
+
+        verify(mPlatformCompat).putOverridesOnReleaseBuilds(
+                mOverridesToAddConfigCaptor.capture(), eq(PACKAGE_1));
+        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(101L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(103L);
+    }
+
+    @Test
+    public void packageReceiver_packageAddedIntentRemoveOverridesSetForSomeNamespaces_skipsIds()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_1 + "=103," + PACKAGE_2 + "=101")
+                .setString(PACKAGE_1, "101:::true,103:::")
+                .setString(PACKAGE_2, "102:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
+                .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_1 + "=301," + PACKAGE_3 + "=302")
+                .setString(PACKAGE_1, "301:::true,302:::false,303:::")
+                .setString(PACKAGE_3, "302:::false").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_ADDED));
+
+        verify(mPlatformCompat, times(3)).putOverridesOnReleaseBuilds(
+                mOverridesToAddConfigCaptor.capture(), eq(PACKAGE_1));
+        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        List<CompatibilityOverrideConfig> configs = mOverridesToAddConfigCaptor.getAllValues();
+        assertThat(configs.get(0).overrides.keySet()).containsExactly(101L);
+        assertThat(configs.get(1).overrides.keySet()).containsExactly(201L);
+        assertThat(configs.get(2).overrides.keySet()).containsExactly(302L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(303L);
+    }
+
+    @Test
+    public void packageReceiver_packageRemovedIntentNoOverridesForPackage_doesNothing()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "101,102")
+                .setString(PACKAGE_2, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(FLAG_OWNED_CHANGE_IDS, "201,202")
+                .setString(PACKAGE_3, "201:::true").build());
+        mockGetApplicationInfoNotInstalled(PACKAGE_1);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_REMOVED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_packageRemovedIntentPackageInstalledForAnotherUser_doesNothing()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "101,102,103")
+                .setString(PACKAGE_1, "101:::true,103:::").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(FLAG_OWNED_CHANGE_IDS, "201,202")
+                .setString(PACKAGE_1, "202:::false").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_REMOVED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
+    @Test
+    public void packageReceiver_packageRemovedIntent_removesOwnedOverridesForNamespacesWithPackage()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "101,102,103")
+                .setString(PACKAGE_1, "101:::true,103:::")
+                .setString(PACKAGE_2, "102:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(FLAG_OWNED_CHANGE_IDS, "201")
+                .setString(PACKAGE_3, "201:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
+                .setString(FLAG_OWNED_CHANGE_IDS, "301,302")
+                .setString(PACKAGE_1, "302:::")
+                .setString(PACKAGE_2, "301:::true").build());
+        mockGetApplicationInfoNotInstalled(PACKAGE_1);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_REMOVED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        List<CompatibilityOverridesToRemoveConfig> configs =
+                mOverridesToRemoveConfigCaptor.getAllValues();
+        assertThat(configs.get(0).changeIds).containsExactly(101L, 102L, 103L);
+        assertThat(configs.get(1).changeIds).containsExactly(301L, 302L);
+    }
+
+    @Test
+    public void packageReceiver_packageRemovedIntentNoOwnedIdsForSomeNamespace_skipsNamespace()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "101,102")
+                .setString(PACKAGE_1, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
+                .setString(FLAG_OWNED_CHANGE_IDS, "301")
+                .setString(PACKAGE_1, "301:::true").build());
+        mockGetApplicationInfoNotInstalled(PACKAGE_1);
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_REMOVED));
+
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        List<CompatibilityOverridesToRemoveConfig> configs =
+                mOverridesToRemoveConfigCaptor.getAllValues();
+        assertThat(configs.get(0).changeIds).containsExactly(101L, 102L);
+        assertThat(configs.get(1).changeIds).containsExactly(301L);
+    }
+
+    @Test
+    public void packageReceiver_platformCompatThrowsExceptionForSomeNamespace_skipsFailedCall()
+            throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "101:::true").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(PACKAGE_1, "201:::false").build());
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
+                .setString(PACKAGE_1, "301:::true").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+        doThrow(new RemoteException()).when(mPlatformCompat).putOverridesOnReleaseBuilds(
+                argThat(config -> config.overrides.containsKey(201L)), eq(PACKAGE_1));
+
+        mPackageReceiver.onReceive(mMockContext,
+                createPackageIntent(PACKAGE_1, ACTION_PACKAGE_ADDED));
+
+        verify(mPlatformCompat, times(3)).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+    }
+
     private void mockGetApplicationInfo(String packageName, long versionCode)
             throws Exception {
         when(mPackageManager.getApplicationInfo(eq(packageName), anyInt())).thenReturn(
@@ -376,5 +680,9 @@ public class AppCompatOverridesServiceTest {
         ApplicationInfo appInfo = new ApplicationInfo();
         appInfo.longVersionCode = versionCode;
         return appInfo;
+    }
+
+    private Intent createPackageIntent(String packageName, @Nullable String action) {
+        return new Intent(action, Uri.parse("package:" + packageName));
     }
 }

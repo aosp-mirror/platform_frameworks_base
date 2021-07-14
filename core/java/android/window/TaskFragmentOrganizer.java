@@ -156,6 +156,10 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         }
     };
 
+    public ITaskFragmentOrganizer getIOrganizer() {
+        return mInterface;
+    }
+
     private ITaskFragmentOrganizerController getController() {
         try {
             return getWindowOrganizerController().getTaskFragmentOrganizerController();
