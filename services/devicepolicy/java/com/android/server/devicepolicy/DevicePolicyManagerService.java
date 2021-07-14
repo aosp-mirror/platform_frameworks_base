@@ -15019,10 +15019,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             if (active) {
                 if (shouldSendNotification) {
-                    sendNetworkLoggingNotification();
+                    mHandler.post(() -> sendNetworkLoggingNotification());
                 }
             } else {
-                mInjector.getNotificationManager().cancel(SystemMessage.NOTE_NETWORK_LOGGING);
+                mHandler.post(() -> mInjector.getNotificationManager().cancel(
+                        SystemMessage.NOTE_NETWORK_LOGGING));
             }
         });
     }
