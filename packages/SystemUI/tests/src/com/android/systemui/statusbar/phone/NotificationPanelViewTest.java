@@ -283,7 +283,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private SecureSettings mSecureSettings;
     @Mock
-    private SplitShadeStatusBarController mSplitShadeStatusBarController;
+    private SplitShadeHeaderController mSplitShadeHeaderController;
     @Mock
     private ContentResolver mContentResolver;
     @Mock
@@ -440,7 +440,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mQuickAccessWalletController,
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings,
-                mSplitShadeStatusBarController,
+                mSplitShadeHeaderController,
                 mUnlockedScreenOffAnimationController,
                 mNotificationRemoteInputManager);
         mNotificationPanelViewController.initDependencies(

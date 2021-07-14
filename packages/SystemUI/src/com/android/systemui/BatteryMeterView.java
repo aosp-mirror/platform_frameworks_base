@@ -192,6 +192,7 @@ public class BatteryMeterView extends LinearLayout implements
      * 0 - No preference
      * 1 - Force on
      * 2 - Force off
+     * 3 - Estimate
      * @param mode desired mode (none, on, off)
      */
     public void setPercentShowMode(@BatteryPercentMode int mode) {
