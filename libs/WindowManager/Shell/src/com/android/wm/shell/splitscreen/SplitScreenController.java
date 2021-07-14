@@ -142,6 +142,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.removeFromSideStage(taskId);
     }
 
+    public void setSideStageOutline(boolean enable) {
+        mStageCoordinator.setSideStageOutline(enable);
+    }
+
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition);
     }
