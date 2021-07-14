@@ -747,7 +747,7 @@ public final class Zygote {
                             new DataOutputStream(sessionSocket.getOutputStream());
                     Credentials peerCredentials = sessionSocket.getPeerCredentials();
                     tmpArgBuffer = new ZygoteCommandBuffer(sessionSocket);
-                    args = ZygoteArguments.getInstance(argBuffer);
+                    args = ZygoteArguments.getInstance(tmpArgBuffer);
                     applyUidSecurityPolicy(args, peerCredentials);
                     // TODO (chriswailes): Should this only be run for debug builds?
                     validateUsapCommand(args);
