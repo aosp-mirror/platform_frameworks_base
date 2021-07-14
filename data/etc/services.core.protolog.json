@@ -181,6 +181,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1924376693": {
+      "message": " Setting Ready-group to %b. group=%s from %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1918702467": {
       "message": "onSyncFinishedDrawing %s",
       "level": "VERBOSE",
@@ -606,6 +612,12 @@
       "level": "INFO",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1442613680": {
+      "message": " Creating Ready-group for Transition %d with root=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-1438175584": {
       "message": "Input focus has changed to %s display=%d",
@@ -2209,6 +2221,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "352982444": {
+      "message": " allReady query: used=%b override=%b states=[%s]",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
       "level": "DEBUG",
@@ -3276,6 +3294,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/InsetsStateController.java"
+    },
+    "1670933628": {
+      "message": " Setting allReady override",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "1671994402": {
       "message": "Nulling last startingData",

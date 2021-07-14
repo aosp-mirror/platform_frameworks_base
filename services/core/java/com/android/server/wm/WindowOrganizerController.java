@@ -227,7 +227,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 applyTransaction(t, -1 /*syncId*/, transition, caller);
                 if (needsSetReady) {
-                    transition.setReady();
+                    transition.setAllReady();
                 }
                 return transition;
             }
