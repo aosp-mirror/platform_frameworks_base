@@ -23,8 +23,11 @@ import android.os.Parcelable;
 /**
  * Describes the way to store scan result.
  *
+ * @deprecated this is not used anywhere
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public final class ResultStorageDescriptor implements Parcelable {
     private int mType;
