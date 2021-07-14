@@ -109,6 +109,7 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -218,7 +219,8 @@ public interface StatusBarPhoneModule {
             LockscreenShadeTransitionController transitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            Optional<StartingSurface> startingSurfaceOptional) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -306,6 +308,7 @@ public interface StatusBarPhoneModule {
                 transitionController,
                 featureFlags,
                 keyguardUnlockAnimationController,
-                unlockedScreenOffAnimationController);
+                unlockedScreenOffAnimationController,
+                startingSurfaceOptional);
     }
 }

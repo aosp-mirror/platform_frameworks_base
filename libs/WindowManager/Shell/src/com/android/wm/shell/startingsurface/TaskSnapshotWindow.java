@@ -283,6 +283,10 @@ public class TaskSnapshotWindow {
         mClearWindowHandler = clearWindowHandler;
     }
 
+    int getBackgroundColor() {
+        return mBackgroundPaint.getColor();
+    }
+
     /**
      * Ask system bar background painter to draw status bar background.
      * @hide
