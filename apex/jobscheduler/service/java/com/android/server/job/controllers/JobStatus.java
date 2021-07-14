@@ -391,6 +391,7 @@ public final class JobStatus {
 
     private long mTotalNetworkDownloadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
     private long mTotalNetworkUploadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+    private long mMinimumNetworkChunkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
 
     /////// Booleans that track if a job is ready to run. They should be updated whenever dependent
     /////// states change.
@@ -531,7 +532,7 @@ public final class JobStatus {
 
         mInternalFlags = internalFlags;
 
-        updateEstimatedNetworkBytesLocked();
+        updateNetworkBytesLocked();
 
         if (job.getRequiredNetwork() != null) {
             // Later, when we check if a given network satisfies the required
@@ -664,7 +665,7 @@ public final class JobStatus {
                     sourcePackageName, sourceUserId, toShortString()));
         }
         pendingWork.add(work);
-        updateEstimatedNetworkBytesLocked();
+        updateNetworkBytesLocked();
     }
 
     public JobWorkItem dequeueWorkLocked() {
@@ -677,7 +678,7 @@ public final class JobStatus {
                 executingWork.add(work);
                 work.bumpDeliveryCount();
             }
-            updateEstimatedNetworkBytesLocked();
+            updateNetworkBytesLocked();
             return work;
         }
         return null;
@@ -736,7 +737,7 @@ public final class JobStatus {
             pendingWork = null;
             executingWork = null;
             incomingJob.nextPendingWorkId = nextPendingWorkId;
-            incomingJob.updateEstimatedNetworkBytesLocked();
+            incomingJob.updateNetworkBytesLocked();
         } else {
             // We are completely stopping the job...  need to clean up work.
             ungrantWorkList(pendingWork);
@@ -744,7 +745,7 @@ public final class JobStatus {
             ungrantWorkList(executingWork);
             executingWork = null;
         }
-        updateEstimatedNetworkBytesLocked();
+        updateNetworkBytesLocked();
     }
 
     public void prepareLocked() {
@@ -944,9 +945,10 @@ public final class JobStatus {
         }
     }
 
-    private void updateEstimatedNetworkBytesLocked() {
+    private void updateNetworkBytesLocked() {
         mTotalNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
         mTotalNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
+        mMinimumNetworkChunkBytes = job.getMinimumNetworkChunkBytes();
 
         if (pendingWork != null) {
             for (int i = 0; i < pendingWork.size(); i++) {
@@ -968,6 +970,12 @@ public final class JobStatus {
                         mTotalNetworkUploadBytes += uploadBytes;
                     }
                 }
+                final long chunkBytes = pendingWork.get(i).getMinimumNetworkChunkBytes();
+                if (mMinimumNetworkChunkBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    mMinimumNetworkChunkBytes = chunkBytes;
+                } else if (chunkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    mMinimumNetworkChunkBytes = Math.min(mMinimumNetworkChunkBytes, chunkBytes);
+                }
             }
         }
     }
@@ -978,6 +986,10 @@ public final class JobStatus {
 
     public long getEstimatedNetworkUploadBytes() {
         return mTotalNetworkUploadBytes;
+    }
+
+    public long getMinimumNetworkChunkBytes() {
+        return mMinimumNetworkChunkBytes;
     }
 
     /** Does this job have any sort of networking constraint? */
@@ -1941,6 +1953,10 @@ public final class JobStatus {
             if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
                 pw.print("Network upload bytes: ");
                 pw.println(mTotalNetworkUploadBytes);
+            }
+            if (mMinimumNetworkChunkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                pw.print("Minimum network chunk bytes: ");
+                pw.println(mMinimumNetworkChunkBytes);
             }
             if (job.getMinLatencyMillis() != 0) {
                 pw.print("Minimum latency: ");

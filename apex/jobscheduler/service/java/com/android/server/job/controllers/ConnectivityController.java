@@ -549,6 +549,47 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private boolean isInsane(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
+        // Use the maximum possible time since it gives us an upper bound, even though the job
+        // could end up stopping earlier.
+        final long maxJobExecutionTimeMs = mService.getMaxJobExecutionTimeMs(jobStatus);
+
+        final long minimumChunkBytes = jobStatus.getMinimumNetworkChunkBytes();
+        if (minimumChunkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+            final long bandwidthDown = capabilities.getLinkDownstreamBandwidthKbps();
+            // If we don't know the bandwidth, all we can do is hope the job finishes the minimum
+            // chunk in time.
+            if (bandwidthDown > 0) {
+                // Divide by 8 to convert bits to bytes.
+                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
+                        / (DataUnit.KIBIBYTES.toBytes(bandwidthDown) / 8));
+                if (estimatedMillis > maxJobExecutionTimeMs) {
+                    // If we'd never finish the minimum chunk before the timeout, we'd be insane!
+                    Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over "
+                            + bandwidthDown + " kbps network would take "
+                            + estimatedMillis + "ms and job has "
+                            + maxJobExecutionTimeMs + "ms to run; that's insane!");
+                    return true;
+                }
+            }
+            final long bandwidthUp = capabilities.getLinkUpstreamBandwidthKbps();
+            // If we don't know the bandwidth, all we can do is hope the job finishes in time.
+            if (bandwidthUp > 0) {
+                // Divide by 8 to convert bits to bytes.
+                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
+                        / (DataUnit.KIBIBYTES.toBytes(bandwidthUp) / 8));
+                if (estimatedMillis > maxJobExecutionTimeMs) {
+                    // If we'd never finish the minimum chunk before the timeout, we'd be insane!
+                    Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over " + bandwidthUp
+                            + " kbps network would take " + estimatedMillis + "ms and job has "
+                            + maxJobExecutionTimeMs + "ms to run; that's insane!");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Minimum chunk size isn't defined. Check using the estimated upload/download sizes.
+
         if (capabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && mChargingTracker.isCharging()) {
             // We're charging and on an unmetered network. We don't have to be as conservative about
@@ -557,9 +598,6 @@ public final class ConnectivityController extends RestrictingController implemen
             return false;
         }
 
-        // Use the maximum possible time since it gives us an upper bound, even though the job
-        // could end up stopping earlier.
-        final long maxJobExecutionTimeMs = mService.getMaxJobExecutionTimeMs(jobStatus);
 
         final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
         if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
