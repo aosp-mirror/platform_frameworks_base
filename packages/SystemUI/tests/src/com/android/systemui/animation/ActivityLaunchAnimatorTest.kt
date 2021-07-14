@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.wm.shell.startingsurface.StartingSurface
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
@@ -47,13 +48,14 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Mock lateinit var keyguardHandler: ActivityLaunchAnimator.KeyguardHandler
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
+    @Mock lateinit var startingSurface: StartingSurface
 
     private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @get:Rule val rule = MockitoJUnit.rule()
 
     @Before
     fun setup() {
-        activityLaunchAnimator = ActivityLaunchAnimator(keyguardHandler, mContext)
+        activityLaunchAnimator = ActivityLaunchAnimator(keyguardHandler, startingSurface, mContext)
     }
 
     private fun startIntentWithAnimation(
@@ -117,7 +119,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun animatesIfActivityIsAlreadyOpenAndIsOnKeyguard() {
         `when`(keyguardHandler.isOnKeyguard()).thenReturn(true)
-        val animator = ActivityLaunchAnimator(keyguardHandler, context)
+        val animator = ActivityLaunchAnimator(keyguardHandler, startingSurface, context)
 
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         var animationAdapter: RemoteAnimationAdapter? = null

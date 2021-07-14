@@ -97,7 +97,8 @@ public class StartingSurfaceDrawerTests {
             // listen for addView
             mAddWindowForTask = taskId;
             mViewThemeResId = view.getContext().getThemeResId();
-            return true;
+            // Do not wait for background color
+            return false;
         }
 
         @Override
