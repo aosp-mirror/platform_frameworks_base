@@ -2014,7 +2014,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             return mIndex;
         }
 
-        /**s
+        /**
          * @return the total number of activities for which the assist data is
          * being returned.
          */
