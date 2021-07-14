@@ -421,10 +421,20 @@ public class StackScrollAlgorithm {
                     // When pulsing (incoming notification on AOD), innerHeight is 0; clamp all
                     // to shelf start, thereby hiding all notifications (except the first one, which
                     // we later unhide in updatePulsingState)
-                    final int stackBottom =
-                            !ambientState.isShadeExpanded() || ambientState.isDozing()
-                                    ? ambientState.getInnerHeight()
-                                    : (int) ambientState.getStackHeight();
+                    // TODO(b/192348384): merge InnerHeight with StackHeight
+                    final int stackBottom;
+                    if (ambientState.isBypassEnabled()) {
+                        // We want to use the stackHeight when pulse expanding, since the animation
+                        // isn't currently optimized if the pulseHeight is continuously changing
+                        // Let's improve this when we're merging the heights above
+                        stackBottom = ambientState.isPulseExpanding()
+                                ? (int) ambientState.getStackHeight()
+                                : ambientState.getInnerHeight();
+                    } else {
+                        stackBottom = !ambientState.isShadeExpanded() || ambientState.isDozing()
+                                        ? ambientState.getInnerHeight()
+                                        : (int) ambientState.getPulseStackHeight();
+                    }
                     final int shelfStart =
                             stackBottom - ambientState.getShelf().getIntrinsicHeight();
                     viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);
@@ -741,5 +751,15 @@ public class StackScrollAlgorithm {
          * notifications section. False if sections are not enabled.
          */
         boolean beginsSection(@NonNull View view, @Nullable View previous);
+    }
+
+    /**
+     * Interface for telling the StackScrollAlgorithm information about the bypass state
+     */
+    public interface BypassController {
+        /**
+         * True if bypass is enabled.  Note that this is always false if face auth is not enabled.
+         */
+        boolean isBypassEnabled();
     }
 }

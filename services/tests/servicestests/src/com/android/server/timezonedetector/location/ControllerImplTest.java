@@ -15,6 +15,7 @@
  */
 package com.android.server.timezonedetector.location;
 
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
@@ -728,6 +729,9 @@ public class ControllerImplTest {
         // Simulate the user change (but geo detection still enabled).
         testEnvironment.simulateConfigChange(USER2_CONFIG_GEO_DETECTION_ENABLED);
 
+        // Confirm that the previous suggestion was overridden.
+        mTestCallback.assertUncertainSuggestionMadeAndCommit();
+
         // We expect the provider to end up in PROVIDER_STATE_STARTED_INITIALIZING, but it should
         // have been stopped when the user changed.
         int[] expectedStateTransitions =
@@ -1068,6 +1072,48 @@ public class ControllerImplTest {
         }
     }
 
+    @Test
+    public void destroy() {
+        ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
+                mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controllerImpl, USER1_CONFIG_GEO_DETECTION_ENABLED);
+
+        // Initialize and check initial state.
+        controllerImpl.initialize(testEnvironment, mTestCallback);
+
+        mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
+                PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestCallback.assertNoSuggestionMade();
+        assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+
+        // Simulate the primary provider suggesting a time zone.
+        mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
+
+        // Receiving a "success" provider event should cause a suggestion to be made synchronously,
+        // and also clear the scheduled uncertainty suggestion.
+        mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
+                PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestCallback.assertSuggestionMadeAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+
+        // Trigger destroy().
+        controllerImpl.destroy();
+
+        // Confirm that the previous suggestion was overridden.
+        mTestCallback.assertUncertainSuggestionMadeAndCommit();
+
+        mTestPrimaryLocationTimeZoneProvider.assertStateChangesAndCommit(
+                PROVIDER_STATE_STOPPED, PROVIDER_STATE_DESTROYED);
+        mTestSecondaryLocationTimeZoneProvider.assertStateChangesAndCommit(
+                PROVIDER_STATE_DESTROYED);
+        assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+    }
+
     private static void assertUncertaintyTimeoutSet(
             LocationTimeZoneProviderController.Environment environment,
             LocationTimeZoneProviderController controller) {
@@ -1175,7 +1221,6 @@ public class ControllerImplTest {
         private final TestState<ProviderState> mTestProviderState = new TestState<>();
         private boolean mFailDuringInitialization;
         private boolean mInitialized;
-        private boolean mDestroyed;
 
         /**
          * Creates the instance.
@@ -1200,7 +1245,7 @@ public class ControllerImplTest {
 
         @Override
         void onDestroy() {
-            mDestroyed = true;
+            // No behavior needed.
         }
 
         @Override

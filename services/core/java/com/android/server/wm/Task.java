@@ -3365,9 +3365,9 @@ class Task extends TaskFragment {
 
     private @Nullable PictureInPictureParams getPictureInPictureParams(Task top) {
         if (top == null) return null;
-        final ActivityRecord topVisibleActivity = top.getTopVisibleActivity();
-        return (topVisibleActivity == null || topVisibleActivity.pictureInPictureArgs.empty())
-                ? null : new PictureInPictureParams(topVisibleActivity.pictureInPictureArgs);
+        final ActivityRecord topMostActivity = top.getTopMostActivity();
+        return (topMostActivity == null || topMostActivity.pictureInPictureArgs.empty())
+                ? null : new PictureInPictureParams(topMostActivity.pictureInPictureArgs);
     }
 
     /**
@@ -4500,8 +4500,10 @@ class Task extends TaskFragment {
             mAtmService.continueWindowLayout();
         }
 
-        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-        mRootWindowContainer.resumeFocusedTasksTopActivities();
+        if (!mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            mRootWindowContainer.resumeFocusedTasksTopActivities();
+        }
     }
 
     void resumeNextFocusAfterReparent() {

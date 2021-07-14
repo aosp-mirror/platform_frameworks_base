@@ -2720,8 +2720,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean attachWindowContextToDisplayArea(IBinder clientToken, int type, int displayId,
-            Bundle options) {
+    public Configuration attachWindowContextToDisplayArea(IBinder clientToken, int
+            type, int displayId, Bundle options) {
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
                 "attachWindowContextToDisplayArea", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
@@ -2732,15 +2732,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null) {
                     ProtoLog.w(WM_ERROR, "attachWindowContextToDisplayArea: trying to attach"
                             + " to a non-existing display:%d", displayId);
-                    return false;
+                    return null;
                 }
                 // TODO(b/155340867): Investigate if we still need roundedCornerOverlay after
                 // the feature b/155340867 is completed.
                 final DisplayArea da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
+                // TODO(b/190019118): Avoid to send onConfigurationChanged because it has been done
+                //  in return value of attachWindowContextToDisplayArea.
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
                         callingUid, type, options);
-                return true;
+                return da.getConfiguration();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -8193,11 +8195,11 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
                     true /* includingParents */);
         }
-        handleTaskFocusChange(touchedWindow.getTask());
+        handleTaskFocusChange(touchedWindow.getTask(), touchedWindow.mActivityRecord);
     }
 
     @VisibleForTesting
-    void handleTaskFocusChange(Task task) {
+    void handleTaskFocusChange(Task task, ActivityRecord touchedActivity) {
         if (task == null) {
             return;
         }
@@ -8216,7 +8218,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        mAtmService.setFocusedTask(task.mTaskId);
+        mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
     }
 
     /**

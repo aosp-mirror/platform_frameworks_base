@@ -5277,7 +5277,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            if (deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
+                    && deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
                 // Go ahead and just put the activity in pip if it supports auto-pip.
                 mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
                 return;
@@ -8185,7 +8186,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
-            startFreezingScreenLocked(globalChanges);
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+                startFreezingScreenLocked(globalChanges);
+            }
             forceNewConfig = false;
             preserveWindow &= isResizeOnlyChange(changes);
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());

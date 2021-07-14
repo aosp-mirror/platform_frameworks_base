@@ -875,6 +875,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
+     * Returns all the requested visibilities.
+     *
+     * @return an {@link InsetsState} as the requested visibilities.
+     */
+    InsetsState getRequestedState() {
+        return mRequestedInsetsState;
+    }
+
+    /**
      * @see #getRequestedVisibility(int)
      */
     void updateRequestedVisibility(InsetsState state) {
@@ -2394,6 +2403,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void removeImmediately() {
+        if (!mRemoved) {
+            // Destroy surface before super call. The general pattern is that the children need
+            // to be removed before the parent (so that the sync-engine tracking works). Since
+            // WindowStateAnimator is a "virtual" child, we have to do it manually here.
+            mWinAnimator.destroySurfaceLocked(getSyncTransaction());
+        }
         super.removeImmediately();
 
         if (mRemoved) {
@@ -2435,8 +2450,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         disposeInputChannel();
 
-        mWinAnimator.destroySurfaceLocked(mTmpTransaction);
-        mTmpTransaction.apply();
         mSession.windowRemovedLocked();
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);

@@ -49,7 +49,7 @@ public:
             paint.setAntiAlias(true);
             paint.setColor(Color::Green_700);
             canvas.drawCircle(200, 200, 200, paint);
-            SkPaint alphaPaint;
+            Paint alphaPaint;
             alphaPaint.setAlpha(128);
             canvas.restoreUnclippedLayer(unclippedSaveLayer, alphaPaint);
             canvas.restore();

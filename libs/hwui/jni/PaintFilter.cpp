@@ -29,10 +29,6 @@ public:
         fClearFlags = static_cast<uint16_t>(clearFlags);
         fSetFlags = static_cast<uint16_t>(setFlags);
     }
-    void filter(SkPaint* paint) override {
-        uint32_t flags = Paint::GetSkPaintJavaFlags(*paint);
-        Paint::SetSkPaintJavaFlags(paint, (flags & ~fClearFlags) | fSetFlags);
-    }
     void filterFullPaint(Paint* paint) override {
         paint->setJavaFlags((paint->getJavaFlags() & ~fClearFlags) | fSetFlags);
     }
