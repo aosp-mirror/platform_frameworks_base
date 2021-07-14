@@ -53,7 +53,6 @@ public class SideStageTests extends ShellTestCase {
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private ActivityManager.RunningTaskInfo mRootTask;
     @Mock private SurfaceControl mRootLeash;
-    @Mock private OutlineManager mOutlineManager;
     @Spy private WindowContainerTransaction mWct;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SideStage mSideStage;
@@ -63,7 +62,7 @@ public class SideStageTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mOutlineManager);
+                mSyncQueue, mSurfaceSession);
         mSideStage.onTaskAppeared(mRootTask, mRootLeash);
     }
 

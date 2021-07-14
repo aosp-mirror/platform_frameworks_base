@@ -103,6 +103,8 @@ public final class ShellCommandHandlerImpl {
                 return runMoveToSideStage(args, pw);
             case "removeFromSideStage":
                 return runRemoveFromSideStage(args, pw);
+            case "setSideStageOutline":
+                return runSetSideStageOutline(args, pw);
             case "setSideStagePosition":
                 return runSetSideStagePosition(args, pw);
             case "setSideStageVisibility":
@@ -161,6 +163,18 @@ public final class ShellCommandHandlerImpl {
         return true;
     }
 
+    private boolean runSetSideStageOutline(String[] args, PrintWriter pw) {
+        if (args.length < 3) {
+            // First arguments are "WMShell" and command name.
+            pw.println("Error: whether to enable or disable side stage outline border should be"
+                    + " provided as arguments");
+            return false;
+        }
+        final boolean enable = new Boolean(args[2]);
+        mSplitScreenOptional.ifPresent(split -> split.setSideStageOutline(enable));
+        return true;
+    }
+
     private boolean runSetSideStagePosition(String[] args, PrintWriter pw) {
         if (args.length < 3) {
             // First arguments are "WMShell" and command name.
@@ -175,7 +189,7 @@ public final class ShellCommandHandlerImpl {
     private boolean runSetSideStageVisibility(String[] args, PrintWriter pw) {
         if (args.length < 3) {
             // First arguments are "WMShell" and command name.
-            pw.println("Error: side stage position should be provided as arguments");
+            pw.println("Error: side stage visibility should be provided as arguments");
             return false;
         }
         final Boolean visible = new Boolean(args[2]);
@@ -197,6 +211,8 @@ public final class ShellCommandHandlerImpl {
         pw.println("    Move a task with given id in split-screen mode.");
         pw.println("  removeFromSideStage <taskId>");
         pw.println("    Remove a task with given id in split-screen mode.");
+        pw.println("  setSideStageOutline <true/false>");
+        pw.println("    Enable/Disable outline on the side-stage.");
         pw.println("  setSideStagePosition <SideStagePosition>");
         pw.println("    Sets the position of the side-stage.");
         pw.println("  setSideStageVisibility <true/false>");
