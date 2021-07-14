@@ -6524,12 +6524,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
                         return;
                     }
-                    if (wpc.getNightMode() == mNightMode) {
-                        return;
-                    }
-                    if (!wpc.setOverrideNightMode(mNightMode)) {
-                        return;
-                    }
+                    wpc.setOverrideNightMode(mNightMode);
                     wpc.updateNightModeForAllActivities(mNightMode);
                     mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
                 } finally {
