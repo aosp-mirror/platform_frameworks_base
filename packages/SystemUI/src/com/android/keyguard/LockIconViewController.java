@@ -40,7 +40,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
@@ -145,6 +144,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mUnlockedLabel = context.getResources().getString(R.string.accessibility_unlock_button);
         mLockedLabel = context.getResources().getString(R.string.accessibility_lock_icon);
         dumpManager.registerDumpable("LockIconViewController", this);
+
     }
 
     @Override
@@ -224,6 +224,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setImageDrawable(mLockIcon);
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mLockedLabel);
+            mView.hideBg();
         } else if (mShowUnlockIcon) {
             if (wasShowingFpIcon) {
                 mView.setImageDrawable(mFpToUnlockIcon);
@@ -234,9 +235,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 mLockToUnlockIcon.forceAnimationOnUI();
                 mLockToUnlockIcon.start();
             }
+            mView.animateBg();
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mUnlockedLabel);
         } else {
+            mView.hideBg();
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
         }
@@ -281,11 +284,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateColors() {
-        final int color = Utils.getColorAttrDefaultColor(mView.getContext(),
-                R.attr.wallpaperTextColorAccent);
-        mFpToUnlockIcon.setTint(color);
-        mLockToUnlockIcon.setTint(color);
-        mLockIcon.setTint(color);
+        mView.updateColor();
     }
 
     private void updateConfiguration() {
@@ -445,6 +444,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onConfigChanged(Configuration newConfig) {
             updateConfiguration();
+            updateColors();
         }
     };
 

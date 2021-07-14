@@ -162,7 +162,12 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     void updateColor() {
+        mWallpaperTextColor = Utils.getColorAttrDefaultColor(mContext,
+            R.attr.wallpaperTextColorAccent);
+        mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
+            android.R.attr.textColorPrimary);
         mLockScreenFp.invalidate();
+        mBgProtection.setBackground(getContext().getDrawable(R.drawable.fingerprint_bg));
     }
 
     private boolean showingUdfpsBouncer() {
