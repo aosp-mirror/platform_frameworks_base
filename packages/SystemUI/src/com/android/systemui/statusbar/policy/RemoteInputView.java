@@ -805,7 +805,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void onEditTextFocusChanged(RemoteEditText remoteEditText, boolean focused) {
-        for (View.OnFocusChangeListener listener : mEditTextFocusChangeListeners) {
+        for (View.OnFocusChangeListener listener : new ArrayList<>(mEditTextFocusChangeListeners)) {
             listener.onFocusChange(remoteEditText, focused);
         }
     }
