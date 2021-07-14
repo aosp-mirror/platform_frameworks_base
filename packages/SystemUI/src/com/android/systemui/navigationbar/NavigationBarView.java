@@ -69,6 +69,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.ContextualButton;
 import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
@@ -275,14 +276,23 @@ public class NavigationBarView extends FrameLayout implements
                 false /* inScreen */, false /* useNearestRegion */));
     };
 
-    private final Consumer<Boolean> mRotationButtonListener = (visible) -> {
-        if (visible) {
-            // If the button will actually become visible and the navbar is about to hide,
-            // tell the statusbar to keep it around for longer
-            mAutoHideController.touchAutoHide();
-        }
-        notifyActiveTouchRegions();
-    };
+    private final RotationButtonUpdatesCallback mRotationButtonListener =
+            new RotationButtonUpdatesCallback() {
+                @Override
+                public void onVisibilityChanged(boolean visible) {
+                    if (visible) {
+                        // If the button will actually become visible and the navbar is about
+                        // to hide, tell the statusbar to keep it around for longer
+                        mAutoHideController.touchAutoHide();
+                    }
+                    notifyActiveTouchRegions();
+                }
+
+                @Override
+                public void onPositionChanged() {
+                    notifyActiveTouchRegions();
+                }
+            };
 
     private final Consumer<Boolean> mNavbarOverlayVisibilityChangeCallback = (visible) -> {
         if (visible) {
