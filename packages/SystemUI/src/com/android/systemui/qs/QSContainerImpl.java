@@ -160,8 +160,8 @@ public class QSContainerImpl extends FrameLayout {
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         mQSPanelContainer.setPaddingRelative(
                 getPaddingStart(),
-                mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height),
+                mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.qs_header_system_icons_area_height),
                 getPaddingEnd(),
                 getPaddingBottom()
         );

@@ -57,9 +57,8 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     protected QuickQSPanel mHeaderQsPanel;
     private View mDatePrivacyView;
-    private View mDateView;
     private View mSecurityHeaderView;
-    private View mClockIconsView;
+    private View mStatusIconsView;
     private View mContainer;
 
     private View mQSCarriers;
@@ -82,7 +81,6 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mWaterfallTopInset;
     private int mCutOutPaddingLeft;
     private int mCutOutPaddingRight;
-    private float mViewAlpha = 1.0f;
     private float mKeyguardExpansionFraction;
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
@@ -115,12 +113,11 @@ public class QuickStatusBarHeader extends FrameLayout {
 
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
         mDatePrivacyView = findViewById(R.id.quick_status_bar_date_privacy);
-        mClockIconsView = findViewById(R.id.quick_qs_status_icons);
+        mStatusIconsView = findViewById(R.id.quick_qs_status_icons);
         mQSCarriers = findViewById(R.id.carrier_group);
         mContainer = findViewById(R.id.qs_container);
         mIconContainer = findViewById(R.id.statusIcons);
         mPrivacyChip = findViewById(R.id.privacy_chip);
-        mDateView = findViewById(R.id.date);
         mSecurityHeaderView = findViewById(R.id.header_text_container);
         mClockIconsSeparator = findViewById(R.id.separator);
         mRightLayout = findViewById(R.id.rightLayout);
@@ -161,10 +158,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         updateAnimators();
     }
 
-    public QuickQSPanel getHeaderQsPanel() {
-        return mHeaderQsPanel;
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -201,6 +194,11 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     void updateResources() {
         Resources resources = mContext.getResources();
+        // status bar is already displayed out of QS in split shade
+        boolean shouldUseSplitShade =
+                resources.getBoolean(R.bool.config_use_split_notification_shade);
+        mStatusIconsView.setVisibility(shouldUseSplitShade ? View.GONE : View.VISIBLE);
+        mDatePrivacyView.setVisibility(shouldUseSplitShade ? View.GONE : View.VISIBLE);
 
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
@@ -212,13 +210,13 @@ public class QuickStatusBarHeader extends FrameLayout {
                 Math.max(qsOffsetHeight, mDatePrivacyView.getMinimumHeight());
         mDatePrivacyView.setLayoutParams(mDatePrivacyView.getLayoutParams());
 
-        mClockIconsView.getLayoutParams().height =
-                Math.max(qsOffsetHeight, mClockIconsView.getMinimumHeight());
-        mClockIconsView.setLayoutParams(mClockIconsView.getLayoutParams());
+        mStatusIconsView.getLayoutParams().height =
+                Math.max(qsOffsetHeight, mStatusIconsView.getMinimumHeight());
+        mStatusIconsView.setLayoutParams(mStatusIconsView.getLayoutParams());
 
         ViewGroup.LayoutParams lp = getLayoutParams();
         if (mQsDisabled) {
-            lp.height = mClockIconsView.getLayoutParams().height;
+            lp.height = mStatusIconsView.getLayoutParams().height;
         } else {
             lp.height = WRAP_CONTENT;
         }
@@ -364,7 +362,7 @@ public class QuickStatusBarHeader extends FrameLayout {
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
         mHeaderQsPanel.setDisabledByPolicy(disabled);
-        mClockIconsView.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        mStatusIconsView.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         updateResources();
     }
 
@@ -378,7 +376,7 @@ public class QuickStatusBarHeader extends FrameLayout {
                 StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
                         cutout, cornerCutoutPadding, -1);
         mDatePrivacyView.setPadding(padding.first, 0, padding.second, 0);
-        mClockIconsView.setPadding(padding.first, 0, padding.second, 0);
+        mStatusIconsView.setPadding(padding.first, 0, padding.second, 0);
         LinearLayout.LayoutParams datePrivacySeparatorLayoutParams =
                 (LinearLayout.LayoutParams) mDatePrivacySeparator.getLayoutParams();
         LinearLayout.LayoutParams mClockIconsSeparatorLayoutParams =
@@ -440,7 +438,7 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     private void updateHeadersPadding() {
         setContentMargins(mDatePrivacyView, 0, 0);
-        setContentMargins(mClockIconsView, 0, 0);
+        setContentMargins(mStatusIconsView, 0, 0);
         int paddingLeft = 0;
         int paddingRight = 0;
 
@@ -466,7 +464,7 @@ public class QuickStatusBarHeader extends FrameLayout {
                 mWaterfallTopInset,
                 paddingRight,
                 0);
-        mClockIconsView.setPadding(paddingLeft,
+        mStatusIconsView.setPadding(paddingLeft,
                 mWaterfallTopInset,
                 paddingRight,
                 0);
@@ -493,7 +491,7 @@ public class QuickStatusBarHeader extends FrameLayout {
      * @param scrollY the scroll of the QSPanel container
      */
     public void setExpandedScrollAmount(int scrollY) {
-        mClockIconsView.setScrollY(scrollY);
+        mStatusIconsView.setScrollY(scrollY);
         mDatePrivacyView.setScrollY(scrollY);
     }
 }
