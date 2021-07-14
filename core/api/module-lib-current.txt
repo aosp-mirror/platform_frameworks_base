@@ -102,6 +102,14 @@ package android.hardware.usb {
 
 }
 
+package android.location {
+
+  public class LocationManager {
+    method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public boolean injectLocation(@NonNull android.location.Location);
+  }
+
+}
+
 package android.media {
 
   public class AudioManager {
