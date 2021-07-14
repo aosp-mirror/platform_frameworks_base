@@ -289,8 +289,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private String mActiveIface;
 
     /** Set of any ifaces associated with mobile networks since boot. */
-    @GuardedBy("mStatsLock")
-    private String[] mMobileIfaces = new String[0];
+    private volatile String[] mMobileIfaces = new String[0];
 
     /** Set of all ifaces currently used by traffic that does not explicitly specify a Network. */
     @GuardedBy("mStatsLock")
@@ -935,7 +934,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public String[] getMobileIfaces() {
-        return mMobileIfaces;
+        return mMobileIfaces.clone();
     }
 
     @Override
@@ -1084,7 +1083,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public long getIfaceStats(String iface, int type) {
+    public long getIfaceStats(@NonNull String iface, int type) {
+        Objects.requireNonNull(iface);
         long nativeIfaceStats = nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
         if (nativeIfaceStats == -1) {
             return nativeIfaceStats;
@@ -1382,7 +1382,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
 
-        mMobileIfaces = mobileIfaces.toArray(new String[mobileIfaces.size()]);
+        mMobileIfaces = mobileIfaces.toArray(new String[0]);
     }
 
     private static int getSubIdForMobile(@NonNull NetworkStateSnapshot state) {
