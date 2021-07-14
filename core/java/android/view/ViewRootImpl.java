@@ -1955,22 +1955,23 @@ public final class ViewRootImpl implements ViewParent,
        return mBoundsLayer;
     }
 
-    Surface getOrCreateBLASTSurface(int width, int height,
-            @Nullable WindowManager.LayoutParams params) {
+    Surface getOrCreateBLASTSurface() {
         if (!mSurfaceControl.isValid()) {
             return null;
         }
 
-        int format = params == null ? PixelFormat.TRANSLUCENT : params.format;
         Surface ret = null;
         if (mBlastBufferQueue == null) {
-            mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl, width, height,
-                    format);
+            mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
+                mSurfaceSize.x, mSurfaceSize.y,
+                mWindowAttributes.format);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
         } else {
-            mBlastBufferQueue.update(mSurfaceControl, width, height, format);
+            mBlastBufferQueue.update(mSurfaceControl,
+                mSurfaceSize.x, mSurfaceSize.y,
+                mWindowAttributes.format);
         }
 
         return ret;
@@ -7784,8 +7785,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!useBLAST()) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
-                final Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x, mSurfaceSize.y,
-                        params);
+                final Surface blastSurface = getOrCreateBLASTSurface();
                 // If blastSurface == null that means it hasn't changed since the last time we
                 // called. In this situation, avoid calling transferFrom as we would then
                 // inc the generation ID and cause EGL resources to be recreated.
