@@ -646,4 +646,9 @@ public abstract class ActivityManagerInternal {
      */
     @Nullable
     public abstract List<Integer> getIsolatedProcesses(int uid);
+
+    /** @see ActivityManagerService#sendIntentSender */
+    public abstract int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
+            Intent intent, String resolvedType,
+            IIntentReceiver finishedReceiver, String requiredPermission, Bundle options);
 }

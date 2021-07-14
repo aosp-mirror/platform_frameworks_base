@@ -5014,6 +5014,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    void cancelAppTransition() {
+        if (!mAppTransition.isTransitionSet() || mAppTransition.isRunning()) return;
+        mAppTransition.abort();
+    }
+
     /**
      * Update pendingLayoutChanges after app transition has finished.
      */

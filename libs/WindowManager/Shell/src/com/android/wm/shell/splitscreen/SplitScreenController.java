@@ -17,14 +17,12 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -39,9 +37,13 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.IRemoteTransition;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -58,6 +60,7 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
+import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -185,7 +188,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void startTask(int taskId, @SplitScreen.StageType int stage,
             @SplitPosition int position, @Nullable Bundle options) {
-        options = resolveStartStage(stage, position, options, null /* wct */);
+        options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
 
         try {
             ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
@@ -197,7 +200,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public void startShortcut(String packageName, String shortcutId,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
-        options = resolveStartStage(stage, position, options, null /* wct */);
+        options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
 
         try {
             LauncherApps launcherApps =
@@ -212,65 +215,61 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public void startIntent(PendingIntent intent, Intent fillInIntent,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options) {
-        options = resolveStartStage(stage, position, options);
-
-        try {
-            intent.send(mContext, 0, fillInIntent, null, null, null, options);
-        } catch (PendingIntent.CanceledException e) {
-            Slog.e(TAG, "Failed to launch activity", e);
+        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+            startIntentLegacy(intent, fillInIntent, stage, position, options);
+            return;
         }
+        mStageCoordinator.startIntent(intent, fillInIntent, stage, position, options,
+                null /* remote */);
     }
 
-    private Bundle resolveStartStage(@SplitScreen.StageType int stage,
-            @SplitPosition int position, @Nullable Bundle options,
-            @Nullable WindowContainerTransaction wct) {
-        switch (stage) {
-            case STAGE_TYPE_UNDEFINED: {
-                // Use the stage of the specified position is valid.
-                if (position != SPLIT_POSITION_UNDEFINED) {
-                    if (position == mStageCoordinator.getSideStagePosition()) {
-                        options = resolveStartStage(STAGE_TYPE_SIDE, position, options, wct);
-                    } else {
-                        options = resolveStartStage(STAGE_TYPE_MAIN, position, options, wct);
-                    }
-                } else {
-                    // Exit split-screen and launch fullscreen since stage wasn't specified.
-                    mStageCoordinator.prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
-                }
-                break;
-            }
-            case STAGE_TYPE_SIDE: {
-                if (position != SPLIT_POSITION_UNDEFINED) {
-                    mStageCoordinator.setSideStagePosition(position, wct);
-                } else {
-                    position = mStageCoordinator.getSideStagePosition();
-                }
-                if (options == null) {
-                    options = new Bundle();
-                }
-                mStageCoordinator.updateActivityOptions(options, position, wct);
-                break;
-            }
-            case STAGE_TYPE_MAIN: {
-                if (position != SPLIT_POSITION_UNDEFINED) {
-                    // Set the side stage opposite of what we want to the main stage.
-                    final int sideStagePosition = position == SPLIT_POSITION_TOP_OR_LEFT
-                            ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
-                    mStageCoordinator.setSideStagePosition(sideStagePosition, wct);
-                } else {
-                    position = mStageCoordinator.getMainStagePosition();
-                }
-                if (options == null) {
-                    options = new Bundle();
-                }
-                mStageCoordinator.updateActivityOptions(options, position, wct);
-                break;
-            }
-            default:
-                throw new IllegalArgumentException("Unknown stage=" + stage);
-        }
+    private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
+            @SplitScreen.StageType int stage, @SplitPosition int position,
+            @Nullable Bundle options) {
+        final boolean wasInSplit = isSplitScreenVisible();
 
-        return options;
+        LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
+            @Override
+            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                    IRemoteAnimationFinishedCallback finishedCallback,
+                    SurfaceControl.Transaction t) {
+                boolean cancelled = apps == null || apps.length == 0;
+                mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
+                if (cancelled) {
+                    if (!wasInSplit) {
+                        final WindowContainerTransaction undoWct = new WindowContainerTransaction();
+                        mStageCoordinator.prepareExitSplitScreen(STAGE_TYPE_MAIN, undoWct);
+                        mSyncQueue.queue(undoWct);
+                        mSyncQueue.runInSync(undoT -> {
+                            // looks weird, but we want undoT to execute after t but still want the
+                            // rest of the syncQueue runnables to aggregate.
+                            t.merge(undoT);
+                            undoT.merge(t);
+                        });
+                        return;
+                    }
+                }
+                for (int i = 0; i < apps.length; ++i) {
+                    if (apps[i].mode == MODE_OPENING) {
+                        t.show(apps[i].leash);
+                    }
+                }
+                RemoteAnimationTarget divider = mStageCoordinator.getDividerBarLegacyTarget();
+                t.show(divider.leash);
+                t.apply();
+                if (cancelled) return;
+                try {
+                    finishedCallback.onAnimationFinished();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error finishing legacy transition: ", e);
+                }
+            }
+        };
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        options = mStageCoordinator.resolveStartStage(stage, position, options, wct);
+        wct.sendPendingIntent(intent, fillInIntent, options);
+        mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) {

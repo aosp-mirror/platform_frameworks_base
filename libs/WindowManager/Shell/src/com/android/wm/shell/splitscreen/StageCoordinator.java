@@ -36,6 +36,7 @@ import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenTransitions.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS_SNAP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 import static com.android.wm.shell.transition.Transitions.isClosingType;
 import static com.android.wm.shell.transition.Transitions.isOpeningType;
@@ -45,8 +46,10 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
@@ -329,6 +332,69 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // Using legacy transitions, so we can't use blast sync since it conflicts.
         mTaskOrganizer.applyTransaction(wct);
+    }
+
+    public void startIntent(PendingIntent intent, Intent fillInIntent,
+            @SplitScreen.StageType int stage, @SplitPosition int position,
+            @androidx.annotation.Nullable Bundle options,
+            @Nullable IRemoteTransition remoteTransition) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        options = resolveStartStage(stage, position, options, wct);
+        wct.sendPendingIntent(intent, fillInIntent, options);
+        mSplitTransitions.startEnterTransition(
+                TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, wct, remoteTransition, this);
+    }
+
+    Bundle resolveStartStage(@SplitScreen.StageType int stage,
+            @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
+            @androidx.annotation.Nullable WindowContainerTransaction wct) {
+        switch (stage) {
+            case STAGE_TYPE_UNDEFINED: {
+                // Use the stage of the specified position is valid.
+                if (position != SPLIT_POSITION_UNDEFINED) {
+                    if (position == getSideStagePosition()) {
+                        options = resolveStartStage(STAGE_TYPE_SIDE, position, options, wct);
+                    } else {
+                        options = resolveStartStage(STAGE_TYPE_MAIN, position, options, wct);
+                    }
+                } else {
+                    // Exit split-screen and launch fullscreen since stage wasn't specified.
+                    prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
+                }
+                break;
+            }
+            case STAGE_TYPE_SIDE: {
+                if (position != SPLIT_POSITION_UNDEFINED) {
+                    setSideStagePosition(position, wct);
+                } else {
+                    position = getSideStagePosition();
+                }
+                if (options == null) {
+                    options = new Bundle();
+                }
+                updateActivityOptions(options, position, wct);
+                break;
+            }
+            case STAGE_TYPE_MAIN: {
+                if (position != SPLIT_POSITION_UNDEFINED) {
+                    // Set the side stage opposite of what we want to the main stage.
+                    final int sideStagePosition = position == SPLIT_POSITION_TOP_OR_LEFT
+                            ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
+                    setSideStagePosition(sideStagePosition, wct);
+                } else {
+                    position = getMainStagePosition();
+                }
+                if (options == null) {
+                    options = new Bundle();
+                }
+                updateActivityOptions(options, position, wct);
+                break;
+            }
+            default:
+                throw new IllegalArgumentException("Unknown stage=" + stage);
+        }
+
+        return options;
     }
 
     @SplitLayout.SplitPosition
