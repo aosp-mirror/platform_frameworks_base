@@ -748,10 +748,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, jako dymek"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, przerywa działanie trybu Nie przeszkadzać"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywa działanie trybu Nie przeszkadzać"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
@@ -1161,8 +1161,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> wysyła wiadomość: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> wysyła zdjęcie"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ma nowy stan: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"Użytkownik dostępny"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem z odczytaniem pomiaru wykorzystania baterii"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nie ustawiono alarmu"</string>

@@ -1101,8 +1101,11 @@ public class VoiceInteractionManagerService extends SystemService {
         //----------------- Hotword Detection/Validation APIs --------------------------------//
 
         @Override
-        public void updateState(@Nullable PersistableBundle options,
-                @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+        public void updateState(
+                @NonNull Identity voiceInteractorIdentity,
+                @Nullable PersistableBundle options,
+                @Nullable SharedMemory sharedMemory,
+                IHotwordRecognitionStatusCallback callback) {
             enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
@@ -1111,9 +1114,14 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "updateState without running voice interaction service");
                     return;
                 }
+
+                voiceInteractorIdentity.uid = Binder.getCallingUid();
+                voiceInteractorIdentity.pid = Binder.getCallingPid();
+
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.updateStateLocked(options, sharedMemory, callback);
+                    mImpl.updateStateLocked(
+                            voiceInteractorIdentity, options, sharedMemory, callback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

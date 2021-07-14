@@ -16,20 +16,28 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.RECORD_AUDIO;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
 
+import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.media.permission.Identity;
+import android.media.permission.PermissionUtil;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -46,6 +54,7 @@ import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.contentcapture.IContentCaptureManager;
@@ -107,6 +116,10 @@ final class HotwordDetectionConnection {
 
     private ScheduledFuture<?> mCancellationTaskFuture;
 
+    /** Identity used for attributing app ops when delivering data to the Interactor. */
+    @GuardedBy("mLock")
+    @Nullable
+    private final Identity mVoiceInteractorIdentity;
     @GuardedBy("mLock")
     private ParcelFileDescriptor mCurrentAudioSink;
     @GuardedBy("mLock")
@@ -117,12 +130,13 @@ final class HotwordDetectionConnection {
     private IBinder mAudioFlinger;
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
-            ComponentName serviceName, int userId, boolean bindInstantServiceAllowed,
-            @Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory,
-            IHotwordRecognitionStatusCallback callback) {
+            Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
+            boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
         mLock = lock;
         mContext = context;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
+        mVoiceInteractorIdentity = voiceInteractorIdentity;
         mDetectionComponentName = serviceName;
         mUser = userId;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
@@ -310,6 +324,7 @@ final class HotwordDetectionConnection {
                 }
                 synchronized (mLock) {
                     if (mPerformingSoftwareHotwordDetection) {
+                        enforcePermissionsForDataDelivery();
                         mSoftwareCallback.onDetected(result, null, null);
                         mPerformingSoftwareHotwordDetection = false;
                         if (result != null) {
@@ -404,6 +419,7 @@ final class HotwordDetectionConnection {
                 synchronized (mLock) {
                     if (mValidatingDspTrigger) {
                         mValidatingDspTrigger = false;
+                        enforcePermissionsForDataDelivery();
                         externalCallback.onKeyphraseDetected(recognitionEvent, result);
                         if (result != null) {
                             Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -461,6 +477,7 @@ final class HotwordDetectionConnection {
                         return;
                     }
                     mValidatingDspTrigger = false;
+                    enforcePermissionsForDataDelivery();
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
                     if (result != null) {
                         Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -575,8 +592,7 @@ final class HotwordDetectionConnection {
             if (DEBUG) {
                 Slog.d(TAG, "onKeyphraseDetected recognitionEvent : " + recognitionEvent);
             }
-            final boolean useHotwordDetectionService = mHotwordDetectionConnection != null
-                    && mHotwordDetectionConnection.isBound();
+            final boolean useHotwordDetectionService = mHotwordDetectionConnection != null;
             if (useHotwordDetectionService) {
                 mRecognitionEvent = recognitionEvent;
                 mHotwordDetectionConnection.detectFromDspSource(
@@ -692,7 +708,7 @@ final class HotwordDetectionConnection {
                                     throws RemoteException {
                                 bestEffortClose(serviceAudioSink);
                                 bestEffortClose(serviceAudioSource);
-                                // TODO: noteOp here.
+                                enforcePermissionsForDataDelivery();
                                 callback.onDetected(triggerResult, null /* audioFormat */,
                                         null /* audioStream */);
                                 if (triggerResult != null) {
@@ -872,4 +888,42 @@ final class HotwordDetectionConnection {
             }
         }
     }
+
+    // TODO: Share this code with SoundTriggerMiddlewarePermission.
+    private void enforcePermissionsForDataDelivery() {
+        Binder.withCleanCallingIdentity(() -> {
+            enforcePermissionForPreflight(mContext, mVoiceInteractorIdentity, RECORD_AUDIO);
+            int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
+            mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp,
+                    mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                    mVoiceInteractorIdentity.attributionTag, OP_MESSAGE);
+            enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
+                    CAPTURE_AUDIO_HOTWORD, OP_MESSAGE);
+        });
+    }
+
+    /**
+     * Throws a {@link SecurityException} iff the given identity has given permission to receive
+     * data.
+     *
+     * @param context    A {@link Context}, used for permission checks.
+     * @param identity   The identity to check.
+     * @param permission The identifier of the permission we want to check.
+     * @param reason     The reason why we're requesting the permission, for auditing purposes.
+     */
+    private static void enforcePermissionForDataDelivery(@NonNull Context context,
+            @NonNull Identity identity,
+            @NonNull String permission, @NonNull String reason) {
+        final int status = PermissionUtil.checkPermissionForDataDelivery(context, identity,
+                permission, reason);
+        if (status != PermissionChecker.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    TextUtils.formatSimple("Failed to obtain permission %s for identity %s",
+                            permission,
+                            SoundTriggerSessionPermissionsDecorator.toString(identity)));
+        }
+    }
+
+    private static final String OP_MESSAGE =
+            "Providing hotword detection result to VoiceInteractionService";
 };

@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.fingerprint.IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
 
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -317,8 +318,10 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mServerRequest != null
+                    && mServerRequest.mRequestReason != REASON_AUTH_FPM_KEYGUARD
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
+                        + mServerRequest.mRequestReason);
                 mServerRequest.onUserCanceled();
                 mServerRequest = null;
                 updateOverlay();
@@ -633,9 +636,12 @@ public class UdfpsController implements DozeReceiver {
         // Gets the size based on the current rotation of the display.
         mContext.getDisplay().getRealSize(p);
 
-        // Transform dimensions if the device is in landscape mode.
+        // Transform dimensions if the device is in landscape mode
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
+                if (animation instanceof UdfpsKeyguardViewController) {
+                    break;
+                }
                 mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
                         - paddingX;
                 mCoreLayoutParams.y = p.y - mSensorProps.sensorLocationX - mSensorProps.sensorRadius
@@ -643,6 +649,9 @@ public class UdfpsController implements DozeReceiver {
                 break;
 
             case Surface.ROTATION_270:
+                if (animation instanceof UdfpsKeyguardViewController) {
+                    break;
+                }
                 mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
                         - paddingX;
                 mCoreLayoutParams.y = mSensorProps.sensorLocationX - mSensorProps.sensorRadius
@@ -651,6 +660,7 @@ public class UdfpsController implements DozeReceiver {
 
             default:
                 // Do nothing to stay in portrait mode.
+                // Keyguard is always in portrait mode.
         }
         // avoid announcing window title
         mCoreLayoutParams.accessibilityTitle = " ";

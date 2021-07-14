@@ -376,7 +376,7 @@
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"မျက်နှာပြင် ကာ့စ်လုပ်ခြင်း"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"အမည်မတပ် ကိရိယာ"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"ကာစ်တ် လုပ်ရန် အသင့် ရှိနေပြီ"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"ကာစ် လုပ်ရန် အသင့် ရှိနေပြီ"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ကိရိယာများ မရှိ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi ချိတ်ဆက်ထားခြင်းမရှိပါ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"အလင်းတောက်ပမှု"</string>
@@ -1149,8 +1149,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> က မက်ဆေ့ဂျ်ပို့လိုက်သည်- <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> က ပုံပို့လိုက်သည်"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> က အခြေအနေ အပ်ဒိတ်လုပ်လိုက်သည်- <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"ချိတ်ဆက်နိုင်သည်"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"သင်၏ ဘက်ထရီမီတာကို ဖတ်ရာတွင် ပြဿနာရှိနေသည်"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"နောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"နှိုးစက်ပေးမထားပါ"</string>

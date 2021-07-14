@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<LinearLayout
+<com.android.internal.widget.ConversationHeaderLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/conversation_header"
     android:layout_width="wrap_content"
@@ -119,6 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+        android:layout_weight="100"
         android:showRelative="true"
         android:singleLine="true"
         android:visibility="gone"
@@ -171,4 +172,4 @@
         android:src="@drawable/ic_notifications_alerted"
         android:visibility="gone"
         />
-</LinearLayout>
+</com.android.internal.widget.ConversationHeaderLinearLayout>

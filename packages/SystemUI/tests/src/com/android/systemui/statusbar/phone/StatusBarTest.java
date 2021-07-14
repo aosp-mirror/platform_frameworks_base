@@ -152,6 +152,7 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.startingsurface.StartingSurface;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -273,6 +274,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private IWallpaperManager mWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private StartingSurface mStartingSurface;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -443,7 +445,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                Optional.of(mStartingSurface));
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))

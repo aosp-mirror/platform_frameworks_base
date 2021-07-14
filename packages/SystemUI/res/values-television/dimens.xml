@@ -38,7 +38,7 @@
 
     <dimen name="bottom_sheet_min_height">208dp</dimen>
     <dimen name="bottom_sheet_margin">24dp</dimen>
-    <dimen name="bottom_sheet_background_blur_radius">120dp</dimen>
+    <dimen name="bottom_sheet_background_blur_radius">37dp</dimen>
 
     <dimen name="privacy_chip_margin">12dp</dimen>
     <dimen name="privacy_chip_icon_margin_in_between">9dp</dimen>
