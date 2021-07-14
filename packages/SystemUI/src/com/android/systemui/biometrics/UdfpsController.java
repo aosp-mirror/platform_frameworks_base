@@ -425,7 +425,6 @@ public class UdfpsController implements DozeReceiver {
                             mTouchLogTime = SystemClock.elapsedRealtime();
                             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                                     PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-                            playStartHaptic();
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -829,6 +828,9 @@ public class UdfpsController implements DozeReceiver {
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerDown");
             return;
+        }
+        if (!mOnFingerDown) {
+            playStartHaptic();
         }
         mOnFingerDown = true;
         mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
