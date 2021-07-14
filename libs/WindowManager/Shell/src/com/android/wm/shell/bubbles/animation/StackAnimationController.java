@@ -1024,11 +1024,9 @@ public class StackAnimationController extends
     }
 
     /**
-     * Returns the {@link MagnetizedObject} instance for the bubble stack, with the provided
-     * {@link MagnetizedObject.MagneticTarget} added as a target.
+     * Returns the {@link MagnetizedObject} instance for the bubble stack.
      */
-    public MagnetizedObject<StackAnimationController> getMagnetizedStack(
-            MagnetizedObject.MagneticTarget target) {
+    public MagnetizedObject<StackAnimationController> getMagnetizedStack() {
         if (mMagnetizedStack == null) {
             mMagnetizedStack = new MagnetizedObject<StackAnimationController>(
                     mLayout.getContext(),
@@ -1053,7 +1051,6 @@ public class StackAnimationController extends
                     loc[1] = (int) mStackPosition.y;
                 }
             };
-            mMagnetizedStack.addTarget(target);
             mMagnetizedStack.setHapticsEnabled(true);
             mMagnetizedStack.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
         }
