@@ -1030,7 +1030,13 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+        if (!mCanceled) {
+            cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+        } else {
+            // If we are already canceled but with a screenshot, and are waiting for the
+            // cleanupScreenshot() callback, then force-finish the animation now
+            continueDeferredCancelAnimation();
+        }
 
         synchronized (mService.getWindowManagerLock()) {
             // Clear associated input consumers on runner death
