@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskStackListener;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
@@ -30,7 +29,6 @@ import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
@@ -57,9 +55,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    @NonNull private final ContentResolver mContentResolver;
-    private final boolean mCustomHaptics;
-
     FingerprintAuthenticationClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
@@ -74,10 +69,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
                 lockoutCache, allowBackgroundAuthentication);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
-
-        mContentResolver = context.getContentResolver();
-        mCustomHaptics = Settings.Global.getInt(mContentResolver,
-            "fp_custom_success_error", 0) == 1;
     }
 
     @NonNull
@@ -212,19 +203,5 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
 
         UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         mCallback.onClientFinished(this, false /* success */);
-    }
-
-    @Override
-    protected boolean successHapticsEnabled() {
-        return mCustomHaptics
-            ? Settings.Global.getInt(mContentResolver, "fp_success_enabled", 1) == 0
-            : super.successHapticsEnabled();
-    }
-
-    @Override
-    protected boolean errorHapticsEnabled() {
-        return mCustomHaptics
-            ? Settings.Global.getInt(mContentResolver, "fp_error_enabled", 1) == 0
-            : super.errorHapticsEnabled();
     }
 }
