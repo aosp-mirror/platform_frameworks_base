@@ -957,9 +957,10 @@ public final class InputMethodManager {
                     final boolean fullscreen = msg.arg1 != 0;
                     InputConnection ic = null;
                     synchronized (mH) {
-                        mFullscreenMode = fullscreen;
-                        if (mServedInputConnectionWrapper != null) {
+                        if (mFullscreenMode != fullscreen
+                                && mServedInputConnectionWrapper != null) {
                             ic = mServedInputConnectionWrapper.getInputConnection();
+                            mFullscreenMode = fullscreen;
                         }
                     }
                     if (ic != null) {
