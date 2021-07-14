@@ -96,7 +96,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "*",
-                apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "*");
+                apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "*",
+                "/system/apex/test.rebootless_apex_v*.apex",
+                "/data/apex/active/test.apex.rebootless*.apex");
     }
 
     /**
@@ -160,7 +162,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackApexWithApkCrashing() throws Exception {
-        pushTestApex();
+        pushTestApex(APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
 
         // Install an apex with apk that crashes
         runPhase("testRollbackApexWithApkCrashing_Phase1_Install");
@@ -178,6 +180,15 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertThat(mLogger).eventOccurred(ROLLBACK_INITIATE, null, REASON_APP_CRASH, TESTAPP_A);
         assertThat(mLogger).eventOccurred(ROLLBACK_BOOT_TRIGGERED, null, null, null);
         assertThat(mLogger).eventOccurred(ROLLBACK_SUCCESS, null, null, null);
+    }
+
+    /**
+     * Tests rollback is supported correctly for rebootless apex
+     */
+    @Test
+    public void testRollbackRebootlessApex() throws Exception {
+        pushTestApex("test.rebootless_apex_v1.apex");
+        runPhase("testRollbackRebootlessApex");
     }
 
     /**
@@ -204,9 +215,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testWatchdogMonitorsAcrossReboots_Phase3_VerifyRollback");
     }
 
-    private void pushTestApex() throws Exception {
+    private void pushTestApex(String fileName) throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
-        final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
         final File apex = buildHelper.getTestFile(fileName);
         try {
             getDevice().enableAdbRoot();

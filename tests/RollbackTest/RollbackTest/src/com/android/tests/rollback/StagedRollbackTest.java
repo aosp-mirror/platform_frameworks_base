@@ -241,6 +241,33 @@ public class StagedRollbackTest {
     }
 
     @Test
+    public void testRollbackRebootlessApex() throws Exception {
+        final String packageName = "test.apex.rebootless";
+        assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(1);
+
+        // install
+        TestApp apex1 = new TestApp("TestRebootlessApexV1", packageName, 1,
+                /* isApex= */ true, "test.rebootless_apex_v1.apex");
+        TestApp apex2 = new TestApp("TestRebootlessApexV2", packageName, 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        Install.single(apex2).setEnableRollback(PackageManager.ROLLBACK_DATA_POLICY_RETAIN)
+                .commit();
+
+        // verify rollback
+        assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(2);
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                rm.getAvailableRollbacks(), packageName);
+        assertThat(rollback).isNotNull();
+        assertThat(rollback).packagesContainsExactly(Rollback.from(apex2).to(apex1));
+        assertThat(rollback).isNotStaged();
+
+        // rollback
+        RollbackUtils.rollback(rollback.getRollbackId());
+        assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(1);
+    }
+
+    @Test
     public void hasMainlineModule() throws Exception {
         String pkgName = getModuleMetadataPackageName();
         boolean existed =  InstrumentationRegistry.getInstrumentation().getContext()

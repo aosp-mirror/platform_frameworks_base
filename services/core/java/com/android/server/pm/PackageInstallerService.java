@@ -651,11 +651,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             if (params.isMultiPackage) {
                 throw new IllegalArgumentException("A multi-session can't be set as APEX.");
             }
-            if (!params.isStaged
-                    && (params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
-                throw new IllegalArgumentException(
-                    "Non-staged APEX session doesn't support INSTALL_ENABLE_ROLLBACK");
-            }
             if (isCalledBySystemOrShell(callingUid) || mBypassNextAllowedApexUpdateCheck) {
                 params.installFlags |= PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK;
             } else {
