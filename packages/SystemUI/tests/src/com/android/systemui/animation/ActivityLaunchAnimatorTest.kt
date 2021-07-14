@@ -14,6 +14,7 @@ import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
@@ -175,6 +176,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(keyguardHandler).setBlursDisabledForAppLaunch(eq(true))
         verify(controller).onLaunchAnimationStart(anyBoolean())
+    }
+
+    @Test
+    fun controllerFromOrphanViewReturnsNull() {
+        assertNull(ActivityLaunchAnimator.Controller.fromView(View(mContext)))
     }
 
     private fun fakeWindow(): RemoteAnimationTarget {
