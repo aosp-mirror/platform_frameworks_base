@@ -1622,7 +1622,10 @@ public class NotificationPanelViewController extends PanelViewController {
     public void expandWithQsDetail(DetailAdapter qsDetailAdapter) {
         traceQsJank(true /* startTracing */, false /* wasCancelled */);
         flingSettings(0 /* velocity */, FLING_EXPAND);
-        mQSDetailDisplayer.showDetailAdapter(qsDetailAdapter, 0, 0);
+        // When expanding with a panel, there's no meaningful touch point to correspond to. Set the
+        // origin to somewhere above the screen. This is used for animations.
+        int x = mQsFrame.getWidth() / 2;
+        mQSDetailDisplayer.showDetailAdapter(qsDetailAdapter, x, -getHeight());
         if (mAccessibilityManager.isEnabled()) {
             mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         }
