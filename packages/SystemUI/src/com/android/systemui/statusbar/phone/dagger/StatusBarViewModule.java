@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone.dagger;
 
 import android.annotation.Nullable;
+import android.view.View;
 
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
@@ -25,11 +26,16 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.TapAgainView;
 
+import javax.inject.Named;
+
 import dagger.Module;
 import dagger.Provides;
 
 @Module
 public abstract class StatusBarViewModule {
+
+    public static final String SPLIT_SHADE_STATUS_BAR = "split_shade_status_bar";
+
     /** */
     @Provides
     @StatusBarComponent.StatusBarScope
@@ -53,6 +59,15 @@ public abstract class StatusBarViewModule {
     public static AuthRippleView getAuthRippleView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.auth_ripple);
+    }
+
+    /** */
+    @Provides
+    @Named(SPLIT_SHADE_STATUS_BAR)
+    @StatusBarComponent.StatusBarScope
+    public static View getSlitShadeStatusBarView(
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.findViewById(R.id.quick_qs_status_icons);
     }
 
     /** */
