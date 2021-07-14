@@ -1359,7 +1359,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             }
 
             mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_TO_FRONT,
-                    0 /* flags */, task, options != null ? options.getRemoteTransition() : null);
+                    0 /* flags */, task, task /* readyGroupRef */,
+                    options != null ? options.getRemoteTransition() : null);
             reason = reason + " findTaskToMoveToFront";
             boolean reparented = false;
             if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {

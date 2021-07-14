@@ -508,6 +508,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
     }
 
+    @Override
+    boolean isAttached() {
+        return true;
+    }
+
     /**
      * Called when DisplayWindowSettings values may change.
      */
