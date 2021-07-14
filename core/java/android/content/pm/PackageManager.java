@@ -4605,6 +4605,16 @@ public abstract class PackageManager {
     public static final String FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS =
             "android.software.wallet_location_based_suggestions";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the rotary encoder hardware to support rotating bezel on watch.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ROTARY_ENCODER_LOW_RES =
+            "android.hardware.rotaryencoder.lowres";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
