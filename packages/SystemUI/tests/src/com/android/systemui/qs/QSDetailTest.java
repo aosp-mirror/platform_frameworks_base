@@ -148,8 +148,10 @@ public class QSDetailTest extends SysuiTestCase {
                 eq(true) /* in */, any());
         clearInvocations(mQsDetail.mClipper);
 
+        // Detail adapters should always animate on close. shouldAnimate() should only affect the
+        // open transition
         mQsDetail.handleShowingDetail(null, 0, 0, false);
-        verify(mQsDetail.mClipper).updateCircularClip(eq(false) /* animate */, anyInt(), anyInt(),
+        verify(mQsDetail.mClipper).updateCircularClip(eq(true) /* animate */, anyInt(), anyInt(),
                 eq(false) /* in */, any());
     }
 
