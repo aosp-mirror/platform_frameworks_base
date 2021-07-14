@@ -26,17 +26,22 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
+import android.app.ActivityThread;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.RemoteCallback;
+import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -149,6 +154,12 @@ public class StartingSurfaceDrawer {
         return context.createDisplayContext(targetDisplay);
     }
 
+    private int getSplashScreenTheme(int splashScreenThemeResId, ActivityInfo activityInfo) {
+        return splashScreenThemeResId != 0
+                ? splashScreenThemeResId
+                : activityInfo.getThemeResource() != 0 ? activityInfo.getThemeResource()
+                        : com.android.internal.R.style.Theme_DeviceDefault_DayNight;
+    }
     /**
      * Called when a task need a splash screen starting window.
      *
@@ -170,10 +181,7 @@ public class StartingSurfaceDrawer {
         final int taskId = taskInfo.taskId;
         Context context = mContext;
         // replace with the default theme if the application didn't set
-        final int theme = windowInfo.splashScreenThemeResId != 0
-                ? windowInfo.splashScreenThemeResId
-                : activityInfo.getThemeResource() != 0 ? activityInfo.getThemeResource()
-                        : com.android.internal.R.style.Theme_DeviceDefault_DayNight;
+        final int theme = getSplashScreenTheme(windowInfo.splashScreenThemeResId, activityInfo);
         if (DEBUG_SPLASH_SCREEN) {
             Slog.d(TAG, "addSplashScreen " + activityInfo.packageName
                     + " theme=" + Integer.toHexString(theme) + " task=" + taskInfo.taskId
@@ -336,6 +344,10 @@ public class StartingSurfaceDrawer {
                 // the window before first round relayoutWindow, which will happen after insets
                 // animation.
                 mChoreographer.postCallback(CALLBACK_INSETS_ANIMATION, setViewSynchronized, null);
+                // Block until we get the background color.
+                final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+                final SplashScreenView contentView = viewSupplier.get();
+                record.mBGColor = contentView.getInitBackgroundColor();
             }
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a
@@ -346,11 +358,11 @@ public class StartingSurfaceDrawer {
     }
 
     int getStartingWindowBackgroundColorForTask(int taskId) {
-        StartingWindowRecord startingWindowRecord = mStartingWindowRecords.get(taskId);
-        if (startingWindowRecord == null || startingWindowRecord.mContentView == null) {
-            return 0;
+        final StartingWindowRecord startingWindowRecord = mStartingWindowRecords.get(taskId);
+        if (startingWindowRecord == null) {
+            return Color.TRANSPARENT;
         }
-        return startingWindowRecord.mContentView.getInitBackgroundColor();
+        return startingWindowRecord.mBGColor;
     }
 
     private static class SplashScreenViewSupplier implements Supplier<SplashScreenView> {
@@ -376,6 +388,43 @@ public class StartingSurfaceDrawer {
                 return mView;
             }
         }
+    }
+
+    int estimateTaskBackgroundColor(TaskInfo taskInfo) {
+        if (taskInfo.topActivityInfo == null) {
+            return Color.TRANSPARENT;
+        }
+        final ActivityInfo activityInfo = taskInfo.topActivityInfo;
+        final String packageName = activityInfo.packageName;
+        final int userId = taskInfo.userId;
+        final Context windowContext;
+        try {
+            windowContext = mContext.createPackageContextAsUser(
+                    packageName, Context.CONTEXT_RESTRICTED, UserHandle.of(userId));
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Failed creating package context with package name "
+                    + packageName + " for user " + taskInfo.userId, e);
+            return Color.TRANSPARENT;
+        }
+        try {
+            final IPackageManager packageManager = ActivityThread.getPackageManager();
+            final String splashScreenThemeName = packageManager.getSplashScreenTheme(packageName,
+                    userId);
+            final int splashScreenThemeId = splashScreenThemeName != null
+                    ? windowContext.getResources().getIdentifier(splashScreenThemeName, null, null)
+                    : 0;
+
+            final int theme = getSplashScreenTheme(splashScreenThemeId, activityInfo);
+
+            if (theme != windowContext.getThemeResId()) {
+                windowContext.setTheme(theme);
+            }
+            return mSplashscreenContentDrawer.estimateTaskBackgroundColor(windowContext);
+        } catch (RuntimeException | RemoteException e) {
+            Slog.w(TAG, "failed get starting window background color at taskId: "
+                    + taskInfo.taskId, e);
+        }
+        return Color.TRANSPARENT;
     }
 
     /**
@@ -556,19 +605,16 @@ public class StartingSurfaceDrawer {
         private SplashScreenView mContentView;
         private boolean mSetSplashScreen;
         private @StartingWindowType int mSuggestType;
-
-        StartingWindowRecord(IBinder appToken, View decorView,
-                TaskSnapshotWindow taskSnapshotWindow) {
-            mAppToken = appToken;
-            mDecorView = decorView;
-            mTaskSnapshotWindow = taskSnapshotWindow;
-        }
+        private int mBGColor;
 
         StartingWindowRecord(IBinder appToken, View decorView,
                 TaskSnapshotWindow taskSnapshotWindow, @StartingWindowType int suggestType) {
             mAppToken = appToken;
             mDecorView = decorView;
             mTaskSnapshotWindow = taskSnapshotWindow;
+            if (mTaskSnapshotWindow != null) {
+                mBGColor = mTaskSnapshotWindow.getBackgroundColor();
+            }
             mSuggestType = suggestType;
         }
 

@@ -127,11 +127,13 @@ public class SplashscreenContentDrawer {
      * parallel.
      *
      * @param suggestType Suggest type to create the splash screen view.
-     * @param consumer Receiving the SplashScreenView object, which will also be executed
-     *                 on splash screen thread. Note that the view can be null if failed.
+     * @param splashScreenViewConsumer Receiving the SplashScreenView object, which will also be
+     *                                 executed on splash screen thread. Note that the view can be
+     *                                 null if failed.
+     * @param bgColorConsumer Receiving the background color once it's estimated complete.
      */
     void createContentView(Context context, @StartingWindowType int suggestType, ActivityInfo info,
-            int taskId, Consumer<SplashScreenView> consumer) {
+            int taskId, Consumer<SplashScreenView> splashScreenViewConsumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
             try {
@@ -143,7 +145,7 @@ public class SplashscreenContentDrawer {
                         + taskId, e);
                 contentView = null;
             }
-            consumer.accept(contentView);
+            splashScreenViewConsumer.accept(contentView);
         });
     }
 
@@ -160,7 +162,10 @@ public class SplashscreenContentDrawer {
                 com.android.wm.shell.R.dimen.starting_surface_exit_animation_window_shift_length);
     }
 
-    private static int getSystemBGColor() {
+    /**
+     * @return Current system background color.
+     */
+    public static int getSystemBGColor() {
         final Context systemContext = ActivityThread.currentApplication();
         if (systemContext == null) {
             Slog.e(TAG, "System context does not exist!");
@@ -170,12 +175,22 @@ public class SplashscreenContentDrawer {
         return res.getColor(com.android.wm.shell.R.color.splash_window_background_default);
     }
 
+    /**
+     * Estimate the background color of the app splash screen, this may take a while so use it only
+     * if there is no starting window exists for that context.
+     **/
+    int estimateTaskBackgroundColor(Context context) {
+        final SplashScreenWindowAttrs windowAttrs = new SplashScreenWindowAttrs();
+        getWindowAttrs(context, windowAttrs);
+        return peekWindowBGColor(context, windowAttrs);
+    }
+
     private static Drawable createDefaultBackgroundDrawable() {
         return new ColorDrawable(getSystemBGColor());
     }
 
     /** Extract the window background color from {@code attrs}. */
-    public static int peekWindowBGColor(Context context, SplashScreenWindowAttrs attrs) {
+    private static int peekWindowBGColor(Context context, SplashScreenWindowAttrs attrs) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "peekWindowBGColor");
         final Drawable themeBGDrawable;
         if (attrs.mWindowBgColor != 0) {
@@ -255,7 +270,7 @@ public class SplashscreenContentDrawer {
      * Get the {@link SplashScreenWindowAttrs} from {@code context} and fill them into
      * {@code attrs}.
      */
-    public static void getWindowAttrs(Context context, SplashScreenWindowAttrs attrs) {
+    private static void getWindowAttrs(Context context, SplashScreenWindowAttrs attrs) {
         final TypedArray typedArray = context.obtainStyledAttributes(
                 com.android.internal.R.styleable.Window);
         attrs.mWindowBgResId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
