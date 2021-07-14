@@ -17,7 +17,6 @@
 package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -28,7 +27,6 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -49,8 +47,6 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
     private static final String TAG = "FaceAuthenticationClient";
 
-    @NonNull private final ContentResolver mContentResolver;
-    private final boolean mCustomHaptics;
     private final UsageStats mUsageStats;
 
     private final int[] mBiometricPromptIgnoreList;
@@ -81,10 +77,6 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
                 R.array.config_face_acquire_keyguard_ignorelist);
         mKeyguardIgnoreListVendor = resources.getIntArray(
                 R.array.config_face_acquire_vendor_keyguard_ignorelist);
-
-        mContentResolver = context.getContentResolver();
-        mCustomHaptics = Settings.Global.getInt(mContentResolver,
-                "face_custom_success_error", 0) == 1;
     }
 
     @NonNull
@@ -199,19 +191,5 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
         final boolean shouldSend = shouldSend(acquireInfo, vendorCode);
         onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
-    }
-
-    @Override
-    protected boolean successHapticsEnabled() {
-        return mCustomHaptics
-            ? Settings.Global.getInt(mContentResolver, "face_success_enabled", 1) == 0
-            : super.successHapticsEnabled();
-    }
-
-    @Override
-    protected boolean errorHapticsEnabled() {
-        return mCustomHaptics
-            ? Settings.Global.getInt(mContentResolver, "face_error_enabled", 1) == 0
-            : super.errorHapticsEnabled();
     }
 }
