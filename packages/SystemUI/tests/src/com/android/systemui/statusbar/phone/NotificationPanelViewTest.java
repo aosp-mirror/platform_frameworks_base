@@ -97,6 +97,7 @@ import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSDetailDisplayer;
+import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -300,6 +301,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock
     private RemoteInputController mRemoteInputController;
+    @Mock
+    private RecordingController mRecordingController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -438,6 +441,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mFragmentService,
                 mContentResolver,
                 mQuickAccessWalletController,
+                mRecordingController,
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings,
                 mSplitShadeHeaderController,
