@@ -181,6 +181,7 @@ public class PeopleTileViewHelper {
     private int mWidth;
     private int mHeight;
     private int mLayoutSize;
+    private boolean mIsLeftToRight;
 
     private Locale mLocale;
     private NumberFormat mIntegerFormat;
@@ -195,6 +196,8 @@ public class PeopleTileViewHelper {
         mWidth = width;
         mHeight = height;
         mLayoutSize = getLayoutSize();
+        mIsLeftToRight = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
+                == View.LAYOUT_DIRECTION_LTR;
     }
 
     /**
@@ -659,7 +662,7 @@ public class PeopleTileViewHelper {
     private RemoteViews createMissedCallRemoteViews() {
         RemoteViews views = setViewForContentLayout(new RemoteViews(mContext.getPackageName(),
                 getLayoutForContent()));
-        views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        setPredefinedIconVisible(views);
         views.setViewVisibility(R.id.text_content, View.VISIBLE);
         views.setViewVisibility(R.id.messages_count, View.GONE);
         setMaxLines(views, false);
@@ -676,6 +679,17 @@ public class PeopleTileViewHelper {
         }
         setAvailabilityDotPadding(views, R.dimen.availability_dot_notification_padding);
         return views;
+    }
+
+    private void setPredefinedIconVisible(RemoteViews views) {
+        views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        if (mLayoutSize == LAYOUT_MEDIUM) {
+            int endPadding = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.before_predefined_icon_padding);
+            views.setViewPadding(R.id.name, mIsLeftToRight ? 0 : endPadding, 0,
+                    mIsLeftToRight ? endPadding : 0,
+                    0);
+        }
     }
 
     private RemoteViews createNotificationRemoteViews() {
@@ -717,6 +731,13 @@ public class PeopleTileViewHelper {
             views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_message);
         }
         if (mTile.getMessagesCount() > 1) {
+            if (mLayoutSize == LAYOUT_MEDIUM) {
+                int endPadding = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.before_messages_count_padding);
+                views.setViewPadding(R.id.name, mIsLeftToRight ? 0 : endPadding, 0,
+                        mIsLeftToRight ? endPadding : 0,
+                        0);
+            }
             views.setViewVisibility(R.id.messages_count, View.VISIBLE);
             views.setTextViewText(R.id.messages_count,
                     getMessagesCountText(mTile.getMessagesCount()));
@@ -803,7 +824,7 @@ public class PeopleTileViewHelper {
         if (TextUtils.isEmpty(statusText)) {
             statusText = getStatusTextByType(status.getActivity());
         }
-        views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        setPredefinedIconVisible(views);
         views.setTextViewText(R.id.text_content, statusText);
 
         if (status.getActivity() == ACTIVITY_BIRTHDAY
@@ -913,13 +934,11 @@ public class PeopleTileViewHelper {
      * on the status layouts compared to all other layouts.
      */
     private void setAvailabilityDotPadding(RemoteViews views, int resId) {
-        boolean isLeftToRight = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
-                == View.LAYOUT_DIRECTION_LTR;
         int startPadding = mContext.getResources().getDimensionPixelSize(resId);
         int bottomPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.medium_content_padding_above_name);
         views.setViewPadding(R.id.medium_content,
-                isLeftToRight ? startPadding : 0, 0, isLeftToRight ? 0 : startPadding,
+                mIsLeftToRight ? startPadding : 0, 0, mIsLeftToRight ? 0 : startPadding,
                 bottomPadding);
     }
 
@@ -1117,6 +1136,7 @@ public class PeopleTileViewHelper {
             views.setViewPadding(R.id.content, horizontalPadding, verticalPadding,
                     horizontalPadding,
                     verticalPadding);
+            views.setViewPadding(R.id.name, 0, 0, 0, 0);
             // Expand the name font on medium if there's space.
             int heightRequiredForMaxContentText = (int) (mContext.getResources().getDimension(
                     R.dimen.medium_height_for_max_name_text_size) / mDensity);
