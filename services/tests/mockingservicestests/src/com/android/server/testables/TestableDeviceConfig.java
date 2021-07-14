@@ -101,6 +101,15 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         ).when(() -> DeviceConfig.setProperty(anyString(), anyString(), anyString(), anyBoolean()));
 
         doAnswer((Answer<Boolean>) invocationOnMock -> {
+                    String namespace = invocationOnMock.getArgument(0);
+                    String name = invocationOnMock.getArgument(1);
+                    mKeyValueMap.remove(getKey(namespace, name));
+                    invokeListeners(namespace, getProperties(namespace, name, null));
+                    return true;
+                }
+        ).when(() -> DeviceConfig.deleteProperty(anyString(), anyString()));
+
+        doAnswer((Answer<Boolean>) invocationOnMock -> {
                     Properties properties = invocationOnMock.getArgument(0);
                     String namespace = properties.getNamespace();
                     Map<String, String> keyValues = new ArrayMap<>();
