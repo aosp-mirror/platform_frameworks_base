@@ -10131,6 +10131,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             setNotifiedContentCaptureAppeared();
 
             if (ai != null) {
+                makeParentImportantAndNotifyAppearedEventIfNeed();
                 ai.delayNotifyContentCaptureEvent(session, this, appeared);
             } else {
                 if (DEBUG_CONTENT_CAPTURE) {
@@ -10155,6 +10156,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!isTemporarilyDetached()) {
                 clearTranslationState();
             }
+        }
+    }
+
+    private void makeParentImportantAndNotifyAppearedEventIfNeed() {
+        // If view sent the appeared event to Content Capture, Content Capture also
+        // would like to receive its parents' appeared events. So checks its parents
+        // whether the appeared event is sent or not. If not, send the appeared event.
+        final ViewParent parent = getParent();
+        if (parent instanceof View) {
+            View p = ((View) parent);
+            if (p.getNotifiedContentCaptureAppeared()) {
+                return;
+            }
+            // Set important for content capture in the cache.
+            p.mPrivateFlags4 |= PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
+            p.notifyAppearedOrDisappearedForContentCaptureIfNeeded(/* appeared */ true);
         }
     }
 
