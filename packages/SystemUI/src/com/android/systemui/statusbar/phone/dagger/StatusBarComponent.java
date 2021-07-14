@@ -23,7 +23,7 @@ import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
-import com.android.systemui.statusbar.phone.SplitShadeStatusBarController;
+import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.lang.annotation.Documented;
@@ -92,5 +92,5 @@ public interface StatusBarComponent {
      * Creates a SplitShadeStatusBarController.
      */
     @StatusBarScope
-    SplitShadeStatusBarController getSplitShadeStatusBarController();
+    SplitShadeHeaderController getSplitShadeStatusBarController();
 }

@@ -34,7 +34,7 @@ import dagger.Provides;
 @Module
 public abstract class StatusBarViewModule {
 
-    public static final String SPLIT_SHADE_STATUS_BAR = "split_shade_status_bar";
+    public static final String SPLIT_SHADE_HEADER = "split_shade_header";
 
     /** */
     @Provides
@@ -63,11 +63,11 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @Named(SPLIT_SHADE_STATUS_BAR)
+    @Named(SPLIT_SHADE_HEADER)
     @StatusBarComponent.StatusBarScope
     public static View getSlitShadeStatusBarView(
             NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.quick_qs_status_icons);
+        return notificationShadeWindowView.findViewById(R.id.split_shade_status_bar);
     }
 
     /** */

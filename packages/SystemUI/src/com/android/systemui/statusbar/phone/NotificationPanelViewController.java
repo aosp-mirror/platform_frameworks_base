@@ -334,7 +334,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final int mMaxKeyguardNotifications;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
-    private final SplitShadeStatusBarController mSplitShadeStatusBarController;
+    private final SplitShadeHeaderController mSplitShadeHeaderController;
     private boolean mShouldUseSplitNotificationShade;
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
@@ -723,7 +723,7 @@ public class NotificationPanelViewController extends PanelViewController {
             QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
-            SplitShadeStatusBarController splitShadeStatusBarController,
+            SplitShadeHeaderController splitShadeHeaderController,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             NotificationRemoteInputManager remoteInputManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
@@ -757,7 +757,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources);
         mView.setWillNotDraw(!DEBUG);
-        mSplitShadeStatusBarController = splitShadeStatusBarController;
+        mSplitShadeHeaderController = splitShadeHeaderController;
         mLayoutInflater = layoutInflater;
         mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
@@ -1027,7 +1027,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mQuickQsOffsetHeight = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mSplitShadeStatusBarHeight =
-                mResources.getDimensionPixelSize(R.dimen.split_shade_status_bar_height);
+                mResources.getDimensionPixelSize(R.dimen.split_shade_header_height);
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         mShouldUseSplitNotificationShade =
@@ -1039,7 +1039,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         int topMargin = mShouldUseSplitNotificationShade ? mSplitShadeStatusBarHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
-        mSplitShadeStatusBarController.setSplitShadeMode(mShouldUseSplitNotificationShade);
+        mSplitShadeHeaderController.setSplitShadeMode(mShouldUseSplitNotificationShade);
 
         // To change the constraints at runtime, all children of the ConstraintLayout must have ids
         ensureAllViewsHaveIds(mNotificationContainerParent);
@@ -4468,7 +4468,7 @@ public class NotificationPanelViewController extends PanelViewController {
             maybeAnimateBottomAreaAlpha();
             resetHorizontalPanelPosition();
             updateQsState();
-            mSplitShadeStatusBarController.setShadeExpanded(
+            mSplitShadeHeaderController.setShadeExpanded(
                     mBarState == SHADE || mBarState == SHADE_LOCKED);
         }
 
