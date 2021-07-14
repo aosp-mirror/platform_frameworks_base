@@ -10,6 +10,7 @@ import android.graphics.Rect
 import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.util.Log
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
@@ -27,6 +28,7 @@ import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import junit.framework.AssertionFailedError
+import kotlin.concurrent.thread
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,7 +41,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
-import kotlin.concurrent.thread
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -50,6 +51,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
     @Mock lateinit var startingSurface: StartingSurface
+    @Mock lateinit var failHandler: Log.TerribleFailureHandler
 
     private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @get:Rule val rule = MockitoJUnit.rule()
@@ -179,8 +181,10 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun controllerFromOrphanViewReturnsNull() {
+    fun controllerFromOrphanViewReturnsNullAndIsATerribleFailure() {
+        Log.setWtfHandler(failHandler)
         assertNull(ActivityLaunchAnimator.Controller.fromView(View(mContext)))
+        verify(failHandler).onTerribleFailure(any(), any(), anyBoolean())
     }
 
     private fun fakeWindow(): RemoteAnimationTarget {
