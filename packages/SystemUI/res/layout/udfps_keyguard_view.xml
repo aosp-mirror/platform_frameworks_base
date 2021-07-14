@@ -30,16 +30,15 @@
         android:visibility="gone"/>
 
     <!-- Fingerprint -->
-
     <!-- AOD dashed fingerprint icon with moving dashes -->
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/udfps_aod_fp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:padding="48px"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
         app:lottie_autoPlay="false"
-        android:padding="16dp"
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/udfps_aod_fp"/>
 
@@ -48,10 +47,10 @@
         android:id="@+id/udfps_lockscreen_fp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:padding="48px"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
         app:lottie_autoPlay="false"
         app:lottie_loop="false"
-        android:padding="16dp"
         app:lottie_rawRes="@raw/udfps_lockscreen_fp"/>
 </com.android.systemui.biometrics.UdfpsKeyguardView>
