@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="2333336097603822490">"নেটওয়ার্কগুলির জন্য স্ক্যান করা যাবে না"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"কোনও কিছুই নয়"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"সংরক্ষিত"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"কানেকশন নেই"</string>
+    <string name="wifi_disabled_generic" msgid="2651916945380294607">"অক্ষম হয়েছে"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP কনফিগারেশনের ব্যর্থতা"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"খারাপ নেটওয়ার্কের কারণে কানেক্ট নয়"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"ওয়াই ফাই সংযোগের ব্যর্থতা"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"যাচাইকরণ সমস্যা"</string>
+    <string name="wifi_cant_connect" msgid="5718417542623056783">"কানেক্ট স্থাপন করা যাচ্ছে না"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'এ যোগ করা যায়নি"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"পাসওয়ার্ড দেখে আবার চেষ্টা করুন"</string>
+    <string name="wifi_not_in_range" msgid="1541760821805777772">"পরিসরের মধ্যে নয়"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"অটোমেটিক কানেক্ট করবে না"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"ইন্টারনেট অ্যাক্সেস নেই"</string>
+    <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> দ্বারা সেভ করা"</string>
+    <string name="connected_via_network_scorer" msgid="7665725527352893558">"স্বয়ংক্রিয়ভাবে %1$s এর মাধ্যমে কানেক্ট হয়েছে"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"নেটওয়ার্কের রেটিং প্রদানকারীর মাধ্যমে অটোমেটিক কানেক্ট"</string>
+    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s মাধ্যমে কানেক্ট হয়েছে"</string>
+    <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g>-এর মাধ্যমে কানেক্ট করা আছে"</string>
+    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s এর মাধ্যমে উপলব্ধ"</string>
+    <string name="tap_to_sign_up" msgid="5356397741063740395">"সাইন-আপ করতে ট্যাপ করুন"</string>
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"ইন্টারনেট কানেকশন নেই"</string>
+    <string name="private_dns_broken" msgid="1984159464346556931">"ব্যক্তিগত ডিএনএস সার্ভার অ্যাক্সেস করা যাবে না"</string>
+    <string name="wifi_limited_connection" msgid="1184778285475204682">"সীমিত কানেকশন"</string>
+    <string name="wifi_status_no_internet" msgid="3799933875988829048">"ইন্টারনেট কানেকশন নেই"</string>
+    <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"সাইন-ইন করা দরকার"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
+    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s এর মাধ্যমে কানেক্ট হয়েছে"</string>
+    <string name="available_via_carrier" msgid="465598683092718294">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
+    <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> খোলা হচ্ছে"</string>
+    <string name="osu_connect_failed" msgid="9107873364807159193">"কানেক্ট করা যায়নি"</string>
+    <string name="osu_completing_sign_up" msgid="8412636665040390901">"সাইন-আপ সম্পূর্ণ করা হচ্ছে…"</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"সাইন-আপ করা যায়নি। আবার চেষ্টা করতে ট্যাপ করুন।"</string>
+    <string name="osu_sign_up_complete" msgid="7640183358878916847">"সাইন-আপ করা হয়ে গেছে। কানেক্ট করা হচ্ছে…"</string>
+    <string name="speed_label_very_slow" msgid="8526005255731597666">"খুব ধীরে"</string>
+    <string name="speed_label_slow" msgid="6069917670665664161">"ধীরে"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"ঠিক আছে"</string>
+    <string name="speed_label_medium" msgid="9078405312828606976">"মাঝারি"</string>
+    <string name="speed_label_fast" msgid="2677719134596044051">"দ্রুত"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"খুব দ্রুত"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"মেয়াদ শেষ হয়ে গেছে"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ডিসকানেক্ট করা হয়েছে"</string>
+    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ডিসকানেক্ট হচ্ছে..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"কানেক্ট হচ্ছে..."</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"কানেক্ট করা আছে<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"চেনানো হচ্ছে..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"কানেক্ট করা আছে (ফোনের অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"কানেক্ট করা আছে (মিডিয়ার অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"কানেক্ট করা আছে (মেসেজে অ্যাকসেস নেই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"কানেক্ট করা আছে (ফোনের বা মিডিয়ার অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"কানেক্ট করা আছে, ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"কানেক্ট করা আছে (ফোনের অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"কানেক্ট করা আছে (মিডিয়ার অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"কানেক্ট করা আছে (ফোনের বা মিডিয়ার অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"চালু আছে, চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"চালু, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ব্যাটারি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ব্যাটারি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"চালু আছে"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়া অডিও"</string>
+    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ফোন কল"</string>
+    <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ফাইল স্থানান্তর"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ইনপুট ডিভাইস"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ইন্টারনেট অ্যাক্সেস"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"পরিচিতি শেয়ার করা"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"পরিচিতি শেয়ার করার কাজে ব্যবহার করুন"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ইন্টারনেট কানেকশন শেয়ার করা হচ্ছে"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"এসএমএস"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"সিম অ্যাক্সেস"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD অডিও: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD অডিও"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"হিয়ারিং এড"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"হিয়ারিং এডের সাথে কানেক্ট করা হয়েছে"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"মিডিয়া অডিওতে কানেক্ট রয়েছে"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ফোন অডিওতে কানেক্ট"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ফাইল স্থানান্তর সার্ভারের সঙ্গে কানেক্ট"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"ম্যাপের সাথে কানেক্ট করা আছে"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP -তে কানেক্ট হয়েছে"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"ফাইল স্থানান্তর সার্ভারের সঙ্গে কানেক্ট নয়"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"ইনপুট ডিভাইসে কানেক্ট"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"ইন্টারনেটের জন্য কানেক্ট"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"স্থানীয় ইন্টারনেটে চলছে"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"ইন্টারনেটের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"মানচিত্রের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"সিম -এর অ্যাক্সেসের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"মিডিয়া অডিওয়ের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ফোন অডিওয়ের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ফাইল স্থানান্তরের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ইনপুটের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"হিয়ারিং এডের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"যুক্ত করুন"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"যুক্ত করুন"</string>
+    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"বাতিল করুন"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"চেনানো থাকলে তা কানেক্ট থাকাকালীন অবস্থায় আপনার পরিচিতিগুলি এবং কলের ইতিহাসকে অ্যাক্সেস করতে অনুমোদিত করে৷"</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সাথে চেনানো যায়নি।"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ভুল পিন বা কোড দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-এর সঙ্গে যুক্ত করা যায়নি।"</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যোগাযোগ করতে পারবেন না।"</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"চেনানো <xliff:g id="DEVICE_NAME">%1$s</xliff:g> প্রত্যাখ্যান করেছে।"</string>
+    <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"কম্পিউটার"</string>
+    <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"হেডসেট"</string>
+    <string name="bluetooth_talkback_phone" msgid="868393783858123880">"ফোন"</string>
+    <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"ইমেজিং"</string>
+    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"হেডফোন"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"পেরিফেরাল ইনপুট"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ব্লুটুথ"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"বাঁদিকের হিয়ারিং এডটি পেয়ার করা হচ্ছে..."</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"ডানদিকের হিয়ারিং এড পেয়ার করা হচ্ছে…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> চার্জ বাকি আছে"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ডানদিকের - চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"ওয়াই ফাই বন্ধ৷"</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"ওয়াই-ফাই ডিসকানেক্ট হয়েছে৷"</string>
+    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"ওয়াই ফাই এ একটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"ওয়াই ফাই এ দুইটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"ওয়াই ফাই এ তিনটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"ওয়াই ফাই এ সম্পূর্ণ সিগন্যাল৷"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"খোলা নেটওয়ার্ক"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"সুরক্ষিত নেটওয়ার্ক"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"সরানো অ্যাপ্লিকেশানগুলি"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"সরানো অ্যাপ্লিকেশানগুলি এবং ব্যবহারকারীগণ"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"সিস্টেম আপডেট"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB টিথারিং"</string>
+    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"পোর্টেবল হটস্পট"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ব্লুটুথ টিথারিং"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"টিথারিং"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"টিথারিং ও পোর্টেবল হটস্পট"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"সমস্ত কাজের অ্যাপ্লিকেশান"</string>
+    <string name="user_guest" msgid="6939192779649870792">"অতিথি"</string>
+    <string name="unknown" msgid="3544487229740637809">"অজানা"</string>
+    <string name="running_process_item_user_label" msgid="3988506293099805796">"ব্যবহারকারী: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="launch_defaults_some" msgid="3631650616557252926">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"কোনও ডিফল্ট সেট করা নেই"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"টেক্সট-টু-স্পিচ"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"কথা বলার হার"</string>
+    <string name="tts_default_rate_summary" msgid="3781937042151716987">"যে গতিতে পাঠ্য উচ্চারিত হয়"</string>
+    <string name="tts_default_pitch_title" msgid="6988592215554485479">"পিচ"</string>
+    <string name="tts_default_pitch_summary" msgid="9132719475281551884">"সিন্থেসাইজ করা ভাষ্যের স্বরকে প্রভাবিত করে"</string>
+    <string name="tts_default_lang_title" msgid="4698933575028098940">"ভাষা"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"সিস্টেমের ভাষা ব্যবহার করুন"</string>
+    <string name="tts_lang_not_selected" msgid="7927823081096056147">"ভাষা নির্বাচন করা নেই"</string>
+    <string name="tts_default_lang_summary" msgid="9042620014800063470">"কথ্য পাঠ্যের জন্য ভাষা-নির্দিষ্ট ভয়েস সেট করে"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"একটি উদাহরণ শুনুন"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"কথন সংশ্লেষণের উপর একটি ছোট ডেমো প্লে করুন"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"ভয়েস ডেটা ইনস্টল করুন"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"বিবৃতি সংশ্লেষণের জন্য প্রয়োজনীয় ভয়েস ডেটা ইনস্টল করুন"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"এই বিবৃতি সংশ্লেষণ ইঞ্জিন হয়ত পাসওয়ার্ড এবং ক্রেডিট কার্ড নম্বর সহ কথ্য সমস্ত টেক্সট সংগ্রহ করতে সক্ষম হতে পারে। এটি <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ইঞ্জিন থেকে আসে। এই বিবৃতি সংশ্লেষণ ইঞ্জিন সক্রিয় করবেন?"</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"পাঠ্য থেকে ভাষ্য আউটপুটের জন্য এই ভাষার একটি কাজ করছে এমন নেটওয়ার্ক কানেকশন প্রয়োজন।"</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"এটি হল ভাষ্য সংশ্লেষণের একটি উদাহরণ"</string>
+    <string name="tts_status_title" msgid="8190784181389278640">"ডিফল্ট ভাষা স্থিতি"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> সম্পূর্ণ সমর্থিত"</string>
+    <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> এর নেটওয়ার্ক সংযোগের প্রয়োজন"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> সমর্থিত নয়"</string>
+    <string name="tts_status_checking" msgid="8026559918948285013">"পরীক্ষা করা হচ্ছে..."</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> জন্য সেটিংস"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"ইঞ্জিন সেটিংস লঞ্চ করুন"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"পছন্দের ইঞ্জিন"</string>
+    <string name="tts_general_section_title" msgid="8919671529502364567">"সাধারণ"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ভাষ্য়ের শব্দ মাত্রাকে আবার সেট করুন"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ডিফল্ট হিসেবে যে মাত্রায় পাঠ্য উচ্চারিত হয়, সেই শব্দ মাত্রাকে আবার সেট করুন৷"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="9004239613505400644">"অত্যন্ত ধীরে"</item>
+    <item msgid="1815382991399815061">"ধীর"</item>
+    <item msgid="3075292553049300105">"স্বাভাবিক"</item>
+    <item msgid="1158955023692670059">"দ্রুত"</item>
+    <item msgid="5664310435707146591">"আরো দ্রুত"</item>
+    <item msgid="5491266922147715962">"খুব দ্রুত"</item>
+    <item msgid="7659240015901486196">"দ্রুত"</item>
+    <item msgid="7147051179282410945">"খুব দ্রুত"</item>
+    <item msgid="581904787661470707">"দ্রুততম"</item>
+  </string-array>
+    <string name="choose_profile" msgid="343803890897657450">"প্রোফাইল বেছে নিন"</string>
+    <string name="category_personal" msgid="6236798763159385225">"ব্যক্তিগত"</string>
+    <string name="category_work" msgid="4014193632325996115">"অফিস"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ডেভেলপার বিকল্প"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"ডেভেলপার বিকল্প সক্ষম করুন"</string>
+    <string name="development_settings_summary" msgid="8718917813868735095">"অ্যাপ্লিকেশান উন্নয়নের জন্য বিকল্পগুলি সেট করুন"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"এই ব্যবহারকারীর জন্য ডেভেলপার বিকল্প উপলব্ধ নয়"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"এই ব্যবহারকারীর জন্য VPN সেটিংস উপলব্ধ নয়"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"এই ব্যবহারকারীর জন্য টিথারিং সেটিংস উপলব্ধ নয়"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"এই ব্যবহারকারীর জন্য অ্যাক্সেস পয়েন্ট নাম সেটিংস উপলব্ধ নয়"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB ডিবাগিং"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"USB ডিবাগিং অনুমতিগুলি প্রত্যাহার করুন"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ওয়্যারলেস ডিবাগিং"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ওয়াই-ফাই কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"সমস্যা"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ওয়্যারলেস ডিবাগিং"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"কোন কোন ডিভাইস উপলভ্য আছে তা দেখে নিয়ে ব্যবহার করার জন্য, ওয়্যারলেস ডিবাগিং চালু করুন"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR কোড ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR কোড স্ক্যানার ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"পেয়ারিং কোড ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ছয় সংখ্যার কোড ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"যোগ করা ডিভাইস"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"এখন কানেক্ট রয়েছে"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ডিভাইসের বিবরণ"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"ভুলে যান"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ডিভাইসে আঙ্গুলের ছাপ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"কানেক্ট করা যায়নি"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>টি সঠিক নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ডিভাইসের সাথে পেয়ার করুন"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ওয়াই-ফাইয়ের সাথে পেয়ার করার কোড"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"পেয়ার করা যায়নি"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ডিভাইসটি একই নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন।"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ডিভাইস পেয়ার করা হচ্ছে…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইস যোগ করা যায়নি। এটি দুটি কারণে হয়ে থাকে - QR কোডটি সঠিক নয় বা ডিভাইসটি একই নেটওয়ার্কে কানেক্ট করা নেই।"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP অ্যাড্রেস ও পোর্ট"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR কোড স্ক্যান করুন"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"একটি ওয়াই-ফাই নেটওয়ার্কের সাথে কানেক্ট করুন"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"সমস্যার তথ্য ক্যাপচার করতে পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"জাগিয়ে রাখুন"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"চার্জ হওয়ার স্ক্রিন কখনই নিদ্রা মোডে যাবে না"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ব্লুটুথ HCI স্নুপ লগ চালু করুন"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ প্যাকেট ক্যাপচার করুন। (এই সেটিং পরিবর্তন করার পরে ব্লুটুথ চালু অথবা বন্ধ করুন)"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM আনলক করা হচ্ছে"</string>
+    <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM আনলক করার অনুমতি দিতে চান?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"সতর্কতা: এই ডিভাইসে সেটিংটি চালু থাকা অবস্থায় ডিভাইস সুরক্ষা বৈশিষ্ট্যগুলি কাজ করবে না৷"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"অনুরূপ লোকেশন অ্যাপ্লিকেশান বেছে নিন"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"কোনো অনুরূপ লোকেশন অ্যাপ্লিকেশান সেট করা নেই"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"অনুরূপ লোকেশন অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="6829757985772659599">"নেটওয়ার্কিং"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"ওয়াই-ফাই ভারবোস লগিং চালু করুন"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"ওয়াই-ফাই স্ক্যান থ্রোটলিং"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ওয়াই-ফাই উন্নত MAC র‍্যান্ডমাইজেশন"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ফিচার চালু করুন"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ব্লুটুথ AVRCP ভার্সন"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ব্লুটুথ AVRCP ভার্সন বেছে নিন"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ব্লুটুথ MAP ভার্সন"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ব্লুটুথ MAP ভার্সন বেছে নিন"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ব্লুটুথ অডিও কোডেক"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ব্লুটুথ অডিওর নমুনা হার"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: স্যাম্পল রেট"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"গ্রে-আউট মানে যেখানে ফোন বা হেডসেট কাজ করে না"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"নমুনা প্রতি ব্লুটুথ অডিও বিট"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: বিট্স পার স্যাম্পল"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ব্লুটুথ অডিও চ্যানেল মোড"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: চ্যানেল মোড"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ব্লুটুথ অডিও LDAC কোডেক: প্লেব্যাক গুণমান"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ব্লুটুথ অডিও LDAC কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: প্লেব্যাকের কোয়ালিটি"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"প্রাইভেট ডিএনএস"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ব্যক্তিগত ডিএনএস মোড বেছে নিন"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"বন্ধ আছে"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"অটোমেটিক"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"ব্যক্তিগত ডিএনএস প্রদানকারীর হোস্টনেম"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"ডিএনএস প্রদানকারীর হোস্টনেম লিখুন"</string>
+    <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"কানেক্ট করা যায়নি"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ব্যাটারির খরচ কমায় এবং নেটওয়ার্কের পারফর্ম্যান্স উন্নত করে"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"এই মোডটি চালু থাকার সময়, MAC র‍্যান্ডমাইজেশন চালু হওয়া এমন কোনও নেটওয়ার্কে কানেক্ট করার সময় এই ডিভাইসের MAC অ্যাড্রেস পরিবর্তিত হতে পারে।"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"মিটার্ড"</string>
+    <string name="wifi_unmetered_label" msgid="6174142840934095093">"পরিমাপ করা নয়"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"লগার বাফারের আকারগুলি"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির বেছে নিন"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"লগারের স্টোরেজ সাফ করবেন?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"যেহেতু আমারা সর্বদা লগার চালু রেখে আর নিরিক্ষণ করছি না, তাই আমাদের আপনার ডিভাইসে থাকা লগার ডেটা মুছে ফেলতে হবে৷"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"ডিভাইসে স্থায়ীভাবে লগার ডেটা সেভ করুন"</string>
+    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"ডিভাইসে স্থায়ীভাবে সঞ্চয় করতে লগ বাফারগুলিকে বেছে নিন"</string>
+    <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB কনফিগারেশন বেছে নিন"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB কনফিগারেশন বেছে নিন"</string>
+    <string name="allow_mock_location" msgid="2102650981552527884">"নকল অবস্থানের অনুমতি দিন"</string>
+    <string name="allow_mock_location_summary" msgid="179780881081354579">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"অ্যাট্রিবিউট ইন্সপেকশন দেখা চালু করুন"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ওয়াই-ফাই সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন উপলভ্য থাকলে ব্যবহার করুন"</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB ডিবাগিং কেবলমাত্র বিকাশ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা অনুলিপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ্লিকেশানগুলি ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ওয়্যারলেস ডিবাগিং-এর অনুমতি দেবেন?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ওয়্যারলেস ডিবাগিং কেবলমাত্র ডেভেলপ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা কপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"আপনি আগে যে সব কম্পিউটার USB ডিবাগিং এর অ্যাক্সেসের অনুমতি দিয়েছিলেন তা প্রত্যাহার করবেন?"</string>
+    <string name="dev_settings_warning_title" msgid="8251234890169074553">"উন্নতি সেটিংসের অনুমতি দেবেন?"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"এইসব সেটিংস কেবলমাত্র উন্নত করার উদ্দেশ্য। সেগুলি কারণে আপনার ডিভাইস ভেঙ্গে এবং অ্যাপ্লিকেশানগুলি ভালো ভাবে কাজ করা নাও কারতে পারে।"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB এর অ্যাপ্লিকেশনগুলি যাচাই করুন"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখানো হবে (শুধুমাত্র MAC অ্যাড্রেস)"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ব্লুটুথ Gabeldorche ফিচার স্ট্যাক চালু করে।"</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"কানেক্টিভিটি ফিচার উন্নত করার বিষয়টি চালু করা হয়েছে।"</string>
+    <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
+    <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
+    <string name="debug_app" msgid="8903350241392391766">"ডিবাগ অ্যাপ বেছে নিন"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"ডিবাগ অ্যাপ্লিকেশান সেট করা নেই"</string>
+    <string name="debug_app_set" msgid="6599535090477753651">"ডিবাগিং অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="2543228890535466325">"অ্যাপ্লিকেশান বেছে নিন"</string>
+    <string name="no_application" msgid="9038334538870247690">"কিছুই না"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"ডিবাগারের জন্য অপেক্ষা করুন"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"চালানোর আগে সংযুক্ত করতে জন্য ডিবাগ করা অ্যাপ্লিকেশনটি ডিবাগারের জন্য অপেক্ষা করছে"</string>
+    <string name="debug_input_category" msgid="7349460906970849771">"ইনপুট"</string>
+    <string name="debug_drawing_category" msgid="5066171112313666619">"অঙ্কন"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"হার্ডওয়্যার দ্বারা চালিত রেন্ডারিং"</string>
+    <string name="media_category" msgid="8122076702526144053">"মিডিয়া"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"পর্যবেক্ষণে রাখা"</string>
+    <string name="strict_mode" msgid="889864762140862437">"স্ট্রিক্ট মোড চালু আছে"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ অ্যাক্টিভিটির সময় স্ক্রিন ফ্ল্যাশ করে"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"পয়েন্টারের লোকেশন"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
+    <string name="show_touches" msgid="8437666942161289025">"আলতো চাপ দেখান"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"আলতো চাপ দিলে ভিজ্যুয়াল প্রতিক্রিয়া দেখান"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"সারফেস আপডেটগুলি দেখান"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"সম্পূর্ণ উইন্ডোর সারফেস আপডেট হয়ে গেলে সেটিকে ফ্ল্যাশ করুন"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"ভিউয়ের আপডেট দেখুন"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ড্র করা থাকলে উইন্ডোর মধ্যে কী ঘটছে তা দেখানো হবে"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"হার্ডওয়্যার স্তর আপডেটগুলি প্রদর্শন করুন"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"যখন হার্ডওয়্যার স্তরগুলি আপডেট হয় তখন সেগুলিকে সবুজ রঙে ফ্ল্যাশ করুন"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"ডিবাগ GPU ওভারড্র"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"HW ওভারলে বন্ধ করুন"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"সর্বদা স্ক্রিন কম্পোসিটিংয়ের জন্য GPU ব্যবহার করুন"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"রঙ স্থান নকল করুন"</string>
+    <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ট্রেসগুলি সক্ষম করুন"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB অডিও রাউটিং বন্ধ করুন"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB অডিও যন্ত্রানুষঙ্গে অটোমেটিক রাউটিং অক্ষম করুন"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"লেআউট সীমাগুলি দেখান"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"প্রোফাইল HWUI রেন্ডারিং"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ডিবাগ স্তর চালু করুন"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ভারবোস ভেন্ডর লগ-ইন চালু করুন"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"সমস্যা সংক্রান্ত রিপোর্টগুলিতে অতিরিক্ত ডিভাইস-নির্দিষ্ট ভেন্ডরের লগগুলি অন্তর্ভুক্ত করুন, যার মধ্যে ব্যক্তিগত তথ্য থাকতে পারে, আরও বেশি ব্যাটারি ব্যবহার করতে পারে, এবং/অথবা আরও স্টোরেজ ব্যবহার করতে পারে।"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"উইন্ডো অ্যানিমেশন স্কেল"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"অ্যানিমেটর সময়কাল স্কেল"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্রদর্শনগুলি নকল করুন"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"অ্যাপ"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"অ্যাক্টিভিটি রাখবেন না"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি অ্যাক্টিভিটি ধ্বংস করুন"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"পশ্চাদপট প্রক্রিয়ার সীমা"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"ব্যাকগ্রাউন্ডের ANR দেখুন"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"ব্যাকগ্রাউন্ডের অ্যাপগুলির জন্য \'অ্যাপ থেকে সাড়া পাওয়া যাচ্ছে না\' মেসেজ দেখান"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"বিজ্ঞপ্তির সতর্কতা দেখুন"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"অ্যাপ সঠিক চ্যানেল ছাড়া বিজ্ঞপ্তি দেখালে সতর্ক করে"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"বহিরাগততে বলপূর্বক মঞ্জুরি"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ম্যানিফেস্ট মানগুলি নির্বিশেষে যেকোনো অ্যাপ্লিকেশানকে বাহ্যিক সঞ্চয়স্থানে লেখার উপযুক্ত বানায়"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"আকার পরিবর্তনযোগ্য করার জন্য ক্রিয়াকলাপগুলিকে জোর করুন"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ম্যানিফেস্ট মানগুলির নির্বিশেষে মাল্টি-উইন্ডোর জন্য সমস্ত ক্রিয়াকলাপগুলির আকার পরিবর্তনযোগ্য করুন৷"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্রি-ফর্ম উইন্ডোগুলি সক্ষম করুন"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"পরীক্ষামূলক ফ্রি-ফর্ম উইন্ডোগুলির জন্য সহায়তা সক্ষম করুন৷"</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"ডেস্কটপ ব্যাকআপ পাসওয়ার্ড"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ডেস্কটপ পূর্ণ ব্যাকআপ বর্তমানে সুরক্ষিত নয়"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ডেস্কটপের সম্পূর্ণ ব্যাকআপের পাসওয়ার্ডটি পরিবর্তন করতে বা মুছে ফেলতে আলতো চাপুন"</string>
+    <string name="local_backup_password_toast_success" msgid="4891666204428091604">"নতুন ব্যাকআপ পাসওয়ার্ড সেট করুন"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ মিলছে না"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"ব্যাকআপ পাসওয়ার্ড সেট করা ব্যর্থ"</string>
+    <string name="loading_injected_setting_summary" msgid="8394446285689070348">"লোড হচ্ছে…"</string>
+  <string-array name="color_mode_names">
+    <item msgid="3836559907767149216">"ভাইব্রেন্ট (ডিফল্ট)"</item>
+    <item msgid="9112200311983078311">"প্রাকৃতিক"</item>
+    <item msgid="6564241960833766170">"সাধারণ"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="6828141153199944847">"উন্নত রঙ"</item>
+    <item msgid="4548987861791236754">"স্বাভাবিক ভাবে আমরা চোখে যেমনটি দেখি সেইরূপ প্রাকৃতিক রঙ"</item>
+    <item msgid="1282170165150762976">"ডিজিট্যাল সামগ্রীর জন্য অপ্টিমাইজ করা রঙগুলি"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"স্ট্যান্ডবাই অ্যাপ"</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"নিষ্ক্রিয় রয়েছে৷ টগল করতে আলতো চাপুন৷"</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"সক্রিয় রয়েছে৷ টগল করতে আলতো চাপুন৷"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"অ্যাপ স্ট্যান্ডবাই-এর অবস্থা:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="runningservices_settings_title" msgid="6460099290493086515">"এখন চলছে যে পরিষেবাগুলি"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
+    <string name="select_webview_provider_title" msgid="3917815648099445503">"ওয়েবভিউ প্রয়োগ"</string>
+    <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
+    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"এই পছন্দটি আর বৈধ নেই৷ আবার চেষ্টা করুন৷"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ফাইল এনক্রিপশান রূপান্তর করুন"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"রূপান্তর করুন..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ফাইল ইতিমধ্যেই এনক্রিপ্ট করা রয়েছে"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"ফাইল ভিত্তিক এনক্রিপশানে রূপান্তর করা হচ্ছে"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ডেটা পার্টিশানকে ফাইলভিত্তিক এনক্রিপশানে রূপান্তর করুন৷ \n !!সতর্কবাণী!! এটি আপনার সমস্ত ডেটা মুছে ফেলবে৷\n এই বৈশিষ্ট্যটি আলফা এবং সঠিকভাবে কাজ নাও করতে পারে৷\n চালিয়ে যেতে \'মুছুন ও রূপান্তর করুন...\' টিপুন৷"</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"মুছুন ও রূপান্তর করুন..."</string>
+    <string name="picture_color_mode" msgid="1013807330552931903">"ছবি রঙ মোড"</string>
+    <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ব্যবহার করুন"</string>
+    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"অক্ষম হয়েছে"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"মোনোক্রোমেসি"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"বর্ণান্ধতা (লাল-সবুজ)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"প্রোটানোম্যালি (লাল-সবুজ)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ট্রিট্যানোম্যালি (নীল-হলুদ)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"রঙ সংশোধন"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ডিভাইসে রঙগুলি কেমনভাবে দেখানো হবে তা অ্যাডজাস্ট করতে \'রঙ সংশোধন করুন\' বিকল্প ব্যবহার করা যেতে পারে"</string>
+    <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
+    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
+    <string name="power_discharging_duration" msgid="1076561255466053220">"আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"ব্যবহারের উপর ভিত্তি করে আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"ব্যবহারের উপর ভিত্তি করে আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
+    <skip />
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"বর্তমান ব্যবহার অনুযায়ী আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"বর্তমান ব্যবহার অনুযায়ী আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ব্যাটারির চার্জ <xliff:g id="TIME">%1$s</xliff:g>-এ শেষ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-এরও কম সময় চলবে"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-এরও কম সময় চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এরও বেশি সময় চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এরও বেশি সময় চলবে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ফোন শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"ফোনটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%1$s</xliff:g> বাকি আছে"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>-এ সম্পূর্ণ চার্জ হয়ে যাবে"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ব্যাটারির চার্জ অপটিমাইজ করা হচ্ছে"</string>
+    <string name="battery_info_status_unknown" msgid="268625384868401114">"অজানা"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"চার্জ হচ্ছে"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্রুত চার্জ হচ্ছে"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ধীরে চার্জ হচ্ছে"</string>
+    <string name="battery_info_status_discharging" msgid="6962689305413556485">"চার্জ হচ্ছে না"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"প্লাগ-ইন করা হয়েছে কিন্তু এখনই চার্জ করা যাবে না"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"পূর্ণ"</string>
+    <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"প্রশাসকের দ্বারা নিয়ন্ত্রিত"</string>
+    <string name="disabled" msgid="8017887509554714950">"অক্ষম হয়েছে"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"অনুমোদিত"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"অনুমোদিত নয়"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"অজানা অ্যাপ ইনস্টল করা"</string>
+    <string name="home" msgid="973834627243661438">"সেটিংস হোম"</string>
+  <string-array name="battery_labels">
+    <item msgid="7878690469765357158">"০%"</item>
+    <item msgid="8894873528875953317">"৫০%"</item>
+    <item msgid="7529124349186240216">"১০০%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> আগে"</string>
+    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> বাকি আছে"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"ক্ষুদ্র"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ডিফল্ট"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"বড়"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"খুব বড়"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"বৃহত্তম"</string>
+    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"কাস্টম (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="content_description_menu_button" msgid="6254844309171779931">"মেনু"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"ডেমো মোডে ফ্যাক্টরি রিসেট করতে পাসওয়ার্ড দিন"</string>
+    <string name="retail_demo_reset_next" msgid="3688129033843885362">"পরবর্তী"</string>
+    <string name="retail_demo_reset_title" msgid="1866911701095959800">"পাসওয়ার্ড আবশ্যক"</string>
+    <string name="active_input_method_subtypes" msgid="4232680535471633046">"সক্রিয় ইনপুট পদ্ধতিগুলি"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"সিস্টেমের ভাষাগুলি ব্যবহার করুন"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> জন্য সেটিংস খুলতে ব্যর্থ হয়েছে"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটি হয়ত পাসওয়ার্ড এবং ক্রেডিট কার্ড নম্বর সহ আপনার টাইপ করা সমস্ত টেক্সট সংগ্রহ করতে সক্ষম হতে পারে। এটি <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> অ্যাপ থেকে এসেছে। এই ইনপুট পদ্ধতিটি ব্যবহার করবেন?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"দ্রষ্টব্য: পুনরায় চালু করার পরে, আপনি আপনার ফোন আনলক না করা পর্যন্ত এই অ্যাপটিকে চালু করতে পারবেন না"</string>
+    <string name="ims_reg_title" msgid="8197592958123671062">"IMS রেজিস্ট্রেশনের স্থিতি"</string>
+    <string name="ims_reg_status_registered" msgid="884916398194885457">"রেজিস্টার করা"</string>
+    <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"রেজিস্টার করা নয়"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"অনুপলভ্য"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC র‍্যান্ডমাইজ করা হয়েছে"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
+      <item quantity="one">%1$dটি ডিভাইস কানেক্ট রয়েছে</item>
+      <item quantity="other">%1$dটি ডিভাইস কানেক্ট রয়েছে</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"আরও বেশি।"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"আরও কম।"</string>
+    <string name="cancel" msgid="5665114069455378395">"বাতিল"</string>
+    <string name="okay" msgid="949938843324579502">"ঠিক আছে"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"চালু করুন"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'বিরক্ত করবে না\' মোড চালু করুন"</string>
+    <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"কখনও নয়"</string>
+    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"শুধুমাত্র অগ্রাধিকার"</string>
+    <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="4146527909616457163">"<xliff:g id="WHEN">%1$s</xliff:g> এর আগে এটি বন্ধ না করা পর্যন্ত পরবর্তী অ্যালার্ম শুনতে পাবেন না"</string>
+    <string name="zen_alarm_warning" msgid="245729928048586280">"<xliff:g id="WHEN">%1$s</xliff:g> এর সময় আপনার পরবর্তী অ্যালার্ম শুনতে পাবেন না"</string>
+    <string name="alarm_template" msgid="3346777418136233330">"সময় <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="6382760514842998629">"তারিখ ও সময় <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"সময়কাল"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"প্রতিবার জিজ্ঞেস করা হবে"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"যতক্ষণ না আপনি বন্ধ করছেন"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"এখনই"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ফোনের স্পিকার"</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"কানেক্ট করতে সমস্যা হচ্ছে। ডিভাইস বন্ধ করে আবার চালু করুন"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ওয়্যার অডিও ডিভাইস"</string>
+    <string name="help_label" msgid="3528360748637781274">"সহায়তা ও মতামত"</string>
+    <string name="storage_category" msgid="2287342585424631813">"স্টোরেজ"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"শেয়ার্ড ডেটা"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"শেয়ার্ড ডেটা দেখুন ও পরিবর্তন করুন"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ব্যবহারকারীর জন্য কোনও শেয়ার করা ডেটা নেই।"</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"শেয়ার করা ডেটা পেতে গিয়ে কোনও সমস্যা হয়েছে। আবার চেষ্টা করুন।"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"শেয়ার্ড ডেটা আইডি: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> তারিখে শেষ হয়ে যাবে"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"শেয়ার করা ডেটা মুছতে গিয়ে কোনও সমস্যা হয়েছে।"</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"শেয়ার করা এই ডেটার জন্য কোনও লিজ নেওয়া হয়নি। আপনি কি এটি মুছে দিতে চান?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"এই অ্যাপ শেয়ার্ড ডেটা অ্যাক্সেস করছে"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"অ্যাপ কোনও বিবরণ প্রদান করেনি।"</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"<xliff:g id="DATE">%s</xliff:g> তারিখে লিজের মেয়াদ শেষ হয়ে যাবে"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"শেয়ার্ড ডেটা মুছে দিন"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"আপনি কি সত্যিই এই শেয়ার্ড ডেটা মুছে দিতে চান?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ব্যবহারকারীদের তাঁদের নিজস্ব অ্যাপ্লিকেশন এবং কন্টেন্ট আছে"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"আপনি আপনার অ্যাকাউন্ট থেকে অ্যাপ্লিকেশন এবং কন্টেন্ট অ্যাক্সেস সীমাবদ্ধ করতে পারেন"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"ব্যবহারকারী"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"সীমাবদ্ধ প্রোফাইল"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যবহারকারী জুড়বেন?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"আপনি একাধিক ব্যবহারকারীর আইডি তৈরি করে অন্যদের সাথে এই ডিভাইসটি শেয়ার করতে পারেন। ডিভাইসের স্টোরেজে প্রত্যেক ব্যবহারকারী তার নিজস্ব জায়গা পাবেন যা তিনি অ্যাপ, ওয়ালপেপার এবং আরও অনেক কিছু দিয়ে কাস্টমাইজ করতে পারেন। ওয়াই-ফাই এর মতো ডিভাইস সেটিংস, যেগুলি সকলের ক্ষেত্রে প্রযোজ্য হয়, সেগুলি ব্যবহারকারীরা পরিবর্তন করতে পারবেন।\n\nনতুন ব্যবহারকারীর আইডি যোগ করলে সেই ব্যক্তিকে স্টোরেজে তার নিজের জায়গা সেট-আপ করতে হবে।\n\nঅন্যান্য ব্যবহারকারীদের হয়ে যে কোনও ব্যবহারকারী অ্যাপ আপডেট করতে পারবেন। তবে ব্যবহারযোগ্যতার সেটিংস এবং পরিষেবা নতুন ব্যবহারকারীর ক্ষেত্রে প্রযোজ্য নাও হতে পারে।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"আপনি একজন নতুন ব্যবহারকারী জুড়লে তাকে তার জায়গা সেট-আপ করে নিতে হবে।\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন।"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"এখন ব্যবহারকারী সেট-আপ করবেন?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"নিশ্চিত করুন, যে ব্যক্তিটি ডিভাইসটি নেওয়ার জন্য এবং তার জায়গা সেট-আপ করার জন্য উপলব্ধ আছেন"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"এখনই প্রোফাইল সেট-আপ করবেন?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"এখনই সেট-আপ করুন"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"এখনই নয়"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"যোগ করুন"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"নতুন ব্যবহারকারী"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"নতুন প্রোফাইল"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যবহারকারী তথ্য"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"প্রোফাইল তথ্য"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"আপনি একটি সীমাবদ্ধযুক্ত প্রোফাইল তৈরি করার আগে, আপনাকে আপনার অ্যাপ্লিকেশন এবং ব্যক্তিগত ডেটা সুরক্ষিত করার জন্য একটি স্ক্রিন লক সেট-আপ করতে হবে।"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"লক সেট করুন"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>-এ পাল্টান"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ করুন"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি সরান"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ডিভাইসের ডিফল্ট"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"বন্ধ করা আছে"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"চালু করা আছে"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"এই পরিবর্তনটি প্রয়োগ করার জন্য আপনার ডিভাইসটি অবশ্যই রিবুট করতে হবে। এখনই রিবুট করুন বা বাতিল করুন।"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"তার যুক্ত হেডফোন"</string>
+</resources>

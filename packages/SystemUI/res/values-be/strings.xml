@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"2 планкі акумулятара."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Тры планкі акумулятара."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Акумулятар поўны."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Працэнт зараду акумулятара невядомы."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Няма тэлефона."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Адна планка на тэлефоне."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"2 планкі тэлефона."</string>
@@ -296,8 +297,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Ліхтарык уключаны."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Ліхтарык выключаецца."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Ліхтарык уключаецца."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Інверсія колеру адключаецца."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Інверсія колеру ўключаецца."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Інверсія колераў адключаецца."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Інверсія колераў уключаецца."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мабільны хот-спот выключаецца."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Хот-спот уключаны."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Трансляцыя экрана спынена."</string>
@@ -381,7 +382,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi уключаны"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Няма даступнай сеткі Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Уключэнне…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Відэа з экрана"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Трансляцыя экрана"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Ідзе перадача"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Прылада без назвы"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Гатова для трансляцыі"</string>
@@ -390,7 +391,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркасць"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"АЎТА"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Інвертаваць колеры"</string>
-    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Рэжым карэкцыі колеру"</string>
+    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Рэжым карэкцыі колераў"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Дадатковыя налады"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Гатова"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Падлучана"</string>
@@ -720,7 +721,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя. Размовы ў праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" стандартна паяўляюцца ў выглядзе ўсплывальных апавяшчэнняў."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Прыцягвае ўвагу да гэтага змесціва ўсплывальнай кнопкай."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў, як усплывальнае апавяшчэнне, паказвае фота профілю на экране блакіроўкі"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, паказвае фота профілю на экране блакіроўкі"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налады"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (адключана)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не ўдалося падключыцца. Паўтарыце спробу."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Спалучыць з новай прыладай"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Праблема з чытаннем індыкатара зараду акумулятара"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Націсніце, каб убачыць больш"</string>
 </resources>

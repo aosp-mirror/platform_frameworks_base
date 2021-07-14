@@ -1762,6 +1762,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1798,6 +1809,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Nežinomas stačias"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Nežinomas gulsčias"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Atšaukta"</string>
@@ -2123,7 +2135,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pokalbis"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupės pokalbis"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninė"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninis"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Darbo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Asmeninė peržiūra"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Darbo peržiūra"</string>

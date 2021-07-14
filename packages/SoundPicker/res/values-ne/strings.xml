@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ringtone_default" msgid="798836092118824500">"पूर्वनिर्धारित रिङटोन"</string>
+    <string name="ringtone_default" msgid="798836092118824500">"डिफल्ट रिङटोन"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"सूचनाको डिफल्ट साउन्ड"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"अलार्मको डिफल्ट साउन्ड"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"रिङटोन थप्नुहोस्"</string>

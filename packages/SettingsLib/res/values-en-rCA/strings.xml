@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Can\'t scan for networks"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"None"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"Saved"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Disconnected"</string>
+    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Disabled"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP Configuration Failure"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Not connected due to low quality network"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi Connection Failure"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Authentication problem"</string>
+    <string name="wifi_cant_connect" msgid="5718417542623056783">"Can\'t connect"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Can\'t connect to \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Check password and try again"</string>
+    <string name="wifi_not_in_range" msgid="1541760821805777772">"Not in range"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Won\'t automatically connect"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"No Internet access"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Saved by <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatically connected via %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatically connected via network rating provider"</string>
+    <string name="connected_via_passpoint" msgid="7735442932429075684">"Connected via %1$s"</string>
+    <string name="connected_via_app" msgid="3532267661404276584">"Connected via <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="available_via_passpoint" msgid="1716000261192603682">"Available via %1$s"</string>
+    <string name="tap_to_sign_up" msgid="5356397741063740395">"Tap to sign up"</string>
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"No Internet"</string>
+    <string name="private_dns_broken" msgid="1984159464346556931">"Private DNS server cannot be accessed"</string>
+    <string name="wifi_limited_connection" msgid="1184778285475204682">"Limited connection"</string>
+    <string name="wifi_status_no_internet" msgid="3799933875988829048">"No Internet"</string>
+    <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Sign-in required"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Access point temporarily full"</string>
+    <string name="connected_via_carrier" msgid="1968057009076191514">"Connected via %1$s"</string>
+    <string name="available_via_carrier" msgid="465598683092718294">"Available via %1$s"</string>
+    <string name="osu_opening_provider" msgid="4318105381295178285">"Opening <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
+    <string name="osu_connect_failed" msgid="9107873364807159193">"Couldn’t connect"</string>
+    <string name="osu_completing_sign_up" msgid="8412636665040390901">"Completing sign-up…"</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Couldn’t complete sign-up. Tap to try again"</string>
+    <string name="osu_sign_up_complete" msgid="7640183358878916847">"Sign-up complete. Connecting…"</string>
+    <string name="speed_label_very_slow" msgid="8526005255731597666">"Very slow"</string>
+    <string name="speed_label_slow" msgid="6069917670665664161">"Slow"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
+    <string name="speed_label_medium" msgid="9078405312828606976">"Medium"</string>
+    <string name="speed_label_fast" msgid="2677719134596044051">"Fast"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"Very fast"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expired"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Disconnected"</string>
+    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnecting…"</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Connecting…"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"Connected<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Pairing…"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Connected (no phone)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Connected (no media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Connected (no message access)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Connected (no phone or media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Connected, battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Connected (no phone), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Connected (no media), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Connected (no phone or media), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Active, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Active, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> battery, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> battery"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> battery, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> battery"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Active"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media audio"</string>
+    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Phone calls"</string>
+    <string name="bluetooth_profile_opp" msgid="6692618568149493430">"File transfer"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Input device"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internet access"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Contact sharing"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Use for contact sharing"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internet connection sharing"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"Text messages"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM access"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hearing Aids"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connected to Hearing Aids"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connected to media audio"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Connected to phone audio"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Connected to file-transfer server"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Connected to map"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Connected to SAP"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Not connected to file-transfer server"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Connected to input device"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Connected to device for Internet access"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Sharing local Internet connection with device"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Use for Internet access"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Use for map"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Use for SIM access"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Use for media audio"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Use for phone audio"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Use for file transfer"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Use for input"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Use for Hearing Aids"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Pair"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PAIR"</string>
+    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancel"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Pairing grants access to your contacts and call history when connected."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Couldn\'t pair with <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Couldn\'t pair with <xliff:g id="DEVICE_NAME">%1$s</xliff:g> because of an incorrect PIN or passkey."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Can\'t communicate with <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Pairing rejected by <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
+    <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"Headset"</string>
+    <string name="bluetooth_talkback_phone" msgid="868393783858123880">"Telephone"</string>
+    <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Imaging"</string>
+    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Headphone"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Input Peripheral"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Pairing left hearing aid…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Pairing right hearing aid…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Left – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Right – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi off."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi disconnected."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi one bar."</string>
+    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi two bars."</string>
+    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi three bars."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi signal full."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Open network"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Secure network"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Removed apps"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Removed apps and users"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"System updates"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB tethering"</string>
+    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Portable hotspot"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth tethering"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Tethering"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Tethering and portable hotspot"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"All work apps"</string>
+    <string name="user_guest" msgid="6939192779649870792">"Guest"</string>
+    <string name="unknown" msgid="3544487229740637809">"Unknown"</string>
+    <string name="running_process_item_user_label" msgid="3988506293099805796">"User: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="launch_defaults_some" msgid="3631650616557252926">"Some defaults set"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"No defaults set"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Text-to-speech settings"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Text-to-speech output"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Speech rate"</string>
+    <string name="tts_default_rate_summary" msgid="3781937042151716987">"Speed at which the text is spoken"</string>
+    <string name="tts_default_pitch_title" msgid="6988592215554485479">"Pitch"</string>
+    <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Affects the tone of the synthesised speech"</string>
+    <string name="tts_default_lang_title" msgid="4698933575028098940">"Language"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Use system language"</string>
+    <string name="tts_lang_not_selected" msgid="7927823081096056147">"Language not selected"</string>
+    <string name="tts_default_lang_summary" msgid="9042620014800063470">"Sets the language-specific voice for the spoken text"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"Listen to an example"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Play a short demonstration of speech synthesis"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"Install voice data"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"Install the voice data required for speech synthesis"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"This speech synthesis engine may be able to collect all the text that will be spoken, including personal data like passwords and credit card numbers. It comes from the <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> engine. Enable the use of this speech synthesis engine?"</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"This language requires a working network connection for Text-to-Speech output."</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"This is an example of speech synthesis"</string>
+    <string name="tts_status_title" msgid="8190784181389278640">"Default language status"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> is fully supported"</string>
+    <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> requires network connection"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> is not supported"</string>
+    <string name="tts_status_checking" msgid="8026559918948285013">"Checking…"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"Settings for <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"Launch engine settings"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Preferred engine"</string>
+    <string name="tts_general_section_title" msgid="8919671529502364567">"General"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Reset speech pitch"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Reset the pitch at which the text is spoken to default."</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="9004239613505400644">"Very slow"</item>
+    <item msgid="1815382991399815061">"Slow"</item>
+    <item msgid="3075292553049300105">"Normal"</item>
+    <item msgid="1158955023692670059">"Fast"</item>
+    <item msgid="5664310435707146591">"Faster"</item>
+    <item msgid="5491266922147715962">"Very fast"</item>
+    <item msgid="7659240015901486196">"Rapid"</item>
+    <item msgid="7147051179282410945">"Very rapid"</item>
+    <item msgid="581904787661470707">"Fastest"</item>
+  </string-array>
+    <string name="choose_profile" msgid="343803890897657450">"Choose profile"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
+    <string name="category_work" msgid="4014193632325996115">"Work"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Developer options"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Enable developer options"</string>
+    <string name="development_settings_summary" msgid="8718917813868735095">"Set options for app development"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Developer options are not available for this user"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN settings are not available for this user"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Tethering settings are not available for this user"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"Access Point Name settings are not available for this user"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB debugging"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Debug mode when USB is connected"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Revoke USB debugging authorisations"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Wireless debugging"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Debug mode when Wi‑Fi is connected"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Error"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Wireless debugging"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"To see and use available devices, turn on wireless debugging"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Pair device with QR code"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Pair new devices using QR code scanner"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Pair device with pairing code"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Pair new devices using six-digit code"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Paired devices"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Currently connected"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Device details"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Forget"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Device fingerprint: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Connection unsuccessful"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Make sure that <xliff:g id="DEVICE_NAME">%1$s</xliff:g> is connected to the correct network"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Pair with device"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi pairing code"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Pairing unsuccessful"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Make sure that the device is connected to the same network."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Pair device over Wi‑Fi by scanning a QR code"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Pairing device…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Failed to pair the device. Either the QR code was incorrect, or the device is not connected to the same network."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address and port"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR code"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Pair device over Wi‑Fi by scanning a QR code"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Please connect to a Wi‑Fi network"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Bug report shortcut"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Show a button in the power menu for taking a bug report"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Stay awake"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Screen will never sleep while charging"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Enable Bluetooth HCI snoop log"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capture Bluetooth packets. (Toggle Bluetooth after changing this setting)"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM unlocking"</string>
+    <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Allow the bootloader to be unlocked"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Allow OEM unlocking?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"WARNING: Device protection features will not work on this device while this setting is turned on."</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Select mock location app"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"No mock location app set"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"Mock location app: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="6829757985772659599">"Networking"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Wireless display certification"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Enable Wi‑Fi verbose logging"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi scan throttling"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑enhanced MAC randomisation"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobile data always active"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering hardware acceleration"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Show Bluetooth devices without names"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Disable absolute volume"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Enable Gabeldorsche"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP version"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Select Bluetooth AVRCP Version"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP version"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Select Bluetooth MAP version"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth audio codec"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Trigger Bluetooth Audio Codec\nSelection"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth audio sample rate"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Trigger Bluetooth Audio Codec\nSelection: Sample Rate"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Grey-out means not supported by phone or headset"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bluetooth audio bits per sample"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Trigger Bluetooth Audio Codec\nSelection: Bits Per Sample"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth audio channel mode"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Trigger Bluetooth Audio Codec\nSelection: Channel Mode"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth audio LDAC codec: Playback quality"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Trigger Bluetooth Audio LDAC\nCodec Selection: Playback Quality"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Private DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Select Private DNS Mode"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatic"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Private DNS provider hostname"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Enter hostname of DNS provider"</string>
+    <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Couldn\'t connect"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Show options for wireless display certification"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Increase Wi‑Fi logging level, show per SSID RSSI in Wi‑Fi Picker"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduces battery drain and improves network performance"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"When this mode is enabled, this device’s MAC address may change each time that it connects to a network that has MAC randomisation enabled."</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"Metered"</string>
+    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Unmetered"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Logger buffer sizes"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Select Logger sizes per log buffer"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Clear logger persistent storage?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"When we are no longer monitoring with the persistent logger, we are required to erase the logger data resident on your device."</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Store logger data persistently on device"</string>
+    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Select log buffers to store persistently on device"</string>
+    <string name="select_usb_configuration_title" msgid="6339801314922294586">"Select USB Configuration"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Select USB Configuration"</string>
+    <string name="allow_mock_location" msgid="2102650981552527884">"Allow mock locations"</string>
+    <string name="allow_mock_location_summary" msgid="179780881081354579">"Allow mock locations"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Enable view attribute inspection"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Always keep mobile data active, even when Wi‑Fi is active (for fast network switching)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Use tethering hardware acceleration if available"</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Allow USB debugging?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification and read log data."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Allow wireless debugging?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Wireless debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification, and read log data."</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revoke access to USB debugging from all computers you\'ve previously authorised?"</string>
+    <string name="dev_settings_warning_title" msgid="8251234890169074553">"Allow development settings?"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"These settings are intended for development use only. They can cause your device and the applications on it to break or misbehave."</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verify apps over USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Check apps installed via ADB/ADT for harmful behaviour."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth devices without names (MAC addresses only) will be displayed"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Enables the Bluetooth Gabeldorsche feature stack."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Enables the enhanced connectivity feature."</string>
+    <string name="enable_terminal_title" msgid="3834790541986303654">"Local terminal"</string>
+    <string name="enable_terminal_summary" msgid="2481074834856064500">"Enable terminal app that offers local shell access"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP checking"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Set HDCP checking behaviour"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"Debugging"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Select debug app"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"No debug application set"</string>
+    <string name="debug_app_set" msgid="6599535090477753651">"Debugging application: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="2543228890535466325">"Select application"</string>
+    <string name="no_application" msgid="9038334538870247690">"Nothing"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Wait for debugger"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Debugged application waits for debugger to attach before executing"</string>
+    <string name="debug_input_category" msgid="7349460906970849771">"Input"</string>
+    <string name="debug_drawing_category" msgid="5066171112313666619">"Drawing"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardware accelerated rendering"</string>
+    <string name="media_category" msgid="8122076702526144053">"Media"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoring"</string>
+    <string name="strict_mode" msgid="889864762140862437">"Strict mode enabled"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Flash screen when apps do long operations on main thread"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Pointer location"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"Screen overlay showing current touch data"</string>
+    <string name="show_touches" msgid="8437666942161289025">"Show taps"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Show visual feedback for taps"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Show surface updates"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Flash entire window surfaces when they update"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Show view updates"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Flash views inside windows when drawn"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Show hardware layers updates"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Flash hardware layers green when they update"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug GPU overdraw"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Disable HW overlays"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Always use GPU for screen compositing"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulate colour space"</string>
+    <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Enable OpenGL traces"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Disable USB audio routing"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Disable automatic routing to USB audio peripherals"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"Show layout bounds"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Show clip bounds, margins, etc."</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Force RTL layout direction"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Force screen layout direction to RTL for all locales"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"Force 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"Enable 4x MSAA in OpenGL ES 2.0 apps"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Debug non-rectangular clip operations"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"Profile HWUI rendering"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Enable GPU debug layers"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Allow loading GPU debug layers for debug apps"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery and/or use more storage."</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Window animation scale"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Transition animation scale"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator duration scale"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulate secondary displays"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Don\'t keep activities"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destroy every activity as soon as the user leaves it"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Background process limit"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Show background ANRs"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display App Not Responding dialogue for background apps"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Show notification channel warnings"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Force allow apps on external"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Makes any app eligible to be written to external storage, regardless of manifest values"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"Force activities to be resizeable"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Make all activities resizeable for multi-window, regardless of manifest values."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Enable freeform windows"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Enable support for experimental freeform windows."</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Desktop backup password"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Desktop full backups aren\'t currently protected"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tap to change or remove the password for desktop full backups"</string>
+    <string name="local_backup_password_toast_success" msgid="4891666204428091604">"New backup password set"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"New password and confirmation don\'t match"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Failure setting backup password"</string>
+    <string name="loading_injected_setting_summary" msgid="8394446285689070348">"Loading…"</string>
+  <string-array name="color_mode_names">
+    <item msgid="3836559907767149216">"Vibrant (default)"</item>
+    <item msgid="9112200311983078311">"Natural"</item>
+    <item msgid="6564241960833766170">"Standard"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="6828141153199944847">"Enhanced colours"</item>
+    <item msgid="4548987861791236754">"Natural colours as seen by the eye"</item>
+    <item msgid="1282170165150762976">"Colours optimised for digital content"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"Standby apps"</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Inactive. Tap to toggle."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Active. Tap to toggle."</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"App standby state:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="runningservices_settings_title" msgid="6460099290493086515">"Running services"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"View and control currently running services"</string>
+    <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView implementation"</string>
+    <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Set WebView implementation"</string>
+    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"This choice is no longer valid. Try again."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Convert to file encryption"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Convert…"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Already file encrypted"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Converting to file-based encryption"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Convert data partition to file-based encryption.\n !!Warning!! This will delete all your data.\n This feature is alpha, and may not work correctly.\n Press \'Wipe and convert…\' to continue."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Wipe and convert…"</string>
+    <string name="picture_color_mode" msgid="1013807330552931903">"Picture colour mode"</string>
+    <string name="picture_color_mode_desc" msgid="151780973768136200">"Use sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Disabled"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monochromacy"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomaly (red-green)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (red-green)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (blue-yellow)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Colour correction"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Colour correction allows you to adjust how colours are displayed on your device"</string>
+    <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overridden by <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left"</string>
+    <string name="power_discharging_duration" msgid="1076561255466053220">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left based on your usage"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
+    <skip />
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Should last until about <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Until <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Battery may run out by <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> left"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Phone may shut down soon"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet may shut down soon"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Device may shut down soon"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Phone may shut down soon (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet may shut down soon (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Device may shut down soon (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> left until charged"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until charged"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimising for battery health"</string>
+    <string name="battery_info_status_unknown" msgid="268625384868401114">"Unknown"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"Charging"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charging rapidly"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Charging slowly"</string>
+    <string name="battery_info_status_discharging" msgid="6962689305413556485">"Not charging"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Plugged in, can\'t charge at the moment"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"Full"</string>
+    <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlled by admin"</string>
+    <string name="disabled" msgid="8017887509554714950">"Disabled"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Allowed"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Not allowed"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Install unknown apps"</string>
+    <string name="home" msgid="973834627243661438">"Settings Home"</string>
+  <string-array name="battery_labels">
+    <item msgid="7878690469765357158">"0%"</item>
+    <item msgid="8894873528875953317">"50%"</item>
+    <item msgid="7529124349186240216">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> ago"</string>
+    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> left"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Small"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Default"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Large"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Larger"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Largest"</string>
+    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Custom (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="content_description_menu_button" msgid="6254844309171779931">"Menu"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Enter password to perform factory reset in demo mode"</string>
+    <string name="retail_demo_reset_next" msgid="3688129033843885362">"Next"</string>
+    <string name="retail_demo_reset_title" msgid="1866911701095959800">"Password required"</string>
+    <string name="active_input_method_subtypes" msgid="4232680535471633046">"Active input methods"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Use system languages"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Failed to open settings for <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"This input method may be able to collect all the text that you type, including personal data like passwords and credit card numbers. It comes from the app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Use this input method?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Note: After a reboot, this app can\'t start until you unlock your phone"</string>
+    <string name="ims_reg_title" msgid="8197592958123671062">"IMS registration state"</string>
+    <string name="ims_reg_status_registered" msgid="884916398194885457">"Registered"</string>
+    <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Not registered"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Unavailable"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC is randomised"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
+      <item quantity="other">%1$d devices connected</item>
+      <item quantity="one">%1$d device connected</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"More time."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Less time."</string>
+    <string name="cancel" msgid="5665114069455378395">"Cancel"</string>
+    <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Turn on"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Turn on Do Not Disturb"</string>
+    <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Never"</string>
+    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Priority only"</string>
+    <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="4146527909616457163">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g> unless you turn this off before then"</string>
+    <string name="zen_alarm_warning" msgid="245729928048586280">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3346777418136233330">"at <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="6382760514842998629">"on <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duration"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ask every time"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Until you turn off"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Just now"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Phone speaker"</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem connecting. Turn device off and back on"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired audio device"</string>
+    <string name="help_label" msgid="3528360748637781274">"Help and feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Storage"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Shared data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"View and modify shared data"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"There is no shared data for this user."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"There was an error fetching shared data. Try again."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Shared data ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Expires on <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"There was an error deleting the shared data."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"There are no leases acquired for this shared data. Would you like to delete it?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Apps sharing data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"No description provided by the app."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Lease expires on <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Delete shared data"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Are you sure that you want to delete this shared data?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Users have their own apps and content"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"You can restrict access to apps and content from your account"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"User"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Restricted profile"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customise with apps, wallpaper and so on. Users can also adjust device settings such as Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure that the person is available to take the device and set up their space."</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Set up profile now?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Set up now"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Not now"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Add"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"New user"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"New profile"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"User info"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profile info"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Before you can create a restricted profile, you\'ll need to set up a screen lock to protect your apps and personal data."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Set lock"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Switch to <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Add guest"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Remove guest"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Guest"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Device default"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Disabled"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphones"</string>
+</resources>

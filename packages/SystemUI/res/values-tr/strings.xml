@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Başlat"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekran kaydediliyor"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekran ve ses kaydediliyor"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Dokunmaları ekranda göster"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ekrana dokunmaları göster"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Durdurmak için dokunun"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Durdur"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Duraklat"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Pil gücü iki çubuk."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Pil gücü üç çubuk."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Pil tam dolu."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Pil yüzdesi bilinmiyor."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Telefon sinyali yok."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon sinyali bir çubuk."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon sinyali iki çubuk."</string>
@@ -366,7 +367,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Konum Bilgisi Kapalı"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Medya cihazı"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Yalnızca Acil Çağrılar İçin"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Yalnızca Acil Aramalar İçin"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"Ayarlar"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"Saat"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Ben"</string>
@@ -543,8 +544,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN\'yi devre dışı bırak"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN bağlantısını kes"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Politikaları Göster"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait.\n\nBT yöneticiniz cihazınızın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Bu cihaz kuruluşunuza ait.\n\nBT yöneticiniz cihazın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait.\n\nBT yöneticiniz cihazınızın ayarlarını, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Bu cihaz kuruluşunuza ait.\n\nBT yöneticiniz cihazın ayarlarını, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Kuruluşunuz bu cihaza bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Kuruluşunuz iş profilinize bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Bu cihazda bir sertifika yetkilisi yüklü. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
@@ -555,7 +556,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Kişisel profiliniz; e-postalar, uygulamalar ve web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilen <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Cihazınız <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, cihazınızı yönetmek için <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> kullanıyor."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Yöneticiniz ayarları, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini takip edip yönetebilir."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Yöneticiniz ayarları, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini izleyip yönetebilir."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Daha fazla bilgi"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"E-postalarınız, uygulamalarınız ve web siteleriniz de dahil olmak üzere ağ etkinliğinizi takip edebilen <xliff:g id="VPN_APP">%1$s</xliff:g> ağına bağlısınız."</string>
@@ -599,8 +600,8 @@
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Kişisel verilere erişilebilir (ör. kişiler ve e-posta içerikleri)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Sabitlenmiş uygulama diğer uygulamaları açabilir."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Genel Bakış düğmelerine dokunup basılı tutun"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu ekranın sabitlemesini kaldırmak için Geri ve Ana sayfa düğmelerine dokunup basılı tutun"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu ekranın sabitlemesini kaldırmak için hızlıca yukarı kaydırıp tutun"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Ana sayfa düğmelerine dokunup basılı tutun"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu uygulamanın sabitlemesini kaldırmak için yukarı kaydırıp tutun"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Anladım"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Hayır, teşekkürler"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Uygulama sabitlendi"</string>
@@ -632,7 +633,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"sesi aç"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"titreşim"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ses denetimleri"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Çağrılar ve bildirimler telefonun zilini çaldıracak (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Aramalar ve bildirimler telefonun zilini çaldıracak (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Medya çıkışı"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Telefon çağrısı çıkışı"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Cihaz bulunamadı"</string>
@@ -653,8 +654,8 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"İş profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Uçak modu"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Blok ekle"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Yayın Bloku"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Kutu ekle"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Yayın Kutusu"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"<xliff:g id="WHEN">%1$s</xliff:g> olarak ayarlanmış bir sonraki alarmınızdan önce bu işlevi kapatmazsanız alarmı duymayacaksınız"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g> olarak ayarlanmış bir sonraki alarmınızı duymayacaksınız"</string>
     <string name="alarm_template" msgid="2234991538018805736">"saat: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -716,7 +717,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Görüşme bölümünün üstünde gösterilir, kayan baloncuk olarak görünür, kilit ekranında profil resmini görüntüler"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelikli"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>, sohbet özelliklerini desteklemiyor"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Son kapatılan baloncuk yok"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Son baloncuklar ve kapattığınız baloncuklar burada görünür"</string>
@@ -853,10 +854,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"Sağ tuş kodu"</string>
     <string name="left_icon" msgid="5036278531966897006">"Sol simge"</string>
     <string name="right_icon" msgid="1103955040645237425">"Sağ simge"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Blok eklemek için basılı tutup sürükleyin"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Blokları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Kutu eklemek için basılı tutup sürükleyin"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Kutuları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Kaldırmak için buraya sürükleyin"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blok gerekiyor"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kutu gerekiyor"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Düzenle"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Saat"</string>
   <string-array name="clock_options">
@@ -882,10 +883,10 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Üstte %50"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Üstte %30"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Altta tam ekran"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Karoyu kaldırmak için"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Sona karo eklemek için"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Karoyu taşı"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Karo ekle"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Kutuyu kaldırmak için"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Sona kutu eklemek için"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Kutuyu taşı"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Kutu ekle"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna taşı"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna ekle"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Konum: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
@@ -1051,8 +1052,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>. konuma taşı"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Güç menüsünden erişmek istediğiniz denetimleri seçin"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Denetimleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm denetimler kaldırıldı"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Değişiklikler kaydedilmedi"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Tüm uygulamaları göster"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontroller yüklenemedi. Uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APP">%s</xliff:g> uygulamasını kontrol edin."</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (bağlı değil)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Bağlanılamadı. Tekrar deneyin."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yeni cihaz eşle"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pil ölçeriniz okunurken sorun oluştu"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Daha fazla bilgi için dokunun"</string>
 </resources>
