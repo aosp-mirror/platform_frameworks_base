@@ -2451,6 +2451,15 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private String getApexPackageNameContainingPackage(String pkg) {
+        ApexManager apexManager = ApexManager.getInstance();
+        return apexManager.getActiveApexPackageNameContainingPackage(pkg);
+    }
+
+    private boolean isApexApp(String pkg) {
+        return getApexPackageNameContainingPackage(pkg) != null;
+    }
+
     private int runGetPrivappPermissions() {
         final String pkg = getNextArg();
         if (pkg == null) {
@@ -2466,6 +2475,9 @@ class PackageManagerShellCommand extends ShellCommand {
         } else if (isSystemExtApp(pkg)) {
             privAppPermissions = SystemConfig.getInstance()
                     .getSystemExtPrivAppPermissions(pkg);
+        } else if (isApexApp(pkg)) {
+            privAppPermissions = SystemConfig.getInstance()
+                    .getApexPrivAppPermissions(getApexPackageNameContainingPackage(pkg), pkg);
         } else {
             privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
         }
@@ -2490,6 +2502,9 @@ class PackageManagerShellCommand extends ShellCommand {
         } else if (isSystemExtApp(pkg)) {
             privAppPermissions = SystemConfig.getInstance()
                     .getSystemExtPrivAppDenyPermissions(pkg);
+        } else if (isApexApp(pkg)) {
+            privAppPermissions = SystemConfig.getInstance()
+                    .getApexPrivAppDenyPermissions(getApexPackageNameContainingPackage(pkg), pkg);
         } else {
             privAppPermissions = SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
         }
