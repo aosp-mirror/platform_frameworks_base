@@ -76,7 +76,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
     private static final int DO_CREATE_INLINE_SUGGESTIONS_REQUEST = 90;
 
-    final WeakReference<AbstractInputMethodService> mTarget;
+    final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
     @UnsupportedAppUsage
     final HandlerCaller mCaller;
@@ -129,12 +129,12 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
 
-    public IInputMethodWrapper(AbstractInputMethodService context, InputMethod inputMethod) {
-        mTarget = new WeakReference<>(context);
-        mContext = context.getApplicationContext();
+    IInputMethodWrapper(InputMethodServiceInternal imsInternal, InputMethod inputMethod) {
+        mTarget = new WeakReference<>(imsInternal);
+        mContext = imsInternal.getContext().getApplicationContext();
         mCaller = new HandlerCaller(mContext, null, this, true /*asyncHandler*/);
         mInputMethod = new WeakReference<>(inputMethod);
-        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+        mTargetSdkVersion = imsInternal.getContext().getApplicationInfo().targetSdkVersion;
     }
 
     @MainThread
@@ -149,7 +149,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
         switch (msg.what) {
             case DO_DUMP: {
-                AbstractInputMethodService target = mTarget.get();
+                InputMethodServiceInternal target = mTarget.get();
                 if (target == null) {
                     return;
                 }
@@ -251,11 +251,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        AbstractInputMethodService target = mTarget.get();
+        InputMethodServiceInternal target = mTarget.get();
         if (target == null) {
             return;
         }
-        if (target.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+        if (target.getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             
             fout.println("Permission Denial: can't dump InputMethodManager from from pid="

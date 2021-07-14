@@ -58,10 +58,11 @@ public final class InputConnectionProtoDumper {
      * {@link android.view.inputmethod.InputConnection#GET_TEXT_WITH_STYLES}.
      * @param result The text after the cursor position; the length of the
      * returned text might be less than <var>length</var>.
-     * @return ProtoOutputStream holding the InputConnectionCallProto data.
+     * @return Byte-array holding the InputConnectionCallProto data.
      */
-    public static ProtoOutputStream buildGetTextAfterCursorProto(@IntRange(from = 0) int length,
-            int flags, @Nullable CharSequence result) {
+    @NonNull
+    public static byte[] buildGetTextAfterCursorProto(@IntRange(from = 0) int length, int flags,
+            @Nullable CharSequence result) {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_TEXT_AFTER_CURSOR);
         proto.write(GetTextAfterCursor.LENGTH, length);
@@ -72,7 +73,7 @@ public final class InputConnectionProtoDumper {
             proto.write(GetTextAfterCursor.RESULT, result.toString());
         }
         proto.end(token);
-        return proto;
+        return proto.getBytes();
     }
 
     /**
@@ -85,9 +86,10 @@ public final class InputConnectionProtoDumper {
      * {@link android.view.inputmethod.InputConnection#GET_TEXT_WITH_STYLES}.
      * @param result The text before the cursor position; the length of the
      * returned text might be less than <var>length</var>.
-     * @return ProtoOutputStream holding the InputConnectionCallProto data.
+     * @return Byte-array holding the InputConnectionCallProto data.
      */
-    public static ProtoOutputStream buildGetTextBeforeCursorProto(@IntRange(from = 0) int length,
+    @NonNull
+    public static byte[] buildGetTextBeforeCursorProto(@IntRange(from = 0) int length,
             int flags, @Nullable CharSequence result) {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_TEXT_BEFORE_CURSOR);
@@ -99,7 +101,7 @@ public final class InputConnectionProtoDumper {
             proto.write(GetTextBeforeCursor.RESULT, result.toString());
         }
         proto.end(token);
-        return proto;
+        return proto.getBytes();
     }
 
     /**
@@ -113,10 +115,10 @@ public final class InputConnectionProtoDumper {
      * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
      * later, returns false when the target application does not implement
      * this method.
-     * @return ProtoOutputStream holding the InputConnectionCallProto data.
+     * @return Byte-array holding the InputConnectionCallProto data.
      */
-    public static ProtoOutputStream buildGetSelectedTextProto(int flags,
-            @Nullable CharSequence result) {
+    @NonNull
+    public static byte[] buildGetSelectedTextProto(int flags, @Nullable CharSequence result) {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_SELECTED_TEXT);
         proto.write(GetSelectedText.FLAGS, flags);
@@ -126,7 +128,7 @@ public final class InputConnectionProtoDumper {
             proto.write(GetSelectedText.RESULT, result.toString());
         }
         proto.end(token);
-        return proto;
+        return proto.getBytes();
     }
 
     /**
@@ -143,11 +145,11 @@ public final class InputConnectionProtoDumper {
      * or the editor can't comply with the request for some reason, or the application does not
      * implement this method. The length of the returned text might be less than the sum of
      * <var>beforeLength</var> and <var>afterLength</var> .
-     * @return ProtoOutputStream holding the InputConnectionCallProto data.
+     * @return Byte-array holding the InputConnectionCallProto data.
      */
-    public static ProtoOutputStream buildGetSurroundingTextProto(@IntRange(from = 0)
-            int beforeLength, @IntRange(from = 0) int afterLength, int flags,
-            @Nullable SurroundingText result) {
+    @NonNull
+    public static byte[] buildGetSurroundingTextProto(@IntRange(from = 0) int beforeLength,
+            @IntRange(from = 0) int afterLength, int flags, @Nullable SurroundingText result) {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_SURROUNDING_TEXT);
         proto.write(GetSurroundingText.BEFORE_LENGTH, beforeLength);
@@ -168,7 +170,7 @@ public final class InputConnectionProtoDumper {
             proto.end(token_result);
         }
         proto.end(token);
-        return proto;
+        return proto.getBytes();
     }
 
     /**
@@ -179,9 +181,10 @@ public final class InputConnectionProtoDumper {
      * {@link android.text.TextUtils#getCapsMode TextUtils.getCapsMode}.
      * @param result the caps mode flags that are in effect at the current
      * cursor position. See TYPE_TEXT_FLAG_CAPS_* in {@link android.text.InputType}.
-     * @return ProtoOutputStream holding the InputConnectionCallProto data.
+     * @return Byte-array holding the InputConnectionCallProto data.
      */
-    public static ProtoOutputStream buildGetCursorCapsModeProto(int reqModes, int result) {
+    @NonNull
+    public static byte[] buildGetCursorCapsModeProto(int reqModes, int result) {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_CURSOR_CAPS_MODE);
         proto.write(GetCursorCapsMode.REQ_MODES, reqModes);
@@ -189,7 +192,7 @@ public final class InputConnectionProtoDumper {
             proto.write(GetCursorCapsMode.RESULT, result);
         }
         proto.end(token);
-        return proto;
+        return proto.getBytes();
     }
 
     /**
@@ -206,9 +209,10 @@ public final class InputConnectionProtoDumper {
      * extracted text itself, or null if the input connection is no
      * longer valid of the editor can't comply with the request for
      * some reason.
-     * @return ProtoOutputStream holding the InputConnectionCallProto data.
+     * @return Byte-array holding the InputConnectionCallProto data.
      */
-    public static ProtoOutputStream buildGetExtractedTextProto(@NonNull ExtractedTextRequest
+    @NonNull
+    public static byte[] buildGetExtractedTextProto(@NonNull ExtractedTextRequest
             request, int flags, @Nullable ExtractedText result) {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_EXTRACTED_TEXT);
@@ -225,6 +229,6 @@ public final class InputConnectionProtoDumper {
             proto.write(GetExtractedText.RESULT, result.text.toString());
         }
         proto.end(token);
-        return proto;
+        return proto.getBytes();
     }
 }

@@ -32,6 +32,7 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
 import android.app.TaskInfo;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.Surface;
@@ -214,6 +215,25 @@ public class PipTransition extends PipTransitionController {
         final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
         PipAnimationController.PipTransitionAnimator animator;
         finishTransaction.setPosition(leash, destinationBounds.left, destinationBounds.top);
+        if (taskInfo.pictureInPictureParams != null
+                && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
+            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
+
+            // PiP menu is attached late in the process here to avoid any artifacts on the leash
+            // caused by addShellRoot when in gesture navigation mode.
+            mPipMenuController.attach(leash);
+            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            tx.setMatrix(leash, Matrix.IDENTITY_MATRIX, new float[9])
+                    .setPosition(leash, destinationBounds.left, destinationBounds.top)
+                    .setWindowCrop(leash, destinationBounds.width(), destinationBounds.height());
+            startTransaction.merge(tx);
+            startTransaction.apply();
+            mPipBoundsState.setBounds(destinationBounds);
+            onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, tx);
+            sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
+            mFinishCallback = null;
+            return true;
+        }
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             final Rect sourceHintRect =
                     PipBoundsAlgorithm.getValidSourceHintRect(
