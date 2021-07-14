@@ -72,7 +72,7 @@ void Command::AddRequiredFlagList(const StringPiece& name, const StringPiece& de
 }
 
 void Command::AddOptionalFlag(const StringPiece& name, const StringPiece& description,
-                              Maybe<std::string>* value, uint32_t flags) {
+                              std::optional<std::string>* value, uint32_t flags) {
   auto func = [value, flags](const StringPiece& arg) -> bool {
     *value = (flags & Command::kPath) ? GetSafePath(arg) : arg.to_string();
     return true;

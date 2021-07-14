@@ -50,12 +50,12 @@ namespace file {
 FileType GetFileType(const std::string& path) {
   std::wstring path_utf16;
   if (!::android::base::UTF8PathToWindowsLongPath(path.c_str(), &path_utf16)) {
-    return FileType::kNonexistant;
+    return FileType::kNonExistant;
   }
 
   DWORD result = GetFileAttributesW(path_utf16.c_str());
   if (result == INVALID_FILE_ATTRIBUTES) {
-    return FileType::kNonexistant;
+    return FileType::kNonExistant;
   }
 
   if (result & FILE_ATTRIBUTE_DIRECTORY) {
@@ -72,7 +72,7 @@ FileType GetFileType(const std::string& path) {
 
   if (result == -1) {
     if (errno == ENOENT || errno == ENOTDIR) {
-      return FileType::kNonexistant;
+      return FileType::kNonExistant;
     }
     return FileType::kUnknown;
   }
@@ -208,7 +208,7 @@ std::string PackageToPath(const StringPiece& package) {
   return out_path;
 }
 
-Maybe<FileMap> MmapPath(const std::string& path, std::string* out_error) {
+std::optional<FileMap> MmapPath(const std::string& path, std::string* out_error) {
   int flags = O_RDONLY | O_CLOEXEC | O_BINARY;
   unique_fd fd(TEMP_FAILURE_RETRY(::android::base::utf8::open(path.c_str(), flags)));
   if (fd == -1) {
@@ -344,8 +344,8 @@ bool FileFilter::operator()(const std::string& filename, FileType type) const {
   return true;
 }
 
-Maybe<std::vector<std::string>> FindFiles(const android::StringPiece& path, IDiagnostics* diag,
-                                          const FileFilter* filter) {
+std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& path,
+                                                  IDiagnostics* diag, const FileFilter* filter) {
   const std::string root_dir = path.to_string();
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
@@ -382,7 +382,7 @@ Maybe<std::vector<std::string>> FindFiles(const android::StringPiece& path, IDia
   for (const std::string& subdir : subdirs) {
     std::string full_subdir = root_dir;
     AppendPath(&full_subdir, subdir);
-    Maybe<std::vector<std::string>> subfiles = FindFiles(full_subdir, diag, filter);
+    std::optional<std::vector<std::string>> subfiles = FindFiles(full_subdir, diag, filter);
     if (!subfiles) {
       return {};
     }
