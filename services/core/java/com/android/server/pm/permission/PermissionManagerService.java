@@ -2920,7 +2920,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 wasChanged = true;
                             }
 
-                            if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0) {
+                            if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
+                                    && !isPermissionSplitFromNonRuntime(permName,
+                                    pkg.getTargetSdkVersion())) {
                                 flags &= ~FLAG_PERMISSION_REVOKED_COMPAT;
                                 wasChanged = true;
                             // Hard restricted permissions cannot be held.

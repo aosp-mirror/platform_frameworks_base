@@ -112,8 +112,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-import static com.android.internal.util.ArrayUtils.emptyIfNull;
-import static com.android.internal.util.ArrayUtils.filter;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME;
@@ -23636,18 +23634,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 getPackageFromComponentString(R.string.config_defaultAppPredictionService));
     }
 
-    private @NonNull String[] dropNonSystemPackages(@NonNull String[] pkgNames) {
-        return emptyIfNull(filter(pkgNames, String[]::new, mIsSystemPackage), String.class);
-    }
-
-    private Predicate<String> mIsSystemPackage = (pkgName) -> {
-        if ("android".equals(pkgName)) {
-            return true;
-        }
-        AndroidPackage pkg = mPackages.get(pkgName);
-        return pkg != null && pkg.isSystem();
-    };
-
     @Override
     public String getSystemCaptionsServicePackageName() {
         return ensureSystemPackageName(
@@ -27271,7 +27257,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public @NonNull String[] getKnownPackageNames(int knownPackage, int userId) {
-            return dropNonSystemPackages(getKnownPackageNamesInternal(knownPackage, userId));
+            return getKnownPackageNamesInternal(knownPackage, userId);
         }
 
         private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {

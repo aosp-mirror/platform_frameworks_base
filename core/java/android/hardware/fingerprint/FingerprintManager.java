@@ -1382,12 +1382,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_error_vendor);
                 if (vendorCode < msgArray.length) {
-                    if (Build.IS_ENG || Build.IS_USERDEBUG) {
-                        return msgArray[vendorCode];
-                    } else {
-                        return context.getString(
-                            com.android.internal.R.string.fingerprint_error_unable_to_process);
-                    }
+                    return msgArray[vendorCode];
                 }
             }
         }
@@ -1427,12 +1422,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_acquired_vendor);
                 if (vendorCode < msgArray.length) {
-                    if (Build.IS_ENG || Build.IS_USERDEBUG) {
-                        return msgArray[vendorCode];
-                    } else {
-                        return context.getString(
-                            com.android.internal.R.string.fingerprint_error_unable_to_process);
-                    }
+                    return msgArray[vendorCode];
                 }
             }
                 break;
