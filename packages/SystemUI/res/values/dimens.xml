@@ -1480,6 +1480,8 @@
     <dimen name="content_text_size_for_large">14sp</dimen>
     <dimen name="below_name_text_padding">16dp</dimen>
     <dimen name="above_notification_text_padding">22dp</dimen>
+    <dimen name="before_messages_count_padding">40dp</dimen>
+    <dimen name="before_predefined_icon_padding">30dp</dimen>
     <dimen name="regular_predefined_icon">18dp</dimen>
     <dimen name="larger_predefined_icon">24dp</dimen>
     <dimen name="largest_predefined_icon">32dp</dimen>
