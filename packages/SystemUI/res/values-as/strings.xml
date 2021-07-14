@@ -32,14 +32,14 @@
     <string name="invalid_charger" msgid="4370074072117767416">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি। আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
-    <string name="battery_low_why" msgid="2056750982959359863">"ছেটিংসমূহ"</string>
+    <string name="battery_low_why" msgid="2056750982959359863">"ছেটিং"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰি সঞ্চয়কাৰী অন কৰেনে?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰি সঞ্চয়কাৰীৰ বিষয়ে"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰি সঞ্চয়কাৰী অন কৰক"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ছেটিংসমূহ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ৱাই-ফাই"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীণ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"মিউট"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"স্বয়ং"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"জাননীসমূহ"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"বেটাৰিৰ দুডাল দণ্ড।"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"বেটাৰিৰ তিনিডাল দণ্ড।"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"বেটাৰি পূৰাকৈ চ্চাৰ্জ হৈছে।"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"বেটাৰীৰ চাৰ্জৰ শতাংশ অজ্ঞাত।"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ফ\'নত ছিগনেল নাই৷"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ফ\'ন ছিগনেলৰ এডাল দণ্ড।"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ফ\'ন ছিগনেলৰ দুডাল দণ্ড।"</string>
@@ -232,7 +233,7 @@
     <string name="not_default_data_content_description" msgid="6757881730711522517">"ডেটা ব্যৱহাৰ কৰিবলৈ ছেট কৰা নাই"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"অফ অৱস্থাত আছে"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ব্লুটুথ টেডাৰিং।"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"এয়াৰপ্লেইন ম\'ড।"</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"এয়াৰপ্লে’ন ম’ড।"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"ভিপিএন অন অৱস্থাত আছে।"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"কোনো ছিম কাৰ্ড নাই"</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"বাহক নেটৱৰ্কৰ পৰিৱৰ্তন"</string>
@@ -356,7 +357,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"অন কৰি থকা হৈছে…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"উজ্জ্বলতা"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"স্বয়ং-ঘূৰ্ণন"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীণ"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> ম\'ড"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"ঘূৰ্ণন লক কৰা হ’ল"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"প\'ৰ্ট্ৰেইট"</string>
@@ -388,7 +389,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"উজ্জ্বলতা"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"স্বয়ং"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ৰং ওলোটা কৰক"</string>
-    <string name="quick_settings_color_space_label" msgid="537528291083575559">"ৰং শুধৰণী কৰা ম\'ড"</string>
+    <string name="quick_settings_color_space_label" msgid="537528291083575559">"ৰং শুধৰণি কৰা ম\'ড"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"অধিক ছেটিং"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"সম্পন্ন কৰা হ’ল"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"সংযোগ কৰা হ’ল"</string>
@@ -949,7 +950,7 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"বেটাৰি"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"স্ক্ৰীণশ্বটসমূহ"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধাৰণ বার্তাসমূহ"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"সঞ্চয়াগাৰ"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"ষ্ট\'ৰেজ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ইংগিতবোৰ"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
@@ -1034,7 +1035,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"বিবৰ্ধন ৱিণ্ড’"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"বিবৰ্ধন ৱিণ্ড’ৰ নিয়ন্ত্ৰণসমূহ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ডিভাইচৰ নিয়ন্ত্ৰণসমূহ"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপোনাৰ সংযোজিত ডিভাইচসমূহৰ বাবে নিয়ন্ত্ৰণসমূহ যোগ কৰক"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপোনাৰ সংযোজিত ডিভাইচৰ বাবে নিয়ন্ত্ৰণ যোগ কৰক"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ডিভাইচৰ নিয়ন্ত্ৰণসমূহ ছেট আপ কৰক"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"আপোনাৰ নিয়ন্ত্ৰণসমূহ এক্সেছ কৰিবলৈ পাৱাৰ বুটামটো হেঁচি ধৰি ৰাখক"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"নিয়ন্ত্ৰণসমূহ যোগ কৰিবলৈ এপ্‌ বাছনি কৰক"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (সংযোগ বিচ্ছিন্ন হৈছে)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"সংযোগ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"আপোনাৰ বেটাৰী মিটাৰ পঢ়োঁতে সমস্যা হৈছে"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"অধিক তথ্যৰ বাবে টিপক"</string>
 </resources>

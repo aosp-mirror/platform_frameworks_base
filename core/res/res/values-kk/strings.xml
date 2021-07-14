@@ -238,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Экранды құлыптау"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Өшіру"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Қуат"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Қайта қосу"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Өшіріп қосу"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Төтенше жағдай"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Вирус туралы хабарлау"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Сеансты аяқтау"</string>
@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Геодерек"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Локация"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"бұл құрылғының орналасқан жерін көру"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Қолданбаға күй жолағы болуға рұқсат береді."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"күйі жолағын кеңейту/жиыру"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Қолданбаға статус жолағын жаюға емесе тасалауға рұқсат береді."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"төте пернелерді орнату"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"таңбаша орнату"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"төте пернелерді алып тастау"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз алып тастау мүмкіндігін береді."</string>
@@ -428,7 +428,7 @@
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"болжалды орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол Локация қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған Локация қызметтері қосулы тұруы керек."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"геодеректерді фондық режимде пайдалану"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба пайдаланылмайтын кезде де, ол геодеректі кез келген уақытта пайдалана алады."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба кез келген уақытта (пайдаланылмайтын кезде де) локацияны  пайдалана алады."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"аудио параметрлерін өзгерту"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Қолданбаға дыбыс қаттылығы және аудио шығыс үндеткішін таңдау сияқты жаһандық аудио параметрлерін өзгерту мүмкіндігін береді."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"аудио жазу"</string>
@@ -569,11 +569,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"Face Unlock жабдығын басқару"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"Бет тану жабдығын басқару"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Қолданбаға пайдаланатын бет үлгілерін енгізу және жою әдістерін шақыруға мүмкіндік береді."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Face Unlock жабдығын пайдалану"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Аутентификациялау үшін қолданбаға Face Unlock жабдығын пайдалануға рұқсат береді."</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Бет тану жабдығын пайдалану"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Аутентификациялау үшін қолданбаға бет тану жабдығын пайдалануға рұқсат береді."</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Бет тану"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Бетті қайта тіркеу"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
@@ -599,15 +599,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Face Unlock функциясын қайта қолданып көріңіз."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Бет тану функциясын қайта қолданып көріңіз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Бетті танудан бас тартылды."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Пайдаланушы Face Unlock функциясынан бас тартты."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Пайдаланушы бет тану функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Тым көп әрекет жасалды. Face Unlock функциясы өшірілді."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Тым көп әрекет жасалды. Бет тану функциясы өшірілді."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Face Unlock реттелмеді."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Бұл құрылғыда Face Unlock функциясы істемейді."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Бет тану реттелмеді."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Бұл құрылғыда бет тану функциясы істемейді."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик уақытша өшірулі."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
   <string-array name="face_error_vendor">
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Қайталап көріңіз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Қайталап көріңіз"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Мүмкіндіктер мен деректер үшін құлыпты ашыңыз"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Бет-әлпет арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Бет тану арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM картасы жоқ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Планшетте SIM картасы жоқ."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV құрылғыңызда SIM картасы жоқ."</string>
@@ -907,7 +907,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Ашу аймағын кеңейту."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Сырғыту арқылы ашу."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Кескін арқылы ашу."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Бет-әлпет арқылы ашу."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Бет тану."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin арқылы ашу."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM құлпын PIN кодымен ашу"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM құлпын PUK кодымен ашу"</string>
@@ -924,7 +924,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"Зауыт тесті орындалмады."</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"ЗАУЫТ_TEСТІ әрекетінің қолдауы жүйеде/қолданбада орнатылған жинақтар үшін ғана ұсынылған."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"ЗАУЫТ_TEСТІ әрекетін жабдықтайтын жинақ табылмады."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"Қайта қосу"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"Өшіріп қосу"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" парағында былай делінген:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Жылжуды растау"</string>
@@ -1185,7 +1185,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Үнемі көрсету"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы сіздің Android OЖ-бен үйлеспейді және дұрыс жұмыс істемеуі ықтимал. Қолданбаның жаңартылған нұсқасы қолжетімді болуы мүмкін."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Үнемі көрсету"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңа нұсқасының бар-жоғын тексеру"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңарту бар-жоғын тексеру"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасы (<xliff:g id="PROCESS">%2$s</xliff:g> процесі) өзі қолданған StrictMode саясатын бұзды."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> үрдісі өздігінен күшіне енген ҚатаңРежим ережесін бұзды."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңартылуда…"</string>
@@ -1218,7 +1218,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> процесінің дамп файлы бөлісуге дайын. Бұл дамп файлында процесс кезінде пайдаланылған кез келген құпия жеке ақпарат (соның ішінде сіз енгізген деректер) болуы мүмкін екенін ескеріңіз."</string>
     <string name="sendText" msgid="493003724401350724">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Қоңырау шырылының қаттылығы"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Mультимeдиа дыбыс деңгейі"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Mультимeдианың дыбыс деңгейі"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth арқылы ойнату"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Үнсіз қоңырау әуенін орнату"</string>
     <string name="volume_call" msgid="7625321655265747433">"Сөйлесу кезіндегі дыбыс деңгейі"</string>
@@ -1228,8 +1228,8 @@
     <string name="volume_unknown" msgid="4041914008166576293">"Дыбыс қаттылығы"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth дыбысының қаттылығы"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Қоңырау әуенінің дыбыс қаттылығы"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Сөйлескендегі дыбыс деңгейі"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Mультимeдиа дыбыс деңгейі"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Сөйлесу кезіндегі дыбыс деңгейі"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Mультимeдианың дыбыс деңгейі"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1415,7 +1415,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Бұл өтініштің орындалуын қалайсыз ба?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Кіру өтініші"</string>
     <string name="allow" msgid="6195617008611933762">"Рұқсат беру"</string>
-    <string name="deny" msgid="6632259981847676572">"Бас тарту"</string>
+    <string name="deny" msgid="6632259981847676572">"Тыйым салу"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Рұқсат өтінілді"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Рұқсат \nесептік жазба үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Осы қолданбаны жұмыс профиліңізден тыс пайдаланып жатырсыз"</string>
@@ -1519,7 +1519,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB дискі"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB жады"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Өзгерту"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Деректердің пайдаланылуы туралы ескерту"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Дерек шығыны туралы ескерту"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Деректің <xliff:g id="APP">%s</xliff:g> пайдаландыңыз"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Мобильдік деректер шегіне жетті"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi деректер шегіне жеттіңіз"</string>
@@ -1636,7 +1636,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Қосылмасын"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ҚОСУЛЫ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨШІРУЛІ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметі құрылғыңызды толық басқаруына рұқсат етілсін бе?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметіне құрылғыны толық басқаруға рұқсат етілсін бе?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> қоссаңыз, құрылғыңыз деректерді шифрлау үшін экранды бекітуді пайдаланбайды."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Арнайы мүмкіндіктер бойынша көмектесетін қолданбаларға ғана құрылғыны толық басқару рұқсатын берген дұрыс."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көру және басқару"</string>
@@ -1644,7 +1644,7 @@
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Әрекеттерді көру және орындау"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ол қолданбамен немесе жабдық датчигімен істеген тапсырмаларыңызды бақылайды және қолданбаларды сіздің атыңыздан пайдаланады."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Рұқсат ету"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Қабылдамау"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Тыйым салу"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны пайдалана бастау үшін түртіңіз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"\"Арнайы мүмкіндіктер\" түймесімен қолданылатын функцияларды таңдаңыз"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Дыбыс деңгейі пернелері тіркесімімен қолданылатын функцияларды таңдаңыз"</string>
@@ -1653,7 +1653,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Дайын"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Төте жолды өшіру"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Төте жолды пайдалану"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстер инверсиясы"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Түс инверсиясы"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Түсті түзету"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Пайдаланушы дыбыс деңгейі пернелерін басып ұстап тұрды. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қосулы."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дыбыс деңгейі пернелерін басып тұрған соң, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өшірілді."</string>
@@ -1718,6 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Монарх"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Кварто"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1754,6 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Белгісіз портреттік"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Белгісіз ландшафт"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Тоқтатылды"</string>
@@ -1761,7 +1773,7 @@
     <string name="reason_unknown" msgid="5599739807581133337">"белгісіз"</string>
     <string name="reason_service_unavailable" msgid="5288405248063804713">"Принтер қызметі қосылмаған"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> қызметі орнатылды"</string>
-    <string name="print_service_installed_message" msgid="7005672469916968131">"Қосу үшін түрту"</string>
+    <string name="print_service_installed_message" msgid="7005672469916968131">"Қосу үшін түртіңіз"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Әкімшінің PIN кодын енгізіңіз"</string>
     <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN енгізу"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Дұрыс емес"</string>
@@ -1800,7 +1812,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарея жұмысының ұзақтығын арттыру үшін Батареяны үнемдеу режимі:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді не шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Батарея ұзағырақ жұмыс істеуі үшін, Батареяны үнемдеу режимі:\n\n• қараңғы тақырыпты қосады;\n•фондық жұмысты, кейбір визуалды әсерлерді және \"Ok Google\" сияқты басқа функцияларды өшіреді не шектейді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу функциясын қосу керек пе?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
@@ -1897,7 +1909,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Қолданба қолжетімді емес"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> қазір қолжетімді емес."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Қолданба Android жүйесінің ескі нұсқасына арналған және дұрыс жұмыс істемеуі мүмкін. Жаңартылған нұсқаны тексеріңіз немесе әзірлеушіге хабарласыңыз."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңа нұсқасының бар-жоғын тексеру"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңарту бар-жоғын тексеру"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сізде жаңа хабарлар бар"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Көру үшін SMS қолданбасын ашыңыз"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Кейбір функциялар істемеуі мүмкін."</string>
@@ -2034,7 +2046,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Қолданбалар тізімі"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Негізгі экран"</string>

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batterij: twee streepjes."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batterij: drie streepjes."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batterij is vol."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batterijpercentage onbekend."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Geen telefoonsignaal."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefoon: één streepje."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefoon: twee streepjes."</string>
@@ -1034,7 +1035,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Apparaatbediening"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bedieningselementen voor je gekoppelde apparaten toevoegen"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Voeg bedieningselementen voor je gekoppelde apparaten toe"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Apparaatbediening instellen"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Houd de aan/uit-knop ingedrukt voor toegang tot de bedieningselementen"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Kies de app waaraan je bedieningselementen wilt toevoegen"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (verbinding verbroken)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Kan geen verbinding maken. Probeer het nog eens."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Nieuw apparaat koppelen"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Probleem bij het lezen van je batterijmeter"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tik hier voor meer informatie"</string>
 </resources>

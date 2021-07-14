@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Να επιτρέπεται"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Δεν επιτρέπεται ο εντοπισμός σφαλμάτων USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή σε αυτήν τη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων USB. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ο ασύρματος εντοπισμός σφαλμάτων σε αυτό το δίκτυο;"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ασύρματος εντοπ. σφαλ. στο δίκτυο;"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Όνομα δικτύου (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nΔιεύθυνση Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Να επιτρέπεται πάντα σε αυτό το δίκτυο"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Να επιτρέπεται"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Δύο γραμμές μπαταρίας."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Τρεις γραμμές μπαταρίας."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Πλήρης μπαταρία."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Άγνωστο ποσοστό μπαταρίας."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Δεν υπάρχει τηλέφωνο."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Μία γραμμή τηλεφώνου."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Δύο γραμμές τηλεφώνου."</string>
@@ -600,7 +601,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Η καρφιτσωμένη εφαρμογή μπορεί να ανοίξει άλλες εφαρμογές."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Για να ξεκαρφιτσώσετε αυτήν την εφαρμογή, αγγίξτε παρατεταμένα τα κουμπιά Πίσω και Επισκόπηση."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Για να ξεκαρφιτσώσετε αυτήν την εφαρμογή, αγγίξτε παρατεταμένα τα κουμπιά Πίσω και Αρχική οθόνη."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Για να ξεκαρφιτσώσετε αυτήν την εφαρμογή, σύρετε προς τα πάνω και κρατήστε παρατεταμένα"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Για να ξεκαρφ. την εφαρμογή, σύρετε προς τα πάνω και κρατήστε"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Το κατάλαβα"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Όχι"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Η εφαρμογή καρφιτσώθηκε."</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (αποσυνδέθηκε)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Δεν ήταν δυνατή η σύνδεση. Δοκιμάστε ξανά."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Σύζευξη νέας συσκευής"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Υπάρχει κάποιο πρόβλημα με την ανάγνωση του μετρητή μπαταρίας"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Πατήστε για περισσότερες πληροφορίες."</string>
 </resources>

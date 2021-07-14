@@ -877,7 +877,7 @@ static jlong android_os_Debug_getGpuDmaBufUsageKb(JNIEnv* env, jobject clazz) {
             continue;
         }
 
-        sizeKb += importer_info->second.size;
+        sizeKb += importer_info->second.size / 1024;
     }
 
     return sizeKb;
