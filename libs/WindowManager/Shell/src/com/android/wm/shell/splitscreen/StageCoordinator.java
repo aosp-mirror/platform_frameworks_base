@@ -232,6 +232,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return result;
     }
 
+    void setSideStageOutline(boolean enable) {
+        mSideStage.enableOutline(enable);
+    }
+
     /** Starts 2 tasks in one transition. */
     void startTasks(int mainTaskId, @Nullable Bundle mainOptions, int sideTaskId,
             @Nullable Bundle sideOptions, @SplitPosition int sidePosition,

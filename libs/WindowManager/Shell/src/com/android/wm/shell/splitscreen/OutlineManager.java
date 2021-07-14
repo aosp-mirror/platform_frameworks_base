@@ -22,7 +22,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -39,8 +38,6 @@ import android.view.WindowlessWindowManager;
 
 import com.android.wm.shell.R;
 
-import java.util.function.Supplier;
-
 /**
  * Handles drawing outline of the bounds of provided root surface. The outline will be drown with
  * the consideration of display insets like status bar, navigation bar and display cutout.
@@ -48,49 +45,27 @@ import java.util.function.Supplier;
 class OutlineManager extends WindowlessWindowManager {
     private static final String WINDOW_NAME = "SplitOutlineLayer";
     private final Context mContext;
-    private final int mOutlineColor;
     private final Rect mOutlineBounds = new Rect();
     private final Rect mTmpBounds = new Rect();
-    private final Supplier<SurfaceControl> mOutlineSurfaceSupplier;
-    private final SurfaceControlViewHost mViewHost;
-    private final SurfaceControl mLeash;
+    private SurfaceControlViewHost mViewHost;
+    private SurfaceControl mHostLeash;
+    private SurfaceControl mLeash;
+    private int mOutlineColor;
 
-    /**
-     * Constructs {@link #OutlineManager} with indicated outline color for the provided root
-     * surface.
-     */
-    OutlineManager(Context context, Configuration configuration,
-            Supplier<SurfaceControl> outlineSurfaceSupplier, int color) {
+    OutlineManager(Context context, Configuration configuration) {
         super(configuration, null /* rootSurface */, null /* hostInputToken */);
         mContext = context.createWindowContext(context.getDisplay(), TYPE_APPLICATION_OVERLAY,
                 null /* options */);
-        mOutlineSurfaceSupplier = outlineSurfaceSupplier;
-        mOutlineColor = color;
-
-        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
-        final OutlineRoot rootView = (OutlineRoot) LayoutInflater.from(mContext)
-                .inflate(R.layout.split_outline, null);
-        rootView.updateOutlineBounds(mOutlineBounds, mOutlineColor);
-
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                0 /* width */, 0 /* height */, TYPE_APPLICATION_OVERLAY,
-                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
-        lp.token = new Binder();
-        lp.setTitle(WINDOW_NAME);
-        lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
-        // TODO(b/189839391): Set INPUT_FEATURE_NO_INPUT_CHANNEL after WM supports
-        //  TRUSTED_OVERLAY for windowless window without input channel.
-        mViewHost.setView(rootView, lp);
-
-        mLeash = getSurfaceControl(mViewHost.getWindowToken());
     }
 
     @Override
     protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
-        b.setParent(mOutlineSurfaceSupplier.get());
+        b.setParent(mHostLeash);
     }
 
-    boolean updateOutlineBounds(Rect rootBounds) {
+    boolean drawOutlineBounds(Rect rootBounds) {
+        if (mLeash == null || mViewHost == null) return false;
+
         computeOutlineBounds(mContext, rootBounds, mTmpBounds);
         if (mOutlineBounds.equals(mTmpBounds)) {
             return false;
@@ -107,9 +82,32 @@ class OutlineManager extends WindowlessWindowManager {
         return true;
     }
 
-    @Nullable
-    SurfaceControl getLeash() {
-        return mLeash;
+    void inflate(SurfaceControl.Transaction t, SurfaceControl hostLeash, int color) {
+        if (mLeash != null || mViewHost != null) return;
+
+        mHostLeash = hostLeash;
+        mOutlineColor = color;
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+        final OutlineRoot rootView = (OutlineRoot) LayoutInflater.from(mContext)
+                .inflate(R.layout.split_outline, null);
+
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                0 /* width */, 0 /* height */, TYPE_APPLICATION_OVERLAY,
+                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
+        lp.token = new Binder();
+        lp.setTitle(WINDOW_NAME);
+        lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
+        // TODO(b/189839391): Set INPUT_FEATURE_NO_INPUT_CHANNEL after WM supports
+        //  TRUSTED_OVERLAY for windowless window without input channel.
+        mViewHost.setView(rootView, lp);
+        mLeash = getSurfaceControl(mViewHost.getWindowToken());
+        t.setLayer(mLeash, Integer.MAX_VALUE);
+    }
+
+    void release() {
+        if (mViewHost != null) {
+            mViewHost.release();
+        }
     }
 
     private static void computeOutlineBounds(Context context, Rect rootBounds, Rect outBounds) {
