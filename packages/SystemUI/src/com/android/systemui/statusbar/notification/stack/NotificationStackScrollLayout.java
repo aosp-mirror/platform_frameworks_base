@@ -89,7 +89,6 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
@@ -155,7 +154,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * gap is drawn between them). In this case we don't want to round their corners.
      */
     private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
-    private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
+    private boolean mKeyguardBypassEnabled;
 
     private ExpandHelper mExpandHelper;
     private NotificationSwipeHelper mSwipeHelper;
@@ -212,7 +211,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     private GroupMembershipManager mGroupMembershipManager;
     private GroupExpansionManager mGroupExpansionManager;
-    private NotificationActivityStarter mNotificationActivityStarter;
     private HashSet<ExpandableView> mChildrenToAddAnimated = new HashSet<>();
     private ArrayList<View> mAddedHeadsUpChildren = new ArrayList<>();
     private ArrayList<ExpandableView> mChildrenToRemoveAnimated = new ArrayList<>();
@@ -564,6 +562,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     };
 
+    @Nullable
+    private OnClickListener mManageButtonClickListener;
+
     @Inject
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
@@ -650,12 +651,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
+     * Sets whether keyguard bypass is enabled. If true, this layout will be rendered in bypass
+     * mode when it is on the keyguard.
+     */
+    public void setKeyguardBypassEnabled(boolean isEnabled) {
+        mKeyguardBypassEnabled = isEnabled;
+    }
+
+    /**
      * @return the height at which we will wake up when pulsing
      */
     public float getWakeUpHeight() {
         ExpandableView firstChild = getFirstChildWithBackground();
         if (firstChild != null) {
-            if (mKeyguardBypassEnabledProvider.getBypassEnabled()) {
+            if (mKeyguardBypassEnabled) {
                 return firstChild.getHeadsUpHeightWithoutHeader();
             } else {
                 return firstChild.getCollapsedHeight();
@@ -783,7 +792,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
         boolean shouldDrawBackground;
-        if (mKeyguardBypassEnabledProvider.getBypassEnabled() && onKeyguard()) {
+        if (mKeyguardBypassEnabled && onKeyguard()) {
             shouldDrawBackground = isPulseExpanding();
         } else {
             shouldDrawBackground = !mAmbientState.isDozing() || anySectionHasVisibleChild;
@@ -898,15 +907,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void reinitView() {
-        initView(getContext(), mKeyguardBypassEnabledProvider, mSwipeHelper);
+        initView(getContext(), mSwipeHelper);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void initView(Context context,
-            KeyguardBypassEnabledProvider keyguardBypassEnabledProvider,
-            NotificationSwipeHelper swipeHelper) {
+    void initView(Context context, NotificationSwipeHelper swipeHelper) {
         mScroller = new OverScroller(getContext());
-        mKeyguardBypassEnabledProvider = keyguardBypassEnabledProvider;
         mSwipeHelper = swipeHelper;
 
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
@@ -1346,7 +1352,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void notifyAppearChangedListeners() {
         float appear;
         float expandAmount;
-        if (mKeyguardBypassEnabledProvider.getBypassEnabled() && onKeyguard()) {
+        if (mKeyguardBypassEnabled && onKeyguard()) {
             appear = calculateAppearFractionBypass();
             expandAmount = getPulseHeight();
         } else {
@@ -2384,8 +2390,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             minTopPosition = firstVisibleSection.getBounds().top;
         }
         boolean shiftPulsingWithFirst = mNumHeadsUp <= 1
-                && (mAmbientState.isDozing()
-                        || (mKeyguardBypassEnabledProvider.getBypassEnabled() && onKeyguard));
+                && (mAmbientState.isDozing() || (mKeyguardBypassEnabled && onKeyguard));
         for (NotificationSection section : mSections) {
             int minBottomPosition = minTopPosition;
             if (section == lastSection) {
@@ -2528,7 +2533,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             mTopPaddingOverflow = 0;
         }
-        setTopPadding(topPadding, animate && !mKeyguardBypassEnabledProvider.getBypassEnabled());
+        setTopPadding(topPadding, animate && !mKeyguardBypassEnabled);
         setExpandedHeight(mExpandedHeight);
     }
 
@@ -3092,7 +3097,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             boolean performDisappearAnimation = !mIsExpanded
                     // Only animate if we still have pinned heads up, otherwise we just have the
                     // regular collapse animation of the lock screen
-                    || (mKeyguardBypassEnabledProvider.getBypassEnabled() && onKeyguard()
+                    || (mKeyguardBypassEnabled && onKeyguard()
                             && mInHeadsUpPinnedMode);
             if (performDisappearAnimation && !isHeadsUp) {
                 type = row.wasJustClicked()
@@ -4315,7 +4320,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // Since we are clipping to the outline we need to make sure that the shadows aren't
         // clipped when pulsing
         float ownTranslationZ = 0;
-        if (mKeyguardBypassEnabledProvider.getBypassEnabled() && mAmbientState.isHiddenAtAll()) {
+        if (mKeyguardBypassEnabled && mAmbientState.isHiddenAtAll()) {
             ExpandableView firstChildNotGone = getFirstChildNotGone();
             if (firstChildNotGone != null && firstChildNotGone.showingPulsing()) {
                 ownTranslationZ = firstChildNotGone.getTranslationZ();
@@ -4357,6 +4362,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return -1;
     }
 
+    /**
+     * Returns whether or not a History button is shown in the footer. If there is no footer, then
+     * this will return false.
+     **/
+    public boolean isHistoryShown() {
+        return mFooterView != null && mFooterView.isHistoryShown();
+    }
+
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
@@ -4366,6 +4379,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mFooterView = footerView;
         addView(mFooterView, index);
+        if (mManageButtonClickListener != null) {
+            mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5069,9 +5085,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    public void setNotificationActivityStarter(
-            NotificationActivityStarter notificationActivityStarter) {
-        mNotificationActivityStarter = notificationActivityStarter;
+    /** Register a {@link View.OnClickListener} to be invoked when the Manage button is clicked. */
+    public void setManageButtonClickListener(@Nullable OnClickListener listener) {
+        mManageButtonClickListener = listener;
+        if (mFooterView != null) {
+            mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+        }
     }
 
     @VisibleForTesting
@@ -5084,9 +5103,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mFooterDismissListener.onDismiss();
             }
             clearNotifications(ROWS_ALL, true /* closeShade */);
-        });
-        footerView.setManageButtonClickListener(v -> {
-            mNotificationActivityStarter.startHistoryIntent(v, mFooterView.isHistoryShown());
         });
         setFooterView(footerView);
     }
@@ -5138,7 +5154,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public float setPulseHeight(float height) {
         mAmbientState.setPulseHeight(height);
-        if (mKeyguardBypassEnabledProvider.getBypassEnabled()) {
+        if (mKeyguardBypassEnabled) {
             notifyAppearChangedListeners();
         }
         requestChildrenUpdate();
@@ -6068,10 +6084,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public static final int ROWS_HIGH_PRIORITY = 1;
     /** Only rows where entry.isHighPriority() is false. */
     public static final int ROWS_GENTLE = 2;
-
-    interface KeyguardBypassEnabledProvider {
-        boolean getBypassEnabled();
-    }
 
     interface DismissListener {
         void onDismiss(@SelectedRows int selectedRows);

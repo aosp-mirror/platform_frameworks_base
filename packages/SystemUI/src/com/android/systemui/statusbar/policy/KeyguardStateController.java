@@ -245,5 +245,11 @@ public interface KeyguardStateController extends CallbackController<Callback> {
          * animation.
          */
         default void onKeyguardDismissAmountChanged() {}
+
+        /**
+         * Triggered when face auth becomes available or unavailable. Value should be queried with
+         * {@link KeyguardStateController#isFaceAuthEnabled()}.
+         */
+        default void onFaceAuthEnabledChanged() {}
     }
 }

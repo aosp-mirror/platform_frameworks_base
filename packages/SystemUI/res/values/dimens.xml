@@ -62,7 +62,9 @@
     <item name="navigation_luminance_change_threshold" type="dimen" format="float">0.05</item>
 
     <dimen name="floating_rotation_button_diameter">40dp</dimen>
-    <dimen name="floating_rotation_button_min_margin">4dp</dimen>
+    <dimen name="floating_rotation_button_min_margin">20dp</dimen>
+    <dimen name="floating_rotation_button_taskbar_left_margin">20dp</dimen>
+    <dimen name="floating_rotation_button_taskbar_bottom_margin">10dp</dimen>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
@@ -402,8 +404,11 @@
     <dimen name="status_bar_header_padding_bottom">48dp</dimen>
 
     <!-- The height of the container that holds the battery and time in the quick settings header.
+    Preferred over using "@*android:dimen/quick_qs_offset_height" as system icons are not always
+    present in quick settings (e.g. in split shade) and it's useful to be able to override this
+    value in such cases.
          -->
-    <dimen name="qs_header_system_icons_area_height">48dp</dimen>
+    <dimen name="qs_header_system_icons_area_height">@*android:dimen/quick_qs_offset_height</dimen>
 
     <!-- How far the quick-quick settings panel extends below the status bar -->
     <dimen name="qs_quick_header_panel_height">128dp</dimen>
@@ -454,6 +459,10 @@
 
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
+
+    <!-- Height of status bar in split shade mode - visible only on large screens -->
+    <dimen name="split_shade_header_height">@*android:dimen/quick_qs_offset_height</dimen>
+    <dimen name="split_shade_header_min_height">@dimen/qs_header_row_min_height</dimen>
 
     <!-- The top margin of the panel that holds the list of notifications. -->
     <dimen name="notification_panel_margin_top">0dp</dimen>
@@ -623,6 +632,7 @@
     <dimen name="qs_footer_icon_size">20dp</dimen>
     <dimen name="qs_header_top_padding">15dp</dimen>
     <dimen name="qs_header_bottom_padding">14dp</dimen>
+    <dimen name="qs_header_row_min_height">48dp</dimen>
 
     <dimen name="qs_footer_padding">20dp</dimen>
     <dimen name="qs_security_footer_height">88dp</dimen>
@@ -1479,6 +1489,8 @@
     <dimen name="content_text_size_for_large">14sp</dimen>
     <dimen name="below_name_text_padding">16dp</dimen>
     <dimen name="above_notification_text_padding">22dp</dimen>
+    <dimen name="before_messages_count_padding">40dp</dimen>
+    <dimen name="before_predefined_icon_padding">30dp</dimen>
     <dimen name="regular_predefined_icon">18dp</dimen>
     <dimen name="larger_predefined_icon">24dp</dimen>
     <dimen name="largest_predefined_icon">32dp</dimen>

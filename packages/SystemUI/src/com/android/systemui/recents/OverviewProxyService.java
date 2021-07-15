@@ -110,6 +110,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -172,55 +173,34 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
         @Override
         public void startScreenPinning(int taskId) {
-            if (!verifyCaller("startScreenPinning")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> {
+            verifyCallerAndClearCallingIdentityPostMain("startScreenPinning", () ->
                     mStatusBarOptionalLazy.ifPresent(
                             statusBarLazy -> statusBarLazy.get().showScreenPinningRequest(taskId,
-                                    false /* allowCancel */));
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+                                    false /* allowCancel */)));
         }
 
         @Override
         public void stopScreenPinning() {
-            if (!verifyCaller("stopScreenPinning")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> {
-                    try {
-                        ActivityTaskManager.getService().stopSystemLockTaskMode();
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to stop screen pinning");
-                    }
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("stopScreenPinning", () -> {
+                try {
+                    ActivityTaskManager.getService().stopSystemLockTaskMode();
+                } catch (RemoteException e) {
+                    Log.e(TAG_OPS, "Failed to stop screen pinning");
+                }
+            });
         }
 
         // TODO: change the method signature to use (boolean inputFocusTransferStarted)
         @Override
         public void onStatusBarMotionEvent(MotionEvent event) {
-            if (!verifyCaller("onStatusBarMotionEvent")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
+            verifyCallerAndClearCallingIdentity("onStatusBarMotionEvent", () -> {
                 // TODO move this logic to message queue
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
                     StatusBar statusBar = statusBarLazy.get();
                     if (event.getActionMasked() == ACTION_DOWN) {
                         statusBar.getPanelController().startExpandLatencyTracking();
                     }
-                    mHandler.post(()-> {
+                    mHandler.post(() -> {
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
                             mInputFocusTransferStarted = true;
@@ -232,50 +212,38 @@ public class OverviewProxyService extends CurrentUserTracker implements
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
                             mInputFocusTransferStarted = false;
+                            float velocity = (event.getY() - mInputFocusTransferStartY)
+                                    / (event.getEventTime() - mInputFocusTransferStartMillis);
                             statusBar.onInputFocusTransfer(mInputFocusTransferStarted,
                                     action == ACTION_CANCEL,
-                                    (event.getY() - mInputFocusTransferStartY)
-                                    / (event.getEventTime() - mInputFocusTransferStartMillis));
+                                    velocity);
                         }
                         event.recycle();
                     });
                 });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            });
         }
 
         @Override
         public void onBackPressed() throws RemoteException {
-            if (!verifyCaller("onBackPressed")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> {
-                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-                    sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+            verifyCallerAndClearCallingIdentityPostMain("onBackPressed", () -> {
+                sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
 
-                    notifyBackAction(true, -1, -1, true, false);
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+                notifyBackAction(true, -1, -1, true, false);
+            });
         }
 
         @Override
         public void setHomeRotationEnabled(boolean enabled) {
-            if (!verifyCaller("setHomeRotationEnabled")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> {
-                    mHandler.post(() -> notifyHomeRotationEnabled(enabled));
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("setHomeRotationEnabled", () ->
+                    mHandler.post(() -> notifyHomeRotationEnabled(enabled)));
+        }
+
+        @Override
+        public void notifyTaskbarStatus(boolean visible, boolean stashed) {
+            verifyCallerAndClearCallingIdentityPostMain("notifyTaskbarStatus", () ->
+                    onTaskbarStatusUpdated(visible, stashed));
         }
 
         private boolean sendEvent(int action, int code) {
@@ -292,124 +260,74 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void onOverviewShown(boolean fromHome) {
-            if (!verifyCaller("onOverviewShown")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> {
-                    for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-                        mConnectionCallbacks.get(i).onOverviewShown(fromHome);
-                    }
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("onOverviewShown", () -> {
+                for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+                    mConnectionCallbacks.get(i).onOverviewShown(fromHome);
+                }
+            });
         }
 
         @Override
         public Rect getNonMinimizedSplitScreenSecondaryBounds() {
-            if (!verifyCaller("getNonMinimizedSplitScreenSecondaryBounds")) {
-                return null;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                return mLegacySplitScreenOptional.map(splitScreen ->
-                        splitScreen.getDividerView().getNonMinimizedSplitScreenSecondaryBounds())
-                        .orElse(null);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            return verifyCallerAndClearCallingIdentity(
+                    "getNonMinimizedSplitScreenSecondaryBounds",
+                    () -> mLegacySplitScreenOptional.map(splitScreen ->
+                            splitScreen
+                                    .getDividerView()
+                                    .getNonMinimizedSplitScreenSecondaryBounds())
+                            .orElse(null)
+            );
         }
 
         @Override
         public void setNavBarButtonAlpha(float alpha, boolean animate) {
-            if (!verifyCaller("setNavBarButtonAlpha")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mNavBarButtonAlpha = alpha;
-                mHandler.post(() -> notifyNavBarButtonAlphaChanged(alpha, animate));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("setNavBarButtonAlpha", () ->
+                    notifyNavBarButtonAlphaChanged(alpha, animate));
         }
 
         @Override
         public void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {
-            if (!verifyCaller("onAssistantProgress")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> notifyAssistantProgress(progress));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("onAssistantProgress", () ->
+                    notifyAssistantProgress(progress));
         }
 
         @Override
         public void onAssistantGestureCompletion(float velocity) {
-            if (!verifyCaller("onAssistantGestureCompletion")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> notifyAssistantGestureCompletion(velocity));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("onAssistantGestureCompletion", () ->
+                    notifyAssistantGestureCompletion(velocity));
         }
 
         @Override
         public void startAssistant(Bundle bundle) {
-            if (!verifyCaller("startAssistant")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> notifyStartAssistant(bundle));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("startAssistant", () ->
+                    notifyStartAssistant(bundle));
         }
 
         @Override
         public void notifyAccessibilityButtonClicked(int displayId) {
-            if (!verifyCaller("notifyAccessibilityButtonClicked")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                AccessibilityManager.getInstance(mContext)
-                        .notifyAccessibilityButtonClicked(displayId);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonClicked", () ->
+                    AccessibilityManager.getInstance(mContext)
+                            .notifyAccessibilityButtonClicked(displayId));
         }
 
         @Override
         public void notifyAccessibilityButtonLongClicked() {
-            if (!verifyCaller("notifyAccessibilityButtonLongClicked")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final Intent intent =
-                        new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-                final String chooserClassName = AccessibilityButtonChooserActivity.class.getName();
-                intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonLongClicked",
+                    () -> {
+                        final Intent intent =
+                                new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
+                        final String chooserClassName = AccessibilityButtonChooserActivity
+                                .class.getName();
+                        intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
+                        intent.addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    });
         }
 
         @Override
         public void handleImageAsScreenshot(Bitmap screenImage, Rect locationInScreen,
-                Insets visibleInsets, int taskId) {
+                                            Insets visibleInsets, int taskId) {
             // Deprecated
         }
 
@@ -421,43 +339,22 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void notifySwipeToHomeFinished() {
-            if (!verifyCaller("notifySwipeToHomeFinished")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mPipOptional.ifPresent(
-                        pip -> pip.setPinnedStackAnimationType(
-                                PipAnimationController.ANIM_TYPE_ALPHA));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentity("notifySwipeToHomeFinished", () ->
+                    mPipOptional.ifPresent(
+                            pip -> pip.setPinnedStackAnimationType(
+                                    PipAnimationController.ANIM_TYPE_ALPHA)));
         }
 
         @Override
         public void notifySwipeUpGestureStarted() {
-            if (!verifyCaller("notifySwipeUpGestureStarted")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> notifySwipeUpGestureStartedInternal());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("notifySwipeUpGestureStarted", () ->
+                    notifySwipeUpGestureStartedInternal());
         }
 
         @Override
         public void notifyPrioritizedRotation(@Surface.Rotation int rotation) {
-            if (!verifyCaller("notifyPrioritizedRotation")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(() -> notifyPrioritizedRotationInternal(rotation));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentityPostMain("notifyPrioritizedRotation", () ->
+                    notifyPrioritizedRotationInternal(rotation));
         }
 
         @Override
@@ -477,15 +374,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void expandNotificationPanel() {
-            if (!verifyCaller("expandNotificationPanel")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            verifyCallerAndClearCallingIdentity("expandNotificationPanel",
+                    () -> mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
         }
 
         private boolean verifyCaller(String reason) {
@@ -496,6 +386,29 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 return false;
             }
             return true;
+        }
+
+        private <T> T verifyCallerAndClearCallingIdentity(String reason, Supplier<T> supplier) {
+            if (!verifyCaller(reason)) {
+                return null;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return supplier.get();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        private void verifyCallerAndClearCallingIdentity(String reason, Runnable runnable) {
+            verifyCallerAndClearCallingIdentity(reason, () -> {
+                runnable.run();
+                return null;
+            });
+        }
+
+        private void verifyCallerAndClearCallingIdentityPostMain(String reason, Runnable runnable) {
+            verifyCallerAndClearCallingIdentity(reason, () -> mHandler.post(runnable));
         }
     };
 
@@ -883,6 +796,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    private void onTaskbarStatusUpdated(boolean visible, boolean stashed) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onTaskbarStatusUpdated(visible, stashed);
+        }
+    }
+
     private void notifyConnectionChanged() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
@@ -1049,6 +968,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         /** Notify changes in the nav bar button alpha */
         default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
         default void onHomeRotationEnabled(boolean enabled) {}
+        default void onTaskbarStatusUpdated(boolean visible, boolean stashed) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
