@@ -17,6 +17,7 @@
 package com.android.systemui.sensorprivacy
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.Intent.EXTRA_PACKAGE_NAME
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -38,6 +39,10 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE
+import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL
+import com.android.internal.util.FrameworkStatsLog.write
 
 /**
  * Dialog to be shown on top of apps that are attempting to use a sensor (e.g. microphone) which is
@@ -174,7 +179,7 @@ class SensorUseStartedActivity @Inject constructor(
     override fun onStart() {
         super.onStart()
 
-        sensorPrivacyController.suppressSensorPrivacyReminders(sensorUsePackageName, true)
+        setSuppressed(true)
         unsuppressImmediately = false
     }
 
@@ -185,16 +190,25 @@ class SensorUseStartedActivity @Inject constructor(
                     keyguardDismissUtil.executeWhenUnlocked({
                         bgHandler.postDelayed({
                             disableSensorPrivacy()
+                            write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                                    PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE,
+                                    sensorUsePackageName)
                         }, UNLOCK_DELAY_MILLIS)
 
                         false
                     }, false, true)
                 } else {
                     disableSensorPrivacy()
+                    write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                            PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE,
+                            sensorUsePackageName)
                 }
             }
             BUTTON_NEGATIVE -> {
                 unsuppressImmediately = false
+                write(PRIVACY_TOGGLE_DIALOG_INTERACTION,
+                        PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL,
+                        sensorUsePackageName)
             }
         }
 
@@ -205,12 +219,10 @@ class SensorUseStartedActivity @Inject constructor(
         super.onStop()
 
         if (unsuppressImmediately) {
-            sensorPrivacyController
-                    .suppressSensorPrivacyReminders(sensorUsePackageName, false)
+            setSuppressed(false)
         } else {
             bgHandler.postDelayed({
-                sensorPrivacyController
-                        .suppressSensorPrivacyReminders(sensorUsePackageName, false)
+                setSuppressed(false)
             }, SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS)
         }
     }
@@ -224,6 +236,11 @@ class SensorUseStartedActivity @Inject constructor(
         // do not allow backing out
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        setIntent(intent)
+        recreate()
+    }
+
     private fun disableSensorPrivacy() {
         if (sensor == ALL_SENSORS) {
             sensorPrivacyController.setSensorBlocked(DIALOG, MICROPHONE, false)
@@ -233,5 +250,17 @@ class SensorUseStartedActivity @Inject constructor(
         }
         unsuppressImmediately = true
         setResult(RESULT_OK)
+    }
+
+    private fun setSuppressed(suppressed: Boolean) {
+        if (sensor == ALL_SENSORS) {
+            sensorPrivacyController
+                    .suppressSensorPrivacyReminders(MICROPHONE, suppressed)
+            sensorPrivacyController
+                    .suppressSensorPrivacyReminders(CAMERA, suppressed)
+        } else {
+            sensorPrivacyController
+                    .suppressSensorPrivacyReminders(sensor, suppressed)
+        }
     }
 }

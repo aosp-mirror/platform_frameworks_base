@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics;
 
-import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
+import static android.hardware.fingerprint.IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -26,7 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,8 +45,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -78,6 +75,8 @@ import com.android.systemui.util.concurrency.Execution;
 import java.util.Optional;
 
 import javax.inject.Inject;
+
+import kotlin.Unit;
 
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
@@ -118,6 +117,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Nullable private final UdfpsHbmProvider mHbmProvider;
+    @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -156,16 +156,8 @@ public class UdfpsController implements DozeReceiver {
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .build();
 
-    public static final VibrationEffect EFFECT_TICK =
-            VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-    private static final VibrationEffect EFFECT_TEXTURE_TICK =
-            VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
-    @VisibleForTesting
-    static final VibrationEffect EFFECT_CLICK = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-    private static final VibrationEffect EFFECT_HEAVY =
-            VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
-    private static final VibrationEffect EFFECT_DOUBLE_CLICK =
-            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+    public static final VibrationEffect EFFECT_CLICK =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
     private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
@@ -314,8 +306,10 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mServerRequest != null
+                    && mServerRequest.mRequestReason != REASON_AUTH_FPM_KEYGUARD
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
+                        + mServerRequest.mRequestReason);
                 mServerRequest.onUserCanceled();
                 mServerRequest = null;
                 updateOverlay();
@@ -431,7 +425,6 @@ public class UdfpsController implements DozeReceiver {
                             mTouchLogTime = SystemClock.elapsedRealtime();
                             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                                     PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-                            playStartHaptic();
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -511,6 +504,10 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
+        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
+            onOrientationChanged();
+            return Unit.INSTANCE;
+        });
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -542,18 +539,7 @@ public class UdfpsController implements DozeReceiver {
     @VisibleForTesting
     public void playStartHaptic() {
         if (mVibrator != null) {
-            final ContentResolver contentResolver =
-                    mContext.getContentResolver();
-            // TODO: these settings checks should eventually be removed after ux testing
-            //  (b/185124905)
-            int startEnabled = Settings.Global.getInt(contentResolver,
-                    "udfps_start", 1);
-            if (startEnabled > 0) {
-                String startEffectSetting = Settings.Global.getString(
-                        contentResolver, "udfps_start_type");
-                mVibrator.vibrate(getVibration(startEffectSetting,
-                        EFFECT_CLICK), VIBRATION_SONIFICATION_ATTRIBUTES);
-            }
+            mVibrator.vibrate(EFFECT_CLICK, VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
 
@@ -626,9 +612,12 @@ public class UdfpsController implements DozeReceiver {
         // Gets the size based on the current rotation of the display.
         mContext.getDisplay().getRealSize(p);
 
-        // Transform dimensions if the device is in landscape mode.
+        // Transform dimensions if the device is in landscape mode
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
+                if (animation instanceof UdfpsKeyguardViewController) {
+                    break;
+                }
                 mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
                         - paddingX;
                 mCoreLayoutParams.y = p.y - mSensorProps.sensorLocationX - mSensorProps.sensorRadius
@@ -636,6 +625,9 @@ public class UdfpsController implements DozeReceiver {
                 break;
 
             case Surface.ROTATION_270:
+                if (animation instanceof UdfpsKeyguardViewController) {
+                    break;
+                }
                 mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
                         - paddingX;
                 mCoreLayoutParams.y = mSensorProps.sensorLocationX - mSensorProps.sensorRadius
@@ -644,13 +636,14 @@ public class UdfpsController implements DozeReceiver {
 
             default:
                 // Do nothing to stay in portrait mode.
+                // Keyguard is always in portrait mode.
         }
         // avoid announcing window title
         mCoreLayoutParams.accessibilityTitle = " ";
         return mCoreLayoutParams;
     }
 
-    void onOrientationChanged() {
+    private void onOrientationChanged() {
         // When the configuration changes it's almost always necessary to destroy and re-create
         // the overlay's window to pass it the new LayoutParams.
         // Hiding the overlay will destroy its window. It's safe to hide the overlay regardless
@@ -668,6 +661,7 @@ public class UdfpsController implements DozeReceiver {
         if (mView == null) {
             try {
                 Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
+
                 mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
                 mOnFingerDown = false;
                 mView.setSensorProperties(mSensorProps);
@@ -675,11 +669,13 @@ public class UdfpsController implements DozeReceiver {
                 UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
                 animation.init();
                 mView.setAnimationViewController(animation);
+                mOrientationListener.enable();
 
                 // This view overlaps the sensor area, so prevent it from being selectable
                 // during a11y.
                 if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING
+                        || reason == IUdfpsOverlayController.REASON_AUTH_BP) {
                     mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }
 
@@ -768,6 +764,8 @@ public class UdfpsController implements DozeReceiver {
         } else {
             Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
         }
+
+        mOrientationListener.disable();
     }
 
     /**
@@ -822,11 +820,18 @@ public class UdfpsController implements DozeReceiver {
         mIsAodInterruptActive = false;
     }
 
+    public boolean isFingerDown() {
+        return mOnFingerDown;
+    }
+
     private void onFingerDown(int x, int y, float minor, float major) {
         mExecution.assertIsMainThread();
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerDown");
             return;
+        }
+        if (!mOnFingerDown) {
+            playStartHaptic();
         }
         mOnFingerDown = true;
         mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
@@ -852,38 +857,6 @@ public class UdfpsController implements DozeReceiver {
         mOnFingerDown = false;
         if (mView.isIlluminationRequested()) {
             mView.stopIllumination();
-        }
-    }
-
-    /**
-     * get vibration to play given string
-     * used for testing purposes (b/185124905)
-     */
-    public static VibrationEffect getVibration(String effect, VibrationEffect defaultEffect) {
-        if (TextUtils.isEmpty(effect)) {
-            return defaultEffect;
-        }
-
-        switch (effect.toLowerCase()) {
-            case "click":
-                return EFFECT_CLICK;
-            case "heavy":
-                return EFFECT_HEAVY;
-            case "texture_tick":
-                return EFFECT_TEXTURE_TICK;
-            case "tick":
-                return EFFECT_TICK;
-            case "double_tap":
-                return EFFECT_DOUBLE_CLICK;
-            default:
-                try {
-                    int primitive = Integer.parseInt(effect);
-                    if (primitive <= PRIMITIVE_LOW_TICK && primitive > -1) {
-                        return VibrationEffect.startComposition().addPrimitive(primitive).compose();
-                    }
-                } catch (NumberFormatException e) {
-                }
-                return defaultEffect;
         }
     }
 

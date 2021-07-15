@@ -54,6 +54,12 @@ public class AppSearchConfigTest {
                 AppSearchConfig.DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES);
         assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentCount()).isEqualTo(
                 AppSearchConfig.DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT);
+        assertThat(appSearchConfig.getCachedBytesOptimizeThreshold()).isEqualTo(
+                AppSearchConfig.DEFAULT_BYTES_OPTIMIZE_THRESHOLD);
+        assertThat(appSearchConfig.getCachedTimeOptimizeThresholdMs()).isEqualTo(
+                AppSearchConfig.DEFAULT_TIME_OPTIMIZE_THRESHOLD_MILLIS);
+        assertThat(appSearchConfig.getCachedDocCountOptimizeThreshold()).isEqualTo(
+                AppSearchConfig.DEFAULT_DOC_COUNT_OPTIMIZE_THRESHOLD);
     }
 
     @Test
@@ -163,10 +169,8 @@ public class AppSearchConfigTest {
 
     /**
      * Tests if we fall back to {@link AppSearchConfig#DEFAULT_SAMPLING_INTERVAL} if both default
-     * sampling
-     * interval and custom value are not set in DeviceConfig, and there is some other sampling
-     * interval
-     * set.
+     * sampling interval and custom value are not set in DeviceConfig, and there is some other
+     * sampling interval set.
      */
     @Test
     public void testFallbackToDefaultSamplingValue_useHardCodedDefault() {
@@ -269,7 +273,7 @@ public class AppSearchConfigTest {
     }
 
     @Test
-    public void testCustomizedValue() {
+    public void testCustomizedValue_maxDocument() {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
                 AppSearchConfig.KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES,
                 Integer.toString(2001),
@@ -282,6 +286,64 @@ public class AppSearchConfigTest {
         AppSearchConfig appSearchConfig = AppSearchConfig.create(DIRECT_EXECUTOR);
         assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentSizeBytes()).isEqualTo(2001);
         assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentCount()).isEqualTo(2002);
+    }
+
+    @Test
+    public void testCustomizedValue_optimizeThreshold() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_BYTES_OPTIMIZE_THRESHOLD,
+                Integer.toString(147147),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS,
+                Integer.toString(258258),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_DOC_COUNT_OPTIMIZE_THRESHOLD,
+                Integer.toString(369369),
+                false);
+
+        AppSearchConfig appSearchConfig = AppSearchConfig.create(DIRECT_EXECUTOR);
+
+        assertThat(appSearchConfig.getCachedBytesOptimizeThreshold()).isEqualTo(147147);
+        assertThat(appSearchConfig.getCachedTimeOptimizeThresholdMs()).isEqualTo(258258);
+        assertThat(appSearchConfig.getCachedDocCountOptimizeThreshold()).isEqualTo(369369);
+    }
+
+    @Test
+    public void testCustomizedValueOverride_optimizeThreshold() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_BYTES_OPTIMIZE_THRESHOLD,
+                Integer.toString(147147),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS,
+                Integer.toString(258258),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_DOC_COUNT_OPTIMIZE_THRESHOLD,
+                Integer.toString(369369),
+                false);
+
+        AppSearchConfig appSearchConfig = AppSearchConfig.create(DIRECT_EXECUTOR);
+
+        // Override
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_BYTES_OPTIMIZE_THRESHOLD,
+                Integer.toString(741741),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS,
+                Integer.toString(852852),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_DOC_COUNT_OPTIMIZE_THRESHOLD,
+                Integer.toString(963963),
+                false);
+
+        assertThat(appSearchConfig.getCachedBytesOptimizeThreshold()).isEqualTo(741741);
+        assertThat(appSearchConfig.getCachedTimeOptimizeThresholdMs()).isEqualTo(852852);
+        assertThat(appSearchConfig.getCachedDocCountOptimizeThreshold()).isEqualTo(963963);
     }
 
     @Test
@@ -302,5 +364,14 @@ public class AppSearchConfigTest {
         Assert.assertThrows("Trying to use a closed AppSearchConfig instance.",
                 IllegalStateException.class,
                 () -> appSearchConfig.getCachedSamplingIntervalForPutDocumentStats());
+        Assert.assertThrows("Trying to use a closed AppSearchConfig instance.",
+                IllegalStateException.class,
+                () -> appSearchConfig.getCachedBytesOptimizeThreshold());
+        Assert.assertThrows("Trying to use a closed AppSearchConfig instance.",
+                IllegalStateException.class,
+                () -> appSearchConfig.getCachedTimeOptimizeThresholdMs());
+        Assert.assertThrows("Trying to use a closed AppSearchConfig instance.",
+                IllegalStateException.class,
+                () -> appSearchConfig.getCachedDocCountOptimizeThreshold());
     }
 }

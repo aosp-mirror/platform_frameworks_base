@@ -87,7 +87,7 @@ public class KeyguardBouncer {
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardViewController != null) {
             mKeyguardViewController.resetSecurityContainer();
-            for (KeyguardResetCallback callback : mResetCallbacks) {
+            for (KeyguardResetCallback callback : new ArrayList<>(mResetCallbacks)) {
                 callback.onKeyguardReset();
             }
         }

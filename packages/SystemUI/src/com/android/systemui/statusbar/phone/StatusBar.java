@@ -55,6 +55,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.TaskInfo;
 import android.app.UiModeManager;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
@@ -247,6 +248,8 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
+import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -268,7 +271,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener,
         LifecycleOwner, BatteryController.BatteryStateChangeCallback,
-        ActivityLaunchAnimator.KeyguardHandler {
+        ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -685,9 +688,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             new FalsingManager.FalsingBeliefListener() {
                 @Override
                 public void onFalse() {
-                    // Hides quick settings.
-                    mNotificationPanelViewController.resetViews(true);
-                    // Hides bouncer and quick-quick settings.
+                    // Hides quick settings, bouncer, and quick-quick settings.
                     mStatusBarKeyguardViewManager.reset(true);
                 }
             };
@@ -705,6 +706,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final Optional<Bubbles> mBubblesOptional;
     private final Bubbles.BubbleExpandListener mBubbleExpandListener;
+    private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
@@ -804,7 +806,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            Optional<StartingSurface> startingSurfaceOptional) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -891,6 +894,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
+        mStartingSurfaceOptional = startingSurfaceOptional;
         lockscreenShadeTransitionController.setStatusbar(this);
 
         mExpansionChangedListeners = new ArrayList<>();
@@ -2117,6 +2121,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void setBlursDisabledForAppLaunch(boolean disabled) {
         mKeyguardViewMediator.setBlursDisabledForAppLaunch(disabled);
+    }
+
+    @Override
+    public int getBackgroundColor(TaskInfo task) {
+        if (!mStartingSurfaceOptional.isPresent()) {
+            Log.w(TAG, "No starting surface, defaulting to SystemBGColor");
+            return SplashscreenContentDrawer.getSystemBGColor();
+        }
+
+        return mStartingSurfaceOptional.get().getBackgroundColor(task);
     }
 
     public boolean isDeviceInVrMode() {

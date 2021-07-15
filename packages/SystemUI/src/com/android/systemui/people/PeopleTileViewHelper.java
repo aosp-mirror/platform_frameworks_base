@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.text.LineBreaker;
@@ -59,6 +60,7 @@ import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -79,6 +81,7 @@ import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.people.widget.PeopleTileKey;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -178,6 +181,7 @@ public class PeopleTileViewHelper {
     private int mWidth;
     private int mHeight;
     private int mLayoutSize;
+    private boolean mIsLeftToRight;
 
     private Locale mLocale;
     private NumberFormat mIntegerFormat;
@@ -192,6 +196,8 @@ public class PeopleTileViewHelper {
         mWidth = width;
         mHeight = height;
         mLayoutSize = getLayoutSize();
+        mIsLeftToRight = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
+                == View.LAYOUT_DIRECTION_LTR;
     }
 
     /**
@@ -501,6 +507,8 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.availability, View.VISIBLE);
                 startPadding = mContext.getResources().getDimensionPixelSize(
                         R.dimen.availability_dot_shown_padding);
+                views.setContentDescription(R.id.availability,
+                        mContext.getString(R.string.person_available));
             } else {
                 views.setViewVisibility(R.id.availability, View.GONE);
                 startPadding = mContext.getResources().getDimensionPixelSize(
@@ -654,7 +662,7 @@ public class PeopleTileViewHelper {
     private RemoteViews createMissedCallRemoteViews() {
         RemoteViews views = setViewForContentLayout(new RemoteViews(mContext.getPackageName(),
                 getLayoutForContent()));
-        views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        setPredefinedIconVisible(views);
         views.setViewVisibility(R.id.text_content, View.VISIBLE);
         views.setViewVisibility(R.id.messages_count, View.GONE);
         setMaxLines(views, false);
@@ -673,19 +681,39 @@ public class PeopleTileViewHelper {
         return views;
     }
 
+    private void setPredefinedIconVisible(RemoteViews views) {
+        views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        if (mLayoutSize == LAYOUT_MEDIUM) {
+            int endPadding = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.before_predefined_icon_padding);
+            views.setViewPadding(R.id.name, mIsLeftToRight ? 0 : endPadding, 0,
+                    mIsLeftToRight ? endPadding : 0,
+                    0);
+        }
+    }
+
     private RemoteViews createNotificationRemoteViews() {
         RemoteViews views = setViewForContentLayout(new RemoteViews(mContext.getPackageName(),
                 getLayoutForNotificationContent()));
         CharSequence sender = mTile.getNotificationSender();
-        Uri image = mTile.getNotificationDataUri();
-        if (image != null) {
-            // TODO: Use NotificationInlineImageCache
-            views.setImageViewUri(R.id.image, image);
+        Uri imageUri = mTile.getNotificationDataUri();
+        if (imageUri != null) {
             String newImageDescription = mContext.getString(
                     R.string.new_notification_image_content_description, mTile.getUserName());
             views.setContentDescription(R.id.image, newImageDescription);
             views.setViewVisibility(R.id.image, View.VISIBLE);
             views.setViewVisibility(R.id.text_content, View.GONE);
+            try {
+                Drawable drawable = resolveImage(imageUri, mContext);
+                Bitmap bitmap = convertDrawableToBitmap(drawable);
+                views.setImageViewBitmap(R.id.image, bitmap);
+            } catch (IOException e) {
+                Log.e(TAG, "Could not decode image: " + e);
+                // If we couldn't load the image, show text that we have a new image.
+                views.setTextViewText(R.id.text_content, newImageDescription);
+                views.setViewVisibility(R.id.text_content, View.VISIBLE);
+                views.setViewVisibility(R.id.image, View.GONE);
+            }
         } else {
             setMaxLines(views, !TextUtils.isEmpty(sender));
             CharSequence content = mTile.getNotificationContent();
@@ -703,6 +731,13 @@ public class PeopleTileViewHelper {
             views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_message);
         }
         if (mTile.getMessagesCount() > 1) {
+            if (mLayoutSize == LAYOUT_MEDIUM) {
+                int endPadding = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.before_messages_count_padding);
+                views.setViewPadding(R.id.name, mIsLeftToRight ? 0 : endPadding, 0,
+                        mIsLeftToRight ? endPadding : 0,
+                        0);
+            }
             views.setViewVisibility(R.id.messages_count, View.VISIBLE);
             views.setTextViewText(R.id.messages_count,
                     getMessagesCountText(mTile.getMessagesCount()));
@@ -718,6 +753,40 @@ public class PeopleTileViewHelper {
         }
         setAvailabilityDotPadding(views, R.dimen.availability_dot_notification_padding);
         return views;
+    }
+
+    private Drawable resolveImage(Uri uri, Context context) throws IOException {
+        final ImageDecoder.Source source =
+                ImageDecoder.createSource(context.getContentResolver(), uri);
+        final Drawable drawable =
+                ImageDecoder.decodeDrawable(source, (decoder, info, s) -> {
+                    onHeaderDecoded(decoder, info, s);
+                });
+        return drawable;
+    }
+
+    private static int getPowerOfTwoForSampleRatio(double ratio) {
+        final int k = Integer.highestOneBit((int) Math.floor(ratio));
+        return Math.max(1, k);
+    }
+
+    private void onHeaderDecoded(ImageDecoder decoder, ImageDecoder.ImageInfo info,
+            ImageDecoder.Source source) {
+        int widthInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mWidth,
+                mContext.getResources().getDisplayMetrics());
+        int heightInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mHeight,
+                mContext.getResources().getDisplayMetrics());
+        int maxIconSizeInPx = Math.max(widthInPx, heightInPx);
+        int minDimen = (int) (1.5 * Math.min(widthInPx, heightInPx));
+        if (minDimen < maxIconSizeInPx) {
+            maxIconSizeInPx = minDimen;
+        }
+        final Size size = info.getSize();
+        final int originalSize = Math.max(size.getHeight(), size.getWidth());
+        final double ratio = (originalSize > maxIconSizeInPx)
+                ? originalSize * 1f / maxIconSizeInPx
+                : 1.0;
+        decoder.setTargetSampleSize(getPowerOfTwoForSampleRatio(ratio));
     }
 
     private void setContentDescriptionForNotificationTextContent(RemoteViews views,
@@ -755,7 +824,7 @@ public class PeopleTileViewHelper {
         if (TextUtils.isEmpty(statusText)) {
             statusText = getStatusTextByType(status.getActivity());
         }
-        views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        setPredefinedIconVisible(views);
         views.setTextViewText(R.id.text_content, statusText);
 
         if (status.getActivity() == ACTIVITY_BIRTHDAY
@@ -865,13 +934,11 @@ public class PeopleTileViewHelper {
      * on the status layouts compared to all other layouts.
      */
     private void setAvailabilityDotPadding(RemoteViews views, int resId) {
-        boolean isLeftToRight = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
-                == View.LAYOUT_DIRECTION_LTR;
         int startPadding = mContext.getResources().getDimensionPixelSize(resId);
         int bottomPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.medium_content_padding_above_name);
         views.setViewPadding(R.id.medium_content,
-                isLeftToRight ? startPadding : 0, 0, isLeftToRight ? 0 : startPadding,
+                mIsLeftToRight ? startPadding : 0, 0, mIsLeftToRight ? 0 : startPadding,
                 bottomPadding);
     }
 
@@ -1069,6 +1136,7 @@ public class PeopleTileViewHelper {
             views.setViewPadding(R.id.content, horizontalPadding, verticalPadding,
                     horizontalPadding,
                     verticalPadding);
+            views.setViewPadding(R.id.name, 0, 0, 0, 0);
             // Expand the name font on medium if there's space.
             int heightRequiredForMaxContentText = (int) (mContext.getResources().getDimension(
                     R.dimen.medium_height_for_max_name_text_size) / mDensity);

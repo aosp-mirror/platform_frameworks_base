@@ -24,8 +24,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.DisplayMetrics;
@@ -40,7 +40,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
@@ -79,7 +78,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final DelayableExecutor mExecutor;
     private boolean mUdfpsEnrolled;
 
-    @NonNull private final Drawable mUnlockIcon;
+    @NonNull private final AnimatedVectorDrawable mFpToUnlockIcon;
+    @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
     @NonNull private final CharSequence mUnlockedLabel;
     @NonNull private final CharSequence mLockedLabel;
@@ -98,7 +98,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private float mHeightPixels;
     private float mWidthPixels;
     private float mDensity;
-    private int mKgBottomAreaHeight;
+    private int mAmbientIndicationHeight; // in pixels
+    private int mKgIndicationHeight; // in pixels
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -132,17 +133,18 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mExecutor = executor;
 
         final Context context = view.getContext();
-        mUnlockIcon = new InsetDrawable(context.getResources().getDrawable(
-                com.android.internal.R.drawable.ic_lock_open, context.getTheme()),
-                context.getResources().getDimensionPixelSize(
-                        com.android.systemui.R.dimen.udfps_unlock_icon_inset));
-        mLockIcon = new InsetDrawable(context.getResources().getDrawable(
-                com.android.internal.R.drawable.ic_lock, context.getTheme()),
-                context.getResources().getDimensionPixelSize(
-                        com.android.systemui.R.dimen.udfps_unlock_icon_inset));
+        mLockIcon = mView.getContext().getResources().getDrawable(
+                R.anim.lock_to_unlock,
+                mView.getContext().getTheme());
+        mFpToUnlockIcon = (AnimatedVectorDrawable) mView.getContext().getResources().getDrawable(
+                R.anim.fp_to_unlock, mView.getContext().getTheme());
+        mLockToUnlockIcon = (AnimatedVectorDrawable) mView.getContext().getResources().getDrawable(
+                R.anim.lock_to_unlock,
+                mView.getContext().getTheme());
         mUnlockedLabel = context.getResources().getString(R.string.accessibility_unlock_button);
         mLockedLabel = context.getResources().getString(R.string.accessibility_lock_icon);
         dumpManager.registerDumpable("LockIconViewController", this);
+
     }
 
     @Override
@@ -211,6 +213,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             return;
         }
 
+        boolean wasShowingFpIcon = mHasUdfps && !mShowUnlockIcon && !mShowLockIcon;
+        boolean wasShowingLockIcon = mShowLockIcon;
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
             && (!mUdfpsEnrolled || !mRunningFPS);
         mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
@@ -220,11 +224,22 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setImageDrawable(mLockIcon);
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mLockedLabel);
+            mView.hideBg();
         } else if (mShowUnlockIcon) {
-            mView.setImageDrawable(mUnlockIcon);
+            if (wasShowingFpIcon) {
+                mView.setImageDrawable(mFpToUnlockIcon);
+                mFpToUnlockIcon.forceAnimationOnUI();
+                mFpToUnlockIcon.start();
+            } else if (wasShowingLockIcon) {
+                mView.setImageDrawable(mLockToUnlockIcon);
+                mLockToUnlockIcon.forceAnimationOnUI();
+                mLockToUnlockIcon.start();
+            }
+            mView.animateBg();
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mUnlockedLabel);
         } else {
+            mView.hideBg();
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
         }
@@ -269,10 +284,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateColors() {
-        final int color = Utils.getColorAttrDefaultColor(mView.getContext(),
-                R.attr.wallpaperTextColorAccent);
-        mUnlockIcon.setTint(color);
-        mLockIcon.setTint(color);
+        mView.updateColor();
     }
 
     private void updateConfiguration() {
@@ -280,7 +292,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mWidthPixels = metrics.widthPixels;
         mHeightPixels = metrics.heightPixels;
         mDensity = metrics.density;
-        mKgBottomAreaHeight = mView.getContext().getResources().getDimensionPixelSize(
+        mKgIndicationHeight = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom)
             + mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
@@ -295,13 +307,22 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         } else {
             final float distAboveKgBottomArea = 12 * mDensity;
             final float radius = 36 * mDensity;
+            final int kgBottomAreaHeight = Math.max(mKgIndicationHeight, mAmbientIndicationHeight);
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - mKgBottomAreaHeight - distAboveKgBottomArea
+                        mHeightPixels - kgBottomAreaHeight - distAboveKgBottomArea
                             - radius / 2), (int) radius);
         }
 
         mView.getHitRect(mSensorTouchLocation);
+    }
+
+    /**
+     * Set the location of ambient indication if showing (ie: now playing)
+     */
+    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
+        mAmbientIndicationHeight = ambientIndicationBottomPadding;
+        updateLockIconLocation();
     }
 
     @Override
@@ -423,6 +444,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onConfigChanged(Configuration newConfig) {
             updateConfiguration();
+            updateColors();
         }
     };
 

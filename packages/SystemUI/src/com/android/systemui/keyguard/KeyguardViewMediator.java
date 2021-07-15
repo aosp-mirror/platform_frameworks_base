@@ -1506,8 +1506,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             return;
         }
 
-        // if the keyguard is already showing, don't bother
-        if (mKeyguardViewControllerLazy.get().isShowing()) {
+        // if the keyguard is already showing, don't bother. check flags in both files
+        // to account for the hiding animation which results in a delay and discrepancy
+        // between flags
+        if (mShowing && mKeyguardViewControllerLazy.get().isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
             resetStateLocked();
             return;
@@ -2309,7 +2311,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         // only play "unlock" noises if not on a call (since the incall UI
         // disables the keyguard)
         if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
-            Log.i("TEST", "playSounds: false");
             playSounds(false);
         }
 

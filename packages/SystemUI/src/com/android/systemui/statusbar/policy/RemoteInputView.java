@@ -272,6 +272,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             public void onEnd(@NonNull WindowInsetsAnimation animation) {
                 super.onEnd(animation);
                 if (animation.getTypeMask() == WindowInsets.Type.ime()) {
+                    mEntry.mRemoteEditImeAnimatingAway = false;
                     mEntry.mRemoteEditImeVisible =
                             mEditText.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
@@ -392,6 +393,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mSendButton.setVisibility(INVISIBLE);
         mProgressBar.setVisibility(VISIBLE);
         mEntry.lastRemoteInputSent = SystemClock.elapsedRealtime();
+        mEntry.mRemoteEditImeAnimatingAway = true;
         mController.addSpinning(mEntry.getKey(), mToken);
         mController.removeRemoteInput(mEntry, mToken);
         mEditText.mShowImeOnInputConnection = false;
@@ -807,7 +809,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void onEditTextFocusChanged(RemoteEditText remoteEditText, boolean focused) {
-        for (View.OnFocusChangeListener listener : mEditTextFocusChangeListeners) {
+        for (View.OnFocusChangeListener listener : new ArrayList<>(mEditTextFocusChangeListeners)) {
             listener.onFocusChange(remoteEditText, focused);
         }
     }

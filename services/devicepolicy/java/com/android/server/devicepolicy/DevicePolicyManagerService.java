@@ -14991,9 +14991,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void setNetworkLoggingActiveInternal(boolean active) {
-        final boolean[] shouldSendNotification = new boolean[] {false};
-        synchronized (getLockObject()) {
-            mInjector.binderWithCleanCallingIdentity(() -> {
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            boolean shouldSendNotification = false;
+            synchronized (getLockObject()) {
                 if (active) {
                     if (mNetworkLogger == null) {
                         final int affectedUserId = getNetworkLoggingAffectedUser();
@@ -15008,7 +15008,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                 + " service not being available yet.");
                     }
                     maybePauseDeviceWideLoggingLocked();
-                    shouldSendNotification[0] = shouldSendNetworkLoggingNotificationLocked();
+                    shouldSendNotification = shouldSendNetworkLoggingNotificationLocked();
                 } else {
                     if (mNetworkLogger != null && !mNetworkLogger.stopNetworkLogging()) {
                         Slogf.wtf(LOG_TAG, "Network logging could not be stopped due to the logging"
@@ -15016,15 +15016,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                     mNetworkLogger = null;
                 }
-            });
-        }
-        if (active) {
-            if (shouldSendNotification[0]) {
-                sendNetworkLoggingNotification();
             }
-        } else {
-            mInjector.getNotificationManager().cancel(SystemMessage.NOTE_NETWORK_LOGGING);
-        }
+            if (active) {
+                if (shouldSendNotification) {
+                    mHandler.post(() -> sendNetworkLoggingNotification());
+                }
+            } else {
+                mHandler.post(() -> mInjector.getNotificationManager().cancel(
+                        SystemMessage.NOTE_NETWORK_LOGGING));
+            }
+        });
     }
 
     private @UserIdInt int getNetworkLoggingAffectedUser() {
@@ -17557,9 +17558,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         final boolean usbEnabled;
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            usbEnabled = admin != null && admin.mUsbDataSignalingEnabled;
+            usbEnabled = isUsbDataSignalingEnabledInternalLocked();
         }
         if (!mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getUsbManager().enableUsbDataSignal(usbEnabled))) {
