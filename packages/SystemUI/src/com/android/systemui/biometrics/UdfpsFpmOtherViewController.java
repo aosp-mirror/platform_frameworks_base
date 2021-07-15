@@ -22,6 +22,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.util.Optional;
+
 /**
  * Class that coordinates non-HBM animations for non keyguard, enrollment or biometric prompt
  * states.
@@ -32,9 +34,9 @@ class UdfpsFpmOtherViewController extends UdfpsAnimationViewController<UdfpsFpmO
     protected UdfpsFpmOtherViewController(
             @NonNull UdfpsFpmOtherView view,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull StatusBar statusBar,
+            @NonNull Optional<StatusBar> statusBarOptional,
             @NonNull DumpManager dumpManager) {
-        super(view, statusBarStateController, statusBar, dumpManager);
+        super(view, statusBarStateController, statusBarOptional, dumpManager);
     }
 
     @Override

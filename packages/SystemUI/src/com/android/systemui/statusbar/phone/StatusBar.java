@@ -1190,7 +1190,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 mAnimationScheduler,
                                 mStatusBarLocationPublisher,
                                 mNotificationIconAreaController,
-                                mFeatureFlags),
+                                mFeatureFlags,
+                                () -> Optional.of(this)),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 

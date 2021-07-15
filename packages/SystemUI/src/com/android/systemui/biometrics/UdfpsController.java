@@ -108,7 +108,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final LayoutInflater mInflater;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
-    @NonNull private final StatusBar mStatusBar;
+    @NonNull private final Optional<StatusBar> mStatusBarOptional;
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
@@ -480,7 +480,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
-            @NonNull StatusBar statusBar,
+            @NonNull Optional<StatusBar> statusBarOptional,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -504,7 +504,7 @@ public class UdfpsController implements DozeReceiver {
         mFingerprintManager = checkNotNull(fingerprintManager);
         mWindowManager = windowManager;
         mFgExecutor = fgExecutor;
-        mStatusBar = statusBar;
+        mStatusBarOptional = statusBarOptional;
         mStatusBarStateController = statusBarStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
@@ -726,7 +726,7 @@ public class UdfpsController implements DozeReceiver {
                         enrollView,
                         mServerRequest.mEnrollHelper,
                         mStatusBarStateController,
-                        mStatusBar,
+                        mStatusBarOptional,
                         mDumpManager
                 );
             case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
@@ -736,7 +736,7 @@ public class UdfpsController implements DozeReceiver {
                 return new UdfpsKeyguardViewController(
                         keyguardView,
                         mStatusBarStateController,
-                        mStatusBar,
+                        mStatusBarOptional,
                         mKeyguardViewManager,
                         mKeyguardUpdateMonitor,
                         mFgExecutor,
@@ -752,7 +752,7 @@ public class UdfpsController implements DozeReceiver {
                 return new UdfpsBpViewController(
                         bpView,
                         mStatusBarStateController,
-                        mStatusBar,
+                        mStatusBarOptional,
                         mDumpManager
                 );
             case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
@@ -762,7 +762,7 @@ public class UdfpsController implements DozeReceiver {
                 return new UdfpsFpmOtherViewController(
                         authOtherView,
                         mStatusBarStateController,
-                        mStatusBar,
+                        mStatusBarOptional,
                         mDumpManager
                 );
             default:

@@ -105,7 +105,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(LegacySplitScreen.class)),
                         Optional.of(mock(Recents.class)),
-                        () -> mock(StatusBar.class),
+                        () -> Optional.of(mock(StatusBar.class)),
                         mock(ShadeController.class),
                         mock(NotificationRemoteInputManager.class),
                         mock(NotificationShadeDepthController.class),

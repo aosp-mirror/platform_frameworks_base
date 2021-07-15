@@ -47,11 +47,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import java.util.Optional;
+
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
+    private StatusBar mStatusBar;
     private NotificationIconAreaController mMockNotificationAreaController;
     private View mNotificationAreaInner;
     private StatusBarStateController mStatusBarStateController;
@@ -65,12 +68,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Before
     public void setup() {
-        StatusBar statusBar = mock(StatusBar.class);
-        mDependency.injectTestDependency(StatusBar.class, statusBar);
+        mStatusBar = mock(StatusBar.class);
         mStatusBarStateController = mDependency
                 .injectMockDependency(StatusBarStateController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
-        when(statusBar.getPanelController()).thenReturn(
+        when(mStatusBar.getPanelController()).thenReturn(
                 mock(NotificationPanelViewController.class));
     }
 
@@ -231,7 +233,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mAnimationScheduler,
                 mLocationPublisher,
                 mMockNotificationAreaController,
-                mock(FeatureFlags.class));
+                mock(FeatureFlags.class),
+                () -> Optional.of(mStatusBar));
     }
 
     private void setUpNotificationIconAreaController() {

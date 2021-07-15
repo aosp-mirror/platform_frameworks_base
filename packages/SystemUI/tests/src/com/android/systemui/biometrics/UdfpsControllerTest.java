@@ -181,7 +181,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mWindowManager,
                 mStatusBarStateController,
                 mFgExecutor,
-                mStatusBar,
+                Optional.of(mStatusBar),
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
                 mKeyguardUpdateMonitor,
