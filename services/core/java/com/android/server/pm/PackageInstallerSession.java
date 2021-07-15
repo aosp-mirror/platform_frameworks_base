@@ -1277,12 +1277,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mProgressLock")
     private void computeProgressLocked(boolean forcePublish) {
-        if (!mCommitted) {
+        if (!isIncrementalInstallation() || !mCommitted) {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
-            // For incremental install, continue to publish incremental progress during committing.
-            if (isIncrementalInstallation() && (mIncrementalProgress - mProgress) >= 0.01) {
+            // For incremental, publish regular install progress before the session is committed,
+            // but publish incremental progress afterwards.
+            if (mIncrementalProgress - mProgress >= 0.01) {
                 // It takes some time for data loader to write to incremental file system, so at the
                 // beginning of the commit, the incremental progress might be very small.
                 // Wait till the incremental progress is larger than what's already displayed.
@@ -1291,7 +1292,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // Only publish when meaningful change
+        // Only publish meaningful progress changes.
         if (forcePublish || (mProgress - mReportedProgress) >= 0.01) {
             mReportedProgress = mProgress;
             mCallback.onSessionProgressChanged(this, mProgress);
