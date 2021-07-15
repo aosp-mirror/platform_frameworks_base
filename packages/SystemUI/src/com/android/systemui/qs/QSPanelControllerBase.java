@@ -69,7 +69,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final DumpManager mDumpManager;
     private final FeatureFlags mFeatureFlags;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
-    private boolean mShouldUseSplitNotificationShade;
+    protected boolean mShouldUseSplitNotificationShade;
 
     @Nullable
     private Consumer<Boolean> mMediaVisibilityChangedListener;
@@ -88,10 +88,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                             Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
+                        onScreenRotated();
                         switchTileLayout(false);
                     }
                 }
             };
+
+    protected void onScreenRotated() { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {

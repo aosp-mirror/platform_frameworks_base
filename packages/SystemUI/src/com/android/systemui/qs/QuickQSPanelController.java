@@ -49,16 +49,21 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
                 }
             };
 
+    // brightness is visible only in split shade
+    private final QuickQSBrightnessController mBrightnessController;
+
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager, FeatureFlags featureFlags
+            DumpManager dumpManager, FeatureFlags featureFlags,
+            QuickQSBrightnessController quickQSBrightnessController
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager, featureFlags);
+        mBrightnessController = quickQSBrightnessController;
     }
 
     @Override
@@ -67,6 +72,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         mMediaHost.setExpansion(0.0f);
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+        mBrightnessController.init(mShouldUseSplitNotificationShade);
     }
 
     @Override
@@ -81,6 +87,12 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
     }
 
+    @Override
+    void setListening(boolean listening) {
+        super.setListening(listening);
+        mBrightnessController.setListening(listening);
+    }
+
     public boolean isListening() {
         return mView.isListening();
     }
@@ -88,6 +100,17 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     private void setMaxTiles(int parseNumTiles) {
         mView.setMaxTiles(parseNumTiles);
         setTiles();
+    }
+
+    @Override
+    public void refreshAllTiles() {
+        mBrightnessController.checkRestrictionAndSetEnabled();
+        super.refreshAllTiles();
+    }
+
+    @Override
+    protected void onScreenRotated() {
+        mBrightnessController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override
