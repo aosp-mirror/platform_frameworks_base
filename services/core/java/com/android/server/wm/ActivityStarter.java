@@ -2038,7 +2038,7 @@ class ActivityStarter {
         // We didn't do anything...  but it was needed (a.k.a., client don't use that intent!)
         // And for paranoia, make sure we have correctly resumed the top activity.
         resumeTargetRootTaskIfNeeded();
-      
+
         mLastStartActivityRecord = targetTaskTop;
         return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;
     }
@@ -2585,13 +2585,28 @@ class ActivityStarter {
     /**
      * Figure out which task and activity to bring to front when we have found an existing matching
      * activity record in history. May also clear the task if needed.
+     *
      * @param intentActivity Existing matching activity.
      * @return {@link ActivityRecord} brought to front.
      */
     private void setTargetRootTaskIfNeeded(ActivityRecord intentActivity) {
-        mTargetRootTask = intentActivity.getRootTask();
         intentActivity.getTaskFragment().clearLastPausedActivity();
         Task intentTask = intentActivity.getTask();
+
+        // Only update the target-root-task when it is not indicated.
+        if (mTargetRootTask == null) {
+            if (mSourceRecord != null && mSourceRecord.mLaunchRootTask != null) {
+                // Inherit the target-root-task from source to ensure trampoline activities will be
+                // launched into the same root task.
+                mTargetRootTask = Task.fromWindowContainerToken(mSourceRecord.mLaunchRootTask);
+            } else {
+                final Task launchRootTask =
+                        getLaunchRootTask(mStartActivity, mLaunchFlags, intentTask, mOptions);
+                mTargetRootTask =
+                        launchRootTask != null ? launchRootTask : intentActivity.getRootTask();
+            }
+        }
+
         // If the target task is not in the front, then we need to bring it to the front...
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
         // the same behavior as if a new instance was being started, which means not bringing it
@@ -2619,9 +2634,7 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
 
-                final Task launchRootTask = getLaunchRootTask(mStartActivity, mLaunchFlags,
-                        intentTask, mOptions);
-                if (launchRootTask == null || launchRootTask == mTargetRootTask) {
+                if (mTargetRootTask == intentActivity.getRootTask()) {
                     // TODO(b/151572268): Figure out a better way to move tasks in above 2-levels
                     //  tasks hierarchies.
                     if (mTargetRootTask != intentTask
@@ -2645,7 +2658,7 @@ class ActivityStarter {
                             "bringingFoundTaskToFront");
                     mMovedToFront = !wasTopOfVisibleRootTask;
                 } else {
-                    intentTask.reparent(launchRootTask, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
+                    intentTask.reparent(mTargetRootTask, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
                             ANIMATE, DEFER_RESUME, "reparentToTargetRootTask");
                     mMovedToFront = true;
                 }

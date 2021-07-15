@@ -300,9 +300,12 @@ class ActivityMetricsLogger {
                 return;
             }
             if (mLastLaunchedActivity != null) {
-                // Transfer the launch cookie because it is a consecutive launch event.
+                // Transfer the launch cookie and launch root task because it is a consecutive
+                // launch event.
                 r.mLaunchCookie = mLastLaunchedActivity.mLaunchCookie;
                 mLastLaunchedActivity.mLaunchCookie = null;
+                r.mLaunchRootTask = mLastLaunchedActivity.mLaunchRootTask;
+                mLastLaunchedActivity.mLaunchRootTask = null;
             }
             mLastLaunchedActivity = r;
             if (!r.noDisplay && !r.isReportedDrawn()) {
