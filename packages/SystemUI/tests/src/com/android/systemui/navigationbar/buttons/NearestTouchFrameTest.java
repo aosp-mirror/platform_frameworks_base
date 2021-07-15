@@ -16,10 +16,13 @@
 
 package com.android.systemui.navigationbar.buttons;
 
+import static com.android.systemui.Dependency.EDGE_BACK_GESTURE_HANDLER_PROVIDER;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -36,6 +39,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +56,8 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mDependency.injectTestDependency(EDGE_BACK_GESTURE_HANDLER_PROVIDER,
+                () -> mock(EdgeBackGestureHandler.class));
         Configuration c = new Configuration(mContext.getResources().getConfiguration());
         c.smallestScreenWidthDp = 500;
         mNearestTouchFrame = new NearestTouchFrame(mContext, null, c);
