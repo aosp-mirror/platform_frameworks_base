@@ -170,4 +170,20 @@ public abstract class SysUIConcurrencyModule {
     public static Executor provideUiBackgroundExecutor() {
         return Executors.newSingleThreadExecutor();
     }
+
+    /** */
+    @Provides
+    @Main
+    public static MessageRouter providesMainMessageRouter(
+            @Main DelayableExecutor executor) {
+        return new MessageRouterImpl(executor);
+    }
+
+    /** */
+    @Provides
+    @Background
+    public static MessageRouter providesBackgroundMessageRouter(
+            @Background DelayableExecutor executor) {
+        return new MessageRouterImpl(executor);
+    }
 }
