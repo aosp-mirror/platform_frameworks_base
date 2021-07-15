@@ -34,6 +34,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
@@ -1096,6 +1097,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (record.mVoiceInteraction) {
                     flags |= FLAG_IS_VOICE_INTERACTION;
                 }
+            }
+            final DisplayContent dc = wc.asDisplayContent();
+            if (dc != null) {
+                flags |= FLAG_IS_DISPLAY;
             }
             if (isWallpaper(wc)) {
                 flags |= FLAG_IS_WALLPAPER;

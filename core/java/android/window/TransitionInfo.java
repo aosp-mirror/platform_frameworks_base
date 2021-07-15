@@ -87,8 +87,11 @@ public final class TransitionInfo implements Parcelable {
     /** The container has voice session. */
     public static final int FLAG_IS_VOICE_INTERACTION = 1 << 4;
 
+    /** The container is the display. */
+    public static final int FLAG_IS_DISPLAY = 1 << 5;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 5;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 6;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -98,6 +101,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_TRANSLUCENT,
             FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT,
             FLAG_IS_VOICE_INTERACTION,
+            FLAG_IS_DISPLAY,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -275,6 +279,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_VOICE_INTERACTION) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "IS_VOICE_INTERACTION");
+        }
+        if ((flags & FLAG_IS_DISPLAY) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "IS_DISPLAY");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");
