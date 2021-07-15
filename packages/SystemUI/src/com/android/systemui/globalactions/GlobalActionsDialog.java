@@ -81,6 +81,7 @@ import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -172,7 +173,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             SysUiState sysUiState,
             @Main Handler handler,
             PackageManager packageManager,
-            StatusBar statusBar) {
+            Optional<StatusBar> statusBarOptional) {
 
         super(context,
                 windowManagerFuncs,
@@ -203,7 +204,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 sysUiState,
                 handler,
                 packageManager,
-                statusBar);
+                statusBarOptional);
 
         mLockPatternUtils = lockPatternUtils;
         mKeyguardStateController = keyguardStateController;
@@ -333,11 +334,11 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
-                StatusBar statusBar) {
+                Optional<StatusBar> statusBarOptional) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions,
                     adapter, overflowAdapter, sysuiColorExtractor, statusBarService,
                     notificationShadeWindowController, sysuiState, onRotateCallback,
-                    keyguardShowing, powerAdapter, uiEventLogger, statusBar);
+                    keyguardShowing, powerAdapter, uiEventLogger, statusBarOptional);
             mWalletFactory = walletFactory;
 
             // Update window attributes
