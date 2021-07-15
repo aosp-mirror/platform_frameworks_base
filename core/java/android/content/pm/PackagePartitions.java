@@ -47,7 +47,7 @@ public class PackagePartitions {
     public static final int PARTITION_PRODUCT = 4;
     public static final int PARTITION_SYSTEM_EXT = 5;
 
-    @IntDef(flag = true, prefix = { "PARTITION_" }, value = {
+    @IntDef(prefix = { "PARTITION_" }, value = {
         PARTITION_SYSTEM,
         PARTITION_VENDOR,
         PARTITION_ODM,
@@ -119,6 +119,9 @@ public class PackagePartitions {
         @Nullable
         private final DeferredCanonicalFile mOverlayFolder;
 
+        @NonNull
+        private final File mNonConicalFolder;
+
         private SystemPartition(@NonNull File folder, @PartitionType int type,
                 boolean containsPrivApp, boolean containsOverlay) {
             this.type = type;
@@ -128,6 +131,7 @@ public class PackagePartitions {
                     : null;
             this.mOverlayFolder = containsOverlay ? new DeferredCanonicalFile(folder, "overlay")
                     : null;
+            this.mNonConicalFolder = folder;
         }
 
         public SystemPartition(@NonNull SystemPartition original) {
@@ -136,6 +140,7 @@ public class PackagePartitions {
             this.mAppFolder = original.mAppFolder;
             this.mPrivAppFolder = original.mPrivAppFolder;
             this.mOverlayFolder = original.mOverlayFolder;
+            this.mNonConicalFolder = original.mNonConicalFolder;
         }
 
         /**
@@ -151,6 +156,12 @@ public class PackagePartitions {
         @NonNull
         public File getFolder() {
             return mFolder.getFile();
+        }
+
+        /** Returns the non-canonical folder of the partition. */
+        @NonNull
+        public File getNonConicalFolder() {
+            return mNonConicalFolder;
         }
 
         /** Returns the canonical app folder of the partition. */

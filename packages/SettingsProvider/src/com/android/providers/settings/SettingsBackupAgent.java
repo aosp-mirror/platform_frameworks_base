@@ -24,6 +24,7 @@ import android.app.backup.FullBackupDataOutput;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
@@ -42,6 +43,7 @@ import android.provider.settings.validators.GlobalSettingsValidators;
 import android.provider.settings.validators.SecureSettingsValidators;
 import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
+import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.BackupUtils;
@@ -95,10 +97,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_NETWORK_POLICIES = "network_policies";
     private static final String KEY_WIFI_NEW_CONFIG = "wifi_new_config";
     private static final String KEY_DEVICE_SPECIFIC_CONFIG = "device_specific_config";
+    private static final String KEY_SIM_SPECIFIC_SETTINGS = "sim_specific_settings";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 8;
+    private static final int STATE_VERSION = 9;
 
     // Versioning of the Network Policies backup payload.
     private static final int NETWORK_POLICIES_BACKUP_VERSION = 1;
@@ -106,19 +109,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
-    private static final int STATE_SYSTEM           = 0;
-    private static final int STATE_SECURE           = 1;
-    private static final int STATE_LOCALE           = 2;
-    private static final int STATE_WIFI_SUPPLICANT  = 3;
-    private static final int STATE_WIFI_CONFIG      = 4;
-    private static final int STATE_GLOBAL           = 5;
-    private static final int STATE_LOCK_SETTINGS    = 6;
-    private static final int STATE_SOFTAP_CONFIG    = 7;
-    private static final int STATE_NETWORK_POLICIES = 8;
-    private static final int STATE_WIFI_NEW_CONFIG  = 9;
-    private static final int STATE_DEVICE_CONFIG    = 10;
+    private static final int STATE_SYSTEM                = 0;
+    private static final int STATE_SECURE                = 1;
+    private static final int STATE_LOCALE                = 2;
+    private static final int STATE_WIFI_SUPPLICANT       = 3;
+    private static final int STATE_WIFI_CONFIG           = 4;
+    private static final int STATE_GLOBAL                = 5;
+    private static final int STATE_LOCK_SETTINGS         = 6;
+    private static final int STATE_SOFTAP_CONFIG         = 7;
+    private static final int STATE_NETWORK_POLICIES      = 8;
+    private static final int STATE_WIFI_NEW_CONFIG       = 9;
+    private static final int STATE_DEVICE_CONFIG         = 10;
+    private static final int STATE_SIM_SPECIFIC_SETTINGS = 11;
 
-    private static final int STATE_SIZE             = 11; // The current number of state items
+    private static final int STATE_SIZE                  = 12; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
@@ -130,7 +134,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             8,              // version 5 added STATE_SOFTAP_CONFIG
             9,              // version 6 added STATE_NETWORK_POLICIES
             10,             // version 7 added STATE_WIFI_NEW_CONFIG
-            STATE_SIZE      // version 8 added STATE_DEVICE_CONFIG
+            11,             // version 8 added STATE_DEVICE_CONFIG
+            STATE_SIZE      // version 9 added STATE_SIM_SPECIFIC_SETTINGS
     };
 
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
@@ -208,7 +213,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
-
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
@@ -218,6 +222,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] netPoliciesData = getNetworkPolicies();
         byte[] wifiFullConfigData = getNewWifiConfigData();
         byte[] deviceSpecificInformation = getDeviceSpecificConfiguration();
+        byte[] simSpecificSettingsData = getSimSpecificSettingsData();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -246,6 +251,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_DEVICE_CONFIG] =
                 writeIfChanged(stateChecksums[STATE_DEVICE_CONFIG], KEY_DEVICE_SPECIFIC_CONFIG,
                         deviceSpecificInformation, data);
+        stateChecksums[STATE_SIM_SPECIFIC_SETTINGS] =
+                writeIfChanged(stateChecksums[STATE_SIM_SPECIFIC_SETTINGS],
+                        KEY_SIM_SPECIFIC_SETTINGS, simSpecificSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -384,6 +392,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                             R.array.restore_blocked_device_specific_settings,
                             dynamicBlockList,
                             preservedSettings);
+                    break;
+
+                case KEY_SIM_SPECIFIC_SETTINGS:
+                    byte[] restoredSimSpecificSettings = new byte[size];
+                    data.readEntityData(restoredSimSpecificSettings, 0, size);
+                    restoreSimSpecificSettings(restoredSimSpecificSettings);
                     break;
 
                 default :
@@ -1187,6 +1201,28 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         updateWindowManagerIfNeeded(originalDensity);
 
         return true;
+    }
+
+    private byte[] getSimSpecificSettingsData() {
+        byte[] simSpecificData = new byte[0];
+        PackageManager packageManager = getBaseContext().getPackageManager();
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
+            simSpecificData = subManager.getAllSimSpecificSettingsForBackup();
+            Log.i(TAG, "sim specific data of length + " + simSpecificData.length
+                + " successfully retrieved");
+        }
+
+        return simSpecificData;
+    }
+
+    private void restoreSimSpecificSettings(byte[] data) {
+        PackageManager packageManager = getBaseContext().getPackageManager();
+        boolean hasTelephony = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        if (hasTelephony) {
+            SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
+            subManager.restoreAllSimSpecificSettingsFromBackup(data);
+        }
     }
 
     private void updateWindowManagerIfNeeded(Integer previousDensity) {

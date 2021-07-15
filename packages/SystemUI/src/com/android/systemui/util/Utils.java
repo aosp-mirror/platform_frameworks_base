@@ -20,11 +20,16 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.provider.Settings;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -129,16 +134,59 @@ public class Utils {
      * Off by default, but can be disabled by setting to 0
      */
     public static boolean useQsMediaPlayer(Context context) {
-        return true;
+        int flag = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1);
+        return flag > 0;
     }
 
     /**
      * Allow media resumption controls. Requires {@link #useQsMediaPlayer(Context)} to be enabled.
-     * Off by default, but can be enabled by setting to 1
+     * On by default, but can be disabled by setting to 0
      */
     public static boolean useMediaResumption(Context context) {
         int flag = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.MEDIA_CONTROLS_RESUME, 1);
         return useQsMediaPlayer(context) && flag > 0;
     }
+
+    /**
+     * Allow recommendations from smartspace to show in media controls.
+     * Requires {@link #useQsMediaPlayer(Context)} to be enabled.
+     * On by default, but can be disabled by setting to 0
+     */
+    public static boolean allowMediaRecommendations(Context context) {
+        int flag = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1);
+        return useQsMediaPlayer(context) && flag > 0;
+    }
+
+    /**
+     * Returns true if the device should use the split notification shade, based on feature flags,
+     * orientation and screen width.
+     */
+    public static boolean shouldUseSplitNotificationShade(FeatureFlags featureFlags,
+            Resources resources) {
+        return featureFlags.isTwoColumnNotificationShadeEnabled()
+                && resources.getBoolean(R.bool.config_use_split_notification_shade);
+    }
+
+    /**
+     * Returns the color provided at the specified {@param attrIndex} in {@param a} if it exists,
+     * otherwise, returns the color from the private attribute {@param privAttrId}.
+     */
+    public static int getPrivateAttrColorIfUnset(ContextThemeWrapper ctw, TypedArray a,
+            int attrIndex, int defColor, int privAttrId) {
+        // If the index is specified, use that value
+        if (a.hasValue(attrIndex)) {
+            return a.getColor(attrIndex, defColor);
+        }
+
+        // Otherwise fallback to the value of the private attribute
+        int[] customAttrs = { privAttrId };
+        a = ctw.obtainStyledAttributes(customAttrs);
+        int color = a.getColor(0, defColor);
+        a.recycle();
+        return color;
+    }
+
 }

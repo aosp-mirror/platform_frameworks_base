@@ -17,25 +17,30 @@
 package com.android.server.wm;
 
 import static android.os.Build.IS_USER;
+import static android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
 import android.view.IWindowManager;
-import android.view.Surface;
 import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
-import com.android.server.protolog.ProtoLogImpl;
+import com.android.internal.protolog.ProtoLogImpl;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -83,13 +88,41 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // trace files can be written.
                     return mInternal.mWindowTracing.onShellCommand(this);
                 case "logging":
-                    return ProtoLogImpl.getSingleInstance().onShellCommand(this);
-                case "set-user-rotation":
-                    return runSetDisplayUserRotation(pw);
-                case "set-fix-to-user-rotation":
-                    return runSetFixToUserRotation(pw);
+                    String[] args = peekRemainingArgs();
+                    int result = ProtoLogImpl.getSingleInstance().onShellCommand(this);
+                    if (result != 0) {
+                        // Let the shell try and handle this
+                        try (ParcelFileDescriptor pfd
+                                     = ParcelFileDescriptor.dup(getOutFileDescriptor())){
+                            pw.println("Not handled, calling status bar with args: "
+                                    + Arrays.toString(args));
+                            LocalServices.getService(StatusBarManagerInternal.class)
+                                    .handleWindowManagerLoggingCommand(args, pfd);
+                        } catch (IOException e) {
+                            pw.println("Failed to handle logging command: " + e.getMessage());
+                        }
+                    }
+                    return result;
+                case "user-rotation":
+                    return runDisplayUserRotation(pw);
+                case "fixed-to-user-rotation":
+                    return runFixedToUserRotation(pw);
+                case "set-ignore-orientation-request":
+                    return runSetIgnoreOrientationRequest(pw);
+                case "get-ignore-orientation-request":
+                    return runGetIgnoreOrientationRequest(pw);
                 case "dump-visible-window-views":
                     return runDumpVisibleWindowViews(pw);
+                case "set-multi-window-config":
+                    return runSetMultiWindowConfig();
+                case "get-multi-window-config":
+                    return runGetMultiWindowConfig(pw);
+                case "reset-multi-window-config":
+                    return runResetMultiWindowConfig();
+                case "reset":
+                    return runReset(pw);
+                case "disable-blur":
+                    return runSetBlurDisabled(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -166,6 +199,35 @@ public class WindowManagerShellCommand extends ShellCommand {
         } else {
             mInterface.clearForcedDisplaySize(displayId);
         }
+        return 0;
+    }
+
+    private int runSetBlurDisabled(PrintWriter pw) throws RemoteException {
+        String arg = getNextArg();
+        if (arg == null) {
+            pw.println("Blur supported on device: " + CROSS_WINDOW_BLUR_SUPPORTED);
+            pw.println("Blur enabled: " + mInternal.mBlurController.getBlurEnabled());
+            return 0;
+        }
+
+        final boolean disableBlur;
+        switch (arg) {
+            case "true":
+            case "1":
+                disableBlur = true;
+                break;
+            case "false":
+            case "0":
+                disableBlur = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expected true, 1, false, 0, but got " + arg);
+                return -1;
+        }
+
+        Settings.Global.putInt(mInternal.mContext.getContentResolver(),
+                Settings.Global.DISABLE_WINDOW_BLURS, disableBlur ? 1 : 0);
+
         return 0;
     }
 
@@ -291,14 +353,21 @@ public class WindowManagerShellCommand extends ShellCommand {
         return Integer.parseInt(s);
     }
 
-    private int runSetDisplayUserRotation(PrintWriter pw) {
-        final String lockMode = getNextArgRequired();
-
+    private int runDisplayUserRotation(PrintWriter pw) {
         int displayId = Display.DEFAULT_DISPLAY;
         String arg = getNextArg();
+        if (arg == null) {
+            return printDisplayUserRotation(pw, displayId);
+        }
+
         if ("-d".equals(arg)) {
             displayId = Integer.parseInt(getNextArgRequired());
             arg = getNextArg();
+        }
+
+        final String lockMode = arg;
+        if (lockMode == null) {
+            return printDisplayUserRotation(pw, displayId);
         }
 
         if ("free".equals(lockMode)) {
@@ -306,13 +375,15 @@ public class WindowManagerShellCommand extends ShellCommand {
             return 0;
         }
 
-        if (!lockMode.equals("lock")) {
-            getErrPrintWriter().println("Error: lock mode needs to be either free or lock.");
+        if (!"lock".equals(lockMode)) {
+            getErrPrintWriter().println("Error: argument needs to be either -d, free or lock.");
             return -1;
         }
 
+        arg = getNextArg();
         try {
-            final int rotation = arg != null ? Integer.parseInt(arg) : Surface.ROTATION_0;
+            final int rotation =
+                    arg != null ? Integer.parseInt(arg) : -1 /* lock to current rotation */;
             mInternal.freezeDisplayRotation(displayId, rotation);
             return 0;
         } catch (IllegalArgumentException e) {
@@ -321,12 +392,36 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runSetFixToUserRotation(PrintWriter pw) throws RemoteException {
+    private int printDisplayUserRotation(PrintWriter pw, int displayId) {
+        final int displayUserRotation = mInternal.getDisplayUserRotation(displayId);
+        if (displayUserRotation < 0) {
+            getErrPrintWriter().println("Error: check logcat for more details.");
+            return -1;
+        }
+        if (!mInternal.isDisplayRotationFrozen(displayId)) {
+            pw.println("free");
+            return 0;
+        }
+        pw.print("lock ");
+        pw.println(displayUserRotation);
+        return 0;
+    }
+
+    private int runFixedToUserRotation(PrintWriter pw) throws RemoteException {
         int displayId = Display.DEFAULT_DISPLAY;
-        String arg = getNextArgRequired();
+        String arg = getNextArg();
+        if (arg == null) {
+            printFixedToUserRotation(pw, displayId);
+            return 0;
+        }
+
         if ("-d".equals(arg)) {
             displayId = Integer.parseInt(getNextArgRequired());
-            arg = getNextArgRequired();
+            arg = getNextArg();
+        }
+
+        if (arg == null) {
+            return printFixedToUserRotation(pw, displayId);
         }
 
         final int fixedToUserRotation;
@@ -347,6 +442,65 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
 
         mInterface.setFixedToUserRotation(displayId, fixedToUserRotation);
+        return 0;
+    }
+
+    private int printFixedToUserRotation(PrintWriter pw, int displayId) {
+        int fixedToUserRotationMode = mInternal.getFixedToUserRotation(displayId);
+        switch (fixedToUserRotationMode) {
+            case IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT:
+                pw.println("default");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_DISABLED:
+                pw.println("disabled");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_ENABLED:
+                pw.println("enabled");
+                return 0;
+            default:
+                getErrPrintWriter().println("Error: check logcat for more details.");
+                return -1;
+        }
+    }
+
+    private int runSetIgnoreOrientationRequest(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArgRequired();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+            arg = getNextArgRequired();
+        }
+
+        final boolean ignoreOrientationRequest;
+        switch (arg) {
+            case "true":
+            case "1":
+                ignoreOrientationRequest = true;
+                break;
+            case "false":
+            case "0":
+                ignoreOrientationRequest = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expecting true, 1, false, 0, but we "
+                        + "get " + arg);
+                return -1;
+        }
+
+        mInterface.setIgnoreOrientationRequest(displayId, ignoreOrientationRequest);
+        return 0;
+    }
+
+    private int runGetIgnoreOrientationRequest(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArg();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+        }
+
+        final boolean ignoreOrientationRequest = mInternal.getIgnoreOrientationRequest(displayId);
+        pw.println("ignoreOrientationRequest " + ignoreOrientationRequest
+                + " for displayId=" + displayId);
         return 0;
     }
 
@@ -394,6 +548,111 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetMultiWindowConfig() {
+        if (peekNextArg() == null) {
+            getErrPrintWriter().println("Error: No arguments provided.");
+        }
+        int result = 0;
+        while (peekNextArg() != null) {
+            String arg = getNextArg();
+            switch (arg) {
+                case "--supportsNonResizable":
+                    result += runSetSupportsNonResizableMultiWindow();
+                    break;
+                case "--respectsActivityMinWidthHeight":
+                    result += runSetRespectsActivityMinWidthHeightMultiWindow();
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: Unrecognized multi window option: " + arg);
+                    return -1;
+            }
+        }
+        return result == 0 ? 0 : -1;
+    }
+
+    private int runSetSupportsNonResizableMultiWindow() {
+        final String arg = getNextArg();
+        if (!arg.equals("-1") && !arg.equals("0") && !arg.equals("1")) {
+            getErrPrintWriter().println("Error: a config value of [-1, 0, 1] must be provided as"
+                    + " an argument for supportsNonResizableMultiWindow");
+            return -1;
+        }
+        final int configValue = Integer.parseInt(arg);
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            mInternal.mAtmService.mSupportsNonResizableMultiWindow = configValue;
+        }
+        return 0;
+    }
+
+    private int runSetRespectsActivityMinWidthHeightMultiWindow() {
+        final String arg = getNextArg();
+        if (!arg.equals("-1") && !arg.equals("0") && !arg.equals("1")) {
+            getErrPrintWriter().println("Error: a config value of [-1, 0, 1] must be provided as"
+                    + " an argument for respectsActivityMinWidthHeightMultiWindow");
+            return -1;
+        }
+        final int configValue = Integer.parseInt(arg);
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            mInternal.mAtmService.mRespectsActivityMinWidthHeightMultiWindow = configValue;
+        }
+        return 0;
+    }
+
+    private int runGetMultiWindowConfig(PrintWriter pw) {
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            pw.println("Supports non-resizable in multi window: "
+                    + mInternal.mAtmService.mSupportsNonResizableMultiWindow);
+            pw.println("Respects activity min width/height in multi window: "
+                    + mInternal.mAtmService.mRespectsActivityMinWidthHeightMultiWindow);
+        }
+        return 0;
+    }
+
+    private int runResetMultiWindowConfig() {
+        final int supportsNonResizable = mInternal.mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_supportsNonResizableMultiWindow);
+        final int respectsActivityMinWidthHeight = mInternal.mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_respectsActivityMinWidthHeightMultiWindow);
+        synchronized (mInternal.mAtmService.mGlobalLock) {
+            mInternal.mAtmService.mSupportsNonResizableMultiWindow = supportsNonResizable;
+            mInternal.mAtmService.mRespectsActivityMinWidthHeightMultiWindow =
+                    respectsActivityMinWidthHeight;
+        }
+        return 0;
+    }
+
+    private int runReset(PrintWriter pw) throws RemoteException {
+        int displayId = getDisplayId(getNextArg());
+
+        // size
+        mInterface.clearForcedDisplaySize(displayId);
+
+        // density
+        mInterface.clearForcedDisplayDensityForUser(displayId, UserHandle.USER_CURRENT);
+
+        // folded-area
+        mInternal.setOverrideFoldedArea(new Rect());
+
+        // scaling
+        mInterface.setForcedDisplayScalingMode(displayId, DisplayContent.FORCE_SCALING_MODE_AUTO);
+
+        // user-rotation
+        mInternal.thawDisplayRotation(displayId);
+
+        // fixed-to-user-rotation
+        mInterface.setFixedToUserRotation(displayId, IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT);
+
+        // set-ignore-orientation-request
+        mInterface.setIgnoreOrientationRequest(displayId, false /* ignoreOrientationRequest */);
+
+        // set-multi-window-config
+        runResetMultiWindowConfig();
+
+        pw.println("Reset all settings for displayId=" + displayId);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -411,17 +670,53 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
-        pw.println("  set-user-rotation [free|lock] [-d DISPLAY_ID] [rotation]");
-        pw.println("    Set user rotation mode and user rotation.");
+        pw.println("  disable-blur [true|1|false|0]");
+        pw.println("  user-rotation [-d DISPLAY_ID] [free|lock] [rotation]");
+        pw.println("    Print or set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
-        pw.println("  set-fix-to-user-rotation [-d DISPLAY_ID] [enabled|disabled]");
-        pw.println("    Enable or disable rotating display for app requested orientation.");
+        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
+        pw.println("    Print or set rotating display for app requested orientation.");
+        pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
+        pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
+        pw.println("    If app requested orientation should be ignored.");
+
+        printMultiWindowConfigHelp(pw);
+
+        pw.println("  reset [-d DISPLAY_ID]");
+        pw.println("    Reset all override settings.");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");
             pw.println("  logging (start | stop | enable | disable | enable-text | disable-text)");
             pw.println("    Logging settings.");
         }
+    }
+
+    private void printMultiWindowConfigHelp(PrintWriter pw) {
+        pw.println("  set-multi-window-config");
+        pw.println("    Sets options to determine if activity should be shown in multi window:");
+        pw.println("      --supportsNonResizable [configValue]");
+        pw.println("        Whether the device supports non-resizable activity in multi window.");
+        pw.println("        -1: The device doesn't support non-resizable in multi window.");
+        pw.println("         0: The device supports non-resizable in multi window only if");
+        pw.println("            this is a large screen device.");
+        pw.println("         1: The device always supports non-resizable in multi window.");
+        pw.println("      --respectsActivityMinWidthHeight [configValue]");
+        pw.println("        Whether the device checks the activity min width/height to determine ");
+        pw.println("        if it can be shown in multi window.");
+        pw.println("        -1: The device ignores the activity min width/height when determining");
+        pw.println("            if it can be shown in multi window.");
+        pw.println("         0: If this is a small screen, the device compares the activity min");
+        pw.println("            width/height with the min multi window modes dimensions");
+        pw.println("            the device supports to determine if the activity can be shown in");
+        pw.println("            multi window.");
+        pw.println("         1: The device always compare the activity min width/height with the");
+        pw.println("            min multi window dimensions the device supports to determine if");
+        pw.println("            the activity can be shown in multi window.");
+        pw.println("  get-multi-window-config");
+        pw.println("    Prints values of the multi window config options.");
+        pw.println("  reset-multi-window-config");
+        pw.println("    Resets overrides to default values of the multi window config options.");
     }
 }

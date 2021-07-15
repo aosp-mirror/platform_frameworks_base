@@ -21,14 +21,14 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
 import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -50,7 +50,7 @@ public class ViewShowHidePerfTest {
             new ActivityTestRule<>(PerfTestActivity.class);
 
     @Rule
-    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    public final BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public Context getContext() {
         return InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -143,7 +143,7 @@ public class ViewShowHidePerfTest {
 
     private void testParentWithChild(TestCallback callback) throws Throwable {
         mActivityRule.runOnUiThread(() -> {
-            final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            final BenchmarkState state = mBenchmarkRule.getState();
 
             FrameLayout parent = new FrameLayout(getContext());
             mActivityRule.getActivity().setContentView(parent);

@@ -159,21 +159,6 @@ public class ParcelPerfTest {
     }
 
     @Test
-    public void timeObtainRecycle() {
-        // Use up the pooled instances.
-        // A lot bigger than the actual size but in case someone increased it.
-        final int POOL_SIZE = 100;
-        for (int i = 0; i < POOL_SIZE; i++) {
-            Parcel.obtain();
-        }
-
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            Parcel.obtain().recycle();
-        }
-    }
-
-    @Test
     public void timeWriteException() {
         timeWriteException(false);
     }

@@ -24,6 +24,8 @@
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:gravity="center_vertical"
     android:background="@android:color/transparent"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:clipToPadding="false">
 
     <LinearLayout
@@ -32,16 +34,14 @@
         android:layout_weight="1"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="start|center_vertical"
-        android:clipToPadding="false"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+        android:clipToPadding="false">
 
         <LinearLayout
             android:id="@+id/checkbox_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
-            android:minWidth="56dp"
+            android:minWidth="48dp"
             android:minHeight="48dp"
             android:orientation="horizontal"
             android:clipToPadding="false"
@@ -61,7 +61,7 @@
                 android:id="@android:id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
+                android:maxLines="2"
                 android:textAppearance="?android:attr/textAppearanceListItem"
                 android:ellipsize="marquee" />
 
@@ -86,7 +86,7 @@
         android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:minWidth="64dp"
+        android:minWidth="@dimen/two_target_min_width"
         android:gravity="center"
         android:orientation="vertical" />
 

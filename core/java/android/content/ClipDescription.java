@@ -16,15 +16,25 @@
 
 package android.content;
 
+import android.annotation.FloatRange;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Meta-data describing the contents of a {@link ClipData}.  Provides enough
@@ -64,6 +74,29 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
 
     /**
+     * The MIME type for an activity. The ClipData must include intents with required extras
+     * {@link #EXTRA_PENDING_INTENT} and {@link Intent#EXTRA_USER}, and an optional
+     * {@link #EXTRA_ACTIVITY_OPTIONS}.
+     * @hide
+     */
+    public static final String MIMETYPE_APPLICATION_ACTIVITY = "application/vnd.android.activity";
+
+    /**
+     * The MIME type for a shortcut. The ClipData must include intents with required extras
+     * {@link Intent#EXTRA_SHORTCUT_ID}, {@link Intent#EXTRA_PACKAGE_NAME} and
+     * {@link Intent#EXTRA_USER}, and an optional {@link #EXTRA_ACTIVITY_OPTIONS}.
+     * @hide
+     */
+    public static final String MIMETYPE_APPLICATION_SHORTCUT = "application/vnd.android.shortcut";
+
+    /**
+     * The MIME type for a task. The ClipData must include an intent with a required extra
+     * {@link Intent#EXTRA_TASK_ID} of the task to launch.
+     * @hide
+     */
+    public static final String MIMETYPE_APPLICATION_TASK = "application/vnd.android.task";
+
+    /**
      * The MIME type for data whose type is otherwise unknown.
      * <p>
      * Per RFC 2046, the "application" media type is to be used for discrete
@@ -74,37 +107,56 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_UNKNOWN = "application/octet-stream";
 
     /**
-     * The name of the extra used to define a component name when copying/dragging
-     * an app icon from Launcher.
+     * The pending intent for the activity to launch.
      * <p>
-     * Type: String
-     * </p>
-     * <p>
-     * Use {@link ComponentName#unflattenFromString(String)}
-     * and {@link ComponentName#flattenToString()} to convert the extra value
-     * to/from {@link ComponentName}.
+     * Type: PendingIntent
      * </p>
      * @hide
      */
-    public static final String EXTRA_TARGET_COMPONENT_NAME =
-            "android.content.extra.TARGET_COMPONENT_NAME";
+    public static final String EXTRA_PENDING_INTENT = "android.intent.extra.PENDING_INTENT";
 
     /**
-     * The name of the extra used to define a user serial number when copying/dragging
-     * an app icon from Launcher.
+     * The activity options bundle to use when launching an activity.
      * <p>
-     * Type: long
+     * Type: Bundle
      * </p>
      * @hide
      */
-    public static final String EXTRA_USER_SERIAL_NUMBER =
-            "android.content.extra.USER_SERIAL_NUMBER";
+    public static final String EXTRA_ACTIVITY_OPTIONS = "android.intent.extra.ACTIVITY_OPTIONS";
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value =
+            { CLASSIFICATION_NOT_COMPLETE, CLASSIFICATION_NOT_PERFORMED, CLASSIFICATION_COMPLETE})
+    @interface ClassificationStatus {}
+
+    /**
+     * Value returned by {@link #getConfidenceScore(String)} if text classification has not been
+     * completed on the associated clip. This will be always be the case if the clip has not been
+     * copied to clipboard, or if there is no associated clip.
+     */
+    public static final int CLASSIFICATION_NOT_COMPLETE = 1;
+
+    /**
+     * Value returned by {@link #getConfidenceScore(String)} if text classification was not and will
+     * not be performed on the associated clip. This may be the case if the clip does not contain
+     * text in its first item, or if the text is too long.
+     */
+    public static final int CLASSIFICATION_NOT_PERFORMED = 2;
+
+    /**
+     * Value returned by {@link #getConfidenceScore(String)} if text classification has been
+     * completed.
+     */
+    public static final int CLASSIFICATION_COMPLETE = 3;
 
     final CharSequence mLabel;
     private final ArrayList<String> mMimeTypes;
     private PersistableBundle mExtras;
     private long mTimeStamp;
+    private boolean mIsStyledText;
+    private final ArrayMap<String, Float> mEntityConfidence = new ArrayMap<>();
+    private int mClassificationStatus = CLASSIFICATION_NOT_COMPLETE;
 
     /**
      * Create a new clip.
@@ -203,6 +255,24 @@ public class ClipDescription implements Parcelable {
     }
 
     /**
+     * Check whether the clip description contains any of the given MIME types.
+     *
+     * @param targetMimeTypes The target MIME types. May use patterns.
+     * @return Returns true if at least one of the MIME types in the clip description matches at
+     * least one of the target MIME types, else false.
+     *
+     * @hide
+     */
+    public boolean hasMimeType(@NonNull String[] targetMimeTypes) {
+        for (String targetMimeType : targetMimeTypes) {
+            if (hasMimeType(targetMimeType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Filter the clip description MIME types by the given MIME type.  Returns
      * all MIME types in the clip that match the given MIME type.
      *
@@ -292,35 +362,125 @@ public class ClipDescription implements Parcelable {
         }
     }
 
+    /**
+     * Returns true if the first item of the associated {@link ClipData} contains styled text, i.e.
+     * if it contains spans such as {@link android.text.style.CharacterStyle CharacterStyle}, {@link
+     * android.text.style.ParagraphStyle ParagraphStyle}, or {@link
+     * android.text.style.UpdateAppearance UpdateAppearance}. Returns false if it does not, or if
+     * there is no associated clip data.
+     */
+    public boolean isStyledText() {
+        return mIsStyledText;
+    }
+
+    /**
+     * Sets whether the associated {@link ClipData} contains styled text in its first item. This
+     * should be called when this description is associated with clip data or when the first item
+     * is added to the associated clip data.
+     */
+    void setIsStyledText(boolean isStyledText) {
+        mIsStyledText = isStyledText;
+    }
+
+    /**
+     * Sets the current status of text classification for the associated clip.
+     *
+     * @hide
+     */
+    public void setClassificationStatus(@ClassificationStatus int status) {
+        mClassificationStatus = status;
+    }
+
+    /**
+     * Returns a score indicating confidence that an instance of the given entity is present in the
+     * first item of the clip data, if that item is plain text and text classification has been
+     * performed. The value ranges from 0 (low confidence) to 1 (high confidence). 0 indicates that
+     * the entity was not found in the classified text.
+     *
+     * <p>Entities should be as defined in the {@link TextClassifier} class, such as
+     * {@link TextClassifier#TYPE_ADDRESS}, {@link TextClassifier#TYPE_URL}, or
+     * {@link TextClassifier#TYPE_EMAIL}.
+     *
+     * <p>If the result is positive for any entity, the full classification result as a
+     * {@link TextLinks} object may be obtained using the {@link ClipData.Item#getTextLinks()}
+     * method.
+     *
+     * @throws IllegalStateException if {@link #getClassificationStatus()} is not
+     * {@link #CLASSIFICATION_COMPLETE}
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    public float getConfidenceScore(@NonNull @TextClassifier.EntityType String entity) {
+        if (mClassificationStatus != CLASSIFICATION_COMPLETE) {
+            throw new IllegalStateException("Classification not complete");
+        }
+        return mEntityConfidence.getOrDefault(entity, 0f);
+    }
+
+    /**
+     * Returns {@link #CLASSIFICATION_COMPLETE} if text classification has been performed on the
+     * associated {@link ClipData}. If this is the case then {@link #getConfidenceScore} may be used
+     * to retrieve information about entities within the text. Otherwise, returns
+     * {@link #CLASSIFICATION_NOT_COMPLETE} if classification has not yet returned results, or
+     * {@link #CLASSIFICATION_NOT_PERFORMED} if classification was not attempted (e.g. because the
+     * text was too long).
+     */
+    public @ClassificationStatus int getClassificationStatus() {
+        return mClassificationStatus;
+    }
+
+    /**
+     * @hide
+     */
+    public void setConfidenceScores(Map<String, Float> confidences) {
+        mEntityConfidence.clear();
+        mEntityConfidence.putAll(confidences);
+        mClassificationStatus = CLASSIFICATION_COMPLETE;
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
 
         b.append("ClipDescription { ");
-        toShortString(b);
+        toShortString(b, true);
         b.append(" }");
 
         return b.toString();
     }
 
-    /** @hide */
-    public boolean toShortString(StringBuilder b) {
+    /**
+     * Appends this description to the given builder.
+     * @param redactContent If true, redacts common forms of PII; otherwise appends full details.
+     * @hide
+     */
+    public boolean toShortString(StringBuilder b, boolean redactContent) {
         boolean first = !toShortStringTypesOnly(b);
         if (mLabel != null) {
             if (!first) {
                 b.append(' ');
             }
             first = false;
-            b.append('"');
-            b.append(mLabel);
-            b.append('"');
+            if (redactContent) {
+                b.append("hasLabel(").append(mLabel.length()).append(')');
+            } else {
+                b.append('"').append(mLabel).append('"');
+            }
         }
         if (mExtras != null) {
             if (!first) {
                 b.append(' ');
             }
             first = false;
-            b.append(mExtras.toString());
+            if (redactContent) {
+                if (mExtras.isParcelled()) {
+                    // We don't want this toString function to trigger un-parcelling.
+                    b.append("hasExtras");
+                } else {
+                    b.append("hasExtras(").append(mExtras.size()).append(')');
+                }
+            } else {
+                b.append(mExtras.toString());
+            }
         }
         if (mTimeStamp > 0) {
             if (!first) {
@@ -381,6 +541,24 @@ public class ClipDescription implements Parcelable {
         dest.writeStringList(mMimeTypes);
         dest.writePersistableBundle(mExtras);
         dest.writeLong(mTimeStamp);
+        dest.writeBoolean(mIsStyledText);
+        dest.writeInt(mClassificationStatus);
+        dest.writeBundle(confidencesToBundle());
+    }
+
+    private Bundle confidencesToBundle() {
+        Bundle bundle = new Bundle();
+        int size = mEntityConfidence.size();
+        for (int i = 0; i < size; i++) {
+            bundle.putFloat(mEntityConfidence.keyAt(i), mEntityConfidence.valueAt(i));
+        }
+        return bundle;
+    }
+
+    private void readBundleToConfidences(Bundle bundle) {
+        for (String key : bundle.keySet()) {
+            mEntityConfidence.put(key, bundle.getFloat(key));
+        }
     }
 
     ClipDescription(Parcel in) {
@@ -388,6 +566,9 @@ public class ClipDescription implements Parcelable {
         mMimeTypes = in.createStringArrayList();
         mExtras = in.readPersistableBundle();
         mTimeStamp = in.readLong();
+        mIsStyledText = in.readBoolean();
+        mClassificationStatus = in.readInt();
+        readBundleToConfidences(in.readBundle());
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ClipDescription> CREATOR =

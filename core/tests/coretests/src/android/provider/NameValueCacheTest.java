@@ -33,6 +33,7 @@ import android.test.mock.MockContentResolver;
 import android.util.MemoryIntArray;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -73,7 +74,8 @@ public class NameValueCacheTest {
         Settings.Config.clearProviderForTest();
         MockitoAnnotations.initMocks(this);
         when(mMockContentProvider.getIContentProvider()).thenReturn(mMockIContentProvider);
-        mMockContentResolver = new MockContentResolver();
+        mMockContentResolver = new MockContentResolver(InstrumentationRegistry
+                .getInstrumentation().getContext());
         mMockContentResolver.addProvider(DeviceConfig.CONTENT_URI.getAuthority(),
                 mMockContentProvider);
         mCacheGenerationStore = new MemoryIntArray(1);
@@ -82,10 +84,10 @@ public class NameValueCacheTest {
         // Stores keyValues for a given prefix and increments the generation. (Note that this
         // increments the generation no matter what, it doesn't pay attention to if anything
         // actually changed).
-        when(mMockIContentProvider.call(any(), any(), eq(DeviceConfig.CONTENT_URI.getAuthority()),
+        when(mMockIContentProvider.call(any(), eq(DeviceConfig.CONTENT_URI.getAuthority()),
                 eq(Settings.CALL_METHOD_SET_ALL_CONFIG),
                 any(), any(Bundle.class))).thenAnswer(invocationOnMock -> {
-                    Bundle incomingBundle = invocationOnMock.getArgument(5);
+                    Bundle incomingBundle = invocationOnMock.getArgument(4);
                     HashMap<String, String> keyValues =
                             (HashMap<String, String>) incomingBundle.getSerializable(
                                     Settings.CALL_METHOD_FLAGS_KEY);
@@ -94,17 +96,18 @@ public class NameValueCacheTest {
                     mCacheGenerationStore.set(0, ++mCurrentGeneration);
 
                     Bundle result = new Bundle();
-                    result.putBoolean(Settings.KEY_CONFIG_SET_RETURN, true);
+                    result.putInt(Settings.KEY_CONFIG_SET_ALL_RETURN,
+                            Settings.SET_ALL_RESULT_SUCCESS);
                     return result;
                 });
 
         // Returns the keyValues corresponding to a namespace, or an empty map if the namespace
         // doesn't have anything stored for it. Returns the generation key if the caller asked
         // for one.
-        when(mMockIContentProvider.call(any(), any(), eq(DeviceConfig.CONTENT_URI.getAuthority()),
+        when(mMockIContentProvider.call(any(), eq(DeviceConfig.CONTENT_URI.getAuthority()),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class))).thenAnswer(invocationOnMock -> {
-                    Bundle incomingBundle = invocationOnMock.getArgument(5);
+                    Bundle incomingBundle = invocationOnMock.getArgument(4);
 
                     String prefix = incomingBundle.getString(Settings.CALL_METHOD_PREFIX_KEY);
 
@@ -132,14 +135,14 @@ public class NameValueCacheTest {
         HashMap<String, String> keyValues = new HashMap<>();
         keyValues.put("a", "b");
         Settings.Config.setStrings(mMockContentResolver, NAMESPACE, keyValues);
-        verify(mMockIContentProvider).call(any(), any(), any(),
+        verify(mMockIContentProvider).call(any(), any(),
                 eq(Settings.CALL_METHOD_SET_ALL_CONFIG),
                 any(), any(Bundle.class));
 
         Map<String, String> returnedValues = Settings.Config.getStrings(mMockContentResolver,
                 NAMESPACE,
                 Collections.emptyList());
-        verify(mMockIContentProvider).call(any(), any(), any(),
+        verify(mMockIContentProvider).call(any(), any(),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class));
         assertThat(returnedValues).containsExactlyEntriesIn(keyValues);
@@ -152,13 +155,13 @@ public class NameValueCacheTest {
         // Modify the value to invalidate the cache.
         keyValues.put("a", "c");
         Settings.Config.setStrings(mMockContentResolver, NAMESPACE, keyValues);
-        verify(mMockIContentProvider, times(2)).call(any(), any(), any(),
+        verify(mMockIContentProvider, times(2)).call(any(), any(),
                 eq(Settings.CALL_METHOD_SET_ALL_CONFIG),
                 any(), any(Bundle.class));
 
         Map<String, String> returnedValues2 = Settings.Config.getStrings(mMockContentResolver,
                 NAMESPACE, Collections.emptyList());
-        verify(mMockIContentProvider, times(2)).call(any(), any(), any(),
+        verify(mMockIContentProvider, times(2)).call(any(), any(),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class));
         assertThat(returnedValues2).containsExactlyEntriesIn(keyValues);
@@ -174,7 +177,7 @@ public class NameValueCacheTest {
         HashMap<String, String> keyValues = new HashMap<>();
         keyValues.put("a", "b");
         Settings.Config.setStrings(mMockContentResolver, NAMESPACE, keyValues);
-        verify(mMockIContentProvider).call(any(), any(), any(),
+        verify(mMockIContentProvider).call(any(), any(),
                 eq(Settings.CALL_METHOD_SET_ALL_CONFIG),
                 any(), any(Bundle.class));
 
@@ -182,14 +185,14 @@ public class NameValueCacheTest {
         keyValues2.put("c", "d");
         keyValues2.put("e", "f");
         Settings.Config.setStrings(mMockContentResolver, NAMESPACE2, keyValues2);
-        verify(mMockIContentProvider, times(2)).call(any(), any(), any(),
+        verify(mMockIContentProvider, times(2)).call(any(), any(),
                 eq(Settings.CALL_METHOD_SET_ALL_CONFIG),
                 any(), any(Bundle.class));
 
         Map<String, String> returnedValues = Settings.Config.getStrings(mMockContentResolver,
                 NAMESPACE,
                 Collections.emptyList());
-        verify(mMockIContentProvider).call(any(), any(), any(),
+        verify(mMockIContentProvider).call(any(), any(),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class));
         assertThat(returnedValues).containsExactlyEntriesIn(keyValues);
@@ -197,7 +200,7 @@ public class NameValueCacheTest {
         Map<String, String> returnedValues2 = Settings.Config.getStrings(mMockContentResolver,
                 NAMESPACE2,
                 Collections.emptyList());
-        verify(mMockIContentProvider, times(2)).call(any(), any(), any(),
+        verify(mMockIContentProvider, times(2)).call(any(), any(),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class));
         assertThat(returnedValues2).containsExactlyEntriesIn(keyValues2);
@@ -218,7 +221,7 @@ public class NameValueCacheTest {
         Map<String, String> returnedValues = Settings.Config.getStrings(mMockContentResolver,
                 NAMESPACE,
                 Collections.emptyList());
-        verify(mMockIContentProvider).call(any(), any(), any(),
+        verify(mMockIContentProvider).call(any(), any(),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class));
         assertThat(returnedValues).isEmpty();

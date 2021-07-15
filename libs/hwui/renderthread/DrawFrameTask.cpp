@@ -16,11 +16,13 @@
 
 #include "DrawFrameTask.h"
 
+#include <gui/TraceUtils.h>
 #include <utils/Log.h>
-#include <utils/Trace.h>
+#include <algorithm>
 
 #include "../DeferredLayerUpdater.h"
 #include "../DisplayList.h"
+#include "../Properties.h"
 #include "../RenderNode.h"
 #include "CanvasContext.h"
 #include "RenderThread.h"
@@ -42,6 +44,12 @@ void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context,
     mRenderThread = thread;
     mContext = context;
     mTargetNode = targetNode;
+}
+
+void DrawFrameTask::setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
+                                            std::function<void(int64_t)> reportActualWorkDuration) {
+    mUpdateTargetWorkDuration = std::move(updateTargetWorkDuration);
+    mReportActualWorkDuration = std::move(reportActualWorkDuration);
 }
 
 void DrawFrameTask::pushLayerUpdate(DeferredLayerUpdater* layer) {
@@ -82,7 +90,9 @@ void DrawFrameTask::postAndWait() {
 }
 
 void DrawFrameTask::run() {
-    ATRACE_NAME("DrawFrame");
+    const int64_t vsyncId = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameTimelineVsyncId)];
+    ATRACE_FORMAT("DrawFrames %" PRId64, vsyncId);
+    nsecs_t syncDelayDuration = systemTime(SYSTEM_TIME_MONOTONIC) - mSyncQueued;
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;
@@ -101,6 +111,9 @@ void DrawFrameTask::run() {
     CanvasContext* context = mContext;
     std::function<void(int64_t)> callback = std::move(mFrameCallback);
     mFrameCallback = nullptr;
+    int64_t intendedVsync = mFrameInfo[static_cast<int>(FrameInfoIndex::IntendedVsync)];
+    int64_t frameDeadline = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameDeadline)];
+    int64_t frameStartTime = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameStartTime)];
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
     if (canUnblockUiThread) {
@@ -113,8 +126,9 @@ void DrawFrameTask::run() {
                 [callback, frameNr = context->getFrameNumber()]() { callback(frameNr); });
     }
 
+    nsecs_t dequeueBufferDuration = 0;
     if (CC_LIKELY(canDrawThisFrame)) {
-        context->draw();
+        dequeueBufferDuration = context->draw();
     } else {
         // wait on fences so tasks don't overlap next frame
         context->waitOnFences();
@@ -123,12 +137,40 @@ void DrawFrameTask::run() {
     if (!canUnblockUiThread) {
         unblockUiThread();
     }
+
+    // These member callbacks are effectively const as they are set once during init, so it's safe
+    // to use these directly instead of making local copies.
+    if (mUpdateTargetWorkDuration && mReportActualWorkDuration) {
+        constexpr int64_t kSanityCheckLowerBound = 100000;       // 0.1ms
+        constexpr int64_t kSanityCheckUpperBound = 10000000000;  // 10s
+        int64_t targetWorkDuration = frameDeadline - intendedVsync;
+        targetWorkDuration = targetWorkDuration * Properties::targetCpuTimePercentage / 100;
+        if (targetWorkDuration > kSanityCheckLowerBound &&
+            targetWorkDuration < kSanityCheckUpperBound &&
+            targetWorkDuration != mLastTargetWorkDuration) {
+            mLastTargetWorkDuration = targetWorkDuration;
+            mUpdateTargetWorkDuration(targetWorkDuration);
+        }
+        int64_t frameDuration = systemTime(SYSTEM_TIME_MONOTONIC) - frameStartTime;
+        int64_t actualDuration = frameDuration -
+                                 (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
+                                 dequeueBufferDuration;
+        if (actualDuration > kSanityCheckLowerBound && actualDuration < kSanityCheckUpperBound) {
+            mReportActualWorkDuration(actualDuration);
+        }
+    }
+    mLastDequeueBufferDuration = dequeueBufferDuration;
 }
 
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
     int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::Vsync)];
-    mRenderThread->timeLord().vsyncReceived(vsync);
+    int64_t intendedVsync = mFrameInfo[static_cast<int>(FrameInfoIndex::IntendedVsync)];
+    int64_t vsyncId = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameTimelineVsyncId)];
+    int64_t frameDeadline = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameDeadline)];
+    int64_t frameInterval = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameInterval)];
+    mRenderThread->timeLord().vsyncReceived(vsync, intendedVsync, vsyncId, frameDeadline,
+            frameInterval);
     bool canDraw = mContext->makeCurrent();
     mContext->unpinImages();
 

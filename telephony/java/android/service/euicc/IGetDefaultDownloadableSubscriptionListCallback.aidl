@@ -20,6 +20,6 @@ import android.service.euicc.GetDefaultDownloadableSubscriptionListResult;
 
 /** @hide */
 oneway interface IGetDefaultDownloadableSubscriptionListCallback {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onComplete(in GetDefaultDownloadableSubscriptionListResult result);
 }

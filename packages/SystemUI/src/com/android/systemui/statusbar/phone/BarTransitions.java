@@ -34,8 +34,8 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -166,6 +166,7 @@ public class BarTransitions {
 
         private int mGradientAlpha;
         private int mColor;
+        private float mOverrideAlpha = 1f;
         private PorterDuffColorFilter mTintFilter;
         private Paint mPaint = new Paint();
 
@@ -193,6 +194,23 @@ public class BarTransitions {
 
         public void setFrame(Rect frame) {
             mFrame = frame;
+        }
+
+        public void setOverrideAlpha(float overrideAlpha) {
+            mOverrideAlpha = overrideAlpha;
+            invalidateSelf();
+        }
+
+        public float getOverrideAlpha() {
+            return mOverrideAlpha;
+        }
+
+        public int getColor() {
+            return mColor;
+        }
+
+        public Rect getFrame() {
+            return mFrame;
         }
 
         @Override
@@ -296,11 +314,13 @@ public class BarTransitions {
                 mGradient.setAlpha(mGradientAlpha);
                 mGradient.draw(canvas);
             }
+
             if (Color.alpha(mColor) > 0) {
                 mPaint.setColor(mColor);
                 if (mTintFilter != null) {
                     mPaint.setColorFilter(mTintFilter);
                 }
+                mPaint.setAlpha((int) (Color.alpha(mColor) * mOverrideAlpha));
                 if (mFrame != null) {
                     canvas.drawRect(mFrame, mPaint);
                 } else {

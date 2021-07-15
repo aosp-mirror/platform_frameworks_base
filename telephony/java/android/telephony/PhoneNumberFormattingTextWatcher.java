@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextWatcher;
@@ -50,7 +51,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
      */
     private boolean mStopFormatting;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private AsYouTypeFormatter mFormatter;
 
     /**

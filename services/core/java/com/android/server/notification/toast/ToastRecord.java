@@ -31,6 +31,7 @@ public abstract class ToastRecord {
     public final int uid;
     public final int pid;
     public final String pkg;
+    public final boolean isSystemToast;
     public final IBinder token;
     public final int displayId;
     public final Binder windowToken;
@@ -38,11 +39,13 @@ public abstract class ToastRecord {
     private int mDuration;
 
     protected ToastRecord(NotificationManagerService notificationManager, int uid, int pid,
-            String pkg, IBinder token, int duration, Binder windowToken, int displayId) {
+            String pkg, boolean isSystemToast, IBinder token, int duration, Binder windowToken,
+            int displayId) {
         this.mNotificationManager = notificationManager;
         this.uid = uid;
         this.pid = pid;
         this.pkg = pkg;
+        this.isSystemToast = isSystemToast;
         this.token = token;
         this.windowToken = windowToken;
         this.displayId = displayId;
@@ -85,4 +88,20 @@ public abstract class ToastRecord {
         }
         pw.println(prefix + this);
     }
+
+    /**
+     * Returns whether it's necessary to bump the process state to keep it alive in order to show
+     * the toast.
+     */
+    public boolean keepProcessAlive() {
+        // By default we assume the toast is rendered by the systemUI. Any toast rendered by the app
+        // should override this method.
+        return false;
+    }
+
+    /**
+     * Returns true if the app is responsible for rendering the toast, false otherwise (for example,
+     * if it's rendered by the system).
+     */
+    public abstract boolean isAppRendered();
 }

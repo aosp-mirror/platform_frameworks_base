@@ -19,6 +19,7 @@ package android.preference;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -73,7 +74,7 @@ public class SeekBarPreference extends Preference
         this(context, attrs, com.android.internal.R.attr.seekBarPreferenceStyle);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public SeekBarPreference(Context context) {
         this(context, null);
     }

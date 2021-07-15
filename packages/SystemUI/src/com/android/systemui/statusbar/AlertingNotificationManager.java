@@ -185,6 +185,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         mAlertEntries.put(entry.getKey(), alertEntry);
         onAlertEntryAdded(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        entry.setIsAlerting(true);
     }
 
     /**
@@ -203,6 +204,12 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
             return;
         }
         NotificationEntry entry = alertEntry.mEntry;
+
+        // If the notification is animating, we will remove it at the end of the animation.
+        if (entry != null && entry.isExpandAnimationRunning()) {
+            return;
+        }
+
         mAlertEntries.remove(key);
         onAlertEntryRemoved(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);

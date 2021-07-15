@@ -27,10 +27,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.DemoMode;
 import com.android.systemui.R;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -39,23 +40,31 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconStat
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 import java.util.ArrayList;
+import java.util.List;
 
+//TODO: This should be a controller, not its own view
 public class DemoStatusIcons extends StatusIconContainer implements DemoMode, DarkReceiver {
     private static final String TAG = "DemoStatusIcons";
 
     private final LinearLayout mStatusIcons;
     private final ArrayList<StatusBarMobileView> mMobileViews = new ArrayList<>();
     private final int mIconSize;
+    private final FeatureFlags mFeatureFlags;
 
     private StatusBarWifiView mWifiView;
     private boolean mDemoMode;
     private int mColor;
 
-    public DemoStatusIcons(LinearLayout statusIcons, int iconSize) {
+    public DemoStatusIcons(
+            LinearLayout statusIcons,
+            int iconSize,
+            FeatureFlags featureFlags
+    ) {
         super(statusIcons.getContext());
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
+        mFeatureFlags = featureFlags;
 
         if (statusIcons instanceof StatusIconContainer) {
             setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
@@ -90,73 +99,84 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     }
 
     @Override
+    public List<String> demoCommands() {
+        List<String> commands = new ArrayList<>();
+        commands.add(COMMAND_STATUS);
+        return commands;
+    }
+
+    @Override
+    public void onDemoModeStarted() {
+        mDemoMode = true;
+        mStatusIcons.setVisibility(View.GONE);
+        setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        mDemoMode = false;
+        mStatusIcons.setVisibility(View.VISIBLE);
+        setVisibility(View.GONE);
+    }
+
+    @Override
     public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mDemoMode = true;
-            mStatusIcons.setVisibility(View.GONE);
-            setVisibility(View.VISIBLE);
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            mStatusIcons.setVisibility(View.VISIBLE);
-            setVisibility(View.GONE);
-        } else if (mDemoMode && command.equals(COMMAND_STATUS)) {
-            String volume = args.getString("volume");
-            if (volume != null) {
-                int iconId = volume.equals("vibrate") ? R.drawable.stat_sys_ringer_vibrate
-                        : 0;
-                updateSlot("volume", null, iconId);
-            }
-            String zen = args.getString("zen");
-            if (zen != null) {
-                int iconId = zen.equals("dnd") ? R.drawable.stat_sys_dnd : 0;
-                updateSlot("zen", null, iconId);
-            }
-            String bt = args.getString("bluetooth");
-            if (bt != null) {
-                int iconId = bt.equals("connected")
-                        ? R.drawable.stat_sys_data_bluetooth_connected : 0;
-                updateSlot("bluetooth", null, iconId);
-            }
-            String location = args.getString("location");
-            if (location != null) {
-                int iconId = location.equals("show") ? PhoneStatusBarPolicy.LOCATION_STATUS_ICON_ID
-                        : 0;
-                updateSlot("location", null, iconId);
-            }
-            String alarm = args.getString("alarm");
-            if (alarm != null) {
-                int iconId = alarm.equals("show") ? R.drawable.stat_sys_alarm
-                        : 0;
-                updateSlot("alarm_clock", null, iconId);
-            }
-            String tty = args.getString("tty");
-            if (tty != null) {
-                int iconId = tty.equals("show") ? R.drawable.stat_sys_tty_mode
-                        : 0;
-                updateSlot("tty", null, iconId);
-            }
-            String mute = args.getString("mute");
-            if (mute != null) {
-                int iconId = mute.equals("show") ? android.R.drawable.stat_notify_call_mute
-                        : 0;
-                updateSlot("mute", null, iconId);
-            }
-            String speakerphone = args.getString("speakerphone");
-            if (speakerphone != null) {
-                int iconId = speakerphone.equals("show") ? android.R.drawable.stat_sys_speakerphone
-                        : 0;
-                updateSlot("speakerphone", null, iconId);
-            }
-            String cast = args.getString("cast");
-            if (cast != null) {
-                int iconId = cast.equals("show") ? R.drawable.stat_sys_cast : 0;
-                updateSlot("cast", null, iconId);
-            }
-            String hotspot = args.getString("hotspot");
-            if (hotspot != null) {
-                int iconId = hotspot.equals("show") ? R.drawable.stat_sys_hotspot : 0;
-                updateSlot("hotspot", null, iconId);
-            }
+        String volume = args.getString("volume");
+        if (volume != null) {
+            int iconId = volume.equals("vibrate") ? R.drawable.stat_sys_ringer_vibrate
+                    : 0;
+            updateSlot("volume", null, iconId);
+        }
+        String zen = args.getString("zen");
+        if (zen != null) {
+            int iconId = zen.equals("dnd") ? R.drawable.stat_sys_dnd : 0;
+            updateSlot("zen", null, iconId);
+        }
+        String bt = args.getString("bluetooth");
+        if (bt != null) {
+            int iconId = bt.equals("connected")
+                    ? R.drawable.stat_sys_data_bluetooth_connected : 0;
+            updateSlot("bluetooth", null, iconId);
+        }
+        String location = args.getString("location");
+        if (location != null) {
+            int iconId = location.equals("show") ? PhoneStatusBarPolicy.LOCATION_STATUS_ICON_ID
+                    : 0;
+            updateSlot("location", null, iconId);
+        }
+        String alarm = args.getString("alarm");
+        if (alarm != null) {
+            int iconId = alarm.equals("show") ? R.drawable.stat_sys_alarm
+                    : 0;
+            updateSlot("alarm_clock", null, iconId);
+        }
+        String tty = args.getString("tty");
+        if (tty != null) {
+            int iconId = tty.equals("show") ? R.drawable.stat_sys_tty_mode
+                    : 0;
+            updateSlot("tty", null, iconId);
+        }
+        String mute = args.getString("mute");
+        if (mute != null) {
+            int iconId = mute.equals("show") ? android.R.drawable.stat_notify_call_mute
+                    : 0;
+            updateSlot("mute", null, iconId);
+        }
+        String speakerphone = args.getString("speakerphone");
+        if (speakerphone != null) {
+            int iconId = speakerphone.equals("show") ? android.R.drawable.stat_sys_speakerphone
+                    : 0;
+            updateSlot("speakerphone", null, iconId);
+        }
+        String cast = args.getString("cast");
+        if (cast != null) {
+            int iconId = cast.equals("show") ? R.drawable.stat_sys_cast : 0;
+            updateSlot("cast", null, iconId);
+        }
+        String hotspot = args.getString("hotspot");
+        if (hotspot != null) {
+            int iconId = hotspot.equals("show") ? R.drawable.stat_sys_hotspot : 0;
+            updateSlot("hotspot", null, iconId);
         }
     }
 
@@ -234,7 +254,8 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void addMobileView(MobileIconState state) {
         Log.d(TAG, "addMobileView: ");
-        StatusBarMobileView view = StatusBarMobileView.fromContext(mContext, state.slot);
+        StatusBarMobileView view = StatusBarMobileView.fromContext(
+                mContext, state.slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
 
         view.applyMobileState(state);
         view.setStaticDrawableColor(mColor);

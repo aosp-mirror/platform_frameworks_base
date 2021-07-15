@@ -25,6 +25,9 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -41,15 +44,16 @@
         android:supportsRtl="true">
 
         <service
-            android:name=".DeviceDiscoveryService"
+            android:name=".CompanionDeviceDiscoveryService"
             android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
             android:exported="true">
         </service>
 
         <activity
-            android:name=".DeviceChooserActivity"
+            android:name=".CompanionDeviceActivity"
             android:theme="@style/ChooserActivity"
-            android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE">
+            android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
+            android:exported="true">
             <!--TODO include url scheme filter similar to PrintSpooler -->
             <intent-filter>
                 <action android:name="android.companiondevice.START_DISCOVERY" />

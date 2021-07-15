@@ -20,7 +20,7 @@ option java_multiple_files = true;
 package android.app;
 
 import "frameworks/base/core/proto/android/privacy.proto";
-import "frameworks/base/core/proto/android/app/appexit_enums.proto";
+import "frameworks/proto_logging/stats/enums/app/enums.proto";
 
 /**
  * An android.app.ApplicationExitInfo object.

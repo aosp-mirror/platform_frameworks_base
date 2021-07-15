@@ -15,15 +15,17 @@
       "name": "OverlayHostTests"
     },
     {
-      "name": "OverlayRemountedTest"
-    },
-    {
       "name": "CtsAppSecurityHostTestCases",
       "options": [
         {
           "include-filter": "android.appsecurity.cts.OverlayHostTest"
         }
       ]
+    }
+  ],
+  "presubmit-large": [
+    {
+      "name": "OverlayRemountedTest"
     }
   ]
 }

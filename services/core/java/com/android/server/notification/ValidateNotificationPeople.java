@@ -523,27 +523,39 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             if (VERBOSE) Slog.i(TAG, "Executing: validation for: " + mKey);
             long timeStartMs = System.currentTimeMillis();
             for (final String handle: mPendingLookups) {
+                final String cacheKey = getCacheKey(mContext.getUserId(), handle);
                 LookupResult lookupResult = null;
-                final Uri uri = Uri.parse(handle);
-                if ("tel".equals(uri.getScheme())) {
-                    if (DEBUG) Slog.d(TAG, "checking telephone URI: " + handle);
-                    lookupResult = resolvePhoneContact(mContext, uri.getSchemeSpecificPart());
-                } else if ("mailto".equals(uri.getScheme())) {
-                    if (DEBUG) Slog.d(TAG, "checking mailto URI: " + handle);
-                    lookupResult = resolveEmailContact(mContext, uri.getSchemeSpecificPart());
-                } else if (handle.startsWith(Contacts.CONTENT_LOOKUP_URI.toString())) {
-                    if (DEBUG) Slog.d(TAG, "checking lookup URI: " + handle);
-                    lookupResult = searchContacts(mContext, uri);
-                } else {
-                    lookupResult = new LookupResult();  // invalid person for the cache
-                    if (!"name".equals(uri.getScheme())) {
-                        Slog.w(TAG, "unsupported URI " + handle);
+                boolean cacheHit = false;
+                synchronized (mPeopleCache) {
+                    lookupResult = mPeopleCache.get(cacheKey);
+                    if (lookupResult != null && !lookupResult.isExpired()) {
+                        // The name wasn't already added to the cache, no need to retry
+                        cacheHit = true;
+                    }
+                }
+                if (!cacheHit) {
+                    final Uri uri = Uri.parse(handle);
+                    if ("tel".equals(uri.getScheme())) {
+                        if (DEBUG) Slog.d(TAG, "checking telephone URI: " + handle);
+                        lookupResult = resolvePhoneContact(mContext, uri.getSchemeSpecificPart());
+                    } else if ("mailto".equals(uri.getScheme())) {
+                        if (DEBUG) Slog.d(TAG, "checking mailto URI: " + handle);
+                        lookupResult = resolveEmailContact(mContext, uri.getSchemeSpecificPart());
+                    } else if (handle.startsWith(Contacts.CONTENT_LOOKUP_URI.toString())) {
+                        if (DEBUG) Slog.d(TAG, "checking lookup URI: " + handle);
+                        lookupResult = searchContacts(mContext, uri);
+                    } else {
+                        lookupResult = new LookupResult();  // invalid person for the cache
+                        if (!"name".equals(uri.getScheme())) {
+                            Slog.w(TAG, "unsupported URI " + handle);
+                        }
                     }
                 }
                 if (lookupResult != null) {
-                    synchronized (mPeopleCache) {
-                        final String cacheKey = getCacheKey(mContext.getUserId(), handle);
-                        mPeopleCache.put(cacheKey, lookupResult);
+                    if (!cacheHit) {
+                        synchronized (mPeopleCache) {
+                            mPeopleCache.put(cacheKey, lookupResult);
+                        }
                     }
                     if (DEBUG) {
                         Slog.d(TAG, "lookup contactAffinity is " + lookupResult.getAffinity());
@@ -580,4 +592,3 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
     }
 }
-

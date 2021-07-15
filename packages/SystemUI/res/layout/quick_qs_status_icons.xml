@@ -18,39 +18,73 @@
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/quick_qs_status_icons"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="@dimen/qs_header_top_padding"
-    android:paddingBottom="@dimen/qs_header_bottom_padding"
-    android:layout_below="@id/quick_status_bar_system_icons"
+    android:layout_height="@*android:dimen/quick_qs_offset_height"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="20dp"
+    android:minHeight="48dp"
     android:clickable="false"
     android:focusable="true"
-    android:theme="@style/QSHeaderTheme">
+    android:theme="@style/Theme.SystemUI.QuickSettings.Header">
 
-    <com.android.systemui.statusbar.policy.DateView
-        android:id="@+id/date"
+    <com.android.systemui.statusbar.policy.Clock
+        android:id="@+id/clock"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:gravity="center_vertical"
+        android:layout_height="match_parent"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:gravity="center_vertical|start"
+        android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
+        android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.QS.Status"
-        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+        android:textAppearance="@style/TextAppearance.QS.Status" />
 
-    <com.android.systemui.statusbar.phone.StatusIconContainer
-        android:id="@+id/statusIcons"
+    <include layout="@layout/qs_carrier_group"
+        android:id="@+id/carrier_group"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+        android:minHeight="48dp"
+        android:minWidth="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_gravity="end|center_vertical"
+        android:focusable="false"/>
 
-    <com.android.systemui.BatteryMeterView
-        android:id="@+id/batteryRemainingIcon"
+    <View
+        android:id="@+id/separator"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        />
+
+    <FrameLayout
+        android:id="@+id/rightLayout"
         android:layout_width="wrap_content"
-        systemui:textAppearance="@style/TextAppearance.QS.Status"
-        android:paddingEnd="2dp" />
+        android:layout_height="match_parent"
+        android:gravity="end"
+        >
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|end"
+        >
+        <com.android.systemui.statusbar.phone.StatusIconContainer
+            android:id="@+id/statusIcons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+
+        <com.android.systemui.BatteryMeterView
+            android:id="@+id/batteryRemainingIcon"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            systemui:textAppearance="@style/TextAppearance.QS.Status"
+            android:paddingEnd="2dp" />
+
+    </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

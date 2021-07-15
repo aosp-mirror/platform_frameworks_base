@@ -326,4 +326,18 @@ public abstract class UsageStatsManagerInternal {
      * @return {@code true} if the updating was successful, {@code false} otherwise
      */
     public abstract boolean updatePackageMappingsData();
+
+    /**
+     * Listener interface for usage events.
+     */
+    public interface UsageEventListener {
+        /** Callback to inform listeners of a new usage event. */
+        void onUsageEvent(@UserIdInt int userId, @NonNull UsageEvents.Event event);
+    }
+
+    /** Register a listener that will be notified of every new usage event. */
+    public abstract void registerListener(@NonNull UsageEventListener listener);
+
+    /** Unregister a listener from being notified of every new usage event. */
+    public abstract void unregisterListener(@NonNull UsageEventListener listener);
 }

@@ -16,6 +16,8 @@
 
 package android.database;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -23,6 +25,8 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import java.io.Closeable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,12 +60,23 @@ public interface Cursor extends Closeable {
     /** Value returned by {@link #getType(int)} if the specified column type is blob */
     static final int FIELD_TYPE_BLOB = 4;
 
+    /** @hide */
+    @IntDef(prefix = { "FIELD_TYPE_" }, value = {
+            FIELD_TYPE_NULL,
+            FIELD_TYPE_INTEGER,
+            FIELD_TYPE_FLOAT,
+            FIELD_TYPE_STRING,
+            FIELD_TYPE_BLOB,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FieldType {}
+
     /**
      * Returns the numbers of rows in the cursor.
      *
      * @return the number of rows in the cursor.
      */
-    int getCount();
+    @IntRange(from = 0) int getCount();
 
     /**
      * Returns the current position of the cursor in the row set.
@@ -72,7 +87,7 @@ public interface Cursor extends Closeable {
      *
      * @return the current cursor position.
      */
-    int getPosition();
+    @IntRange(from = -1) int getPosition();
 
     /**
      * Move the cursor by a relative amount, forward or backward, from the
@@ -101,7 +116,7 @@ public interface Cursor extends Closeable {
      * @param position the zero-based position to move to.
      * @return whether the requested move fully succeeded.
      */
-    boolean moveToPosition(int position);
+    boolean moveToPosition(@IntRange(from = -1) int position);
 
     /**
      * Move the cursor to the first row.
@@ -181,7 +196,7 @@ public interface Cursor extends Closeable {
      * the column name does not exist.
      * @see #getColumnIndexOrThrow(String)
      */
-    int getColumnIndex(String columnName);
+    @IntRange(from = -1) int getColumnIndex(String columnName);
 
     /**
      * Returns the zero-based index for the given column name, or throws
@@ -194,7 +209,8 @@ public interface Cursor extends Closeable {
      * @see #getColumnIndex(String)
      * @throws IllegalArgumentException if the column does not exist
      */
-    int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException;
+    @IntRange(from = 0) int getColumnIndexOrThrow(String columnName)
+            throws IllegalArgumentException;
 
     /**
      * Returns the column name at the given zero-based column index.
@@ -202,7 +218,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the column name for the given column index.
      */
-    String getColumnName(int columnIndex);
+    String getColumnName(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns a string array holding the names of all of the columns in the
@@ -216,7 +232,7 @@ public interface Cursor extends Closeable {
      * Return total number of columns
      * @return number of columns 
      */
-    int getColumnCount();
+    @IntRange(from = 0) int getColumnCount();
     
     /**
      * Returns the value of the requested column as a byte array.
@@ -228,7 +244,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a byte array.
      */
-    byte[] getBlob(int columnIndex);
+    byte[] getBlob(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns the value of the requested column as a String.
@@ -240,7 +256,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a String.
      */
-    String getString(int columnIndex);
+    String getString(@IntRange(from = 0) int columnIndex);
     
     /**
      * Retrieves the requested column text and stores it in the buffer provided.
@@ -250,7 +266,7 @@ public interface Cursor extends Closeable {
      *        if the target column is null, return buffer
      * @param buffer the buffer to copy the text into. 
      */
-    void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer);
+    void copyStringToBuffer(@IntRange(from = 0) int columnIndex, CharArrayBuffer buffer);
     
     /**
      * Returns the value of the requested column as a short.
@@ -263,7 +279,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a short.
      */
-    short getShort(int columnIndex);
+    short getShort(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns the value of the requested column as an int.
@@ -276,7 +292,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as an int.
      */
-    int getInt(int columnIndex);
+    int getInt(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns the value of the requested column as a long.
@@ -289,7 +305,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a long.
      */
-    long getLong(int columnIndex);
+    long getLong(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns the value of the requested column as a float.
@@ -302,7 +318,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a float.
      */
-    float getFloat(int columnIndex);
+    float getFloat(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns the value of the requested column as a double.
@@ -315,28 +331,18 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a double.
      */
-    double getDouble(int columnIndex);
+    double getDouble(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns data type of the given column's value.
      * The preferred type of the column is returned but the data may be converted to other types
      * as documented in the get-type methods such as {@link #getInt(int)}, {@link #getFloat(int)}
      * etc.
-     *<p>
-     * Returned column types are
-     * <ul>
-     *   <li>{@link #FIELD_TYPE_NULL}</li>
-     *   <li>{@link #FIELD_TYPE_INTEGER}</li>
-     *   <li>{@link #FIELD_TYPE_FLOAT}</li>
-     *   <li>{@link #FIELD_TYPE_STRING}</li>
-     *   <li>{@link #FIELD_TYPE_BLOB}</li>
-     *</ul>
-     *</p>
      *
      * @param columnIndex the zero-based index of the target column.
      * @return column value type
      */
-    int getType(int columnIndex);
+    @FieldType int getType(@IntRange(from = 0) int columnIndex);
 
     /**
      * Returns <code>true</code> if the value in the indicated column is null.
@@ -344,7 +350,7 @@ public interface Cursor extends Closeable {
      * @param columnIndex the zero-based index of the target column.
      * @return whether the column value is null.
      */
-    boolean isNull(int columnIndex);
+    boolean isNull(@IntRange(from = 0) int columnIndex);
 
     /**
      * Deactivates the Cursor, making all calls on it fail until {@link #requery} is called.

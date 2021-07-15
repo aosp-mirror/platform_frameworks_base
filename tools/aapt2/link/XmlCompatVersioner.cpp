@@ -23,9 +23,10 @@
 namespace aapt {
 
 static xml::Attribute CopyAttr(const xml::Attribute& src, StringPool* out_string_pool) {
+  CloningValueTransformer cloner(out_string_pool);
   xml::Attribute dst{src.namespace_uri, src.name, src.value, src.compiled_attribute};
   if (src.compiled_value != nullptr) {
-    dst.compiled_value.reset(src.compiled_value->Clone(out_string_pool));
+    dst.compiled_value = src.compiled_value->Transform(cloner);
   }
   return dst;
 }
@@ -34,6 +35,7 @@ static xml::Attribute CopyAttr(const xml::Attribute& src, StringPool* out_string
 // (came from a rule).
 static bool CopyAttribute(const xml::Attribute& src_attr, bool generated, xml::Element* dst_el,
                           StringPool* out_string_pool) {
+  CloningValueTransformer cloner(out_string_pool);
   xml::Attribute* dst_attr = dst_el->FindAttribute(src_attr.namespace_uri, src_attr.name);
   if (dst_attr != nullptr) {
     if (generated) {
@@ -41,7 +43,7 @@ static bool CopyAttribute(const xml::Attribute& src_attr, bool generated, xml::E
       dst_attr->value = src_attr.value;
       dst_attr->compiled_attribute = src_attr.compiled_attribute;
       if (src_attr.compiled_value != nullptr) {
-        dst_attr->compiled_value.reset(src_attr.compiled_value->Clone(out_string_pool));
+        dst_attr->compiled_value = src_attr.compiled_value->Transform(cloner);
       }
       return true;
     }
@@ -143,8 +145,8 @@ std::vector<std::unique_ptr<xml::XmlResource>> XmlCompatVersioner::Process(
 
   // Iterate from smallest to largest API version.
   for (ApiVersion api : apis_referenced) {
-    std::set<ApiVersion> dummy;
-    versioned_docs.push_back(ProcessDoc(api, api_range.end, doc, &dummy));
+    std::set<ApiVersion> tmp;
+    versioned_docs.push_back(ProcessDoc(api, api_range.end, doc, &tmp));
   }
   return versioned_docs;
 }
@@ -158,7 +160,8 @@ static inline std::unique_ptr<Item> CloneIfNotNull(const std::unique_ptr<Item>& 
   if (src == nullptr) {
     return {};
   }
-  return std::unique_ptr<Item>(src->Clone(out_string_pool));
+  CloningValueTransformer cloner(out_string_pool);
+  return src->Transform(cloner);
 }
 
 std::vector<DegradeResult> DegradeToManyRule::Degrade(const xml::Element& src_el,

@@ -2,6 +2,7 @@
 #define _ANDROID_GRAPHICS_CREATE_JAVA_OUTPUT_STREAM_ADAPTOR_H_
 
 #include "jni.h"
+#include "SkData.h"
 
 class SkMemoryStream;
 class SkStream;
@@ -27,15 +28,14 @@ SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream, jbyteArray s
                                        bool swallowExceptions = true);
 
 /**
- *  Copy a Java InputStream. The result will be rewindable.
+ *  Copy a Java InputStream to an SkData.
  *  @param env JNIEnv object.
  *  @param stream Pointer to Java InputStream.
  *  @param storage Java byte array for retrieving data from the
  *      Java InputStream.
- *  @return SkStreamRewindable The data in stream will be copied
- *      to a new SkStreamRewindable.
+ *  @return SkData containing the stream's data.
  */
-SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream, jbyteArray storage);
+sk_sp<SkData> CopyJavaInputStream(JNIEnv* env, jobject stream, jbyteArray storage);
 
 SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream, jbyteArray storage);
 

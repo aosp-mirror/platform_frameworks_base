@@ -16,19 +16,18 @@
 
 #include "GraphicsStatsService.h"
 
+#include <android/util/ProtoOutputStream.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <inttypes.h>
 #include <log/log.h>
+#include <stats_event.h>
+#include <statslog_hwui.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <android/util/ProtoOutputStream.h>
-#include <stats_event.h>
-#include <statslog.h>
 
 #include "JankTracker.h"
 #include "protos/graphicsstats.pb.h"
@@ -539,7 +538,7 @@ void GraphicsStatsService::finishDumpInMemory(Dump* dump, AStatsEventList* data,
     for (int stat_index = 0; stat_index < serviceDump.stats_size(); stat_index++) {
         auto& stat = serviceDump.stats(stat_index);
         AStatsEvent* event = AStatsEventList_addStatsEvent(data);
-        AStatsEvent_setAtomId(event, android::util::GRAPHICS_STATS);
+        AStatsEvent_setAtomId(event, stats::GRAPHICS_STATS);
         AStatsEvent_writeString(event, stat.package_name().c_str());
         AStatsEvent_writeInt64(event, (int64_t)stat.version_code());
         AStatsEvent_writeInt64(event, (int64_t)stat.stats_start());

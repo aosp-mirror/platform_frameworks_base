@@ -266,7 +266,7 @@ public final class MessageQueue {
     }
 
     // Called from native code.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int dispatchEvents(int fd, int events) {
         // Get the file descriptor record and any state that might change.
         final FileDescriptorRecord record;
@@ -635,7 +635,7 @@ public final class MessageQueue {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean hasMessages(Handler h, Runnable r, Object object) {
         if (h == null) {
             return false;
@@ -726,7 +726,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 if (n != null) {
                     if (n.target == h && n.what == what
-                            && (object == null || object.equals(n.obj))) {
+                        && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         n.recycleUnchecked();
                         p.next = nn;
@@ -794,7 +794,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 if (n != null) {
                     if (n.target == h && n.callback == r
-                            && (object == null || object.equals(n.obj))) {
+                        && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         n.recycleUnchecked();
                         p.next = nn;

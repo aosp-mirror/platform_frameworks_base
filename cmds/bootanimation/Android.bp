@@ -1,3 +1,12 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_defaults {
     name: "bootanimation_defaults",
 
@@ -27,6 +36,8 @@ cc_defaults {
 cc_binary {
     name: "bootanimation",
     defaults: ["bootanimation_defaults"],
+
+    header_libs: ["jni_headers"],
 
     shared_libs: [
         "libOpenSLES",
@@ -58,7 +69,7 @@ cc_library_shared {
 
     shared_libs: [
         "libui",
-        "libhwui",
+        "libjnigraphics",
         "libEGL",
         "libGLESv1_CM",
         "libgui",

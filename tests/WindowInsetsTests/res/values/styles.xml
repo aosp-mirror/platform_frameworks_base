@@ -17,7 +17,7 @@
 
 <resources>
 
-    <style name="appTheme" parent="@style/Theme.MaterialComponents.Light">
+    <style name="chat" parent="@style/Theme.MaterialComponents.Light">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
@@ -63,5 +63,11 @@
     <dimen name="bubble_padding">8dp</dimen>
     <dimen name="bubble_padding_side">16dp</dimen>
 
+    <style name="controller" parent="android:Theme.Material">
+        <item name="android:colorPrimaryDark">#111111</item>
+        <item name="android:navigationBarColor">#111111</item>
+        <item name="android:colorPrimary">#222222</item>
+        <item name="android:colorAccent">#33ccff</item>
+    </style>
 
 </resources>

@@ -52,7 +52,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_INPUT = 1L << 2;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final long TRACE_TAG_VIEW = 1L << 3;
     /** @hide */
     public static final long TRACE_TAG_WEBVIEW = 1L << 4;
@@ -101,6 +101,8 @@ public final class Trace {
     public static final long TRACE_TAG_NNAPI = 1L << 25;
     /** @hide */
     public static final long TRACE_TAG_RRO = 1L << 26;
+    /** @hide */
+    public static final long TRACE_TAG_SYSPROP = 1L << 27;
     /** @hide */
     public static final long TRACE_TAG_APEX_MANAGER = 1L << 18;
 
@@ -166,8 +168,10 @@ public final class Trace {
     }
 
     /**
-     * Set whether application tracing is allowed for this process.  This is intended to be set
-     * once at application start-up time based on whether the application is debuggable.
+     * From Android S, this is no-op.
+     *
+     * Before, set whether application tracing is allowed for this process.  This is intended to be
+     * set once at application start-up time based on whether the application is debuggable.
      *
      * @hide
      */

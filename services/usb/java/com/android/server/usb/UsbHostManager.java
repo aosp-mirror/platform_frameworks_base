@@ -62,7 +62,7 @@ public class UsbHostManager {
     private final Context mContext;
 
     // USB busses to exclude from USB host support
-    private final String[] mHostBlacklist;
+    private final String[] mHostDenyList;
 
     private final UsbAlsaManager mUsbAlsaManager;
     private final UsbPermissionManager mPermissionManager;
@@ -235,8 +235,8 @@ public class UsbHostManager {
             UsbPermissionManager permissionManager) {
         mContext = context;
 
-        mHostBlacklist = context.getResources().getStringArray(
-                com.android.internal.R.array.config_usbHostBlacklist);
+        mHostDenyList = context.getResources().getStringArray(
+                com.android.internal.R.array.config_usbHostDenylist);
         mUsbAlsaManager = alsaManager;
         mPermissionManager = permissionManager;
         String deviceConnectionHandler = context.getResources().getString(
@@ -271,10 +271,10 @@ public class UsbHostManager {
         }
     }
 
-    private boolean isBlackListed(String deviceAddress) {
-        int count = mHostBlacklist.length;
+    private boolean isDenyListed(String deviceAddress) {
+        int count = mHostDenyList.length;
         for (int i = 0; i < count; i++) {
-            if (deviceAddress.startsWith(mHostBlacklist[i])) {
+            if (deviceAddress.startsWith(mHostDenyList[i])) {
                 return true;
             }
         }
@@ -282,11 +282,11 @@ public class UsbHostManager {
     }
 
     /* returns true if the USB device should not be accessible by applications */
-    private boolean isBlackListed(int clazz, int subClass) {
-        // blacklist hubs
+    private boolean isDenyListed(int clazz, int subClass) {
+        // deny hubs
         if (clazz == UsbConstants.USB_CLASS_HUB) return true;
 
-        // blacklist HID boot devices (mouse and keyboard)
+        // deny HID boot devices (mouse and keyboard)
         return clazz == UsbConstants.USB_CLASS_HID
                 && subClass == UsbConstants.USB_INTERFACE_SUBCLASS_BOOT;
 
@@ -355,23 +355,23 @@ public class UsbHostManager {
             Slog.d(TAG, "usbDeviceAdded(" + deviceAddress + ") - start");
         }
 
-        if (isBlackListed(deviceAddress)) {
+        if (isDenyListed(deviceAddress)) {
             if (DEBUG) {
-                Slog.d(TAG, "device address is black listed");
+                Slog.d(TAG, "device address is Deny listed");
             }
             return false;
         }
 
-        if (isBlackListed(deviceClass, deviceSubclass)) {
+        if (isDenyListed(deviceClass, deviceSubclass)) {
             if (DEBUG) {
-                Slog.d(TAG, "device class is black listed");
+                Slog.d(TAG, "device class is deny listed");
             }
             return false;
         }
 
         UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
         if (deviceClass == UsbConstants.USB_CLASS_PER_INTERFACE
-                && !checkUsbInterfacesBlackListed(parser)) {
+                && !checkUsbInterfacesDenyListed(parser)) {
             return false;
         }
 
@@ -491,12 +491,12 @@ public class UsbHostManager {
     public ParcelFileDescriptor openDevice(String deviceAddress,
             UsbUserPermissionManager permissions, String packageName, int pid, int uid) {
         synchronized (mLock) {
-            if (isBlackListed(deviceAddress)) {
+            if (isDenyListed(deviceAddress)) {
                 throw new SecurityException("USB device is on a restricted bus");
             }
             UsbDevice device = mDevices.get(deviceAddress);
             if (device == null) {
-                // if it is not in mDevices, it either does not exist or is blacklisted
+                // if it is not in mDevices, it either does not exist or is denylisted
                 throw new IllegalArgumentException(
                         "device " + deviceAddress + " does not exist or is restricted");
             }
@@ -554,23 +554,23 @@ public class UsbHostManager {
         }
     }
 
-    private boolean checkUsbInterfacesBlackListed(UsbDescriptorParser parser) {
+    private boolean checkUsbInterfacesDenyListed(UsbDescriptorParser parser) {
         // Device class needs to be obtained through the device interface.  Ignore device only
-        // if ALL interfaces are black-listed.
+        // if ALL interfaces are deny-listed.
         boolean shouldIgnoreDevice = false;
         for (UsbDescriptor descriptor: parser.getDescriptors()) {
             if (!(descriptor instanceof UsbInterfaceDescriptor)) {
                 continue;
             }
             UsbInterfaceDescriptor iface = (UsbInterfaceDescriptor) descriptor;
-            shouldIgnoreDevice = isBlackListed(iface.getUsbClass(), iface.getUsbSubclass());
+            shouldIgnoreDevice = isDenyListed(iface.getUsbClass(), iface.getUsbSubclass());
             if (!shouldIgnoreDevice) {
                 break;
             }
         }
         if (shouldIgnoreDevice) {
             if (DEBUG) {
-                Slog.d(TAG, "usb interface class is black listed");
+                Slog.d(TAG, "usb interface class is deny listed");
             }
             return false;
         }

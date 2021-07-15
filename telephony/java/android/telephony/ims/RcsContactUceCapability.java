@@ -16,10 +16,12 @@
 
 package android.telephony.ims;
 
-import android.annotation.LongDef;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,124 +29,91 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Contains the User Capability Exchange capabilities corresponding to a contact's URI.
  * @hide
  */
+@SystemApi
 public final class RcsContactUceCapability implements Parcelable {
 
-    /** Supports 1-to-1 chat */
-    public static final int CAPABILITY_CHAT_STANDALONE = (1 << 0);
-    /** Supports group chat */
-    public static final int CAPABILITY_CHAT_SESSION = (1 << 1);
-    /** Supports full store and forward group chat information. */
-    public static final int CAPABILITY_CHAT_SESSION_STORE_FORWARD = (1 << 2);
-    /**
-     * Supports file transfer via Message Session Relay Protocol (MSRP) without Store and Forward.
-     */
-    public static final int CAPABILITY_FILE_TRANSFER = (1 << 3);
-    /** Supports File Transfer Thumbnail */
-    public static final int CAPABILITY_FILE_TRANSFER_THUMBNAIL = (1 << 4);
-    /** Supports File Transfer with Store and Forward */
-    public static final int CAPABILITY_FILE_TRANSFER_STORE_FORWARD = (1 << 5);
-    /** Supports File Transfer via HTTP */
-    public static final int CAPABILITY_FILE_TRANSFER_HTTP = (1 << 6);
-    /** Supports file transfer via SMS */
-    public static final int CAPABILITY_FILE_TRANSFER_SMS = (1 << 7);
-    /** Supports image sharing */
-    public static final int CAPABILITY_IMAGE_SHARE = (1 << 8);
-    /** Supports video sharing during a circuit-switch call (IR.74)*/
-    public static final int CAPABILITY_VIDEO_SHARE_DURING_CS_CALL = (1 << 9);
-    /** Supports video share outside of voice call (IR.84) */
-    public static final int CAPABILITY_VIDEO_SHARE = (1 << 10);
-    /** Supports social presence information */
-    public static final int CAPABILITY_SOCIAL_PRESENCE = (1 << 11);
-    /** Supports capability discovery via presence */
-    public static final int CAPABILITY_DISCOVERY_VIA_PRESENCE = (1 << 12);
-    /** Supports IP Voice calling over LTE or IWLAN (IR.92/IR.51) */
-    public static final int CAPABILITY_IP_VOICE_CALL = (1 << 13);
-    /** Supports IP video calling (IR.94) */
-    public static final int CAPABILITY_IP_VIDEO_CALL = (1 << 14);
-    /** Supports Geolocation PUSH during 1-to-1 or multiparty chat */
-    public static final int CAPABILITY_GEOLOCATION_PUSH = (1 << 15);
-    /** Supports Geolocation PUSH via SMS for fallback.  */
-    public static final int CAPABILITY_GEOLOCATION_PUSH_SMS = (1 << 16);
-    /** Supports Geolocation pull. */
-    public static final int CAPABILITY_GEOLOCATION_PULL = (1 << 17);
-    /** Supports Geolocation pull using file transfer support. */
-    public static final int CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER = (1 << 18);
-    /** Supports RCS voice calling */
-    public static final int CAPABILITY_RCS_VOICE_CALL = (1 << 19);
-    /** Supports RCS video calling */
-    public static final int CAPABILITY_RCS_VIDEO_CALL = (1 << 20);
-    /** Supports RCS video calling, where video media can not be dropped. */
-    public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = (1 << 21);
-    /** Supports call composer, where outgoing calls can be enriched with pre-call content.*/
-    public static final int CAPABILITY_CALL_COMPOSER = (1 << 22);
-    /** Supports post call information that is included in the call if the call is missed.*/
-    public static final int CAPABILITY_POST_CALL = (1 << 23);
-    /** Supports sharing a map where the user can draw, share markers, and share their position. */
-    public static final int CAPABILITY_SHARED_MAP = (1 << 24);
-    /** Supports sharing a canvas, where users can draw, add images, and change background colors.*/
-    public static final int CAPABILITY_SHARED_SKETCH = (1 << 25);
-    /** Supports communication with Chatbots. */
-    public static final int CAPABILITY_CHAT_BOT = (1 << 26);
-    /** Supports Chatbot roles. */
-    public static final int CAPABILITY_CHAT_BOT_ROLE = (1 << 27);
-    /** Supports the unidirectional plug-ins framework. */
-    public static final int CAPABILITY_PLUG_IN = (1 << 28);
-    /** Supports standalone Chatbot communication. */
-    public static final int CAPABILITY_STANDALONE_CHAT_BOT = (1 << 29);
-    /** Supports MMTEL based call composer. */
-    public static final int CAPABILITY_MMTEL_CALL_COMPOSER = (1 << 30);
+    /** Contains presence information associated with the contact */
+    public static final int CAPABILITY_MECHANISM_PRESENCE = 1;
 
+    /** Contains OPTIONS information associated with the contact */
+    public static final int CAPABILITY_MECHANISM_OPTIONS = 2;
 
-
-    /** @hide*/
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @LongDef(prefix = "CAPABILITY_", flag = true, value = {
-            CAPABILITY_CHAT_STANDALONE,
-            CAPABILITY_CHAT_SESSION,
-            CAPABILITY_CHAT_SESSION_STORE_FORWARD,
-            CAPABILITY_FILE_TRANSFER,
-            CAPABILITY_FILE_TRANSFER_THUMBNAIL,
-            CAPABILITY_FILE_TRANSFER_STORE_FORWARD,
-            CAPABILITY_FILE_TRANSFER_HTTP,
-            CAPABILITY_FILE_TRANSFER_SMS,
-            CAPABILITY_IMAGE_SHARE,
-            CAPABILITY_VIDEO_SHARE_DURING_CS_CALL,
-            CAPABILITY_VIDEO_SHARE,
-            CAPABILITY_SOCIAL_PRESENCE,
-            CAPABILITY_DISCOVERY_VIA_PRESENCE,
-            CAPABILITY_IP_VOICE_CALL,
-            CAPABILITY_IP_VIDEO_CALL,
-            CAPABILITY_GEOLOCATION_PUSH,
-            CAPABILITY_GEOLOCATION_PUSH_SMS,
-            CAPABILITY_GEOLOCATION_PULL,
-            CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER,
-            CAPABILITY_RCS_VOICE_CALL,
-            CAPABILITY_RCS_VIDEO_CALL,
-            CAPABILITY_RCS_VIDEO_ONLY_CALL,
-            CAPABILITY_CALL_COMPOSER,
-            CAPABILITY_POST_CALL,
-            CAPABILITY_SHARED_MAP,
-            CAPABILITY_SHARED_SKETCH,
-            CAPABILITY_CHAT_BOT,
-            CAPABILITY_CHAT_BOT_ROLE,
-            CAPABILITY_PLUG_IN,
-            CAPABILITY_STANDALONE_CHAT_BOT,
-            CAPABILITY_MMTEL_CALL_COMPOSER
+    @IntDef(prefix = "CAPABILITY_MECHANISM_", value = {
+        CAPABILITY_MECHANISM_PRESENCE,
+        CAPABILITY_MECHANISM_OPTIONS
     })
-    public @interface CapabilityFlag {}
+    public @interface CapabilityMechanism {}
 
     /**
-     * Builder to help construct {@link RcsContactUceCapability} instances.
+     * The capabilities of this contact were requested recently enough to still be considered in
+     * the availability window.
      */
-    public static class Builder {
+    public static final int SOURCE_TYPE_NETWORK = 0;
+
+    /**
+     * The capabilities of this contact were retrieved from the cached information in the Enhanced
+     * Address Book.
+     */
+    public static final int SOURCE_TYPE_CACHED = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SOURCE_TYPE_", value = {
+        SOURCE_TYPE_NETWORK,
+        SOURCE_TYPE_CACHED
+    })
+    public @interface SourceType {}
+
+    /**
+     * Capability information for the requested contact has expired and can not be refreshed due to
+     * a temporary network error. This is a temporary error and the capabilities of the contact
+     * should be queried again at a later time.
+     */
+    public static final int REQUEST_RESULT_UNKNOWN = 0;
+
+    /**
+     * The requested contact was found to be offline when queried. This is only applicable to
+     * contact capabilities that were queried via OPTIONS requests and the network returned a
+     * 408/480 response.
+     */
+    public static final int REQUEST_RESULT_NOT_ONLINE = 1;
+
+    /**
+     * Capability information for the requested contact was not found. The contact should not be
+     * considered an RCS user.
+     */
+    public static final int REQUEST_RESULT_NOT_FOUND = 2;
+
+    /**
+     * Capability information for the requested contact was found successfully.
+     */
+    public static final int REQUEST_RESULT_FOUND = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "REQUEST_RESULT_", value = {
+        REQUEST_RESULT_UNKNOWN,
+        REQUEST_RESULT_NOT_ONLINE,
+        REQUEST_RESULT_NOT_FOUND,
+        REQUEST_RESULT_FOUND
+    })
+    public @interface RequestResult {}
+
+    /**
+     * Builder to help construct {@link RcsContactUceCapability} instances when capabilities were
+     * queried through SIP OPTIONS.
+     */
+    public static final class OptionsBuilder {
 
         private final RcsContactUceCapability mCapabilities;
 
@@ -153,51 +122,50 @@ public final class RcsContactUceCapability implements Parcelable {
          * capability extensions.
          * @param contact The contact URI that the capabilities are attached to.
          */
-        public Builder(@NonNull Uri contact) {
-            mCapabilities = new RcsContactUceCapability(contact);
+        public OptionsBuilder(@NonNull Uri contact) {
+            mCapabilities = new RcsContactUceCapability(contact, CAPABILITY_MECHANISM_OPTIONS,
+                    SOURCE_TYPE_NETWORK);
         }
 
         /**
-         * Add a UCE capability bit-field as well as the associated URI that the framework should
-         * use for those services. This is mainly used for capabilities that may use a URI separate
-         * from the contact's URI, for example the URI to use for VT calls.
-         * @param type The capability to map to a service URI that is different from the contact's
-         *         URI.
+         * Create the Builder, which can be used to set UCE capabilities as well as custom
+         * capability extensions.
+         * @param contact The contact URI that the capabilities are attached to.
+         * @param sourceType The type where the capabilities of this contact were retrieved from.
+         * @hide
          */
-        public @NonNull Builder add(@CapabilityFlag long type, @NonNull Uri serviceUri) {
-            mCapabilities.mCapabilities |= type;
-            // Put each of these capabilities into the map separately.
-            for (long shift = 0; shift < Integer.SIZE; shift++) {
-                long cap = type & (1 << shift);
-                if (cap != 0) {
-                    mCapabilities.mServiceMap.put(cap, serviceUri);
-                    // remove that capability from the field.
-                    type &= ~cap;
-                }
-                if (type == 0) {
-                    // no need to keep going, end early.
-                    break;
-                }
-            }
+        public OptionsBuilder(@NonNull Uri contact, @SourceType int sourceType) {
+            mCapabilities = new RcsContactUceCapability(contact, CAPABILITY_MECHANISM_OPTIONS,
+                    sourceType);
+        }
+
+        /**
+         * Set the result of the capabilities request.
+         * @param requestResult the request result
+         * @return this OptionBuilder
+         */
+        public @NonNull OptionsBuilder setRequestResult(@RequestResult int requestResult) {
+            mCapabilities.mRequestResult = requestResult;
             return this;
         }
 
         /**
-         * Add a UCE capability flag that this contact supports.
-         * @param type the capability that the contact supports.
+         * Add the feature tag into the capabilities instance.
+         * @param tag the supported feature tag
+         * @return this OptionBuilder
          */
-        public @NonNull Builder add(@CapabilityFlag long type) {
-            mCapabilities.mCapabilities |= type;
+        public @NonNull OptionsBuilder addFeatureTag(@NonNull String tag) {
+            mCapabilities.mFeatureTags.add(tag);
             return this;
         }
 
         /**
-         * Add a carrier specific service tag.
-         * @param extension A string containing a carrier specific service tag that is an extension
-         *         of the {@link CapabilityFlag}s that are defined here.
+         * Add the list of feature tag into the capabilities instance.
+         * @param tags the list of the supported feature tags
+         * @return this OptionBuilder
          */
-        public @NonNull Builder add(@NonNull String extension) {
-            mCapabilities.mExtensionTags.add(extension);
+        public @NonNull OptionsBuilder addFeatureTags(@NonNull Set<String> tags) {
+            mCapabilities.mFeatureTags.addAll(tags);
             return this;
         }
 
@@ -209,56 +177,91 @@ public final class RcsContactUceCapability implements Parcelable {
         }
     }
 
-    private final Uri mContactUri;
-    private long mCapabilities;
-    private List<String> mExtensionTags = new ArrayList<>();
-    private Map<Long, Uri> mServiceMap = new HashMap<>();
-
     /**
-     * Use {@link Builder} to build an instance of this interface.
-     * @param contact The URI associated with this capability information.
-     * @hide
+     * Builder to help construct {@link RcsContactUceCapability} instances when capabilities were
+     * queried through a presence server.
      */
-    RcsContactUceCapability(@NonNull Uri contact) {
-        mContactUri = contact;
+    public static final class PresenceBuilder {
+
+        private final RcsContactUceCapability mCapabilities;
+
+        /**
+         * Create the builder, which can be used to set UCE capabilities as well as custom
+         * capability extensions.
+         * @param contact The contact URI that the capabilities are attached to.
+         * @param sourceType The type where the capabilities of this contact were retrieved from.
+         * @param requestResult the request result
+         */
+        public PresenceBuilder(@NonNull Uri contact, @SourceType int sourceType,
+                @RequestResult int requestResult) {
+            mCapabilities = new RcsContactUceCapability(contact, CAPABILITY_MECHANISM_PRESENCE,
+                sourceType);
+            mCapabilities.mRequestResult = requestResult;
+        }
+
+        /**
+         * Add the {@link RcsContactPresenceTuple} into the capabilities instance.
+         * @param tuple The {@link RcsContactPresenceTuple} to be added into.
+         * @return this PresenceBuilder
+         */
+        public @NonNull PresenceBuilder addCapabilityTuple(@NonNull RcsContactPresenceTuple tuple) {
+            mCapabilities.mPresenceTuples.add(tuple);
+            return this;
+        }
+
+        /**
+         * Add the list of {@link RcsContactPresenceTuple} into the capabilities instance.
+         * @param tuples The list of the {@link RcsContactPresenceTuple} to be added into.
+         * @return this PresenceBuilder
+         */
+        public @NonNull PresenceBuilder addCapabilityTuples(
+                @NonNull List<RcsContactPresenceTuple> tuples) {
+            mCapabilities.mPresenceTuples.addAll(tuples);
+            return this;
+        }
+
+        /**
+         * @return the RcsContactUceCapability instance.
+         */
+        public @NonNull RcsContactUceCapability build() {
+            return mCapabilities;
+        }
+    }
+
+    private final Uri mContactUri;
+    private @SourceType int mSourceType;
+    private @CapabilityMechanism int mCapabilityMechanism;
+    private @RequestResult int mRequestResult;
+
+    private final Set<String> mFeatureTags = new HashSet<>();
+    private final List<RcsContactPresenceTuple> mPresenceTuples = new ArrayList<>();
+
+    private RcsContactUceCapability(@NonNull Uri contactUri, @CapabilityMechanism int mechanism,
+            @SourceType int sourceType) {
+        mContactUri = contactUri;
+        mCapabilityMechanism = mechanism;
+        mSourceType = sourceType;
     }
 
     private RcsContactUceCapability(Parcel in) {
         mContactUri = in.readParcelable(Uri.class.getClassLoader());
-        mCapabilities = in.readLong();
-        in.readStringList(mExtensionTags);
-        // read mServiceMap as key,value pair
-        int mapSize = in.readInt();
-        for (int i = 0; i < mapSize; i++) {
-            mServiceMap.put(in.readLong(), in.readParcelable(Uri.class.getClassLoader()));
-        }
+        mCapabilityMechanism = in.readInt();
+        mSourceType = in.readInt();
+        mRequestResult = in.readInt();
+        List<String> featureTagList = new ArrayList<>();
+        in.readStringList(featureTagList);
+        mFeatureTags.addAll(featureTagList);
+        in.readParcelableList(mPresenceTuples, RcsContactPresenceTuple.class.getClassLoader());
     }
-
-    public static final @NonNull Creator<RcsContactUceCapability> CREATOR =
-            new Creator<RcsContactUceCapability>() {
-        @Override
-        public RcsContactUceCapability createFromParcel(Parcel in) {
-            return new RcsContactUceCapability(in);
-        }
-
-        @Override
-        public RcsContactUceCapability[] newArray(int size) {
-            return new RcsContactUceCapability[size];
-        }
-    };
 
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeParcelable(mContactUri, 0);
-        out.writeLong(mCapabilities);
-        out.writeStringList(mExtensionTags);
-        // write mServiceMap as key,value pairs
-        int mapSize = mServiceMap.keySet().size();
-        out.writeInt(mapSize);
-        for (long key : mServiceMap.keySet()) {
-            out.writeLong(key);
-            out.writeParcelable(mServiceMap.get(key), 0);
-        }
+        out.writeParcelable(mContactUri, flags);
+        out.writeInt(mCapabilityMechanism);
+        out.writeInt(mSourceType);
+        out.writeInt(mRequestResult);
+        out.writeStringList(new ArrayList<>(mFeatureTags));
+        out.writeParcelableList(mPresenceTuples, flags);
     }
 
     @Override
@@ -266,55 +269,130 @@ public final class RcsContactUceCapability implements Parcelable {
         return 0;
     }
 
+    public static final @NonNull Creator<RcsContactUceCapability> CREATOR =
+            new Creator<RcsContactUceCapability>() {
+                @Override
+                public RcsContactUceCapability createFromParcel(Parcel in) {
+                    return new RcsContactUceCapability(in);
+                }
+
+                @Override
+                public RcsContactUceCapability[] newArray(int size) {
+                    return new RcsContactUceCapability[size];
+                }
+            };
+
     /**
-     * Query for a capability
-     * @param type The capability flag to query.
-     * @return true if the capability flag specified is set, false otherwise.
+     * @return The mechanism used to get the capabilities.
      */
-    public boolean isCapable(@CapabilityFlag long type) {
-        return (mCapabilities & type) > 0;
+    public @CapabilityMechanism int getCapabilityMechanism() {
+        return mCapabilityMechanism;
     }
 
     /**
-     * @return true if the extension service tag is set, false otherwise.
-     */
-    public boolean isCapable(@NonNull String extensionTag) {
-        return mExtensionTags.contains(extensionTag);
-    }
-
-    /**
-     * @return An immutable list containing all of the extension tags that have been set as capable.
-     * @throws UnsupportedOperationException if this list is modified.
-     */
-    public @NonNull List<String> getCapableExtensionTags() {
-        return Collections.unmodifiableList(mExtensionTags);
-    }
-
-    /**
-     * Retrieves the {@link Uri} associated with the capability being queried.
+     * @return The feature tags present in the OPTIONS response from the network.
      * <p>
-     * This will typically be the contact {@link Uri} available via {@link #getContactUri()} unless
-     * a different service {@link Uri} was associated with this capability using
-     * {@link Builder#add(long, Uri)}.
-     *
-     * @return a String containing the {@link Uri} associated with the service tag or
-     * {@code null} if this capability is not set as capable.
-     * @see #isCapable(long)
+     * Note: this is only populated if {@link #getCapabilityMechanism} is
+     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_OPTIONS}
      */
-    public @Nullable Uri getServiceUri(@CapabilityFlag long type) {
-        Uri result = mServiceMap.getOrDefault(type, null);
-        // If the capability is capable, but does not have a service URI associated, use the default
-        // contact URI.
-        if (result == null) {
-            return isCapable(type) ? getContactUri() : null;
+    public @NonNull Set<String> getFeatureTags() {
+        if (mCapabilityMechanism != CAPABILITY_MECHANISM_OPTIONS) {
+            return Collections.emptySet();
         }
-        return result;
+        return Collections.unmodifiableSet(mFeatureTags);
     }
 
     /**
+     * @return The tuple elements associated with the presence element portion of the PIDF document
+     * contained in the NOTIFY response from the network.
+     * <p>
+     * Note: this is only populated if {@link #getCapabilityMechanism} is
+     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_PRESENCE}
+     */
+    public @NonNull List<RcsContactPresenceTuple> getCapabilityTuples() {
+        if (mCapabilityMechanism != CAPABILITY_MECHANISM_PRESENCE) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(mPresenceTuples);
+    }
+
+    /**
+     * Get the RcsContactPresenceTuple associated with the given service id.
+     * @param serviceId The service id to get the presence tuple.
+     * @return The RcsContactPresenceTuple which has the given service id or {@code null} if the
+     * service id does not exist in the list of presence tuples returned from the network.
+     *
+     * <p>
+     * Note: this is only populated if {@link #getCapabilityMechanism} is
+     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_PRESENCE}
+     */
+    public @Nullable RcsContactPresenceTuple getCapabilityTuple(@NonNull String serviceId) {
+        if (mCapabilityMechanism != CAPABILITY_MECHANISM_PRESENCE) {
+            return null;
+        }
+        for (RcsContactPresenceTuple tuple : mPresenceTuples) {
+            if (tuple.getServiceId() != null && tuple.getServiceId().equals(serviceId)) {
+                return tuple;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return the source of the data that was used to populate the capabilities of the requested
+     * contact.
+     */
+    public @SourceType int getSourceType() {
+        return mSourceType;
+    }
+
+    /**
+     * @return the result of querying the capabilities of the requested contact.
+     */
+    public @RequestResult int getRequestResult() {
+        return mRequestResult;
+    }
+
+    /**
+     * Retrieve the contact URI requested by the applications.
      * @return the URI representing the contact associated with the capabilities.
      */
     public @NonNull Uri getContactUri() {
         return mContactUri;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("RcsContactUceCapability");
+        if (mCapabilityMechanism == CAPABILITY_MECHANISM_PRESENCE) {
+            builder.append("(presence) {");
+        } else if (mCapabilityMechanism == CAPABILITY_MECHANISM_OPTIONS) {
+            builder.append("(options) {");
+        } else {
+            builder.append("(?) {");
+        }
+        if (Build.IS_ENG) {
+            builder.append("uri=");
+            builder.append(mContactUri);
+        } else {
+            builder.append("uri (isNull)=");
+            builder.append(mContactUri != null ? "XXX" : "null");
+        }
+        builder.append(", sourceType=");
+        builder.append(mSourceType);
+        builder.append(", requestResult=");
+        builder.append(mRequestResult);
+
+        if (mCapabilityMechanism == CAPABILITY_MECHANISM_PRESENCE) {
+            builder.append(", presenceTuples={");
+            builder.append(mPresenceTuples);
+            builder.append("}");
+        } else if (mCapabilityMechanism == CAPABILITY_MECHANISM_OPTIONS) {
+            builder.append(", featureTags={");
+            builder.append(mFeatureTags);
+            builder.append("}");
+        }
+
+        return builder.toString();
     }
 }

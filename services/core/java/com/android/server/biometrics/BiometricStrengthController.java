@@ -48,16 +48,9 @@ public class BiometricStrengthController {
      */
     private static final String KEY_BIOMETRIC_STRENGTHS = "biometric_strengths";
 
-    /**
-     * Default (no-op) value of the flag KEY_BIOMETRIC_STRENGTHS
-     */
-    public static final String DEFAULT_BIOMETRIC_STRENGTHS = null;
-
     private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener = properties -> {
-        for (String name : properties.getKeyset()) {
-            if (KEY_BIOMETRIC_STRENGTHS.equals(name)) {
-                updateStrengths();
-            }
+        if (properties.getKeyset().contains(KEY_BIOMETRIC_STRENGTHS)) {
+            updateStrengths();
         }
     };
 
@@ -75,26 +68,44 @@ public class BiometricStrengthController {
      * has been changed.
      */
     public void updateStrengths() {
-        final Map<Integer, Integer> idToStrength = getIdToStrengthMap();
+        final String newValue = DeviceConfig.getString(DeviceConfig.NAMESPACE_BIOMETRICS,
+                KEY_BIOMETRIC_STRENGTHS, "null");
+        if ("null".equals(newValue) || newValue.isEmpty()) {
+            revertStrengths();
+        } else {
+            updateStrengths(newValue);
+        }
+    }
+
+    private void updateStrengths(String flags) {
+        final Map<Integer, Integer> idToStrength = getIdToStrengthMap(flags);
         if (idToStrength == null) {
             return;
         }
 
-        for (BiometricService.AuthenticatorWrapper authenticator : mService.mAuthenticators) {
-            final int id = authenticator.id;
+        for (BiometricSensor sensor : mService.mSensors) {
+            final int id = sensor.id;
             if (idToStrength.containsKey(id)) {
                 final int newStrength = idToStrength.get(id);
-                authenticator.updateStrength(newStrength);
+                Slog.d(TAG, "updateStrengths: update sensorId=" + id + " to newStrength="
+                        + newStrength);
+                sensor.updateStrength(newStrength);
             }
+        }
+    }
+
+    private void revertStrengths() {
+        for (BiometricSensor sensor : mService.mSensors) {
+            Slog.d(TAG, "updateStrengths: revert sensorId=" + sensor.id + " to oemStrength="
+                    + sensor.oemStrength);
+            sensor.updateStrength(sensor.oemStrength);
         }
     }
 
     /**
      * @return a map of <ID, Strength>
      */
-    private Map<Integer, Integer> getIdToStrengthMap() {
-        final String flags = DeviceConfig.getString(DeviceConfig.NAMESPACE_BIOMETRICS,
-                KEY_BIOMETRIC_STRENGTHS, DEFAULT_BIOMETRIC_STRENGTHS);
+    private static Map<Integer, Integer> getIdToStrengthMap(String flags) {
         if (flags == null || flags.isEmpty()) {
             Slog.d(TAG, "Flags are null or empty");
             return null;

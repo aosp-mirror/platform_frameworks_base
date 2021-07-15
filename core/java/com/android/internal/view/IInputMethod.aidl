@@ -35,7 +35,8 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
  * {@hide}
  */
 oneway interface IInputMethod {
-    void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps);
+    void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps,
+             int configChanges);
 
     void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);
@@ -45,7 +46,7 @@ oneway interface IInputMethod {
     void unbindInput();
 
     void startInput(in IBinder startInputToken, in IInputContext inputContext, int missingMethods,
-            in EditorInfo attribute, boolean restarting, boolean preRenderImeViews);
+            in EditorInfo attribute, boolean restarting);
 
     void createSession(in InputChannel channel, IInputSessionCallback callback);
 

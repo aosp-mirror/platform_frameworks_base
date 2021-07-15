@@ -79,7 +79,6 @@ public class PackageCacher {
         final PackageParserCacheHelper.ReadHelper helper = new PackageParserCacheHelper.ReadHelper(p);
         helper.startAndInstall();
 
-        // TODO(b/135203078): Hide PackageImpl constructor?
         ParsedPackage pkg = new PackageImpl(p);
 
         p.recycle();

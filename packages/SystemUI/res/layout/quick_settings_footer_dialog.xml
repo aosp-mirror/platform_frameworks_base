@@ -38,7 +38,6 @@
                 android:id="@+id/device_management_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/monitoring_title_device_owned"
                 style="@style/DeviceManagementDialogTitle"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />

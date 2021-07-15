@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -35,6 +36,7 @@ import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
 import android.nfc.tech.NfcF;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Represents the local NFC adapter.
@@ -63,6 +66,8 @@ import java.util.List;
  */
 public final class NfcAdapter {
     static final String TAG = "NFC";
+
+    private final NfcControllerAlwaysOnListener mControllerAlwaysOnListener;
 
     /**
      * Intent to start an activity when a tag with NDEF payload is discovered.
@@ -357,6 +362,14 @@ public final class NfcAdapter {
     public static final String EXTRA_HANDOVER_TRANSFER_URI =
             "android.nfc.extra.HANDOVER_TRANSFER_URI";
 
+    /**
+     * Broadcast Action: Notify possible NFC transaction blocked because device is locked.
+     * <p>An external NFC field detected when device locked and SecureNfc enabled.
+     * @hide
+     */
+    public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC =
+            "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
+
     // Guarded by NfcAdapter.class
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
@@ -402,6 +415,22 @@ public final class NfcAdapter {
      */
     public interface ReaderCallback {
         public void onTagDiscovered(Tag tag);
+    }
+
+    /**
+     * A listener to be invoked when NFC controller always on state changes.
+     * <p>Register your {@code ControllerAlwaysOnListener} implementation with {@link
+     * NfcAdapter#registerControllerAlwaysOnListener} and disable it with {@link
+     * NfcAdapter#unregisterControllerAlwaysOnListener}.
+     * @see #registerControllerAlwaysOnListener
+     * @hide
+     */
+    @SystemApi
+    public interface ControllerAlwaysOnListener {
+        /**
+         * Called on NFC controller always on state changes
+         */
+        void onControllerAlwaysOnChanged(boolean isEnabled);
     }
 
     /**
@@ -677,6 +706,12 @@ public final class NfcAdapter {
             throw new IllegalArgumentException(
                     "context not associated with any application (using a mock context?)");
         }
+
+        if (getServiceInterface() == null) {
+            // NFC is not available
+            return null;
+        }
+
         /* use getSystemService() for consistency */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
         if (manager == null) {
@@ -713,6 +748,7 @@ public final class NfcAdapter {
         mNfcUnlockHandlers = new HashMap<NfcUnlockHandler, INfcUnlockHandler>();
         mTagRemovedListener = null;
         mLock = new Object();
+        mControllerAlwaysOnListener = new NfcControllerAlwaysOnListener(getService());
     }
 
     /**
@@ -773,6 +809,16 @@ public final class NfcAdapter {
             return sService.getNfcDtaInterface(mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return null;
+            }
+            try {
+                return sService.getNfcDtaInterface(mContext.getPackageName());
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return null;
         }
     }
@@ -835,6 +881,16 @@ public final class NfcAdapter {
             return sService.getState() == STATE_ON;
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.getState() == STATE_ON;
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -858,6 +914,16 @@ public final class NfcAdapter {
             return sService.getState();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return NfcAdapter.STATE_OFF;
+            }
+            try {
+                return sService.getState();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return NfcAdapter.STATE_OFF;
         }
     }
@@ -885,6 +951,16 @@ public final class NfcAdapter {
             return sService.enable();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.enable();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -914,6 +990,16 @@ public final class NfcAdapter {
             return sService.disable(true);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.disable(true);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -929,6 +1015,16 @@ public final class NfcAdapter {
             return sService.disable(persist);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.disable(persist);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -1762,6 +1858,16 @@ public final class NfcAdapter {
             return sService.setNfcSecure(enable);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.setNfcSecure(enable);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -1780,6 +1886,16 @@ public final class NfcAdapter {
             return sService.deviceSupportsNfcSecure();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.deviceSupportsNfcSecure();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -1800,6 +1916,16 @@ public final class NfcAdapter {
             return sService.isNfcSecureEnabled();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isNfcSecureEnabled();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return false;
         }
     }
@@ -2077,7 +2203,7 @@ public final class NfcAdapter {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public INfcAdapterExtras getNfcAdapterExtrasInterface() {
         if (mContext == null) {
             throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
@@ -2087,6 +2213,16 @@ public final class NfcAdapter {
             return sService.getNfcAdapterExtrasInterface(mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return null;
+            }
+            try {
+                return sService.getNfcAdapterExtrasInterface(mContext.getPackageName());
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
             return null;
         }
     }
@@ -2103,5 +2239,142 @@ public final class NfcAdapter {
         } else {
             return mContext.getApplicationInfo().targetSdkVersion;
         }
+    }
+
+    /**
+     * Sets NFC controller always on feature.
+     * <p>This API is for the NFCC internal state management. It allows to discriminate
+     * the controller function from the NFC function by keeping the NFC controller on without
+     * any NFC RF enabled if necessary.
+     * <p>This call is asynchronous. Register a listener {@link #ControllerAlwaysOnListener}
+     * by {@link #registerControllerAlwaysOnListener} to find out when the operation is
+     * complete.
+     * <p>If this returns true, then either NFCC always on state has been set based on the value,
+     * or a {@link ControllerAlwaysOnListener#onControllerAlwaysOnChanged(boolean)} will be invoked
+     * to indicate the state change.
+     * If this returns false, then there is some problem that prevents an attempt to turn NFCC
+     * always on.
+     * @param value if true the NFCC will be kept on (with no RF enabled if NFC adapter is
+     * disabled), if false the NFCC will follow completely the Nfc adapter state.
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @return void
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public boolean setControllerAlwaysOn(boolean value) {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.setControllerAlwaysOn(value);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.setControllerAlwaysOn(value);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks NFC controller always on feature is enabled.
+     *
+     * @return True if NFC controller always on is enabled, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public boolean isControllerAlwaysOn() {
+        try {
+            return sService.isControllerAlwaysOn();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isControllerAlwaysOn();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the device supports NFC controller always on functionality.
+     *
+     * @return True if device supports NFC controller always on, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public boolean isControllerAlwaysOnSupported() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isControllerAlwaysOnSupported();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isControllerAlwaysOnSupported();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Register a {@link ControllerAlwaysOnListener} to listen for NFC controller always on
+     * state changes
+     * <p>The provided listener will be invoked by the given {@link Executor}.
+     *
+     * @param executor an {@link Executor} to execute given listener
+     * @param listener user implementation of the {@link ControllerAlwaysOnListener}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public void registerControllerAlwaysOnListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ControllerAlwaysOnListener listener) {
+        mControllerAlwaysOnListener.register(executor, listener);
+    }
+
+    /**
+     * Unregister the specified {@link ControllerAlwaysOnListener}
+     * <p>The same {@link ControllerAlwaysOnListener} object used when calling
+     * {@link #registerControllerAlwaysOnListener(Executor, ControllerAlwaysOnListener)}
+     * must be used.
+     *
+     * <p>Listeners are automatically unregistered when application process goes away
+     *
+     * @param listener user implementation of the {@link ControllerAlwaysOnListener}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public void unregisterControllerAlwaysOnListener(
+            @NonNull ControllerAlwaysOnListener listener) {
+        mControllerAlwaysOnListener.unregister(listener);
     }
 }

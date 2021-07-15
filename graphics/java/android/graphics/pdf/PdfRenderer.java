@@ -25,6 +25,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -121,7 +122,7 @@ public final class PdfRenderer implements AutoCloseable {
 
     private ParcelFileDescriptor mInput;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Page mCurrentPage;
 
     /** @hide */
@@ -246,7 +247,7 @@ public final class PdfRenderer implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void doClose() {
         if (mCurrentPage != null) {
             mCurrentPage.close();
@@ -434,7 +435,9 @@ public final class PdfRenderer implements AutoCloseable {
                 transform.postTranslate(contentLeft, contentTop);
             }
 
-            final long transformPtr = transform.native_instance;
+            // FIXME: This code is planned to be outside the UI rendering module, so it should not
+            // be able to access native instances from Bitmap, Matrix, etc.
+            final long transformPtr = transform.ni();
 
             synchronized (sPdfiumLock) {
                 nativeRenderPage(mNativeDocument, mNativePage, destination.getNativeInstance(),
