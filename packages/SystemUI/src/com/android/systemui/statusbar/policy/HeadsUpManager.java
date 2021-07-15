@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -157,7 +158,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                         NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
                         entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
             }
-            for (OnHeadsUpChangedListener listener : mListeners) {
+            for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
                 } else {
@@ -177,7 +178,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(true);
         setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
-        for (OnHeadsUpChangedListener listener : mListeners) {
+        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
             listener.onHeadsUpStateChanged(entry, true);
         }
     }
@@ -188,7 +189,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
-        for (OnHeadsUpChangedListener listener : mListeners) {
+        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
             listener.onHeadsUpStateChanged(entry, false);
         }
     }
@@ -206,7 +207,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (mHasPinnedNotification) {
             MetricsLogger.count(mContext, "note_peek", 1);
         }
-        for (OnHeadsUpChangedListener listener : mListeners) {
+        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
             listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
         }
     }
