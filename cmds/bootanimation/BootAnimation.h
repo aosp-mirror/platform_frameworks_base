@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <queue>
+#include <climits>
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -32,8 +33,6 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-class SkBitmap;
-
 namespace android {
 
 class Surface;
@@ -45,6 +44,8 @@ class SurfaceControl;
 class BootAnimation : public Thread, public IBinder::DeathRecipient
 {
 public:
+    static constexpr int MAX_FADED_FRAMES_COUNT = std::numeric_limits<int>::max();
+
     struct Texture {
         GLint   w;
         GLint   h;
@@ -84,19 +85,26 @@ public:
             String8 trimData;
             SortedVector<Frame> frames;
             bool playUntilComplete;
+            int framesToFadeCount;
             float backgroundColor[3];
             uint8_t* audioData;
             int audioLength;
             Animation* animation;
+
+            bool hasFadingPhase() const {
+                return !playUntilComplete && framesToFadeCount > 0;
+            }
         };
         int fps;
         int width;
         int height;
+        bool progressEnabled;
         Vector<Part> parts;
         String8 audioConf;
         String8 fileName;
         ZipFileRO* zip;
         Font clockFont;
+        Font progressFont;
     };
 
     // All callbacks will be called from this class's internal thread.
@@ -150,6 +158,8 @@ private:
 
     // Display event handling
     class DisplayEventCallback;
+    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
+    sp<Looper> mLooper;
     int displayEventCallback(int fd, int events, void* data);
     void processDisplayEvents();
 
@@ -160,6 +170,9 @@ private:
     bool movie();
     void drawText(const char* str, const Font& font, bool bold, int* x, int* y);
     void drawClock(const Font& font, const int xPos, const int yPos);
+    void drawProgress(int percent, const Font& font, const int xPos, const int yPos);
+    void fadeFrame(int frameLeft, int frameBottom, int frameWidth, int frameHeight,
+                   const Animation::Part& part, int fadedFramesCount);
     bool validClock(const Animation::Part& part);
     Animation* loadAnimation(const String8&);
     bool playAnimation(const Animation&);
@@ -172,7 +185,10 @@ private:
     EGLConfig getEglConfig(const EGLDisplay&);
     ui::Size limitSurfaceSize(int width, int height) const;
     void resizeSurface(int newWidth, int newHeight);
+    void projectSceneToWindow();
 
+    bool shouldStopPlayingPart(const Animation::Part& part, int fadedFramesCount,
+                               int lastDisplayedProgress);
     void checkExit();
 
     void handleViewport(nsecs_t timestep);
@@ -202,8 +218,6 @@ private:
     sp<TimeCheckThread> mTimeCheckThread = nullptr;
     sp<Callbacks> mCallbacks;
     Animation* mAnimation = nullptr;
-    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
-    sp<Looper> mLooper;
 };
 
 // ---------------------------------------------------------------------------

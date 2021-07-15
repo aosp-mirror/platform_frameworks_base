@@ -18,16 +18,11 @@ package com.android.internal.os;
 
 import android.annotation.Nullable;
 import android.os.Process;
-
-import com.android.internal.util.ArrayUtils;
+import android.util.IntArray;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Reads and parses {@code time_in_state} files in the {@code proc} filesystem.
@@ -68,24 +63,25 @@ public class ProcTimeInStateReader {
      * The format of a single line of the {@code time_in_state} file that exports the frequency
      * values
      */
-    private static final List<Integer> TIME_IN_STATE_LINE_FREQUENCY_FORMAT = Arrays.asList(
+    private static final int[] TIME_IN_STATE_LINE_FREQUENCY_FORMAT = new int[] {
             Process.PROC_OUT_LONG | Process.PROC_SPACE_TERM,
             Process.PROC_NEWLINE_TERM
-    );
+    };
 
     /**
      * The format of a single line of the {@code time_in_state} file that exports the time values
      */
-    private static final List<Integer> TIME_IN_STATE_LINE_TIME_FORMAT = Arrays.asList(
+    private static final int[] TIME_IN_STATE_LINE_TIME_FORMAT = new int[] {
             Process.PROC_SPACE_TERM,
             Process.PROC_OUT_LONG | Process.PROC_NEWLINE_TERM
-    );
+    };
 
     /**
      * The format of a header line of the {@code time_in_state} file
      */
-    private static final List<Integer> TIME_IN_STATE_HEADER_LINE_FORMAT =
-            Collections.singletonList(Process.PROC_NEWLINE_TERM);
+    private static final int[] TIME_IN_STATE_HEADER_LINE_FORMAT = new int[] {
+            Process.PROC_NEWLINE_TERM
+    };
 
     /**
      * The format of the {@code time_in_state} file to extract times, defined using {@link
@@ -166,8 +162,8 @@ public class ProcTimeInStateReader {
         // formats. These formats are used to extract either the frequencies or the times from a
         // time_in_state file
         // Also check if each line is a header, and handle this in the created format arrays
-        ArrayList<Integer> timeInStateFrequencyFormat = new ArrayList<>();
-        ArrayList<Integer> timeInStateTimeFormat = new ArrayList<>();
+        IntArray timeInStateFrequencyFormat = new IntArray();
+        IntArray timeInStateTimeFormat = new IntArray();
         int numFrequencies = 0;
         for (int i = 0; i < timeInStateBytes.length; i++) {
             // If the first character of the line is not a digit, we treat it as a header
@@ -194,12 +190,12 @@ public class ProcTimeInStateReader {
         final long[] readLongs = new long[numFrequencies];
         final boolean readSuccess = Process.parseProcLine(
                 timeInStateBytes, 0, timeInStateBytes.length,
-                ArrayUtils.convertToIntArray(timeInStateFrequencyFormat), null, readLongs, null);
+                timeInStateFrequencyFormat.toArray(), null, readLongs, null);
         if (!readSuccess) {
             throw new IOException("Failed to parse time_in_state file");
         }
 
-        mTimeInStateTimeFormat = ArrayUtils.convertToIntArray(timeInStateTimeFormat);
+        mTimeInStateTimeFormat = timeInStateTimeFormat.toArray();
         mFrequenciesKhz = readLongs;
     }
 }

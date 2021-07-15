@@ -14,17 +14,62 @@
 // limitations under the License.
 //
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test {
     name: "FlickerTests",
-    srcs: ["src/**/*.java"],
+    srcs: ["src/**/*.java", "src/**/*.kt"],
+    manifest: "AndroidManifest.xml",
+    test_config: "AndroidTest.xml",
     platform_apis: true,
     certificate: "platform",
     test_suites: ["device-tests"],
     libs: ["android.test.runner"],
     static_libs: [
+        "androidx.test.ext.junit",
         "flickertestapplib",
         "flickerlib",
         "truth-prebuilt",
-        "app-helpers-core",
+        "launcher-helper-lib",
+        "launcher-aosp-tapl",
+        "platform-test-annotations",
+    ],
+}
+
+java_library {
+    name: "wm-flicker-common-assertions",
+    platform_apis: true,
+    srcs: [
+        "src/**/*Assertions.java",
+        "src/**/*Assertions.kt",
+    ],
+    exclude_srcs: [
+        "**/helpers/*",
+    ],
+    static_libs: [
+        "flickerlib",
+        "truth-prebuilt",
+        "app-helpers-core"
+    ],
+}
+
+java_library {
+    name: "wm-flicker-common-app-helpers",
+    platform_apis: true,
+    srcs: [
+        "**/helpers/*"
+    ],
+    static_libs: [
+        "flickerlib",
+        "flickertestapplib",
+        "truth-prebuilt",
+        "app-helpers-core"
     ],
 }

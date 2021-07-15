@@ -20,6 +20,8 @@ import android.os.Message;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.telephony.ims.RtpHeaderExtension;
+
 import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
@@ -153,8 +155,8 @@ interface IImsCallSession {
      * Transfer an established call to given number
      *
      * @param number number to transfer the call
-     * @param isConfirmationRequired if {@code True}, indicates Assured transfer,
-     * if {@code False} it indicates Blind transfer.
+     * @param isConfirmationRequired if {@code True}, indicates a confirmed transfer,
+     * if {@code False} it indicates an unconfirmed transfer.
      */
     void transfer(String number, boolean isConfirmationRequired);
 
@@ -297,4 +299,10 @@ interface IImsCallSession {
      * @param rttMessage RTT message to be sent
      */
     void sendRttMessage(in String rttMessage);
+
+    /*
+     * Device sends RTP header extension(s).
+     * @param extensions the header extensions to be sent
+     */
+    void sendRtpHeaderExtensions(in List<RtpHeaderExtension> extensions);
 }

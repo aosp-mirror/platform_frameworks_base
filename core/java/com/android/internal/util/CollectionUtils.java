@@ -47,6 +47,13 @@ public class CollectionUtils {
     private CollectionUtils() { /* cannot be instantiated */ }
 
     /**
+     * @see Collection#contains(Object)
+     */
+    public static <T> boolean contains(@Nullable Collection<T> collection, T element) {
+        return collection != null && collection.contains(element);
+    }
+
+    /**
      * Returns a list of items from the provided list that match the given condition.
      *
      * This is similar to {@link Stream#filter} but without the overhead of creating an intermediate

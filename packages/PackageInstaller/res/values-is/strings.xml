@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Uppsetningarforrit pakka"</string>
     <string name="install" msgid="711829760615509273">"Setja upp"</string>
+    <string name="update" msgid="3932142540719227615">"Uppfæra"</string>
     <string name="done" msgid="6632441120016885253">"Lokið"</string>
     <string name="cancel" msgid="1018267193425558088">"Hætta við"</string>
     <string name="installing" msgid="4921993079741206516">"Setur upp…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Setur <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> upp…"</string>
     <string name="install_done" msgid="5987363587661783896">"Forritið er uppsett."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Viltu setja þetta forrit upp?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Viltu setja upp uppfærslu á þessu uppsetta forriti? Eldri gögn glatast ekki."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Viltu setja upp uppfærslu á þessu innbyggða forriti? Eldri gögn glatast ekki."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Viltu setja upp þetta forrit?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Viltu uppfæra þetta forrit?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Forritið er ekki uppsett."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Lokað var á uppsetningu pakkans."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Forritið var ekki sett upp vegna árekstra á milli pakkans og annars pakka."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Aðgerðir til að setja upp / fjarlægja eru ekki studdar í Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Setur upp forrit…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Óþekkt"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Til að tryggja öryggi þitt er ekki heimild í spjaldtölvunni þinni fyrir uppsetningu óþekktra forrita frá þessari veitu."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Til að tryggja öryggi þitt er ekki heimild í sjónvarpinu þínu fyrir uppsetningu óþekktra forrita frá þessari veitu."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Til að tryggja öryggi þitt er ekki heimild í símanum þínum fyrir uppsetningu óþekktra forrita frá þessari veitu."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í spjaldtölvunni þinni. Þú getur breytt þessu í stillingum."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í sjónvarpinu þínu. Þú getur breytt þessu í stillingum."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í símanum þínum. Þú getur breytt þessu í stillingum."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Síminn þinn og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á símanum eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Spjaldtölvan þín og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á spjaldtölvunni eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sjónvarpið þitt og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á sjónvarpinu eða gagnatapi sem leiða kann af notkun þess."</string>

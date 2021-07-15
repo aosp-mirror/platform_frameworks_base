@@ -16,7 +16,7 @@
 
 #include "android_nio_utils.h"
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 
 namespace android {
 

@@ -98,7 +98,7 @@ public class MetricsFeatureProvider {
     /**
      * Logs a simple action without page id or attribution
      */
-    public void action(Context context, int category,  Pair<Integer, Object>... taggedData) {
+    public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, taggedData);
         }

@@ -16,35 +16,35 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.google.android.test.cameraprewarm">
+     package="com.google.android.test.cameraprewarm">
     <application android:label="@string/activity_title">
 
         <activity android:name=".CameraActivity"
-                android:theme="@android:style/Theme.NoTitleBar">
+             android:theme="@android:style/Theme.NoTitleBar"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.media.action.STILL_IMAGE_CAMERA"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data
-                android:name="android.media.still_image_camera_preview_service"
-                android:value="com.google.android.test.cameraprewarm.PrewarmService">
+            <meta-data android:name="android.media.still_image_camera_preview_service"
+                 android:value="com.google.android.test.cameraprewarm.PrewarmService">
             </meta-data>
         </activity>
 
         <activity android:name=".SecureCameraActivity"
-                android:theme="@android:style/Theme.NoTitleBar">
+             android:theme="@android:style/Theme.NoTitleBar"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA_SECURE" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.media.action.STILL_IMAGE_CAMERA_SECURE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data
-                android:name="android.media.still_image_camera_preview_service"
-                android:value="com.google.android.test.cameraprewarm.PrewarmService">
+            <meta-data android:name="android.media.still_image_camera_preview_service"
+                 android:value="com.google.android.test.cameraprewarm.PrewarmService">
             </meta-data>
         </activity>
 
         <service android:name=".PrewarmService"
-            android:exported="true">
+             android:exported="true">
         </service>
 
     </application>

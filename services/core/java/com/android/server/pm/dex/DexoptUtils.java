@@ -18,12 +18,12 @@ package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;
@@ -85,12 +85,12 @@ public final class DexoptUtils {
 
         // The application has splits. Compute their class loader contexts.
 
-        // First, cache the relative paths of the splits and do some sanity checks
+        // First, cache the relative paths of the splits and do some validity checks
         String[] splitRelativeCodePaths = getSplitRelativeCodePaths(pkg);
 
         // The splits have an implicit dependency on the base apk.
         // This means that we have to add the base apk file in addition to the shared libraries.
-        String baseApkName = new File(pkg.getBaseCodePath()).getName();
+        String baseApkName = new File(pkg.getBaseApkPath()).getName();
         String baseClassPath = baseApkName;
 
         // The result is stored in classLoaderContexts.
@@ -401,13 +401,13 @@ public final class DexoptUtils {
      * Assumes that the application declares a non-null array of splits.
      */
     private static String[] getSplitRelativeCodePaths(AndroidPackage pkg) {
-        String baseCodePath = new File(pkg.getBaseCodePath()).getParent();
+        String baseCodePath = new File(pkg.getBaseApkPath()).getParent();
         String[] splitCodePaths = pkg.getSplitCodePaths();
         String[] splitRelativeCodePaths = new String[ArrayUtils.size(splitCodePaths)];
         for (int i = 0; i < splitRelativeCodePaths.length; i++) {
             File pathFile = new File(splitCodePaths[i]);
             splitRelativeCodePaths[i] = pathFile.getName();
-            // Sanity check that the base paths of the splits are all the same.
+            // Validity check that the base paths of the splits are all the same.
             String basePath = pathFile.getParent();
             if (!basePath.equals(baseCodePath)) {
                 Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +

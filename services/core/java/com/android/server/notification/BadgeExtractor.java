@@ -70,9 +70,8 @@ public class BadgeExtractor implements NotificationSignalExtractor {
         if (mConfig.isMediaNotificationFilteringEnabled()) {
             final Notification notif = record.getNotification();
             if (notif.hasMediaSession()) {
-                Class<? extends Notification.Style> notifStyle = notif.getNotificationStyle();
-                if (Notification.DecoratedMediaCustomViewStyle.class.equals(notifStyle)
-                        || Notification.MediaStyle.class.equals(notifStyle)) {
+                if (notif.isStyle(Notification.DecoratedMediaCustomViewStyle.class)
+                        || notif.isStyle(Notification.MediaStyle.class)) {
                     record.setShowBadge(false);
                 }
             }

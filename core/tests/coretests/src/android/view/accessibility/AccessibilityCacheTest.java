@@ -563,7 +563,7 @@ public class AccessibilityCacheTest {
     }
 
     @Test
-    public void nodeWithA11yFocusWhenAnotherNodeGetsFocus_getsRefreshed() {
+    public void nodeWithA11yFocusWhenAnotherNodeGetsFocus_getsRemoved() {
         AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
         nodeInfo.setAccessibilityFocused(true);
         mAccessibilityCache.add(nodeInfo);
@@ -573,7 +573,7 @@ public class AccessibilityCacheTest {
         mAccessibilityCache.onAccessibilityEvent(event);
         event.recycle();
         try {
-            verify(mAccessibilityNodeRefresher).refreshNode(nodeInfo, true);
+            assertNull(mAccessibilityCache.getNode(WINDOW_ID_1, SINGLE_VIEW_ID));
         } finally {
             nodeInfo.recycle();
         }
@@ -614,7 +614,7 @@ public class AccessibilityCacheTest {
     }
 
     @Test
-    public void nodeWithInputFocusWhenAnotherNodeGetsFocus_getsRefreshed() {
+    public void nodeWithInputFocusWhenAnotherNodeGetsFocus_getsRemoved() {
         AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
         nodeInfo.setFocused(true);
         mAccessibilityCache.add(nodeInfo);
@@ -624,7 +624,7 @@ public class AccessibilityCacheTest {
         mAccessibilityCache.onAccessibilityEvent(event);
         event.recycle();
         try {
-            verify(mAccessibilityNodeRefresher).refreshNode(nodeInfo, true);
+            assertNull(mAccessibilityCache.getNode(WINDOW_ID_1, SINGLE_VIEW_ID));
         } finally {
             nodeInfo.recycle();
         }
@@ -733,20 +733,15 @@ public class AccessibilityCacheTest {
     }
 
     @Test
-    public void addA11yFocusNodeBeforeFocusClearedEvent_previousA11yFocusNodeGetsRefreshed() {
+    public void addA11yFocusNodeBeforeFocusClearedEvent_previousA11yFocusNodeGetsRemoved() {
         AccessibilityNodeInfo nodeInfo1 = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
         nodeInfo1.setAccessibilityFocused(true);
         mAccessibilityCache.add(nodeInfo1);
         AccessibilityNodeInfo nodeInfo2 = getNodeWithA11yAndWindowId(OTHER_VIEW_ID, WINDOW_ID_1);
         nodeInfo2.setAccessibilityFocused(true);
         mAccessibilityCache.add(nodeInfo2);
-        AccessibilityEvent event = AccessibilityEvent.obtain(
-                AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-        event.setSource(getMockViewWithA11yAndWindowIds(SINGLE_VIEW_ID, WINDOW_ID_1));
-        mAccessibilityCache.onAccessibilityEvent(event);
-        event.recycle();
         try {
-            verify(mAccessibilityNodeRefresher).refreshNode(nodeInfo1, true);
+            assertNull(mAccessibilityCache.getNode(WINDOW_ID_1, SINGLE_VIEW_ID));
         } finally {
             nodeInfo1.recycle();
             nodeInfo2.recycle();

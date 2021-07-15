@@ -18,15 +18,22 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+
+import java.util.Set;
 
 public interface NotificationManagerInternal {
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
+    NotificationChannelGroup getNotificationChannelGroup(String pkg, int uid, String channelId);
     void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int userId);
     void cancelNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, int userId);
 
+    /** is the given notification currently showing? */
+    boolean isNotificationShown(String pkg, String tag, int notificationId, int userId);
+
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
 
-    void onConversationRemoved(String pkg, int uid, String conversationId);
+    void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 }

@@ -16,9 +16,32 @@
 <resources>
     <style name="AlertDialog.Leanback" parent="AlertDialog.Material">
         <item name="buttonPanelSideLayout">@android:layout/alert_dialog_leanback_button_panel_side</item>
+        <item name="layout">@android:layout/alert_dialog_leanback</item>
     </style>
 
     <style name="AlertDialog.Leanback.Light">
+    </style>
+
+    <style name="Widget.Leanback.Button" parent="Widget.Material.Button">
+        <item name="android:background">@drawable/btn_leanback</item>
+        <item name="android:textColor">@color/btn_leanback_text_color</item>
+        <item name="android:layout_height">@dimen/leanback_button_height</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:paddingHorizontal">@dimen/leanback_button_padding_horizontal</item>
+        <item name="android:paddingVertical">@dimen/leanback_button_padding_vertical</item>
+    </style>
+
+    <style name="Widget.Leanback.Button.ButtonBar" parent="Widget.Leanback.Button">
+        <item name="android:layout_marginStart">10dp</item>
+    </style>
+
+    <style name="Widget.Leanback.Button.ButtonBarGravityStart" parent="Widget.Leanback.Button">
+        <item name="android:layout_marginEnd">10dp</item>
+    </style>
+
+    <style name="Widget.Leanback.ButtonBar" parent="Widget.Material.ButtonBar">
+        <item name="android:padding">?android:attr/dialogPreferredPadding</item>
     </style>
 
     <style name="Widget.Leanback.TimePicker" parent="Widget.Material.TimePicker">

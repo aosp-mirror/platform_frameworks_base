@@ -17,7 +17,7 @@
 #define LOG_TAG "NMST_QTagUidNative"
 #include <utils/Log.h>
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 
 #include "jni.h"
 #include <utils/misc.h>

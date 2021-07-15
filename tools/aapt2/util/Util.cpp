@@ -38,6 +38,11 @@ using ::android::StringPiece16;
 namespace aapt {
 namespace util {
 
+// Package name and shared user id would be used as a part of the file name.
+// Limits size to 223 and reserves 32 for the OS.
+// See frameworks/base/core/java/android/content/pm/parsing/ParsingPackageUtils.java
+constexpr static const size_t kMaxPackageNameSize = 223;
+
 static std::vector<std::string> SplitAndTransform(
     const StringPiece& str, char sep, const std::function<char(char)>& f) {
   std::vector<std::string> parts;
@@ -169,7 +174,19 @@ static int IsAndroidNameImpl(const StringPiece& str) {
 }
 
 bool IsAndroidPackageName(const StringPiece& str) {
+  if (str.size() > kMaxPackageNameSize) {
+    return false;
+  }
   return IsAndroidNameImpl(str) > 1 || str == "android";
+}
+
+bool IsAndroidSharedUserId(const android::StringPiece& package_name,
+                           const android::StringPiece& shared_user_id) {
+  if (shared_user_id.size() > kMaxPackageNameSize) {
+    return false;
+  }
+  return shared_user_id.empty() || IsAndroidNameImpl(shared_user_id) > 1 ||
+         package_name == "android";
 }
 
 bool IsAndroidSplitName(const StringPiece& str) {
@@ -531,19 +548,15 @@ bool ExtractResFilePathParts(const StringPiece& path, StringPiece* out_prefix,
 }
 
 StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx) {
-  size_t len;
-  const char16_t* str = pool.stringAt(idx, &len);
-  if (str != nullptr) {
-    return StringPiece16(str, len);
+  if (auto str = pool.stringAt(idx); str.ok()) {
+    return *str;
   }
   return StringPiece16();
 }
 
 std::string GetString(const android::ResStringPool& pool, size_t idx) {
-  size_t len;
-  const char* str = pool.string8At(idx, &len);
-  if (str != nullptr) {
-    return ModifiedUtf8ToUtf8(std::string(str, len));
+  if (auto str = pool.string8At(idx); str.ok()) {
+    return ModifiedUtf8ToUtf8(str->to_string());
   }
   return Utf16ToUtf8(GetString16(pool, idx));
 }

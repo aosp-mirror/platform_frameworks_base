@@ -21,13 +21,21 @@ import android.content.pm.PermissionInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
+import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
+import com.android.internal.util.Parcelling.BuiltIn.ForStringSet;
+
+import java.util.Locale;
+import java.util.Set;
 
 /** @hide */
 public class ParsedPermission extends ParsedComponent {
+
+    private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
 
     @Nullable
     String backgroundPermission;
@@ -39,6 +47,8 @@ public class ParsedPermission extends ParsedComponent {
     boolean tree;
     @Nullable
     private ParsedPermissionGroup parsedPermissionGroup;
+    @Nullable
+    Set<String> knownCerts;
 
     @VisibleForTesting
     public ParsedPermission() {
@@ -52,22 +62,6 @@ public class ParsedPermission extends ParsedComponent {
         this.protectionLevel = other.protectionLevel;
         this.tree = other.tree;
         this.parsedPermissionGroup = other.parsedPermissionGroup;
-    }
-
-    public ParsedPermission(ParsedPermission other, PermissionInfo pendingPermissionInfo,
-            String packageName, String name) {
-        this(other);
-
-        this.flags = pendingPermissionInfo.flags;
-        this.descriptionRes = pendingPermissionInfo.descriptionRes;
-
-        this.backgroundPermission = pendingPermissionInfo.backgroundPermission;
-        this.group = pendingPermissionInfo.group;
-        this.requestRes = pendingPermissionInfo.requestRes;
-        this.protectionLevel = pendingPermissionInfo.protectionLevel;
-
-        setName(name);
-        setPackageName(packageName);
     }
 
     public ParsedPermission setGroup(String group) {
@@ -95,6 +89,23 @@ public class ParsedPermission extends ParsedComponent {
 
     public int getProtectionFlags() {
         return protectionLevel & ~PermissionInfo.PROTECTION_MASK_BASE;
+    }
+
+    public @Nullable Set<String> getKnownCerts() {
+        return knownCerts;
+    }
+
+    protected void setKnownCert(String knownCert) {
+        // Convert the provided digest to upper case for consistent Set membership
+        // checks when verifying the signing certificate digests of requesting apps.
+        this.knownCerts = Set.of(knownCert.toUpperCase(Locale.US));
+    }
+
+    protected void setKnownCerts(String[] knownCerts) {
+        this.knownCerts = new ArraySet<>();
+        for (String knownCert : knownCerts) {
+            this.knownCerts.add(knownCert.toUpperCase(Locale.US));
+        }
     }
 
     public int calculateFootprint() {
@@ -125,6 +136,7 @@ public class ParsedPermission extends ParsedComponent {
         dest.writeInt(this.protectionLevel);
         dest.writeBoolean(this.tree);
         dest.writeParcelable(this.parsedPermissionGroup, flags);
+        sForStringSet.parcel(knownCerts, dest, flags);
     }
 
     protected ParsedPermission(Parcel in) {
@@ -137,6 +149,7 @@ public class ParsedPermission extends ParsedComponent {
         this.protectionLevel = in.readInt();
         this.tree = in.readBoolean();
         this.parsedPermissionGroup = in.readParcelable(boot);
+        this.knownCerts = sForStringSet.unparcel(in);
     }
 
     public static final Parcelable.Creator<ParsedPermission> CREATOR =

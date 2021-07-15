@@ -19,6 +19,7 @@ package android.hardware.display;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -38,6 +39,7 @@ interface IDisplayManager {
     boolean isUidPresentOnDisplay(int uid, int displayId);
 
     void registerCallback(in IDisplayManagerCallback callback);
+    void registerCallbackWithEventMask(in IDisplayManagerCallback callback, long eventsMask);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
     // The process must have previously registered a callback.
@@ -66,6 +68,18 @@ interface IDisplayManager {
 
     // No permissions required.
     WifiDisplayStatus getWifiDisplayStatus();
+
+    // Requires WRITE_SECURE_SETTINGS permission.
+    void setUserDisabledHdrTypes(in int[] userDisabledTypes);
+
+    // Requires WRITE_SECURE_SETTINGS permission.
+    void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed);
+
+    // No permissions required.
+    boolean areUserDisabledHdrTypesAllowed();
+
+    // No permissions required.
+    int[] getUserDisabledHdrTypes();
 
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
@@ -116,7 +130,13 @@ interface IDisplayManager {
     boolean isMinimalPostProcessingRequested(int displayId);
 
     // Temporarily sets the display brightness.
-    void setTemporaryBrightness(float brightness);
+    void setTemporaryBrightness(int displayId, float brightness);
+
+    // Saves the display brightness.
+    void setBrightness(int displayId, float brightness);
+
+    // Retrieves the display brightness.
+    float getBrightness(int displayId);
 
     // Temporarily sets the auto brightness adjustment factor.
     void setTemporaryAutoBrightnessAdjustment(float adjustment);
@@ -124,8 +144,23 @@ interface IDisplayManager {
     // Get the minimum brightness curve.
     Curve getMinimumBrightnessCurve();
 
+    // Get Brightness Information for the specified display.
+    BrightnessInfo getBrightnessInfo(int displayId);
+
     // Gets the id of the preferred wide gamut color space for all displays.
     // The wide gamut color space is returned from composition pipeline
     // based on hardware capability.
     int getPreferredWideGamutColorSpaceId();
+
+    // When enabled the app requested display resolution and refresh rate is always selected
+    // in DisplayModeDirector regardless of user settings and policies for low brightness, low
+    // battery etc.
+    void setShouldAlwaysRespectAppRequestedMode(boolean enabled);
+    boolean shouldAlwaysRespectAppRequestedMode();
+
+    // Sets the refresh rate switching type.
+    void setRefreshRateSwitchingType(int newValue);
+
+    // Returns the refresh rate switching type.
+    int getRefreshRateSwitchingType();
 }

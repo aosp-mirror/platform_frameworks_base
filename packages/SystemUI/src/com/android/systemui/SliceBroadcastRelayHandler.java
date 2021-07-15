@@ -29,15 +29,15 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.SliceBroadcastRelay;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Allows settings to register certain broadcasts to launch the settings app for pinned slices.
  * @see SliceBroadcastRelay
  */
-@Singleton
+@SysUISingleton
 public class SliceBroadcastRelayHandler extends SystemUI {
     private static final String TAG = "SliceBroadcastRelay";
     private static final boolean DEBUG = false;

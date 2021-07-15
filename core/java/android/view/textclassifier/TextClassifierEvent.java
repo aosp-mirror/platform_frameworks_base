@@ -86,7 +86,8 @@ public abstract class TextClassifierEvent implements Parcelable {
             TYPE_ACTIONS_SHOWN, TYPE_LINK_CLICKED, TYPE_OVERTYPE, TYPE_COPY_ACTION,
             TYPE_PASTE_ACTION, TYPE_CUT_ACTION, TYPE_SHARE_ACTION, TYPE_SMART_ACTION,
             TYPE_SELECTION_DRAG, TYPE_SELECTION_DESTROYED, TYPE_OTHER_ACTION, TYPE_SELECT_ALL,
-            TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED, TYPE_LINKS_GENERATED})
+            TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED, TYPE_LINKS_GENERATED,
+            TYPE_READ_CLIPBOARD})
     public @interface Type {
         // For custom event types, use range 1,000,000+.
     }
@@ -135,6 +136,13 @@ public abstract class TextClassifierEvent implements Parcelable {
     public static final int TYPE_ACTIONS_GENERATED = 20;
     /** Some text links were generated.*/
     public static final int TYPE_LINKS_GENERATED = 21;
+    /**
+     * Read a clipboard.
+     * TODO: Make this public.
+     *
+     * @hide
+     */
+    public static final int TYPE_READ_CLIPBOARD = 22;
 
     @Category
     private final int mEventCategory;

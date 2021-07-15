@@ -25,7 +25,12 @@ import java.io.InputStream;
 /**
  * The superclass for all user-defined scripts. This is only
  * intended to be used by the generated derived classes.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 

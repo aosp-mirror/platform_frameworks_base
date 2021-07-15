@@ -21,15 +21,19 @@ import android.app.IWallpaperManager;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 /**
  * Propagates doze state to wallpaper engine.
  */
+@DozeScope
 public class DozeWallpaperState implements DozeMachine.Part {
 
     private static final String TAG = "DozeWallpaperState";
@@ -41,8 +45,9 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private final BiometricUnlockController mBiometricUnlockController;
     private boolean mIsAmbientMode;
 
+    @Inject
     public DozeWallpaperState(
-            IWallpaperManager wallpaperManagerService,
+            @Nullable IWallpaperManager wallpaperManagerService,
             BiometricUnlockController biometricUnlockController,
             DozeParameters parameters) {
         mWallpaperManagerService = wallpaperManagerService;

@@ -1,0 +1,7 @@
+# compat-team@ for changes to hiddenapi files
+andreionea@google.com
+mathewi@google.com
+satayev@google.com
+
+# soong-team@ as the files these tools protect are tightly coupled with Soong
+file:platform/build/soong:/OWNERS

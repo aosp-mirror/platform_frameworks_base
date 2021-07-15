@@ -32,6 +32,7 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -87,7 +88,7 @@ public abstract class MediaBrowserService extends Service {
      * A key for passing the MediaItem to the ResultReceiver in getItem.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String KEY_MEDIA_ITEM = "media_item";
 
     private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 1 << 0;
@@ -684,10 +685,17 @@ public abstract class MediaBrowserService extends Service {
                 List<MediaBrowser.MediaItem> filteredList =
                         (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
                                 ? applyOptions(list, options) : list;
-                final ParceledListSlice<MediaBrowser.MediaItem> pls =
-                        filteredList == null ? null : new ParceledListSlice<>(filteredList);
+                final ParceledListSlice<MediaBrowser.MediaItem> pls;
+                if (filteredList == null) {
+                    pls = null;
+                } else {
+                    pls = new ParceledListSlice<>(filteredList);
+                    // Limit the size of initial Parcel to prevent binder buffer overflow
+                    // as onLoadChildren is an async binder call.
+                    pls.setInlineCountLimit(1);
+                }
                 try {
-                    connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
+                    connection.callbacks.onLoadChildren(parentId, pls, options);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId

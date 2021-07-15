@@ -22,11 +22,12 @@ import static android.system.OsConstants.SO_BINDTODEVICE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.net.NetworkUtils;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.PacketSocketAddress;
+
+import com.android.internal.net.NetworkUtilsInternal;
 
 import libcore.io.IoBridge;
 
@@ -51,7 +52,7 @@ public final class SocketUtils {
         // of struct ifreq is a NULL-terminated interface name.
         // TODO: add a setsockoptString()
         Os.setsockoptIfreq(socket, SOL_SOCKET, SO_BINDTODEVICE, iface);
-        NetworkUtils.protectFromVpn(socket);
+        NetworkUtilsInternal.protectFromVpn(socket);
     }
 
     /**

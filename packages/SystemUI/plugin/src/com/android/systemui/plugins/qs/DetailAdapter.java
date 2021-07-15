@@ -16,6 +16,7 @@ package com.android.systemui.plugins.qs;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -34,7 +35,31 @@ public interface DetailAdapter {
     }
 
     View createDetailView(Context context, View convertView, ViewGroup parent);
+
+    /**
+     * @return intent for opening more settings related to this detail panel. If null, the more
+     * settings button will not be shown
+     */
     Intent getSettingsIntent();
+
+    /**
+     * @return resource id of the string to use for opening the settings intent. If
+     * {@code Resources.ID_NULL}, then use the default string:
+     * {@code com.android.systemui.R.string.quick_settings_more_settings}
+     */
+    default int getSettingsText() {
+        return Resources.ID_NULL;
+    }
+
+    /**
+     * @return resource id of the string to use for closing the detail panel. If
+     * {@code Resources.ID_NULL}, then use the default string:
+     * {@code com.android.systemui.R.string.quick_settings_done}
+     */
+    default int getDoneText() {
+        return Resources.ID_NULL;
+    }
+
     void setToggleState(boolean state);
     int getMetricsCategory();
 
@@ -44,6 +69,22 @@ public interface DetailAdapter {
      */
     default boolean hasHeader() {
         return true;
+    }
+
+    /**
+     * Indicates whether the detail view wants to animate when shown. This has no affect over the
+     * closing animation. Detail panels will always animate when closed.
+     */
+    default boolean shouldAnimate() {
+        return true;
+    }
+
+    /**
+     * @return true if the callback handled the event and wants to keep the detail panel open, false
+     * otherwise. Returning false will close the panel.
+     */
+    default boolean onDoneButtonClicked() {
+        return false;
     }
 
     default UiEventLogger.UiEventEnum openDetailEvent() {

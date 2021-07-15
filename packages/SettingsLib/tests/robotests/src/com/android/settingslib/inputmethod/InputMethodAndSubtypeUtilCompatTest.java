@@ -197,61 +197,61 @@ public class InputMethodAndSubtypeUtilCompatTest {
     public void isValidSystemNonAuxAsciiCapableIme() {
         // System IME w/ no subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false)))
+                createFakeIme(true, false)))
                 .isFalse();
 
         // System IME w/ non-Aux and non-ASCII-capable "keyboard" subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false, createDummySubtype("keyboard", false, false))))
+                createFakeIme(true, false, createFakeSubtype("keyboard", false, false))))
                 .isFalse();
 
         // System IME w/ non-Aux and ASCII-capable "keyboard" subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false, createDummySubtype("keyboard", false, true))))
+                createFakeIme(true, false, createFakeSubtype("keyboard", false, true))))
                 .isTrue();
 
         // System IME w/ Aux and ASCII-capable "keyboard" subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, true, createDummySubtype("keyboard", true, true))))
+                createFakeIme(true, true, createFakeSubtype("keyboard", true, true))))
                 .isFalse();
 
         // System IME w/ non-Aux and ASCII-capable "voice" subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false, createDummySubtype("voice", false, true))))
+                createFakeIme(true, false, createFakeSubtype("voice", false, true))))
                 .isFalse();
 
         // System IME w/ non-Aux and non-ASCII-capable subtype + Non-Aux and ASCII-capable subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false,
-                        createDummySubtype("keyboard", false, true),
-                        createDummySubtype("keyboard", false, false))))
+                createFakeIme(true, false,
+                        createFakeSubtype("keyboard", false, true),
+                        createFakeSubtype("keyboard", false, false))))
                 .isTrue();
 
         // Non-system IME w/ non-Aux and ASCII-capable "keyboard" subtype
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(false, false, createDummySubtype("keyboard", false, true))))
+                createFakeIme(false, false, createFakeSubtype("keyboard", false, true))))
                 .isFalse();
     }
 
-    private static InputMethodInfo createDummyIme(boolean isSystem, boolean isAuxIme,
+    private static InputMethodInfo createFakeIme(boolean isSystem, boolean isAuxIme,
             InputMethodSubtype... subtypes) {
         final ResolveInfo ri = new ResolveInfo();
         final ServiceInfo si = new ServiceInfo();
         final ApplicationInfo ai = new ApplicationInfo();
-        ai.packageName = "com.example.android.dummyime";
+        ai.packageName = "com.example.android.fakeime";
         ai.enabled = true;
         ai.flags |= (isSystem ? ApplicationInfo.FLAG_SYSTEM : 0);
         si.applicationInfo = ai;
         si.enabled = true;
-        si.packageName = "com.example.android.dummyime";
-        si.name = "Dummy IME";
+        si.packageName = "com.example.android.fakeime";
+        si.name = "Fake IME";
         si.exported = true;
-        si.nonLocalizedLabel = "Dummy IME";
+        si.nonLocalizedLabel = "Fake IME";
         ri.serviceInfo = si;
         return new InputMethodInfo(ri, isAuxIme, "", Arrays.asList(subtypes), 1, false);
     }
 
-    private static InputMethodSubtype createDummySubtype(
+    private static InputMethodSubtype createFakeSubtype(
             String mode, boolean isAuxiliary, boolean isAsciiCapable) {
         return new InputMethodSubtypeBuilder()
                 .setSubtypeNameResId(0)

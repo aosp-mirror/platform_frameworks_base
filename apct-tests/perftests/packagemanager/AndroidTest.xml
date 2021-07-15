@@ -15,74 +15,122 @@
   ~ limitations under the License.
   -->
 <configuration description="Runs PackageManagerPerfTests metric instrumentation.">
-    <option name="test-suite-tag" value="apct" />
-    <option name="test-suite-tag" value="apct-metric-instrumentation" />
+    <option name="test-suite-tag" value="apct"/>
+    <option name="test-suite-tag" value="apct-metric-instrumentation"/>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-        <option name="cleanup-apks" value="true" />
-        <option name="test-file-name" value="PackageManagerPerfTests.apk" />
+        <option name="cleanup-apks" value="true"/>
+        <option name="test-file-name" value="PackageManagerPerfTests.apk"/>
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-        <option name="cleanup-apks" value="true" />
-        <option name="force-queryable" value="false" />
-        <option name="test-file-name" value="QueriesAll0.apk" />
-        <option name="test-file-name" value="QueriesAll1.apk" />
-        <option name="test-file-name" value="QueriesAll2.apk" />
-        <option name="test-file-name" value="QueriesAll3.apk" />
-        <option name="test-file-name" value="QueriesAll4.apk" />
-        <option name="test-file-name" value="QueriesAll5.apk" />
-        <option name="test-file-name" value="QueriesAll6.apk" />
-        <option name="test-file-name" value="QueriesAll7.apk" />
-        <option name="test-file-name" value="QueriesAll8.apk" />
-        <option name="test-file-name" value="QueriesAll9.apk" />
-        <option name="test-file-name" value="QueriesAll10.apk" />
-        <option name="test-file-name" value="QueriesAll11.apk" />
-        <option name="test-file-name" value="QueriesAll12.apk" />
-        <option name="test-file-name" value="QueriesAll13.apk" />
-        <option name="test-file-name" value="QueriesAll14.apk" />
-        <option name="test-file-name" value="QueriesAll15.apk" />
-        <option name="test-file-name" value="QueriesAll16.apk" />
-        <option name="test-file-name" value="QueriesAll17.apk" />
-        <option name="test-file-name" value="QueriesAll18.apk" />
-        <option name="test-file-name" value="QueriesAll19.apk" />
-        <option name="test-file-name" value="QueriesAll20.apk" />
-        <option name="test-file-name" value="QueriesAll21.apk" />
-        <option name="test-file-name" value="QueriesAll22.apk" />
-        <option name="test-file-name" value="QueriesAll23.apk" />
-        <option name="test-file-name" value="QueriesAll24.apk" />
-        <option name="test-file-name" value="QueriesAll25.apk" />
-        <option name="test-file-name" value="QueriesAll26.apk" />
-        <option name="test-file-name" value="QueriesAll27.apk" />
-        <option name="test-file-name" value="QueriesAll28.apk" />
-        <option name="test-file-name" value="QueriesAll29.apk" />
-        <option name="test-file-name" value="QueriesAll30.apk" />
-        <option name="test-file-name" value="QueriesAll31.apk" />
-        <option name="test-file-name" value="QueriesAll32.apk" />
-        <option name="test-file-name" value="QueriesAll33.apk" />
-        <option name="test-file-name" value="QueriesAll34.apk" />
-        <option name="test-file-name" value="QueriesAll35.apk" />
-        <option name="test-file-name" value="QueriesAll36.apk" />
-        <option name="test-file-name" value="QueriesAll37.apk" />
-        <option name="test-file-name" value="QueriesAll38.apk" />
-        <option name="test-file-name" value="QueriesAll39.apk" />
-        <option name="test-file-name" value="QueriesAll40.apk" />
-        <option name="test-file-name" value="QueriesAll41.apk" />
-        <option name="test-file-name" value="QueriesAll42.apk" />
-        <option name="test-file-name" value="QueriesAll43.apk" />
-        <option name="test-file-name" value="QueriesAll44.apk" />
-        <option name="test-file-name" value="QueriesAll45.apk" />
-        <option name="test-file-name" value="QueriesAll46.apk" />
-        <option name="test-file-name" value="QueriesAll47.apk" />
-        <option name="test-file-name" value="QueriesAll48.apk" />
-        <option name="test-file-name" value="QueriesAll49.apk" />
+        <option name="cleanup-apks" value="true"/>
+        <option name="force-queryable" value="false"/>
+        <option name="test-file-name" value="QueriesAll0.apk"/>
+        <option name="test-file-name" value="QueriesAll1.apk"/>
+        <option name="test-file-name" value="QueriesAll2.apk"/>
+        <option name="test-file-name" value="QueriesAll3.apk"/>
+        <option name="test-file-name" value="QueriesAll4.apk"/>
+        <option name="test-file-name" value="QueriesAll5.apk"/>
+        <option name="test-file-name" value="QueriesAll6.apk"/>
+        <option name="test-file-name" value="QueriesAll7.apk"/>
+        <option name="test-file-name" value="QueriesAll8.apk"/>
+        <option name="test-file-name" value="QueriesAll9.apk"/>
+        <option name="test-file-name" value="QueriesAll10.apk"/>
+        <option name="test-file-name" value="QueriesAll11.apk"/>
+        <option name="test-file-name" value="QueriesAll12.apk"/>
+        <option name="test-file-name" value="QueriesAll13.apk"/>
+        <option name="test-file-name" value="QueriesAll14.apk"/>
+        <option name="test-file-name" value="QueriesAll15.apk"/>
+        <option name="test-file-name" value="QueriesAll16.apk"/>
+        <option name="test-file-name" value="QueriesAll17.apk"/>
+        <option name="test-file-name" value="QueriesAll18.apk"/>
+        <option name="test-file-name" value="QueriesAll19.apk"/>
+        <option name="test-file-name" value="QueriesAll20.apk"/>
+        <option name="test-file-name" value="QueriesAll21.apk"/>
+        <option name="test-file-name" value="QueriesAll22.apk"/>
+        <option name="test-file-name" value="QueriesAll23.apk"/>
+        <option name="test-file-name" value="QueriesAll24.apk"/>
+        <option name="test-file-name" value="QueriesAll25.apk"/>
+        <option name="test-file-name" value="QueriesAll26.apk"/>
+        <option name="test-file-name" value="QueriesAll27.apk"/>
+        <option name="test-file-name" value="QueriesAll28.apk"/>
+        <option name="test-file-name" value="QueriesAll29.apk"/>
+        <option name="test-file-name" value="QueriesAll30.apk"/>
+        <option name="test-file-name" value="QueriesAll31.apk"/>
+        <option name="test-file-name" value="QueriesAll32.apk"/>
+        <option name="test-file-name" value="QueriesAll33.apk"/>
+        <option name="test-file-name" value="QueriesAll34.apk"/>
+        <option name="test-file-name" value="QueriesAll35.apk"/>
+        <option name="test-file-name" value="QueriesAll36.apk"/>
+        <option name="test-file-name" value="QueriesAll37.apk"/>
+        <option name="test-file-name" value="QueriesAll38.apk"/>
+        <option name="test-file-name" value="QueriesAll39.apk"/>
+        <option name="test-file-name" value="QueriesAll40.apk"/>
+        <option name="test-file-name" value="QueriesAll41.apk"/>
+        <option name="test-file-name" value="QueriesAll42.apk"/>
+        <option name="test-file-name" value="QueriesAll43.apk"/>
+        <option name="test-file-name" value="QueriesAll44.apk"/>
+        <option name="test-file-name" value="QueriesAll45.apk"/>
+        <option name="test-file-name" value="QueriesAll46.apk"/>
+        <option name="test-file-name" value="QueriesAll47.apk"/>
+        <option name="test-file-name" value="QueriesAll48.apk"/>
+        <option name="test-file-name" value="QueriesAll49.apk"/>
     </target_preparer>
 
-    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
-        <option name="package" value="com.android.perftests.packagemanager" />
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="com.android.perftests.packagemanager"/>
         <option name="hidden-api-checks" value="false"/>
     </test>
 
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
-        <option name="directory-keys" value="/data/local/PackageManagerPerfTests" />
-        <option name="collect-on-run-ended-only" value="true" />
+        <option name="directory-keys" value="/data/local/PackageManagerPerfTests"/>
+        <option name="collect-on-run-ended-only" value="true"/>
     </metrics_collector>
+
+    <!-- Needed for pushing the trace config file -->
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="push-file" key="trace_config_detailed.textproto"
+                value="/data/misc/perfetto-traces/trace_config.textproto"/>
+        <!--Install the content provider automatically when we push some file in sdcard folder.-->
+        <!--Needed to avoid the installation during the test suite.-->
+        <option name="push-file" key="trace_config_detailed.textproto"
+                value="/sdcard/sample.textproto"/>
+    </target_preparer>
+
+    <!-- Needed for pulling the collected trace config on to the host -->
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="perfetto_file_path"/>
+    </metrics_collector>
+
+    <!-- Needed for storing the perfetto trace files in the sdcard/test_results -->
+    <option name="isolated-storage" value="false"/>
+
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="com.android.perftests.packagemanager"/>
+        <option name="hidden-api-checks" value="false"/>
+
+        <!-- Listener related args for collecting the traces and waiting for the device to
+             stabilize. -->
+        <option name="device-listeners"
+                value="android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener"/>
+        <!-- Guarantee that user defined RunListeners will be running before any of the default
+             listeners defined in this runner. -->
+        <option name="instrumentation-arg" key="newRunListenerMode" value="true"/>
+
+        <!-- ProcLoadListener related arguments -->
+        <!-- Wait for device last minute threshold to reach 3 with 2 minute timeout before starting
+             the test run -->
+        <option name="instrumentation-arg" key="procload-collector:per_run" value="true"/>
+        <option name="instrumentation-arg" key="proc-loadavg-threshold" value="3"/>
+        <option name="instrumentation-arg" key="proc-loadavg-timeout" value="120000"/>
+        <option name="instrumentation-arg" key="proc-loadavg-interval" value="10000"/>
+
+        <!-- PerfettoListener related arguments -->
+        <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true"/>
+        <option name="instrumentation-arg" key="perfetto_config_file"
+                value="trace_config.textproto"/>
+
+    </test>
+
+
 </configuration>

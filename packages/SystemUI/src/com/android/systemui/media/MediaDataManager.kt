@@ -18,6 +18,10 @@ package com.android.systemui.media
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.app.smartspace.SmartspaceConfig
+import android.app.smartspace.SmartspaceManager
+import android.app.smartspace.SmartspaceSession
+import android.app.smartspace.SmartspaceTarget
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -25,35 +29,43 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaDescription
 import android.media.MediaMetadata
+import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.net.Uri
+import android.os.Parcelable
 import android.os.UserHandle
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
-import com.android.internal.graphics.ColorUtils
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.notification.MediaNotificationProcessor
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
+import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import javax.inject.Inject
-import javax.inject.Singleton
 
 // URI fields to try loading album art from
 private val ART_URIS = arrayOf(
@@ -63,12 +75,13 @@ private val ART_URIS = arrayOf(
 )
 
 private const val TAG = "MediaDataManager"
-private const val DEFAULT_LUMINOSITY = 0.25f
-private const val LUMINOSITY_THRESHOLD = 0.05f
-private const val SATURATION_MULTIPLIER = 0.8f
+private const val DEBUG = true
 
 private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+@VisibleForTesting
+internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
+    "INVALID", null, emptyList(), 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     if (!sbn.notification.hasMediaSession()) {
@@ -85,36 +98,83 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 /**
  * A class that facilitates management and loading of Media Data, ready for binding.
  */
-@Singleton
+@SysUISingleton
 class MediaDataManager(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExecutor: Executor,
+    @Main private val foregroundExecutor: DelayableExecutor,
     private val mediaControllerFactory: MediaControllerFactory,
     private val broadcastDispatcher: BroadcastDispatcher,
     dumpManager: DumpManager,
     mediaTimeoutListener: MediaTimeoutListener,
     mediaResumeListener: MediaResumeListener,
+    mediaSessionBasedFilter: MediaSessionBasedFilter,
+    mediaDeviceManager: MediaDeviceManager,
+    mediaDataCombineLatest: MediaDataCombineLatest,
+    private val mediaDataFilter: MediaDataFilter,
+    private val activityStarter: ActivityStarter,
+    private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
-    private val useQsMediaPlayer: Boolean
-) : Dumpable {
+    private val useQsMediaPlayer: Boolean,
+    private val systemClock: SystemClock,
+    private val tunerService: TunerService
+) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
-    private val listeners: MutableSet<Listener> = mutableSetOf()
+    companion object {
+        // UI surface label for subscribing Smartspace updates.
+        @JvmField
+        val SMARTSPACE_UI_SURFACE_LABEL = "media_data_manager"
+
+        // Smartspace package name's extra key.
+        @JvmField
+        val EXTRAS_MEDIA_SOURCE_PACKAGE_NAME = "package_name"
+
+        // Maximum number of actions allowed in compact view
+        @JvmField
+        val MAX_COMPACT_ACTIONS = 3
+    }
+
+    private val themeText = com.android.settingslib.Utils.getColorAttr(context,
+            com.android.internal.R.attr.textColorPrimary).defaultColor
+    private val bgColor = context.getColor(android.R.color.system_accent2_50)
+
+    // Internal listeners are part of the internal pipeline. External listeners (those registered
+    // with [MediaDeviceManager.addListener]) receive events after they have propagated through
+    // the internal pipeline.
+    // Another way to think of the distinction between internal and external listeners is the
+    // following. Internal listeners are listeners that MediaDataManager depends on, and external
+    // listeners are listeners that depend on MediaDataManager.
+    // TODO(b/159539991#comment5): Move internal listeners to separate package.
+    private val internalListeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+    // There should ONLY be at most one Smartspace media recommendation.
+    var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
+    private var smartspaceSession: SmartspaceSession? = null
+    private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
 
     @Inject
     constructor(
         context: Context,
         @Background backgroundExecutor: Executor,
-        @Main foregroundExecutor: Executor,
+        @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
         dumpManager: DumpManager,
         broadcastDispatcher: BroadcastDispatcher,
         mediaTimeoutListener: MediaTimeoutListener,
-        mediaResumeListener: MediaResumeListener
+        mediaResumeListener: MediaResumeListener,
+        mediaSessionBasedFilter: MediaSessionBasedFilter,
+        mediaDeviceManager: MediaDeviceManager,
+        mediaDataCombineLatest: MediaDataCombineLatest,
+        mediaDataFilter: MediaDataFilter,
+        activityStarter: ActivityStarter,
+        smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
+        clock: SystemClock,
+        tunerService: TunerService
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
-            Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
+            mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
+            activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
+            Utils.useQsMediaPlayer(context), clock, tunerService)
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -136,12 +196,26 @@ class MediaDataManager(
 
     init {
         dumpManager.registerDumpable(TAG, this)
+
+        // Initialize the internal processing pipeline. The listeners at the front of the pipeline
+        // are set as internal listeners so that they receive events. From there, events are
+        // propagated through the pipeline. The end of the pipeline is currently mediaDataFilter,
+        // so it is responsible for dispatching events to external listeners. To achieve this,
+        // external listeners that are registered with [MediaDataManager.addListener] are actually
+        // registered as listeners to mediaDataFilter.
+        addInternalListener(mediaTimeoutListener)
+        addInternalListener(mediaResumeListener)
+        addInternalListener(mediaSessionBasedFilter)
+        mediaSessionBasedFilter.addListener(mediaDeviceManager)
+        mediaSessionBasedFilter.addListener(mediaDataCombineLatest)
+        mediaDeviceManager.addListener(mediaDataCombineLatest)
+        mediaDataCombineLatest.addListener(mediaDataFilter)
+
+        // Set up links back into the pipeline for listeners that need to send events upstream.
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
             setTimedOut(token, timedOut) }
-        addListener(mediaTimeoutListener)
-
         mediaResumeListener.setManager(this)
-        addListener(mediaResumeListener)
+        mediaDataFilter.mediaDataManager = this
 
         val suspendFilter = IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED)
         broadcastDispatcher.registerReceiver(appChangeReceiver, suspendFilter, null, UserHandle.ALL)
@@ -153,9 +227,39 @@ class MediaDataManager(
         }
         // BroadcastDispatcher does not allow filters with data schemes
         context.registerReceiver(appChangeReceiver, uninstallFilter)
+
+        // Register for Smartspace data updates.
+        smartspaceMediaDataProvider.registerListener(this)
+        val smartspaceManager: SmartspaceManager =
+            context.getSystemService(SmartspaceManager::class.java)
+        smartspaceSession = smartspaceManager.createSmartspaceSession(
+            SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build())
+        smartspaceSession?.let {
+            it.addOnTargetsAvailableListener(
+                // Use a new thread listening to Smartspace updates instead of using the existing
+                // backgroundExecutor. SmartspaceSession has scheduled routine updates which can be
+                // unpredictable on test simulators, using the backgroundExecutor makes it's hard to
+                // test the threads numbers.
+                // Switch to use backgroundExecutor when SmartspaceSession has a good way to be
+                // mocked.
+                Executors.newCachedThreadPool(),
+                SmartspaceSession.OnTargetsAvailableListener { targets ->
+                    smartspaceMediaDataProvider.onTargetsAvailable(targets)
+                })
+        }
+        smartspaceSession?.let { it.requestSmartspaceUpdate() }
+        tunerService.addTunable(object : TunerService.Tunable {
+            override fun onTuningChanged(key: String?, newValue: String?) {
+                allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+                if (!allowMediaRecommendations) {
+                    dismissSmartspaceRecommendation(key = smartspaceMediaData.targetId, delay = 0L)
+                }
+            }
+        }, Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION)
     }
 
     fun destroy() {
+        smartspaceMediaDataProvider.unregisterListener(this)
         context.unregisterReceiver(appChangeReceiver)
     }
 
@@ -179,13 +283,9 @@ class MediaDataManager(
 
     private fun removeAllForPackage(packageName: String) {
         Assert.isMainThread()
-        val listenersCopy = listeners.toSet()
         val toRemove = mediaEntries.filter { it.value.packageName == packageName }
         toRemove.forEach {
-            mediaEntries.remove(it.key)
-            listenersCopy.forEach { listener ->
-                listener.onMediaDataRemoved(it.key)
-            }
+            removeEntry(it.key)
         }
     }
 
@@ -245,26 +345,128 @@ class MediaDataManager(
     /**
      * Add a listener for changes in this class
      */
-    fun addListener(listener: Listener) = listeners.add(listener)
+    fun addListener(listener: Listener) {
+        // mediaDataFilter is the current end of the internal pipeline. Register external
+        // listeners as listeners to it.
+        mediaDataFilter.addListener(listener)
+    }
 
     /**
      * Remove a listener for changes in this class
      */
-    fun removeListener(listener: Listener) = listeners.remove(listener)
+    fun removeListener(listener: Listener) {
+        // Since mediaDataFilter is the current end of the internal pipelie, external listeners
+        // have been registered to it. So, they need to be removed from it too.
+        mediaDataFilter.removeListener(listener)
+    }
 
     /**
-     * Called whenever the player has been paused or stopped for a while.
+     * Add a listener for internal events.
+     */
+    private fun addInternalListener(listener: Listener) = internalListeners.add(listener)
+
+    /**
+     * Notify internal listeners of media loaded event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifyMediaDataLoaded(key: String, oldKey: String?, info: MediaData) {
+        internalListeners.forEach { it.onMediaDataLoaded(key, oldKey, info) }
+    }
+
+    /**
+     * Notify internal listeners of Smartspace media loaded event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifySmartspaceMediaDataLoaded(key: String, info: SmartspaceMediaData) {
+        internalListeners.forEach { it.onSmartspaceMediaDataLoaded(key, info) }
+    }
+
+    /**
+     * Notify internal listeners of media removed event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifyMediaDataRemoved(key: String) {
+        internalListeners.forEach { it.onMediaDataRemoved(key) }
+    }
+
+    /**
+     * Notify internal listeners of Smartspace media removed event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     *
+     * @param immediately indicates should apply the UI changes immediately, otherwise wait until
+     * the next refresh-round before UI becomes visible. Should only be true if the update is
+     * initiated by user's interaction.
+     */
+    private fun notifySmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
+        internalListeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
+    }
+
+    /**
+     * Called whenever the player has been paused or stopped for a while, or swiped from QQS.
      * This will make the player not active anymore, hiding it from QQS and Keyguard.
      * @see MediaData.active
      */
-    internal fun setTimedOut(token: String, timedOut: Boolean) {
+    internal fun setTimedOut(token: String, timedOut: Boolean, forceUpdate: Boolean = false) {
         mediaEntries[token]?.let {
-            if (it.active == !timedOut) {
+            if (it.active == !timedOut && !forceUpdate) {
                 return
             }
             it.active = !timedOut
+            if (DEBUG) Log.d(TAG, "Updating $token timedOut: $timedOut")
             onMediaDataLoaded(token, token, it)
         }
+    }
+
+    private fun removeEntry(key: String) {
+        mediaEntries.remove(key)
+        notifyMediaDataRemoved(key)
+    }
+
+    /**
+     * Dismiss a media entry. Returns false if the key was not found.
+     */
+    fun dismissMediaData(key: String, delay: Long): Boolean {
+        val existed = mediaEntries[key] != null
+        backgroundExecutor.execute {
+            mediaEntries[key]?.let { mediaData ->
+                if (mediaData.isLocalSession) {
+                    mediaData.token?.let {
+                        val mediaController = mediaControllerFactory.create(it)
+                        mediaController.transportControls.stop()
+                    }
+                }
+            }
+        }
+        foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
+        return existed
+    }
+
+    /**
+     * Called whenever the recommendation has been expired, or swiped from QQS.
+     * This will make the recommendation view to not be shown anymore during this headphone
+     * connection session.
+     */
+    fun dismissSmartspaceRecommendation(key: String, delay: Long) {
+        if (smartspaceMediaData.targetId != key) {
+            return
+        }
+
+        if (DEBUG) Log.d(TAG, "Dismissing Smartspace media target")
+        if (smartspaceMediaData.isActive) {
+            smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                targetId = smartspaceMediaData.targetId)
+        }
+        foregroundExecutor.executeDelayed(
+            { notifySmartspaceMediaDataRemoved(
+                smartspaceMediaData.targetId, immediately = true) }, delay)
     }
 
     private fun loadMediaDataInBgForResumption(
@@ -283,7 +485,9 @@ class MediaDataManager(
             return
         }
 
-        Log.d(TAG, "adding track for $userId from browser: $desc")
+        if (DEBUG) {
+            Log.d(TAG, "adding track for $userId from browser: $desc")
+        }
 
         // Album art
         var artworkBitmap = desc.iconBitmap
@@ -295,15 +499,15 @@ class MediaDataManager(
         } else {
             null
         }
-        val bgColor = artworkBitmap?.let { computeBackgroundColor(it) } ?: Color.DKGRAY
 
         val mediaAction = getResumeMediaAction(resumeAction)
+        val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
-                    hasCheckedForResume = true))
+                    hasCheckedForResume = true, lastActive = lastActive))
         }
     }
 
@@ -314,20 +518,16 @@ class MediaDataManager(
     ) {
         val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
                 as MediaSession.Token?
-        val metadata = mediaControllerFactory.create(token).metadata
-
-        if (metadata == null) {
-            // TODO: handle this better, removing media notification
-            return
-        }
+        val mediaController = mediaControllerFactory.create(token)
+        val metadata = mediaController.metadata
 
         // Foreground and Background colors computed from album art
         val notif: Notification = sbn.notification
-        var artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        var artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
         if (artworkBitmap == null) {
-            artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+            artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
         }
-        if (artworkBitmap == null) {
+        if (artworkBitmap == null && metadata != null) {
             artworkBitmap = loadBitmapFromUri(metadata)
         }
         val artWorkIcon = if (artworkBitmap == null) {
@@ -353,26 +553,25 @@ class MediaDataManager(
                 }
             }
         }
-        val bgColor = computeBackgroundColor(artworkBitmap)
 
         // App name
         val builder = Notification.Builder.recoverBuilder(context, notif)
         val app = builder.loadHeaderAppName()
 
         // App Icon
-        val smallIconDrawable: Drawable = sbn.notification.smallIcon.loadDrawable(context)
+        val smallIcon = sbn.notification.smallIcon
 
         // Song name
-        var song: CharSequence? = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
         if (song == null) {
-            song = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
         }
         if (song == null) {
             song = HybridGroupManager.resolveTitle(notif)
         }
 
         // Artist name
-        var artist: CharSequence? = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        var artist: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
         if (artist == null) {
             artist = HybridGroupManager.resolveText(notif)
         }
@@ -380,46 +579,63 @@ class MediaDataManager(
         // Control buttons
         val actionIcons: MutableList<MediaAction> = ArrayList()
         val actions = notif.actions
-        val actionsToShowCollapsed = notif.extras.getIntArray(
+        var actionsToShowCollapsed = notif.extras.getIntArray(
                 Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf<Int>()
+        if (actionsToShowCollapsed.size > MAX_COMPACT_ACTIONS) {
+            Log.e(TAG, "Too many compact actions for $key, limiting to first $MAX_COMPACT_ACTIONS")
+            actionsToShowCollapsed = actionsToShowCollapsed.subList(0, MAX_COMPACT_ACTIONS)
+        }
         // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
-        val packageContext: Context = sbn.getPackageContext(context)
         if (actions != null) {
             for ((index, action) in actions.withIndex()) {
                 if (action.getIcon() == null) {
-                    Log.i(TAG, "No icon for action $index ${action.title}")
+                    if (DEBUG) Log.i(TAG, "No icon for action $index ${action.title}")
                     actionsToShowCollapsed.remove(index)
                     continue
                 }
                 val runnable = if (action.actionIntent != null) {
                     Runnable {
-                        try {
-                            action.actionIntent.send()
-                        } catch (e: PendingIntent.CanceledException) {
-                            Log.d(TAG, "Intent canceled", e)
+                        if (action.isAuthenticationRequired()) {
+                            activityStarter.dismissKeyguardThenExecute({
+                                var result = sendPendingIntent(action.actionIntent)
+                                result
+                            }, {}, true)
+                        } else {
+                            sendPendingIntent(action.actionIntent)
                         }
                     }
                 } else {
                     null
                 }
+                val mediaActionIcon = if (action.getIcon()?.getType() == Icon.TYPE_RESOURCE) {
+                    Icon.createWithResource(sbn.packageName, action.getIcon()!!.getResId())
+                } else {
+                    action.getIcon()
+                }.setTint(themeText)
                 val mediaAction = MediaAction(
-                        action.getIcon().loadDrawable(packageContext),
+                        mediaActionIcon,
                         runnable,
                         action.title)
                 actionIcons.add(mediaAction)
             }
         }
 
+        val isLocalSession = mediaController.playbackInfo?.playbackType ==
+            MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL
+        val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
+        val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
             onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
-                    smallIconDrawable, artist, song, artWorkIcon, actionIcons,
+                    smallIcon, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
-                    active, resumeAction = resumeAction, notificationKey = key,
-                    hasCheckedForResume = hasCheckedForResume))
+                    active, resumeAction = resumeAction, isLocalSession = isLocalSession,
+                    notificationKey = key, hasCheckedForResume = hasCheckedForResume,
+                    isPlaying = isPlaying, isClearable = sbn.isClearable(),
+                    lastActive = lastActive))
         }
     }
 
@@ -432,7 +648,7 @@ class MediaDataManager(
             if (!TextUtils.isEmpty(uriString)) {
                 val albumArt = loadBitmapFromUri(Uri.parse(uriString))
                 if (albumArt != null) {
-                    Log.d(TAG, "loaded art from $uri")
+                    if (DEBUG) Log.d(TAG, "loaded art from $uri")
                     return albumArt
                 }
             }
@@ -440,6 +656,15 @@ class MediaDataManager(
         return null
     }
 
+    private fun sendPendingIntent(intent: PendingIntent): Boolean {
+        return try {
+            intent.send()
+            true
+        } catch (e: PendingIntent.CanceledException) {
+            Log.d(TAG, "Intent canceled", e)
+            false
+        }
+    }
     /**
      * Load a bitmap from a URI
      * @param uri the uri to load
@@ -460,44 +685,20 @@ class MediaDataManager(
         val source = ImageDecoder.createSource(context.getContentResolver(), uri)
         return try {
             ImageDecoder.decodeBitmap(source) {
-                decoder, info, source -> decoder.isMutableRequired = true
+                decoder, info, source -> decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         } catch (e: IOException) {
-            e.printStackTrace()
+            Log.e(TAG, "Unable to load bitmap", e)
+            null
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unable to load bitmap", e)
             null
         }
     }
 
-    private fun computeBackgroundColor(artworkBitmap: Bitmap?): Int {
-        var color = Color.WHITE
-        if (artworkBitmap != null) {
-            // If we have art, get colors from that
-            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
-                    .generate()
-            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
-            color = swatch.rgb
-        }
-        // Adapt background color, so it's always subdued and text is legible
-        val tmpHsl = floatArrayOf(0f, 0f, 0f)
-        ColorUtils.colorToHSL(color, tmpHsl)
-
-        val l = tmpHsl[2]
-        // Colors with very low luminosity can have any saturation. This means that changing the
-        // luminosity can make a black become red. Let's remove the saturation of very light or
-        // very dark colors to avoid this issue.
-        if (l < LUMINOSITY_THRESHOLD || l > 1f - LUMINOSITY_THRESHOLD) {
-            tmpHsl[1] = 0f
-        }
-        tmpHsl[1] *= SATURATION_MULTIPLIER
-        tmpHsl[2] = DEFAULT_LUMINOSITY
-
-        color = ColorUtils.HSLToColor(tmpHsl)
-        return color
-    }
-
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            context.getDrawable(R.drawable.lb_ic_play),
+            Icon.createWithResource(context, R.drawable.lb_ic_play).setTint(themeText),
             action,
             context.getString(R.string.controls_media_resume)
         )
@@ -508,9 +709,47 @@ class MediaDataManager(
         if (mediaEntries.containsKey(key)) {
             // Otherwise this was removed already
             mediaEntries.put(key, data)
-            val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataLoaded(key, oldKey, data)
+            notifyMediaDataLoaded(key, oldKey, data)
+        }
+    }
+
+    override fun onSmartspaceTargetsUpdated(targets: List<Parcelable>) {
+        if (!allowMediaRecommendations) {
+            if (DEBUG) Log.d(TAG, "Smartspace recommendation is disabled in Settings.")
+            return
+        }
+
+        val mediaTargets = targets.filterIsInstance<SmartspaceTarget>()
+        when (mediaTargets.size) {
+            0 -> {
+                if (!smartspaceMediaData.isActive) {
+                    return
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "Set Smartspace media to be inactive for the data update")
+                }
+                smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                    targetId = smartspaceMediaData.targetId)
+                notifySmartspaceMediaDataRemoved(smartspaceMediaData.targetId, immediately = false)
+            }
+            1 -> {
+                val newMediaTarget = mediaTargets.get(0)
+                if (smartspaceMediaData.targetId == newMediaTarget.smartspaceTargetId) {
+                    // The same Smartspace updates can be received. Skip the duplicate updates.
+                    return
+                }
+                if (DEBUG) Log.d(TAG, "Forwarding Smartspace media update.")
+                smartspaceMediaData = toSmartspaceMediaData(newMediaTarget, isActive = true)
+                notifySmartspaceMediaDataLoaded(
+                    smartspaceMediaData.targetId, smartspaceMediaData)
+            }
+            else -> {
+                // There should NOT be more than 1 Smartspace media update. When it happens, it
+                // indicates a bad state or an error. Reset the status accordingly.
+                Log.wtf(TAG, "More than 1 Smartspace Media Update. Resetting the status...")
+                notifySmartspaceMediaDataRemoved(
+                    smartspaceMediaData.targetId, false /* immediately */)
+                smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
             }
         }
     }
@@ -518,40 +757,31 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
-        if (useMediaResumption && removed?.resumeAction != null) {
+        if (useMediaResumption && removed?.resumeAction != null && removed?.isLocalSession) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
             val updated = removed.copy(token = null, actions = listOf(resumeAction),
-                    actionsToShowInCompact = listOf(0), active = false, resumption = true)
-            val pkg = removed?.packageName
+                    actionsToShowInCompact = listOf(0), active = false, resumption = true,
+                    isClearable = true)
+            val pkg = removed.packageName
             val migrate = mediaEntries.put(pkg, updated) == null
             // Notify listeners of "new" controls when migrating or removed and update when not
-            val listenersCopy = listeners.toSet()
             if (migrate) {
-                listenersCopy.forEach {
-                    it.onMediaDataLoaded(pkg, key, updated)
-                }
+                notifyMediaDataLoaded(pkg, key, updated)
             } else {
                 // Since packageName is used for the key of the resumption controls, it is
                 // possible that another notification has already been reused for the resumption
                 // controls of this package. In this case, rather than renaming this player as
                 // packageName, just remove it and then send a update to the existing resumption
                 // controls.
-                listenersCopy.forEach {
-                    it.onMediaDataRemoved(key)
-                }
-                listenersCopy.forEach {
-                    it.onMediaDataLoaded(pkg, pkg, updated)
-                }
+                notifyMediaDataRemoved(key)
+                notifyMediaDataLoaded(pkg, pkg, updated)
             }
             return
         }
         if (removed != null) {
-            val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataRemoved(key)
-            }
+            notifyMediaDataRemoved(key)
         }
     }
 
@@ -564,16 +794,30 @@ class MediaDataManager(
 
         if (!useMediaResumption) {
             // Remove any existing resume controls
-            val listenersCopy = listeners.toSet()
             val filtered = mediaEntries.filter { !it.value.active }
             filtered.forEach {
                 mediaEntries.remove(it.key)
-                listenersCopy.forEach { listener ->
-                    listener.onMediaDataRemoved(it.key)
-                }
+                notifyMediaDataRemoved(it.key)
             }
         }
     }
+
+    /**
+     * Invoked when the user has dismissed the media carousel
+     */
+    fun onSwipeToDismiss() = mediaDataFilter.onSwipeToDismiss()
+
+    /**
+     * Are there any media notifications active?
+     */
+    fun hasActiveMedia() = mediaDataFilter.hasActiveMedia()
+
+    /**
+     * Are there any media entries we should display?
+     * If resumption is enabled, this will include inactive players
+     * If resumption is disabled, we only want to show active players
+     */
+    fun hasAnyMedia() = mediaDataFilter.hasAnyMedia()
 
     interface Listener {
 
@@ -583,18 +827,87 @@ class MediaDataManager(
          * oldKey is provided to check whether the view has changed keys, which can happen when a
          * player has gone from resume state (key is package name) to active state (key is
          * notification key) or vice versa.
+         *
+         * @param immediately indicates should apply the UI changes immediately, otherwise wait
+         * until the next refresh-round before UI becomes visible. True by default to take in place
+         * immediately.
+         *
+         * @param isSsReactivated indicates transition from a state with no active media players to
+         * a state with active media players upon receiving Smartspace media data.
          */
-        fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {}
+        fun onMediaDataLoaded(
+            key: String,
+            oldKey: String?,
+            data: MediaData,
+            immediately: Boolean = true,
+            isSsReactivated: Boolean = false
+        ) {}
 
         /**
-         * Called whenever a previously existing Media notification was removed
+         * Called whenever there's new Smartspace media data loaded.
+         *
+         * @param shouldPrioritize indicates the sorting priority of the Smartspace card. If true,
+         * it will be prioritized as the first card. Otherwise, it will show up as the last card as
+         * default.
          */
+        fun onSmartspaceMediaDataLoaded(
+            key: String,
+            data: SmartspaceMediaData,
+            shouldPrioritize: Boolean = false
+        ) {}
+
+        /** Called whenever a previously existing Media notification was removed. */
         fun onMediaDataRemoved(key: String) {}
+
+        /**
+         * Called whenever a previously existing Smartspace media data was removed.
+         *
+         * @param immediately indicates should apply the UI changes immediately, otherwise wait
+         * until the next refresh-round before UI becomes visible. True by default to take in place
+         * immediately.
+         */
+        fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean = true) {}
+    }
+
+    /**
+     * Converts the pass-in SmartspaceTarget to SmartspaceMediaData with the pass-in active status.
+     *
+     * @return An empty SmartspaceMediaData with the valid target Id is returned if the
+     * SmartspaceTarget's data is invalid.
+     */
+    private fun toSmartspaceMediaData(
+        target: SmartspaceTarget,
+        isActive: Boolean
+    ): SmartspaceMediaData {
+        packageName(target)?.let {
+            return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,
+                target.baseAction, target.iconGrid, 0)
+        }
+        return EMPTY_SMARTSPACE_MEDIA_DATA
+            .copy(targetId = target.smartspaceTargetId, isActive = isActive)
+    }
+
+    private fun packageName(target: SmartspaceTarget): String? {
+        val recommendationList = target.iconGrid
+        if (recommendationList == null || recommendationList.isEmpty()) {
+            Log.w(TAG, "Empty or null media recommendation list.")
+            return null
+        }
+        for (recommendation in recommendationList) {
+            val extras = recommendation.extras
+            extras?.let {
+                it.getString(EXTRAS_MEDIA_SOURCE_PACKAGE_NAME)?.let {
+                    packageName -> return packageName }
+            }
+        }
+        Log.w(TAG, "No valid package name is provided.")
+        return null
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.apply {
-            println("listeners: $listeners")
+            println("internalListeners: $internalListeners")
+            println("externalListeners: ${mediaDataFilter.listeners}")
             println("mediaEntries: $mediaEntries")
             println("useMediaResumption: $useMediaResumption")
         }

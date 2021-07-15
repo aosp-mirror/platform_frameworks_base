@@ -377,8 +377,8 @@ public class Atsc3FrontendSettings extends FrontendSettings {
          */
         @NonNull
         public Atsc3FrontendSettings build() {
-            return new Atsc3FrontendSettings(
-                mFrequency, mBandwidth, mDemodOutputFormat, mPlpSettings);
+            return new Atsc3FrontendSettings(mFrequency, mBandwidth, mDemodOutputFormat,
+                    mPlpSettings);
         }
     }
 

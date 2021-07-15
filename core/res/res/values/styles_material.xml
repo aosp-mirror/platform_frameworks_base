@@ -466,15 +466,22 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Notification">
-        <item name="textColor">@color/notification_secondary_text_color_light</item>
+        <item name="textColor">@color/notification_secondary_text_color_current</item>
         <item name="textSize">@dimen/notification_text_size</item>
     </style>
 
     <style name="TextAppearance.Material.Notification.Reply" />
 
     <style name="TextAppearance.Material.Notification.Title">
+        <item name="textColor">@color/notification_primary_text_color_current</item>
         <item name="fontFamily">sans-serif-medium</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Material.Notification.BigTitle">
+        <item name="textColor">@color/notification_primary_text_color_current</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="textSize">@dimen/notification_big_title_text_size</item>
     </style>
 
     <style name="TextAppearance.Material.Notification.Line2">
@@ -487,13 +494,8 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.Notification.Time" parent="TextAppearance.Material.Notification.Info" />
 
-    <style name="TextAppearance.Material.Notification.Emphasis">
-        <item name="textColor">#66000000</item>
-    </style>
-
-    <style name="TextAppearance.Material.Notification.Conversation.AppName" parent="TextAppearance.Material.Notification.Title">
-        <item name="android:textSize">16sp</item>
-    </style>
+    <!-- unused; keep identical to parent -->
+    <style name="TextAppearance.Material.Notification.Emphasis"/>
 
     <style name="TextAppearance.Material.ListItem" parent="TextAppearance.Material.Subhead" />
     <style name="TextAppearance.Material.ListItemSecondary" parent="TextAppearance.Material.Body1" />

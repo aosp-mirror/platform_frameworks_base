@@ -23,13 +23,6 @@
         <item name="numColumns">4</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
-        <item name="android:textSize">@dimen/kg_user_switcher_text_size</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?attr/wallpaperTextColor</item>
-    </style>
-
     <style name="TextAppearance.QS.UserSwitcher">
         <item name="android:textSize">@dimen/kg_user_switcher_text_size</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>

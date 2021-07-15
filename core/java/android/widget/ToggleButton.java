@@ -60,7 +60,7 @@ public class ToggleButton extends CompoundButton {
         syncTextState();
         // Default state is derived from on/off-text, so state has to be updated when on/off-text
         // are updated.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
         a.recycle();
     }
 
@@ -111,7 +111,7 @@ public class ToggleButton extends CompoundButton {
         mTextOn = textOn;
         // Default state is derived from on/off-text, so state has to be updated when on/off-text
         // are updated.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
     }
 
     /**
@@ -133,7 +133,7 @@ public class ToggleButton extends CompoundButton {
         mTextOff = textOff;
         // Default state is derived from on/off-text, so state has to be updated when on/off-text
         // are updated.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
     }
 
     /**
