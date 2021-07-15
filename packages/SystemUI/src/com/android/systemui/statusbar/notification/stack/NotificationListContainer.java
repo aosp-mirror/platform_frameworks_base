@@ -16,17 +16,16 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
-
-import android.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.SimpleNotificationListContainer;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -35,8 +34,9 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
  * Interface representing the entity that contains notifications. It can have
  * notification views added and removed from it, and will manage displaying them to the user.
  */
-public interface NotificationListContainer extends ExpandableView.OnHeightChangedListener,
-        VisibilityLocationProvider, SimpleNotificationListContainer {
+public interface NotificationListContainer extends
+        ExpandableView.OnHeightChangedListener,
+        VisibilityLocationProvider {
 
     /**
      * Called when a child is being transferred.
@@ -91,6 +91,7 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * @param i ith child to get
      * @return the ith child in the list container
      */
+    @Nullable
     View getContainerChildAt(int i);
 
     /**
@@ -106,6 +107,11 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * @param v view to add
      */
     void addContainerView(View v);
+
+    /**
+     * Add a view to the container at a particular index
+     */
+    void addContainerViewAt(View v, int index);
 
     /**
      * Sets the maximum number of notifications to display.
@@ -188,13 +194,17 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
         return true;
     }
 
-    default void setWillExpand(boolean willExpand) {};
-
     /**
-     * Remove a list item from the container
-     * @param v the item to remove
+     * Tells the container that an animation is about to expand it.
      */
-    void removeListItem(@NonNull NotificationListItem v);
+    default void setWillExpand(boolean willExpand) {}
 
     void setNotificationActivityStarter(NotificationActivityStarter notificationActivityStarter);
+
+    /**
+     * @return the start location where we start clipping notifications.
+     */
+    default int getTopClippingStartLocation() {
+        return 0;
+    }
 }

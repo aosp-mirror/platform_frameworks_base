@@ -52,6 +52,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private boolean mSharedElementTransitionStarted;
     private Activity mActivity;
+    private boolean mIsTaskRoot;
     private boolean mHasStopped;
     private boolean mIsCanceled;
     private ObjectAnimator mBackgroundAnimator;
@@ -252,7 +253,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 cancel();
                 break;
             case MSG_ALLOW_RETURN_TRANSITION:
-                if (!mIsCanceled) {
+                if (!mIsCanceled && !mIsTaskRoot) {
                     mPendingExitNames = mAllSharedElementNames;
                 }
                 break;
@@ -343,6 +344,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mActivity == null || decorView == null) {
             return;
         }
+
+        mIsTaskRoot = mActivity.isTaskRoot();
+
         if (!isCrossTask()) {
             mActivity.overridePendingTransition(0, 0);
         }

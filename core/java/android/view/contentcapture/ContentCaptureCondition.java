@@ -17,6 +17,7 @@ package android.view.contentcapture;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.LocusId;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -91,7 +92,7 @@ public final class ContentCaptureCondition implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;

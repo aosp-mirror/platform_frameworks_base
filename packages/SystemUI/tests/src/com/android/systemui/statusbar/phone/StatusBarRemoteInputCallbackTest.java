@@ -36,8 +36,11 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +60,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private ActivityStarter mActivityStarter;
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     private int mCurrentUserId = 0;
     private StatusBarRemoteInputCallback mRemoteInputCallback;
@@ -72,10 +76,10 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager);
 
         mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext,
-                mock(NotificationGroupManager.class), mNotificationLockscreenUserManager,
+                mock(NotificationGroupManagerLegacy.class), mNotificationLockscreenUserManager,
                 mKeyguardStateController, mStatusBarStateController, mStatusBarKeyguardViewManager,
                 mActivityStarter, mShadeController, new CommandQueue(mContext),
-                mock(ActionClickLogger.class)));
+                mock(ActionClickLogger.class), mFakeExecutor));
         mRemoteInputCallback.mChallengeReceiver = mRemoteInputCallback.new ChallengeReceiver();
     }
 

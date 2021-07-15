@@ -125,6 +125,13 @@ public abstract class InputMethodManagerInternal {
     public abstract void removeImeSurface();
 
     /**
+     * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
+     * TODO(b/189923292): Making SystemUI to be true IME icon controller vs. presenter that
+     *     controlled by IMMS.
+     */
+    public abstract void updateImeWindowStatus(boolean disableImeIcon);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -175,10 +182,14 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void removeImeSurface() {
                 }
+
+                @Override
+                public void updateImeWindowStatus(boolean disableImeIcon) {
+                }
             };
 
     /**
-     * @return Global instance if exists.  Otherwise, a dummy no-op instance.
+     * @return Global instance if exists.  Otherwise, a fallback no-op instance.
      */
     @NonNull
     public static InputMethodManagerInternal get() {

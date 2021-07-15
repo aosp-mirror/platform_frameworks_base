@@ -296,7 +296,7 @@ public abstract class RemoteDisplayProvider {
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             mSettingsPendingIntent = PendingIntent.getActivity(
-                    mContext, 0, settingsIntent, 0, null);
+                    mContext, 0, settingsIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED, null);
         }
         return mSettingsPendingIntent;
     }

@@ -15,23 +15,21 @@
   ~ limitations under the License
   -->
 
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:insetLeft="@dimen/button_inset_horizontal_material"
-       android:insetTop="@dimen/button_inset_vertical_material"
-       android:insetRight="@dimen/button_inset_horizontal_material"
-       android:insetBottom="@dimen/button_inset_vertical_material">
-    <ripple android:color="?attr/colorControlHighlight">
-        <item>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="?attr/colorControlHighlight">
+    <item>
+        <inset
+            android:insetLeft="@dimen/button_inset_horizontal_material"
+            android:insetTop="@dimen/button_inset_vertical_material"
+            android:insetRight="@dimen/button_inset_horizontal_material"
+            android:insetBottom="@dimen/button_inset_vertical_material">
             <shape android:shape="rectangle">
-                <corners android:radius="?attr/buttonCornerRadius" />
-                <padding android:left="@dimen/button_padding_horizontal_material"
+                <corners android:radius="@dimen/notification_action_button_radius" />
+                <padding android:left="12dp"
                          android:top="@dimen/button_padding_vertical_material"
-                         android:right="@dimen/button_padding_horizontal_material"
+                         android:right="12dp"
                          android:bottom="@dimen/button_padding_vertical_material" />
                 <solid android:color="@color/white" />
-                <stroke android:width="@dimen/emphasized_button_stroke_width"
-                        android:color="@color/material_grey_300"/>
             </shape>
-        </item>
-    </ripple>
-</inset>
+        </inset>
+    </item>
+</ripple>

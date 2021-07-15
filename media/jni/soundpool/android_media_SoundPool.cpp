@@ -21,7 +21,8 @@
 
 #include <utils/Log.h>
 #include <jni.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/AndroidRuntime.h>
 #include "SoundPool.h"
 
@@ -33,7 +34,8 @@ static struct fields_t {
     jclass      mSoundPoolClass;
 } fields;
 static inline SoundPool* MusterSoundPool(JNIEnv *env, jobject thiz) {
-    return (SoundPool*)env->GetLongField(thiz, fields.mNativeContext);
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
+    return reinterpret_cast<SoundPool*>(env->GetLongField(thiz, fields.mNativeContext));
 }
 static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
 struct audio_attributes_fields_t {
@@ -181,7 +183,7 @@ static void android_media_callback(SoundPoolEvent event, SoundPool* soundPool, v
 
 static jint
 android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
-        jint maxChannels, jobject jaa)
+        jint maxChannels, jobject jaa, jstring opPackageName)
 {
     if (jaa == nullptr) {
         ALOGE("Error creating SoundPool: invalid audio attributes");
@@ -200,10 +202,11 @@ android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
     paa->usage = (audio_usage_t) env->GetIntField(jaa, javaAudioAttrFields.fieldUsage);
     paa->content_type =
             (audio_content_type_t) env->GetIntField(jaa, javaAudioAttrFields.fieldContentType);
-    paa->flags = env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
+    paa->flags = (audio_flags_mask_t) env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
 
     ALOGV("android_media_SoundPool_native_setup");
-    auto *ap = new SoundPool(maxChannels, paa);
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
+    auto *ap = new SoundPool(maxChannels, paa, opPackageNameStr.c_str());
     if (ap == nullptr) {
         return -1;
     }
@@ -298,7 +301,7 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_SoundPool_setRate
     },
     {   "native_setup",
-        "(Ljava/lang/Object;ILjava/lang/Object;)I",
+        "(Ljava/lang/Object;ILjava/lang/Object;Ljava/lang/String;)I",
         (void*)android_media_SoundPool_native_setup
     },
     {   "native_release",

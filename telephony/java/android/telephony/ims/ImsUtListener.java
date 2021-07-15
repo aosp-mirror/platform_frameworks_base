@@ -178,4 +178,11 @@ public class ImsUtListener {
     public ImsUtListener(IImsUtListener serviceInterface) {
         mServiceInterface = serviceInterface;
     }
+
+    /**
+     * @hide
+     */
+    public IImsUtListener getListenerInterface() {
+        return mServiceInterface;
+    }
 }

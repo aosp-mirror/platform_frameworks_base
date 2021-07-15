@@ -22,9 +22,11 @@ import static com.android.server.power.batterysaver.BatterySaverPolicy.POLICY_LE
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.os.BatterySaverPolicyConfig;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
+import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -46,20 +48,23 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private static final float PRECISION = 0.001f;
     private static final int GPS_MODE = 0; // LOCATION_MODE_NO_CHANGE
     private static final int DEFAULT_GPS_MODE =
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF;
-    private static final String BATTERY_SAVER_CONSTANTS = "vibration_disabled=true,"
+            PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
+    private static final int SOUND_TRIGGER_MODE = 0; // SOUND_TRIGGER_MODE_ALL_ENABLED
+    private static final int DEFAULT_SOUND_TRIGGER_MODE =
+            PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY;
+    private static final String BATTERY_SAVER_CONSTANTS = "disable_vibration=true,"
             + "advertise_is_enabled=true,"
-            + "animation_disabled=false,"
-            + "soundtrigger_disabled=true,"
-            + "firewall_disabled=false,"
-            + "datasaver_disabled=false,"
-            + "adjust_brightness_disabled=true,"
+            + "disable_animation=false,"
+            + "enable_firewall=true,"
+            + "enable_datasaver=true,"
+            + "enable_brightness_adjustment=false,"
             + "adjust_brightness_factor=0.7,"
-            + "fullbackup_deferred=true,"
-            + "keyvaluebackup_deferred=false,"
-            + "gps_mode=0," // LOCATION_MODE_NO_CHANGE
+            + "defer_full_backup=true,"
+            + "defer_keyvalue_backup=false,"
+            + "location_mode=0," // LOCATION_MODE_NO_CHANGE
+            + "soundtrigger_mode=0," // SOUND_TRIGGER_MODE_ALL_ENABLE
             + "enable_night_mode=false,"
-            + "quick_doze_enabled=true";
+            + "enable_quick_doze=true";
     private static final String BATTERY_SAVER_INCORRECT_CONSTANTS = "vi*,!=,,true";
 
     private class BatterySaverPolicyForTest extends BatterySaverPolicy {
@@ -117,13 +122,18 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_WithAccessibilityEnabled() {
-        mBatterySaverPolicy.setAccessibilityEnabled(true);
+        mBatterySaverPolicy.mAccessibilityEnabled.update(true);
         testServiceDefaultValue_Off(ServiceType.VIBRATION);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicySound_DefaultValueCorrect() {
         testServiceDefaultValue_On(ServiceType.SOUND);
+
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
+        PowerSaveState stateOn =
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SOUND);
+        assertThat(stateOn.soundTriggerMode).isEqualTo(DEFAULT_SOUND_TRIGGER_MODE);
     }
 
     @SmallTest
@@ -210,6 +220,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         final PowerSaveState soundState =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SOUND);
         assertThat(soundState.batterySaverEnabled).isTrue();
+        assertThat(soundState.soundTriggerMode).isEqualTo(SOUND_TRIGGER_MODE);
 
         final PowerSaveState networkState = mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NETWORK_FIREWALL);
@@ -336,13 +347,15 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         }
 
         mBatterySaverPolicy.setAdaptivePolicyLocked(
-                Policy.fromSettings(BATTERY_SAVER_CONSTANTS, ""));
+                Policy.fromSettings(BATTERY_SAVER_CONSTANTS, "",
+                        new DeviceConfig.Properties.Builder(
+                                DeviceConfig.NAMESPACE_BATTERY_SAVER).build(), null));
         verifyBatterySaverConstantsUpdated();
     }
 
-    public void testCarModeChanges_Full() {
+    public void testAutomotiveProjectionChanges_Full() {
         mBatterySaverPolicy.updateConstantsLocked(
-                "gps_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
+                "location_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
                         + ",enable_night_mode=true", "");
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
@@ -350,7 +363,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(true);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(true);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isAnyOf(PowerManager.LOCATION_MODE_NO_CHANGE,
@@ -358,7 +371,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertFalse(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(false);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(false);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
@@ -366,18 +379,20 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
     }
 
-    public void testCarModeChanges_Adaptive() {
+    public void testAutomotiveProjectionChanges_Adaptive() {
         mBatterySaverPolicy.setAdaptivePolicyLocked(
                 Policy.fromSettings(
-                        "gps_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
-                                + ",enable_night_mode=true", ""));
+                        "location_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
+                                + ",enable_night_mode=true", "",
+                        new DeviceConfig.Properties.Builder(
+                                DeviceConfig.NAMESPACE_BATTERY_SAVER).build(), null));
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_ADAPTIVE);
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
         assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(true);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(true);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isAnyOf(PowerManager.LOCATION_MODE_NO_CHANGE,
@@ -385,11 +400,232 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertFalse(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(false);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(false);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
         assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
+    }
+
+    public void testUserSettingsOverrideDeviceConfig() {
+        Policy policy = Policy.fromSettings(
+                BatterySaverPolicy.KEY_ADJUST_BRIGHTNESS_FACTOR + "=.1"
+                        + "," + BatterySaverPolicy.KEY_ADVERTISE_IS_ENABLED + "=true"
+                        + "," + BatterySaverPolicy.KEY_DEFER_FULL_BACKUP + "=true"
+                        + "," + BatterySaverPolicy.KEY_DEFER_KEYVALUE_BACKUP + "=true"
+                        + "," + BatterySaverPolicy.KEY_DISABLE_ANIMATION + "=true"
+                        + "," + BatterySaverPolicy.KEY_DISABLE_AOD + "=true"
+                        + "," + BatterySaverPolicy.KEY_DISABLE_LAUNCH_BOOST + "=true"
+                        + "," + BatterySaverPolicy.KEY_DISABLE_OPTIONAL_SENSORS + "=true"
+                        + "," + BatterySaverPolicy.KEY_DISABLE_VIBRATION + "=true"
+                        + "," + BatterySaverPolicy.KEY_ENABLE_BRIGHTNESS_ADJUSTMENT + "=true"
+                        + "," + BatterySaverPolicy.KEY_ENABLE_DATASAVER + "=true"
+                        + "," + BatterySaverPolicy.KEY_ENABLE_FIREWALL + "=true"
+                        + "," + BatterySaverPolicy.KEY_ENABLE_NIGHT_MODE + "=true"
+                        + "," + BatterySaverPolicy.KEY_ENABLE_QUICK_DOZE + "=true"
+                        + "," + BatterySaverPolicy.KEY_FORCE_ALL_APPS_STANDBY + "=true"
+                        + "," + BatterySaverPolicy.KEY_FORCE_BACKGROUND_CHECK + "=true"
+                        + "," + BatterySaverPolicy.KEY_LOCATION_MODE
+                        + "=" + PowerManager.LOCATION_MODE_FOREGROUND_ONLY
+                        + "," + BatterySaverPolicy.KEY_SOUNDTRIGGER_MODE
+                        + "=" + PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+                "",
+                new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_BATTERY_SAVER)
+                        .setFloat(BatterySaverPolicy.KEY_ADJUST_BRIGHTNESS_FACTOR, .5f)
+                        .setBoolean(BatterySaverPolicy.KEY_ADVERTISE_IS_ENABLED, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_FULL_BACKUP, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_KEYVALUE_BACKUP, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_ANIMATION, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_AOD, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_LAUNCH_BOOST, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_OPTIONAL_SENSORS, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_VIBRATION, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_BRIGHTNESS_ADJUSTMENT, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_DATASAVER, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_FIREWALL, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_NIGHT_MODE, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_QUICK_DOZE, false)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_ALL_APPS_STANDBY, false)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_BACKGROUND_CHECK, false)
+                        .setInt(BatterySaverPolicy.KEY_LOCATION_MODE,
+                                PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF)
+                        .setInt(BatterySaverPolicy.KEY_SOUNDTRIGGER_MODE,
+                                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED)
+                        .build(),
+                null);
+        assertEquals(.1f, policy.adjustBrightnessFactor);
+        assertTrue(policy.advertiseIsEnabled);
+        assertTrue(policy.deferFullBackup);
+        assertTrue(policy.deferKeyValueBackup);
+        assertTrue(policy.disableAnimation);
+        assertTrue(policy.disableAod);
+        assertTrue(policy.disableLaunchBoost);
+        assertTrue(policy.disableOptionalSensors);
+        assertTrue(policy.disableVibration);
+        assertTrue(policy.enableAdjustBrightness);
+        assertTrue(policy.enableDataSaver);
+        assertTrue(policy.enableFirewall);
+        assertTrue(policy.enableNightMode);
+        assertTrue(policy.enableQuickDoze);
+        assertTrue(policy.forceAllAppsStandby);
+        assertTrue(policy.forceBackgroundCheck);
+        assertEquals(PowerManager.LOCATION_MODE_FOREGROUND_ONLY, policy.locationMode);
+        assertEquals(PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY, policy.soundTriggerMode);
+    }
+
+    public void testDeviceConfigOverridesDefaults() {
+        Policy policy = Policy.fromSettings(
+                "", "",
+                new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_BATTERY_SAVER)
+                        .setFloat(BatterySaverPolicy.KEY_ADJUST_BRIGHTNESS_FACTOR, .5f)
+                        .setBoolean(BatterySaverPolicy.KEY_ADVERTISE_IS_ENABLED, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_FULL_BACKUP, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_KEYVALUE_BACKUP, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_ANIMATION, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_AOD, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_LAUNCH_BOOST, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_OPTIONAL_SENSORS, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_VIBRATION, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_BRIGHTNESS_ADJUSTMENT, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_DATASAVER, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_FIREWALL, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_NIGHT_MODE, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_QUICK_DOZE, false)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_ALL_APPS_STANDBY, false)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_BACKGROUND_CHECK, false)
+                        .setInt(BatterySaverPolicy.KEY_LOCATION_MODE,
+                                PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF)
+                        .setInt(BatterySaverPolicy.KEY_SOUNDTRIGGER_MODE,
+                                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED)
+                        .build(),
+                null);
+        assertEquals(.5f, policy.adjustBrightnessFactor);
+        assertFalse(policy.advertiseIsEnabled);
+        assertFalse(policy.deferFullBackup);
+        assertFalse(policy.deferKeyValueBackup);
+        assertFalse(policy.disableAnimation);
+        assertFalse(policy.disableAod);
+        assertFalse(policy.disableLaunchBoost);
+        assertFalse(policy.disableOptionalSensors);
+        assertFalse(policy.disableVibration);
+        assertFalse(policy.enableAdjustBrightness);
+        assertFalse(policy.enableDataSaver);
+        assertFalse(policy.enableFirewall);
+        assertFalse(policy.enableNightMode);
+        assertFalse(policy.enableQuickDoze);
+        assertFalse(policy.forceAllAppsStandby);
+        assertFalse(policy.forceBackgroundCheck);
+        assertEquals(PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF,
+                policy.locationMode);
+        assertEquals(PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED,
+                policy.soundTriggerMode);
+    }
+
+    public void testDeviceConfig_AdaptiveValues() {
+        final String adaptiveSuffix = "_adaptive";
+        Policy policy = Policy.fromSettings(
+                "", "",
+                new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_BATTERY_SAVER)
+                        .setFloat(BatterySaverPolicy.KEY_ADJUST_BRIGHTNESS_FACTOR, .5f)
+                        .setBoolean(BatterySaverPolicy.KEY_ADVERTISE_IS_ENABLED, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_FULL_BACKUP, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_KEYVALUE_BACKUP, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_ANIMATION, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_AOD, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_LAUNCH_BOOST, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_OPTIONAL_SENSORS, false)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_VIBRATION, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_BRIGHTNESS_ADJUSTMENT, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_DATASAVER, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_FIREWALL, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_NIGHT_MODE, false)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_QUICK_DOZE, false)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_ALL_APPS_STANDBY, false)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_BACKGROUND_CHECK, false)
+                        .setInt(BatterySaverPolicy.KEY_LOCATION_MODE,
+                                PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF)
+                        .setInt(BatterySaverPolicy.KEY_SOUNDTRIGGER_MODE,
+                                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED)
+                        .setFloat(BatterySaverPolicy.KEY_ADJUST_BRIGHTNESS_FACTOR + adaptiveSuffix,
+                                .9f)
+                        .setBoolean(BatterySaverPolicy.KEY_ADVERTISE_IS_ENABLED + adaptiveSuffix,
+                                true)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_FULL_BACKUP + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_DEFER_KEYVALUE_BACKUP + adaptiveSuffix,
+                                true)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_ANIMATION + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_AOD + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_LAUNCH_BOOST + adaptiveSuffix,
+                                true)
+                        .setBoolean(
+                                BatterySaverPolicy.KEY_DISABLE_OPTIONAL_SENSORS + adaptiveSuffix,
+                                true)
+                        .setBoolean(BatterySaverPolicy.KEY_DISABLE_VIBRATION + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_BRIGHTNESS_ADJUSTMENT
+                                        + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_DATASAVER + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_FIREWALL + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_NIGHT_MODE + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_ENABLE_QUICK_DOZE + adaptiveSuffix, true)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_ALL_APPS_STANDBY + adaptiveSuffix,
+                                true)
+                        .setBoolean(BatterySaverPolicy.KEY_FORCE_BACKGROUND_CHECK + adaptiveSuffix,
+                                true)
+                        .setInt(BatterySaverPolicy.KEY_LOCATION_MODE + adaptiveSuffix,
+                                PowerManager.LOCATION_MODE_FOREGROUND_ONLY)
+                        .setInt(BatterySaverPolicy.KEY_SOUNDTRIGGER_MODE + adaptiveSuffix,
+                                PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY)
+                        .build(), adaptiveSuffix);
+        assertEquals(.9f, policy.adjustBrightnessFactor);
+        assertTrue(policy.advertiseIsEnabled);
+        assertTrue(policy.deferFullBackup);
+        assertTrue(policy.deferKeyValueBackup);
+        assertTrue(policy.disableAnimation);
+        assertTrue(policy.disableAod);
+        assertTrue(policy.disableLaunchBoost);
+        assertTrue(policy.disableOptionalSensors);
+        assertTrue(policy.disableVibration);
+        assertTrue(policy.enableAdjustBrightness);
+        assertTrue(policy.enableDataSaver);
+        assertTrue(policy.enableFirewall);
+        assertTrue(policy.enableNightMode);
+        assertTrue(policy.enableQuickDoze);
+        assertTrue(policy.forceAllAppsStandby);
+        assertTrue(policy.forceBackgroundCheck);
+        assertEquals(PowerManager.LOCATION_MODE_FOREGROUND_ONLY, policy.locationMode);
+        assertEquals(PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY, policy.soundTriggerMode);
+    }
+
+    public void testSetFullPolicy_overridesSettingsAndDeviceConfig_clearOnFullExit() {
+        mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_1;
+        mMockGlobalSettings.put(Global.BATTERY_SAVER_CONSTANTS,
+                "location_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+        mMockGlobalSettings.put(Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS, "");
+
+        mBatterySaverPolicy.onChange();
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+
+        Policy currentFullPolicy = mBatterySaverPolicy.getPolicyLocked(POLICY_LEVEL_FULL);
+        BatterySaverPolicyConfig currentFullPolicyConfig = currentFullPolicy.toConfig();
+        BatterySaverPolicyConfig newFullPolicyConfig =
+                new BatterySaverPolicyConfig.Builder(currentFullPolicyConfig)
+                        .setLocationMode(PowerManager.LOCATION_MODE_FOREGROUND_ONLY)
+                        .build();
+        mBatterySaverPolicy.setFullPolicyLocked(Policy.fromConfig(newFullPolicyConfig));
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_FOREGROUND_ONLY);
+
+        // Any policy settings set through #setFullPolicy will be cleared when exiting full policy.
+        // Default policy settings will be used on the next full policy mode enter unless
+        // #setFullPolicy is called again.
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_OFF);
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_NO_CHANGE);
+
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
     }
 }

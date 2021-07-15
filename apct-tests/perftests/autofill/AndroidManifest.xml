@@ -18,7 +18,8 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.perftests.utils.PerfTestActivity">
+        <activity android:name="android.perftests.utils.PerfTestActivity"
+            android:exported="true">
           <intent-filter>
             <action android:name="com.android.perftests.core.PERFTEST" />
           </intent-filter>
@@ -27,7 +28,8 @@
         <service
             android:name="android.view.autofill.MyAutofillService"
             android:label="PERF AutofillService"
-            android:permission="android.permission.BIND_AUTOFILL_SERVICE" >
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.autofill.AutofillService" />
             </intent-filter>

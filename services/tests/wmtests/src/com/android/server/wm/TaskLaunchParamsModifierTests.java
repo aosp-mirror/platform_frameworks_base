@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -28,15 +30,22 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER_FIRST;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.ActivityStarter.Request;
+import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
@@ -46,10 +55,12 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.view.Gravity;
+import android.view.InsetsState;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.LaunchParamsController.LaunchParams;
+import com.android.server.wm.LaunchParamsController.LaunchParamsModifier.Result;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +79,7 @@ import java.util.Locale;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
+public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     private static final Rect DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
             /* right */ 1920, /* bottom */ 1080);
     private static final Rect DISPLAY_STABLE_BOUNDS = new Rect(/* left */ 100,
@@ -83,7 +94,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mActivity = new ActivityBuilder(mService).build();
+        mActivity = new ActivityBuilder(mAtm).build();
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
         mActivity.info.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
 
@@ -98,19 +109,17 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     @Test
     public void testReturnsSkipWithEmptyActivity() {
         final Task task = new TaskBuilder(mSupervisor).build();
-        assertEquals(RESULT_SKIP, mTarget.onCalculate(task, /* layout */ null,
-                /* activity */ null, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_SKIP, new CalculateRequestBuilder().setActivity(null).calculate());
     }
 
-    // =============================
-    // Display ID Related Tests
-    // =============================
+    // =======================
+    // Display Related Tests
+    // =======================
     @Test
     public void testDefaultToPrimaryDisplayArea() {
         createNewDisplayContent(WINDOWING_MODE_FREEFORM);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
@@ -123,8 +132,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquals(display.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
     }
@@ -140,8 +148,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         ActivityRecord source = createSourceActivity(fullscreenDisplay);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setSource(source).calculate());
 
         assertEquals(fullscreenDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
@@ -160,8 +167,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(fullscreenDisplay.mDisplayId);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
 
         assertEquals(fullscreenDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
@@ -181,15 +188,15 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchTaskDisplayArea(fullscreenDisplay.getDefaultTaskDisplayArea()
                 .mRemoteToken.toWindowContainerToken());
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
 
         assertEquals(fullscreenDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
     }
 
     @Test
-    public void testUsesTasksDisplayAreaIdPriorToSourceIfSet() {
+    public void testUsesSourcesDisplayAreaIdPriorToTaskIfSet() {
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
         final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
@@ -199,10 +206,13 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         ActivityRecord reusableActivity = createSourceActivity(fullscreenDisplay);
         ActivityRecord source = createSourceActivity(freeformDisplay);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTask(),
-                /* layout */ null, mActivity, source, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setTask(reusableActivity.getTask())
+                        .setSource(source)
+                        .calculate());
 
-        assertEquals(fullscreenDisplay.getDefaultTaskDisplayArea(),
+        assertEquals(freeformDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
     }
 
@@ -212,8 +222,10 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 WINDOWING_MODE_FREEFORM);
         ActivityRecord source = createSourceActivity(freeformDisplay);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(source.getTask(), null /* layout */,
-                null /* activity */, null /* source */, null /* options */, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setTask(source.getTask())
+                        .calculate());
 
         assertEquals(freeformDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
@@ -232,8 +244,11 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         source.mHandoverLaunchDisplayId = freeformDisplay.mDisplayId;
         source.noDisplay = true;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTask(),
-                null /* layout */, mActivity, source, null /* options */, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setTask(reusableActivity.getTask())
+                        .setSource(source)
+                        .calculate());
 
         assertEquals(freeformDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
@@ -252,11 +267,273 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         source.mHandoverTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
         source.noDisplay = true;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTask(),
-                null /* layout */, mActivity, source, null /* options */, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setTask(reusableActivity.getTask())
+                        .setSource(source)
+                        .calculate());
 
         assertEquals(freeformDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDisplayAreaFromTopMostActivityInApplicationIfAvailable() {
+        final String processName = "processName";
+        final int uid = 124214;
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea expectedDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final WindowProcessController controller = mock(WindowProcessController.class);
+
+        when(controller.getTopActivityDisplayArea()).thenReturn(expectedDisplayArea);
+
+        when(mActivity.getProcessName()).thenReturn(processName);
+        when(mActivity.getUid()).thenReturn(uid);
+        doReturn(controller)
+                .when(mAtm)
+                .getProcessController(processName, uid);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(expectedDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDisplayAreaFromLaunchingActivityIfApplicationLaunching() {
+        final String processName = "processName";
+        final int uid = 124214;
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea expectedTaskDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final WindowProcessController controller = mock(WindowProcessController.class);
+
+        when(controller.getTopActivityDisplayArea()).thenReturn(expectedTaskDisplayArea);
+
+        when(mActivity.getProcessName()).thenReturn(processName);
+        when(mActivity.getUid()).thenReturn(uid);
+        doReturn(null)
+                .when(mAtm)
+                .getProcessController(processName, uid);
+
+        doReturn(controller)
+                .when(mAtm)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(expectedTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testDisplayAreaFromLaunchingActivityTakesPrecedence() {
+        final String processName = "processName";
+        final int uid = 124214;
+        final TestDisplayContent firstScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea firstTaskDisplayArea = firstScreen.getDefaultTaskDisplayArea();
+        final TaskDisplayArea expectedTaskDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final WindowProcessController controllerForLaunching = mock(WindowProcessController.class);
+        final WindowProcessController controllerForApplication =
+                mock(WindowProcessController.class);
+
+        when(mActivity.getProcessName()).thenReturn(processName);
+        when(mActivity.getUid()).thenReturn(uid);
+
+        when(controllerForApplication.getTopActivityDisplayArea()).thenReturn(firstTaskDisplayArea);
+        when(controllerForLaunching.getTopActivityDisplayArea())
+                .thenReturn(expectedTaskDisplayArea);
+
+        doReturn(controllerForApplication)
+                .when(mAtm)
+                .getProcessController(processName, uid);
+        doReturn(controllerForLaunching)
+                .when(mAtm)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(expectedTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDisplayAreaOriginalProcessAsLastResort() {
+        final TestDisplayContent firstScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea expectedTaskDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final Request request = new Request();
+        request.realCallingPid = 12412413;
+        request.realCallingUid = 235424;
+
+        final WindowProcessController controller = mock(WindowProcessController.class);
+
+        when(controller.getTopActivityDisplayArea()).thenReturn(expectedTaskDisplayArea);
+
+        doReturn(null)
+                .when(mAtm)
+                .getProcessController(mActivity.processName, mActivity.info.applicationInfo.uid);
+
+        doReturn(null)
+                .when(mAtm)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        doReturn(controller)
+                .when(mAtm)
+                .getProcessController(request.realCallingPid, request.realCallingUid);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setRequest(request).calculate());
+
+        assertEquals(expectedTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDefaultDisplayAreaIfWindowProcessControllerIsNotPresent() {
+        doReturn(null)
+                .when(mAtm)
+                .getProcessController(mActivity.processName, mActivity.info.applicationInfo.uid);
+
+        doReturn(null)
+                .when(mAtm)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(DEFAULT_DISPLAY, mResult.mPreferredTaskDisplayArea.getDisplayId());
+    }
+
+    @Test
+    public void testOverridesDisplayAreaWithStandardTypeAndFullscreenMode() {
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(mDefaultDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTask(secondaryDisplayArea, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
+        launchRoot.mCreatedByOrganizer = true;
+
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FULLSCREEN },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testOverridesDisplayAreaWithHomeTypeAndFullscreenMode() {
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(mDefaultDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTask(secondaryDisplayArea, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
+        launchRoot.mCreatedByOrganizer = true;
+
+        mActivity.setActivityType(ACTIVITY_TYPE_HOME);
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FULLSCREEN },
+                new int[] { ACTIVITY_TYPE_HOME });
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testOverridesDisplayAreaWithStandardTypeAndFreeformMode() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(freeformDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTask(secondaryDisplayArea, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
+        launchRoot.mCreatedByOrganizer = true;
+
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FREEFORM },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testNotOverrideDisplayAreaWhenActivityOptionsHasDisplayArea() {
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(mDefaultDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTask(secondaryDisplayArea, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
+        launchRoot.mCreatedByOrganizer = true;
+
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FULLSCREEN },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchTaskDisplayArea(
+                mDefaultDisplay.getDefaultTaskDisplayArea().mRemoteToken.toWindowContainerToken());
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquals(
+                mDefaultDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testRecalculateFreeformInitialBoundsWithOverrideDisplayArea() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(freeformDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        secondaryDisplayArea.setBounds(DISPLAY_BOUNDS.width() / 2, 0,
+                        DISPLAY_BOUNDS.width(), DISPLAY_BOUNDS.height());
+        final Task launchRoot = createTask(secondaryDisplayArea, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
+        launchRoot.mCreatedByOrganizer = true;
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FREEFORM },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+        final Rect secondaryDAStableBounds = new Rect();
+        secondaryDisplayArea.getStableRect(secondaryDAStableBounds);
+
+        // Specify the display and provide a layout so that it will be set to freeform bounds.
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(freeformDisplay.getDisplayId());
+        final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
+                .setGravity(Gravity.LEFT).build();
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).setLayout(layout).calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+        assertTrue(secondaryDAStableBounds.contains(mResult.mBounds));
+    }
+
+    @Test
+    public void testRecalculateFreeformInitialBoundsWithOverrideDisplayArea_unresizableApp() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(freeformDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        secondaryDisplayArea.setBounds(DISPLAY_BOUNDS.width() / 2, 0,
+                DISPLAY_BOUNDS.width(), DISPLAY_BOUNDS.height());
+        final Task launchRoot = createTask(secondaryDisplayArea, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD);
+        launchRoot.mCreatedByOrganizer = true;
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FREEFORM },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+        final Rect secondaryDAStableBounds = new Rect();
+        secondaryDisplayArea.getStableRect(secondaryDAStableBounds);
+
+        // The bounds will get updated for unresizable with opposite orientation on freeform display
+        final Rect displayBounds = new Rect(freeformDisplay.getBounds());
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = displayBounds.width() > displayBounds.height()
+                ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE;
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(freeformDisplay.getDisplayId());
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+        assertTrue(secondaryDAStableBounds.contains(mResult.mBounds));
     }
 
     // =====================================
@@ -272,8 +549,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -286,8 +563,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -300,12 +577,13 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityRecord source = createSourceActivity(fullscreenDisplay);
         source.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
     }
+
 
     @Test
     public void testKeepsPictureInPictureLaunchModeInOptions() {
@@ -317,8 +595,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_PINNED, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -335,8 +613,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_PINNED, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -349,8 +627,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -366,25 +644,31 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
     }
 
     @Test
-    public void testNonEmptyLayoutInfersFreeformWithEmptySize() {
+    public void testLayoutWithGravityAndEmptySizeInfersFreeformAndRespectsCurrentSize() {
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
+        final Rect expectedLaunchBounds = new Rect(0, 0, 200, 100);
+
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        mCurrent.mBounds.set(expectedLaunchBounds);
 
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.LEFT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
+
+        assertEquals(expectedLaunchBounds.width(), mResult.mBounds.width());
+        assertEquals(expectedLaunchBounds.height(), mResult.mBounds.height());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -397,8 +681,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -410,8 +694,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -425,8 +708,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
         mCurrent.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -441,8 +723,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -450,7 +731,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Test
     public void testForceMaximizesUnresizeableApp() {
-        mService.mSizeCompatFreeform = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -464,20 +745,20 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
     }
 
     @Test
-    public void testLaunchesAppInWindowOnFreeformDisplay() {
-        mService.mSizeCompatFreeform = true;
+    public void testLaunchesPortraitSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
-        Rect expectedLaunchBounds = new Rect(0, 0, 200, 100);
+        Rect expectedLaunchBounds = new Rect(0, 0, 100, 200);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -488,11 +769,44 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mBounds.set(expectedLaunchBounds);
 
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(expectedLaunchBounds, mResult.mBounds);
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+                WINDOWING_MODE_FREEFORM);
+    }
+
+    @Test
+    public void testLaunchesLandscapeSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
+                WINDOWING_MODE_FREEFORM);
+    }
+
+    @Test
+    public void testLaunchesPortraitUnresizableOnFreeformDisplayWithFreeformSizeCompat() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -510,8 +824,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -522,8 +836,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(DEFAULT_DISPLAY);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -538,8 +852,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -553,8 +867,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -570,8 +884,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
@@ -584,8 +898,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
@@ -607,8 +921,27 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquals(expected, mResult.mBounds);
+    }
+
+    @Test
+    public void testKeepsBoundsForMultiWindowModeInOptions() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FULLSCREEN);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+
+        final Rect expected = new Rect(0, 0, 100, 100);
+        options.setLaunchBounds(expected);
+
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(expected, mResult.mBounds);
     }
@@ -624,8 +957,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final Rect expected = new Rect(0, 0, 150, 150);
         options.setLaunchBounds(expected);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
 
         assertEquals(expected, mResult.mBounds);
     }
@@ -640,8 +973,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.LEFT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(DISPLAY_STABLE_BOUNDS.left, mResult.mBounds.left);
     }
@@ -656,8 +989,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.TOP).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(DISPLAY_STABLE_BOUNDS.top, mResult.mBounds.top);
     }
@@ -672,8 +1005,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.TOP | Gravity.LEFT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(DISPLAY_STABLE_BOUNDS.left, mResult.mBounds.left);
         assertEquals(DISPLAY_STABLE_BOUNDS.top, mResult.mBounds.top);
@@ -689,8 +1022,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.RIGHT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(DISPLAY_STABLE_BOUNDS.right, mResult.mBounds.right);
     }
@@ -705,8 +1038,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.BOTTOM).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(DISPLAY_STABLE_BOUNDS.bottom, mResult.mBounds.bottom);
     }
@@ -721,8 +1054,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.BOTTOM | Gravity.RIGHT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(DISPLAY_STABLE_BOUNDS.right, mResult.mBounds.right);
         assertEquals(DISPLAY_STABLE_BOUNDS.bottom, mResult.mBounds.bottom);
@@ -738,8 +1071,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(800, 400, 920, 480), mResult.mBounds);
     }
@@ -754,8 +1087,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).setGravity(Gravity.LEFT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(100, 400, 220, 480), mResult.mBounds);
     }
@@ -770,8 +1103,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).setGravity(Gravity.TOP).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(800, 200, 920, 280), mResult.mBounds);
     }
@@ -786,8 +1119,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).setGravity(Gravity.TOP | Gravity.LEFT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(100, 200, 220, 280), mResult.mBounds);
     }
@@ -802,8 +1135,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).setGravity(Gravity.RIGHT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(1500, 400, 1620, 480), mResult.mBounds);
     }
@@ -818,8 +1151,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).setGravity(Gravity.BOTTOM).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(800, 600, 920, 680), mResult.mBounds);
     }
@@ -834,8 +1167,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).setGravity(Gravity.BOTTOM | Gravity.RIGHT).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(1500, 600, 1620, 680), mResult.mBounds);
     }
@@ -850,8 +1183,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidthFraction(0.125f).setHeightFraction(0.1f).build();
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).calculate());
 
         assertEquals(new Rect(765, 416, 955, 464), mResult.mBounds);
     }
@@ -865,8 +1198,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquals(new Rect(0, 0, 200, 100), mResult.mBounds);
     }
@@ -880,8 +1212,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquals(new Rect(0, 0, 200, 100), mResult.mBounds);
     }
@@ -897,8 +1228,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.screenOrientation = SCREEN_ORIENTATION_NOSENSOR;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         final int orientationForDisplay = orientationFromBounds(freeformDisplay.getBounds());
         final int orientationForTask = orientationFromBounds(mResult.mBounds);
@@ -921,8 +1252,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.screenOrientation = SCREEN_ORIENTATION_LANDSCAPE;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, orientationFromBounds(mResult.mBounds));
     }
@@ -938,8 +1269,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, orientationFromBounds(mResult.mBounds));
     }
@@ -954,8 +1285,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         final int resultWidth = mResult.mBounds.width();
         final int displayWidth = freeformDisplay.getBounds().width();
@@ -978,8 +1309,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals("Distance to left and right should be equal.",
                 mResult.mBounds.left - DISPLAY_STABLE_BOUNDS.left,
@@ -1002,8 +1333,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
 
         final Rect displayBounds = freeformDisplay.getBounds();
         assertTrue("Left bounds should be larger than 0.", mResult.mBounds.left > 0);
@@ -1029,8 +1360,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
 
         final Rect displayBounds = freeformDisplay.getBounds();
         assertTrue("display bounds doesn't contain result. display bounds: "
@@ -1051,8 +1382,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
 
         final Rect displayBounds = freeformDisplay.getBounds();
         assertTrue("display bounds doesn't contain result. display bounds: "
@@ -1073,8 +1404,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertTrue("Result bounds should start from app bounds's origin, but it's "
                         + mResult.mBounds,
@@ -1100,8 +1431,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertTrue("Result bounds should start from top-right corner of app bounds, but "
                         + "it's " + mResult.mBounds,
@@ -1115,8 +1446,9 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         // This test case requires a relatively big app bounds to ensure the default size calculated
         // by letterbox won't be too small to hold the minimum width/height.
-        freeformDisplay.mDisplayContent.mDisplayFrames.mStable.set(/* left */ 10, /* top */ 10,
-                /* right */ 1910, /* top */ 1070);
+        configInsetsState(
+                freeformDisplay.getInsetsStateController().getRawInsetsState(), freeformDisplay,
+                new Rect(10, 10, 1910, 1070));
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
@@ -1126,8 +1458,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setLayout(layout).setOptions(options).calculate());
 
         assertEquals(500, mResult.mBounds.width());
         assertEquals(800, mResult.mBounds.height());
@@ -1144,8 +1476,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(200, 0, 400, 400), mResult.mBounds);
     }
@@ -1161,8 +1493,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchBounds(new Rect(50, 50, 500, 300));
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(170, 50, 620, 300), mResult.mBounds);
     }
@@ -1178,8 +1510,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchBounds(new Rect(1720, 50, 1850, 300));
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(1600, 50, 1730, 300), mResult.mBounds);
     }
@@ -1195,8 +1527,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchBounds(new Rect(0, 0, 1800, 200));
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(120, 0, 1920, 200), mResult.mBounds);
     }
@@ -1212,8 +1544,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchBounds(new Rect(120, 0, 1860, 200));
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(0, 0, 1740, 200), mResult.mBounds);
     }
@@ -1229,8 +1561,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchBounds(new Rect(120, 0, 1800, 1013));
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(240, 67, 1920, 1080), mResult.mBounds);
     }
@@ -1246,8 +1578,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
         options.setLaunchBounds(new Rect(120, 67, 1800, 1020));
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(0, 0, 1680, 953), mResult.mBounds);
     }
@@ -1258,8 +1590,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         // Returned bounds with in fullscreen mode will be set to last non-fullscreen bounds.
         assertEquals(new Rect(0, 0, 200, 100), mResult.mBounds);
@@ -1277,8 +1608,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(new Rect(100, 200, 400, 500), mResult.mBounds);
     }
@@ -1294,8 +1625,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquals(new Rect(120, 0, 320, 100), mResult.mBounds);
     }
@@ -1319,18 +1649,17 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Test
     public void testNoMultiDisplaySupports() {
-        final boolean orgValue = mService.mSupportsMultiDisplay;
+        final boolean orgValue = mAtm.mSupportsMultiDisplay;
         final TestDisplayContent display = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
         mCurrent.mPreferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
 
         try {
-            mService.mSupportsMultiDisplay = false;
-            assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                    mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+            mAtm.mSupportsMultiDisplay = false;
+            assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
             assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
                     mResult.mPreferredTaskDisplayArea);
         } finally {
-            mService.mSupportsMultiDisplay = orgValue;
+            mAtm.mSupportsMultiDisplay = orgValue;
         }
     }
 
@@ -1340,26 +1669,54 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         display.setBounds(DISPLAY_BOUNDS);
         display.getConfiguration().densityDpi = DENSITY_DEFAULT;
         display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
-        display.mDisplayContent.mDisplayFrames.mStable.set(DISPLAY_STABLE_BOUNDS);
-        spyOn(display.mDisplayContent.mDisplayFrames);
-
-        // We didn't set up the overall environment for this test, so we need to mute the side
-        // effect of layout passes that loosen the stable frame.
-        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
+        configInsetsState(display.getInsetsStateController().getRawInsetsState(), display,
+                DISPLAY_STABLE_BOUNDS);
         return display;
     }
 
+    /**
+     * Creates insets sources so that we can get the expected stable frame.
+     */
+    private static void configInsetsState(InsetsState state, DisplayContent display,
+            Rect stableFrame) {
+        final Rect displayFrame = display.getBounds();
+        final int dl = displayFrame.left;
+        final int dt = displayFrame.top;
+        final int dr = displayFrame.right;
+        final int db = displayFrame.bottom;
+        final int sl = stableFrame.left;
+        final int st = stableFrame.top;
+        final int sr = stableFrame.right;
+        final int sb = stableFrame.bottom;
+
+        state.setDisplayFrame(displayFrame);
+        if (sl > dl) {
+            state.getSource(ITYPE_CLIMATE_BAR).setFrame(dl, dt, sl, db);
+        }
+        if (st > dt) {
+            state.getSource(ITYPE_STATUS_BAR).setFrame(dl, dt, dr, st);
+        }
+        if (sr < dr) {
+            state.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(sr, dt, dr, db);
+        }
+        if (sb < db) {
+            state.getSource(ITYPE_NAVIGATION_BAR).setFrame(dl, sb, dr, db);
+        }
+        // Recompute config and push to children.
+        display.onRequestedOverrideConfigurationChanged(display.getConfiguration());
+    }
+
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
-        final ActivityStack stack = display.getDefaultTaskDisplayArea()
-                .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
-        return new ActivityBuilder(mService).setStack(stack).setCreateTask(true).build();
+        final Task rootTask = display.getDefaultTaskDisplayArea()
+                .createRootTask(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
+        return new ActivityBuilder(mAtm).setTask(rootTask).build();
     }
 
     private void addFreeformTaskTo(TestDisplayContent display, Rect bounds) {
-        final ActivityStack stack = display.getDefaultTaskDisplayArea()
-                .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
-        stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Task rootTask = display.getDefaultTaskDisplayArea()
+                .createRootTask(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
+        rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         // Just work around the unnecessary adjustments for bounds.
         task.getWindowConfiguration().setBounds(bounds);
     }
@@ -1375,6 +1732,53 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     private int orientationFromBounds(Rect bounds) {
         return bounds.width() > bounds.height() ? SCREEN_ORIENTATION_LANDSCAPE
                 : SCREEN_ORIENTATION_PORTRAIT;
+    }
+
+    private class CalculateRequestBuilder {
+        private Task mTask;
+        private ActivityInfo.WindowLayout mLayout;
+        private ActivityRecord mActivity = TaskLaunchParamsModifierTests.this.mActivity;
+        private ActivityRecord mSource;
+        private ActivityOptions mOptions;
+        private Request mRequest;
+        private int mPhase = PHASE_BOUNDS;
+        private LaunchParams mCurrentParams = mCurrent;
+        private LaunchParams mOutParams = mResult;
+
+        private CalculateRequestBuilder setTask(Task task) {
+            mTask = task;
+            return this;
+        }
+
+        private CalculateRequestBuilder setLayout(ActivityInfo.WindowLayout layout) {
+            mLayout = layout;
+            return this;
+        }
+
+        private CalculateRequestBuilder setActivity(ActivityRecord activity) {
+            mActivity = activity;
+            return this;
+        }
+
+        private CalculateRequestBuilder setSource(ActivityRecord source) {
+            mSource = source;
+            return this;
+        }
+
+        private CalculateRequestBuilder setOptions(ActivityOptions options) {
+            mOptions = options;
+            return this;
+        }
+
+        private CalculateRequestBuilder setRequest(Request request) {
+            mRequest = request;
+            return this;
+        }
+
+        private @Result int calculate() {
+            return mTarget.onCalculate(mTask, mLayout, mActivity, mSource, mOptions, mRequest,
+                    mPhase, mCurrentParams, mOutParams);
+        }
     }
 
     private static class WindowLayoutBuilder {

@@ -17,6 +17,7 @@
 package android.content.pm.parsing.component;
 
 import android.annotation.NonNull;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
@@ -39,8 +40,6 @@ import java.util.Set;
 
 /** @hide */
 public class ParsedProcessUtils {
-
-    private static final String TAG = ParsingUtils.TAG;
 
     @NonNull
     private static ParseResult<Set<String>> parseDenyPermission(Set<String> perms,
@@ -105,6 +104,13 @@ public class ParsedProcessUtils {
             }
 
             proc.gwpAsanMode = sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1);
+            proc.memtagMode = sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1);
+            if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized)) {
+                Boolean v = sa.getBoolean(
+                        R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized, false);
+                proc.nativeHeapZeroInitialized =
+                        v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED;
+            }
         } finally {
             sa.recycle();
         }

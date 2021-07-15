@@ -15,16 +15,19 @@ Copyright (C) 2015 The Android Open Source Project
     limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/work_widget_mask_frame"
+    android:theme="@android:style/Theme.DeviceDefault.DayNight"
+    android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F3374248"
+    android:background="@drawable/work_widget_mask_view_background"
     android:importantForAccessibility="noHideDescendants"
-    android:clickable="true">
+    android:clickable="true"
+    android:clipToOutline="true">
 
-    <ImageView android:id="@+id/work_widget_app_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.android.internal.widget.DisableImageView
+        android:id="@+id/work_widget_app_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center"
         android:clickable="false" />
 
@@ -32,8 +35,8 @@ Copyright (C) 2015 The Android Open Source Project
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
-        android:layout_marginBottom="4dp"
-        android:layout_marginRight="4dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginRight="12dp"
         android:src="@drawable/ic_corp_badge_off"
         android:clickable="false" />
 </FrameLayout>

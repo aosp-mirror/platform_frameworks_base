@@ -20,4 +20,8 @@
         android:width="@*android:dimen/car_primary_icon_size"
         android:height="@*android:dimen/car_primary_icon_size"
         android:drawable="@drawable/btn_check_material_anim"/>
+    <item
+        android:width="@*android:dimen/car_primary_icon_size"
+        android:height="@*android:dimen/car_primary_icon_size"
+        android:drawable="@drawable/car_checkbox_background"/>
 </layer-list>

@@ -199,8 +199,9 @@ public abstract class ImsFeature {
          * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
          * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS}.
          * @param radioTech The radio tech that this capability failed for, defined as
-         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
-         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE},
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN} or
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}.
          * @param reason The reason this capability was unable to be changed, defined as
          * {@link #CAPABILITY_ERROR_GENERIC} or {@link #CAPABILITY_SUCCESS}.
          */
@@ -336,7 +337,7 @@ public abstract class ImsFeature {
     /**
      * @hide
      */
-    public final void initialize(Context context, int slotId) {
+    public void initialize(Context context, int slotId) {
         mContext = context;
         mSlotId = slotId;
     }
@@ -509,6 +510,7 @@ public abstract class ImsFeature {
      * @return true if the capability is enabled, false otherwise.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract boolean queryCapabilityConfiguration(int capability, int radioTech);
 
     /**
@@ -547,5 +549,6 @@ public abstract class ImsFeature {
      * @return Binder instance that the framework will use to communicate with this feature.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     protected abstract IInterface getBinder();
 }

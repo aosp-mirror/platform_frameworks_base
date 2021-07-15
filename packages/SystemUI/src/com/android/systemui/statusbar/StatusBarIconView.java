@@ -53,8 +53,8 @@ import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
@@ -416,18 +416,24 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         return mIcon.icon;
     }
 
-    private Drawable getIcon(StatusBarIcon icon) {
-        return getIcon(getContext(), icon);
+    Drawable getIcon(StatusBarIcon icon) {
+        Context notifContext = getContext();
+        if (mNotification != null) {
+            notifContext = mNotification.getPackageContext(getContext());
+        }
+        return getIcon(getContext(), notifContext != null ? notifContext : getContext(), icon);
     }
 
     /**
      * Returns the right icon to use for this item
      *
-     * @param context Context to use to get resources
+     * @param sysuiContext Context to use to get scale factor
+     * @param context Context to use to get resources of notification icon
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
-    public static Drawable getIcon(Context context, StatusBarIcon statusBarIcon) {
+    public static Drawable getIcon(Context sysuiContext,
+            Context context, StatusBarIcon statusBarIcon) {
         int userId = statusBarIcon.user.getIdentifier();
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
@@ -436,7 +442,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         Drawable icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
 
         TypedValue typedValue = new TypedValue();
-        context.getResources().getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        sysuiContext.getResources().getValue(R.dimen.status_bar_icon_scale_factor,
+                typedValue, true);
         float scaleFactor = typedValue.getFloat();
 
         // No need to scale the icon, so return it as is.

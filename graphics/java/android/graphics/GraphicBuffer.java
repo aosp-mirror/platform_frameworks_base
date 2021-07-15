@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.HardwareBuffer;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -55,7 +56,7 @@ public class GraphicBuffer implements Parcelable {
     private final int mFormat;
     private final int mUsage;
     // Note: do not rename, this field is used by native code
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final long mNativeObject;
 
     // These two fields are only used by lock/unlockCanvas()
@@ -87,27 +88,13 @@ public class GraphicBuffer implements Parcelable {
     /**
      * Private use only. See {@link #create(int, int, int, int)}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private GraphicBuffer(int width, int height, int format, int usage, long nativeObject) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
         mUsage = usage;
         mNativeObject = nativeObject;
-    }
-
-    /**
-     * For SurfaceControl JNI.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static GraphicBuffer createFromExisting(int width, int height,
-            int format, int usage, long unwrappedNativeObject) {
-        long nativeObject = nWrapGraphicBuffer(unwrappedNativeObject);
-        if (nativeObject != 0) {
-            return new GraphicBuffer(width, height, format, usage, nativeObject);
-        }
-        return null;
     }
 
     /**
@@ -313,6 +300,5 @@ public class GraphicBuffer implements Parcelable {
     private static native long nReadGraphicBufferFromParcel(Parcel in);
     private static native boolean nLockCanvas(long nativeObject, Canvas canvas, Rect dirty);
     private static native boolean nUnlockCanvasAndPost(long nativeObject, Canvas canvas);
-    private static native long nWrapGraphicBuffer(long nativeObject);
     private static native GraphicBuffer nCreateFromHardwareBuffer(HardwareBuffer buffer);
 }

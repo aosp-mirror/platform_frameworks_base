@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.role.RoleManager.ROLE_BROWSER;
 import static android.app.role.RoleManager.ROLE_DIALER;
 import static android.app.role.RoleManager.ROLE_EMERGENCY;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -23,6 +24,7 @@ import static android.content.pm.PackageManager.MATCH_ALL;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -30,6 +32,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static java.util.Arrays.asList;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -44,7 +48,6 @@ import android.companion.ICompanionDeviceManager;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -67,6 +70,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -79,7 +83,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -97,21 +100,19 @@ public class RoleObserverTest extends UiServiceTestCase {
     @Mock
     private UserManager mUm;
     @Mock
-    private Executor mExecutor;
-    @Mock
     private RoleManager mRoleManager;
+    @Mock
+    private Looper mMainLooper;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
-    private List<UserInfo> mUsers;
-    private InjectableSystemClock mSystemClock = new FakeSystemClock();
+    private List<UserHandle> mUsers;
 
     private static class TestableNotificationManagerService extends NotificationManagerService {
         TestableNotificationManagerService(Context context,
                 NotificationRecordLogger logger,
-                InjectableSystemClock systemClock,
                 InstanceIdSequence notificationInstanceIdSequence) {
-            super(context, logger, systemClock, notificationInstanceIdSequence);
+            super(context, logger, notificationInstanceIdSequence);
         }
 
         @Override
@@ -134,13 +135,15 @@ public class RoleObserverTest extends UiServiceTestCase {
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
 
         mUsers = new ArrayList<>();
-        mUsers.add(new UserInfo(0, "system", 0));
-        mUsers.add(new UserInfo(10, "second", 0));
-        when(mUm.getUsers()).thenReturn(mUsers);
+        mUsers.add(new UserHandle(0));
+        mUsers.add(new UserHandle(10));
+        when(mUm.getUserHandles(anyBoolean())).thenReturn(mUsers);
+
+        when(mMainLooper.isCurrentThread()).thenReturn(true);
 
         mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
-                mSystemClock, mNotificationInstanceIdSequence);
-        mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
+                mNotificationInstanceIdSequence);
+        mRoleObserver = mService.new RoleObserver(mContext, mRoleManager, mPm, mMainLooper);
 
         try {
             mService.init(mService.new WorkerHandler(mock(Looper.class)),
@@ -158,7 +161,8 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UriGrantsManagerInternal.class),
                     mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
                     mock(StatsManager.class), mock(TelephonyManager.class),
-                    mock(ActivityManagerInternal.class));
+                    mock(ActivityManagerInternal.class),
+                    mock(MultiRateLimiter.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -174,7 +178,7 @@ public class RoleObserverTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testInit() throws Exception {
+    public void testInit_forNonBlockableDefaultApps() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
         List<String> emer0 = new ArrayList<>();
@@ -191,29 +195,29 @@ public class RoleObserverTest extends UiServiceTestCase {
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(dialer0);
+                mUsers.get(0)))
+                .thenReturn(dialer0);
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_EMERGENCY,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(emer0);
+                mUsers.get(0)))
+                .thenReturn(emer0);
 
         mRoleObserver.init();
 
         // verify internal records of current state of the world
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_DIALER, dialer0.get(0), mUsers.get(0).id));
+                ROLE_DIALER, dialer0.get(0), mUsers.get(0).getIdentifier()));
         assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_DIALER, dialer0.get(0), mUsers.get(1).id));
+                ROLE_DIALER, dialer0.get(0), mUsers.get(1).getIdentifier()));
 
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_EMERGENCY, emer0.get(0), mUsers.get(0).id));
+                ROLE_EMERGENCY, emer0.get(0), mUsers.get(0).getIdentifier()));
         assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_EMERGENCY, emer0.get(0), mUsers.get(1).id));
+                ROLE_EMERGENCY, emer0.get(0), mUsers.get(1).getIdentifier()));
 
         // make sure we're listening to updates
         verify(mRoleManager, times(1)).addOnRoleHoldersChangedListenerAsUser(
-                eq(mExecutor), any(), eq(UserHandle.ALL));
+                any(), any(), eq(UserHandle.ALL));
 
         // make sure we told pref helper about the state of the world
         verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, dialer0Pair);
@@ -221,14 +225,31 @@ public class RoleObserverTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSwapDefault() throws Exception {
+    public void testInit_forTrampolines() throws Exception {
+        when(mPm.getPackageUid("com.browser", MATCH_ALL, 0)).thenReturn(30);
+        when(mRoleManager.getRoleHoldersAsUser(
+                ROLE_BROWSER,
+                mUsers.get(0)))
+                .thenReturn(asList("com.browser"));
+
+        mRoleObserver.init();
+
+        assertTrue(mRoleObserver.isUidExemptFromTrampolineRestrictions(30));
+
+        // make sure we're listening to updates
+        verify(mRoleManager, times(1)).addOnRoleHoldersChangedListenerAsUser(any(), any(),
+                eq(UserHandle.ALL));
+    }
+
+    @Test
+    public void testSwapDefault_forNonBlockableDefaultApps() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(dialer0);
+                mUsers.get(0)))
+                .thenReturn(dialer0);
 
         mRoleObserver.init();
 
@@ -241,8 +262,8 @@ public class RoleObserverTest extends UiServiceTestCase {
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(newDefault);
+                mUsers.get(0)))
+                .thenReturn(newDefault);
 
         mRoleObserver.onRoleHoldersChanged(ROLE_DIALER, UserHandle.of(0));
 
@@ -251,15 +272,39 @@ public class RoleObserverTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSwapDefault_multipleOverlappingApps() throws Exception {
+    public void testSwapDefault_forTrampolines() throws Exception {
+        List<String> dialer0 = new ArrayList<>();
+        when(mPm.getPackageUid("com.browser", MATCH_ALL, 0)).thenReturn(30);
+        when(mPm.getPackageUid("com.browser2", MATCH_ALL, 0)).thenReturn(31);
+        when(mRoleManager.getRoleHoldersAsUser(
+                ROLE_BROWSER,
+                mUsers.get(0)))
+                .thenReturn(asList("com.browser"));
+        mRoleObserver.init();
+        assertTrue(mRoleObserver.isUidExemptFromTrampolineRestrictions(30));
+        assertFalse(mRoleObserver.isUidExemptFromTrampolineRestrictions(31));
+        // Default changed
+        when(mRoleManager.getRoleHoldersAsUser(
+                ROLE_BROWSER,
+                mUsers.get(0)))
+                .thenReturn(asList("com.browser2"));
+        mRoleObserver.onRoleHoldersChanged(ROLE_BROWSER, UserHandle.of(0));
+
+        assertFalse(mRoleObserver.isUidExemptFromTrampolineRestrictions(30));
+        assertTrue(mRoleObserver.isUidExemptFromTrampolineRestrictions(31));
+    }
+
+    @Test
+    public void testSwapDefault_multipleOverlappingApps_forNonBlockableDefaultApps()
+            throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
         dialer0.add("phone");
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(dialer0);
+                mUsers.get(0)))
+                .thenReturn(dialer0);
 
         mRoleObserver.init();
 
@@ -273,8 +318,8 @@ public class RoleObserverTest extends UiServiceTestCase {
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(newDefault);
+                mUsers.get(0)))
+                .thenReturn(newDefault);
 
         ArraySet<String> expectedRemove = new ArraySet<>();
         expectedRemove.add("dialer");
@@ -294,14 +339,14 @@ public class RoleObserverTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSwapDefault_newUser() throws Exception {
+    public void testSwapDefault_newUser_forNonBlockableDefaultApps() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(0).getUserHandle())).
-                thenReturn(dialer0);
+                mUsers.get(0)))
+                .thenReturn(dialer0);
 
         mRoleObserver.init();
 
@@ -310,8 +355,8 @@ public class RoleObserverTest extends UiServiceTestCase {
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
-                mUsers.get(1).getUserHandle())).
-                thenReturn(dialer10);
+                mUsers.get(1)))
+                .thenReturn(dialer10);
 
         ArraySet<Pair<String, Integer>> expectedAddPair = new ArraySet<>();
         expectedAddPair.add(new Pair("phone", 30));
@@ -328,5 +373,28 @@ public class RoleObserverTest extends UiServiceTestCase {
 
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(ROLE_DIALER, "phone", 10));
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(ROLE_DIALER, "dialer", 0));
+    }
+
+    @Test
+    public void testSwapDefault_newUser_forTrampolines() throws Exception {
+        List<String> dialer0 = new ArrayList<>();
+        when(mPm.getPackageUid("com.browser", MATCH_ALL, 0)).thenReturn(30);
+        when(mPm.getPackageUid("com.browser2", MATCH_ALL, 10)).thenReturn(1031);
+        when(mRoleManager.getRoleHoldersAsUser(
+                ROLE_BROWSER,
+                mUsers.get(0)))
+                .thenReturn(asList("com.browser"));
+        mRoleObserver.init();
+        assertTrue(mRoleObserver.isUidExemptFromTrampolineRestrictions(30));
+        assertFalse(mRoleObserver.isUidExemptFromTrampolineRestrictions(1031));
+        // New user
+        when(mRoleManager.getRoleHoldersAsUser(
+                ROLE_BROWSER,
+                mUsers.get(1)))
+                .thenReturn(asList("com.browser2"));
+        mRoleObserver.onRoleHoldersChanged(ROLE_BROWSER, UserHandle.of(10));
+
+        assertTrue(mRoleObserver.isUidExemptFromTrampolineRestrictions(30));
+        assertTrue(mRoleObserver.isUidExemptFromTrampolineRestrictions(1031));
     }
 }

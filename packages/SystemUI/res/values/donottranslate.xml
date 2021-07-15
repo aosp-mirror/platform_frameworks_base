@@ -21,5 +21,5 @@
     <string name="system_ui_date_pattern" translatable="false">@*android:string/system_ui_date_pattern</string>
 
     <!-- Date format for the always on display.  -->
-    <item type="string" name="system_ui_aod_date_pattern" translatable="false">eeeMMMd</item>
+    <item type="string" name="system_ui_aod_date_pattern" translatable="false">EEEMMMd</item>
 </resources>

@@ -328,8 +328,7 @@ public abstract class EuiccService extends Service {
      *                                       or when an number is bigger than 15
      */
     public int encodeSmdxSubjectAndReasonCode(@Nullable String subjectCode,
-            @Nullable String reasonCode)
-            throws NumberFormatException, IllegalArgumentException, UnsupportedOperationException {
+            @Nullable String reasonCode) {
         final int maxSupportedSection = 3;
         final int maxSupportedDigit = 15;
         final int bitsPerSection = 4;

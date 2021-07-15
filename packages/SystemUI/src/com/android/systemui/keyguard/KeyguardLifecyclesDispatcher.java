@@ -18,14 +18,16 @@ package com.android.systemui.keyguard;
 
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Dispatches the lifecycles keyguard gets from WindowManager on the main thread.
  */
-@Singleton
+@SysUISingleton
 public class KeyguardLifecyclesDispatcher {
 
     static final int SCREEN_TURNING_ON = 0;
@@ -52,6 +54,17 @@ public class KeyguardLifecyclesDispatcher {
         mHandler.obtainMessage(what).sendToTarget();
     }
 
+    /**
+     * @param what Message to send.
+     * @param pmReason Reason this message was triggered - this should be a value from either
+     * {@link PowerManager.WakeReason} or {@link PowerManager.GoToSleepReason}.
+     */
+    void dispatch(int what, int pmReason) {
+        final Message message = mHandler.obtainMessage(what);
+        message.arg1 = pmReason;
+        message.sendToTarget();
+    }
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -69,13 +82,13 @@ public class KeyguardLifecyclesDispatcher {
                     mScreenLifecycle.dispatchScreenTurnedOff();
                     break;
                 case STARTED_WAKING_UP:
-                    mWakefulnessLifecycle.dispatchStartedWakingUp();
+                    mWakefulnessLifecycle.dispatchStartedWakingUp(msg.arg1 /* pmReason */);
                     break;
                 case FINISHED_WAKING_UP:
                     mWakefulnessLifecycle.dispatchFinishedWakingUp();
                     break;
                 case STARTED_GOING_TO_SLEEP:
-                    mWakefulnessLifecycle.dispatchStartedGoingToSleep();
+                    mWakefulnessLifecycle.dispatchStartedGoingToSleep(msg.arg1 /* pmReason */);
                     break;
                 case FINISHED_GOING_TO_SLEEP:
                     mWakefulnessLifecycle.dispatchFinishedGoingToSleep();

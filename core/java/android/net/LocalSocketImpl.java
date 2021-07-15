@@ -17,8 +17,8 @@
 package android.net;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.system.ErrnoException;
-import android.system.Int32Ref;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructLinger;
@@ -51,7 +51,7 @@ class LocalSocketImpl
     @UnsupportedAppUsage
     FileDescriptor[] inboundFileDescriptors;
     /** file descriptor array that should be written during next write */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     FileDescriptor[] outboundFileDescriptors;
 
     /**
@@ -64,14 +64,11 @@ class LocalSocketImpl
         public int available() throws IOException {
             FileDescriptor myFd = fd;
             if (myFd == null) throw new IOException("socket closed");
-
-            Int32Ref avail = new Int32Ref(0);
             try {
-                Os.ioctlInt(myFd, OsConstants.FIONREAD, avail);
+                return Os.ioctlInt(myFd, OsConstants.FIONREAD);
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
             }
-            return avail.value;
         }
 
         /** {@inheritDoc} */
@@ -133,7 +130,7 @@ class LocalSocketImpl
         public void write (byte[] b) throws IOException {
             write(b, 0, b.length);
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public void write (byte[] b, int off, int len) throws IOException {
@@ -254,7 +251,7 @@ class LocalSocketImpl
     /** note timeout presently ignored */
     protected void connect(LocalSocketAddress address, int timeout)
                         throws IOException
-    {        
+    {
         if (fd == null) {
             throw new IOException("socket not created");
         }
@@ -338,7 +335,7 @@ class LocalSocketImpl
      * @throws IOException if socket has been closed or cannot be created.
      */
     protected OutputStream getOutputStream() throws IOException
-    { 
+    {
         if (fd == null) {
             throw new IOException("socket not created");
         }

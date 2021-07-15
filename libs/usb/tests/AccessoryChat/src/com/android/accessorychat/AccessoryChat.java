@@ -83,7 +83,7 @@ public class AccessoryChat extends Activity implements Runnable, TextView.OnEdit
         super.onCreate(savedInstanceState);
 
         mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE_UNAUDITED);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(mUsbReceiver, filter);
 

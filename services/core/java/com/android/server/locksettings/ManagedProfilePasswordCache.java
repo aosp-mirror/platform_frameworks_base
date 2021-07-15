@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.security.keystore.AndroidKeyStoreSpi;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.UserNotAuthenticatedException;
@@ -95,11 +94,12 @@ public class ManagedProfilePasswordCache {
             SecretKey key;
             try {
                 generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,
-                        AndroidKeyStoreSpi.NAME);
+                        mKeyStore.getProvider());
                 generator.init(new KeyGenParameterSpec.Builder(
                         keyName, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                         .setKeySize(KEY_LENGTH)
                         .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                        .setNamespace(SyntheticPasswordCrypto.keyNamespace())
                         .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                         // Generate auth-bound key to user 0 (since we the caller is user 0)
                         .setUserAuthenticationRequired(true)

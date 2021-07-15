@@ -22,15 +22,16 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Contains useful methods for querying properties of an Activity Intent.
  */
-@Singleton
+@SysUISingleton
 public class ActivityIntentHelper {
 
     private final Context mContext;

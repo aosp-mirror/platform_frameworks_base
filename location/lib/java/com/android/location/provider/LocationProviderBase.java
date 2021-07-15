@@ -16,12 +16,17 @@
 
 package com.android.location.provider;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.location.provider.ILocationProvider;
+import android.location.provider.ILocationProviderManager;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -31,11 +36,6 @@ import android.os.WorkSource;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-
-import com.android.internal.location.ILocationProvider;
-import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderProperties;
-import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -58,14 +58,33 @@ import java.util.List;
  * <p>IMPORTANT: This class is effectively a public API for unbundled
  * applications, and must remain API stable. See README.txt in the root
  * of this package for more information.
+ *
+ * @deprecated This class is not part of the standard API surface - use
+ * {@link android.location.provider.LocationProviderBase} instead.
  */
+@Deprecated
 public abstract class LocationProviderBase {
+
+    /**
+     * Callback to be invoked when a flush operation is complete and all flushed locations have been
+     * reported.
+     */
+    protected interface OnFlushCompleteCallback {
+
+        /**
+         * Should be invoked once the flush is complete.
+         */
+        void onFlushComplete();
+    }
 
     /**
      * Bundle key for a version of the location containing no GPS data.
      * Allows location providers to flag locations as being safe to
      * feed to LocationFudger.
+     *
+     * @deprecated Do not use from Android R onwards.
      */
+    @Deprecated
     public static final String EXTRA_NO_GPS_LOCATION = Location.EXTRA_NO_GPS_LOCATION;
 
     /**
@@ -76,8 +95,9 @@ public abstract class LocationProviderBase {
      */
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
-    private final String mTag;
-    private final IBinder mBinder;
+    final String mTag;
+    @Nullable final String mAttributionTag;
+    final IBinder mBinder;
 
     /**
      * This field may be removed in the future, do not rely on it.
@@ -90,13 +110,29 @@ public abstract class LocationProviderBase {
     protected final ILocationManager mLocationManager;
 
     // write locked on mBinder, read lock is optional depending on atomicity requirements
-    @Nullable private volatile ILocationProviderManager mManager;
-    private volatile ProviderProperties mProperties;
-    private volatile boolean mAllowed;
-    private final ArrayList<String> mAdditionalProviderPackages;
+    @Nullable volatile ILocationProviderManager mManager;
+    volatile ProviderProperties mProperties;
+    volatile boolean mAllowed;
 
+    /**
+     * @deprecated Prefer
+     * {@link #LocationProviderBase(Context, String, ProviderPropertiesUnbundled)}.
+     */
+    @Deprecated
     public LocationProviderBase(String tag, ProviderPropertiesUnbundled properties) {
+        this(null, tag, properties);
+    }
+
+    /**
+     * This constructor associates the feature id of the given context with this location provider.
+     * The location service may afford special privileges to incoming calls identified as belonging
+     * to this location provider.
+     */
+    @RequiresApi(VERSION_CODES.R)
+    public LocationProviderBase(Context context, String tag,
+            ProviderPropertiesUnbundled properties) {
         mTag = tag;
+        mAttributionTag = context != null ? context.getAttributionTag() : null;
         mBinder = new Service();
 
         mLocationManager = ILocationManager.Stub.asInterface(
@@ -105,7 +141,6 @@ public abstract class LocationProviderBase {
         mManager = null;
         mProperties = properties.getProviderProperties();
         mAllowed = true;
-        mAdditionalProviderPackages = new ArrayList<>(0);
     }
 
     public IBinder getBinder() {
@@ -151,7 +186,9 @@ public abstract class LocationProviderBase {
         if (manager != null) {
             try {
                 manager.onSetAllowed(mAllowed);
-            } catch (RemoteException | RuntimeException e) {
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
                 Log.w(mTag, e);
             }
         }
@@ -171,7 +208,9 @@ public abstract class LocationProviderBase {
         if (manager != null) {
             try {
                 manager.onSetProperties(mProperties);
-            } catch (RemoteException | RuntimeException e) {
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
                 Log.w(mTag, e);
             }
         }
@@ -183,23 +222,12 @@ public abstract class LocationProviderBase {
      * another package may issue location requests on behalf of this package in the course of
      * providing location. This will inform location services to treat the other packages as
      * location providers as well.
+     *
+     * @deprecated On Android R and above this has no effect.
      */
+    @Deprecated
     @RequiresApi(VERSION_CODES.Q)
-    public void setAdditionalProviderPackages(List<String> packageNames) {
-        synchronized (mBinder) {
-            mAdditionalProviderPackages.clear();
-            mAdditionalProviderPackages.addAll(packageNames);
-        }
-
-        ILocationProviderManager manager = mManager;
-        if (manager != null) {
-            try {
-                manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
-            } catch (RemoteException | RuntimeException e) {
-                Log.w(mTag, e);
-            }
-        }
-    }
+    public void setAdditionalProviderPackages(List<String> packageNames) {}
 
     /**
      * @deprecated Use {@link #isAllowed()} instead.
@@ -221,25 +249,31 @@ public abstract class LocationProviderBase {
     /**
      * Reports a new location from this provider.
      */
-    public void reportLocation(Location location) {
+    public void reportLocation(@NonNull Location location) {
         ILocationProviderManager manager = mManager;
         if (manager != null) {
-            // remove deprecated extras to save on serialization
-            Bundle extras = location.getExtras();
-            if (extras != null && (extras.containsKey("noGPSLocation")
-                    || extras.containsKey("coarseLocation"))) {
-                location = new Location(location);
-                extras = location.getExtras();
-                extras.remove("noGPSLocation");
-                extras.remove("coarseLocation");
-                if (extras.isEmpty()) {
-                    location.setExtras(null);
-                }
-            }
-
             try {
-                manager.onReportLocation(location);
-            } catch (RemoteException | RuntimeException e) {
+                manager.onReportLocation(stripExtras(location));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
+                Log.w(mTag, e);
+            }
+        }
+    }
+
+    /**
+     * Reports a new batch of locations from this provider. Locations must be ordered in the list
+     * from earliest first to latest last.
+     */
+    public void reportLocations(@NonNull List<Location> locations) {
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onReportLocations(stripExtras(locations));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
                 Log.w(mTag, e);
             }
         }
@@ -275,6 +309,16 @@ public abstract class LocationProviderBase {
      * locations, or to stop returning locations, depending on the parameters in the request.
      */
     protected abstract void onSetRequest(ProviderRequestUnbundled request, WorkSource source);
+
+    /**
+     * Requests a flush of any pending batched locations. The callback must always be invoked once
+     * per invocation, and should be invoked after {@link #reportLocation(Location)} or
+     * {@link #reportLocations(List)} has been invoked with any flushed locations. The callback may
+     * be invoked immediately if no locations are flushed.
+     */
+    protected void onFlush(OnFlushCompleteCallback callback) {
+        callback.onFlushComplete();
+    }
 
     /**
      * @deprecated This callback will never be invoked on Android Q and above. This method may be
@@ -317,16 +361,17 @@ public abstract class LocationProviderBase {
 
     private final class Service extends ILocationProvider.Stub {
 
+        Service() {
+        }
+
         @Override
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    if (!mAdditionalProviderPackages.isEmpty()) {
-                        manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
-                    }
-                    manager.onSetProperties(mProperties);
-                    manager.onSetAllowed(mAllowed);
+                    manager.onInitialize(mAllowed, mProperties, mAttributionTag);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } catch (RuntimeException e) {
                     Log.w(mTag, e);
                 }
 
@@ -337,13 +382,74 @@ public abstract class LocationProviderBase {
         }
 
         @Override
-        public void setRequest(ProviderRequest request, WorkSource ws) {
-            onSetRequest(new ProviderRequestUnbundled(request), ws);
+        public void setRequest(ProviderRequest request) {
+            onSetRequest(new ProviderRequestUnbundled(request), request.getWorkSource());
+        }
+
+        @Override
+        public void flush() {
+            onFlush(this::onFlushComplete);
+        }
+
+        private void onFlushComplete() {
+            ILocationProviderManager manager = mManager;
+            if (manager != null) {
+                try {
+                    manager.onFlushComplete();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } catch (RuntimeException e) {
+                    Log.w(mTag, e);
+                }
+            }
         }
 
         @Override
         public void sendExtraCommand(String command, Bundle extras) {
             onSendExtraCommand(command, extras);
         }
+    }
+
+    private static Location stripExtras(Location location) {
+        Bundle extras = location.getExtras();
+        if (extras != null && (extras.containsKey(EXTRA_NO_GPS_LOCATION)
+                || extras.containsKey("indoorProbability")
+                || extras.containsKey("coarseLocation"))) {
+            location = new Location(location);
+            extras = location.getExtras();
+            extras.remove(EXTRA_NO_GPS_LOCATION);
+            extras.remove("indoorProbability");
+            extras.remove("coarseLocation");
+            if (extras.isEmpty()) {
+                location.setExtras(null);
+            }
+        }
+        return location;
+    }
+
+    private static List<Location> stripExtras(List<Location> locations) {
+        List<Location> mapped = locations;
+        final int size = locations.size();
+        int i = 0;
+        for (Location location : locations) {
+            Location newLocation = stripExtras(location);
+            if (mapped != locations) {
+                mapped.add(newLocation);
+            } else if (newLocation != location) {
+                mapped = new ArrayList<>(size);
+                int j = 0;
+                for (Location copiedLocation : locations) {
+                    if (j >= i) {
+                        break;
+                    }
+                    mapped.add(copiedLocation);
+                    j++;
+                }
+                mapped.add(newLocation);
+            }
+            i++;
+        }
+
+        return mapped;
     }
 }
