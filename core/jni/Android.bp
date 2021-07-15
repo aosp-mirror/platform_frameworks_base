@@ -297,6 +297,7 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
+                "libandroid_runtime_threads_headers",
             ],
         },
         host: {
@@ -337,4 +338,19 @@ cc_library_shared {
     lto: {
         never: true,
     },
+}
+
+cc_library_headers {
+    name: "libandroid_runtime_threads_headers",
+    host_supported: true,
+    vendor_available: true,
+    // TODO(b/153609531): remove when libbinder is not native_bridge_supported
+    native_bridge_supported: true,
+    // Allow only modules from the following list to create threads that can be
+    // attached to the JVM. This list should be a subset of the dependencies of
+    // libandroid_runtime.
+    visibility: [
+        "//frameworks/native/libs/binder",
+    ],
+    export_include_dirs: ["include_threads"],
 }

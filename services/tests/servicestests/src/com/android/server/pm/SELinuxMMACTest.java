@@ -44,7 +44,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class SELinuxMMACTest {
 
     private static final String PACKAGE_NAME = "my.package";
-    private static final int LATEST_OPT_IN_VERSION = Build.VERSION_CODES.S;
+    private static final int LATEST_OPT_IN_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private static final int R_OPT_IN_VERSION = Build.VERSION_CODES.R;
 
     @Mock
