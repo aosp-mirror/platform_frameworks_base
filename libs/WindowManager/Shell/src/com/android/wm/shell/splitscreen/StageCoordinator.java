@@ -526,9 +526,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 // visible.
                 mMainStage.updateConfiguration(
                         WINDOWING_MODE_MULTI_WINDOW, getMainStageBounds(), wct);
-            } else {
+            } else if (!mSideStage.mRootTaskInfo.isSleeping) {
                 // We want the main stage configuration to be fullscreen when the side stage isn't
                 // visible.
+                // We should not do it when side stage are not visible due to sleeping display too.
                 mMainStage.updateConfiguration(WINDOWING_MODE_FULLSCREEN, null, wct);
             }
             // TODO: Change to `mSyncQueue.queue(wct)` once BLAST is stable.
