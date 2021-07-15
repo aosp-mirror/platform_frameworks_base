@@ -192,8 +192,8 @@ class TransitionController {
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @Nullable WindowContainer trigger) {
-        return requestTransitionIfNeeded(type, 0 /* flags */, trigger);
+            @NonNull WindowContainer trigger) {
+        return requestTransitionIfNeeded(type, 0 /* flags */, trigger, trigger /* readyGroupRef */);
     }
 
     /**
@@ -201,8 +201,10 @@ class TransitionController {
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger) {
-        return requestTransitionIfNeeded(type, flags, trigger, null /* remote */);
+            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
+            @NonNull WindowContainer readyGroupRef) {
+        return requestTransitionIfNeeded(type, flags, trigger, readyGroupRef,
+                null /* remoteTransition */);
     }
 
     private static boolean isExistenceType(@WindowManager.TransitionType int type) {
@@ -213,19 +215,20 @@ class TransitionController {
      * If a transition isn't requested yet, creates one and asks the TransitionPlayer (Shell) to
      * start it. Collection can start immediately.
      * @param trigger if non-null, this is the first container that will be collected
+     * @param readyGroupRef Used to identify which ready-group this request is for.
      * @return the created transition if created or null otherwise.
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @Nullable IRemoteTransition remoteTransition) {
+            @NonNull WindowContainer readyGroupRef, @Nullable IRemoteTransition remoteTransition) {
         if (mTransitionPlayer == null) {
             return null;
         }
         Transition newTransition = null;
         if (isCollecting()) {
             // Make the collecting transition wait until this request is ready.
-            mCollectingTransition.setReady(false);
+            mCollectingTransition.setReady(readyGroupRef, false);
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
                     trigger != null ? trigger.asTask() : null, remoteTransition);
@@ -280,14 +283,14 @@ class TransitionController {
     }
 
     /** @see Transition#setReady */
-    void setReady(boolean ready) {
+    void setReady(WindowContainer wc, boolean ready) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setReady(ready);
+        mCollectingTransition.setReady(wc, ready);
     }
 
     /** @see Transition#setReady */
-    void setReady() {
-        setReady(true);
+    void setReady(WindowContainer wc) {
+        setReady(wc, true);
     }
 
     /** @see Transition#finishTransition */

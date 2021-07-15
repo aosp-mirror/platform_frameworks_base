@@ -91,6 +91,28 @@ public abstract class ImeTracing {
     }
 
     /**
+     * Calling {@link IInputMethodManager#startImeTrace()}} to capture IME trace.
+     */
+    public final void startImeTrace() {
+        try {
+            mService.startImeTrace();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not start ime trace." + e);
+        }
+    }
+
+    /**
+     * Calling {@link IInputMethodManager#stopImeTrace()} to stop IME trace.
+     */
+    public final void stopImeTrace() {
+        try {
+            mService.stopImeTrace();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not stop ime trace." + e);
+        }
+    }
+
+    /**
      * @param proto dump to be added to the buffer
      */
     public abstract void addToBuffer(ProtoOutputStream proto, int source);

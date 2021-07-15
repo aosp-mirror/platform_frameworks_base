@@ -2987,7 +2987,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     void removeIfPossible() {
-        if (isAnimating(TRANSITION | PARENTS)) {
+        if (isAnimating(TRANSITION | PARENTS)
+                // isAnimating is a legacy transition query and will be removed, so also add a
+                // check for whether this is in a shell-transition when not using legacy.
+                || mAtmService.getTransitionController().inTransition()) {
             mDeferredRemoval = true;
             return;
         }
@@ -4989,7 +4992,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             @WindowManager.TransitionFlags int flags) {
         prepareAppTransition(transit, flags);
         mAtmService.getTransitionController().requestTransitionIfNeeded(transit, flags,
-                null /* trigger */);
+                null /* trigger */, this);
     }
 
     /** @see #requestTransitionAndLegacyPrepare(int, int) */
@@ -4997,11 +5000,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             @Nullable WindowContainer trigger) {
         prepareAppTransition(transit);
         mAtmService.getTransitionController().requestTransitionIfNeeded(transit, 0 /* flags */,
-                trigger);
+                trigger, this);
     }
 
     void executeAppTransition() {
-        mAtmService.getTransitionController().setReady();
+        mAtmService.getTransitionController().setReady(this);
         if (mAppTransition.isTransitionSet()) {
             ProtoLog.w(WM_DEBUG_APP_TRANSITIONS,
                     "Execute app transition: %s, displayId: %d Callers=%s",

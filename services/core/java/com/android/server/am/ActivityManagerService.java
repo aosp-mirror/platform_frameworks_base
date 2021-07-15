@@ -3458,30 +3458,39 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
+            boolean permitted = true;
             // Instant packages are not protected
             if (getPackageManagerInternal().isPackageDataProtected(
                     resolvedUserId, packageName)) {
-                throw new SecurityException(
-                        "Cannot clear data for a protected package: " + packageName);
+                if (ActivityManager.checkUidPermission(android.Manifest.permission.MANAGE_USERS,
+                        uid) == PERMISSION_GRANTED) {
+                    // The caller has the MANAGE_USERS permission, tell them what's going on.
+                    throw new SecurityException(
+                            "Cannot clear data for a protected package: " + packageName);
+                } else {
+                    permitted = false; // fall through and throw the SecurityException below.
+                }
             }
 
             ApplicationInfo applicationInfo = null;
-            try {
-                applicationInfo = pm.getApplicationInfo(packageName,
-                        MATCH_UNINSTALLED_PACKAGES, resolvedUserId);
-            } catch (RemoteException e) {
-                /* ignore */
+            if (permitted) {
+                try {
+                    applicationInfo = pm.getApplicationInfo(packageName,
+                            MATCH_UNINSTALLED_PACKAGES, resolvedUserId);
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+                permitted = (applicationInfo != null && applicationInfo.uid == uid) // own uid data
+                        || (checkComponentPermission(permission.CLEAR_APP_USER_DATA,
+                                pid, uid, -1, true) == PackageManager.PERMISSION_GRANTED);
             }
-            appInfo = applicationInfo;
 
-            final boolean clearingOwnUidData = appInfo != null && appInfo.uid == uid;
-
-            if (!clearingOwnUidData && checkComponentPermission(permission.CLEAR_APP_USER_DATA,
-                        pid, uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+            if (!permitted) {
                 throw new SecurityException("PID " + pid + " does not have permission "
                         + android.Manifest.permission.CLEAR_APP_USER_DATA + " to clear data"
                         + " of package " + packageName);
             }
+            appInfo = applicationInfo;
 
             final boolean hasInstantMetadata = getPackageManagerInternal()
                     .hasInstantApplicationMetadata(packageName, resolvedUserId);
@@ -12456,6 +12465,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Register receiver " + filter + ": " + sticky);
         if (receiver == null) {
             return sticky;
+        }
+
+        // SafetyNet logging for b/177931370. If any process other than system_server tries to
+        // listen to this broadcast action, then log it.
+        if (callingPid != Process.myPid()) {
+            if (filter.hasAction("com.android.server.net.action.SNOOZE_WARNING")
+                    || filter.hasAction("com.android.server.net.action.SNOOZE_RAPID")) {
+                EventLog.writeEvent(0x534e4554, "177931370", callingUid, "");
+            }
         }
 
         synchronized (this) {

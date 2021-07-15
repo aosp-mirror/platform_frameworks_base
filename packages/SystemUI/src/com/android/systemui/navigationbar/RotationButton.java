@@ -20,12 +20,10 @@ import android.view.View;
 
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 
-import java.util.function.Consumer;
-
 /** Interface of a rotation button that interacts {@link RotationButtonController}. */
 public interface RotationButton {
     void setRotationButtonController(RotationButtonController rotationButtonController);
-    void setVisibilityChangedCallback(Consumer<Boolean> visibilityChangedCallback);
+    void setUpdatesCallback(RotationButtonUpdatesCallback updatesCallback);
     View getCurrentView();
     boolean show();
     boolean hide();
@@ -38,5 +36,13 @@ public interface RotationButton {
     default void setCanShowRotationButton(boolean canShow) {}
     default boolean acceptRotationProposal() {
         return getCurrentView() != null;
+    }
+
+    /**
+     * Callback for updates provided by a rotation button
+     */
+    interface RotationButtonUpdatesCallback {
+        void onVisibilityChanged(boolean isVisible);
+        void onPositionChanged();
     }
 }

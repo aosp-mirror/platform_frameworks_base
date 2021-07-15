@@ -46,6 +46,7 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.navigationbar.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.recents.utilities.ViewRippler;
@@ -140,12 +141,12 @@ public class RotationButtonController {
     }
 
     void setRotationButton(RotationButton rotationButton,
-            Consumer<Boolean> visibilityChangedCallback) {
+                           RotationButtonUpdatesCallback updatesCallback) {
         mRotationButton = rotationButton;
         mRotationButton.setRotationButtonController(this);
         mRotationButton.setOnClickListener(this::onRotateSuggestionClick);
         mRotationButton.setOnHoverListener(this::onRotateSuggestionHover);
-        mRotationButton.setVisibilityChangedCallback(visibilityChangedCallback);
+        mRotationButton.setUpdatesCallback(updatesCallback);
     }
 
     void registerListeners() {
