@@ -139,7 +139,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
 
         mFace10.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
                 mContext.getOpPackageName(), new int[0] /* disabledFeatures */,
-                null /* surfaceHandle */, false /* debugConsent */);
+                null /* previewSurface */, false /* debugConsent */);
     }
 
     @Override
