@@ -311,6 +311,8 @@ public abstract class EconomicPolicy {
                     case AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK:
                         return "ALARM_CLOCK";
                 }
+                break;
+
             case POLICY_JS:
                 switch (eventId) {
                     case JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START:
@@ -336,6 +338,7 @@ public abstract class EconomicPolicy {
                     case JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT:
                         return "JOB_TIMEOUT";
                 }
+                break;
         }
         return "UNKNOWN_ACTION:" + Integer.toHexString(eventId);
     }
