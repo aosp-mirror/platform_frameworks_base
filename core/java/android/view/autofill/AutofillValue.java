@@ -63,7 +63,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a text value
      */
     @NonNull public CharSequence getTextValue() {
-        Preconditions.checkState(isText(), "value must be a text value, not type=" + mType);
+        Preconditions.checkState(isText(), "value must be a text value, not type=%d", mType);
         return (CharSequence) mValue;
     }
 
@@ -84,7 +84,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a toggle value
      */
     public boolean getToggleValue() {
-        Preconditions.checkState(isToggle(), "value must be a toggle value, not type=" + mType);
+        Preconditions.checkState(isToggle(), "value must be a toggle value, not type=%d", mType);
         return (Boolean) mValue;
     }
 
@@ -105,7 +105,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a list value
      */
     public int getListValue() {
-        Preconditions.checkState(isList(), "value must be a list value, not type=" + mType);
+        Preconditions.checkState(isList(), "value must be a list value, not type=%d", mType);
         return (Integer) mValue;
     }
 
@@ -126,7 +126,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a date value
      */
     public long getDateValue() {
-        Preconditions.checkState(isDate(), "value must be a date value, not type=" + mType);
+        Preconditions.checkState(isDate(), "value must be a date value, not type=%d", mType);
         return (Long) mValue;
     }
 
@@ -160,7 +160,7 @@ public final class AutofillValue implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;

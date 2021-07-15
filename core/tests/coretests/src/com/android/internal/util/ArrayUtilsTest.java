@@ -118,4 +118,89 @@ public class ArrayUtilsTest extends TestCase {
         assertEquals(3, ArrayUtils.unstableRemoveIf(collection, isNull));
         assertEquals(0, collection.size());
     }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_passesWhenRangeInsideArray() {
+        ArrayUtils.throwsIfOutOfBounds(10, 2, 6);
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_passesWhenRangeIsWholeArray() {
+        ArrayUtils.throwsIfOutOfBounds(10, 0, 10);
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_passesWhenEmptyRangeAtStart() {
+        ArrayUtils.throwsIfOutOfBounds(10, 0, 0);
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_passesWhenEmptyRangeAtEnd() {
+        ArrayUtils.throwsIfOutOfBounds(10, 10, 0);
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_passesWhenEmptyArray() {
+        ArrayUtils.throwsIfOutOfBounds(0, 0, 0);
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_failsWhenRangeStartNegative() {
+        try {
+            ArrayUtils.throwsIfOutOfBounds(10, -1, 5);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException expected) {
+            // expected
+        }
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_failsWhenCountNegative() {
+        try {
+            ArrayUtils.throwsIfOutOfBounds(10, 5, -1);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException expected) {
+            // expected
+        }
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_failsWhenRangeStartTooHigh() {
+        try {
+            ArrayUtils.throwsIfOutOfBounds(10, 11, 0);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException expected) {
+            // expected
+        }
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_failsWhenRangeEndTooHigh() {
+        try {
+            ArrayUtils.throwsIfOutOfBounds(10, 5, 6);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException expected) {
+            // expected
+        }
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_failsWhenLengthNegative() {
+        try {
+            ArrayUtils.throwsIfOutOfBounds(-1, 0, 0);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException expected) {
+            // expected
+        }
+    }
+
+    @SmallTest
+    public void testThrowsIfOutOfBounds_failsWhenOverflowRangeEndTooHigh() {
+        try {
+            ArrayUtils.throwsIfOutOfBounds(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException expected) {
+            // expected
+        }
+    }
 }

@@ -344,11 +344,11 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
             if (!mUniqueCategoryIds.contains(categoryId)) {
                 // New category - check size
                 Preconditions.checkState(mUniqueCategoryIds.size() < getMaxCategoryCount(),
-                        "already added " + mUniqueCategoryIds.size() + " unique category ids");
+                        "already added %d unique category ids", mUniqueCategoryIds.size());
             }
 
             Preconditions.checkState(mValues.size() < getMaxUserDataSize(),
-                    "already added " + mValues.size() + " elements");
+                    "already added %d elements", mValues.size());
             addMapping(value, categoryId);
 
             return this;

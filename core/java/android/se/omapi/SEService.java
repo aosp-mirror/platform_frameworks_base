@@ -22,7 +22,10 @@
 
 package android.se.omapi;
 
+import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -69,6 +72,28 @@ public final class SEService {
          */
         void onConnected();
     }
+
+    /**
+     * Broadcast Action: Intent to notify if the secure element state is changed.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(registeredOnly = true, protectedBroadcast = true)
+    public static final String ACTION_SECURE_ELEMENT_STATE_CHANGED =
+            "android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED";
+
+    /**
+     * Mandatory extra containing the reader name of the state changed secure element.
+     *
+     * @see Reader#getName()
+     */
+    public static final String EXTRA_READER_NAME = "android.se.omapi.extra.READER_NAME";
+
+    /**
+     * Mandatory extra containing the connected state of the state changed secure element.
+     *
+     * True if the secure element is connected correctly, false otherwise.
+     */
+    public static final String EXTRA_READER_STATE = "android.se.omapi.extra.READER_STATE";
 
     /**
      * Listener object that allows the notification of the caller if this

@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayDeque;
+import java.util.Objects;
 import java.util.Queue;
 
 /**
@@ -49,6 +50,8 @@ public class TvRecordingClient {
 
     private boolean mIsRecordingStarted;
     private boolean mIsTuned;
+    private boolean mIsPaused;
+    private boolean mIsRecordingStopping;
     private final Queue<Pair<String, Bundle>> mPendingAppPrivateCommands = new ArrayDeque<>();
 
     /**
@@ -113,17 +116,22 @@ public class TvRecordingClient {
         if (TextUtils.isEmpty(inputId)) {
             throw new IllegalArgumentException("inputId cannot be null or an empty string");
         }
-        if (mIsRecordingStarted) {
+        if (mIsRecordingStarted && !mIsPaused) {
             throw new IllegalStateException("tune failed - recording already started");
         }
         if (mSessionCallback != null && TextUtils.equals(mSessionCallback.mInputId, inputId)) {
             if (mSession != null) {
+                mSessionCallback.mChannelUri = channelUri;
                 mSession.tune(channelUri, params);
             } else {
                 mSessionCallback.mChannelUri = channelUri;
                 mSessionCallback.mConnectionParams = params;
             }
+            mIsTuned = false;
         } else {
+            if (mIsPaused) {
+                throw new IllegalStateException("tune failed - inputId is changed during pause");
+            }
             resetInternal();
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             if (mTvInputManager != null) {
@@ -148,6 +156,8 @@ public class TvRecordingClient {
             mSession.release();
             mIsTuned = false;
             mIsRecordingStarted = false;
+            mIsPaused = false;
+            mIsRecordingStopping = false;
             mSession = null;
         }
     }
@@ -169,7 +179,8 @@ public class TvRecordingClient {
      *
      * @param programUri The URI for the TV program to record, built by
      *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
-     * @throws IllegalStateException If {@link #tune} request hasn't been handled yet.
+     * @throws IllegalStateException If {@link #tune} request hasn't been handled yet or during
+     *            pause.
      */
     public void startRecording(@Nullable Uri programUri) {
         startRecording(programUri, Bundle.EMPTY);
@@ -195,11 +206,16 @@ public class TvRecordingClient {
      * @param params Domain-specific data for this request. Keys <em>must</em> be a scoped
      *            name, i.e. prefixed with a package name you own, so that different developers will
      *            not create conflicting keys.
-     * @throws IllegalStateException If {@link #tune} request hasn't been handled yet.
+     * @throws IllegalStateException If {@link #tune} request hasn't been handled yet or during
+     *            pause.
      */
     public void startRecording(@Nullable Uri programUri, @NonNull Bundle params) {
-        if (!mIsTuned) {
-            throw new IllegalStateException("startRecording failed - not yet tuned");
+        if (mIsRecordingStopping || !mIsTuned || mIsPaused) {
+            throw new IllegalStateException("startRecording failed -"
+                    + "recording not yet stopped or not yet tuned or paused");
+        }
+        if (mIsRecordingStarted) {
+            Log.w(TAG, "startRecording failed - recording already started");
         }
         if (mSession != null) {
             mSession.startRecording(programUri, params);
@@ -225,6 +241,103 @@ public class TvRecordingClient {
         }
         if (mSession != null) {
             mSession.stopRecording();
+            if (mIsRecordingStarted) {
+                mIsRecordingStopping = true;
+            }
+        }
+    }
+
+    /**
+     * Pause TV program recording in the current recording session. Recording is expected to pause
+     * immediately when this method is called. If recording has not yet started in the current
+     * recording session, this method does nothing.
+     *
+     * <p>In pause status, the application can tune during recording. To continue recording,
+     * please call {@link TvRecordingClient#resumeRecording()} to resume instead of
+     * {@link TvRecordingClient#startRecording(Uri)}. Application can stop
+     * the recording with {@link TvRecordingClient#stopRecording()} in recording pause status.
+     *
+     * <p>If the pause request cannot be fulfilled, the recording session will respond by calling
+     * {@link RecordingCallback#onError(int)}.
+     */
+    public void pauseRecording() {
+        pauseRecording(Bundle.EMPTY);
+    }
+
+    /**
+     * Pause TV program recording in the current recording session. Recording is expected to pause
+     * immediately when this method is called. If recording has not yet started in the current
+     * recording session, this method does nothing.
+     *
+     * <p>In pause status, the application can tune during recording. To continue recording,
+     * please call {@link TvRecordingClient#resumeRecording()} to resume instead of
+     * {@link TvRecordingClient#startRecording(Uri)}. Application can stop
+     * the recording with {@link TvRecordingClient#stopRecording()} in recording pause status.
+     *
+     * <p>If the pause request cannot be fulfilled, the recording session will respond by calling
+     * {@link RecordingCallback#onError(int)}.
+     *
+     * @param params Domain-specific data for this request.
+     */
+    public void pauseRecording(@NonNull Bundle params) {
+        if (!mIsRecordingStarted || mIsRecordingStopping) {
+            throw new IllegalStateException(
+                    "pauseRecording failed - recording not yet started or stopping");
+        }
+        TvInputInfo info = mTvInputManager.getTvInputInfo(mSessionCallback.mInputId);
+        if (info == null || !info.canPauseRecording()) {
+            throw new UnsupportedOperationException(
+                    "pauseRecording failed - operation not supported");
+        }
+        if (mIsPaused) {
+            Log.w(TAG, "pauseRecording failed - recording already paused");
+        }
+        if (mSession != null) {
+            mSession.pauseRecording(params);
+            mIsPaused  = true;
+        }
+    }
+
+    /**
+     * Resume TV program recording only in recording pause status in the current recording session.
+     * Recording is expected to resume immediately when this method is called. If recording has not
+     * yet paused in the current recording session, this method does nothing.
+     *
+     * <p>When record is resumed, the recording is continue and can not re-tune. Application can
+     * stop the recording with {@link TvRecordingClient#stopRecording()} after record resumed.
+     *
+     * <p>If the pause request cannot be fulfilled, the recording session will respond by calling
+     * {@link RecordingCallback#onError(int)}.
+     */
+    public void resumeRecording() {
+        resumeRecording(Bundle.EMPTY);
+    }
+
+    /**
+     * Resume TV program recording only in recording pause status in the current recording session.
+     * Recording is expected to resume immediately when this method is called. If recording has not
+     * yet paused in the current recording session, this method does nothing.
+     *
+     * <p>When record is resumed, the recording is continues and can not re-tune. Application can
+     * stop the recording with {@link TvRecordingClient#stopRecording()} after record resumed.
+     *
+     * <p>If the resume request cannot be fulfilled, the recording session will respond by calling
+     * {@link RecordingCallback#onError(int)}.
+     *
+     * @param params Domain-specific data for this request.
+     */
+    public void resumeRecording(@NonNull Bundle params) {
+        if (!mIsRecordingStarted || mIsRecordingStopping || !mIsTuned) {
+            throw new IllegalStateException(
+                    "resumeRecording failed - recording not yet started or stopping or "
+                            + "not yet tuned");
+        }
+        if (!mIsPaused) {
+            Log.w(TAG, "resumeRecording failed - recording not yet paused");
+        }
+        if (mSession != null) {
+            mSession.resumeRecording(params);
+            mIsPaused  = false;
         }
     }
 
@@ -367,6 +480,10 @@ public class TvRecordingClient {
                 Log.w(TAG, "onTuned - session not created");
                 return;
             }
+            if (mIsTuned || !Objects.equals(mChannelUri, channelUri)) {
+                Log.w(TAG, "onTuned - already tuned or not yet tuned to last channel");
+                return;
+            }
             mIsTuned = true;
             mCallback.onTuned(channelUri);
         }
@@ -382,6 +499,8 @@ public class TvRecordingClient {
             }
             mIsTuned = false;
             mIsRecordingStarted = false;
+            mIsPaused = false;
+            mIsRecordingStopping = false;
             mSessionCallback = null;
             mSession = null;
             if (mCallback != null) {
@@ -398,7 +517,13 @@ public class TvRecordingClient {
                 Log.w(TAG, "onRecordingStopped - session not created");
                 return;
             }
+            if (!mIsRecordingStarted) {
+                Log.w(TAG, "onRecordingStopped - recording not yet started");
+                return;
+            }
             mIsRecordingStarted = false;
+            mIsPaused = false;
+            mIsRecordingStopping = false;
             mCallback.onRecordingStopped(recordedProgramUri);
         }
 

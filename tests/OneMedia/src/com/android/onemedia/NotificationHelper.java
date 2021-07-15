@@ -52,22 +52,22 @@ public class NotificationHelper extends BroadcastReceiver {
 
         mIntents.put(R.drawable.ic_pause, PendingIntent.getBroadcast(mService, 100, new Intent(
                 com.android.onemedia.playback.RequestUtils.ACTION_PAUSE).setPackage(pkg),
-                PendingIntent.FLAG_CANCEL_CURRENT));
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
         mIntents.put(R.drawable.ic_play_arrow, PendingIntent.getBroadcast(mService, 100,
                 new Intent(com.android.onemedia.playback.RequestUtils.ACTION_PLAY).setPackage(pkg),
-                PendingIntent.FLAG_CANCEL_CURRENT));
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
         mIntents.put(R.drawable.ic_skip_previous, PendingIntent.getBroadcast(mService, 100,
                 new Intent(com.android.onemedia.playback.RequestUtils.ACTION_PREV).setPackage(pkg),
-                PendingIntent.FLAG_CANCEL_CURRENT));
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
         mIntents.put(R.drawable.ic_skip_next, PendingIntent.getBroadcast(mService, 100,
                 new Intent(com.android.onemedia.playback.RequestUtils.ACTION_NEXT).setPackage(pkg),
-                PendingIntent.FLAG_CANCEL_CURRENT));
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
         mIntents.put(R.drawable.ic_fast_rewind, PendingIntent.getBroadcast(mService, 100,
                 new Intent(com.android.onemedia.playback.RequestUtils.ACTION_REW).setPackage(pkg),
-                PendingIntent.FLAG_CANCEL_CURRENT));
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
         mIntents.put(R.drawable.ic_fast_forward, PendingIntent.getBroadcast(mService, 100,
                 new Intent(com.android.onemedia.playback.RequestUtils.ACTION_FFWD).setPackage(pkg),
-                PendingIntent.FLAG_CANCEL_CURRENT));
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
     }
 
     /**

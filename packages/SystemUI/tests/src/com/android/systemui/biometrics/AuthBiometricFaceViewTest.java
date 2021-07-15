@@ -50,8 +50,12 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
     private TestableFaceView mFaceView;
 
     @Mock private Button mNegativeButton;
-    @Mock private Button mPositiveButton;
+    @Mock private Button mCancelButton;
+    @Mock private Button mUseCredentialButton;
+
+    @Mock private Button mConfirmButton;
     @Mock private Button mTryAgainButton;
+
     @Mock private TextView mErrorView;
 
     @Before
@@ -60,9 +64,14 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
         mFaceView = new TestableFaceView(mContext);
         mFaceView.mIconController = mock(TestableFaceView.TestableIconController.class);
         mFaceView.setCallback(mCallback);
+
         mFaceView.mNegativeButton = mNegativeButton;
-        mFaceView.mPositiveButton = mPositiveButton;
+        mFaceView.mCancelButton = mCancelButton;
+        mFaceView.mUseCredentialButton = mUseCredentialButton;
+
+        mFaceView.mConfirmButton = mConfirmButton;
         mFaceView.mTryAgainButton = mTryAgainButton;
+
         mFaceView.mIndicatorView = mErrorView;
     }
 

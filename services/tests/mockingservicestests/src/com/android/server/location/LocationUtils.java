@@ -17,8 +17,10 @@
 package com.android.server.location;
 
 import android.location.Location;
+import android.location.LocationResult;
 import android.os.SystemClock;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public final class LocationUtils {
@@ -38,6 +40,19 @@ public final class LocationUtils {
                 MIN_ACCURACY + random.nextFloat() * (MAX_ACCURACY - MIN_ACCURACY));
     }
 
+    public static LocationResult createLocationResult(String provider, Random random) {
+        return LocationResult.wrap(createLocation(provider, random));
+    }
+
+    public static LocationResult createLocationResult(String provider, Random random,
+            int numLocations) {
+        Location[] locations = new Location[numLocations];
+        for (int i = 0; i < numLocations; i++) {
+            locations[i] = createLocation(provider, random);
+        }
+        return LocationResult.create(Arrays.asList(locations));
+    }
+
     public static Location createLocation(String provider, double latitude, double longitude,
             float accuracy) {
         Location location = new Location(provider);
@@ -47,5 +62,10 @@ public final class LocationUtils {
         location.setTime(System.currentTimeMillis());
         location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         return location;
+    }
+
+    public static LocationResult createLocationResult(String provider, double latitude,
+            double longitude, float accuracy) {
+        return LocationResult.wrap(createLocation(provider, latitude, longitude, accuracy));
     }
 }

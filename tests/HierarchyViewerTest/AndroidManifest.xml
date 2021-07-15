@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2015 The Android Open Source Project
   ~
@@ -15,22 +16,21 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.test.hierarchyviewer">
+     package="com.android.test.hierarchyviewer">
 
     <application>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
 
-        <activity
-            android:name=".MainActivity"
-            android:label="HvTest" >
+        <activity android:name=".MainActivity"
+             android:label="HvTest"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>
 
-    <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.android.test.hierarchyviewer" />
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+         android:targetPackage="com.android.test.hierarchyviewer"/>
 </manifest>

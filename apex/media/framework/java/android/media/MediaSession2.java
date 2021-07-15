@@ -44,6 +44,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.modules.utils.build.SdkLevel;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +89,8 @@ public class MediaSession2 implements AutoCloseable {
     private final String mSessionId;
     private final PendingIntent mSessionActivity;
     private final Session2Token mSessionToken;
-    private final MediaSessionManager mSessionManager;
+    private final MediaSessionManager mMediaSessionManager;
+    private final MediaCommunicationManager mCommunicationManager;
     private final Handler mResultHandler;
 
     //@GuardedBy("mLock")
@@ -115,8 +118,13 @@ public class MediaSession2 implements AutoCloseable {
         mSessionStub = new Session2Link(this);
         mSessionToken = new Session2Token(Process.myUid(), TYPE_SESSION, context.getPackageName(),
                 mSessionStub, tokenExtras);
-        mSessionManager = (MediaSessionManager) mContext.getSystemService(
-                Context.MEDIA_SESSION_SERVICE);
+        if (SdkLevel.isAtLeastS()) {
+            mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
+            mMediaSessionManager = null;
+        } else {
+            mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+            mCommunicationManager = null;
+        }
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
         mResultHandler = new Handler(context.getMainLooper());
         mClosed = false;
@@ -317,6 +325,14 @@ public class MediaSession2 implements AutoCloseable {
         return mCallback;
     }
 
+    boolean isTrustedForMediaControl(RemoteUserInfo remoteUserInfo) {
+        if (SdkLevel.isAtLeastS()) {
+            return mCommunicationManager.isTrustedForMediaControl(remoteUserInfo);
+        } else {
+            return mMediaSessionManager.isTrustedForMediaControl(remoteUserInfo);
+        }
+    }
+
     void setForegroundServiceEventCallback(ForegroundServiceEventCallback callback) {
         synchronized (mLock) {
             if (mForegroundServiceEventCallback == callback) {
@@ -352,7 +368,7 @@ public class MediaSession2 implements AutoCloseable {
 
         final ControllerInfo controllerInfo = new ControllerInfo(
                 remoteUserInfo,
-                mSessionManager.isTrustedForMediaControl(remoteUserInfo),
+                isTrustedForMediaControl(remoteUserInfo),
                 controller,
                 connectionHints);
         mCallbackExecutor.execute(() -> {
@@ -453,7 +469,9 @@ public class MediaSession2 implements AutoCloseable {
         }
         mCallbackExecutor.execute(() -> {
             if (!controllerInfo.removeRequestedCommandSeqNumber(seq)) {
-                resultReceiver.send(RESULT_INFO_SKIPPED, null);
+                if (resultReceiver != null) {
+                    resultReceiver.send(RESULT_INFO_SKIPPED, null);
+                }
                 return;
             }
             Session2Command.Result result = mCallback.onSessionCommand(
@@ -608,9 +626,15 @@ public class MediaSession2 implements AutoCloseable {
             // Notify framework about the newly create session after the constructor is finished.
             // Otherwise, framework may access the session before the initialization is finished.
             try {
-                MediaSessionManager manager = (MediaSessionManager) mContext.getSystemService(
-                        Context.MEDIA_SESSION_SERVICE);
-                manager.notifySession2Created(session2.getToken());
+                if (SdkLevel.isAtLeastS()) {
+                    MediaCommunicationManager manager =
+                            mContext.getSystemService(MediaCommunicationManager.class);
+                    manager.notifySession2Created(session2.getToken());
+                } else {
+                    MediaSessionManager manager =
+                            mContext.getSystemService(MediaSessionManager.class);
+                    manager.notifySession2Created(session2.getToken());
+                }
             } catch (Exception e) {
                 session2.close();
                 throw e;

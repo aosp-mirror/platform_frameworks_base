@@ -43,8 +43,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 
 /**
- * Session used when the Android a system-provided content capture service
- * about events associated with views.
+ * Session used when notifying the Android system about events associated with views.
  */
 public abstract class ContentCaptureSession implements AutoCloseable {
 
@@ -127,7 +126,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_INTERNAL_ERROR = 0x100;
 
     /**
-     * Session is disabled because service didn't whitelist package or activity.
+     * Session is disabled because service didn't allowlist package or activity.
      *
      * @hide
      */
@@ -342,11 +341,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             }
         }
 
-        try {
-            flush(FLUSH_REASON_SESSION_FINISHED);
-        } finally {
-            onDestroy();
-        }
+        onDestroy();
     }
 
     abstract void onDestroy();

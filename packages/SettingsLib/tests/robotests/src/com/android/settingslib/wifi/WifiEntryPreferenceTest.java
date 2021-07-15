@@ -62,6 +62,17 @@ public class WifiEntryPreferenceTest {
     @Mock
     private Drawable mMockDrawable4;
 
+    @Mock
+    private Drawable mMockShowXDrawable0;
+    @Mock
+    private Drawable mMockShowXDrawable1;
+    @Mock
+    private Drawable mMockShowXDrawable2;
+    @Mock
+    private Drawable mMockShowXDrawable3;
+    @Mock
+    private Drawable mMockShowXDrawable4;
+
     private static final String MOCK_TITLE = "title";
     private static final String MOCK_SUMMARY = "summary";
     private static final String FAKE_URI_STRING = "fakeuri";
@@ -75,11 +86,22 @@ public class WifiEntryPreferenceTest {
         when(mMockWifiEntry.getTitle()).thenReturn(MOCK_TITLE);
         when(mMockWifiEntry.getSummary(false /* concise */)).thenReturn(MOCK_SUMMARY);
 
-        when(mMockIconInjector.getIcon(0)).thenReturn(mMockDrawable0);
-        when(mMockIconInjector.getIcon(1)).thenReturn(mMockDrawable1);
-        when(mMockIconInjector.getIcon(2)).thenReturn(mMockDrawable2);
-        when(mMockIconInjector.getIcon(3)).thenReturn(mMockDrawable3);
-        when(mMockIconInjector.getIcon(4)).thenReturn(mMockDrawable4);
+        when(mMockIconInjector.getIcon(false /* showX */, 0)).thenReturn(mMockDrawable0);
+        when(mMockIconInjector.getIcon(false /* showX */, 1)).thenReturn(mMockDrawable1);
+        when(mMockIconInjector.getIcon(false /* showX */, 2)).thenReturn(mMockDrawable2);
+        when(mMockIconInjector.getIcon(false /* showX */, 3)).thenReturn(mMockDrawable3);
+        when(mMockIconInjector.getIcon(false /* showX */, 4)).thenReturn(mMockDrawable4);
+
+        when(mMockIconInjector.getIcon(true /* showX */, 0))
+                .thenReturn(mMockShowXDrawable0);
+        when(mMockIconInjector.getIcon(true /* showX */, 1))
+                .thenReturn(mMockShowXDrawable1);
+        when(mMockIconInjector.getIcon(true /* showX */, 2))
+                .thenReturn(mMockShowXDrawable2);
+        when(mMockIconInjector.getIcon(true /* showX */, 3))
+                .thenReturn(mMockShowXDrawable3);
+        when(mMockIconInjector.getIcon(true /* showX */, 4))
+                .thenReturn(mMockShowXDrawable4);
     }
 
     @Test
@@ -152,6 +174,36 @@ public class WifiEntryPreferenceTest {
 
         assertThat(iconList).containsExactly(mMockDrawable0, mMockDrawable1,
                 mMockDrawable2, mMockDrawable3, mMockDrawable4, null);
+    }
+
+    @Test
+    public void levelChanged_showXWifiRefresh_shouldUpdateLevelIcon() {
+        final List<Drawable> iconList = new ArrayList<>();
+        when(mMockWifiEntry.shouldShowXLevelIcon()).thenReturn(true);
+        final WifiEntryPreference pref =
+                new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
+
+        when(mMockWifiEntry.getLevel()).thenReturn(0);
+        pref.refresh();
+        iconList.add(pref.getIcon());
+        when(mMockWifiEntry.getLevel()).thenReturn(1);
+        pref.refresh();
+        iconList.add(pref.getIcon());
+        when(mMockWifiEntry.getLevel()).thenReturn(2);
+        pref.refresh();
+        iconList.add(pref.getIcon());
+        when(mMockWifiEntry.getLevel()).thenReturn(3);
+        pref.refresh();
+        iconList.add(pref.getIcon());
+        when(mMockWifiEntry.getLevel()).thenReturn(4);
+        pref.refresh();
+        iconList.add(pref.getIcon());
+        when(mMockWifiEntry.getLevel()).thenReturn(-1);
+        pref.refresh();
+        iconList.add(pref.getIcon());
+
+        assertThat(iconList).containsExactly(mMockShowXDrawable0, mMockShowXDrawable1,
+                mMockShowXDrawable2, mMockShowXDrawable3, mMockShowXDrawable4, null);
     }
 
     @Test

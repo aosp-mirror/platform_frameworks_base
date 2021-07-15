@@ -59,6 +59,9 @@ import com.android.server.IntentResolver;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageInfoUtils.CachedApplicationInfoGenerator;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
+import com.android.server.utils.WatchableImpl;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -72,11 +75,18 @@ import java.util.Set;
 import java.util.function.Function;
 
 /** Resolves all Android component types [activities, services, providers and receivers]. */
-public class ComponentResolver {
+public class ComponentResolver
+        extends WatchableImpl
+        implements Snappable {
     private static final boolean DEBUG = false;
     private static final String TAG = "PackageManager";
     private static final boolean DEBUG_FILTERS = false;
     private static final boolean DEBUG_SHOW_INFO = false;
+
+    // Convenience function to report that this object has changed.
+    private void onChanged() {
+        dispatchChange(this);
+    }
 
     /**
      * The set of all protected actions [i.e. those actions for which a high priority
@@ -158,27 +168,27 @@ public class ComponentResolver {
      * would be able to hold its lock while checking the package setting state.</li>
      * </ol>
      */
-    private final Object mLock;
+    private final PackageManagerTracedLock mLock;
 
     /** All available activities, for your resolving pleasure. */
     @GuardedBy("mLock")
-    private final ActivityIntentResolver mActivities = new ActivityIntentResolver();
+    private final ActivityIntentResolver mActivities;
 
     /** All available providers, for your resolving pleasure. */
     @GuardedBy("mLock")
-    private final ProviderIntentResolver mProviders = new ProviderIntentResolver();
+    private final ProviderIntentResolver mProviders;
 
     /** All available receivers, for your resolving pleasure. */
     @GuardedBy("mLock")
-    private final ActivityIntentResolver mReceivers = new ReceiverIntentResolver();
+    private final ReceiverIntentResolver mReceivers;
 
     /** All available services, for your resolving pleasure. */
     @GuardedBy("mLock")
-    private final ServiceIntentResolver mServices = new ServiceIntentResolver();
+    private final ServiceIntentResolver mServices;
 
     /** Mapping from provider authority [first directory in content URI codePath) to provider. */
     @GuardedBy("mLock")
-    private final ArrayMap<String, ParsedProvider> mProvidersByAuthority = new ArrayMap<>();
+    private final ArrayMap<String, ParsedProvider> mProvidersByAuthority;
 
     /** Whether or not processing protected filters should be deferred. */
     private boolean mDeferProtectedFilters = true;
@@ -200,11 +210,56 @@ public class ComponentResolver {
 
     ComponentResolver(UserManagerService userManager,
             PackageManagerInternal packageManagerInternal,
-            Object lock) {
+            PackageManagerTracedLock lock) {
         sPackageManagerInternal = packageManagerInternal;
         sUserManager = userManager;
         mLock = lock;
+
+        mActivities = new ActivityIntentResolver();
+        mProviders = new ProviderIntentResolver();
+        mReceivers = new ReceiverIntentResolver();
+        mServices = new ServiceIntentResolver();
+        mProvidersByAuthority = new ArrayMap<>();
+        mDeferProtectedFilters = true;
+
+        mSnapshot = new SnapshotCache<ComponentResolver>(this, this) {
+                @Override
+                public ComponentResolver createSnapshot() {
+                    return new ComponentResolver(mSource);
+                }};
     }
+
+    // Copy constructor used in creating snapshots.
+    private ComponentResolver(ComponentResolver orig) {
+        // Do not set the static variables that are set in the default constructor.   Do
+        // create a new object for the lock.  The snapshot is read-only, so a lock is not
+        // strictly required.  However, the current code is simpler if the lock exists,
+        // but does not contend with any outside class.
+        // TODO: make the snapshot lock-free
+        mLock = new PackageManagerTracedLock();
+
+        mActivities = new ActivityIntentResolver(orig.mActivities);
+        mProviders = new ProviderIntentResolver(orig.mProviders);
+        mReceivers = new ReceiverIntentResolver(orig.mReceivers);
+        mServices = new ServiceIntentResolver(orig.mServices);
+        mProvidersByAuthority = new ArrayMap<>(orig.mProvidersByAuthority);
+        mDeferProtectedFilters = orig.mDeferProtectedFilters;
+        mProtectedFilters = (mProtectedFilters == null)
+                            ? null
+                            : new ArrayList<>(orig.mProtectedFilters);
+
+        mSnapshot = null;
+    }
+
+    final SnapshotCache<ComponentResolver> mSnapshot;
+
+    /**
+     * Create a snapshot.
+     */
+    public ComponentResolver snapshot() {
+        return mSnapshot.snapshot();
+    }
+
 
     /** Returns the given activity */
     @Nullable
@@ -474,6 +529,7 @@ public class ComponentResolver {
             addReceiversLocked(pkg, chatty);
             addProvidersLocked(pkg, chatty);
             addServicesLocked(pkg, chatty);
+            onChanged();
         }
         // expect single setupwizard package
         final String setupWizardPackage = ArrayUtils.firstOrNull(
@@ -489,6 +545,7 @@ public class ComponentResolver {
             final List<ParsedActivity> systemActivities =
                     disabledPkg != null ? disabledPkg.getActivities() : null;
             adjustPriority(systemActivities, pair.first, pair.second, setupWizardPackage);
+            onChanged();
         }
     }
 
@@ -496,6 +553,7 @@ public class ComponentResolver {
     void removeAllComponents(AndroidPackage pkg, boolean chatty) {
         synchronized (mLock) {
             removeAllComponentsLocked(pkg, chatty);
+            onChanged();
         }
     }
 
@@ -504,51 +562,54 @@ public class ComponentResolver {
      * all of the filters defined on the /system partition and know the special components.
      */
     void fixProtectedFilterPriorities() {
-        if (!mDeferProtectedFilters) {
-            return;
-        }
-        mDeferProtectedFilters = false;
+        synchronized (mLock) {
+            if (!mDeferProtectedFilters) {
+                return;
+            }
+            mDeferProtectedFilters = false;
 
-        if (mProtectedFilters == null || mProtectedFilters.size() == 0) {
-            return;
-        }
-        final List<Pair<ParsedMainComponent, ParsedIntentInfo>> protectedFilters =
-                mProtectedFilters;
-        mProtectedFilters = null;
+            if (mProtectedFilters == null || mProtectedFilters.size() == 0) {
+                return;
+            }
+            final List<Pair<ParsedMainComponent, ParsedIntentInfo>> protectedFilters =
+                    mProtectedFilters;
+            mProtectedFilters = null;
 
-        // expect single setupwizard package
-        final String setupWizardPackage = ArrayUtils.firstOrNull(
+            // expect single setupwizard package
+            final String setupWizardPackage = ArrayUtils.firstOrNull(
                 sPackageManagerInternal.getKnownPackageNames(
-                        PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM));
+                    PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM));
 
-        if (DEBUG_FILTERS && setupWizardPackage == null) {
-            Slog.i(TAG, "No setup wizard;"
-                    + " All protected intents capped to priority 0");
-        }
-        for (int i = protectedFilters.size() - 1; i >= 0; --i) {
-            final Pair<ParsedMainComponent, ParsedIntentInfo> pair = protectedFilters.get(i);
-            ParsedMainComponent component = pair.first;
-            ParsedIntentInfo filter = pair.second;
-            String packageName = component.getPackageName();
-            String className = component.getClassName();
-            if (packageName.equals(setupWizardPackage)) {
+            if (DEBUG_FILTERS && setupWizardPackage == null) {
+                Slog.i(TAG, "No setup wizard;"
+                        + " All protected intents capped to priority 0");
+            }
+            for (int i = protectedFilters.size() - 1; i >= 0; --i) {
+                final Pair<ParsedMainComponent, ParsedIntentInfo> pair = protectedFilters.get(i);
+                ParsedMainComponent component = pair.first;
+                ParsedIntentInfo filter = pair.second;
+                String packageName = component.getPackageName();
+                String className = component.getClassName();
+                if (packageName.equals(setupWizardPackage)) {
+                    if (DEBUG_FILTERS) {
+                        Slog.i(TAG, "Found setup wizard;"
+                                + " allow priority " + filter.getPriority() + ";"
+                                + " package: " + packageName
+                                + " activity: " + className
+                                + " priority: " + filter.getPriority());
+                    }
+                    // skip setup wizard; allow it to keep the high priority filter
+                    continue;
+                }
                 if (DEBUG_FILTERS) {
-                    Slog.i(TAG, "Found setup wizard;"
-                            + " allow priority " + filter.getPriority() + ";"
+                    Slog.i(TAG, "Protected action; cap priority to 0;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " priority: " + filter.getPriority());
+                            + " origPrio: " + filter.getPriority());
                 }
-                // skip setup wizard; allow it to keep the high priority filter
-                continue;
+                filter.setPriority(0);
             }
-            if (DEBUG_FILTERS) {
-                Slog.i(TAG, "Protected action; cap priority to 0;"
-                        + " package: " + packageName
-                        + " activity: " + className
-                        + " origPrio: " + filter.getPriority());
-            }
-            filter.setPriority(0);
+            onChanged();
         }
     }
 
@@ -623,7 +684,6 @@ public class ComponentResolver {
             AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
 
             if (pkg != null) {
-                // TODO(b/135203078): Print AppInfo?
                 pw.print("      applicationInfo="); pw.println(pkg.toAppInfoWithoutState());
             }
         }
@@ -890,54 +950,55 @@ public class ComponentResolver {
             return;
         }
 
-        if (systemActivities == null) {
-            // the system package is not disabled; we're parsing the system partition
-            if (isProtectedAction(intent)) {
-                if (mDeferProtectedFilters) {
-                    // We can't deal with these just yet. No component should ever obtain a
-                    // >0 priority for a protected actions, with ONE exception -- the setup
-                    // wizard. The setup wizard, however, cannot be known until we're able to
-                    // query it for the category CATEGORY_SETUP_WIZARD. Which we can't do
-                    // until all intent filters have been processed. Chicken, meet egg.
-                    // Let the filter temporarily have a high priority and rectify the
-                    // priorities after all system packages have been scanned.
-                    if (mProtectedFilters == null) {
-                        mProtectedFilters = new ArrayList<>();
-                    }
-                    mProtectedFilters.add(Pair.create(activity, intent));
+        if (isProtectedAction(intent)) {
+            if (mDeferProtectedFilters) {
+                // We can't deal with these just yet. No component should ever obtain a
+                // >0 priority for a protected actions, with ONE exception -- the setup
+                // wizard. The setup wizard, however, cannot be known until we're able to
+                // query it for the category CATEGORY_SETUP_WIZARD. Which we can't do
+                // until all intent filters have been processed. Chicken, meet egg.
+                // Let the filter temporarily have a high priority and rectify the
+                // priorities after all system packages have been scanned.
+                if (mProtectedFilters == null) {
+                    mProtectedFilters = new ArrayList<>();
+                }
+                mProtectedFilters.add(Pair.create(activity, intent));
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "Protected action; save for later;"
+                            + " package: " + packageName
+                            + " activity: " + className
+                            + " origPrio: " + intent.getPriority());
+                }
+            } else {
+                if (DEBUG_FILTERS && setupWizardPackage == null) {
+                    Slog.i(TAG, "No setup wizard;"
+                            + " All protected intents capped to priority 0");
+                }
+                if (packageName.equals(setupWizardPackage)) {
                     if (DEBUG_FILTERS) {
-                        Slog.i(TAG, "Protected action; save for later;"
+                        Slog.i(TAG, "Found setup wizard;"
+                                + " allow priority " + intent.getPriority() + ";"
                                 + " package: " + packageName
                                 + " activity: " + className
-                                + " origPrio: " + intent.getPriority());
+                                + " priority: " + intent.getPriority());
                     }
-                    return;
-                } else {
-                    if (DEBUG_FILTERS && setupWizardPackage == null) {
-                        Slog.i(TAG, "No setup wizard;"
-                                + " All protected intents capped to priority 0");
-                    }
-                    if (packageName.equals(setupWizardPackage)) {
-                        if (DEBUG_FILTERS) {
-                            Slog.i(TAG, "Found setup wizard;"
-                                    + " allow priority " + intent.getPriority() + ";"
-                                    + " package: " + packageName
-                                    + " activity: " + className
-                                    + " priority: " + intent.getPriority());
-                        }
-                        // setup wizard gets whatever it wants
-                        return;
-                    }
-                    if (DEBUG_FILTERS) {
-                        Slog.i(TAG, "Protected action; cap priority to 0;"
-                                + " package: " + packageName
-                                + " activity: " + className
-                                + " origPrio: " + intent.getPriority());
-                    }
-                    intent.setPriority(0);
+                    // setup wizard gets whatever it wants
                     return;
                 }
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "Protected action; cap priority to 0;"
+                            + " package: " + packageName
+                            + " activity: " + className
+                            + " origPrio: " + intent.getPriority());
+                }
+                intent.setPriority(0);
             }
+            return;
+        }
+
+        if (systemActivities == null) {
+            // the system package is not disabled; we're parsing the system partition
+
             // privileged apps on the system image get whatever priority they request
             return;
         }
@@ -1181,8 +1242,19 @@ public class ComponentResolver {
     private abstract static class MimeGroupsAwareIntentResolver<F extends Pair<?
             extends ParsedComponent, ParsedIntentInfo>, R>
             extends IntentResolver<F, R> {
-        private ArrayMap<String, F[]> mMimeGroupToFilter = new ArrayMap<>();
+        private final ArrayMap<String, F[]> mMimeGroupToFilter = new ArrayMap<>();
         private boolean mIsUpdatingMimeGroup = false;
+
+        // Default constructor
+        MimeGroupsAwareIntentResolver() {
+        }
+
+        // Copy constructor used in creating snapshots
+        MimeGroupsAwareIntentResolver(MimeGroupsAwareIntentResolver<F, R> orig) {
+            copyFrom(orig);
+            copyInto(mMimeGroupToFilter, orig.mMimeGroupToFilter);
+            mIsUpdatingMimeGroup = orig.mIsUpdatingMimeGroup;
+        }
 
         @Override
         public void addFilter(F f) {
@@ -1282,6 +1354,17 @@ public class ComponentResolver {
     private static class ActivityIntentResolver
             extends MimeGroupsAwareIntentResolver<Pair<ParsedActivity, ParsedIntentInfo>, ResolveInfo> {
 
+        // Default constructor
+        ActivityIntentResolver() {
+        }
+
+        // Copy constructor used in creating snapshots
+        ActivityIntentResolver(ActivityIntentResolver orig) {
+            super(orig);
+            mActivities.putAll(orig.mActivities);
+            mFlags = orig.mFlags;
+        }
+
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -1330,7 +1413,7 @@ public class ComponentResolver {
             return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
         }
 
-        private void addActivity(ParsedActivity a, String type,
+        protected void addActivity(ParsedActivity a, String type,
                 List<Pair<ParsedActivity, ParsedIntentInfo>> newIntents) {
             mActivities.put(a.getComponentName(), a);
             if (DEBUG_SHOW_INFO) {
@@ -1354,7 +1437,7 @@ public class ComponentResolver {
             }
         }
 
-        private void removeActivity(ParsedActivity a, String type) {
+        protected void removeActivity(ParsedActivity a, String type) {
             mActivities.remove(a.getComponentName());
             if (DEBUG_SHOW_INFO) {
                 Log.v(TAG, "  " + type + ":");
@@ -1492,7 +1575,7 @@ public class ComponentResolver {
                 }
                 return null;
             }
-            final ResolveInfo res = new ResolveInfo();
+            final ResolveInfo res = new ResolveInfo(info.hasCategory(Intent.CATEGORY_BROWSABLE));
             res.activityInfo = ai;
             if ((mFlags & PackageManager.GET_RESOLVED_FILTER) != 0) {
                 res.filter = info;
@@ -1567,14 +1650,26 @@ public class ComponentResolver {
             return pkg.getActivities();
         }
 
-        // Keys are String (activity class name), values are Activity.
-        private final ArrayMap<ComponentName, ParsedActivity> mActivities =
+        // Keys are String (activity class name), values are Activity.  This attribute is
+        // protected because it is accessed directly from ComponentResolver.  That works
+        // even if the attribute is private, but fails for subclasses of
+        // ActivityIntentResolver.
+        protected final ArrayMap<ComponentName, ParsedActivity> mActivities =
                 new ArrayMap<>();
         private int mFlags;
     }
 
     // Both receivers and activities share a class, but point to different get methods
     private static final class ReceiverIntentResolver extends ActivityIntentResolver {
+
+        // Default constructor
+        ReceiverIntentResolver() {
+        }
+
+        // Copy constructor used in creating snapshots
+        ReceiverIntentResolver(ReceiverIntentResolver orig) {
+            super(orig);
+        }
 
         @Override
         protected List<ParsedActivity> getResolveList(AndroidPackage pkg) {
@@ -1584,6 +1679,17 @@ public class ComponentResolver {
 
     private static final class ProviderIntentResolver
             extends MimeGroupsAwareIntentResolver<Pair<ParsedProvider, ParsedIntentInfo>, ResolveInfo> {
+        // Default constructor
+        ProviderIntentResolver() {
+        }
+
+        // Copy constructor used in creating snapshots
+        ProviderIntentResolver(ProviderIntentResolver orig) {
+            super(orig);
+            mProviders.putAll(orig.mProviders);
+            mFlags = orig.mFlags;
+        }
+
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -1829,6 +1935,17 @@ public class ComponentResolver {
 
     private static final class ServiceIntentResolver
             extends MimeGroupsAwareIntentResolver<Pair<ParsedService, ParsedIntentInfo>, ResolveInfo> {
+        // Default constructor
+        ServiceIntentResolver() {
+        }
+
+        // Copy constructor used in creating snapshots
+        ServiceIntentResolver(ServiceIntentResolver orig) {
+            copyFrom(orig);
+            mServices.putAll(orig.mServices);
+            mFlags = orig.mFlags;
+        }
+
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -2213,11 +2330,16 @@ public class ComponentResolver {
      * @return true if any intent filters were changed due to this update
      */
     boolean updateMimeGroup(String packageName, String group) {
-        boolean hasChanges = mActivities.updateMimeGroup(packageName, group);
-        hasChanges |= mProviders.updateMimeGroup(packageName, group);
-        hasChanges |= mReceivers.updateMimeGroup(packageName, group);
-        hasChanges |= mServices.updateMimeGroup(packageName, group);
-
+        boolean hasChanges = false;
+        synchronized (mLock) {
+            hasChanges |= mActivities.updateMimeGroup(packageName, group);
+            hasChanges |= mProviders.updateMimeGroup(packageName, group);
+            hasChanges |= mReceivers.updateMimeGroup(packageName, group);
+            hasChanges |= mServices.updateMimeGroup(packageName, group);
+            if (hasChanges) {
+                onChanged();
+            }
+        }
         return hasChanges;
     }
 }

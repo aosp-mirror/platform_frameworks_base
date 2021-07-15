@@ -47,6 +47,8 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -355,8 +357,7 @@ class UsbUserPermissionManager {
         mAccessoryPersistentPermissionMap.clear();
 
         try (FileInputStream in = mPermissionsFile.openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
 
             XmlUtils.nextElement(parser);
             while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -440,8 +441,7 @@ class UsbUserPermissionManager {
                 FileOutputStream out = null;
                 try {
                     out = mPermissionsFile.startWrite();
-                    FastXmlSerializer serializer = new FastXmlSerializer();
-                    serializer.setOutput(out, StandardCharsets.UTF_8.name());
+                    TypedXmlSerializer serializer = Xml.resolveSerializer(out);
                     serializer.startDocument(null, true);
                     serializer.startTag(null, "permissions");
 
@@ -505,22 +505,23 @@ class UsbUserPermissionManager {
             int uid,
             @NonNull Context userContext,
             @NonNull PendingIntent pi) {
-        long identity = Binder.clearCallingIdentity();
-        Intent intent = new Intent();
-        if (device != null) {
-            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        } else {
-            intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        }
-        intent.putExtra(Intent.EXTRA_INTENT, pi);
-        intent.putExtra(Intent.EXTRA_UID, uid);
-        intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
-        intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
-        intent.setComponent(ComponentName.unflattenFromString(userContext.getResources().getString(
-                com.android.internal.R.string.config_usbPermissionActivity)));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
+        final long identity = Binder.clearCallingIdentity();
         try {
+            Intent intent = new Intent();
+            if (device != null) {
+                intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+            } else {
+                intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+            }
+            intent.putExtra(Intent.EXTRA_INTENT, pi);
+            intent.putExtra(Intent.EXTRA_UID, uid);
+            intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
+            intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
+            intent.setComponent(
+                    ComponentName.unflattenFromString(userContext.getResources().getString(
+                            com.android.internal.R.string.config_usbPermissionActivity)));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             userContext.startActivityAsUser(intent, mUser);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "unable to start UsbPermissionActivity");

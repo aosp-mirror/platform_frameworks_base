@@ -31,7 +31,7 @@ class CommandOptionsTest {
         private const val TEST_PROTOLOG_CLASS = "com.android.server.wm.ProtoLog"
         private const val TEST_PROTOLOGIMPL_CLASS = "com.android.server.wm.ProtoLogImpl"
         private const val TEST_PROTOLOGCACHE_CLASS = "com.android.server.wm.ProtoLog\$Cache"
-        private const val TEST_PROTOLOGGROUP_CLASS = "com.android.server.wm.ProtoLogGroup"
+        private const val TEST_PROTOLOGGROUP_CLASS = "com.android.internal.protolog.ProtoLogGroup"
         private const val TEST_PROTOLOGGROUP_JAR = "out/soong/.intermediates/frameworks/base/" +
                 "services/core/services.core.wm.protologgroups/android_common/javac/" +
                 "services.core.wm.protologgroups.jar"

@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
+import android.os.Process;
+import android.security.KeyStore;
 import android.security.keymaster.KeymasterDefs;
 
 import libcore.util.EmptyArray;
@@ -66,6 +69,8 @@ public abstract class KeyProperties {
             PURPOSE_SIGN,
             PURPOSE_VERIFY,
             PURPOSE_WRAP_KEY,
+            PURPOSE_AGREE_KEY,
+            PURPOSE_ATTEST_KEY,
     })
     public @interface PurposeEnum {}
 
@@ -95,6 +100,27 @@ public abstract class KeyProperties {
     public static final int PURPOSE_WRAP_KEY = 1 << 5;
 
     /**
+     * Purpose of key: creating a shared ECDH secret through key agreement.
+     *
+     * <p>A key having this purpose can be combined with the elliptic curve public key of another
+     * party to establish a shared secret over an insecure channel. It should be used  as a
+     * parameter to {@link javax.crypto.KeyAgreement#init(java.security.Key)} (a complete example is
+     * available <a
+     * href="{@docRoot}reference/android/security/keystore/KeyGenParameterSpec#example:ecdh"
+     * >here</a>).
+     * See <a href="https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman">this
+     * article</a> for a more detailed explanation.
+     */
+    public static final int PURPOSE_AGREE_KEY = 1 << 6;
+
+    /**
+     * Purpose of key: Signing attestaions. This purpose is incompatible with all others, meaning
+     * that when generating a key with PURPOSE_ATTEST_KEY, no other purposes may be specified. In
+     * addition, PURPOSE_ATTEST_KEY may not be specified for imported keys.
+     */
+    public static final int PURPOSE_ATTEST_KEY = 1 << 7;
+
+    /**
      * @hide
      */
     public static abstract class Purpose {
@@ -112,6 +138,10 @@ public abstract class KeyProperties {
                     return KeymasterDefs.KM_PURPOSE_VERIFY;
                 case PURPOSE_WRAP_KEY:
                     return KeymasterDefs.KM_PURPOSE_WRAP;
+                case PURPOSE_AGREE_KEY:
+                    return KeymasterDefs.KM_PURPOSE_AGREE_KEY;
+                case PURPOSE_ATTEST_KEY:
+                    return KeymasterDefs.KM_PURPOSE_ATTEST_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
@@ -129,6 +159,10 @@ public abstract class KeyProperties {
                     return PURPOSE_VERIFY;
                 case KeymasterDefs.KM_PURPOSE_WRAP:
                     return PURPOSE_WRAP_KEY;
+                case KeymasterDefs.KM_PURPOSE_AGREE_KEY:
+                    return PURPOSE_AGREE_KEY;
+                case KeymasterDefs.KM_PURPOSE_ATTEST_KEY:
+                    return PURPOSE_ATTEST_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
@@ -496,10 +530,16 @@ public abstract class KeyProperties {
      */
     public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
 
-    static abstract class SignaturePadding {
+    /**
+     * @hide
+     */
+    public abstract static class SignaturePadding {
         private SignaturePadding() {}
 
-        static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
+        /**
+         * @hide
+         */
+        public static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
             switch (padding.toUpperCase(Locale.US)) {
                 case SIGNATURE_PADDING_RSA_PKCS1:
                     return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN;
@@ -512,7 +552,7 @@ public abstract class KeyProperties {
         }
 
         @NonNull
-        static @SignaturePaddingEnum String fromKeymaster(int padding) {
+        public static @SignaturePaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN:
                     return SIGNATURE_PADDING_RSA_PKCS1;
@@ -524,7 +564,7 @@ public abstract class KeyProperties {
         }
 
         @NonNull
-        static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
+        public static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -771,4 +811,161 @@ public abstract class KeyProperties {
         }
         return result;
     }
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SECURITY_LEVEL_" }, value = {
+            SECURITY_LEVEL_UNKNOWN,
+            SECURITY_LEVEL_UNKNOWN_SECURE,
+            SECURITY_LEVEL_SOFTWARE,
+            SECURITY_LEVEL_TRUSTED_ENVIRONMENT,
+            SECURITY_LEVEL_STRONGBOX,
+    })
+    public @interface SecurityLevelEnum {}
+
+    /**
+     * This security level indicates that no assumptions can be made about the security level of the
+     * respective key.
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN = -2;
+    /**
+     * This security level indicates that due to the target API level of the caller no exact
+     * statement can be made about the security level of the key, however, the security level
+     * can be considered is at least equivalent to {@link #SECURITY_LEVEL_TRUSTED_ENVIRONMENT}.
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN_SECURE = -1;
+
+    /** Indicates enforcement by system software. */
+    public static final int SECURITY_LEVEL_SOFTWARE = 0;
+
+    /** Indicates enforcement by a trusted execution environment. */
+    public static final int SECURITY_LEVEL_TRUSTED_ENVIRONMENT = 1;
+
+    /**
+     * Indicates enforcement by environment meeting the Strongbox security profile,
+     * such as a secure element.
+     */
+    public static final int SECURITY_LEVEL_STRONGBOX = 2;
+
+    /**
+     * @hide
+     */
+    public abstract static class SecurityLevel {
+        private SecurityLevel() {}
+
+        /**
+         * @hide
+         */
+        public static int toKeymaster(int securityLevel) {
+            switch (securityLevel) {
+                case SECURITY_LEVEL_SOFTWARE:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_SOFTWARE;
+                case SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
+                case SECURITY_LEVEL_STRONGBOX:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX;
+                default:
+                    throw new IllegalArgumentException("Unsupported security level: "
+                            + securityLevel);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public static int fromKeymaster(int securityLevel) {
+            switch (securityLevel) {
+                case KeymasterDefs.KM_SECURITY_LEVEL_SOFTWARE:
+                    return SECURITY_LEVEL_SOFTWARE;
+                case KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
+                    return SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
+                case KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX:
+                    return SECURITY_LEVEL_STRONGBOX;
+                default:
+                    throw new IllegalArgumentException("Unsupported security level: "
+                            + securityLevel);
+            }
+        }
+    }
+
+    /**
+     * Namespaces provide system developers and vendors with a way to use keystore without
+     * requiring an applications uid. Namespaces can be configured using SEPolicy.
+     * See <a href="https://source.android.com/security/keystore#access-control">
+     *     Keystore 2.0 access-control</a>
+     * {@See KeyGenParameterSpec.Builder#setNamespace}
+     * {@See android.security.keystore2.AndroidKeyStoreLoadStoreParameter}
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "NAMESPACE_" }, value = {
+            NAMESPACE_APPLICATION,
+            NAMESPACE_WIFI,
+            NAMESPACE_LOCKSETTINGS,
+    })
+    public @interface Namespace {}
+
+    /**
+     * This value indicates the implicit keystore namespace of the calling application.
+     * It is used by default. Only select system components can choose a different namespace
+     * which it must be configured in SEPolicy.
+     * @hide
+     */
+    @SystemApi
+    public static final int NAMESPACE_APPLICATION = -1;
+
+    /**
+     * The namespace identifier for the WIFI Keystore namespace.
+     * This must be kept in sync with system/sepolicy/private/keystore2_key_contexts
+     * @hide
+     */
+    @SystemApi
+    public static final int NAMESPACE_WIFI = 102;
+
+    /**
+     * The namespace identifier for the LOCKSETTINGS Keystore namespace.
+     * This must be kept in sync with system/sepolicy/private/keystore2_key_contexts
+     * @hide
+     */
+    public static final int NAMESPACE_LOCKSETTINGS = 103;
+
+    /**
+     * For legacy support, translate namespaces into known UIDs.
+     * @hide
+     */
+    public static int namespaceToLegacyUid(@Namespace int namespace) {
+        switch (namespace) {
+            case NAMESPACE_APPLICATION:
+                return KeyStore.UID_SELF;
+            case NAMESPACE_WIFI:
+                return Process.WIFI_UID;
+            default:
+                throw new IllegalArgumentException("No UID corresponding to namespace "
+                        + namespace);
+        }
+    }
+
+    /**
+     * For legacy support, translate namespaces into known UIDs.
+     * @hide
+     */
+    public static @Namespace int legacyUidToNamespace(int uid) {
+        switch (uid) {
+            case KeyStore.UID_SELF:
+                return NAMESPACE_APPLICATION;
+            case Process.WIFI_UID:
+                return NAMESPACE_WIFI;
+            default:
+                throw new IllegalArgumentException("No namespace corresponding to uid "
+                        + uid);
+        }
+    }
+
+    /**
+     * This value indicates that there is no restriction on the number of times the key can be used.
+     */
+    public static final int UNRESTRICTED_USAGE_COUNT = -1;
 }

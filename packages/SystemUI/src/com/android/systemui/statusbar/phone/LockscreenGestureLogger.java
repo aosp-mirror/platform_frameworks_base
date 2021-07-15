@@ -27,15 +27,15 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Wrapper that emits both new- and old-style gesture logs.
  * TODO: delete this once the old logs are no longer needed.
  */
-@Singleton
+@SysUISingleton
 public class LockscreenGestureLogger {
 
     /**

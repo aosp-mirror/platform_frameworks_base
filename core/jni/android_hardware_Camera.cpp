@@ -556,7 +556,7 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
 
 // connect to camera service
 static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
-    jobject weak_this, jint cameraId, jint halVersion, jstring clientPackageName)
+    jobject weak_this, jint cameraId, jstring clientPackageName)
 {
     // Convert jstring to String16
     const char16_t *rawClientName = reinterpret_cast<const char16_t*>(
@@ -566,19 +566,9 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     env->ReleaseStringChars(clientPackageName,
                             reinterpret_cast<const jchar*>(rawClientName));
 
-    sp<Camera> camera;
-    if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
-        // Default path: hal version is don't care, do normal camera connect.
-        camera = Camera::connect(cameraId, clientName,
-                Camera::USE_CALLING_UID, Camera::USE_CALLING_PID);
-    } else {
-        jint status = Camera::connectLegacy(cameraId, halVersion, clientName,
-                Camera::USE_CALLING_UID, camera);
-        if (status != NO_ERROR) {
-            return status;
-        }
-    }
-
+    int targetSdkVersion = android_get_application_target_sdk_version();
+    sp<Camera> camera = Camera::connect(cameraId, clientName, Camera::USE_CALLING_UID,
+                                        Camera::USE_CALLING_PID, targetSdkVersion);
     if (camera == NULL) {
         return -EACCES;
     }
@@ -1068,7 +1058,7 @@ static const JNINativeMethod camMethods[] = {
     "(ILandroid/hardware/Camera$CameraInfo;)V",
     (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
-    "(Ljava/lang/Object;IILjava/lang/String;)I",
+    "(Ljava/lang/Object;ILjava/lang/String;)I",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",

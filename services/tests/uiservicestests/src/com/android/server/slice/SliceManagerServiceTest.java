@@ -75,7 +75,6 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(UsageStatsManagerInternal.class,
                 mock(UsageStatsManagerInternal.class));
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
-        mContext.getTestablePermissions().setPermission(TEST_URI, PERMISSION_GRANTED);
 
         mContextSpy = spy(mContext);
         mService = spy(new SliceManagerService(mContextSpy, TestableLooper.get(this).getLooper()));
@@ -90,6 +89,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testAddPinCreatesPinned() throws RemoteException {
+        grantSlicePermission();
         doReturn("pkg").when(mService).getDefaultHome(anyInt());
 
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
@@ -99,6 +99,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRemovePinDestroysPinned() throws RemoteException {
+        grantSlicePermission();
         doReturn("pkg").when(mService).getDefaultHome(anyInt());
 
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
@@ -130,11 +131,13 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @Test(expected = IllegalStateException.class)
     public void testNoPinThrow() throws Exception {
+        grantSlicePermission();
         mService.getPinnedSpecs(TEST_URI, "pkg");
     }
 
     @Test
     public void testGetPinnedSpecs() throws Exception {
+        grantSlicePermission();
         SliceSpec[] specs = new SliceSpec[] {
             new SliceSpec("Something", 1) };
         mService.pinSlice("pkg", TEST_URI, specs, mToken);
@@ -143,4 +146,10 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         assertEquals(specs, mService.getPinnedSpecs(TEST_URI, "pkg"));
     }
 
+    private void grantSlicePermission() {
+        doReturn(PERMISSION_GRANTED).when(mService).checkSlicePermission(
+                eq(TEST_URI), anyString(), anyString(), anyInt(), anyInt(), any());
+        doReturn(PERMISSION_GRANTED).when(mService).checkAccess(
+                anyString(), eq(TEST_URI), anyInt(), anyInt());
+    }
 }

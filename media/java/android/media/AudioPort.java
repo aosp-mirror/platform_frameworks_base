@@ -17,6 +17,14 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * An audio port is a node of the audio framework or hardware that can be connected to or
@@ -77,16 +85,17 @@ public class AudioPort {
     private final int[] mChannelMasks;
     private final int[] mChannelIndexMasks;
     private final int[] mFormats;
+    private final List<AudioProfile> mProfiles;
+    private final List<AudioDescriptor> mDescriptors;
     @UnsupportedAppUsage
     private final AudioGain[] mGains;
     @UnsupportedAppUsage
     private AudioPortConfig mActiveConfig;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     AudioPort(AudioHandle handle, int role, String name,
             int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains) {
-
         mHandle = handle;
         mRole = role;
         mName = name;
@@ -95,6 +104,43 @@ public class AudioPort {
         mChannelIndexMasks = channelIndexMasks;
         mFormats = formats;
         mGains = gains;
+        mProfiles = new ArrayList<>();
+        if (mFormats != null) {
+            for (int format : mFormats) {
+                mProfiles.add(new AudioProfile(
+                        format, samplingRates, channelMasks, channelIndexMasks,
+                        AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE));
+            }
+        }
+        mDescriptors = new ArrayList<>();
+    }
+
+    AudioPort(AudioHandle handle, int role, String name,
+              List<AudioProfile> profiles, AudioGain[] gains,
+              List<AudioDescriptor> descriptors) {
+        mHandle = handle;
+        mRole = role;
+        mName = name;
+        mProfiles = profiles;
+        mDescriptors = descriptors;
+        mGains = gains;
+        Set<Integer> formats = new HashSet<>();
+        Set<Integer> samplingRates = new HashSet<>();
+        Set<Integer> channelMasks = new HashSet<>();
+        Set<Integer> channelIndexMasks = new HashSet<>();
+        for (AudioProfile profile : profiles) {
+            formats.add(profile.getFormat());
+            samplingRates.addAll(Arrays.stream(profile.getSampleRates()).boxed()
+                    .collect(Collectors.toList()));
+            channelMasks.addAll(Arrays.stream(profile.getChannelMasks()).boxed()
+                    .collect(Collectors.toList()));
+            channelIndexMasks.addAll(Arrays.stream(profile.getChannelIndexMasks()).boxed()
+                    .collect(Collectors.toList()));
+        }
+        mSamplingRates = samplingRates.stream().mapToInt(Number::intValue).toArray();
+        mChannelMasks = channelMasks.stream().mapToInt(Number::intValue).toArray();
+        mChannelIndexMasks = channelIndexMasks.stream().mapToInt(Number::intValue).toArray();
+        mFormats = formats.stream().mapToInt(Number::intValue).toArray();
     }
 
     AudioHandle handle() {
@@ -113,7 +159,7 @@ public class AudioPort {
     /**
      * Get the audio port role
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int role() {
         return mRole;
     }
@@ -159,6 +205,20 @@ public class AudioPort {
      */
     public int[] formats() {
         return mFormats;
+    }
+
+    /**
+     * Get the list of supported audio profiles
+     */
+    public List<AudioProfile> profiles() {
+        return mProfiles;
+    }
+
+    /**
+     * Get the list of audio descriptor
+     */
+    public List<AudioDescriptor> audioDescriptors() {
+        return mDescriptors;
     }
 
     /**

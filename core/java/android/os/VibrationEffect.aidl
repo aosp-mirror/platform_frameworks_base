@@ -17,4 +17,3 @@
 package android.os;
 
 parcelable VibrationEffect;
-parcelable VibrationEffect.Composition.PrimitiveEffect;

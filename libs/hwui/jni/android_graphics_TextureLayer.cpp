@@ -67,7 +67,7 @@ static void TextureLayer_updateSurfaceTexture(JNIEnv* env, jobject clazz,
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/TextureLayer";
+const char* const kClassPathName = "android/graphics/TextureLayer";
 
 static const JNINativeMethod gMethods[] = {
     { "nPrepare",                "(JIIZ)Z",    (void*) TextureLayer_prepare },
@@ -78,7 +78,7 @@ static const JNINativeMethod gMethods[] = {
     { "nUpdateSurfaceTexture",   "(J)V",       (void*) TextureLayer_updateSurfaceTexture },
 };
 
-int register_android_view_TextureLayer(JNIEnv* env) {
+int register_android_graphics_TextureLayer(JNIEnv* env) {
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

@@ -24,6 +24,7 @@ using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::SizeIs;
 using ::testing::StrEq;
@@ -39,11 +40,67 @@ class MockFileCollection : public io::IFileCollection {
   MOCK_METHOD0(GetDirSeparator, char());
 };
 
+ResourceEntry* GetEntry(ResourceTable* table, const ResourceNameRef& res_name) {
+  auto result = table->FindResource(res_name);
+  return (result) ? result.value().entry : nullptr;
+}
+
+ResourceEntry* GetEntry(ResourceTable* table, const ResourceNameRef& res_name, ResourceId id) {
+  auto result = table->FindResource(res_name, id);
+  return (result) ? result.value().entry : nullptr;
+}
+
+TEST(ProtoSerializeTest, SerializeVisibility) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .Add(NewResourceBuilder("com.app.a:bool/foo")
+                   .SetVisibility({Visibility::Level::kUndefined})
+                   .Build())
+          .Add(NewResourceBuilder("com.app.a:bool/bar")
+                   .SetVisibility({Visibility::Level::kPrivate})
+                   .Build())
+          .Add(NewResourceBuilder("com.app.a:bool/baz")
+                   .SetVisibility({Visibility::Level::kPublic})
+                   .Build())
+          .Add(NewResourceBuilder("com.app.a:bool/fiz")
+                   .SetVisibility({.level = Visibility::Level::kPublic, .staged_api = true})
+                   .Build())
+          .Build();
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  auto search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_FALSE(search_result.value().entry->visibility.staged_api);
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kPrivate));
+  EXPECT_FALSE(search_result.value().entry->visibility.staged_api);
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_FALSE(search_result.value().entry->visibility.staged_api);
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_TRUE(search_result.value().entry->visibility.staged_api);
+}
+
 TEST(ProtoSerializeTest, SerializeSinglePackage) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.a", 0x7f)
           .AddFileReference("com.app.a:layout/main", ResourceId(0x7f020000), "res/layout/main.xml")
           .AddReference("com.app.a:layout/other", ResourceId(0x7f020001), "com.app.a:layout/main")
           .AddString("com.app.a:string/text", {}, "hi")
@@ -52,11 +109,11 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
                           true /*allow_new*/)
           .Build();
 
-  Visibility public_symbol;
-  public_symbol.level = Visibility::Level::kPublic;
-  ASSERT_TRUE(table->SetVisibilityWithId(test::ParseNameOrDie("com.app.a:layout/main"),
-                                         public_symbol, ResourceId(0x7f020000),
-                                         context->GetDiagnostics()));
+  ASSERT_TRUE(table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:layout/main"))
+                                     .SetId(0x7f020000)
+                                     .SetVisibility({Visibility::Level::kPublic})
+                                     .Build(),
+                                 context->GetDiagnostics()));
 
   Id* id = test::GetValue<Id>(table.get(), "com.app.a:id/foo");
   ASSERT_THAT(id, NotNull());
@@ -64,25 +121,35 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   // Make a plural.
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
   plural->values[Plural::One] = util::make_unique<String>(table->string_pool.MakeRef("one"));
-  ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("com.app.a:plurals/hey"), ConfigDescription{},
-                                 {}, std::move(plural), context->GetDiagnostics()));
+  ASSERT_TRUE(table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:plurals/hey"))
+                                     .SetValue(std::move(plural))
+                                     .Build(),
+                                 context->GetDiagnostics()));
 
   // Make a styled string.
   StyleString style_string;
   style_string.str = "hello";
   style_string.spans.push_back(Span{"b", 0u, 4u});
-  ASSERT_TRUE(
-      table->AddResource(test::ParseNameOrDie("com.app.a:string/styled"), ConfigDescription{}, {},
-                         util::make_unique<StyledString>(table->string_pool.MakeRef(style_string)),
-                         context->GetDiagnostics()));
+  ASSERT_TRUE(table->AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("com.app.a:string/styled"))
+          .SetValue(util::make_unique<StyledString>(table->string_pool.MakeRef(style_string)))
+          .Build(),
+      context->GetDiagnostics()));
 
   // Make a resource with different products.
-  ASSERT_TRUE(table->AddResource(
-      test::ParseNameOrDie("com.app.a:integer/one"), test::ParseConfigOrDie("land"), {},
-      test::BuildPrimitive(android::Res_value::TYPE_INT_DEC, 123u), context->GetDiagnostics()));
-  ASSERT_TRUE(table->AddResource(
-      test::ParseNameOrDie("com.app.a:integer/one"), test::ParseConfigOrDie("land"), "tablet",
-      test::BuildPrimitive(android::Res_value::TYPE_INT_HEX, 321u), context->GetDiagnostics()));
+  ASSERT_TRUE(
+      table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:integer/one"))
+                             .SetValue(test::BuildPrimitive(android::Res_value::TYPE_INT_DEC, 123u),
+                                       test::ParseConfigOrDie("land"))
+                             .Build(),
+                         context->GetDiagnostics()));
+
+  ASSERT_TRUE(
+      table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:integer/one"))
+                             .SetValue(test::BuildPrimitive(android::Res_value::TYPE_INT_HEX, 321u),
+                                       test::ParseConfigOrDie("land"), "tablet")
+                             .Build(),
+                         context->GetDiagnostics()));
 
   // Make a reference with both resource name and resource ID.
   // The reference should point to a resource outside of this table to test that both name and id
@@ -90,16 +157,20 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   Reference expected_ref;
   expected_ref.name = test::ParseNameOrDie("android:layout/main");
   expected_ref.id = ResourceId(0x01020000);
-  ASSERT_TRUE(table->AddResource(
-      test::ParseNameOrDie("com.app.a:layout/abc"), ConfigDescription::DefaultConfig(), {},
-      util::make_unique<Reference>(expected_ref), context->GetDiagnostics()));
+  ASSERT_TRUE(table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:layout/abc"))
+                                     .SetValue(util::make_unique<Reference>(expected_ref))
+                                     .Build(),
+                                 context->GetDiagnostics()));
 
   // Make an overlayable resource.
   OverlayableItem overlayable_item(std::make_shared<Overlayable>(
       "OverlayableName", "overlay://theme", Source("res/values/overlayable.xml", 40)));
   overlayable_item.source = Source("res/values/overlayable.xml", 42);
-  ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.a:integer/overlayable"),
-                                    overlayable_item, test::GetDiagnostics()));
+  ASSERT_TRUE(
+      table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:integer/overlayable"))
+                             .SetOverlayable(overlayable_item)
+                             .Build(),
+                         context->GetDiagnostics()));
 
   pb::ResourceTable pb_table;
   SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
@@ -660,6 +731,224 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeNonDynamicReference) {
   Reference* actual_ref = ValueCast<Reference>(item.get());
   EXPECT_EQ(actual_ref->id.value().id, ref.id.value().id);
   EXPECT_FALSE(actual_ref->is_dynamic);
+}
+
+TEST(ProtoSerializeTest, CollapsingResourceNamesNoNameCollapseExemptionsSucceeds) {
+  const uint32_t id_one_id = 0x7f020000;
+  const uint32_t id_two_id = 0x7f020001;
+  const uint32_t id_three_id = 0x7f020002;
+  const uint32_t integer_three_id = 0x7f030000;
+  const uint32_t string_test_id = 0x7f040000;
+  const uint32_t layout_bar_id = 0x7f050000;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.app.test:id/one", ResourceId(id_one_id))
+          .AddSimple("com.app.test:id/two", ResourceId(id_two_id))
+          .AddValue("com.app.test:id/three", ResourceId(id_three_id),
+                    test::BuildReference("com.app.test:id/one", ResourceId(id_one_id)))
+          .AddValue("com.app.test:integer/one", ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:string/test", ResourceId(string_test_id), "foo")
+          .AddFileReference("com.app.test:layout/bar", ResourceId(layout_bar_id),
+                            "res/layout/bar.xml")
+          .Build();
+
+  SerializeTableOptions options;
+  options.collapse_key_stringpool = true;
+
+  pb::ResourceTable pb_table;
+
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics(), options);
+  test::TestFile file_a("res/layout/bar.xml");
+  MockFileCollection files;
+  EXPECT_CALL(files, FindFile(Eq("res/layout/bar.xml")))
+      .WillRepeatedly(::testing::Return(&file_a));
+  ResourceTable new_table;
+  std::string error;
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error)) << error;
+  EXPECT_THAT(error, IsEmpty());
+
+  ResourceName real_id_resource(
+      "com.app.test", ResourceType::kId, "one");
+  EXPECT_THAT(GetEntry(&new_table, real_id_resource), IsNull());
+
+  ResourceName obfuscated_id_resource(
+      "com.app.test", ResourceType::kId, "0_resource_name_obfuscated");
+
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource,
+                  id_one_id), NotNull());
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource,
+                  id_two_id), NotNull());
+  ResourceEntry* entry = GetEntry(&new_table, obfuscated_id_resource, id_three_id);
+  EXPECT_THAT(entry, NotNull());
+  ResourceConfigValue* config_value = entry->FindValue({});
+  Reference* ref = ValueCast<Reference>(config_value->value.get());
+  EXPECT_THAT(ref->id.value(), Eq(id_one_id));
+
+  ResourceName obfuscated_integer_resource(
+      "com.app.test", ResourceType::kInteger, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_integer_resource, integer_three_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  BinaryPrimitive* bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(1u));
+
+  config_value = entry->FindValue(test::ParseConfigOrDie("v1"));
+  bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(2u));
+
+  ResourceName obfuscated_string_resource(
+      "com.app.test", ResourceType::kString, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_string_resource, string_test_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  String* s = ValueCast<String>(config_value->value.get());
+  EXPECT_THAT(*(s->value), Eq("foo"));
+
+  ResourceName obfuscated_layout_resource(
+      "com.app.test", ResourceType::kLayout, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_layout_resource, layout_bar_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  FileReference* f = ValueCast<FileReference>(config_value->value.get());
+  EXPECT_THAT(*(f->path), Eq("res/layout/bar.xml"));
+}
+
+TEST(ProtoSerializeTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSucceeds) {
+  const uint32_t id_one_id = 0x7f020000;
+  const uint32_t id_two_id = 0x7f020001;
+  const uint32_t id_three_id = 0x7f020002;
+  const uint32_t integer_three_id = 0x7f030000;
+  const uint32_t string_test_id = 0x7f040000;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.app.test:id/one", ResourceId(id_one_id))
+          .AddSimple("com.app.test:id/two", ResourceId(id_two_id))
+          .AddValue("com.app.test:id/three", ResourceId(id_three_id),
+                    test::BuildReference("com.app.test:id/one", ResourceId(id_one_id)))
+          .AddValue("com.app.test:integer/one", ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:string/test", ResourceId(string_test_id), "foo")
+          .Build();
+
+  SerializeTableOptions options;
+  options.collapse_key_stringpool = true;
+  options.name_collapse_exemptions.insert(ResourceName({}, ResourceType::kId, "one"));
+  options.name_collapse_exemptions.insert(ResourceName({}, ResourceType::kString, "test"));
+  pb::ResourceTable pb_table;
+
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics(), options);
+  MockFileCollection files;
+  ResourceTable new_table;
+  std::string error;
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error)) << error;
+  EXPECT_THAT(error, IsEmpty());
+
+  EXPECT_THAT(GetEntry(&new_table, ResourceName("com.app.test", ResourceType::kId, "one"),
+                       id_one_id), NotNull());
+  ResourceName obfuscated_id_resource(
+      "com.app.test", ResourceType::kId, "0_resource_name_obfuscated");
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource, id_one_id), IsNull());
+
+  ResourceName real_id_resource(
+      "com.app.test", ResourceType::kId, "two");
+  EXPECT_THAT(GetEntry(&new_table, real_id_resource, id_two_id), IsNull());
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource, id_two_id), NotNull());
+
+  ResourceEntry* entry = GetEntry(&new_table, obfuscated_id_resource, id_three_id);
+  EXPECT_THAT(entry, NotNull());
+  ResourceConfigValue* config_value = entry->FindValue({});
+  Reference* ref = ValueCast<Reference>(config_value->value.get());
+  EXPECT_THAT(ref->id.value(), Eq(id_one_id));
+
+  // Note that this resource is also named "one", but it's a different type, so gets obfuscated.
+  ResourceName obfuscated_integer_resource(
+      "com.app.test", ResourceType::kInteger, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_integer_resource, integer_three_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  BinaryPrimitive* bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(1u));
+
+  config_value = entry->FindValue(test::ParseConfigOrDie("v1"));
+  bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(2u));
+
+  entry = GetEntry(&new_table, ResourceName("com.app.test", ResourceType::kString, "test"),
+                   string_test_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  String* s = ValueCast<String>(config_value->value.get());
+  EXPECT_THAT(*(s->value), Eq("foo"));
+}
+
+TEST(ProtoSerializeTest, SerializeMacro) {
+  auto original = std::make_unique<Macro>();
+  original->raw_value = "\nThis being human is a guest house.";
+  original->style_string.str = " This being human is a guest house.";
+  original->style_string.spans.emplace_back(Span{.name = "b", .first_char = 12, .last_char = 16});
+  original->untranslatable_sections.emplace_back(UntranslatableSection{.start = 12, .end = 17});
+  original->alias_namespaces.emplace_back(
+      Macro::Namespace{.alias = "prefix", .package_name = "package.name", .is_private = true});
+
+  CloningValueTransformer cloner(nullptr);
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                                             .Add(NewResourceBuilder("com.app.a:macro/foo")
+                                                      .SetValue(original->Transform(cloner))
+                                                      .Build())
+                                             .Build();
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  Macro* deserialized = test::GetValue<Macro>(&new_table, "com.app.a:macro/foo");
+  ASSERT_THAT(deserialized, NotNull());
+  EXPECT_THAT(deserialized->raw_value, Eq(original->raw_value));
+  EXPECT_THAT(deserialized->style_string.str, Eq(original->style_string.str));
+  EXPECT_THAT(deserialized->style_string.spans, Eq(original->style_string.spans));
+  EXPECT_THAT(deserialized->untranslatable_sections, Eq(original->untranslatable_sections));
+  EXPECT_THAT(deserialized->alias_namespaces, Eq(original->alias_namespaces));
+}
+
+TEST(ProtoSerializeTest, StagedId) {
+  CloningValueTransformer cloner(nullptr);
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                                             .Add(NewResourceBuilder("com.app.a:string/foo")
+                                                      .SetStagedId(StagedId{.id = 0x01ff0001})
+                                                      .Build())
+                                             .Build();
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  auto result = new_table.FindResource(test::ParseNameOrDie("com.app.a:string/foo"));
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.value().entry->staged_id);
+  EXPECT_THAT(result.value().entry->staged_id.value().id, Eq(ResourceId(0x01ff0001)));
 }
 
 }  // namespace aapt

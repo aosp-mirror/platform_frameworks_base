@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.util.ArrayMap;
 
 import java.io.PrintWriter;

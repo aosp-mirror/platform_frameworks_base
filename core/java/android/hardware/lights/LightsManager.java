@@ -16,43 +16,39 @@
 
 package android.hardware.lights;
 
-import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
-import android.util.CloseGuard;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.Reference;
 import java.util.List;
 
 /**
  * The LightsManager class allows control over device lights.
  *
- * @hide
  */
-@SystemApi
 @SystemService(Context.LIGHTS_SERVICE)
-public final class LightsManager {
+public abstract class LightsManager {
     private static final String TAG = "LightsManager";
 
+    @NonNull private final Context mContext;
     // These enum values copy the values from {@link com.android.server.lights.LightsManager}
     // and the light HAL. Since 0-7 are lights reserved for system use, only the microphone light
-    // is available through this API.
-    /** Type for lights that indicate microphone usage */
+    // and following types are available through this API.
+    /** Type for lights that indicate microphone usage
+     * @deprecated this has been moved to {@link android.hardware.lights.Light }
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
     public static final int LIGHT_TYPE_MICROPHONE = 8;
 
     /** @hide */
@@ -63,28 +59,11 @@ public final class LightsManager {
         })
     public @interface LightType {}
 
-    @NonNull private final Context mContext;
-    @NonNull private final ILightsManager mService;
-
     /**
-     * Creates a LightsManager.
-     *
-     * @hide
+     * @hide to prevent subclassing from outside of the framework
      */
-    public LightsManager(@NonNull Context context) throws ServiceNotFoundException {
-        this(context, ILightsManager.Stub.asInterface(
-            ServiceManager.getServiceOrThrow(Context.LIGHTS_SERVICE)));
-    }
-
-    /**
-     * Creates a LightsManager with a provided service implementation.
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    public LightsManager(@NonNull Context context, @NonNull ILightsManager service) {
+    public LightsManager(Context context) {
         mContext = Preconditions.checkNotNull(context);
-        mService = Preconditions.checkNotNull(service);
     }
 
     /**
@@ -92,112 +71,72 @@ public final class LightsManager {
      *
      * @return A list of available lights
      */
-    @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
-    public @NonNull List<Light> getLights() {
-        try {
-            return mService.getLights();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+    public @NonNull abstract List<Light> getLights();
 
     /**
      * Returns the state of a specified light.
      *
-     * @hide
      */
-    @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
-    @TestApi
-    public @NonNull LightState getLightState(@NonNull Light light) {
-        Preconditions.checkNotNull(light);
-        try {
-            return mService.getLightState(light.getId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+    public abstract @NonNull LightState getLightState(@NonNull Light light);
 
     /**
      * Creates a new LightsSession that can be used to control the device lights.
      */
-    @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
-    public @NonNull LightsSession openSession() {
-        try {
-            final LightsSession session = new LightsSession();
-            mService.openSession(session.mToken);
-            return session;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+    public abstract @NonNull LightsSession openSession();
+
+    /**
+     *
+     * Creates a new {@link LightsSession}
+     *
+     * @param priority the larger this number, the higher the priority of this session when multiple
+     *                 light state requests arrive simultaneously.
+     *
+     * @hide
+     */
+    @TestApi
+    public abstract @NonNull LightsSession openSession(int priority);
 
     /**
      * Encapsulates a session that can be used to control device lights and represents the lifetime
      * of the requests.
+     *
+     * <p>Any lights requests always live in a lights session which defines the lifecycle of the
+     * lights requests. A lights session is AutoCloseable that will get closed when leaving the
+     * session context.
+     *
+     * <p>Multiple sessions can make lights requests which contains same light. In the case the
+     * LightsManager implementation will arbitrate and honor one of the session's request. When
+     * the session hold the current light request closed, LightsManager implementation will choose
+     * another live session to honor its lights requests.
      */
-    public final class LightsSession implements AutoCloseable {
-
+    public abstract static class LightsSession implements AutoCloseable {
         private final IBinder mToken = new Binder();
 
-        private final CloseGuard mCloseGuard = new CloseGuard();
-        private boolean mClosed = false;
-
         /**
-         * Instantiated by {@link LightsManager#openSession()}.
+         * @hide to prevent subclassing from outside of the framework
          */
-        @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
-        private LightsSession() {
-            mCloseGuard.open("close");
+        public LightsSession() {
         }
 
         /**
          * Sends a request to modify the states of multiple lights.
          *
-         * <p>This method only controls lights that aren't overridden by higher-priority sessions.
-         * Additionally, lights not controlled by this session can be controlled by lower-priority
-         * sessions.
-         *
          * @param request the settings for lights that should change
          */
-        @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
-        public void requestLights(@NonNull LightsRequest request) {
-            Preconditions.checkNotNull(request);
-            if (!mClosed) {
-                try {
-                    mService.setLightStates(mToken, request.mLightIds, request.mLightStates);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
-        }
+        public abstract void requestLights(@NonNull LightsRequest request);
+
+        @Override
+        public abstract void close();
 
         /**
-         * Closes the session, reverting all changes made through it.
+         * Get the token of a light session.
+         *
+         * @return Binder token of the light session.
+         * @hide
          */
-        @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
-        @Override
-        public void close() {
-            if (!mClosed) {
-                try {
-                    mService.closeSession(mToken);
-                    mClosed = true;
-                    mCloseGuard.close();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
-            Reference.reachabilityFence(this);
-        }
-
-        /** @hide */
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                mCloseGuard.warnIfOpen();
-                close();
-            } finally {
-                super.finalize();
-            }
+        public @NonNull IBinder getToken() {
+            return mToken;
         }
     }
+
 }

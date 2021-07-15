@@ -32,6 +32,8 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -40,12 +42,11 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls how light status bar flag applies to the icons.
  */
-@Singleton
+@SysUISingleton
 public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable {
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
@@ -125,7 +126,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         updateStatus();
     }
 
-    void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
+    public void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
             int navigationBarMode, boolean navbarColorManagedByIme) {
         int diff = appearance ^ mAppearance;
         if ((diff & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0 || nbModeChanged) {
@@ -144,7 +145,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
-    void onNavigationBarModeChanged(int newBarMode) {
+    public void onNavigationBarModeChanged(int newBarMode) {
         mHasLightNavigationBar = isLight(mAppearance, newBarMode, APPEARANCE_LIGHT_NAVIGATION_BARS);
     }
 

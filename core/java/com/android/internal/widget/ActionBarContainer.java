@@ -361,7 +361,7 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     /**
-     * Dummy drawable so that we don't break background display lists and
+     * Placeholder drawable so that we don't break background display lists and
      * projection surfaces.
      */
     private class ActionBarBackgroundDrawable extends Drawable {

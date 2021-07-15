@@ -49,7 +49,7 @@ public class NotificationBackupHelper extends BlobBackupHelper {
                 newPayload = nm.getBackupPayload(mUserId);
             } catch (Exception e) {
                 // Treat as no data
-                Slog.e(TAG, "Couldn't communicate with notification manager");
+                Slog.e(TAG, "Couldn't communicate with notification manager", e);
                 newPayload = null;
             }
         }
@@ -68,7 +68,7 @@ public class NotificationBackupHelper extends BlobBackupHelper {
                         ServiceManager.getService("notification"));
                 nm.applyRestore(payload, mUserId);
             } catch (Exception e) {
-                Slog.e(TAG, "Couldn't communicate with notification manager");
+                Slog.e(TAG, "Couldn't communicate with notification manager", e);
             }
         }
     }

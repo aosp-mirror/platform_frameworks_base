@@ -226,6 +226,7 @@ class Visitor : public ValueVisitor {
       : pool_(pool), method_(method), localizer_(method) {}
 
   void Visit(Plural* plural) override {
+    CloningValueTransformer cloner(pool_);
     std::unique_ptr<Plural> localized = util::make_unique<Plural>();
     for (size_t i = 0; i < plural->values.size(); i++) {
       Visitor sub_visitor(pool_, method_);
@@ -234,7 +235,7 @@ class Visitor : public ValueVisitor {
         if (sub_visitor.item) {
           localized->values[i] = std::move(sub_visitor.item);
         } else {
-          localized->values[i] = std::unique_ptr<Item>(plural->values[i]->Clone(pool_));
+          localized->values[i] = plural->values[i]->Transform(cloner);
         }
       }
     }

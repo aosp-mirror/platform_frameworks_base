@@ -15,13 +15,15 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.transform">
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7" />
+     package="com.google.android.test.transform">
+    <uses-sdk android:minSdkVersion="7"
+         android:targetSdkVersion="7"/>
     <application android:label="TransformTest">
-        <activity android:name="TransformTestActivity">
+        <activity android:name="TransformTestActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

@@ -163,8 +163,8 @@ public final class ImsiEncryptionInfo implements Parcelable {
     public String toString(){
         return "[ImsiEncryptionInfo "
                 + "mcc=" + mcc
-                + "mnc=" + mnc
-                + "publicKey=" + publicKey
+                + " mnc=" + mnc
+                + " publicKey=" + publicKey
                 + ", keyIdentifier=" + keyIdentifier
                 + ", keyType=" + keyType
                 + ", expirationTime=" + expirationTime
