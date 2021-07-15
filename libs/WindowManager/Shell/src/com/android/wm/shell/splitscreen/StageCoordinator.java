@@ -422,7 +422,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSideStageListener.mVisible && updateBounds) {
             if (wct == null) {
                 // onBoundsChanged builds/applies a wct with the contents of updateWindowBounds.
-                onBoundsChanged(mSplitLayout);
+                onLayoutChanged(mSplitLayout);
             } else {
                 updateWindowBounds(mSplitLayout, wct);
             }
@@ -732,12 +732,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onBoundsChanging(SplitLayout layout) {
+    public void onLayoutChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
     }
 
     @Override
-    public void onBoundsChanged(SplitLayout layout) {
+    public void onLayoutChanged(SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         updateWindowBounds(layout, wct);
         mSyncQueue.queue(wct);
@@ -781,6 +781,18 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
+    public void onLayoutShifted(int offsetX, int offsetY, SplitLayout layout) {
+        final StageTaskListener topLeftStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
+        final StageTaskListener bottomRightStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        layout.applyLayoutShifted(wct, offsetX, offsetY, topLeftStage.mRootTaskInfo,
+                bottomRightStage.mRootTaskInfo);
+        mTaskOrganizer.applyTransaction(wct);
+    }
+
+    @Override
     public void onDisplayAreaAppeared(DisplayAreaInfo displayAreaInfo) {
         mDisplayAreaInfo = displayAreaInfo;
         if (mSplitLayout == null) {
@@ -802,7 +814,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitLayout != null
                 && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)
                 && mMainStage.isActive()) {
-            onBoundsChanged(mSplitLayout);
+            onLayoutChanged(mSplitLayout);
             mSyncQueue.runInSync(t -> applyDividerVisibility(t));
         }
     }
