@@ -384,6 +384,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
 
         @Override
+        public void onTaskbarStatusUpdated(boolean visible, boolean stashed) {
+            mNavigationBarView
+                    .getFloatingRotationButton()
+                    .onTaskbarStateChanged(visible, stashed);
+        }
+
+        @Override
         public void onToggleRecentApps() {
             // The same case as onOverviewShown but only for 3-button navigation.
             mNavigationBarView.getRotationButtonController().setSkipOverrideUserLockPrefsOnce();
