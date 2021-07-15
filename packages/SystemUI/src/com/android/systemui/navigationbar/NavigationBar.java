@@ -187,7 +187,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final MetricsLogger mMetricsLogger;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final SysUiState mSysUiFlagsContainer;
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final ShadeController mShadeController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
@@ -485,7 +485,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
             Optional<LegacySplitScreen> splitScreenOptional,
-            Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
+            Optional<Recents> recentsOptional,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
@@ -503,7 +504,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mMetricsLogger = metricsLogger;
         mAssistManagerLazy = assistManagerLazy;
         mSysUiFlagsContainer = sysUiFlagsContainer;
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mShadeController = shadeController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
@@ -610,7 +611,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onViewAttachedToWindow(View v) {
         final Display display = v.getDisplay();
-        mNavigationBarView.setComponents(mStatusBarLazy.get().getPanelController());
+        mNavigationBarView.setComponents(mStatusBarOptionalLazy.get().get().getPanelController());
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);
         mNavigationBarView.setOnTouchListener(this::onNavigationTouch);
@@ -1161,13 +1162,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         // If an incoming call is ringing, HOME is totally disabled.
         // (The user is already on the InCallUI at this point,
         // and their ONLY options are to answer or reject the call.)
+        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mHomeBlockedThisTouch = false;
                 TelecomManager telecomManager =
                         mContext.getSystemService(TelecomManager.class);
                 if (telecomManager != null && telecomManager.isRinging()) {
-                    if (mStatusBarLazy.get().isKeyguardShowing()) {
+                    if (statusBarOptional.map(StatusBar::isKeyguardShowing).orElse(false)) {
                         Log.i(TAG, "Ignoring HOME; there's a ringing incoming call. " +
                                 "No heads up");
                         mHomeBlockedThisTouch = true;
@@ -1183,14 +1185,15 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
-                mStatusBarLazy.get().awakenDreams();
+                statusBarOptional.ifPresent(StatusBar::awakenDreams);
                 break;
         }
         return false;
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        mStatusBarLazy.get().setQsScrimEnabled(!isVertical);
+        mStatusBarOptionalLazy.get().ifPresent(
+                statusBar -> statusBar.setQsScrimEnabled(!isVertical));
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {
@@ -1216,7 +1219,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 AssistManager.INVOCATION_TYPE_KEY,
                 AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         mAssistManagerLazy.get().startAssist(args);
-        mStatusBarLazy.get().awakenDreams();
+        mStatusBarOptionalLazy.get().ifPresent(StatusBar::awakenDreams);
         mNavigationBarView.abortCurrentGesture();
         return true;
     }
@@ -1242,7 +1245,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             LatencyTracker.getInstance(mContext).onActionStart(
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
         }
-        mStatusBarLazy.get().awakenDreams();
+        mStatusBarOptionalLazy.get().ifPresent(StatusBar::awakenDreams);
         mCommandQueue.toggleRecentApps();
     }
 
@@ -1347,8 +1350,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             return false;
         }
 
-        return mStatusBarLazy.get().toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
-                MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
+        return mStatusBarOptionalLazy.get().map(
+                statusBar -> statusBar.toggleSplitScreenMode(
+                        MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
+                        MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS))
+            .orElse(false);
     }
 
     private void onAccessibilityClick(View v) {
@@ -1474,7 +1480,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private void checkBarModes() {
         // We only have status bar on default display now.
         if (mIsOnDefaultDisplay) {
-            mStatusBarLazy.get().checkBarModes();
+            mStatusBarOptionalLazy.get().ifPresent(StatusBar::checkBarModes);
         } else {
             checkNavBarModes();
         }
@@ -1492,7 +1498,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
      * Checks current navigation bar mode and make transitions.
      */
     public void checkNavBarModes() {
-        final boolean anim = mStatusBarLazy.get().isDeviceInteractive()
+        final boolean anim =
+                mStatusBarOptionalLazy.get().map(StatusBar::isDeviceInteractive).orElse(false)
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
         mNavigationBarView.getBarTransitions().transitionTo(mNavigationBarMode, anim);
     }

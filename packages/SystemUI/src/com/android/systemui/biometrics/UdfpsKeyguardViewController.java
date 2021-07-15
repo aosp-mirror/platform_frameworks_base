@@ -40,6 +40,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 
 /**
@@ -80,7 +81,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull StatusBar statusBar,
+            @NonNull Optional<StatusBar> statusBarOptional,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull DelayableExecutor mainDelayableExecutor,
@@ -88,7 +89,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull LockscreenShadeTransitionController transitionController,
             @NonNull UdfpsController udfpsController) {
-        super(view, statusBarStateController, statusBar, dumpManager);
+        super(view, statusBarStateController, statusBarOptional, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mExecutor = mainDelayableExecutor;
