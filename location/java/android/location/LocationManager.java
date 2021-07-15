@@ -1569,6 +1569,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_FINE_LOCATION})
     public boolean injectLocation(@NonNull Location location) {
         Preconditions.checkArgument(location != null, "invalid null location");
