@@ -1932,6 +1932,32 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /** @see AudioManager#getSurroundFormats() */
+    @Override
+    public Map<Integer, Boolean> getSurroundFormats() {
+        Map<Integer, Boolean> surroundFormats = new HashMap<>();
+        int status = AudioSystem.getSurroundFormats(surroundFormats);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getSurroundFormats failed:" + status);
+            return new HashMap<>(); // Always return a map.
+        }
+        return surroundFormats;
+    }
+
+    /** @see AudioManager#getReportedSurroundFormats() */
+    @Override
+    public List<Integer> getReportedSurroundFormats() {
+        ArrayList<Integer> reportedSurroundFormats = new ArrayList<>();
+        int status = AudioSystem.getReportedSurroundFormats(reportedSurroundFormats);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getReportedSurroundFormats failed:" + status);
+            return new ArrayList<>(); // Always return a list.
+        }
+        return reportedSurroundFormats;
+    }
+
     /** @see AudioManager#isSurroundFormatEnabled(int) */
     @Override
     public boolean isSurroundFormatEnabled(int audioFormat) {
