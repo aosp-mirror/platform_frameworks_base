@@ -8132,7 +8132,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         || mRoot.isAnimating(TRANSITION | CHILDREN, ANIMATION_TYPE_ALL)
                         || animateStarting;
                 if (!isAnimating) {
-                    break;
+                    // isAnimating is a legacy transition query and will be removed, so also add
+                    // a check for whether this is in a shell-transition when not using legacy.
+                    if (!mAtmService.getTransitionController().inTransition()) {
+                        break;
+                    }
                 }
                 long startTime = System.currentTimeMillis();
                 try {

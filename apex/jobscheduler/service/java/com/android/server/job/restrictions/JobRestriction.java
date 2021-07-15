@@ -66,7 +66,8 @@ public abstract class JobRestriction {
     public abstract void dumpConstants(IndentingPrintWriter pw);
 
     /** Dump any internal constants the Restriction may have. */
-    public abstract void dumpConstants(ProtoOutputStream proto);
+    public void dumpConstants(ProtoOutputStream proto) {
+    }
 
     /** @return reason code for the Restriction. */
     @JobParameters.StopReason

@@ -1294,19 +1294,30 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         @Override
         public boolean shouldPlayWhenVibratorComplete(int vibratorId) {
             if (controller.getVibratorInfo().getId() == vibratorId) {
+                mVibratorCallbackReceived = true;
                 mNextOffTime = SystemClock.uptimeMillis();
             }
-            // Timings are tightly controlled here, so never anticipate when vibrator is complete.
-            return false;
+            // Timings are tightly controlled here, so only anticipate if the vibrator was supposed
+            // to be ON but has completed prematurely, to turn it back on as soon as possible.
+            return mNextOffTime < startTime && controller.getCurrentAmplitude() > 0;
         }
 
         @Override
         public List<Step> play() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "AmplitudeStep");
             try {
+                long now = SystemClock.uptimeMillis();
+                long latency = now - startTime;
                 if (DEBUG) {
-                    long latency = SystemClock.uptimeMillis() - startTime;
                     Slog.d(TAG, "Running amplitude step with " + latency + "ms latency.");
+                }
+
+                if (mVibratorCallbackReceived && latency < 0) {
+                    // This step was anticipated because the vibrator turned off prematurely.
+                    // Turn it back on and return this same step to run at the exact right time.
+                    mNextOffTime = turnVibratorBackOn(/* remainingDuration= */ -latency);
+                    return Arrays.asList(new AmplitudeStep(startTime, controller, effect,
+                            segmentIndex, mNextOffTime));
                 }
 
                 VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
@@ -1321,17 +1332,16 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     return skipToNextSteps(/* segmentsSkipped= */ 1);
                 }
 
-                long now = SystemClock.uptimeMillis();
                 float amplitude = stepSegment.getAmplitude();
                 if (amplitude == 0) {
-                    if (mNextOffTime > now) {
+                    if (vibratorOffTimeout > now) {
                         // Amplitude cannot be set to zero, so stop the vibrator.
                         stopVibrating();
                         mNextOffTime = now;
                     }
                 } else {
                     if (startTime >= mNextOffTime) {
-                        // Vibrator has stopped. Turn vibrator back on for the duration of another
+                        // Vibrator is OFF. Turn vibrator back on for the duration of another
                         // cycle before setting the amplitude.
                         long onDuration = getVibratorOnDuration(effect, segmentIndex);
                         if (onDuration > 0) {
@@ -1348,6 +1358,22 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
+        }
+
+        private long turnVibratorBackOn(long remainingDuration) {
+            long onDuration = getVibratorOnDuration(effect, segmentIndex);
+            if (onDuration <= 0) {
+                // Vibrator is supposed to go back off when this step starts, so just leave it off.
+                return vibratorOffTimeout;
+            }
+            onDuration += remainingDuration;
+            float expectedAmplitude = controller.getCurrentAmplitude();
+            mVibratorOnResult = startVibrating(onDuration);
+            if (mVibratorOnResult > 0) {
+                // Set the amplitude back to the value it was supposed to be playing at.
+                changeAmplitude(expectedAmplitude);
+            }
+            return SystemClock.uptimeMillis() + onDuration + CALLBACKS_EXTRA_TIMEOUT;
         }
 
         private long startVibrating(long duration) {
@@ -1383,7 +1409,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     repeatIndex = -1;
                 }
                 if (i == startIndex) {
-                    return 1000;
+                    // The repeating waveform keeps the vibrator ON all the time. Use a minimum
+                    // of 1s duration to prevent short patterns from turning the vibrator ON too
+                    // frequently.
+                    return Math.max(timing, 1000);
                 }
             }
             if (i == segmentCount && effect.getRepeatIndex() < 0) {

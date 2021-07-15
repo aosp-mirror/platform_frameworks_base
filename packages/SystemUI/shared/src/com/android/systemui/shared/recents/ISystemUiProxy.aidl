@@ -140,5 +140,8 @@ interface ISystemUiProxy {
     /** Notifies that a swipe-up gesture has started */
     oneway void notifySwipeUpGestureStarted() = 46;
 
-    // Next id = 47
+    /** Notifies when taskbar status updated */
+    oneway void notifyTaskbarStatus(boolean visible, boolean stashed) = 47;
+
+    // Next id = 48
 }

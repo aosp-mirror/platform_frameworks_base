@@ -24,7 +24,6 @@
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkEncodedOrigin.h>
-#include <SkFilterQuality.h>
 #include <SkPaint.h>
 
 #undef LOG_TAG

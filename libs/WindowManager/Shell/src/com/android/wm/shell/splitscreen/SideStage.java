@@ -21,12 +21,10 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -48,20 +46,12 @@ class SideStage extends StageTaskListener {
         mContext = context;
     }
 
-    @VisibleForTesting
-    SideStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
-            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, OutlineManager outlineManager) {
-        this(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
-        mOutlineManager = outlineManager;
-    }
-
     void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
             WindowContainerTransaction wct) {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.setBounds(rootToken, rootBounds)
                 .reparent(task.token, rootToken, true /* onTop*/)
-                // Moving the root task to top after the child tasks were repareted , or the root
+                // Moving the root task to top after the child tasks were reparented , or the root
                 // task cannot be visible and focused.
                 .reorder(rootToken, true /* onTop */);
     }
@@ -87,31 +77,33 @@ class SideStage extends StageTaskListener {
         return true;
     }
 
-    @Override
-    @CallSuper
-    public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        super.onTaskAppeared(taskInfo, leash);
-        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId
-                && mOutlineManager == null) {
-            mOutlineManager = new OutlineManager(mContext, mRootTaskInfo.configuration,
-                    () -> mRootLeash,
-                    Color.YELLOW);
-            if (mOutlineManager.getLeash() != null) {
-                mSyncQueue.runInSync(t -> {
-                    t.setLayer(mOutlineManager.getLeash(), Integer.MAX_VALUE);
-                });
+    void enableOutline(boolean enable) {
+        if (enable) {
+            if (mOutlineManager == null && mRootTaskInfo != null) {
+                mOutlineManager = new OutlineManager(mContext, mRootTaskInfo.configuration);
+                mSyncQueue.runInSync(t -> mOutlineManager.inflate(t, mRootLeash, Color.YELLOW));
+                updateOutlineBounds();
+            }
+        } else {
+            if (mOutlineManager != null) {
+                mOutlineManager.release();
+                mOutlineManager = null;
             }
         }
+    }
+
+    private void updateOutlineBounds() {
+        if (mOutlineManager == null || mRootTaskInfo == null || !mRootTaskInfo.isVisible) return;
+        mOutlineManager.drawOutlineBounds(
+                mRootTaskInfo.configuration.windowConfiguration.getBounds());
     }
 
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         super.onTaskInfoChanged(taskInfo);
-        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId
-                && mRootTaskInfo.isRunning) {
-            mOutlineManager.updateOutlineBounds(
-                    mRootTaskInfo.configuration.windowConfiguration.getBounds());
+        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId) {
+            updateOutlineBounds();
         }
     }
 }

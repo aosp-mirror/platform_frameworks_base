@@ -63,7 +63,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -101,7 +100,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
-    @Mock private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
@@ -150,8 +148,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mAmbientState,
                 mFeatureFlags,
                 mUnlockedScreenOffAnimationController);
-        mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
-                mNotificationSwipeHelper);
+        mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);

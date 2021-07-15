@@ -169,6 +169,15 @@ public abstract class PackageSettingBase extends SettingBase {
         doCopy(base);
     }
 
+    // A copy constructor used to create snapshots.  The boolean is present only to
+    // match up with the constructor in PackageSetting.
+    PackageSettingBase(PackageSettingBase orig, boolean snapshot) {
+        super(orig);
+        name = orig.name;
+        realName = orig.realName;
+        doCopy(orig);
+    }
+
     public void setInstallerPackageName(String packageName) {
         installSource = installSource.setInstallerPackage(packageName);
         onChanged();

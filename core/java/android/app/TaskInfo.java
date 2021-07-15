@@ -29,11 +29,13 @@ import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.DisplayCutout;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
@@ -179,6 +181,15 @@ public class TaskInfo {
      */
     @Nullable
     public PictureInPictureParams pictureInPictureParams;
+
+    /**
+     * The {@link Rect} copied from {@link DisplayCutout#getSafeInsets()} if the cutout is not of
+     * (LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS),
+     * {@code null} otherwise.
+     * @hide
+     */
+    @Nullable
+    public Rect displayCutoutInsets;
 
     /**
      * The activity type of the top activity in this task.
@@ -345,6 +356,7 @@ public class TaskInfo {
                 && displayAreaFeatureId == that.displayAreaFeatureId
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
+                && Objects.equals(displayCutoutInsets, that.displayCutoutInsets)
                 && getWindowingMode() == that.getWindowingMode()
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
@@ -396,6 +408,7 @@ public class TaskInfo {
         token = WindowContainerToken.CREATOR.createFromParcel(source);
         topActivityType = source.readInt();
         pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
+        displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
         source.readBinderList(launchCookies);
@@ -435,6 +448,7 @@ public class TaskInfo {
         token.writeToParcel(dest, flags);
         dest.writeInt(topActivityType);
         dest.writeTypedObject(pictureInPictureParams, flags);
+        dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
         dest.writeBinderList(launchCookies);
@@ -465,6 +479,7 @@ public class TaskInfo {
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
+                + " displayCutoutSafeInsets=" + displayCutoutInsets
                 + " topActivityInfo=" + topActivityInfo
                 + " launchCookies=" + launchCookies
                 + " positionInParent=" + positionInParent
