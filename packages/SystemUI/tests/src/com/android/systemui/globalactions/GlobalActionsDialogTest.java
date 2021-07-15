@@ -81,6 +81,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
 
@@ -169,7 +170,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mSysUiState,
                 mHandler,
                 mPackageManager,
-                mStatusBar
+                Optional.of(mStatusBar)
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
 

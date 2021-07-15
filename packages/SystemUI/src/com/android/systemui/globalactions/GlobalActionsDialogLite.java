@@ -131,6 +131,7 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -229,7 +230,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
-    private final StatusBar mStatusBar;
+    private final Optional<StatusBar> mStatusBarOptional;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -336,7 +337,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             SysUiState sysUiState,
              @Main Handler handler,
             PackageManager packageManager,
-            StatusBar statusBar) {
+            Optional<StatusBar> statusBarOptional) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -365,7 +366,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mSysUiState = sysUiState;
         mMainHandler = handler;
         mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
-        mStatusBar = statusBar;
+        mStatusBarOptional = statusBarOptional;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -415,8 +416,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         return mUiEventLogger;
     }
 
-    protected StatusBar getStatusBar() {
-        return mStatusBar;
+    protected Optional<StatusBar> getStatusBar() {
+        return mStatusBarOptional;
     }
 
     /**
@@ -650,7 +651,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mAdapter, mOverflowAdapter, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger,
-                mStatusBar);
+                mStatusBarOptional);
 
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
@@ -852,7 +853,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mUiEventLogger.log(GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
             if (mTelecomManager != null) {
                 // Close shade so user sees the activity
-                mStatusBar.collapseShade();
+                mStatusBarOptional.ifPresent(StatusBar::collapseShade);
                 Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(
                         null /* number */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -984,7 +985,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                             mIActivityManager.requestInteractiveBugReport();
                         }
                         // Close shade so user sees the activity
-                        mStatusBar.collapseShade();
+                        mStatusBarOptional.ifPresent(StatusBar::collapseShade);
                     } catch (RemoteException e) {
                     }
                 }
@@ -1004,7 +1005,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mUiEventLogger.log(GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
                 mIActivityManager.requestFullBugReport();
                 // Close shade so user sees the activity
-                mStatusBar.collapseShade();
+                mStatusBarOptional.ifPresent(StatusBar::collapseShade);
             } catch (RemoteException e) {
             }
             return false;
@@ -2122,7 +2123,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         protected final Runnable mOnRotateCallback;
         private UiEventLogger mUiEventLogger;
         private GestureDetector mGestureDetector;
-        private StatusBar mStatusBar;
+        private Optional<StatusBar> mStatusBarOptional;
 
         protected ViewGroup mContainer;
 
@@ -2147,7 +2148,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
                             float distanceY) {
                         if (distanceY < 0 && distanceY > distanceX
-                                && e1.getY() <= mStatusBar.getStatusBarHeight()) {
+                                && e1.getY() <= mStatusBarOptional.map(
+                                        StatusBar::getStatusBarHeight).orElse(0)) {
                             // Downwards scroll from top
                             openShadeAndDismiss();
                             return true;
@@ -2159,7 +2161,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                             float velocityY) {
                         if (velocityY > 0 && Math.abs(velocityY) > Math.abs(velocityX)
-                                && e1.getY() <= mStatusBar.getStatusBarHeight()) {
+                                && e1.getY() <= mStatusBarOptional.map(
+                                        StatusBar::getStatusBarHeight).orElse(0)) {
                             // Downwards fling from top
                             openShadeAndDismiss();
                             return true;
@@ -2174,7 +2177,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
-                StatusBar statusBar) {
+                Optional<StatusBar> statusBarOptional) {
             super(context, themeRes);
             mContext = context;
             mAdapter = adapter;
@@ -2187,7 +2190,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mOnRotateCallback = onRotateCallback;
             mKeyguardShowing = keyguardShowing;
             mUiEventLogger = uiEventLogger;
-            mStatusBar = statusBar;
+            mStatusBarOptional = statusBarOptional;
 
             mGestureDetector = new GestureDetector(mContext, mGestureListener);
 
@@ -2218,12 +2221,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         private void openShadeAndDismiss() {
             mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-            if (mStatusBar.isKeyguardShowing()) {
+            if (mStatusBarOptional.map(StatusBar::isKeyguardShowing).orElse(false)) {
                 // match existing lockscreen behavior to open QS when swiping from status bar
-                mStatusBar.animateExpandSettingsPanel(null);
+                mStatusBarOptional.ifPresent(
+                        statusBar -> statusBar.animateExpandSettingsPanel(null));
             } else {
                 // otherwise, swiping down should expand notification shade
-                mStatusBar.animateExpandNotificationsPanel();
+                mStatusBarOptional.ifPresent(
+                        statusBar -> statusBar.animateExpandNotificationsPanel());
             }
             dismiss();
         }

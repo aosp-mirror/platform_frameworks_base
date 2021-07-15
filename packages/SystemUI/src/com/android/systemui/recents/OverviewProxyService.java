@@ -136,7 +136,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     private final Context mContext;
     private final Optional<Pip> mPipOptional;
-    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private SysUiState mSysUiState;
@@ -174,8 +174,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
         @Override
         public void startScreenPinning(int taskId) {
             verifyCallerAndClearCallingIdentityPostMain("startScreenPinning", () ->
-                    mStatusBarOptionalLazy.ifPresent(
-                            statusBarLazy -> statusBarLazy.get().showScreenPinningRequest(taskId,
+                    mStatusBarOptionalLazy.get().ifPresent(
+                            statusBar -> statusBar.showScreenPinningRequest(taskId,
                                     false /* allowCancel */)));
         }
 
@@ -195,8 +195,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         public void onStatusBarMotionEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarMotionEvent", () -> {
                 // TODO move this logic to message queue
-                mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
-                    StatusBar statusBar = statusBarLazy.get();
+                mStatusBarOptionalLazy.get().ifPresent(statusBar -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
                         statusBar.getPanelController().startExpandLatencyTracking();
                     }
@@ -527,7 +526,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<Pip> pipOptional,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<SplitScreen> splitScreenOptional,
-            Optional<Lazy<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Optional<OneHanded> oneHandedOptional,
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
@@ -681,10 +680,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
             mHandler.post(() -> {
-                mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
+                mStatusBarOptionalLazy.get().ifPresent(statusBar -> {
                     mInputFocusTransferStarted = false;
-                    statusBarLazy.get().onInputFocusTransfer(false, true /* cancel */,
-                            0 /* velocity */);
+                    statusBar.onInputFocusTransfer(false, true /* cancel */, 0 /* velocity */);
                 });
             });
         }

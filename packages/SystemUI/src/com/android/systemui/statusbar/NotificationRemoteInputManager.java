@@ -45,6 +45,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.RemoteViews;
+import android.widget.RemoteViews.InteractionHandler;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -70,6 +71,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -118,7 +120,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final Handler mMainHandler;
     private final ActionClickLogger mLogger;
 
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
 
     protected final Context mContext;
     private final UserManager mUserManager;
@@ -134,14 +136,14 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected Callback mCallback;
     protected final ArrayList<NotificationLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
 
-    private final RemoteViews.InteractionHandler
-            mInteractionHandler = new RemoteViews.InteractionHandler() {
+    private final InteractionHandler mInteractionHandler = new InteractionHandler() {
 
         @Override
         public boolean onInteraction(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
-            mStatusBarLazy.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
-                    "NOTIFICATION_CLICK");
+            mStatusBarOptionalLazy.get().ifPresent(
+                    statusBar -> statusBar.wakeUpIfDozing(
+                            SystemClock.uptimeMillis(), view, "NOTIFICATION_CLICK"));
 
             final NotificationEntry entry = getNotificationForParent(view.getParent());
             mLogger.logInitialClick(entry, pendingIntent);
@@ -280,7 +282,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
@@ -290,7 +292,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
         mEntryManager = notificationEntryManager;
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mMainHandler = mainHandler;
         mLogger = logger;
         mBarService = IStatusBarService.Stub.asInterface(
