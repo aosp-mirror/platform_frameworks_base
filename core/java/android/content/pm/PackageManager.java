@@ -3699,6 +3699,17 @@ public abstract class PackageManager {
     public static final String FEATURE_KEYSTORE_APP_ATTEST_KEY =
             "android.hardware.keystore.app_attest_key";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * is opted-in to receive per-app compatibility overrides that are applied in
+     * {@link com.android.server.compat.overrides.AppCompatOverridesService}.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_APP_COMPAT_OVERRIDES =
+            "android.software.app_compat_overrides";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
