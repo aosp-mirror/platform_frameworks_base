@@ -611,6 +611,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onViewAttachedToWindow(View v) {
         final Display display = v.getDisplay();
+        mNavigationBarView.setComponents(mRecentsOptional);
         mNavigationBarView.setComponents(mStatusBarOptionalLazy.get().get().getPanelController());
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);

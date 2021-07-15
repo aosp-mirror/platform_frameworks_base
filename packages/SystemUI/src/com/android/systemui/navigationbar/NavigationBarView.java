@@ -98,6 +98,7 @@ import com.android.wm.shell.pip.Pip;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class NavigationBarView extends FrameLayout implements
@@ -165,6 +166,7 @@ public class NavigationBarView extends FrameLayout implements
 
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsOnboarding mRecentsOnboarding;
+    private Optional<Recents> mRecentsOptional = Optional.empty();
     private NotificationPanelViewController mPanelView;
     private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
@@ -253,7 +255,7 @@ public class NavigationBarView extends FrameLayout implements
                 @Override
                 public boolean performAccessibilityAction(View host, int action, Bundle args) {
                     if (action == R.id.action_toggle_overview) {
-                        Dependency.get(Recents.class).toggleRecentApps();
+                        mRecentsOptional.ifPresent(Recents::toggleRecentApps);
                     } else {
                         return super.performAccessibilityAction(host, action, args);
                     }
@@ -395,6 +397,10 @@ public class NavigationBarView extends FrameLayout implements
 
     public LightBarTransitionsController getLightTransitionsController() {
         return mBarTransitions.getLightTransitionsController();
+    }
+
+    public void setComponents(Optional<Recents> recentsOptional) {
+        mRecentsOptional = recentsOptional;
     }
 
     public void setComponents(NotificationPanelViewController panel) {
