@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 
@@ -29,19 +30,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
-import android.view.View;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
@@ -130,12 +134,12 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
     public void testSnapshotBuilder() {
-        final GraphicBuffer buffer = Mockito.mock(GraphicBuffer.class);
+        final HardwareBuffer buffer = Mockito.mock(HardwareBuffer.class);
         final ColorSpace sRGB = ColorSpace.get(ColorSpace.Named.SRGB);
         final long id = 1234L;
         final ComponentName activityComponent = new ComponentName("package", ".Class");
         final int windowingMode = WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-        final int systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        final int appearance = APPEARANCE_LIGHT_STATUS_BARS;
         final int pixelFormat = PixelFormat.RGBA_8888;
         final int orientation = Configuration.ORIENTATION_PORTRAIT;
         final float scaleFraction = 0.25f;
@@ -143,11 +147,11 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final Point taskSize = new Point(5, 6);
 
         try {
-            ActivityManager.TaskSnapshot.Builder builder =
-                    new ActivityManager.TaskSnapshot.Builder();
+            TaskSnapshot.Builder builder =
+                    new TaskSnapshot.Builder();
             builder.setId(id);
             builder.setTopActivityComponent(activityComponent);
-            builder.setSystemUiVisibility(systemUiVisibility);
+            builder.setAppearance(appearance);
             builder.setWindowingMode(windowingMode);
             builder.setColorSpace(sRGB);
             builder.setOrientation(orientation);
@@ -161,10 +165,10 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             // Not part of TaskSnapshot itself, used in screenshot process
             assertEquals(pixelFormat, builder.getPixelFormat());
 
-            ActivityManager.TaskSnapshot snapshot = builder.build();
+            TaskSnapshot snapshot = builder.build();
             assertEquals(id, snapshot.getId());
             assertEquals(activityComponent, snapshot.getTopActivityComponent());
-            assertEquals(systemUiVisibility, snapshot.getSystemUiVisibility());
+            assertEquals(appearance, snapshot.getAppearance());
             assertEquals(windowingMode, snapshot.getWindowingMode());
             assertEquals(sRGB, snapshot.getColorSpace());
             // Snapshots created with the Builder class are always high-res. The only way to get a
@@ -173,16 +177,64 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             assertEquals(orientation, snapshot.getOrientation());
             assertEquals(contentInsets, snapshot.getContentInsets());
             assertTrue(snapshot.isTranslucent());
-            assertSame(buffer, snapshot.getSnapshot());
+            assertSame(buffer, snapshot.getHardwareBuffer());
             assertTrue(snapshot.isRealSnapshot());
             assertEquals(taskSize, snapshot.getTaskSize());
         } finally {
             if (buffer != null) {
-                buffer.destroy();
+                buffer.close();
             }
         }
     }
 
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testCreateTaskSnapshotWithExcludingIme() {
+        Task task = mAppWindow.mActivityRecord.getTask();
+        spyOn(task);
+        spyOn(mDisplayContent);
+        when(task.getDisplayContent().shouldImeAttachedToApp()).thenReturn(false);
+        // Intentionally set the SurfaceControl of input method window as null.
+        mDisplayContent.mInputMethodWindow.setSurfaceControl(null);
+        // Verify no NPE happens when calling createTaskSnapshot.
+        try {
+            final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
+            mWm.mTaskSnapshotController.createTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
+                    1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
+        } catch (NullPointerException e) {
+            fail("There should be no exception when calling createTaskSnapshot");
+        }
+    }
+
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testCreateTaskSnapshotWithIncludingIme() {
+        Task task = mAppWindow.mActivityRecord.getTask();
+        spyOn(task);
+        spyOn(mDisplayContent);
+        spyOn(mDisplayContent.mInputMethodWindow);
+        when(task.getDisplayContent().shouldImeAttachedToApp()).thenReturn(true);
+        // Intentionally set the IME window is in visible state.
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+        // Verify no NPE happens when calling createTaskSnapshot.
+        try {
+            final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
+            spyOn(builder);
+            mWm.mTaskSnapshotController.createTaskSnapshot(
+                    mAppWindow.mActivityRecord.getTask(), 1f /* scaleFraction */,
+                    PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
+            // Verify the builder should includes IME surface.
+            verify(builder).setHasImeSurface(eq(true));
+            builder.setColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+            builder.setTaskSize(new Point(100, 100));
+            final TaskSnapshot snapshot = builder.build();
+            assertTrue(snapshot.hasImeSurface());
+        } catch (NullPointerException e) {
+            fail("There should be no exception when calling createTaskSnapshot");
+        }
+    }
+
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testPrepareTaskSnapshot() {
         mAppWindow.mWinAnimator.mLastAlpha = 1f;
@@ -190,8 +242,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         doReturn(true).when(mAppWindow.mWinAnimator).getShown();
         doReturn(true).when(mAppWindow.mActivityRecord).isSurfaceShowing();
 
-        final ActivityManager.TaskSnapshot.Builder builder =
-                new ActivityManager.TaskSnapshot.Builder();
+        final TaskSnapshot.Builder builder =
+                new TaskSnapshot.Builder();
         boolean success = mWm.mTaskSnapshotController.prepareTaskSnapshot(
                 mAppWindow.mActivityRecord.getTask(), PixelFormat.UNKNOWN, builder);
 

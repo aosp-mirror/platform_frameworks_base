@@ -7,8 +7,10 @@ package android.test {
     method @Deprecated public void assertReadingContentUriRequiresPermission(android.net.Uri, String);
     method @Deprecated public void assertWritingContentUriRequiresPermission(android.net.Uri, String);
     method @Deprecated public android.content.Context getContext();
+    method @Deprecated public android.content.Context getTestContext();
     method @Deprecated protected void scrubClass(Class<?>) throws java.lang.IllegalAccessException;
     method @Deprecated public void setContext(android.content.Context);
+    method @Deprecated public void setTestContext(android.content.Context);
     method @Deprecated @android.test.suitebuilder.annotation.Suppress public void testAndroidTestCaseSetupProperly();
     field @Deprecated protected android.content.Context mContext;
   }

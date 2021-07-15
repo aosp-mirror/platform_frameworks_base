@@ -16,6 +16,8 @@
 
 package com.android.systemui.power;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -24,6 +26,7 @@ import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioAttributes;
@@ -58,6 +61,7 @@ import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
@@ -69,11 +73,10 @@ import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -333,10 +336,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private PendingIntent pendingBroadcast(String action) {
-        return PendingIntent.getBroadcastAsUser(mContext, 0,
-                new Intent(action).setPackage(mContext.getPackageName())
-                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                0, UserHandle.CURRENT);
+        return PendingIntent.getBroadcastAsUser(
+                mContext,
+                0 /* request code */,
+                new Intent(action)
+                        .setPackage(mContext.getPackageName())
+                        .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                FLAG_IMMUTABLE /* flags */,
+                UserHandle.CURRENT);
     }
 
     private static Intent settings(String action) {
@@ -376,13 +383,15 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             return;
         }
         mHighTempWarning = true;
+        final String message = mContext.getString(R.string.high_temp_notif_message);
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.ALERTS)
                         .setSmallIcon(R.drawable.ic_device_thermostat_24)
                         .setWhen(0)
                         .setShowWhen(false)
                         .setContentTitle(mContext.getString(R.string.high_temp_title))
-                        .setContentText(mContext.getString(R.string.high_temp_notif_message))
+                        .setContentText(message)
+                        .setStyle(new Notification.BigTextStyle().bigText(message))
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setContentIntent(pendingBroadcast(ACTION_CLICKED_TEMP_WARNING))
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
@@ -402,6 +411,23 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setPositiveButton(com.android.internal.R.string.ok, null);
         d.setShowForAllUsers(true);
         d.setOnDismissListener(dialog -> mHighTempDialog = null);
+        final String url = mContext.getString(R.string.high_temp_dialog_help_url);
+        if (!url.isEmpty()) {
+            d.setNeutralButton(R.string.high_temp_dialog_help_text,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            final Intent helpIntent =
+                                    new Intent(Intent.ACTION_VIEW)
+                                            .setData(Uri.parse(url))
+                                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                                    true /* dismissShade */, resultCode -> {
+                                        mHighTempDialog = null;
+                                    });
+                        }
+                    });
+        }
         d.show();
         mHighTempDialog = d;
     }
@@ -420,19 +446,38 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setPositiveButton(com.android.internal.R.string.ok, null);
         d.setShowForAllUsers(true);
         d.setOnDismissListener(dialog -> mThermalShutdownDialog = null);
+        final String url = mContext.getString(R.string.thermal_shutdown_dialog_help_url);
+        if (!url.isEmpty()) {
+            d.setNeutralButton(R.string.thermal_shutdown_dialog_help_text,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            final Intent helpIntent =
+                                    new Intent(Intent.ACTION_VIEW)
+                                            .setData(Uri.parse(url))
+                                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                                    true /* dismissShade */, resultCode -> {
+                                        mThermalShutdownDialog = null;
+                                    });
+                        }
+                    });
+        }
         d.show();
         mThermalShutdownDialog = d;
     }
 
     @Override
     public void showThermalShutdownWarning() {
+        final String message = mContext.getString(R.string.thermal_shutdown_message);
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.ALERTS)
                         .setSmallIcon(R.drawable.ic_device_thermostat_24)
                         .setWhen(0)
                         .setShowWhen(false)
                         .setContentTitle(mContext.getString(R.string.thermal_shutdown_title))
-                        .setContentText(mContext.getString(R.string.thermal_shutdown_message))
+                        .setContentText(message)
+                        .setStyle(new Notification.BigTextStyle().bigText(message))
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setContentIntent(pendingBroadcast(ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING))
                         .setDeleteIntent(

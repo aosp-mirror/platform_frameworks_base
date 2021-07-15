@@ -62,6 +62,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Base class for implementing application instrumentation code.  When running
@@ -90,11 +91,14 @@ public class Instrumentation {
 
     private static final String TAG = "Instrumentation";
 
+    private static final long CONNECT_TIMEOUT_MILLIS = 5000;
+
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES})
+    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES,
+            UiAutomation.FLAG_DONT_USE_ACCESSIBILITY})
     public @interface UiAutomationFlags {};
 
 
@@ -132,6 +136,20 @@ public class Instrumentation {
             throw new RuntimeException(method +
                     " cannot be called outside of instrumented processes");
         }
+    }
+
+    /**
+     * Returns if it is being called in an instrumentation environment.
+     *
+     * @hide
+     */
+    public boolean isInstrumenting() {
+        // Check if we have an instrumentation context, as init should only get called by
+        // the system in startup processes that are being instrumented.
+        if (mInstrContext == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1115,7 +1133,8 @@ public class Instrumentation {
         }
         try {
             WindowManagerGlobal.getWindowManagerService().injectInputAfterTransactionsApplied(event,
-                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH,
+                    true /* waitForAnimations */);
         } catch (RemoteException e) {
         }
     }
@@ -1228,7 +1247,8 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */, null /*assistToken*/);
+                null /* window */, null /* activityConfigCallback */, null /*assistToken*/,
+                null /*shareableActivityToken*/);
         return activity;
     }
 
@@ -1412,7 +1432,7 @@ public class Instrumentation {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void callActivityOnNewIntent(Activity activity, ReferrerIntent intent) {
         final String oldReferrer = activity.mReferrer;
         try {
@@ -1721,7 +1741,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivity(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token,
                     target != null ? target.mEmbeddedID : null, requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
@@ -1758,7 +1778,7 @@ public class Instrumentation {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int execStartActivitiesAsUser(Context who, IBinder contextThread,
             IBinder token, Activity target, Intent[] intents, Bundle options,
             int userId) {
@@ -1793,7 +1813,7 @@ public class Instrumentation {
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityTaskManager.getService().startActivities(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intents, resolvedTypes,
+                    who.getOpPackageName(), who.getAttributionTag(), intents, resolvedTypes,
                     token, options, userId);
             checkStartActivityResult(result, intents[0]);
             return result;
@@ -1860,7 +1880,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivity(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token, target,
                     requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
@@ -1927,7 +1947,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivityAsUser(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token, resultWho,
                     requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
@@ -1941,7 +1961,7 @@ public class Instrumentation {
      * Special version!
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ActivityResult execStartActivityAsCaller(
             Context who, IBinder contextThread, IBinder token, Activity target,
             Intent intent, int requestCode, Bundle options, IBinder permissionToken,
@@ -1973,11 +1993,11 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService()
-                .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, options, permissionToken,
-                        ignoreTargetSecurity, userId);
+                    .startActivityAsCaller(whoThread, who.getOpPackageName(), intent,
+                            intent.resolveTypeIfNeeded(who.getContentResolver()),
+                            token, target != null ? target.mEmbeddedID : null,
+                            requestCode, 0, null, options, permissionToken,
+                            ignoreTargetSecurity, userId);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1989,7 +2009,7 @@ public class Instrumentation {
      * Special version!
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void execStartActivityFromAppTask(
             Context who, IBinder contextThread, IAppTask appTask,
             Intent intent, Bundle options) {
@@ -2019,7 +2039,7 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
-            int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
+            int result = appTask.startActivity(whoThread.asBinder(), who.getOpPackageName(),
                     who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), options);
             checkStartActivityResult(result, intent);
@@ -2125,6 +2145,13 @@ public class Instrumentation {
      * Equivalent to {@code getUiAutomation(0)}. If a {@link UiAutomation} exists with different
      * flags, the flags on that instance will be changed, and then it will be returned.
      * </p>
+     * <p>
+     * Compatibility mode: This method is infallible for apps targeted for
+     * {@link Build.VERSION_CODES#R} and earlier versions; for apps targeted for later versions, it
+     * will return null if {@link UiAutomation} fails to connect. The caller can check the return
+     * value and retry on error.
+     * </p>
+     *
      * @return The UI automation instance.
      *
      * @see UiAutomation
@@ -2152,9 +2179,16 @@ public class Instrumentation {
      * If a {@link UiAutomation} exists with different flags, the flags on that instance will be
      * changed, and then it will be returned.
      * </p>
+     * <p>
+     * Compatibility mode: This method is infallible for apps targeted for
+     * {@link Build.VERSION_CODES#R} and earlier versions; for apps targeted for later versions, it
+     * will return null if {@link UiAutomation} fails to connect. The caller can check the return
+     * value and retry on error.
+     * </p>
      *
      * @param flags The flags to be passed to the UiAutomation, for example
-     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES}.
+     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES},
+     *        {@link UiAutomation#FLAG_DONT_USE_ACCESSIBILITY}.
      *
      * @return The UI automation instance.
      *
@@ -2173,8 +2207,17 @@ public class Instrumentation {
             } else {
                 mUiAutomation.disconnect();
             }
-            mUiAutomation.connect(flags);
-            return mUiAutomation;
+            if (getTargetContext().getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.R) {
+                mUiAutomation.connect(flags);
+                return mUiAutomation;
+            }
+            try {
+                mUiAutomation.connectWithTimeout(flags, CONNECT_TIMEOUT_MILLIS);
+                return mUiAutomation;
+            } catch (TimeoutException e) {
+                mUiAutomation.destroy();
+                mUiAutomation = null;
+            }
         }
         return null;
     }

@@ -29,7 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.RemoteViews.OnClickHandler;
+import android.widget.RemoteViews.InteractionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1016,11 +1016,11 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * 
      * @hide
      */
-    public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
+    public void setRemoteViewsOnClickHandler(InteractionHandler handler) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
         if (mRemoteViewsAdapter != null) {
-            mRemoteViewsAdapter.setRemoteViewsOnClickHandler(handler);
+            mRemoteViewsAdapter.setRemoteViewsInteractionHandler(handler);
         }
     }
 

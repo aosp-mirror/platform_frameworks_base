@@ -1,21 +1,44 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// Defaults for platform code that runs inside system_server
 java_defaults {
-    name: "services_defaults",
-    plugins: [
-        "error_prone_android_framework",
-    ],
+    name: "platform_service_defaults",
+    plugins: ["error_prone_android_framework"],
+    errorprone: {
+        javacflags: [
+            // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            // "-Xep:AndroidFrameworkUid:ERROR",
+            // NOTE: only enable to generate local patchfiles
+            // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
+            // "-XepPatchLocation:/tmp/refaster/",
+        ],
+    },
 }
 
 filegroup {
     name: "services-main-sources",
-    srcs: ["java/**/*.java"],
+    srcs: [
+        "java/**/*.java",
+        "java/**/package.html",
+    ],
     path: "java",
     visibility: ["//visibility:private"],
 }
 
 filegroup {
-    name: "services-all-sources",
+    name: "services-non-updatable-sources",
     srcs: [
         ":services.core-sources",
+        ":services.core-sources-am-wm",
+        "core/java/com/android/server/am/package.html",
         ":services.accessibility-sources",
         ":services.appprediction-sources",
         ":services.appwidget-sources",
@@ -28,19 +51,30 @@ filegroup {
         ":services.coverage-sources",
         ":services.devicepolicy-sources",
         ":services.midi-sources",
+        ":services.musicsearch-sources",
         ":services.net-sources",
         ":services.print-sources",
+        ":services.profcollect-sources",
         ":services.restrictions-sources",
+        ":services.searchui-sources",
+        ":services.smartspace-sources",
+        ":services.speech-sources",
         ":services.startop.iorap-sources",
         ":services.systemcaptions-sources",
+        ":services.translation-sources",
+        ":services.texttospeech-sources",
         ":services.usage-sources",
         ":services.usb-sources",
+        ":services.uwb-sources",
         ":services.voiceinteraction-sources",
         ":services.wifi-sources",
-        ":service-permission-sources",
-        ":service-statsd-sources",
     ],
     visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "Slogf",
+    srcs: ["core/java/com/android/server/utils/Slogf.java"],
 }
 
 // merge all required services into one jar
@@ -70,14 +104,22 @@ java_library {
         "services.coverage",
         "services.devicepolicy",
         "services.midi",
+        "services.musicsearch",
         "services.net",
         "services.people",
         "services.print",
+        "services.profcollect",
         "services.restrictions",
+        "services.searchui",
+        "services.smartspace",
+        "services.speech",
         "services.startop",
         "services.systemcaptions",
+        "services.translation",
+        "services.texttospeech",
         "services.usage",
         "services.usb",
+        "services.uwb",
         "services.voiceinteraction",
         "services.wifi",
         "service-blobstore",
@@ -116,46 +158,53 @@ filegroup {
 // API stub
 // =============================================================
 
-droidstubs {
-    name: "services-stubs.sources",
-    srcs: [":services-all-sources"],
+stubs_defaults {
+    name: "services-stubs-default",
     installable: false,
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
         // TODO: remove the --hide options below
         " --hide-package com.google.android.startop.iorap" +
-        " --hide ReferencesHidden" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
-    visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base:__subpackages__"],
     filter_packages: ["com.android."],
+}
+
+droidstubs {
+    name: "services-non-updatable-stubs",
+    srcs: [":services-non-updatable-sources"],
+    defaults: ["services-stubs-default"],
     check_api: {
         current: {
             api_file: "api/current.txt",
             removed_api_file: "api/removed.txt",
         },
-        last_released: {
-            api_file: ":android.api.system-server.latest",
-            removed_api_file: ":removed.api.system-server.latest",
-            baseline_file: ":system-server-api-incompatibilities-with-last-released"
-        },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.system-server.latest",
+            new_since: ":android-non-updatable.api.system-server.latest",
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/system-server/api",
-        dest: "android.txt",
-    },
-}
-
-java_library {
-    name: "android_system_server_stubs_current",
-    srcs: [":services-stubs.sources"],
-    installable: false,
-    static_libs: ["android_module_lib_stubs_current"],
+    dists: [
+        {
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
+            dir: "apistubs/android/system-server/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
+            dir: "apistubs/android/system-server/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }

@@ -16,8 +16,11 @@
 
 package android.appwidget;
 
+import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -68,6 +71,9 @@ public class AppWidgetProviderInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResizeModeFlags {}
 
+    /** {@hide} */
+    public static final int WIDGET_CATEGORY_UNKNOWN = -1;
+
     /**
      * Indicates that the widget can be displayed on the home screen. This is the default value.
      */
@@ -109,10 +115,19 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2;
 
+    /**
+     * The widget provides a default configuration. The host may choose not to launch the provided
+     * configuration activity.
+     *
+     * @see #widgetFeatures
+     */
+    public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 4;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             WIDGET_FEATURE_RECONFIGURABLE,
             WIDGET_FEATURE_HIDE_FROM_PICKER,
+            WIDGET_FEATURE_CONFIGURATION_OPTIONAL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FeatureFlags {}
@@ -162,6 +177,44 @@ public class AppWidgetProviderInfo implements Parcelable {
      * the AppWidget meta-data file.
      */
     public int minResizeHeight;
+
+    /**
+     * Maximum width (in dp) which the widget can be resized to. This field has no effect if it is
+     * smaller than minWidth or if horizontal resizing isn't enabled (see {@link #resizeMode}).
+     *
+     * <p>This field corresponds to the <code>android:maxResizeWidth</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int maxResizeWidth;
+
+    /**
+     * Maximum height (in dp) which the widget can be resized to. This field has no effect if it is
+     * smaller than minHeight or if vertical resizing isn't enabled (see {@link #resizeMode}).
+     *
+     * <p>This field corresponds to the <code>android:maxResizeHeight</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int maxResizeHeight;
+
+    /**
+     * The default width of a widget when added to a host, in units of launcher grid cells.
+     *
+     * <p>This field corresponds to the <code>android:targetCellWidth</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int targetCellWidth;
+
+    /**
+     * The default height of a widget when added to a host, in units of launcher grid cells.
+     *
+     * <p>This field corresponds to the <code>android:targetCellHeight</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int targetCellHeight;
 
     /**
      * How often, in milliseconds, that this AppWidget wants to be updated.
@@ -232,10 +285,27 @@ public class AppWidgetProviderInfo implements Parcelable {
      * A preview of what the AppWidget will look like after it's configured.
      * If not supplied, the AppWidget's icon will be used.
      *
-     * <p>This field corresponds to the <code>android:previewImage</code> attribute in
-     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     * <p>This field corresponds to the <code>android:previewImage</code> attribute in the AppWidget
+     * meta-data file.
      */
     public int previewImage;
+
+    /**
+     * The layout resource id of a preview of what the AppWidget will look like after it's
+     * configured.
+     *
+     * <p>Unlike previewImage, previewLayout can better showcase AppWidget in different locales,
+     * system themes, display sizes & density etc.
+     *
+     * <p>If supplied, this will take precedence over the previewImage on supported widget hosts.
+     * Otherwise, previewImage will be used.
+     *
+     * <p>This field corresponds to the <code>android:previewLayout</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    @IdRes
+    public int previewLayout;
 
     /**
      * The rules by which a widget can be resized. See {@link #RESIZE_NONE},
@@ -261,11 +331,22 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int widgetCategory;
 
     /**
+     * Resource id for the description of the AppWidget.
+     *
+     * <p>This field corresponds to the <code>android:description</code> attribute in the AppWidget
+     * meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    @IdRes
+    public int descriptionRes;
+
+    /**
      * Flags indicating various features supported by the widget. These are hints to the widget
      * host, and do not actually change the behavior of the widget.
      *
      * @see #WIDGET_FEATURE_RECONFIGURABLE
      * @see #WIDGET_FEATURE_HIDE_FROM_PICKER
+     * @see #WIDGET_FEATURE_CONFIGURATION_OPTIONAL
      */
     @FeatureFlags
     public int widgetFeatures;
@@ -288,6 +369,10 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.minHeight = in.readInt();
         this.minResizeWidth = in.readInt();
         this.minResizeHeight = in.readInt();
+        this.maxResizeWidth = in.readInt();
+        this.maxResizeHeight = in.readInt();
+        this.targetCellWidth = in.readInt();
+        this.targetCellHeight = in.readInt();
         this.updatePeriodMillis = in.readInt();
         this.initialLayout = in.readInt();
         this.initialKeyguardLayout = in.readInt();
@@ -295,11 +380,13 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.label = in.readString();
         this.icon = in.readInt();
         this.previewImage = in.readInt();
+        this.previewLayout = in.readInt();
         this.autoAdvanceViewId = in.readInt();
         this.resizeMode = in.readInt();
         this.widgetCategory = in.readInt();
         this.providerInfo = in.readTypedObject(ActivityInfo.CREATOR);
         this.widgetFeatures = in.readInt();
+        this.descriptionRes = in.readInt();
     }
 
     /**
@@ -357,12 +444,44 @@ public class AppWidgetProviderInfo implements Parcelable {
     }
 
     /**
+     * Loads localized description for the app widget.
+     *
+     * <p>Description is intended to be displayed in the UI of the widget picker.
+     *
+     * @param context Context for accessing resources.
+     *
+     * @return CharSequence for app widget description for the current locale.
+     */
+    @Nullable
+    public final CharSequence loadDescription(@NonNull Context context) {
+        if (ResourceId.isValid(descriptionRes)) {
+            CharSequence description =
+                    context.getPackageManager().getText(
+                            providerInfo.packageName,
+                            descriptionRes,
+                            providerInfo.applicationInfo);
+            if (description != null) {
+                return description.toString().trim();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets the user profile in which the provider resides.
      *
      * @return The hosting user profile.
      */
     public final UserHandle getProfile() {
         return new UserHandle(UserHandle.getUserId(providerInfo.applicationInfo.uid));
+    }
+
+    /**
+     * Returns the broadcast receiver that is providing this widget.
+     */
+    @NonNull
+    public ActivityInfo getActivityInfo() {
+        return providerInfo;
     }
 
     @Override
@@ -373,6 +492,10 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.minHeight);
         out.writeInt(this.minResizeWidth);
         out.writeInt(this.minResizeHeight);
+        out.writeInt(this.maxResizeWidth);
+        out.writeInt(this.maxResizeHeight);
+        out.writeInt(this.targetCellWidth);
+        out.writeInt(this.targetCellHeight);
         out.writeInt(this.updatePeriodMillis);
         out.writeInt(this.initialLayout);
         out.writeInt(this.initialKeyguardLayout);
@@ -380,11 +503,13 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeString(this.label);
         out.writeInt(this.icon);
         out.writeInt(this.previewImage);
+        out.writeInt(this.previewLayout);
         out.writeInt(this.autoAdvanceViewId);
         out.writeInt(this.resizeMode);
         out.writeInt(this.widgetCategory);
         out.writeTypedObject(this.providerInfo, flags);
         out.writeInt(this.widgetFeatures);
+        out.writeInt(this.descriptionRes);
     }
 
     @Override
@@ -394,8 +519,12 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.provider = this.provider == null ? null : this.provider.clone();
         that.minWidth = this.minWidth;
         that.minHeight = this.minHeight;
-        that.minResizeWidth = this.minResizeHeight;
+        that.minResizeWidth = this.minResizeWidth;
         that.minResizeHeight = this.minResizeHeight;
+        that.maxResizeWidth = this.maxResizeWidth;
+        that.maxResizeHeight = this.maxResizeHeight;
+        that.targetCellWidth = this.targetCellWidth;
+        that.targetCellHeight = this.targetCellHeight;
         that.updatePeriodMillis = this.updatePeriodMillis;
         that.initialLayout = this.initialLayout;
         that.initialKeyguardLayout = this.initialKeyguardLayout;
@@ -403,11 +532,13 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.label = this.label;
         that.icon = this.icon;
         that.previewImage = this.previewImage;
+        that.previewLayout = this.previewLayout;
         that.autoAdvanceViewId = this.autoAdvanceViewId;
         that.resizeMode = this.resizeMode;
         that.widgetCategory = this.widgetCategory;
         that.providerInfo = this.providerInfo;
         that.widgetFeatures = this.widgetFeatures;
+        that.descriptionRes = this.descriptionRes;
         return that;
     }
 
@@ -441,6 +572,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         minHeight = TypedValue.complexToDimensionPixelSize(minHeight, displayMetrics);
         minResizeWidth = TypedValue.complexToDimensionPixelSize(minResizeWidth, displayMetrics);
         minResizeHeight = TypedValue.complexToDimensionPixelSize(minResizeHeight, displayMetrics);
+        maxResizeWidth = TypedValue.complexToDimensionPixelSize(maxResizeWidth, displayMetrics);
+        maxResizeHeight = TypedValue.complexToDimensionPixelSize(maxResizeHeight, displayMetrics);
     }
 
     /**

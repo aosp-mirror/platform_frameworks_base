@@ -93,7 +93,7 @@ public final class ContentValues implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (!(object instanceof ContentValues)) {
             return false;
         }

@@ -306,7 +306,7 @@ public class ScreenshotHelper {
             };
 
             Message msg = Message.obtain(null, screenshotType, screenshotRequest);
-            final ServiceConnection myConn = mScreenshotConnection;
+
             Handler h = new Handler(handler.getLooper()) {
                 @Override
                 public void handleMessage(Message msg) {
@@ -319,9 +319,7 @@ public class ScreenshotHelper {
                             break;
                         case SCREENSHOT_MSG_PROCESS_COMPLETE:
                             synchronized (mScreenshotLock) {
-                                if (myConn != null && mScreenshotConnection == myConn) {
-                                    resetConnection();
-                                }
+                                resetConnection();
                             }
                             break;
                     }
@@ -364,6 +362,7 @@ public class ScreenshotHelper {
                                 resetConnection();
                                 // only log an error if we're still within the timeout period
                                 if (handler.hasCallbacks(mScreenshotTimeout)) {
+                                    Log.e(TAG, "Screenshot service disconnected");
                                     handler.removeCallbacks(mScreenshotTimeout);
                                     notifyScreenshotError();
                                 }
@@ -379,6 +378,7 @@ public class ScreenshotHelper {
                 }
             } else {
                 Messenger messenger = new Messenger(mScreenshotService);
+
                 try {
                     messenger.send(msg);
                 } catch (RemoteException e) {

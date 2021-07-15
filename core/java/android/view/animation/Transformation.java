@@ -231,7 +231,7 @@ public class Transformation {
      */
     public void toShortString(StringBuilder sb) {
         sb.append("{alpha="); sb.append(mAlpha);
-        sb.append(" matrix="); mMatrix.toShortString(sb);
+        sb.append(" matrix="); sb.append(mMatrix.toShortString());
         sb.append('}');
     }
     
@@ -243,7 +243,7 @@ public class Transformation {
     public void printShortString(PrintWriter pw) {
         pw.print("{alpha="); pw.print(mAlpha);
         pw.print(" matrix=");
-        mMatrix.printShortString(pw);
+        mMatrix.dump(pw);
         pw.print('}');
     }
 }

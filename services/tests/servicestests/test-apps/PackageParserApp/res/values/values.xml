@@ -16,4 +16,10 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <bool name="config_isIsolated">true</bool>
+    <bool name="boolean_property">true</bool>
+    <color name="color_property">#00FF00</color>
+    <item name="float_property" format="float" type="dimen">2.718</item>
+    <dimen name="dimen_property">23dp</dimen>
+    <integer name="integer_property">123</integer>
+    <string name="string_property">giraffe</string>
 </resources>

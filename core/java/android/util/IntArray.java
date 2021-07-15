@@ -144,6 +144,17 @@ public class IntArray implements Cloneable {
     }
 
     /**
+     * Adds the values in the specified array to this array.
+     */
+    public void addAll(int[] values) {
+        final int count = values.length;
+        ensureCapacity(count);
+
+        System.arraycopy(values, 0, mValues, mSize, count);
+        mSize += count;
+    }
+
+    /**
      * Ensures capacity to append at least <code>count</code> values.
      */
     private void ensureCapacity(int count) {

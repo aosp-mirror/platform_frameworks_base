@@ -16,6 +16,7 @@
 
 package com.android.internal.util.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -49,7 +52,7 @@ import javax.annotation.Nullable;
 public class SystemPreparer extends ExternalResource {
     private static final long OVERLAY_ENABLE_TIMEOUT_MS = 30000;
 
-    // The paths of the files pushed onto the device through this rule.
+    // The paths of the files pushed onto the device through this rule to be removed after.
     private ArrayList<String> mPushedFiles = new ArrayList<>();
 
     // The package names of packages installed through this rule.
@@ -60,12 +63,22 @@ public class SystemPreparer extends ExternalResource {
     private final RebootStrategy mRebootStrategy;
     private final TearDownRule mTearDownRule;
 
+    // When debugging, it may be useful to run a test case without rebooting the device afterwards,
+    // to manually verify the device state.
+    private boolean mDebugSkipAfterReboot;
+
     public SystemPreparer(TemporaryFolder hostTempFolder, DeviceProvider deviceProvider) {
         this(hostTempFolder, RebootStrategy.FULL, null, deviceProvider);
     }
 
     public SystemPreparer(TemporaryFolder hostTempFolder, RebootStrategy rebootStrategy,
             @Nullable TestRuleDelegate testRuleDelegate, DeviceProvider deviceProvider) {
+        this(hostTempFolder, rebootStrategy, testRuleDelegate, false, deviceProvider);
+    }
+
+    public SystemPreparer(TemporaryFolder hostTempFolder, RebootStrategy rebootStrategy,
+            @Nullable TestRuleDelegate testRuleDelegate, boolean debugSkipAfterReboot,
+            DeviceProvider deviceProvider) {
         mHostTempFolder = hostTempFolder;
         mDeviceProvider = deviceProvider;
         mRebootStrategy = rebootStrategy;
@@ -73,6 +86,7 @@ public class SystemPreparer extends ExternalResource {
         if (testRuleDelegate != null) {
             testRuleDelegate.setDelegate(mTearDownRule);
         }
+        mDebugSkipAfterReboot = debugSkipAfterReboot;
     }
 
     /** Copies a file within the host test jar to a path on device. */
@@ -81,7 +95,7 @@ public class SystemPreparer extends ExternalResource {
         final ITestDevice device = mDeviceProvider.getDevice();
         remount();
         assertTrue(device.pushFile(copyResourceToTemp(filePath), outputPath));
-        mPushedFiles.add(outputPath);
+        addPushedFile(device, outputPath);
         return this;
     }
 
@@ -91,8 +105,21 @@ public class SystemPreparer extends ExternalResource {
         final ITestDevice device = mDeviceProvider.getDevice();
         remount();
         assertTrue(device.pushFile(file, outputPath));
-        mPushedFiles.add(outputPath);
+        addPushedFile(device, outputPath);
         return this;
+    }
+
+    private void addPushedFile(ITestDevice device, String outputPath)
+            throws DeviceNotAvailableException {
+        Path pathCreated = Paths.get(outputPath);
+
+        // Find the top most parent that is new to the device
+        while (pathCreated.getParent() != null
+                && !device.doesFileExist(pathCreated.getParent().toString())) {
+            pathCreated = pathCreated.getParent();
+        }
+
+        mPushedFiles.add(pathCreated.toString());
     }
 
     /** Deletes the given path from the device */
@@ -111,6 +138,24 @@ public class SystemPreparer extends ExternalResource {
         final String result = device.installPackage(tmpFile, true /* reinstall */);
         Assert.assertNull(result);
         mInstalledPackages.add(packageName);
+        return this;
+    }
+
+    /** Stages multiple APEXs within the host test jar onto the device. */
+    public SystemPreparer stageMultiplePackages(String[] resourcePaths, String[] packageNames)
+            throws DeviceNotAvailableException, IOException {
+        assertEquals(resourcePaths.length, packageNames.length);
+        final ITestDevice device = mDeviceProvider.getDevice();
+        final String[] adbCommandLine = new String[resourcePaths.length + 2];
+        adbCommandLine[0] = "install-multi-package";
+        adbCommandLine[1] = "--staged";
+        for (int i = 0; i < resourcePaths.length; i++) {
+            final File tmpFile = copyResourceToTemp(resourcePaths[i]);
+            adbCommandLine[i + 2] = tmpFile.getAbsolutePath();
+            mInstalledPackages.add(packageNames[i]);
+        }
+        final String output = device.executeAdbCommand(adbCommandLine);
+        assertTrue(output.contains("Success. Reboot device to apply staged session"));
         return this;
     }
 
@@ -157,7 +202,9 @@ public class SystemPreparer extends ExternalResource {
             case USERSPACE_UNTIL_ONLINE:
                 device.rebootUserspaceUntilOnline();
                 break;
-            case START_STOP:
+            // TODO(b/159540015): Make this START_STOP instead of default once it's fixed. Can't
+            //  currently be done because START_STOP is commented out.
+            default:
                 device.executeShellCommand("stop");
                 device.executeShellCommand("start");
                 ITestDevice.RecoveryMode cachedRecoveryMode = device.getRecoveryMode();
@@ -182,11 +229,29 @@ public class SystemPreparer extends ExternalResource {
         return this;
     }
 
+    private static @Nullable String getFileExtension(@Nullable String path) {
+        if (path == null) {
+            return null;
+        }
+        final int lastDot = path.lastIndexOf('.');
+        if (lastDot >= 0) {
+            return path.substring(lastDot + 1);
+        } else {
+            return null;
+        }
+    }
+
     /** Copies a file within the host test jar to a temporary file on the host machine. */
     private File copyResourceToTemp(String resourcePath) throws IOException {
-        final File tempFile = mHostTempFolder.newFile();
+        final String ext = getFileExtension(resourcePath);
+        final File tempFile;
+        if (ext != null) {
+            tempFile = File.createTempFile("junit", "." + ext, mHostTempFolder.getRoot());
+        } else {
+            tempFile = mHostTempFolder.newFile();
+        }
         final ClassLoader classLoader = getClass().getClassLoader();
-        try (InputStream assetIs = classLoader.getResource(resourcePath).openStream();
+        try (InputStream assetIs = classLoader.getResourceAsStream(resourcePath);
              FileOutputStream assetOs = new FileOutputStream(tempFile)) {
             if (assetIs == null) {
                 throw new IllegalStateException("Failed to find resource " + resourcePath);
@@ -203,7 +268,7 @@ public class SystemPreparer extends ExternalResource {
 
     /** Removes installed packages and files that were pushed to the device. */
     @Override
-    protected void after() {
+    public void after() {
         final ITestDevice device = mDeviceProvider.getDevice();
         try {
             remount();
@@ -213,7 +278,9 @@ public class SystemPreparer extends ExternalResource {
             for (final String packageName : mInstalledPackages) {
                 device.uninstallPackage(packageName);
             }
-            reboot();
+            if (!mDebugSkipAfterReboot) {
+                reboot();
+            }
         } catch (DeviceNotAvailableException e) {
             Assert.fail(e.toString());
         }
@@ -340,6 +407,7 @@ public class SystemPreparer extends ExternalResource {
     /**
      * How to reboot the device. Ordered from slowest to fastest.
      */
+    @SuppressWarnings("DanglingJavadoc")
     public enum RebootStrategy {
         /** @see ITestDevice#reboot() */
         FULL,
@@ -359,7 +427,15 @@ public class SystemPreparer extends ExternalResource {
          *
          * TODO(b/159540015): There's a bug with this causing unnecessary disk space usage, which
          *  can eventually lead to an insufficient storage space error.
+         *
+         * This can be uncommented for local development, but should be left out when merging.
+         * It is done this way to hopefully be caught by code review, since merging this will
+         * break all of postsubmit. But the nearly 50% reduction in test runtime is worth having
+         * this option exist.
+         *
+         * @deprecated do not use this in merged code until bug is resolved
          */
-        START_STOP
+//        @Deprecated
+//        START_STOP
     }
 }

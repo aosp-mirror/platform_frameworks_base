@@ -32,9 +32,12 @@ public:
     nsecs_t frameIntervalNanos() const { return mFrameIntervalNanos; }
 
     // returns true if the vsync is newer, false if it was rejected for staleness
-    bool vsyncReceived(nsecs_t vsync);
+    bool vsyncReceived(nsecs_t vsync, nsecs_t indendedVsync, int64_t vsyncId,
+                       int64_t frameDeadline, nsecs_t frameInterval);
     nsecs_t latestVsync() { return mFrameTimeNanos; }
     nsecs_t computeFrameTimeNanos();
+    int64_t lastVsyncId() const { return mFrameVsyncId; }
+    int64_t lastFrameDeadline() const { return mFrameDeadline; }
 
 private:
     friend class RenderThread;
@@ -44,6 +47,9 @@ private:
 
     nsecs_t mFrameIntervalNanos;
     nsecs_t mFrameTimeNanos;
+    nsecs_t mFrameIntendedTimeNanos;
+    int64_t mFrameVsyncId;
+    int64_t mFrameDeadline;
 };
 
 } /* namespace renderthread */

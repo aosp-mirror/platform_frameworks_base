@@ -6,51 +6,63 @@ package com.android.location.provider {
     method @Deprecated public android.os.IBinder getBinder();
   }
 
-  public abstract class LocationProviderBase {
-    ctor public LocationProviderBase(String, com.android.location.provider.ProviderPropertiesUnbundled);
-    method public android.os.IBinder getBinder();
-    method @RequiresApi(android.os.Build.VERSION_CODES.R) public boolean isAllowed();
+  @Deprecated public abstract class LocationProviderBase {
+    ctor @Deprecated public LocationProviderBase(String, com.android.location.provider.ProviderPropertiesUnbundled);
+    ctor @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.R) public LocationProviderBase(android.content.Context, String, com.android.location.provider.ProviderPropertiesUnbundled);
+    method @Deprecated public android.os.IBinder getBinder();
+    method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.R) public boolean isAllowed();
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public boolean isEnabled();
     method @Deprecated protected void onDisable();
     method @Deprecated protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method @Deprecated protected void onEnable();
+    method @Deprecated protected void onFlush(com.android.location.provider.LocationProviderBase.OnFlushCompleteCallback);
     method @Deprecated protected int onGetStatus(android.os.Bundle);
     method @Deprecated protected long onGetStatusUpdateTime();
-    method protected void onInit();
-    method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
-    method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
-    method public void reportLocation(android.location.Location);
-    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
-    method @RequiresApi(android.os.Build.VERSION_CODES.R) public void setAllowed(boolean);
+    method @Deprecated protected void onInit();
+    method @Deprecated protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
+    method @Deprecated protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
+    method @Deprecated public void reportLocation(@NonNull android.location.Location);
+    method @Deprecated public void reportLocations(@NonNull java.util.List<android.location.Location>);
+    method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
+    method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.R) public void setAllowed(boolean);
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setEnabled(boolean);
-    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
-    field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
-    field public static final String FUSED_PROVIDER = "fused";
+    method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
+    field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
+    field @Deprecated public static final String FUSED_PROVIDER = "fused";
   }
 
-  public final class LocationRequestUnbundled {
-    method public long getFastestInterval();
-    method public long getInterval();
-    method public int getQuality();
-    method public float getSmallestDisplacement();
-    method public boolean isLocationSettingsIgnored();
-    field public static final int ACCURACY_BLOCK = 102; // 0x66
-    field public static final int ACCURACY_CITY = 104; // 0x68
-    field public static final int ACCURACY_FINE = 100; // 0x64
-    field public static final int POWER_HIGH = 203; // 0xcb
-    field public static final int POWER_LOW = 201; // 0xc9
-    field public static final int POWER_NONE = 200; // 0xc8
+  @Deprecated protected static interface LocationProviderBase.OnFlushCompleteCallback {
+    method @Deprecated public void onFlushComplete();
+  }
+
+  @Deprecated public final class LocationRequestUnbundled {
+    method @Deprecated public long getFastestInterval();
+    method @Deprecated public long getInterval();
+    method @Deprecated @android.location.LocationRequest.Quality public int getQuality();
+    method @Deprecated public float getSmallestDisplacement();
+    method @Deprecated public boolean isLocationSettingsIgnored();
+    field @Deprecated public static final int ACCURACY_BLOCK = 102; // 0x66
+    field @Deprecated public static final int ACCURACY_CITY = 104; // 0x68
+    field @Deprecated public static final int ACCURACY_FINE = 100; // 0x64
+    field @Deprecated public static final int POWER_HIGH = 203; // 0xcb
+    field @Deprecated public static final int POWER_LOW = 201; // 0xc9
+    field @Deprecated public static final int POWER_NONE = 200; // 0xc8
   }
 
   public final class ProviderPropertiesUnbundled {
-    method public static com.android.location.provider.ProviderPropertiesUnbundled create(boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
+    method @NonNull public static com.android.location.provider.ProviderPropertiesUnbundled create(boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
   }
 
   public final class ProviderRequestUnbundled {
     method public long getInterval();
-    method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
+    method @Deprecated @NonNull public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
+    method @RequiresApi(android.os.Build.VERSION_CODES.S) public long getMaxUpdateDelayMillis();
+    method @android.location.LocationRequest.Quality @RequiresApi(android.os.Build.VERSION_CODES.S) public int getQuality();
     method public boolean getReportLocation();
+    method @NonNull @RequiresApi(android.os.Build.VERSION_CODES.S) public android.os.WorkSource getWorkSource();
     method @RequiresApi(android.os.Build.VERSION_CODES.Q) public boolean isLocationSettingsIgnored();
+    method @RequiresApi(android.os.Build.VERSION_CODES.S) public boolean isLowPower();
+    field public static final long INTERVAL_DISABLED = 9223372036854775807L; // 0x7fffffffffffffffL
   }
 
 }

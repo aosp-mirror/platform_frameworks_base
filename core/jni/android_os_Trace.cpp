@@ -83,7 +83,7 @@ static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass,
 }
 
 static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv*, jclass, jboolean allowed) {
-    atrace_set_debuggable(allowed);
+    atrace_update_tags();
 }
 
 static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean enabled) {

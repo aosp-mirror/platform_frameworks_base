@@ -1,0 +1,6 @@
+include /services/core/java/com/android/server/wm/OWNERS
+
+# Jank people
+ahanwu@google.com
+vadimt@google.com
+marcinoc@google.com

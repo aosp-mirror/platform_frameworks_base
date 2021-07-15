@@ -25,7 +25,6 @@
     <item target="integer/matrix_100100" value="@integer/matrix_100100"/>
     <item target="integer/matrix_100101" value="@integer/matrix_100101"/>
     <item target="integer/matrix_100110" value="@integer/matrix_100110"/>
-    <item target="integer/matrix_100110" value="@integer/matrix_100110"/>
     <item target="integer/matrix_100111" value="@integer/matrix_100111"/>
     <item target="integer/matrix_101000" value="@integer/matrix_101000"/>
     <item target="integer/matrix_101001" value="@integer/matrix_101001"/>

@@ -17,6 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,6 +59,8 @@ public class SyncRequest implements Parcelable {
     private final boolean mIsAuthority;
     /** Sync should be run in lieu of other syncs. */
     private final boolean mIsExpedited;
+    /** Sync sound be ran as an expedited job. */
+    private final boolean mIsScheduledAsExpeditedJob;
 
     /**
      * {@hide}
@@ -75,6 +78,14 @@ public class SyncRequest implements Parcelable {
      */
     public boolean isExpedited() {
         return mIsExpedited;
+    }
+
+    /**
+     * {@hide}
+     * @return whether this sync is scheduled as an expedited job.
+     */
+    public boolean isScheduledAsExpeditedJob() {
+        return mIsScheduledAsExpeditedJob;
     }
 
     /**
@@ -149,6 +160,7 @@ public class SyncRequest implements Parcelable {
         parcel.writeInt((mDisallowMetered ? 1 : 0));
         parcel.writeInt((mIsAuthority ? 1 : 0));
         parcel.writeInt((mIsExpedited? 1 : 0));
+        parcel.writeInt(mIsScheduledAsExpeditedJob ? 1 : 0);
         parcel.writeParcelable(mAccountToSync, flags);
         parcel.writeString(mAuthority);
     }
@@ -161,6 +173,7 @@ public class SyncRequest implements Parcelable {
         mDisallowMetered = (in.readInt() != 0);
         mIsAuthority = (in.readInt() != 0);
         mIsExpedited = (in.readInt() != 0);
+        mIsScheduledAsExpeditedJob = (in.readInt() != 0);
         mAccountToSync = in.readParcelable(null);
         mAuthority = in.readString();
     }
@@ -174,6 +187,7 @@ public class SyncRequest implements Parcelable {
         mIsPeriodic = (b.mSyncType == Builder.SYNC_TYPE_PERIODIC);
         mIsAuthority = (b.mSyncTarget == Builder.SYNC_TARGET_ADAPTER);
         mIsExpedited = b.mExpedited;
+        mIsScheduledAsExpeditedJob = b.mScheduleAsExpeditedJob;
         mExtras = new Bundle(b.mCustomExtras);
         // For now we merge the sync config extras & the custom extras into one bundle.
         // TODO: pass the configuration extras through separately.
@@ -258,6 +272,11 @@ public class SyncRequest implements Parcelable {
          */
         private boolean mRequiresCharging;
 
+        /**
+         * Whether the sync should be scheduled as an expedited job.
+         */
+        private boolean mScheduleAsExpeditedJob;
+
         public Builder() {
         }
 
@@ -309,7 +328,8 @@ public class SyncRequest implements Parcelable {
          * {@link ContentResolver#SYNC_EXTRAS_INITIALIZE},
          * {@link ContentResolver#SYNC_EXTRAS_FORCE},
          * {@link ContentResolver#SYNC_EXTRAS_EXPEDITED},
-         * {@link ContentResolver#SYNC_EXTRAS_MANUAL}
+         * {@link ContentResolver#SYNC_EXTRAS_MANUAL},
+         * {@link ContentResolver#SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB}
          * set to true. If any are supplied then an <code>IllegalArgumentException</code> will
          * be thrown.
          *
@@ -500,6 +520,22 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
+         * Convenience function for setting
+         * {@link ContentResolver#SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB}.
+         *
+         * <p> Not to be confused with {@link ContentResolver#SYNC_EXTRAS_EXPEDITED}.
+         *
+         * <p> Not valid for periodic syncs, expedited syncs, and syncs that require charging - an
+         * <code>IllegalArgumentException</code> will be thrown in {@link #build()}.
+         *
+         * @param scheduleAsExpeditedJob whether to schedule as an expedited job. Default false.
+         */
+        public @NonNull Builder setScheduleAsExpeditedJob(boolean scheduleAsExpeditedJob) {
+            mScheduleAsExpeditedJob = scheduleAsExpeditedJob;
+            return this;
+        }
+
+        /**
          * Performs validation over the request and throws the runtime exception
          * <code>IllegalArgumentException</code> if this validation fails.
          *
@@ -507,11 +543,6 @@ public class SyncRequest implements Parcelable {
          *         builder.
          */
         public SyncRequest build() {
-            // Validate the extras bundle
-            ContentResolver.validateSyncExtrasBundle(mCustomExtras);
-            if (mCustomExtras == null) {
-                mCustomExtras = new Bundle();
-            }
             // Combine builder extra flags into the config bundle.
             mSyncConfigExtras = new Bundle();
             if (mIgnoreBackoff) {
@@ -532,14 +563,32 @@ public class SyncRequest implements Parcelable {
             if (mExpedited) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
             }
+            if (mScheduleAsExpeditedJob) {
+                mSyncConfigExtras.putBoolean(
+                        ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, true);
+            }
             if (mIsManual) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
             }
+
+            if (mCustomExtras == null) {
+                mCustomExtras = new Bundle();
+            }
+            // Validate the extras bundles
+            ContentResolver.validateSyncExtrasBundle(mCustomExtras);
+            // If this is a periodic sync ensure than invalid extras were not set.
             if (mSyncType == SYNC_TYPE_PERIODIC) {
-                // If this is a periodic sync ensure than invalid extras were not set.
                 if (ContentResolver.invalidPeriodicExtras(mCustomExtras) ||
                         ContentResolver.invalidPeriodicExtras(mSyncConfigExtras)) {
+                    throw new IllegalArgumentException("Illegal extras were set");
+                }
+            }
+            // If this sync is scheduled as an EJ, ensure that invalid extras were not set.
+            if (mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB)
+                    || mScheduleAsExpeditedJob) {
+                if (ContentResolver.hasInvalidScheduleAsEjExtras(mCustomExtras)
+                        || ContentResolver.hasInvalidScheduleAsEjExtras(mSyncConfigExtras)) {
                     throw new IllegalArgumentException("Illegal extras were set");
                 }
             }

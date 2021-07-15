@@ -18,6 +18,7 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -30,13 +31,18 @@ import androidx.annotation.StringRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.utils.BuildCompatUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This preference provides a four buttons layout with Settings style.
  * It looks like below
  *
- * --------------------------------------------------
- * button1     | button2   | button3   | button4   |
- * --------------------------------------------------
+ *  ---------------------------------------
+ * - button1 | button2 | button3 | button4 -
+ *  ---------------------------------------
  *
  * User can set title / icon / click listener for each button.
  *
@@ -49,10 +55,25 @@ import androidx.preference.PreferenceViewHolder;
 public class ActionButtonsPreference extends Preference {
 
     private static final String TAG = "ActionButtonPreference";
+    private static final boolean mIsAtLeastS = BuildCompatUtils.isAtLeastS();
+    private static final int SINGLE_BUTTON_STYLE = 1;
+    private static final int TWO_BUTTONS_STYLE = 2;
+    private static final int THREE_BUTTONS_STYLE = 3;
+    private static final int FOUR_BUTTONS_STYLE = 4;
+
     private final ButtonInfo mButton1Info = new ButtonInfo();
     private final ButtonInfo mButton2Info = new ButtonInfo();
     private final ButtonInfo mButton3Info = new ButtonInfo();
     private final ButtonInfo mButton4Info = new ButtonInfo();
+    private final List<ButtonInfo> mVisibleButtonInfos = new ArrayList<>(4);
+    private final List<Drawable> mBtnBackgroundStyle1 = new ArrayList<>(1);
+    private final List<Drawable> mBtnBackgroundStyle2 = new ArrayList<>(2);
+    private final List<Drawable> mBtnBackgroundStyle3 = new ArrayList<>(3);
+    private final List<Drawable> mBtnBackgroundStyle4 = new ArrayList<>(4);
+
+    private View mDivider1;
+    private View mDivider2;
+    private View mDivider3;
 
     public ActionButtonsPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -76,25 +97,131 @@ public class ActionButtonsPreference extends Preference {
     }
 
     private void init() {
-        setLayoutResource(R.layout.settings_action_buttons);
+        setLayoutResource(R.layout.settingslib_action_buttons);
         setSelectable(false);
+
+        final Resources res = getContext().getResources();
+        fetchDrawableArray(mBtnBackgroundStyle1, res.obtainTypedArray(R.array.background_style1));
+        fetchDrawableArray(mBtnBackgroundStyle2, res.obtainTypedArray(R.array.background_style2));
+        fetchDrawableArray(mBtnBackgroundStyle3, res.obtainTypedArray(R.array.background_style3));
+        fetchDrawableArray(mBtnBackgroundStyle4, res.obtainTypedArray(R.array.background_style4));
+    }
+
+    private void fetchDrawableArray(List<Drawable> drawableList, TypedArray typedArray) {
+        for (int i = 0; i < typedArray.length(); i++) {
+            drawableList.add(
+                    getContext().getDrawable(typedArray.getResourceId(i, 0 /* defValue */)));
+        }
     }
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        holder.setDividerAllowedAbove(true);
-        holder.setDividerAllowedBelow(true);
+
+        holder.setDividerAllowedAbove(!mIsAtLeastS);
+        holder.setDividerAllowedBelow(!mIsAtLeastS);
 
         mButton1Info.mButton = (Button) holder.findViewById(R.id.button1);
         mButton2Info.mButton = (Button) holder.findViewById(R.id.button2);
         mButton3Info.mButton = (Button) holder.findViewById(R.id.button3);
         mButton4Info.mButton = (Button) holder.findViewById(R.id.button4);
 
+        mDivider1 = holder.findViewById(R.id.divider1);
+        mDivider2 = holder.findViewById(R.id.divider2);
+        mDivider3 = holder.findViewById(R.id.divider3);
+
         mButton1Info.setUpButton();
         mButton2Info.setUpButton();
         mButton3Info.setUpButton();
         mButton4Info.setUpButton();
+
+        // Clear info list to avoid duplicate setup.
+        if (!mVisibleButtonInfos.isEmpty()) {
+            mVisibleButtonInfos.clear();
+        }
+        updateLayout();
+    }
+
+    @Override
+    protected void notifyChanged() {
+        super.notifyChanged();
+
+        // Update buttons background and layout when notified and visible button list exist.
+        if (!mVisibleButtonInfos.isEmpty()) {
+            mVisibleButtonInfos.clear();
+            updateLayout();
+        }
+    }
+
+    private void updateLayout() {
+        // Add visible button into list only when platform version is newer than S.
+        if (mButton1Info.isVisible() && mIsAtLeastS) {
+            mVisibleButtonInfos.add(mButton1Info);
+        }
+        if (mButton2Info.isVisible() && mIsAtLeastS) {
+            mVisibleButtonInfos.add(mButton2Info);
+        }
+        if (mButton3Info.isVisible() && mIsAtLeastS) {
+            mVisibleButtonInfos.add(mButton3Info);
+        }
+        if (mButton4Info.isVisible() && mIsAtLeastS) {
+            mVisibleButtonInfos.add(mButton4Info);
+        }
+
+        final boolean isRtl = getContext().getResources().getConfiguration()
+                .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        switch (mVisibleButtonInfos.size()) {
+            case SINGLE_BUTTON_STYLE :
+                if (isRtl) {
+                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle1);
+                } else {
+                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle1);
+                }
+                break;
+            case TWO_BUTTONS_STYLE :
+                if (isRtl) {
+                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle2);
+                } else {
+                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle2);
+                }
+                break;
+            case THREE_BUTTONS_STYLE :
+                if (isRtl) {
+                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle3);
+                } else {
+                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle3);
+                }
+                break;
+            case FOUR_BUTTONS_STYLE :
+                if (isRtl) {
+                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle4);
+                } else {
+                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle4);
+                }
+                break;
+            default:
+                Log.e(TAG, "No visible buttons info, skip background settings.");
+                break;
+        }
+
+        setupDivider1();
+        setupDivider2();
+        setupDivider3();
+    }
+
+    private void setupBackgrounds(
+            List<ButtonInfo> buttonInfoList, List<Drawable> buttonBackgroundStyles) {
+        for (int i = 0; i < buttonBackgroundStyles.size(); i++) {
+            buttonInfoList.get(i).mButton.setBackground(buttonBackgroundStyles.get(i));
+        }
+    }
+
+    private void setupRtlBackgrounds(
+            List<ButtonInfo> buttonInfoList, List<Drawable> buttonBackgroundStyles) {
+        for (int i = buttonBackgroundStyles.size() - 1; i >= 0; i--) {
+            buttonInfoList.get(buttonBackgroundStyles.size() - 1 - i)
+                    .mButton.setBackground(buttonBackgroundStyles.get(i));
+        }
     }
 
     /**
@@ -357,6 +484,28 @@ public class ActionButtonsPreference extends Preference {
         return this;
     }
 
+    private void setupDivider1() {
+        // Display divider1 only if button1 and button2 is visible
+        if (mDivider1 != null && mButton1Info.isVisible() && mButton2Info.isVisible()) {
+            mDivider1.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setupDivider2() {
+        // Display divider2 only if button3 is visible and button2 or button3 is visible
+        if (mDivider2 != null && mButton3Info.isVisible()
+                && (mButton1Info.isVisible() || mButton2Info.isVisible())) {
+            mDivider2.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setupDivider3() {
+        // Display divider3 only if button4 is visible and 2 visible buttons at least
+        if (mDivider3 != null && mVisibleButtonInfos.size() > 1 && mButton4Info.isVisible()) {
+            mDivider3.setVisibility(View.VISIBLE);
+        }
+    }
+
     static class ButtonInfo {
         private Button mButton;
         private CharSequence mText;
@@ -377,6 +526,10 @@ public class ActionButtonsPreference extends Preference {
             } else {
                 mButton.setVisibility(View.GONE);
             }
+        }
+
+        boolean isVisible() {
+            return mButton.getVisibility() == View.VISIBLE;
         }
 
         /**

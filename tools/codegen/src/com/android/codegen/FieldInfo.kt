@@ -220,11 +220,12 @@ data class FieldInfo(
             isBinder(FieldInnerType!!) -> "BinderList"
             else -> "ParcelableList"
         }
+        isStrongBinder(Type) -> "StrongBinder"
         isIInterface(Type) -> "StrongInterface"
-        isBinder(Type) -> "StrongBinder"
         else -> "TypedObject"
     }.capitalize()
 
+    private fun isStrongBinder(type: String) = type == "Binder" || type == "IBinder"
     private fun isBinder(type: String) = type == "Binder" || type == "IBinder" || isIInterface(type)
     private fun isIInterface(type: String) = type.length >= 2 && type[0] == 'I' && type[1].isUpperCase()
 }

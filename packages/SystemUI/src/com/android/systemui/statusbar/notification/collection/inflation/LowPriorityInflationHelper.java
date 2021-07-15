@@ -16,31 +16,31 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Helper class that provide methods to help check when we need to inflate a low priority version
  * ot notification content.
  */
-@Singleton
+@SysUISingleton
 public class LowPriorityInflationHelper {
     private final FeatureFlags mFeatureFlags;
-    private final NotificationGroupManager mGroupManager;
+    private final NotificationGroupManagerLegacy mGroupManager;
     private final RowContentBindStage mRowContentBindStage;
 
     @Inject
     LowPriorityInflationHelper(
             FeatureFlags featureFlags,
-            NotificationGroupManager groupManager,
+            NotificationGroupManagerLegacy groupManager,
             RowContentBindStage rowContentBindStage) {
         mFeatureFlags = featureFlags;
         mGroupManager = groupManager;
@@ -78,7 +78,7 @@ public class LowPriorityInflationHelper {
         if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             isGroupChild = (entry.getParent() != GroupEntry.ROOT_ENTRY);
         } else {
-            isGroupChild = mGroupManager.isChildInGroupWithSummary(entry.getSbn());
+            isGroupChild = mGroupManager.isChildInGroup(entry);
         }
         return entry.isAmbient() && !isGroupChild;
     }

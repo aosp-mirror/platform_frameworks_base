@@ -118,7 +118,7 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
                 .putExtra(EXTRA_CONDITION_ID, conditionId)
                 .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
         alarms.cancel(pendingIntent);
         if (mTime > 0) {
             final long now = System.currentTimeMillis();

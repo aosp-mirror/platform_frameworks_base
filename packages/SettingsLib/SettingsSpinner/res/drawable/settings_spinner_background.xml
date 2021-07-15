@@ -15,30 +15,30 @@
   limitations under the License.
   -->
 
-<layer-list
+<ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:paddingMode="stack">
+    xmlns:priv-android="http://schemas.android.com/apk/prv/res/android"
+    android:color="@color/ripple_color">
 
-    <item
-        android:top="8dp"
-        android:bottom="8dp">
-        <shape>
-            <corners
-                android:radius="20dp"/>
-            <solid
-                android:color="?android:attr/colorPrimary"/>
-            <stroke
-                android:color="#1f000000"
-                android:width="1dp"/>
-            <size
-                android:height="32dp"/>
-        </shape>
+    <item android:id="@android:id/background">
+        <layer-list android:paddingMode="stack">
+            <item
+                android:top="8dp"
+                android:bottom="8dp">
+
+                <shape>
+                    <corners android:radius="28dp"/>
+                    <solid android:color="?priv-android:attr/colorAccentPrimary"/>
+                    <size android:height="@dimen/spinner_height"/>
+                </shape>
+            </item>
+
+            <item
+                android:gravity="center|end"
+                android:width="18dp"
+                android:height="18dp"
+                android:end="8dp"
+                android:drawable="@drawable/arrow_drop_down"/>
+        </layer-list>
     </item>
-
-    <item
-        android:gravity="center|end"
-        android:width="24dp"
-        android:height="24dp"
-        android:end="4dp"
-        android:drawable="@drawable/arrow_drop_down_24dp"/>
-</layer-list>
+</ripple>

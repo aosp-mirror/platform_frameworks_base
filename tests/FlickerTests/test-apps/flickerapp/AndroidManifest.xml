@@ -14,56 +14,46 @@
      limitations under the License.
 -->
 
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.server.wm.flicker.testapp">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     package="com.android.server.wm.flicker.testapp">
 
-    <uses-sdk android:minSdkVersion="17" android:targetSdkVersion="27"/>
-    <application
-        android:allowBackup="false"
-        android:supportsRtl="true">
+    <uses-sdk android:minSdkVersion="29"
+         android:targetSdkVersion="29"/>
+    <application android:allowBackup="false"
+         android:supportsRtl="true">
         <activity android:name=".SimpleActivity"
-                  android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
-                  android:label="SimpleApp">
+             android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
+             android:label="SimpleApp"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ImeActivity"
-                  android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivity"
-                  android:label="ImeApp">
+             android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivity"
+             android:label="ImeApp"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ImeActivityAutoFocus"
-                  android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
-                  android:windowSoftInputMode="stateVisible"
-                  android:label="ImeAppAutoFocus">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".PipActivity"
-                  android:resizeableActivity="true"
-                  android:supportsPictureInPicture="true"
-                  android:configChanges=
-                      "screenSize|smallestScreenSize|screenLayout|orientation"
-                  android:taskAffinity="com.android.server.wm.flicker.testapp.PipActivity"
-                  android:label="PipApp">
+             android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
+             android:windowSoftInputMode="stateVisible"
+             android:label="ImeAppAutoFocus"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".SeamlessRotationActivity"
-                  android:taskAffinity=
-                      "com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
-                  android:configChanges="orientation|screenSize"
-                  android:label="SeamlessApp">
+             android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
+             android:configChanges="orientation|screenSize"
+             android:label="SeamlessApp"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

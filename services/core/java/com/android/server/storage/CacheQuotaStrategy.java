@@ -46,16 +46,15 @@ import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,7 +62,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -280,9 +278,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     private void writeXmlToFile(List<CacheQuotaHint> processedRequests) {
         FileOutputStream fileStream = null;
         try {
-            XmlSerializer out = new FastXmlSerializer();
             fileStream = mPreviousValuesFile.startWrite();
-            out.setOutput(fileStream, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fileStream);
             saveToXml(out, processedRequests, 0);
             mPreviousValuesFile.finishWrite(fileStream);
         } catch (Exception e) {
@@ -318,12 +315,12 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     @VisibleForTesting
-    static void saveToXml(XmlSerializer out,
+    static void saveToXml(TypedXmlSerializer out,
             List<CacheQuotaHint> requests, long bytesWhenCalculated) throws IOException {
         out.startDocument(null, true);
         out.startTag(null, CACHE_INFO_TAG);
         int requestSize = requests.size();
-        out.attribute(null, ATTR_PREVIOUS_BYTES, Long.toString(bytesWhenCalculated));
+        out.attributeLong(null, ATTR_PREVIOUS_BYTES, bytesWhenCalculated);
 
         for (int i = 0; i < requestSize; i++) {
             CacheQuotaHint request = requests.get(i);
@@ -332,8 +329,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
             if (uuid != null) {
                 out.attribute(null, ATTR_UUID, request.getVolumeUuid());
             }
-            out.attribute(null, ATTR_UID, Integer.toString(request.getUid()));
-            out.attribute(null, ATTR_QUOTA_IN_BYTES, Long.toString(request.getQuota()));
+            out.attributeInt(null, ATTR_UID, request.getUid());
+            out.attributeLong(null, ATTR_QUOTA_IN_BYTES, request.getQuota());
             out.endTag(null, TAG_QUOTA);
         }
         out.endTag(null, CACHE_INFO_TAG);
@@ -342,8 +339,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
 
     protected static Pair<Long, List<CacheQuotaHint>> readFromXml(InputStream inputStream)
             throws XmlPullParserException, IOException {
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+        TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
 
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.START_TAG &&
@@ -364,8 +360,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         final List<CacheQuotaHint> quotas = new ArrayList<>();
         long previousBytes;
         try {
-            previousBytes = Long.parseLong(parser.getAttributeValue(
-                    null, ATTR_PREVIOUS_BYTES));
+            previousBytes = parser.getAttributeLong(null, ATTR_PREVIOUS_BYTES);
         } catch (NumberFormatException e) {
             throw new IllegalStateException(
                     "Previous bytes formatted incorrectly; aborting quota read.");
@@ -389,14 +384,14 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     @VisibleForTesting
-    static CacheQuotaHint getRequestFromXml(XmlPullParser parser) {
+    static CacheQuotaHint getRequestFromXml(TypedXmlPullParser parser) {
         try {
             String uuid = parser.getAttributeValue(null, ATTR_UUID);
-            int uid = Integer.parseInt(parser.getAttributeValue(null, ATTR_UID));
-            long bytes = Long.parseLong(parser.getAttributeValue(null, ATTR_QUOTA_IN_BYTES));
+            int uid = parser.getAttributeInt(null, ATTR_UID);
+            long bytes = parser.getAttributeLong(null, ATTR_QUOTA_IN_BYTES);
             return new CacheQuotaHint.Builder()
                     .setVolumeUuid(uuid).setUid(uid).setQuota(bytes).build();
-        } catch (NumberFormatException e) {
+        } catch (XmlPullParserException e) {
             Slog.e(TAG, "Invalid cache quota request, skipping.");
             return null;
         }

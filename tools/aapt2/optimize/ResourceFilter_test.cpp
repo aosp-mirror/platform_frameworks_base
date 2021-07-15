@@ -31,22 +31,22 @@ TEST(ResourceFilterTest, SomeValuesAreFilteredOut) {
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .AddString("android:string/notblacklisted", ResourceId{}, default_config, "value")
-          .AddString("android:string/blacklisted", ResourceId{}, default_config, "value")
-          .AddString("android:string/notblacklisted2", ResourceId{}, default_config, "value")
-          .AddString("android:string/blacklisted2", ResourceId{}, default_config, "value")
+          .AddString("android:string/notexclude_listed", ResourceId{}, default_config, "value")
+          .AddString("android:string/exclude_listed", ResourceId{}, default_config, "value")
+          .AddString("android:string/notexclude_listed2", ResourceId{}, default_config, "value")
+          .AddString("android:string/exclude_listed2", ResourceId{}, default_config, "value")
           .Build();
 
-  std::unordered_set<ResourceName> blacklist = {
-    ResourceName({}, ResourceType::kString, "blacklisted"),
-    ResourceName({}, ResourceType::kString, "blacklisted2"),
+  std::unordered_set<ResourceName> exclude_list = {
+    ResourceName({}, ResourceType::kString, "exclude_listed"),
+    ResourceName({}, ResourceType::kString, "exclude_listed2"),
   };
 
-  ASSERT_TRUE(ResourceFilter(blacklist).Consume(context.get(), table.get()));
-  EXPECT_THAT(table, HasValue("android:string/notblacklisted", default_config));
-  EXPECT_THAT(table, HasValue("android:string/notblacklisted2", default_config));
-  EXPECT_THAT(table, Not(HasValue("android:string/blacklisted", default_config)));
-  EXPECT_THAT(table, Not(HasValue("android:string/blacklisted2", default_config)));
+  ASSERT_TRUE(ResourceFilter(exclude_list).Consume(context.get(), table.get()));
+  EXPECT_THAT(table, HasValue("android:string/notexclude_listed", default_config));
+  EXPECT_THAT(table, HasValue("android:string/notexclude_listed2", default_config));
+  EXPECT_THAT(table, Not(HasValue("android:string/exclude_listed", default_config)));
+  EXPECT_THAT(table, Not(HasValue("android:string/exclude_listed2", default_config)));
 }
 
 TEST(ResourceFilterTest, TypeIsCheckedBeforeFiltering) {
@@ -55,21 +55,21 @@ TEST(ResourceFilterTest, TypeIsCheckedBeforeFiltering) {
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .AddString("android:string/notblacklisted", ResourceId{}, default_config, "value")
-          .AddString("android:string/blacklisted", ResourceId{}, default_config, "value")
-          .AddString("android:drawable/notblacklisted", ResourceId{}, default_config, "value")
-          .AddString("android:drawable/blacklisted", ResourceId{}, default_config, "value")
+          .AddString("android:string/notexclude_listed", ResourceId{}, default_config, "value")
+          .AddString("android:string/exclude_listed", ResourceId{}, default_config, "value")
+          .AddString("android:drawable/notexclude_listed", ResourceId{}, default_config, "value")
+          .AddString("android:drawable/exclude_listed", ResourceId{}, default_config, "value")
           .Build();
 
-  std::unordered_set<ResourceName> blacklist = {
-    ResourceName({}, ResourceType::kString, "blacklisted"),
+  std::unordered_set<ResourceName> exclude_list = {
+    ResourceName({}, ResourceType::kString, "exclude_listed"),
   };
 
-  ASSERT_TRUE(ResourceFilter(blacklist).Consume(context.get(), table.get()));
-  EXPECT_THAT(table, HasValue("android:string/notblacklisted", default_config));
-  EXPECT_THAT(table, HasValue("android:drawable/blacklisted", default_config));
-  EXPECT_THAT(table, HasValue("android:drawable/notblacklisted", default_config));
-  EXPECT_THAT(table, Not(HasValue("android:string/blacklisted", default_config)));
+  ASSERT_TRUE(ResourceFilter(exclude_list).Consume(context.get(), table.get()));
+  EXPECT_THAT(table, HasValue("android:string/notexclude_listed", default_config));
+  EXPECT_THAT(table, HasValue("android:drawable/exclude_listed", default_config));
+  EXPECT_THAT(table, HasValue("android:drawable/notexclude_listed", default_config));
+  EXPECT_THAT(table, Not(HasValue("android:string/exclude_listed", default_config)));
 }
 
 }  // namespace aapt

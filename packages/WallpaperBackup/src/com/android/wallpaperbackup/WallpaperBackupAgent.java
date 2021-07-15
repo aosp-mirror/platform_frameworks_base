@@ -51,7 +51,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class WallpaperBackupAgent extends BackupAgent {
     private static final String TAG = "WallpaperBackup";
@@ -323,8 +322,7 @@ public class WallpaperBackupAgent extends BackupAgent {
     private Rect parseCropHint(File wallpaperInfo, String sectionTag) {
         Rect cropHint = new Rect();
         try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            XmlPullParser parser = Xml.resolvePullParser(stream);
 
             int type;
             do {
@@ -351,8 +349,7 @@ public class WallpaperBackupAgent extends BackupAgent {
     private ComponentName parseWallpaperComponent(File wallpaperInfo, String sectionTag) {
         ComponentName name = null;
         try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            final XmlPullParser parser = Xml.resolvePullParser(stream);
 
             int type;
             do {

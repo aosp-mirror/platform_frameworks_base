@@ -34,9 +34,12 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+
+import javax.inject.Inject;
 
 /**
  * Quick settings detail view for user switching.
@@ -54,9 +57,9 @@ public class UserDetailView extends PseudoGridView {
                 R.layout.qs_user_detail, parent, attach);
     }
 
-    public void createAndSetAdapter(UserSwitcherController controller,
-            UiEventLogger uiEventLogger) {
-        mAdapter = new Adapter(mContext, controller, uiEventLogger);
+    /** Set a {@link android.widget.BaseAdapter} */
+    public void setAdapter(Adapter adapter) {
+        mAdapter = adapter;
         ViewGroupAdapterBridge.link(this, mAdapter);
     }
 
@@ -71,13 +74,16 @@ public class UserDetailView extends PseudoGridView {
         protected UserSwitcherController mController;
         private View mCurrentUserView;
         private final UiEventLogger mUiEventLogger;
+        private final FalsingManager mFalsingManager;
 
+        @Inject
         public Adapter(Context context, UserSwitcherController controller,
-                UiEventLogger uiEventLogger) {
+                UiEventLogger uiEventLogger, FalsingManager falsingManager) {
             super(controller);
             mContext = context;
             mController = controller;
             mUiEventLogger = uiEventLogger;
+            mFalsingManager = falsingManager;
         }
 
         @Override
@@ -89,7 +95,7 @@ public class UserDetailView extends PseudoGridView {
         public UserDetailItemView createUserDetailItemView(View convertView, ViewGroup parent,
                 UserSwitcherController.UserRecord item) {
             UserDetailItemView v = UserDetailItemView.convertOrInflate(
-                    mContext, convertView, parent);
+                    parent.getContext(), convertView, parent);
             if (!item.isCurrent || item.isGuest) {
                 v.setOnClickListener(this);
             } else {
@@ -140,6 +146,10 @@ public class UserDetailView extends PseudoGridView {
 
         @Override
         public void onClick(View view) {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
+
             UserSwitcherController.UserRecord tag =
                     (UserSwitcherController.UserRecord) view.getTag();
             if (tag.isDisabledByAdmin) {
@@ -155,7 +165,7 @@ public class UserDetailView extends PseudoGridView {
                     }
                     view.setActivated(true);
                 }
-                switchTo(tag);
+                onUserListItemClicked(tag);
             }
         }
     }

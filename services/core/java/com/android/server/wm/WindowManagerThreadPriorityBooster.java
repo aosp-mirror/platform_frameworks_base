@@ -17,11 +17,11 @@
 package com.android.server.wm;
 
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Process.myTid;
 import static android.os.Process.setThreadPriority;
 
-import static com.android.server.LockGuard.INDEX_WINDOW;
-import static com.android.server.am.ActivityManagerService.TOP_APP_PRIORITY_BOOST;
+import static com.android.server.LockGuard.INDEX_WINDOW;;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.AnimationThread;
@@ -93,7 +93,7 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
     @GuardedBy("mLock")
     private void updatePriorityLocked() {
         int priority = (mAppTransitionRunning || mBoundsAnimationRunning)
-                ? TOP_APP_PRIORITY_BOOST : THREAD_PRIORITY_DISPLAY;
+                ? THREAD_PRIORITY_TOP_APP_BOOST : THREAD_PRIORITY_DISPLAY;
         setBoostToPriority(priority);
         setThreadPriority(mAnimationThreadId, priority);
         setThreadPriority(mSurfaceAnimationThreadId, priority);

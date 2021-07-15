@@ -26,7 +26,7 @@ oneway interface IHdmiCecVolumeControlFeatureListener {
      * Called when the HDMI Control (CEC) volume control feature is enabled/disabled.
      *
      * @param enabled status of HDMI CEC volume control feature
-     * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)} ()}
+     * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(int)} ()}
      **/
-    void onHdmiCecVolumeControlFeature(boolean enabled);
+    void onHdmiCecVolumeControlFeature(int hdmiCecVolumeControl);
 }

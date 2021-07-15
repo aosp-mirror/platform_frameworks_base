@@ -22,7 +22,7 @@ package android.hardware.hdmi;
  *
  * @hide
  */
-interface IHdmiVendorCommandListener {
+oneway interface IHdmiVendorCommandListener {
     void onReceived(int logicalAddress, int destAddress, in byte[] operands, boolean hasVendorId);
     void onControlStateChanged(boolean enabled, int reason);
 }
