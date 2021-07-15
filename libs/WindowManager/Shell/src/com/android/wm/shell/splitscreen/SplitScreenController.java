@@ -147,7 +147,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
-        mStageCoordinator.setSideStagePosition(sideStagePosition);
+        mStageCoordinator.setSideStagePosition(sideStagePosition, null /* wct */);
     }
 
     public void setSideStageVisibility(boolean visible) {
@@ -185,7 +185,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void startTask(int taskId, @SplitScreen.StageType int stage,
             @SplitPosition int position, @Nullable Bundle options) {
-        options = resolveStartStage(stage, position, options);
+        options = resolveStartStage(stage, position, options, null /* wct */);
 
         try {
             ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
@@ -197,7 +197,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public void startShortcut(String packageName, String shortcutId,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
-        options = resolveStartStage(stage, position, options);
+        options = resolveStartStage(stage, position, options, null /* wct */);
 
         try {
             LauncherApps launcherApps =
@@ -222,32 +222,33 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     private Bundle resolveStartStage(@SplitScreen.StageType int stage,
-            @SplitPosition int position, @Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options,
+            @Nullable WindowContainerTransaction wct) {
         switch (stage) {
             case STAGE_TYPE_UNDEFINED: {
                 // Use the stage of the specified position is valid.
                 if (position != SPLIT_POSITION_UNDEFINED) {
                     if (position == mStageCoordinator.getSideStagePosition()) {
-                        options = resolveStartStage(STAGE_TYPE_SIDE, position, options);
+                        options = resolveStartStage(STAGE_TYPE_SIDE, position, options, wct);
                     } else {
-                        options = resolveStartStage(STAGE_TYPE_MAIN, position, options);
+                        options = resolveStartStage(STAGE_TYPE_MAIN, position, options, wct);
                     }
                 } else {
                     // Exit split-screen and launch fullscreen since stage wasn't specified.
-                    mStageCoordinator.exitSplitScreen();
+                    mStageCoordinator.prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
                 }
                 break;
             }
             case STAGE_TYPE_SIDE: {
                 if (position != SPLIT_POSITION_UNDEFINED) {
-                    mStageCoordinator.setSideStagePosition(position);
+                    mStageCoordinator.setSideStagePosition(position, wct);
                 } else {
                     position = mStageCoordinator.getSideStagePosition();
                 }
                 if (options == null) {
                     options = new Bundle();
                 }
-                mStageCoordinator.updateActivityOptions(options, position);
+                mStageCoordinator.updateActivityOptions(options, position, wct);
                 break;
             }
             case STAGE_TYPE_MAIN: {
@@ -255,14 +256,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     // Set the side stage opposite of what we want to the main stage.
                     final int sideStagePosition = position == SPLIT_POSITION_TOP_OR_LEFT
                             ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
-                    mStageCoordinator.setSideStagePosition(sideStagePosition);
+                    mStageCoordinator.setSideStagePosition(sideStagePosition, wct);
                 } else {
                     position = mStageCoordinator.getMainStagePosition();
                 }
                 if (options == null) {
                     options = new Bundle();
                 }
-                mStageCoordinator.updateActivityOptions(options, position);
+                mStageCoordinator.updateActivityOptions(options, position, wct);
                 break;
             }
             default:
