@@ -74,10 +74,10 @@ public abstract class RecommendationService extends Service {
             @Override
             public void registerCallbacks(IRecommendationServiceCallbacks callbacks) {
                 // The callbacks come in order of the caller on oneway calls. Hence while the caller
-                // cannot know at what time the connection is made, he can know the ordering of
+                // cannot know at what time the connection is made, they can know the ordering of
                 // connection and disconnection.
                 //
-                // Similar he cannot know when the disconnection is processed, hence he has to
+                // Similar they cannot know when the disconnection is processed, hence they have to
                 // handle callbacks after calling disconnect.
                 if (callbacks != null) {
                     mHandler.obtainMessage(MyHandler.MSG_CONNECT, callbacks).sendToTarget();

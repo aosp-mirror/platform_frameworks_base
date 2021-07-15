@@ -39,10 +39,10 @@ class RenderProperties;
 
 class AnimationListener : public VirtualLightRefBase {
 public:
-    ANDROID_API virtual void onAnimationFinished(BaseRenderNodeAnimator*) = 0;
+    virtual void onAnimationFinished(BaseRenderNodeAnimator*) = 0;
 
 protected:
-    ANDROID_API virtual ~AnimationListener() {}
+    virtual ~AnimationListener() {}
 };
 
 enum class RepeatMode {
@@ -55,34 +55,34 @@ class BaseRenderNodeAnimator : public VirtualLightRefBase {
     PREVENT_COPY_AND_ASSIGN(BaseRenderNodeAnimator);
 
 public:
-    ANDROID_API void setStartValue(float value);
-    ANDROID_API void setInterpolator(Interpolator* interpolator);
-    ANDROID_API void setDuration(nsecs_t durationInMs);
-    ANDROID_API nsecs_t duration() { return mDuration; }
-    ANDROID_API void setStartDelay(nsecs_t startDelayInMs);
-    ANDROID_API nsecs_t startDelay() { return mStartDelay; }
-    ANDROID_API void setListener(AnimationListener* listener) { mListener = listener; }
+    void setStartValue(float value);
+    void setInterpolator(Interpolator* interpolator);
+    void setDuration(nsecs_t durationInMs);
+    nsecs_t duration() { return mDuration; }
+    void setStartDelay(nsecs_t startDelayInMs);
+    nsecs_t startDelay() { return mStartDelay; }
+    void setListener(AnimationListener* listener) { mListener = listener; }
     AnimationListener* listener() { return mListener.get(); }
-    ANDROID_API void setAllowRunningAsync(bool mayRunAsync) { mMayRunAsync = mayRunAsync; }
+    void setAllowRunningAsync(bool mayRunAsync) { mMayRunAsync = mayRunAsync; }
     bool mayRunAsync() { return mMayRunAsync; }
-    ANDROID_API void start();
-    ANDROID_API virtual void reset();
-    ANDROID_API void reverse();
+    void start();
+    virtual void reset();
+    void reverse();
     // Terminates the animation at its current progress.
-    ANDROID_API void cancel();
+    void cancel();
 
     // Terminates the animation and skip to the end of the animation.
-    ANDROID_API virtual void end();
+    virtual void end();
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
     void detach() { mTarget = nullptr; }
-    ANDROID_API void pushStaging(AnimationContext& context);
-    ANDROID_API bool animate(AnimationContext& context);
+    void pushStaging(AnimationContext& context);
+    bool animate(AnimationContext& context);
 
     // Returns the remaining time in ms for the animation. Note this should only be called during
     // an animation on RenderThread.
-    ANDROID_API nsecs_t getRemainingPlayTime();
+    nsecs_t getRemainingPlayTime();
 
     bool isRunning() {
         return mPlayState == PlayState::Running || mPlayState == PlayState::Reversing;
@@ -90,7 +90,7 @@ public:
     bool isFinished() { return mPlayState == PlayState::Finished; }
     float finalValue() { return mFinalValue; }
 
-    ANDROID_API virtual uint32_t dirtyMask() = 0;
+    virtual uint32_t dirtyMask() = 0;
 
     void forceEndNow(AnimationContext& context);
     RenderNode* target() { return mTarget; }
@@ -196,9 +196,9 @@ public:
         ALPHA,
     };
 
-    ANDROID_API RenderPropertyAnimator(RenderProperty property, float finalValue);
+    RenderPropertyAnimator(RenderProperty property, float finalValue);
 
-    ANDROID_API virtual uint32_t dirtyMask();
+    virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const override;
@@ -221,10 +221,10 @@ private:
 
 class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {
 public:
-    ANDROID_API CanvasPropertyPrimitiveAnimator(CanvasPropertyPrimitive* property,
+    CanvasPropertyPrimitiveAnimator(CanvasPropertyPrimitive* property,
                                                 float finalValue);
 
-    ANDROID_API virtual uint32_t dirtyMask();
+    virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const override;
@@ -241,10 +241,10 @@ public:
         ALPHA,
     };
 
-    ANDROID_API CanvasPropertyPaintAnimator(CanvasPropertyPaint* property, PaintField field,
+    CanvasPropertyPaintAnimator(CanvasPropertyPaint* property, PaintField field,
                                             float finalValue);
 
-    ANDROID_API virtual uint32_t dirtyMask();
+    virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const override;
@@ -257,9 +257,9 @@ private:
 
 class RevealAnimator : public BaseRenderNodeAnimator {
 public:
-    ANDROID_API RevealAnimator(int centerX, int centerY, float startValue, float finalValue);
+    RevealAnimator(int centerX, int centerY, float startValue, float finalValue);
 
-    ANDROID_API virtual uint32_t dirtyMask();
+    virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const override;

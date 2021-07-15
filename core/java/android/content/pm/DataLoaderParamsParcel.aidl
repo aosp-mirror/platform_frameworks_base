@@ -23,7 +23,7 @@ import android.content.pm.DataLoaderType;
  * @hide
  */
 parcelable DataLoaderParamsParcel {
-    DataLoaderType type;
+    DataLoaderType type = DataLoaderType.NONE;
     @utf8InCpp String packageName;
     @utf8InCpp String className;
     @utf8InCpp String arguments;

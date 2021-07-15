@@ -42,7 +42,7 @@ import java.util.List;
 
 /**
  * Activity used to display various targets related to accessibility service, accessibility
- * activity or white listing feature for volume key shortcut.
+ * activity or allowlisting feature for volume key shortcut.
  */
 public class AccessibilityShortcutChooserActivity extends Activity {
     @ShortcutType

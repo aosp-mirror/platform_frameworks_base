@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -183,7 +184,7 @@ public class ViewFlipper extends ViewAnimator {
      *            addition to queuing future flips. If omitted, defaults to
      *            true.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void updateRunning(boolean flipNow) {
         boolean running = mVisible && mStarted && mUserPresent;
         if (running != mRunning) {

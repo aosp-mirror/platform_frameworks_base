@@ -5,6 +5,9 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(PRODUCT_OUT)/system/priv-app
 
 LOCAL_PACKAGE_NAME := LockTaskTests
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_CERTIFICATE := platform
 

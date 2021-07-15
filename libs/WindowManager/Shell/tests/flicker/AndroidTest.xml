@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ -->
+<configuration description="Runs WindowManager Shell Flicker Tests">
+    <option name="test-tag" value="FlickerTests" />
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- keeps the screen on during tests -->
+        <option name="screen-always-on" value="on" />
+        <!-- prevents the phone from restarting -->
+        <option name="force-skip-system-props" value="true" />
+        <!-- set WM tracing verbose level to all -->
+        <option name="run-command" value="cmd window tracing level all" />
+        <!-- set WM tracing to frame (avoid incomplete states) -->
+        <option name="run-command" value="cmd window tracing frame" />
+        <!-- restart launcher to activate TAPL -->
+        <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.DeviceCleaner">
+        <!-- reboot the device to teardown any crashed tests -->
+        <option name="cleanup-action" value="REBOOT" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true"/>
+        <option name="test-file-name" value="WMShellFlickerTests.apk"/>
+        <option name="test-file-name" value="WMShellFlickerTestApp.apk" />
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="com.android.wm.shell.flicker"/>
+        <option name="shell-timeout" value="6600s" />
+        <option name="test-timeout" value="6000s" />
+        <option name="hidden-api-checks" value="false" />
+    </test>
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="directory-keys" value="/sdcard/flicker" />
+        <option name="collect-on-run-ended-only" value="true" />
+        <option name="clean-up" value="true" />
+    </metrics_collector>
+</configuration>

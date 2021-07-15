@@ -16,21 +16,39 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.app.Activity;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
+import android.app.Instrumentation;
+import android.app.Instrumentation.ActivityMonitor;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.view.SurfaceControl;
+import android.window.TaskOrganizer;
 
 import androidx.test.filters.MediumTest;
 
 import org.junit.Test;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Build/Install/Run:
@@ -53,7 +71,6 @@ public class ActivityOptionsTest {
         opts.setRotationAnimationHint(ROTATION_ANIMATION_ROTATE);
         opts.setTaskAlwaysOnTop(true);
         opts.setTaskOverlay(true, true);
-        opts.setSplitScreenCreateMode(SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT);
         Bundle optsBundle = opts.toBundle();
 
         // Try and merge the constructed options with a new set of options
@@ -71,7 +88,79 @@ public class ActivityOptionsTest {
         assertTrue(restoredOpts.getTaskAlwaysOnTop());
         assertTrue(restoredOpts.getTaskOverlay());
         assertTrue(restoredOpts.canTaskOverlayResume());
-        assertEquals(SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,
-                restoredOpts.getSplitScreenCreateMode());
+    }
+
+    @Test
+    public void testTransferLaunchCookie() {
+        final Binder cookie = new Binder();
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchCookie(cookie);
+        final Instrumentation instrumentation = getInstrumentation();
+        final Context context = instrumentation.getContext();
+        final ComponentName trampoline = new ComponentName(context, TrampolineActivity.class);
+        final ComponentName main = new ComponentName(context, MainActivity.class);
+        final Intent intent = new Intent().setComponent(trampoline)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final ActivityMonitor monitor = new ActivityMonitor(main.getClassName(),
+                null /* result */, false /* block */);
+        instrumentation.addMonitor(monitor);
+        final CountDownLatch mainLatch = new CountDownLatch(1);
+        final IBinder[] appearedCookies = new IBinder[2];
+        final TaskOrganizer organizer = new TaskOrganizer() {
+            @Override
+            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+                try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+                    t.setVisibility(leash, true /* visible */).apply();
+                }
+                int cookieIndex = -1;
+                if (trampoline.equals(taskInfo.baseActivity)) {
+                    cookieIndex = 0;
+                } else if (main.equals(taskInfo.baseActivity)) {
+                    cookieIndex = 1;
+                    mainLatch.countDown();
+                }
+                if (cookieIndex >= 0) {
+                    appearedCookies[cookieIndex] = taskInfo.launchCookies.isEmpty()
+                            ? null : taskInfo.launchCookies.get(0);
+                }
+            }
+        };
+        Activity mainActivity = null;
+        try {
+            organizer.registerOrganizer();
+            context.startActivity(intent, options.toBundle());
+            try {
+                mainLatch.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {
+            }
+            mainActivity = monitor.getLastActivity();
+
+            assertNotNull(mainActivity);
+            assertNotEquals(TrampolineActivity.sTaskId, mainActivity.getTaskId());
+            assertNull("Trampoline task must not have cookie", appearedCookies[0]);
+            assertEquals("Main task must get the same cookie", cookie, appearedCookies[1]);
+        } finally {
+            organizer.unregisterOrganizer();
+            instrumentation.removeMonitor(monitor);
+            if (mainActivity != null) {
+                mainActivity.finish();
+            }
+        }
+    }
+
+    public static class TrampolineActivity extends Activity {
+        static int sTaskId;
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            sTaskId = getTaskId();
+            startActivity(new Intent(this, MainActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            finish();
+        }
+    }
+
+    public static class MainActivity extends Activity {
     }
 }

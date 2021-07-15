@@ -19,6 +19,12 @@ package com.android.server.devicepolicy;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
+import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_DEVICE;
+import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_PROFILE;
+import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_USER;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -28,45 +34,59 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
-import android.test.AndroidTestCase;
+import android.os.Bundle;
 import android.test.mock.MockPackageManager;
 import android.view.inputmethod.InputMethodInfo;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class OverlayPackagesProviderTest extends AndroidTestCase {
+/**
+ * Run this test with:
+ *
+ * {@code atest FrameworksServicesTests:com.android.server.devicepolicy.OwnersTest}
+ *
+ */
+@RunWith(AndroidJUnit4.class)
+public class OverlayPackagesProviderTest {
     private static final String TEST_DPC_PACKAGE_NAME = "dpc.package.name";
     private static final ComponentName TEST_MDM_COMPONENT_NAME = new ComponentName(
             TEST_DPC_PACKAGE_NAME, "pc.package.name.DeviceAdmin");
     private static final int TEST_USER_ID = 123;
 
-    private @Mock
-    Resources mResources;
-    @Mock
-    private OverlayPackagesProvider.Injector mInjector;
-    private @Mock
-    Context mTestContext;
+    private @Mock Resources mResources;
+
+    private @Mock OverlayPackagesProvider.Injector mInjector;
+    private @Mock Context mTestContext;
     private Resources mRealResources;
 
     private FakePackageManager mPackageManager;
     private String[] mSystemAppsWithLauncher;
+    private Set<String> mRegularMainlineModules = new HashSet<>();
+    private Map<String, String> mMainlineModuleToDeclaredMetadataMap = new HashMap<>();
     private OverlayPackagesProvider mHelper;
 
     @Before
@@ -159,7 +179,7 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
         setSystemAppsWithLauncher("app.a", "app.b");
         setSystemInputMethods("app.a");
 
-        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "app.a", "app.b");
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "app.b");
     }
 
     @Test
@@ -248,6 +268,93 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
                 R.array.vendor_disallowed_apps_managed_profile);
     }
 
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_managedProfile_works() {
+        setupApexModulesWithManagedProfile("package1");
+        setupRegularModulesWithManagedProfile("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_managedDevice_works() {
+        setupApexModulesWithManagedDevice("package1");
+        setupRegularModulesWithManagedDevice("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_DEVICE, "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_managedUser_works() {
+        setupApexModulesWithManagedUser("package1");
+        setupRegularModulesWithManagedUser("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_USER, "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_noMetadata_works() {
+        setupApexModulesWithNoMetadata("package1");
+        setupRegularModulesWithNoMetadata("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(
+                ACTION_PROVISION_MANAGED_PROFILE, "package1", "package2", "package3");
+    }
+
+    private void setupRegularModulesWithManagedUser(String... regularModules) {
+        setupRegularModulesWithMetadata(regularModules, REQUIRED_APP_MANAGED_USER);
+    }
+
+    private void setupRegularModulesWithManagedDevice(String... regularModules) {
+        setupRegularModulesWithMetadata(regularModules, REQUIRED_APP_MANAGED_DEVICE);
+    }
+
+    private void setupRegularModulesWithManagedProfile(String... regularModules) {
+        setupRegularModulesWithMetadata(regularModules, REQUIRED_APP_MANAGED_PROFILE);
+    }
+
+    private void setupRegularModulesWithNoMetadata(String... regularModules) {
+        mRegularMainlineModules.addAll(Arrays.asList(regularModules));
+    }
+
+    private void setupRegularModulesWithMetadata(String[] regularModules, String metadataKey) {
+        for (String regularModule : regularModules) {
+            mRegularMainlineModules.add(regularModule);
+            mMainlineModuleToDeclaredMetadataMap.put(regularModule, metadataKey);
+        }
+    }
+
+    private void setupApexModulesWithManagedUser(String... apexPackageNames) {
+        setupApexModulesWithMetadata(apexPackageNames, REQUIRED_APP_MANAGED_USER);
+    }
+
+    private void setupApexModulesWithManagedDevice(String... apexPackageNames) {
+        setupApexModulesWithMetadata(apexPackageNames, REQUIRED_APP_MANAGED_DEVICE);
+    }
+
+    private void setupApexModulesWithManagedProfile(String... apexPackageNames) {
+        setupApexModulesWithMetadata(apexPackageNames, REQUIRED_APP_MANAGED_PROFILE);
+    }
+
+    private void setupApexModulesWithNoMetadata(String... apexPackageNames) {
+        for (String apexPackageName : apexPackageNames) {
+            when(mInjector.getActiveApexPackageNameContainingPackage(eq(apexPackageName)))
+                    .thenReturn("apex");
+        }
+    }
+
+    private void setupApexModulesWithMetadata(String[] apexPackageNames, String metadataKey) {
+        for (String apexPackageName : apexPackageNames) {
+            when(mInjector.getActiveApexPackageNameContainingPackage(eq(apexPackageName)))
+                    .thenReturn("apex");
+            mMainlineModuleToDeclaredMetadataMap.put(apexPackageName, metadataKey);
+        }
+    }
+
     private ArrayList<String> getStringArrayInRealResources(int id) {
         return new ArrayList<>(Arrays.asList(mRealResources.getStringArray(id)));
     }
@@ -256,12 +363,12 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
         ArrayList<String> required = getStringArrayInRealResources(requiredId);
         ArrayList<String> disallowed = getStringArrayInRealResources(disallowedId);
         required.retainAll(disallowed);
-        assertTrue(required.isEmpty());
+        assertThat(required.isEmpty()).isTrue();
     }
 
     private void verifyAppsAreNonRequired(String action, String... appArray) {
-        assertEquals(setFromArray(appArray),
-                mHelper.getNonRequiredApps(TEST_MDM_COMPONENT_NAME, TEST_USER_ID, action));
+        assertThat(mHelper.getNonRequiredApps(TEST_MDM_COMPONENT_NAME, TEST_USER_ID, action))
+                .containsExactlyElementsIn(setFromArray(appArray));
     }
 
     private void setRequiredAppsManagedDevice(String... apps) {
@@ -348,19 +455,19 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
     class FakePackageManager extends MockPackageManager {
         @Override
         public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int flags, int userId) {
-            assertTrue("Expected an intent with action ACTION_MAIN",
-                    Intent.ACTION_MAIN.equals(intent.getAction()));
-            assertEquals("Expected an intent with category CATEGORY_LAUNCHER",
-                    setFromArray(Intent.CATEGORY_LAUNCHER), intent.getCategories());
-            assertTrue("Expected the flag MATCH_UNINSTALLED_PACKAGES",
-                    (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0);
-            assertTrue("Expected the flag MATCH_DISABLED_COMPONENTS",
-                    (flags & PackageManager.MATCH_DISABLED_COMPONENTS) != 0);
-            assertTrue("Expected the flag MATCH_DIRECT_BOOT_AWARE",
-                    (flags & PackageManager.MATCH_DIRECT_BOOT_AWARE) != 0);
-            assertTrue("Expected the flag MATCH_DIRECT_BOOT_UNAWARE",
-                    (flags & PackageManager.MATCH_DIRECT_BOOT_UNAWARE) != 0);
-            assertEquals(userId, TEST_USER_ID);
+            assertWithMessage("Expected an intent with action ACTION_MAIN")
+                    .that(Intent.ACTION_MAIN.equals(intent.getAction())).isTrue();
+            assertWithMessage("Expected an intent with category CATEGORY_LAUNCHER")
+                    .that(intent.getCategories()).containsExactly(Intent.CATEGORY_LAUNCHER);
+            assertWithMessage("Expected the flag MATCH_UNINSTALLED_PACKAGES")
+                    .that((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES)).isNotEqualTo(0);
+            assertWithMessage("Expected the flag MATCH_DISABLED_COMPONENTS")
+                    .that((flags & PackageManager.MATCH_DISABLED_COMPONENTS)).isNotEqualTo(0);
+            assertWithMessage("Expected the flag MATCH_DIRECT_BOOT_AWARE")
+                    .that((flags & PackageManager.MATCH_DIRECT_BOOT_AWARE)).isNotEqualTo(0);
+            assertWithMessage("Expected the flag MATCH_DIRECT_BOOT_UNAWARE")
+                    .that((flags & PackageManager.MATCH_DIRECT_BOOT_UNAWARE)).isNotEqualTo(0);
+            assertThat(TEST_USER_ID).isEqualTo(userId);
             List<ResolveInfo> result = new ArrayList<>();
             if (mSystemAppsWithLauncher == null) {
                 return result;
@@ -373,6 +480,30 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
                 result.add(ri);
             }
             return result;
+        }
+
+        @NonNull
+        @Override
+        public PackageInfo getPackageInfo(String packageName, int flags) {
+            final PackageInfo packageInfo = new PackageInfo();
+            final ApplicationInfo applicationInfo = new ApplicationInfo();
+            applicationInfo.metaData = new Bundle();
+            if (mMainlineModuleToDeclaredMetadataMap.containsKey(packageName)) {
+                applicationInfo.metaData.putBoolean(
+                        mMainlineModuleToDeclaredMetadataMap.get(packageName), true);
+            }
+            packageInfo.applicationInfo = applicationInfo;
+            return packageInfo;
+        }
+
+        @NonNull
+        @Override
+        public ModuleInfo getModuleInfo(@NonNull String packageName, int flags)
+                throws NameNotFoundException {
+            if (!mRegularMainlineModules.contains(packageName)) {
+                throw new NameNotFoundException("package does not exist");
+            }
+            return new ModuleInfo().setName(packageName);
         }
     }
 }

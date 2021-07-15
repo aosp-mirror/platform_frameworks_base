@@ -29,6 +29,7 @@
   <item type="id" name="icon2" />
   <item type="id" name="input" />
   <item type="id" name="left_icon" />
+  <item type="id" name="line1" />
   <item type="id" name="list" />
   <item type="id" name="list_container" />
   <item type="id" name="menu" />
@@ -102,6 +103,10 @@
   <item type="id" name="selection_end_handle" />
   <item type="id" name="insertion_handle" />
   <item type="id" name="floating_toolbar_menu_item_image_button" />
+  <item type="id" name="camera" />
+  <item type="id" name="mic" />
+  <item type="id" name="overlay" />
+  <item type="id" name="app_ops" />
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
   <item type="id" name="accessibilityActionShowOnScreen" />
@@ -141,6 +146,7 @@
 
   <item type="id" name="remote_input_tag" />
   <item type="id" name="pending_intent_tag" />
+  <item type="id" name="remote_checked_change_listener_tag" />
 
   <item type="id" name="cross_task_transition" />
 
@@ -194,8 +200,26 @@
   <!-- A tag used to save the index where the custom view is stored -->
   <item type="id" name="notification_custom_view_index_tag" />
 
+  <!-- A tag used to store the margin end for this view when the right icon is visible -->
+  <item type="id" name="tag_margin_end_when_icon_gone" />
+
+  <!-- A tag used to store the margin end for this view when the right icon is gone -->
+  <item type="id" name="tag_margin_end_when_icon_visible" />
+
+  <!-- A tag used on the notification @id/left_icon to indicate that this view should be pupulated with the drawable from @id/right_icon when visible. -->
+  <item type="id" name="tag_uses_right_icon_drawable" />
+
+  <!-- A tag used on notification @id/right_icon to indicate that this view should remain visible even when the @id/left_icon is shown. -->
+  <item type="id" name="tag_keep_when_showing_left_icon" />
+
   <!-- Marks the "copy to clipboard" button in the ChooserActivity -->
   <item type="id" name="chooser_copy_button" />
+
+  <!-- Marks the "nearby" button in the ChooserActivity -->
+  <item type="id" name="chooser_nearby_button" />
+
+  <!-- Marks the "edit" button in the ChooserActivity -->
+  <item type="id" name="chooser_edit_button" />
 
   <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK}. -->
   <item type="id" name="accessibilitySystemActionBack" />
@@ -229,4 +253,13 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_IME_ENTER}. -->
   <item type="id" name="accessibilityActionImeEnter" />
+
+  <!-- View tag for remote views to store the index of the next child when adding nested remote views dynamically. -->
+  <item type="id" name="remote_views_next_child" />
+
+  <!-- View tag associating a view with its stable id for potential recycling. -->
+  <item type="id" name="remote_views_stable_id" />
+
+  <!-- View tag associating a view with its overridden id, to ensure valid recycling only. -->
+  <item type="id" name="remote_views_override_id" />
 </resources>

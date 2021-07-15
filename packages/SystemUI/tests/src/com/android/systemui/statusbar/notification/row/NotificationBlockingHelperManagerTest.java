@@ -46,9 +46,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,12 +71,12 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationMenuRow mMenuRow;
     @Mock private NotificationMenuRowPlugin.MenuItem mMenuItem;
+    @Mock private GroupMembershipManager mGroupMembershipManager;
 
     @Before
     public void setUp() {
         allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(BubbleController.class);
         when(mGutsManager.openGuts(
                 any(View.class),
                 anyInt(),
@@ -84,12 +84,12 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
                 any(NotificationMenuRowPlugin.MenuItem.class)))
                 .thenReturn(true);
         when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
-        mDependency.injectMockDependency(BubbleController.class);
 
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
 
         mBlockingHelperManager = new NotificationBlockingHelperManager(
-                mContext, mGutsManager, mEntryManager, mock(MetricsLogger.class));
+                mContext, mGutsManager, mEntryManager, mock(MetricsLogger.class),
+                mGroupMembershipManager);
         // By default, have the shade visible/expanded.
         mBlockingHelperManager.setNotificationShadeExpanded(1f);
     }
@@ -185,6 +185,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
                 .build();
         assertFalse(childRow.getIsNonblockable());
 
+        when(mGroupMembershipManager.isOnlyChildInGroup(childRow.getEntry())).thenReturn(true);
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(childRow, mMenuRow));
 
         verify(mGutsManager).openGuts(childRow, 0, 0, mMenuItem);

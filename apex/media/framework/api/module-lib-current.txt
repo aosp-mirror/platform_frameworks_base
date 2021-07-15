@@ -1,1 +1,30 @@
 // Signature format: 2.0
+package android.media {
+
+  public class MediaCommunicationManager {
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void registerSessionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaCommunicationManager.SessionCallback);
+    method public void unregisterSessionCallback(@NonNull android.media.MediaCommunicationManager.SessionCallback);
+  }
+
+  public static interface MediaCommunicationManager.SessionCallback {
+    method public default void onSession2TokenCreated(@NonNull android.media.Session2Token);
+    method public default void onSession2TokensChanged(@NonNull java.util.List<android.media.Session2Token>);
+  }
+
+  public class MediaFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setMediaServiceManager(@NonNull android.media.MediaServiceManager);
+  }
+
+  @Deprecated public final class MediaParceledListSlice<T extends android.os.Parcelable> implements android.os.Parcelable {
+    ctor @Deprecated public MediaParceledListSlice(@NonNull java.util.List<T>);
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public static <T extends android.os.Parcelable> android.media.MediaParceledListSlice<T> emptyList();
+    method @Deprecated public java.util.List<T> getList();
+    method @Deprecated public void setInlineCountLimit(int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.ClassLoaderCreator<android.media.MediaParceledListSlice> CREATOR;
+  }
+
+}
+

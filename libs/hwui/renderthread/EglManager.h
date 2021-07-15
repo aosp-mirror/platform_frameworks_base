@@ -21,7 +21,6 @@
 #include <SkImageInfo.h>
 #include <SkRect.h>
 #include <cutils/compiler.h>
-#include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
 
 #include "IRenderPipeline.h"
@@ -89,6 +88,7 @@ private:
 
     static EGLConfig load8BitsConfig(EGLDisplay display, SwapBehavior swapBehavior);
     static EGLConfig loadFP16Config(EGLDisplay display, SwapBehavior swapBehavior);
+    static EGLConfig load1010102Config(EGLDisplay display, SwapBehavior swapBehavior);
 
     void initExtensions();
     void createPBufferSurface();
@@ -98,7 +98,8 @@ private:
 
     EGLDisplay mEglDisplay;
     EGLConfig mEglConfig;
-    EGLConfig mEglConfigWideGamut;
+    EGLConfig mEglConfigF16;
+    EGLConfig mEglConfig1010102;
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
     EGLSurface mCurrentSurface;

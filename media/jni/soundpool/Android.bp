@@ -1,3 +1,22 @@
+package {
+    default_applicable_licenses: [
+        "frameworks_base_media_jni_soundpool_license",
+    ],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_media_jni_soundpool_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
 tidy_errors = [
     // https://clang.llvm.org/extra/clang-tidy/checks/list.html
     // For many categories, the checks are too many to specify individually.
@@ -26,26 +45,30 @@ tidy_errors = [
     "modernize-return-braced-init-list",
     "modernize-shrink-to-fit",
     "modernize-unary-static-assert",
-    "modernize-use-auto",  // debatable - auto can obscure type
+    // "modernize-use-auto",  // found in StreamManager.h, debatable - auto can obscure type
     "modernize-use-bool-literals",
     "modernize-use-default-member-init",
     "modernize-use-emplace",
     "modernize-use-equals-default",
     "modernize-use-equals-delete",
-    "modernize-use-nodiscard",
+    // "modernize-use-nodiscard", // found in SteamManager.h
     "modernize-use-noexcept",
     "modernize-use-nullptr",
     "modernize-use-override",
     //"modernize-use-trailing-return-type", // not necessarily more readable
     "modernize-use-transparent-functors",
     "modernize-use-uncaught-exceptions",
-    "modernize-use-using",
+    //"modernize-use-using", // found in SoundManager.h
     "performance-*",
 
     // Remove some pedantic stylistic requirements.
     "-google-readability-casting", // C++ casts not always necessary and may be verbose
-    "-google-readability-todo",    // do not require TODO(info)
+    "-google-readability-todo", // do not require TODO(info)
     "-google-build-using-namespace", // Reenable and fix later.
+
+    "-google-explicit-constructor", // found in StreamManager.h
+    "-misc-non-private-member-variables-in-classes", // found in SoundManager.h
+    "-performance-unnecessary-value-param", // found in StreamManager.h
 ]
 
 cc_defaults {
@@ -77,8 +100,7 @@ cc_defaults {
     tidy_checks: tidy_errors,
     tidy_checks_as_errors: tidy_errors,
     tidy_flags: [
-      "-format-style='file'",
-      "--header-filter='frameworks/base/media/jni/soundpool'",
+        "-format-style=file",
     ],
 }
 
@@ -104,6 +126,7 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "framework-permission-aidl-cpp",
         "libaudioutils",
         "liblog",
         "libcutils",

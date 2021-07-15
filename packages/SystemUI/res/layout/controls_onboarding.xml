@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
-            android:textColor="?attr/wallpaperTextColor"
+            android:textColor="?android:attr/colorPrimary"
             android:textSize="16sp"/>
         <ImageView
             android:id="@+id/dismiss"
@@ -58,7 +58,7 @@
             android:layout_marginEnd="2dp"
             android:alpha="0.7"
             android:src="@drawable/ic_close_white"
-            android:tint="?attr/wallpaperTextColor"
+            android:tint="?android:attr/colorPrimary"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/accessibility_desc_close"/>
     </LinearLayout>

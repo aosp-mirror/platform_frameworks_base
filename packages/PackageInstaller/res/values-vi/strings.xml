@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Trình cài đặt gói"</string>
     <string name="install" msgid="711829760615509273">"Cài đặt"</string>
+    <string name="update" msgid="3932142540719227615">"Cập nhật"</string>
     <string name="done" msgid="6632441120016885253">"Xong"</string>
     <string name="cancel" msgid="1018267193425558088">"Hủy"</string>
     <string name="installing" msgid="4921993079741206516">"Đang cài đặt…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Đang cài đặt <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Ứng dụng đã được cài đặt."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Bạn có muốn cài đặt ứng dụng này không?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Bạn có muốn cài đặt bản cập nhật cho ứng dụng hiện có này không? Dữ liệu hiện có của bạn sẽ không bị mất."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Bạn có muốn cài đặt bản cập nhật cho ứng dụng cài sẵn này không? Dữ liệu hiện có của bạn sẽ không bị mất."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Bạn có muốn cài đặt ứng dụng này không?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Bạn có muốn cập nhật ứng dụng này không?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Ứng dụng chưa được cài đặt."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Đã chặn cài đặt gói."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Chưa cài đặt được ứng dụng do gói xung đột với một gói hiện có."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Không hỗ trợ thao tác Cài đặt/Gỡ cài đặt trên ứng dụng Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Đang thử nghiệm ứng dụng…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Không xác định"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Để bảo mật, máy tính bảng của bạn không được phép cài đặt các ứng dụng không xác định từ nguồn này."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Để bảo mật, TV của bạn không được phép cài đặt các ứng dụng không xác định từ nguồn này."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Để bảo mật, điện thoại của bạn không được phép cài đặt các ứng dụng không xác định từ nguồn này."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Để bảo mật, máy tính bảng của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Để bảo mật, TV của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Để bảo mật, điện thoại của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Điện thoại và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với điện thoại của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Máy tính bảng và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với máy tính bảng của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với TV của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>

@@ -220,62 +220,6 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertEquals(null, Settings.Bookmarks.getIntentForShortcut(r, '*'));
     }
 
-    @MediumTest
-    public void testParseProviderList() {
-        ContentResolver r = getContext().getContentResolver();
-
-        // We only accept "+value" and "-value"
-        // Test adding a value
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test1");
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test1"));
-
-        // Test adding a second value
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test2");
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test1"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test2"));
-
-        // Test adding a third value
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test3");
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test1"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test2"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test3"));
-
-        // Test deleting the first value in a 3 item list
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test1");
-        assertFalse(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test1"));
-
-        // Test deleting the middle value in a 3 item list
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test4");
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test2"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test3"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test4"));
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test3");
-        assertFalse(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test3"));
-
-        // Test deleting the last value in a 3 item list
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test5");
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test2"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test4"));
-        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test5"));
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test5");
-        assertFalse(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
-                .contains("test5"));
-     }
-
     private boolean findUser(UserManager um, int userHandle) {
         for (UserInfo user : um.getUsers()) {
             if (user.id == userHandle) {

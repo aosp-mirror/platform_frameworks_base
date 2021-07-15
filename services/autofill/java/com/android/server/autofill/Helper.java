@@ -24,6 +24,9 @@ import android.app.assist.AssistStructure.WindowNode;
 import android.content.ComponentName;
 import android.metrics.LogMaker;
 import android.service.autofill.Dataset;
+import android.service.autofill.InternalSanitizer;
+import android.service.autofill.SaveInfo;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -38,6 +41,7 @@ import com.android.internal.util.ArrayUtils;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public final class Helper {
 
@@ -123,8 +127,11 @@ public final class Helper {
     @NonNull
     public static LogMaker newLogMaker(int category, @NonNull ComponentName componentName,
             @NonNull String servicePackageName, int sessionId, boolean compatMode) {
+        // Remove activity name from logging
+        final ComponentName sanitizedComponentName =
+                new ComponentName(componentName.getPackageName(), "");
         return newLogMaker(category, servicePackageName, sessionId, compatMode)
-                .setComponentName(componentName);
+                .setComponentName(sanitizedComponentName);
     }
 
     public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
@@ -232,6 +239,46 @@ public final class Helper {
             final ViewNode child = node.getChildAt(i);
             addAutofillableIds(child, ids, autofillableOnly);
         }
+    }
+
+    @Nullable
+    static ArrayMap<AutofillId, InternalSanitizer> createSanitizers(@Nullable SaveInfo saveInfo) {
+        if (saveInfo == null) return null;
+
+        final InternalSanitizer[] sanitizerKeys = saveInfo.getSanitizerKeys();
+        if (sanitizerKeys == null) return null;
+
+        final int size = sanitizerKeys.length;
+        final ArrayMap<AutofillId, InternalSanitizer> sanitizers = new ArrayMap<>(size);
+        if (sDebug) Slog.d(TAG, "Service provided " + size + " sanitizers");
+        final AutofillId[][] sanitizerValues = saveInfo.getSanitizerValues();
+        for (int i = 0; i < size; i++) {
+            final InternalSanitizer sanitizer = sanitizerKeys[i];
+            final AutofillId[] ids = sanitizerValues[i];
+            if (sDebug) {
+                Slog.d(TAG, "sanitizer #" + i + " (" + sanitizer + ") for ids "
+                        + Arrays.toString(ids));
+            }
+            for (AutofillId id : ids) {
+                sanitizers.put(id, sanitizer);
+            }
+        }
+        return sanitizers;
+    }
+
+    /**
+     * Returns true if {@code s1} contains all characters of {@code s2}, in order.
+     */
+    static boolean containsCharsInOrder(String s1, String s2) {
+        int prevIndex = -1;
+        for (char ch : s2.toCharArray()) {
+            int index = TextUtils.indexOf(s1, ch, prevIndex + 1);
+            if (index == -1) {
+                return false;
+            }
+            prevIndex = index;
+        }
+        return true;
     }
 
     private interface ViewNodeFilter {

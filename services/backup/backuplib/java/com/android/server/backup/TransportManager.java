@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -173,7 +174,7 @@ public class TransportManager {
         }
     }
 
-    /** Returns a set with the whitelisted transports. */
+    /** Returns a set with the allowlisted transports. */
     Set<ComponentName> getTransportWhitelist() {
         return mTransportWhitelist;
     }
@@ -590,7 +591,7 @@ public class TransportManager {
         }
     }
 
-    /** Transport has to be whitelisted and privileged. */
+    /** Transport has to be allowlisted and privileged. */
     private boolean isTransportTrusted(ComponentName transport) {
         if (!mTransportWhitelist.contains(transport)) {
             Slog.w(
@@ -650,6 +651,10 @@ public class TransportManager {
 
         int result;
         try {
+            // This is a temporary fix to allow blocking calls.
+            // TODO: b/147702043. Redesign IBackupTransport so as to make the calls non-blocking.
+            Binder.allowBlocking(transport.asBinder());
+
             String transportName = transport.name();
             String transportDirName = transport.transportDirName();
             registerTransport(transportComponent, transport);

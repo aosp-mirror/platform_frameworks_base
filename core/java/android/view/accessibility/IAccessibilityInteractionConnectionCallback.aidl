@@ -33,7 +33,7 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param infos The result {@link AccessibilityNodeInfo}.
      * @param interactionId The interaction id to match the result with the request.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setFindAccessibilityNodeInfoResult(in AccessibilityNodeInfo info, int interactionId);
 
     /**
@@ -42,9 +42,18 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param infos The result {@link AccessibilityNodeInfo}s.
      * @param interactionId The interaction id to match the result with the request.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setFindAccessibilityNodeInfosResult(in List<AccessibilityNodeInfo> infos,
         int interactionId);
+
+    /**
+     * Sets the result of a prefetch request that returns {@link AccessibilityNodeInfo}s.
+     *
+     * @param root The {@link AccessibilityNodeInfo} for which the prefetching is based off of.
+     * @param infos The result {@link AccessibilityNodeInfo}s.
+     */
+    void setPrefetchAccessibilityNodeInfoResult(
+        in List<AccessibilityNodeInfo> infos, int interactionId);
 
     /**
      * Sets the result of a request to perform an accessibility action.
@@ -52,6 +61,6 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param Whether the action was performed.
      * @param interactionId The interaction id to match the result with the request.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setPerformAccessibilityActionResult(boolean succeeded, int interactionId);
 }

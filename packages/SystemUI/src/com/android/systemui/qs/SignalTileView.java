@@ -134,8 +134,9 @@ public class SignalTileView extends QSIconViewImpl {
             mSignal.setPaddingRelative(0, 0, 0, 0);
         }
         final boolean shouldAnimate = allowAnimations && isShown();
-        setVisibility(mIn, shouldAnimate, s.activityIn);
-        setVisibility(mOut, shouldAnimate, s.activityOut);
+        // Do not show activity indicators
+//        setVisibility(mIn, shouldAnimate, s.activityIn);
+//        setVisibility(mOut, shouldAnimate, s.activityOut);
     }
 
     private void setVisibility(View view, boolean shown, boolean visible) {

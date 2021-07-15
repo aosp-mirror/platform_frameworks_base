@@ -18,7 +18,7 @@
 #include "utils/Log.h"
 
 #include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <sys/types.h>
@@ -48,6 +48,7 @@ static jobject android_server_SerialService_open(JNIEnv *env, jobject /* thiz */
 
     jobject fileDescriptor = jniCreateFileDescriptor(env, fd);
     if (fileDescriptor == NULL) {
+        close(fd);
         return NULL;
     }
     return env->NewObject(gParcelFileDescriptorOffsets.mClass,

@@ -33,7 +33,7 @@ class GLFunctorDrawable : public FunctorDrawable {
 public:
     using FunctorDrawable::FunctorDrawable;
 
-    virtual ~GLFunctorDrawable();
+    virtual ~GLFunctorDrawable() {}
 
 protected:
     void onDraw(SkCanvas* canvas) override;

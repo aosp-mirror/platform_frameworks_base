@@ -36,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/controls_management_page_indicator_height"
         android:layout_gravity="center"
-        android:layout_marginTop="@dimen/controls_management_list_margin"
+        android:layout_marginTop="@dimen/controls_management_indicator_top_margin"
         android:visibility="invisible" />
 
     <androidx.viewpager2.widget.ViewPager2

@@ -91,7 +91,7 @@ public class MbmsTempFileProvider extends ContentProvider {
     public void attachInfo(Context context, ProviderInfo info) {
         super.attachInfo(context, info);
 
-        // Sanity check our security
+        // Correctness check our security
         if (info.exported) {
             throw new SecurityException("Provider must not be exported");
         }

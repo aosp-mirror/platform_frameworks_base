@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include "GlFunctorLifecycleListener.h"
-
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 
@@ -36,44 +34,25 @@ namespace skiapipeline {
  */
 class FunctorDrawable : public SkDrawable {
 public:
-    FunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
-            : mBounds(canvas->getLocalClipBounds())
-            , mAnyFunctor(std::in_place_type<LegacyFunctor>, functor, listener) {}
-
     FunctorDrawable(int functor, SkCanvas* canvas)
             : mBounds(canvas->getLocalClipBounds())
-            , mAnyFunctor(std::in_place_type<NewFunctor>, functor) {}
+            , mWebViewHandle(WebViewFunctorManager::instance().handleFor(functor)) {}
 
     virtual ~FunctorDrawable() {}
 
     virtual void syncFunctor(const WebViewSyncData& data) const {
-        if (mAnyFunctor.index() == 0) {
-            std::get<0>(mAnyFunctor).handle->sync(data);
-        } else {
-            (*(std::get<1>(mAnyFunctor).functor))(DrawGlInfo::kModeSync, nullptr);
-        }
+        mWebViewHandle->sync(data);
+    }
+
+    virtual void onRemovedFromTree() {
+        mWebViewHandle->onRemovedFromTree();
     }
 
 protected:
     virtual SkRect onGetBounds() override { return mBounds; }
 
     const SkRect mBounds;
-
-    struct LegacyFunctor {
-        explicit LegacyFunctor(Functor* functor, GlFunctorLifecycleListener* listener)
-                : functor(functor), listener(listener) {}
-        Functor* functor;
-        sp<GlFunctorLifecycleListener> listener;
-    };
-
-    struct NewFunctor {
-        explicit NewFunctor(int functor) {
-            handle = WebViewFunctorManager::instance().handleFor(functor);
-        }
-        sp<WebViewFunctor::Handle> handle;
-    };
-
-    std::variant<NewFunctor, LegacyFunctor> mAnyFunctor;
+    sp<WebViewFunctor::Handle> mWebViewHandle;
 };
 
 }  // namespace skiapipeline

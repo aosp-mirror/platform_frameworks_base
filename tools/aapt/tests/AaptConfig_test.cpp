@@ -20,7 +20,6 @@
 #include "AaptConfig.h"
 #include "ConfigDescription.h"
 #include "SdkConstants.h"
-#include "TestHelper.h"
 
 using android::String8;
 

@@ -44,9 +44,25 @@ class AnrHelper {
      */
     private static final long EXPIRED_REPORT_TIME_MS = TimeUnit.MINUTES.toMillis(1);
 
+    /**
+     * If the last ANR occurred within this given time, consider it's anomaly.
+     */
+    private static final long CONSECUTIVE_ANR_TIME_MS = TimeUnit.MINUTES.toMillis(2);
+
     @GuardedBy("mAnrRecords")
     private final ArrayList<AnrRecord> mAnrRecords = new ArrayList<>();
     private final AtomicBoolean mRunning = new AtomicBoolean(false);
+
+    private final ActivityManagerService mService;
+
+    /**
+     * The timestamp when the last ANR occurred.
+     */
+    private long mLastAnrTimeMs = 0L;
+
+    AnrHelper(final ActivityManagerService service) {
+        mService = service;
+    }
 
     void appNotResponding(ProcessRecord anrProcess, String annotation) {
         appNotResponding(anrProcess, null /* activityShortComponentName */, null /* aInfo */,
@@ -89,6 +105,7 @@ class AnrHelper {
         public void run() {
             AnrRecord r;
             while ((r = next()) != null) {
+                scheduleBinderHeavyHitterAutoSamplerIfNecessary();
                 final long startTime = SystemClock.uptimeMillis();
                 // If there are many ANR at the same time, the latency may be larger. If the latency
                 // is too large, the stack trace might not be meaningful.
@@ -109,6 +126,15 @@ class AnrHelper {
                 }
             }
         }
+
+    }
+
+    private void scheduleBinderHeavyHitterAutoSamplerIfNecessary() {
+        final long now = SystemClock.uptimeMillis();
+        if (mLastAnrTimeMs + CONSECUTIVE_ANR_TIME_MS > now) {
+            mService.scheduleBinderHeavyHitterAutoSampler();
+        }
+        mLastAnrTimeMs = now;
     }
 
     private static class AnrRecord {
@@ -134,7 +160,7 @@ class AnrHelper {
         }
 
         void appNotResponding(boolean onlyDumpSelf) {
-            mApp.appNotResponding(mActivityShortComponentName, mAppInfo,
+            mApp.mErrorState.appNotResponding(mActivityShortComponentName, mAppInfo,
                     mParentShortComponentName, mParentProcess, mAboveSystem, mAnnotation,
                     onlyDumpSelf);
         }

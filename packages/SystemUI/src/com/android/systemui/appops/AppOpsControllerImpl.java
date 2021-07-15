@@ -16,20 +16,37 @@
 
 package com.android.systemui.appops;
 
+import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
+import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
+import static android.media.AudioManager.ACTION_MICROPHONE_MUTE_CHANGED;
+
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.AudioRecordingConfiguration;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.util.ArrayMap;
+import android.permission.PermissionManager;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseArray;
+
+import androidx.annotation.WorkerThread;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
+import com.android.systemui.util.Assert;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,7 +55,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller to keep track of applications that have requested access to given App Ops
@@ -46,10 +62,11 @@ import javax.inject.Singleton;
  * It can be subscribed to with callbacks. Additionally, it passes on the information to
  * NotificationPresenter to be displayed to the user.
  */
-@Singleton
-public class AppOpsControllerImpl implements AppOpsController,
-        AppOpsManager.OnOpActiveChangedInternalListener,
-        AppOpsManager.OnOpNotedListener, Dumpable {
+@SysUISingleton
+public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsController,
+        AppOpsManager.OnOpActiveChangedListener,
+        AppOpsManager.OnOpNotedListener, IndividualSensorPrivacyController.Callback,
+        Dumpable {
 
     // This is the minimum time that we will keep AppOps that are noted on record. If multiple
     // occurrences of the same (op, package, uid) happen in a shorter interval, they will not be
@@ -57,23 +74,36 @@ public class AppOpsControllerImpl implements AppOpsController,
     private static final long NOTED_OP_TIME_DELAY_MS = 5000;
     private static final String TAG = "AppOpsControllerImpl";
     private static final boolean DEBUG = false;
-    private final Context mContext;
 
+    private final BroadcastDispatcher mDispatcher;
+    private final Context mContext;
     private final AppOpsManager mAppOps;
+    private final AudioManager mAudioManager;
+    private final IndividualSensorPrivacyController mSensorPrivacyController;
+    private final SystemClock mClock;
+
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
-    private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
+    private final SparseArray<Set<Callback>> mCallbacksByCode = new SparseArray<>();
     private boolean mListening;
+    private boolean mMicMuted;
+    private boolean mCameraDisabled;
 
     @GuardedBy("mActiveItems")
     private final List<AppOpItem> mActiveItems = new ArrayList<>();
     @GuardedBy("mNotedItems")
     private final List<AppOpItem> mNotedItems = new ArrayList<>();
+    @GuardedBy("mActiveItems")
+    private final SparseArray<ArrayList<AudioRecordingConfiguration>> mRecordingsByUid =
+            new SparseArray<>();
 
     protected static final int[] OPS = new int[] {
+            AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION,
             AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_PHONE_CALL_CAMERA,
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION
     };
@@ -82,14 +112,26 @@ public class AppOpsControllerImpl implements AppOpsController,
     public AppOpsControllerImpl(
             Context context,
             @Background Looper bgLooper,
-            DumpManager dumpManager) {
-        mContext = context;
+            DumpManager dumpManager,
+            AudioManager audioManager,
+            IndividualSensorPrivacyController sensorPrivacyController,
+            BroadcastDispatcher dispatcher,
+            SystemClock clock
+    ) {
+        mDispatcher = dispatcher;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
         final int numOps = OPS.length;
         for (int i = 0; i < numOps; i++) {
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
         }
+        mAudioManager = audioManager;
+        mSensorPrivacyController = sensorPrivacyController;
+        mMicMuted = audioManager.isMicrophoneMute()
+                || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
+        mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
+        mContext = context;
+        mClock = clock;
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -104,12 +146,29 @@ public class AppOpsControllerImpl implements AppOpsController,
         if (listening) {
             mAppOps.startWatchingActive(OPS, this);
             mAppOps.startWatchingNoted(OPS, this);
+            mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
+            mSensorPrivacyController.addCallback(this);
+
+            mMicMuted = mAudioManager.isMicrophoneMute()
+                    || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
+            mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
+
+            mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
+                    mAudioManager.getActiveRecordingConfigurations()));
+            mDispatcher.registerReceiverWithHandler(this,
+                    new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+
         } else {
             mAppOps.stopWatchingActive(this);
             mAppOps.stopWatchingNoted(this);
+            mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
+            mSensorPrivacyController.removeCallback(this);
+
             mBGHandler.removeCallbacksAndMessages(null); // null removes all
+            mDispatcher.unregisterReceiver(this);
             synchronized (mActiveItems) {
                 mActiveItems.clear();
+                mRecordingsByUid.clear();
             }
             synchronized (mNotedItems) {
                 mNotedItems.clear();
@@ -131,7 +190,7 @@ public class AppOpsControllerImpl implements AppOpsController,
         boolean added = false;
         final int numCodes = opsCodes.length;
         for (int i = 0; i < numCodes; i++) {
-            if (mCallbacksByCode.containsKey(opsCodes[i])) {
+            if (mCallbacksByCode.contains(opsCodes[i])) {
                 mCallbacksByCode.get(opsCodes[i]).add(callback);
                 added = true;
             } else {
@@ -155,7 +214,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     public void removeCallback(int[] opsCodes, AppOpsController.Callback callback) {
         final int numCodes = opsCodes.length;
         for (int i = 0; i < numCodes; i++) {
-            if (mCallbacksByCode.containsKey(opsCodes[i])) {
+            if (mCallbacksByCode.contains(opsCodes[i])) {
                 mCallbacksByCode.get(opsCodes[i]).remove(callback);
             }
         }
@@ -181,10 +240,15 @@ public class AppOpsControllerImpl implements AppOpsController,
         synchronized (mActiveItems) {
             AppOpItem item = getAppOpItemLocked(mActiveItems, code, uid, packageName);
             if (item == null && active) {
-                item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
+                item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
+                if (isOpMicrophone(code)) {
+                    item.setDisabled(isAnyRecordingPausedLocked(uid));
+                } else if (isOpCamera(code)) {
+                    item.setDisabled(mCameraDisabled);
+                }
                 mActiveItems.add(item);
                 if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
-                return true;
+                return !item.isDisabled();
             } else if (item != null && !active) {
                 mActiveItems.remove(item);
                 if (DEBUG) Log.w(TAG, "Removed item: " + item.toString());
@@ -208,7 +272,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             active = getAppOpItemLocked(mActiveItems, code, uid, packageName) != null;
         }
         if (!active) {
-            notifySuscribers(code, uid, packageName, false);
+            notifySuscribersWorker(code, uid, packageName, false);
         }
     }
 
@@ -218,7 +282,7 @@ public class AppOpsControllerImpl implements AppOpsController,
         synchronized (mNotedItems) {
             item = getAppOpItemLocked(mNotedItems, code, uid, packageName);
             if (item == null) {
-                item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
+                item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
                 mNotedItems.add(item);
                 if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
                 createdNew = true;
@@ -230,31 +294,49 @@ public class AppOpsControllerImpl implements AppOpsController,
         return createdNew;
     }
 
+    private boolean isUserVisible(String packageName) {
+        return PermissionManager.shouldShowPackageForIndicatorCached(mContext, packageName);
+    }
+
+    @WorkerThread
+    public List<AppOpItem> getActiveAppOps() {
+        return getActiveAppOps(false);
+    }
+
     /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks.
      *
+     * Call from a worker thread as it may perform long operations.
+     *
      * @return List of active AppOps information
      */
-    public List<AppOpItem> getActiveAppOps() {
-        return getActiveAppOpsForUser(UserHandle.USER_ALL);
+    @WorkerThread
+    public List<AppOpItem> getActiveAppOps(boolean showPaused) {
+        return getActiveAppOpsForUser(UserHandle.USER_ALL, showPaused);
     }
 
     /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks, for
      * a given user id.
      *
+     * Call from a worker thread as it may perform long operations.
+     *
      * @param userId User id to track, can be {@link UserHandle#USER_ALL}
      *
      * @return List of active AppOps information for that user id
      */
-    public List<AppOpItem> getActiveAppOpsForUser(int userId) {
+    @WorkerThread
+    public List<AppOpItem> getActiveAppOpsForUser(int userId, boolean showPaused) {
+        Assert.isNotMainThread();
         List<AppOpItem> list = new ArrayList<>();
         synchronized (mActiveItems) {
             final int numActiveItems = mActiveItems.size();
             for (int i = 0; i < numActiveItems; i++) {
                 AppOpItem item = mActiveItems.get(i);
                 if ((userId == UserHandle.USER_ALL
-                        || UserHandle.getUserId(item.getUid()) == userId)) {
+                        || UserHandle.getUserId(item.getUid()) == userId)
+                        && isUserVisible(item.getPackageName())
+                        && (showPaused || !item.isDisabled())) {
                     list.add(item);
                 }
             }
@@ -264,7 +346,8 @@ public class AppOpsControllerImpl implements AppOpsController,
             for (int i = 0; i < numNotedItems; i++) {
                 AppOpItem item = mNotedItems.get(i);
                 if ((userId == UserHandle.USER_ALL
-                        || UserHandle.getUserId(item.getUid()) == userId)) {
+                        || UserHandle.getUserId(item.getUid()) == userId)
+                        && isUserVisible(item.getPackageName())) {
                     list.add(item);
                 }
             }
@@ -272,11 +355,33 @@ public class AppOpsControllerImpl implements AppOpsController,
         return list;
     }
 
+    private void notifySuscribers(int code, int uid, String packageName, boolean active) {
+        mBGHandler.post(() -> notifySuscribersWorker(code, uid, packageName, active));
+    }
+
+    /**
+     * Required to override, delegate to other. Should not be called.
+     */
+    public void onOpActiveChanged(String op, int uid, String packageName, boolean active) {
+        onOpActiveChanged(op, uid, packageName, null, active,
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+    }
+
+    // Get active app ops, and check if their attributions are trusted
     @Override
-    public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
+    public void onOpActiveChanged(String op, int uid, String packageName, String attributionTag,
+            boolean active, int attributionFlags, int attributionChainId) {
+        int code = AppOpsManager.strOpToOp(op);
         if (DEBUG) {
-            Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s", code, uid, packageName,
-                    Boolean.toString(active)));
+            Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s,%d,%d)", code, uid, packageName,
+                    Boolean.toString(active), attributionChainId, attributionFlags));
+        }
+        if (attributionChainId != AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE
+                && attributionFlags != AppOpsManager.ATTRIBUTION_FLAGS_NONE
+                && (attributionFlags & AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR) == 0
+                && (attributionFlags & AppOpsManager.ATTRIBUTION_FLAG_TRUSTED) == 0) {
+            // if this attribution chain isn't trusted, and this isn't the accessor, do not show it.
+            return;
         }
         boolean activeChanged = updateActives(code, uid, packageName, active);
         if (!activeChanged) return; // early return
@@ -289,12 +394,14 @@ public class AppOpsControllerImpl implements AppOpsController,
         // If active is false, we only send the update if the op is not actively noted (prevent
         // early removal)
         if (!alsoNoted) {
-            mBGHandler.post(() -> notifySuscribers(code, uid, packageName, active));
+            notifySuscribers(code, uid, packageName, active);
         }
     }
 
     @Override
-    public void onOpNoted(int code, int uid, String packageName, int result) {
+    public void onOpNoted(int code, int uid, String packageName,
+            String attributionTag, @AppOpsManager.OpFlags int flags,
+            @AppOpsManager.Mode int result) {
         if (DEBUG) {
             Log.w(TAG, "Noted op: " + code + " with result "
                     + AppOpsManager.MODE_NAMES[result] + " for package " + packageName);
@@ -307,12 +414,12 @@ public class AppOpsControllerImpl implements AppOpsController,
             alsoActive = getAppOpItemLocked(mActiveItems, code, uid, packageName) != null;
         }
         if (!alsoActive) {
-            mBGHandler.post(() -> notifySuscribers(code, uid, packageName, true));
+            notifySuscribers(code, uid, packageName, true);
         }
     }
 
-    private void notifySuscribers(int code, int uid, String packageName, boolean active) {
-        if (mCallbacksByCode.containsKey(code)) {
+    private void notifySuscribersWorker(int code, int uid, String packageName, boolean active) {
+        if (mCallbacksByCode.contains(code) && isUserVisible(packageName)) {
             if (DEBUG) Log.d(TAG, "Notifying of change in package " + packageName);
             for (Callback cb: mCallbacksByCode.get(code)) {
                 cb.onActiveStateChanged(code, uid, packageName, active);
@@ -335,6 +442,101 @@ public class AppOpsControllerImpl implements AppOpsController,
             pw.print("    "); pw.println(item.toString());
         }
 
+    }
+
+    private boolean isAnyRecordingPausedLocked(int uid) {
+        if (mMicMuted) {
+            return true;
+        }
+        List<AudioRecordingConfiguration> configs = mRecordingsByUid.get(uid);
+        if (configs == null) return false;
+        int configsNum = configs.size();
+        for (int i = 0; i < configsNum; i++) {
+            AudioRecordingConfiguration config = configs.get(i);
+            if (config.isClientSilenced()) return true;
+        }
+        return false;
+    }
+
+    private void updateSensorDisabledStatus() {
+        synchronized (mActiveItems) {
+            int size = mActiveItems.size();
+            for (int i = 0; i < size; i++) {
+                AppOpItem item = mActiveItems.get(i);
+
+                boolean paused = false;
+                if (isOpMicrophone(item.getCode())) {
+                    paused = isAnyRecordingPausedLocked(item.getUid());
+                } else if (isOpCamera(item.getCode())) {
+                    paused = mCameraDisabled;
+                }
+
+                if (item.isDisabled() != paused) {
+                    item.setDisabled(paused);
+                    notifySuscribers(
+                            item.getCode(),
+                            item.getUid(),
+                            item.getPackageName(),
+                            !item.isDisabled()
+                    );
+                }
+            }
+        }
+    }
+
+    private AudioManager.AudioRecordingCallback mAudioRecordingCallback =
+            new AudioManager.AudioRecordingCallback() {
+        @Override
+        public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {
+            synchronized (mActiveItems) {
+                mRecordingsByUid.clear();
+                final int recordingsCount = configs.size();
+                for (int i = 0; i < recordingsCount; i++) {
+                    AudioRecordingConfiguration recording = configs.get(i);
+
+                    ArrayList<AudioRecordingConfiguration> recordings = mRecordingsByUid.get(
+                            recording.getClientUid());
+                    if (recordings == null) {
+                        recordings = new ArrayList<>();
+                        mRecordingsByUid.put(recording.getClientUid(), recordings);
+                    }
+                    recordings.add(recording);
+                }
+            }
+            updateSensorDisabledStatus();
+        }
+    };
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        mMicMuted = mAudioManager.isMicrophoneMute()
+                || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
+        updateSensorDisabledStatus();
+    }
+
+    @Override
+    public void onSensorBlockedChanged(int sensor, boolean blocked) {
+        mBGHandler.post(() -> {
+            if (sensor == CAMERA) {
+                mCameraDisabled = blocked;
+            } else if (sensor == MICROPHONE) {
+                mMicMuted = mAudioManager.isMicrophoneMute() || blocked;
+            }
+            updateSensorDisabledStatus();
+        });
+    }
+
+    @Override
+    public boolean isMicMuted() {
+        return mMicMuted;
+    }
+
+    private boolean isOpCamera(int op) {
+        return op == AppOpsManager.OP_CAMERA || op == AppOpsManager.OP_PHONE_CALL_CAMERA;
+    }
+
+    private boolean isOpMicrophone(int op) {
+        return op == AppOpsManager.OP_RECORD_AUDIO || op == AppOpsManager.OP_PHONE_CALL_MICROPHONE;
     }
 
     protected class H extends Handler {

@@ -51,7 +51,7 @@
         android:gravity="center"
         android:singleLine="true"
         android:ellipsize="end"
-        android:fontFamily="sans-serif-medium"
+        android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textSize="@dimen/floating_toolbar_text_size"
         android:textColor="?attr/floatingToolbarForegroundColor"
         android:background="@null"

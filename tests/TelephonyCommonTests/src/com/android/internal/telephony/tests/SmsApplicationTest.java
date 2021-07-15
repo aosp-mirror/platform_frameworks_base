@@ -46,6 +46,7 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Telephony;
 import android.telephony.TelephonyManager;
 
@@ -103,6 +104,7 @@ public class SmsApplicationTest {
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private RoleManager mRoleManager;
     @Mock private PackageManager mPackageManager;
+    @Mock private UserManager mUserManager;
     @Mock private AppOpsManager mAppOpsManager;
 
     @Before
@@ -112,6 +114,7 @@ public class SmsApplicationTest {
         when(mContext.getSystemService(Context.ROLE_SERVICE)).thenReturn(mRoleManager);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mContext.getSystemService(RoleManager.class)).thenReturn(mRoleManager);
+        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
         when(mContext.getSystemService(AppOpsManager.class)).thenReturn(mAppOpsManager);
         when(mContext.createContextAsUser(isNotNull(), anyInt())).thenReturn(mContext);
 
@@ -130,8 +133,10 @@ public class SmsApplicationTest {
 
         when(mTelephonyManager.isSmsCapable()).thenReturn(true);
         when(mRoleManager.isRoleAvailable(RoleManager.ROLE_SMS)).thenReturn(true);
-        when(mRoleManager.getDefaultSmsPackage(anyInt()))
+        when(mRoleManager.getSmsRoleHolder(anyInt()))
                 .thenReturn(TEST_COMPONENT_NAME.getPackageName());
+        when(mUserManager.getUserHandles(true))
+                .thenReturn(Collections.singletonList(UserHandle.SYSTEM));
 
         for (String opStr : APP_OPS_TO_CHECK) {
             when(mAppOpsManager.unsafeCheckOp(

@@ -50,7 +50,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="72dp">
+        android:layout_height="@dimen/controls_management_footer_height">
 
         <View
             android:layout_width="match_parent"
@@ -61,7 +61,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/controls_management_footer_side_margin">
+            android:paddingHorizontal="@dimen/controls_management_footer_side_margin"
+            android:paddingVertical="@dimen/controls_management_footer_top_margin" >
 
             <Button
                 android:id="@+id/other_apps"

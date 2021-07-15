@@ -308,7 +308,7 @@ public class UsbDevice implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof UsbDevice) {
             return ((UsbDevice)o).mName.equals(mName);
         } else if (o instanceof String) {

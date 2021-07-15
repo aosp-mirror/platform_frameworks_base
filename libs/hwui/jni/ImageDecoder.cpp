@@ -27,9 +27,9 @@
 #include <hwui/ImageDecoder.h>
 #include <HardwareBitmapUploader.h>
 
+#include <FrontBufferedStream.h>
 #include <SkAndroidCodec.h>
 #include <SkEncodedImageFormat.h>
-#include <SkFrontBufferedStream.h>
 #include <SkStream.h>
 
 #include <androidfw/Asset.h>
@@ -135,24 +135,21 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
         return throw_exception(env, kSourceException, "", jexception, source);
     }
 
-    auto androidCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
-            SkAndroidCodec::ExifOrientationBehavior::kRespect);
+    auto androidCodec = SkAndroidCodec::MakeFromCodec(std::move(codec));
     if (!androidCodec.get()) {
         return throw_exception(env, kSourceMalformedData, "", nullptr, source);
     }
 
-    const auto& info = androidCodec->getInfo();
-    const int width = info.width();
-    const int height = info.height();
     const bool isNinePatch = peeker->mPatch != nullptr;
-    ImageDecoder* decoder = new ImageDecoder(std::move(androidCodec), std::move(peeker));
+    ImageDecoder* decoder = new ImageDecoder(std::move(androidCodec), std::move(peeker),
+                                             SkCodec::kYes_ZeroInitialized);
     return env->NewObject(gImageDecoder_class, gImageDecoder_constructorMethodID,
-                          reinterpret_cast<jlong>(decoder), width, height,
+                          reinterpret_cast<jlong>(decoder), decoder->width(), decoder->height(),
                           animated, isNinePatch);
 }
 
 static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
-        jobject fileDescriptor, jboolean preferAnimation, jobject source) {
+        jobject fileDescriptor, jlong length, jboolean preferAnimation, jobject source) {
 #ifndef __ANDROID__ // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
     return throw_exception(env, kSourceException, "Only supported on Android", nullptr, source);
 #else
@@ -172,7 +169,14 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
                                nullptr, source);
     }
 
-    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
+    std::unique_ptr<SkFILEStream> fileStream;
+    if (length == -1) {
+        // -1 corresponds to AssetFileDescriptor.UNKNOWN_LENGTH. Pass no length
+        // so SkFILEStream will figure out the size of the file on its own.
+        fileStream.reset(new SkFILEStream(file));
+    } else {
+        fileStream.reset(new SkFILEStream(file, length));
+    }
     return native_create(env, std::move(fileStream), source, preferAnimation);
 #endif
 }
@@ -187,8 +191,7 @@ static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
     }
 
     std::unique_ptr<SkStream> bufferedStream(
-        SkFrontBufferedStream::Make(std::move(stream),
-        SkCodec::MinBufferedBytesNeeded()));
+            skia::FrontBufferedStream::Make(std::move(stream), SkCodec::MinBufferedBytesNeeded()));
     return native_create(env, std::move(bufferedStream), source, preferAnimation);
 }
 
@@ -463,7 +466,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 static jobject ImageDecoder_nGetSampledSize(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                             jint sampleSize) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
-    SkISize size = decoder->mCodec->getSampledDimensions(sampleSize);
+    SkISize size = decoder->getSampledDimensions(sampleSize);
     return env->NewObject(gSize_class, gSize_constructorMethodID, size.width(), size.height());
 }
 
@@ -494,7 +497,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
     { "nCreate",        "(Ljava/nio/ByteBuffer;IIZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteBuffer },
     { "nCreate",        "([BIIZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
     { "nCreate",        "(Ljava/io/InputStream;[BZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
-    { "nCreate",        "(Ljava/io/FileDescriptor;ZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
+    { "nCreate",        "(Ljava/io/FileDescriptor;JZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
     { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZJZ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
     { "nGetSampledSize","(JI)Landroid/util/Size;",               (void*) ImageDecoder_nGetSampledSize },

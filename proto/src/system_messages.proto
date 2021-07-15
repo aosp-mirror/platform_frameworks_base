@@ -252,13 +252,29 @@ message SystemMessage {
     // Package: android
     NOTE_ID_WIFI_SIM_REQUIRED = 60;
 
+    // TODO: remove this notification after feature development is done
+    // Inform the user a foreground service is restricted from BG-launch.
+    NOTE_FOREGROUND_SERVICE_BG_LAUNCH = 61;
+
     // Display the Android Debug Protocol status
     // Package: android
     NOTE_ADB_WIFI_ACTIVE = 62;
 
-    // Notify user there was a non-framework gnss location access during an emergency
+    // Notify the user a carrier suggestion is available to get IMSI exemption.
     // Package: android
-    NOTE_GNSS_NFW_LOCATION_ACCESS = 63;
+    NOTE_CARRIER_SUGGESTION_AVAILABLE = 63;
+
+    // Inform that NAS settings have changed on OS upgrade
+    // Package: android
+    NOTE_NAS_UPGRADE = 64;
+
+    // Notify the user to unblock the microphone global toggle
+    // Package: android
+    NOTE_UNBLOCK_MIC_TOGGLE = 65;
+
+    // Notify the user to unblock the camera global toggle
+    // Package: android
+    NOTE_UNBLOCK_CAM_TOGGLE = 66;
 
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
@@ -332,5 +348,13 @@ message SystemMessage {
     // Notify the user that the admin suspended personal apps on the device.
     // Package: android
     NOTE_PERSONAL_APPS_SUSPENDED = 1003;
+
+    // Notify the user that window magnification is available.
+    // package: android
+    NOTE_A11Y_WINDOW_MAGNIFICATION_FEATURE = 1004;
+
+    // Notify the user that some accessibility service has view and control permissions.
+    // package: android
+    NOTE_A11Y_VIEW_AND_CONTROL_ACCESS = 1005;
   }
 }

@@ -19,7 +19,6 @@
 #ifndef _RUNTIME_ANDROID_RUNTIME_H
 #define _RUNTIME_ANDROID_RUNTIME_H
 
-#include <binder/IBinder.h>
 #include <jni.h>
 #include <pthread.h>
 #include <utils/Errors.h>

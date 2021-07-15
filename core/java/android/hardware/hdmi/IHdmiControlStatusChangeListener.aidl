@@ -16,8 +16,6 @@
 
 package android.hardware.hdmi;
 
-import android.hardware.hdmi.HdmiDeviceInfo;
-
 /**
  * Callback interface definition for HDMI client to get informed of
  * the CEC availability change event.
@@ -30,11 +28,11 @@ oneway interface IHdmiControlStatusChangeListener {
      * Called when HDMI Control (CEC) is enabled/disabled.
      *
      * @param isCecEnabled status of HDMI Control
-     * {@link android.provider.Settings.Global#HDMI_CONTROL_ENABLED}: {@code true} if enabled.
+     * {@link android.hardware.hdmi.HdmiControlManager#CEC_SETTING_NAME_HDMI_CEC_ENABLED}: {@link android.hardware.hdmi.HdmiControlManager#HDMI_CEC_CONTROL_ENABLED} if enabled.
      * @param isCecAvailable status of CEC support of the connected display (the TV).
      * {@code true} if supported.
      *
-     * Note: Value of isCecAvailable is only valid when isCecEnabled is true.
+     * Note: Value of isCecAvailable is only valid when isCecEnabled is {@link android.hardware.hdmi.HdmiControlManager#HDMI_CEC_CONTROL_ENABLED}.
      **/
-    void onStatusChange(boolean isCecEnabled, boolean isCecAvailable);
+    void onStatusChange(int isCecEnabled, boolean isCecAvailable);
 }

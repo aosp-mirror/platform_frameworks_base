@@ -16,10 +16,11 @@
   -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="@color/notification_ripple_untinted_color">
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        android:color="?android:attr/colorControlHighlight">
     <item>
         <shape>
-            <solid android:color="@color/notification_material_background_color" />
+            <solid android:color="?androidprv:attr/colorSurface" />
         </shape>
     </item>
 </ripple>

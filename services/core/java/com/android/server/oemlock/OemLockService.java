@@ -28,14 +28,14 @@ import android.os.IBinder;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
-import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.service.oemlock.IOemLockService;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.pm.UserRestrictionsUtils;
 
 /**

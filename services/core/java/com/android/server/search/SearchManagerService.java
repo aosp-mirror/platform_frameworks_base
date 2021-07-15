@@ -16,9 +16,7 @@
 
 package com.android.server.search;
 
-import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
+import android.annotation.NonNull;
 import android.app.ISearchManager;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -26,18 +24,14 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -48,6 +42,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
@@ -76,18 +71,13 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(final int userId) {
-            mService.mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mService.onUnlockUser(userId);
-                }
-            });
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.mHandler.post(() -> mService.onUnlockUser(user.getUserIdentifier()));
         }
 
         @Override
-        public void onCleanupUser(int userHandle) {
-            mService.onCleanupUser(userHandle);
+        public void onUserStopped(@NonNull TargetUser user) {
+            mService.onCleanupUser(user.getUserIdentifier());
         }
     }
 

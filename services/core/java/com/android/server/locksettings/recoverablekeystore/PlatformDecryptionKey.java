@@ -16,7 +16,7 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import android.security.keystore.AndroidKeyStoreSecretKey;
+import javax.crypto.SecretKey;
 
 /**
  * Used to unwrap recoverable keys before syncing them with remote storage.
@@ -30,7 +30,7 @@ import android.security.keystore.AndroidKeyStoreSecretKey;
 public class PlatformDecryptionKey {
 
     private final int mGenerationId;
-    private final AndroidKeyStoreSecretKey mKey;
+    private final SecretKey mKey;
 
     /**
      * A new instance.
@@ -40,7 +40,7 @@ public class PlatformDecryptionKey {
      *
      * @hide
      */
-    public PlatformDecryptionKey(int generationId, AndroidKeyStoreSecretKey key) {
+    public PlatformDecryptionKey(int generationId, SecretKey key) {
         mGenerationId = generationId;
         mKey = key;
     }
@@ -59,7 +59,7 @@ public class PlatformDecryptionKey {
      *
      * @hide
      */
-    public AndroidKeyStoreSecretKey getKey() {
+    public SecretKey getKey() {
         return mKey;
     }
 }
