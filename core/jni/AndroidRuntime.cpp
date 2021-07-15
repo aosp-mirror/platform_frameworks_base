@@ -22,7 +22,6 @@
 #include <android-base/properties.h>
 #include <android/graphics/jni_runtime.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/threads.h>
 #include <assert.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
@@ -1348,15 +1347,14 @@ void AndroidRuntime::onVmCreated(JNIEnv* env)
     return env;
 }
 
-extern "C" {
-
 /*
  * Makes the current thread visible to the VM.
  *
  * The JNIEnv pointer returned is only valid for the current thread, and
  * thus must be tucked into thread-local storage.
  */
-bool androidJavaAttachThread(const char* threadName) {
+static int javaAttachThread(const char* threadName, JNIEnv** pEnv)
+{
     JavaVMAttachArgs args;
     JavaVM* vm;
     jint result;
@@ -1368,17 +1366,18 @@ bool androidJavaAttachThread(const char* threadName) {
     args.name = (char*) threadName;
     args.group = NULL;
 
-    JNIEnv* env;
-    result = vm->AttachCurrentThread(&env, (void*)&args);
-    if (result != JNI_OK) ALOGI("NOTE: attach of thread '%s' failed\n", threadName);
+    result = vm->AttachCurrentThread(pEnv, (void*) &args);
+    if (result != JNI_OK)
+        ALOGI("NOTE: attach of thread '%s' failed\n", threadName);
 
-    return result == JNI_OK;
+    return result;
 }
 
 /*
  * Detach the current thread from the set visible to the VM.
  */
-bool androidJavaDetachThread(void) {
+static int javaDetachThread(void)
+{
     JavaVM* vm;
     jint result;
 
@@ -1386,11 +1385,10 @@ bool androidJavaDetachThread(void) {
     assert(vm != NULL);
 
     result = vm->DetachCurrentThread();
-    if (result != JNI_OK) ALOGE("ERROR: thread detach failed\n");
-    return result == JNI_OK;
+    if (result != JNI_OK)
+        ALOGE("ERROR: thread detach failed\n");
+    return result;
 }
-
-} // extern "C"
 
 /*
  * When starting a native thread that will be visible from the VM, we
@@ -1402,16 +1400,18 @@ bool androidJavaDetachThread(void) {
     void* userData = ((void **)args)[1];
     char* name = (char*) ((void **)args)[2];        // we own this storage
     free(args);
+    JNIEnv* env;
     int result;
 
     /* hook us into the VM */
-    if (!androidJavaAttachThread(name)) return -1;
+    if (javaAttachThread(name, &env) != JNI_OK)
+        return -1;
 
     /* start the thread running */
     result = (*(android_thread_func_t)start)(userData);
 
     /* unhook us */
-    (void)androidJavaDetachThread();
+    javaDetachThread();
     free(name);
 
     return result;
