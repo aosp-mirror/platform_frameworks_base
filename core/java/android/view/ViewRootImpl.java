@@ -403,6 +403,8 @@ public final class ViewRootImpl implements ViewParent,
     View mView;
 
     View mAccessibilityFocusedHost;
+    // Accessibility-focused virtual view. The bounds and sourceNodeId of
+    // mAccessibilityFocusedVirtualView is up-to-date while other fields may be stale.
     AccessibilityNodeInfo mAccessibilityFocusedVirtualView;
 
     // True if the window currently has pointer capture enabled.
@@ -4828,6 +4830,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Get accessibility-focused virtual view. The bounds and sourceNodeId of the returned node is
+     * up-to-date while other fields may be stale.
+     *
      * @hide
      */
     @UnsupportedAppUsage
