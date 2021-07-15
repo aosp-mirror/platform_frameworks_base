@@ -198,6 +198,7 @@ public class ApkSignatureVerifier {
                     ApkSignatureSchemeV4Verifier.extractCertificates(apkPath);
             Certificate[][] signerCerts = new Certificate[][]{vSigner.certs};
             Signature[] signerSigs = convertToSignatures(signerCerts);
+            Signature[] pastSignerSigs = null;
 
             if (verifyFull) {
                 Map<Integer, byte[]> nonstreamingDigests;
@@ -210,6 +211,15 @@ public class ApkSignatureVerifier {
                             ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
                     nonstreamingDigests = v3Signer.contentDigests;
                     nonstreamingCerts = new Certificate[][]{v3Signer.certs};
+                    if (v3Signer.por != null) {
+                        // populate proof-of-rotation information
+                        pastSignerSigs = new Signature[v3Signer.por.certs.size()];
+                        for (int i = 0; i < pastSignerSigs.length; i++) {
+                            pastSignerSigs[i] = new Signature(
+                                    v3Signer.por.certs.get(i).getEncoded());
+                            pastSignerSigs[i].setFlags(v3Signer.por.flagsList.get(i));
+                        }
+                    }
                 } catch (SignatureNotFoundException e) {
                     try {
                         ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
@@ -250,7 +260,8 @@ public class ApkSignatureVerifier {
             }
 
             return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
-                    SignatureSchemeVersion.SIGNING_BLOCK_V4), vSigner.contentDigests);
+                    SignatureSchemeVersion.SIGNING_BLOCK_V4, pastSignerSigs),
+                    vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
             throw e;
         } catch (Exception e) {

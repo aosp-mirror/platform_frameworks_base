@@ -128,7 +128,8 @@ public final class ContextHubManager {
     public static final int AUTHORIZATION_GRANTED = 2;
 
     /**
-     * Constants describing the type of events from a Context Hub.
+     * Constants describing the type of events from a Context Hub, as defined in
+     * {@link ContextHubClientCallback}.
      * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)

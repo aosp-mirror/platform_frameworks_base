@@ -247,6 +247,7 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -703,6 +704,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final Optional<Bubbles> mBubblesOptional;
     private final Bubbles.BubbleExpandListener mBubbleExpandListener;
+    private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
@@ -802,7 +804,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            Optional<StartingSurface> startingSurfaceOptional) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -889,6 +892,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
+        mStartingSurfaceOptional = startingSurfaceOptional;
         lockscreenShadeTransitionController.setStatusbar(this);
 
         mExpansionChangedListeners = new ArrayList<>();
@@ -1417,7 +1421,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(this, mContext);
+        mActivityLaunchAnimator = new ActivityLaunchAnimator(this,
+                mStartingSurfaceOptional.orElse(null),
+                mContext);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),

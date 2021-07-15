@@ -148,8 +148,22 @@ public class StackScrollAlgorithm {
             AmbientState ambientState) {
 
         NotificationShelf shelf = ambientState.getShelf();
-        if (shelf != null) {
-            shelf.updateState(algorithmState, ambientState);
+        if (shelf == null) {
+            return;
+        }
+
+        shelf.updateState(algorithmState, ambientState);
+
+        // After the shelf has updated its yTranslation,
+        // explicitly hide views below the shelf to skip rendering them in the hardware layer.
+        final float shelfTop = shelf.getViewState().yTranslation;
+
+        for (ExpandableView view : algorithmState.visibleChildren) {
+            final float viewTop = view.getViewState().yTranslation;
+
+            if (viewTop >= shelfTop) {
+                view.getViewState().hidden = true;
+            }
         }
     }
 
@@ -411,8 +425,7 @@ public class StackScrollAlgorithm {
         } else {
             if (view != ambientState.getTrackedHeadsUpRow()) {
                 if (ambientState.isExpansionChanging()) {
-                    // Show all views. Views below the shelf will later be clipped (essentially
-                    // hidden) in NotificationShelf.
+                    // We later update shelf state, then hide views below the shelf.
                     viewState.hidden = false;
                     viewState.inShelf = algorithmState.firstViewInShelf != null
                             && i >= algorithmState.visibleChildren.indexOf(
