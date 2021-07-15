@@ -139,6 +139,8 @@ public final class SurfaceControl implements Parcelable {
             int blurRadius);
     private static native void nativeSetLayerStack(long transactionObj, long nativeObject,
             int layerStack);
+    private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
+            boolean isTrustedOverlay);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -3034,6 +3036,17 @@ public final class SurfaceControl implements Parcelable {
                 @Surface.FrameRateCompatibility int compatibility) {
             checkPreconditions(sc);
             nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility);
+            return this;
+        }
+
+        /**
+         * Sets the trusted overlay state on this SurfaceControl and it is inherited to all the
+         * children. The caller must hold the ACCESS_SURFACE_FLINGER permission.
+         * @hide
+         */
+        public Transaction setTrustedOverlay(SurfaceControl sc, boolean isTrustedOverlay) {
+            checkPreconditions(sc);
+            nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, isTrustedOverlay);
             return this;
         }
 
