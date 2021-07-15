@@ -1068,6 +1068,7 @@ public class NotificationPanelViewController extends PanelViewController {
         constraintSet.setMargin(R.id.notification_stack_scroller, TOP, topMargin);
         constraintSet.setMargin(R.id.qs_frame, TOP, topMargin);
         constraintSet.applyTo(mNotificationContainerParent);
+        mNotificationContainerParent.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
 
         updateKeyguardStatusViewAlignment(false /* animate */);
 

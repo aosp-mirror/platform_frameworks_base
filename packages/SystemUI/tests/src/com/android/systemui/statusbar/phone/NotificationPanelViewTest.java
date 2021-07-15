@@ -356,6 +356,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
         mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
         mNotificationContainerParent.addView(mKeyguardStatusView);
+        mNotificationContainerParent.onFinishInflate();
         when(mView.findViewById(R.id.notification_container_parent))
                 .thenReturn(mNotificationContainerParent);
         when(mFragmentService.getFragmentHostManager(mView)).thenReturn(mFragmentHostManager);
