@@ -4031,17 +4031,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @param packageName The package that is updated
      * @param pkg The package that is updated, or {@code null} if package is deleted
-     * @param filterUserId If not {@link UserHandle.USER_ALL}, only restore the permission state for
-     *                     this particular user
      */
-    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg,
-                                   @UserIdInt int filterUserId) {
+    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
         // If the package is being deleted, update the permissions of all the apps
         final int flags =
                 (pkg == null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG
                         : UPDATE_PERMISSIONS_REPLACE_PKG);
-        updatePermissions(packageName, pkg, getVolumeUuidForPackage(pkg), flags,
-                mDefaultPermissionCallback, filterUserId);
+        updatePermissions(
+                packageName, pkg, getVolumeUuidForPackage(pkg), flags, mDefaultPermissionCallback);
     }
 
     /**
@@ -4063,8 +4060,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     (fingerprintChanged
                             ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                             : 0);
-            updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback,
-                    UserHandle.USER_ALL);
+            updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback);
         } finally {
             PackageManager.uncorkPackageInfoCache();
         }
@@ -4113,14 +4109,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *                          all volumes
      * @param flags Control permission for which apps should be updated
      * @param callback Callback to call after permission changes
-     * @param filterUserId If not {@link UserHandle.USER_ALL}, only restore the permission state for
-     *                     this particular user
      */
     private void updatePermissions(final @Nullable String changingPkgName,
             final @Nullable AndroidPackage changingPkg,
             final @Nullable String replaceVolumeUuid,
             @UpdatePermissionFlags int flags,
-            final @Nullable PermissionCallback callback, @UserIdInt int filterUserId) {
+            final @Nullable PermissionCallback callback) {
         // TODO: Most of the methods exposing BasePermission internals [source package name,
         // etc..] shouldn't be needed. Instead, when we've parsed a permission that doesn't
         // have package settings, we should make note of it elsewhere [map between
@@ -4156,7 +4150,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Only replace for packages on requested volume
                 final String volumeUuid = getVolumeUuidForPackage(pkg);
                 final boolean replace = replaceAll && Objects.equals(replaceVolumeUuid, volumeUuid);
-                restorePermissionState(pkg, replace, changingPkgName, callback, filterUserId);
+                restorePermissionState(pkg, replace, changingPkgName, callback,
+                        UserHandle.USER_ALL);
             });
         }
 
@@ -4165,7 +4160,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final String volumeUuid = getVolumeUuidForPackage(changingPkg);
             final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_PKG) != 0)
                     && Objects.equals(replaceVolumeUuid, volumeUuid);
-            restorePermissionState(changingPkg, replace, changingPkgName, callback, filterUserId);
+            restorePermissionState(changingPkg, replace, changingPkgName, callback,
+                    UserHandle.USER_ALL);
         }
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
@@ -4850,18 +4846,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
             @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
-            @UserIdInt int userId) {
-        updatePermissions(pkg.getPackageName(), pkg, userId);
-        addAllowlistedRestrictedPermissionsInternal(pkg,
-                params.getAllowlistedRestrictedPermissions(),
-                FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
-        final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
-        if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
-                || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
-            setAutoRevokeExemptedInternal(pkg,
-                    autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
+            @UserIdInt int[] userIds) {
+        updatePermissions(pkg.getPackageName(), pkg);
+        for (final int userId : userIds) {
+            addAllowlistedRestrictedPermissionsInternal(pkg,
+                    params.getAllowlistedRestrictedPermissions(),
+                    FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
+            final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
+            if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
+                    || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
+                setAutoRevokeExemptedInternal(pkg,
+                        autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
+            }
+            grantRequestedRuntimePermissionsInternal(pkg, params.getGrantedPermissions(), userId);
         }
-        grantRequestedRuntimePermissionsInternal(pkg, params.getGrantedPermissions(), userId);
     }
 
     private void addAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
@@ -4884,7 +4882,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private void onPackageUninstalledInternal(@NonNull String packageName, int appId,
             @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
-            @UserIdInt int userId) {
+            @UserIdInt int[] userIds) {
         // TODO: Move these checks to check PackageState to be more reliable.
         // System packages should always have an available APK.
         if (pkg != null && pkg.isSystem()
@@ -4895,27 +4893,31 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // If we are only marking a system package as uninstalled, we need to keep its
             // pregranted permission state so that it still works once it gets reinstalled, thus
             // only reset the user modifications to its permission state.
-            resetRuntimePermissionsInternal(pkg, userId);
+            for (final int userId : userIds) {
+                resetRuntimePermissionsInternal(pkg, userId);
+            }
             return;
         }
-        updatePermissions(packageName, null, userId);
-        if (sharedUserPkgs.isEmpty()) {
-            removeUidStateAndResetPackageInstallPermissionsFixed(appId, packageName, userId);
-        } else {
-            // Remove permissions associated with package. Since runtime
-            // permissions are per user we have to kill the removed package
-            // or packages running under the shared user of the removed
-            // package if revoking the permissions requested only by the removed
-            // package is successful and this causes a change in gids.
-            final int userIdToKill = revokeSharedUserPermissionsForDeletedPackageInternal(pkg,
-                    sharedUserPkgs, userId);
-            final boolean shouldKill = userIdToKill != UserHandle.USER_NULL;
-            // If gids changed, kill all affected packages.
-            if (shouldKill) {
-                mHandler.post(() -> {
-                    // This has to happen with no lock held.
-                    killUid(appId, UserHandle.USER_ALL, KILL_APP_REASON_GIDS_CHANGED);
-                });
+        updatePermissions(packageName, null);
+        for (final int userId : userIds) {
+            if (sharedUserPkgs.isEmpty()) {
+                removeUidStateAndResetPackageInstallPermissionsFixed(appId, packageName, userId);
+            } else {
+                // Remove permissions associated with package. Since runtime
+                // permissions are per user we have to kill the removed package
+                // or packages running under the shared user of the removed
+                // package if revoking the permissions requested only by the removed
+                // package is successful and this causes a change in gids.
+                final int userIdToKill = revokeSharedUserPermissionsForDeletedPackageInternal(pkg,
+                        sharedUserPkgs, userId);
+                final boolean shouldKill = userIdToKill != UserHandle.USER_NULL;
+                // If gids changed, kill all affected packages.
+                if (shouldKill) {
+                    mHandler.post(() -> {
+                        // This has to happen with no lock held.
+                        killUid(appId, UserHandle.USER_ALL, KILL_APP_REASON_GIDS_CHANGED);
+                    });
+                }
             }
         }
     }
@@ -5190,8 +5192,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 @NonNull PackageInstalledParams params, @UserIdInt int userId) {
             Objects.requireNonNull(pkg, "pkg");
             Objects.requireNonNull(params, "params");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            onPackageInstalledInternal(pkg, params, userId);
+            Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
+                    || userId == UserHandle.USER_ALL, "userId");
+            final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
+                    : new int[] { userId };
+            onPackageInstalledInternal(pkg, params, userIds);
         }
 
         @Override
@@ -5206,8 +5211,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 @UserIdInt int userId) {
             Objects.requireNonNull(packageName, "packageName");
             Objects.requireNonNull(sharedUserPkgs, "sharedUserPkgs");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userId);
+            Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
+                    || userId == UserHandle.USER_ALL, "userId");
+            final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
+                    : new int[] { userId };
+            onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userIds);
         }
 
         @NonNull
