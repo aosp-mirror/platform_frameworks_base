@@ -461,9 +461,9 @@ public final class SensorPrivacyManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void suppressSensorPrivacyReminders(@NonNull String packageName,
+    public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(packageName, suppress, mContext.getUserId());
+        suppressSensorPrivacyReminders(sensor, suppress, mContext.getUserId());
     }
 
     /**
@@ -476,10 +476,10 @@ public final class SensorPrivacyManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void suppressSensorPrivacyReminders(@NonNull String packageName,
+    public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress, @UserIdInt int userId) {
         try {
-            mService.suppressIndividualSensorPrivacyReminders(userId, packageName,
+            mService.suppressIndividualSensorPrivacyReminders(userId, sensor,
                     token, suppress);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

@@ -1743,7 +1743,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mContext, android.R.attr.colorBackgroundFloating);
 
         final ColorStateList inverseTextTint = Utils.getColorAttr(
-                mContext, com.android.internal.R.attr.textColorPrimaryInverse);
+                mContext, com.android.internal.R.attr.textColorOnAccent);
 
         row.sliderProgressSolid.setTintList(colorTint);
         if (row.sliderBgIcon != null) {
