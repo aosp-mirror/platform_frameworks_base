@@ -31,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -110,6 +111,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private final int mCurrentUserId;
 
+    private ScreenRotationAnimation mRotationAnimation;
+
     DefaultTransitionHandler(@NonNull TransactionPool transactionPool, Context context,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
         mTransactionPool = transactionPool;
@@ -138,6 +141,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
+
+            if (mRotationAnimation != null) {
+                mRotationAnimation.kill();
+                mRotationAnimation = null;
+            }
+
             mAnimations.remove(transition);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
@@ -145,6 +154,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
+
+            if (info.getType() == TRANSIT_CHANGE && change.getMode() == TRANSIT_CHANGE
+                    && (change.getEndRotation() != change.getStartRotation())
+                    && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
+                mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
+                        mTransactionPool, startTransaction, change, info.getRootLeash());
+                mRotationAnimation.startAnimation(animations, onAnimFinish,
+                        mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
+                continue;
+            }
+
             if (change.getMode() == TRANSIT_CHANGE) {
                 // No default animation for this, so just update bounds/position.
                 startTransaction.setPosition(change.getLeash(),
@@ -162,8 +182,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             Animation a = loadAnimation(info, change, wallpaperTransit);
             if (a != null) {
-                startAnimInternal(animations, a, change.getLeash(), onAnimFinish,
-                        null /* position */);
+                startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
+                        mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */);
 
                 if (info.getAnimationOptions() != null) {
                     attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions());
@@ -204,14 +224,24 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
         final boolean canCustomContainer = isTask ? !sDisableCustomTaskAnimationProperty : true;
 
-        if (type == TRANSIT_RELAUNCH) {
-            a = mTransitionAnimation.createRelaunchAnimation(
-                    change.getEndAbsBounds(), mInsets, change.getEndAbsBounds());
-        } else if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
+        if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
             a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
                     (changeFlags & FLAG_SHOW_WALLPAPER) != 0);
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
             a = mTransitionAnimation.loadKeyguardUnoccludeAnimation();
+        } else if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
+            if (isOpeningType) {
+                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(enter);
+            } else {
+                a = mTransitionAnimation.loadVoiceActivityExitAnimation(enter);
+            }
+        } else if (changeMode == TRANSIT_CHANGE) {
+            // In the absence of a specific adapter, we just want to keep everything stationary.
+            a = new AlphaAnimation(1.f, 1.f);
+            a.setDuration(TransitionAnimation.DEFAULT_APP_TRANSITION_DURATION);
+        } else if (type == TRANSIT_RELAUNCH) {
+            a = mTransitionAnimation.createRelaunchAnimation(
+                    change.getEndAbsBounds(), mInsets, change.getEndAbsBounds());
         } else if (overrideType == ANIM_CUSTOM
                 && (canCustomContainer || options.getOverrideTaskTransition())) {
             a = mTransitionAnimation.loadAnimationRes(options.getPackageName(), enter
@@ -231,6 +261,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             a = mTransitionAnimation.createThumbnailEnterExitAnimationLocked(enter, scaleUp,
                     change.getEndAbsBounds(), type, wallpaperTransit, options.getThumbnail(),
                     options.getTransitionBounds());
+        } else if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0 && isOpeningType) {
+            // This received a transferred starting window, so don't animate
+            return null;
         } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_OPEN) {
             a = mTransitionAnimation.loadDefaultAnimationAttr(enter
                     ? R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
@@ -247,15 +280,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             a = mTransitionAnimation.loadDefaultAnimationAttr(enter
                     ? R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
                     : R.styleable.WindowAnimation_wallpaperCloseExitAnimation);
-        } else if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
-            if (isOpeningType) {
-                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(enter);
-            } else {
-                a = mTransitionAnimation.loadVoiceActivityExitAnimation(enter);
-            }
-        } else if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0 && isOpeningType) {
-            // This received a transferred starting window, so don't animate
-            return null;
         } else if (type == TRANSIT_OPEN) {
             if (isTask) {
                 a = mTransitionAnimation.loadDefaultAnimationAttr(enter
@@ -294,10 +318,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             a = mTransitionAnimation.loadDefaultAnimationAttr(enter
                     ? R.styleable.WindowAnimation_taskToBackEnterAnimation
                     : R.styleable.WindowAnimation_taskToBackExitAnimation);
-        } else if (changeMode == TRANSIT_CHANGE) {
-            // In the absence of a specific adapter, we just want to keep everything stationary.
-            a = new AlphaAnimation(1.f, 1.f);
-            a.setDuration(TransitionAnimation.DEFAULT_APP_TRANSITION_DURATION);
         }
 
         if (a != null) {
@@ -311,10 +331,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return a;
     }
 
-    private void startAnimInternal(@NonNull ArrayList<Animator> animations, @NonNull Animation anim,
-            @NonNull SurfaceControl leash, @NonNull Runnable finishCallback,
+    static void startSurfaceAnimation(@NonNull ArrayList<Animator> animations,
+            @NonNull Animation anim, @NonNull SurfaceControl leash,
+            @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
+            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor,
             @Nullable Point position) {
-        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
+        final SurfaceControl.Transaction transaction = pool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
         final Transformation transformation = new Transformation();
         final float[] matrix = new float[9];
@@ -332,8 +354,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix,
                     position);
 
-            mTransactionPool.release(transaction);
-            mMainExecutor.execute(() -> {
+            pool.release(transaction);
+            mainExecutor.execute(() -> {
                 animations.remove(va);
                 finishCallback.run();
             });
@@ -350,7 +372,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
         });
         animations.add(va);
-        mAnimExecutor.execute(va::start);
+        animExecutor.execute(va::start);
     }
 
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
@@ -398,8 +420,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         };
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
-        startAnimInternal(animations, a, wt.getSurface(), finisher,
-                new Point(bounds.left, bounds.top));
+        startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
+                mMainExecutor, mAnimExecutor, new Point(bounds.left, bounds.top));
     }
 
     private void attachThumbnailAnimation(@NonNull ArrayList<Animator> animations,
@@ -422,7 +444,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         };
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
-        startAnimInternal(animations, a, wt.getSurface(), finisher, null /* position */);
+        startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
+                mMainExecutor, mAnimExecutor, null /* position */);
     }
 
     private static int getWallpaperTransitType(TransitionInfo info) {
