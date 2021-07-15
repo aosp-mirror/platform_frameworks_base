@@ -11065,9 +11065,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-                if (gpuDmaBufUsage >= 0) {
-                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+                if (gpuPrivateUsage >= 0) {
+                    final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                     pw.print("      GPU: ");
                     pw.print(stringifyKBSize(gpuUsage));
                     pw.print(" (");
