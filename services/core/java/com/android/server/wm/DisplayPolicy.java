@@ -1568,6 +1568,10 @@ public class DisplayPolicy {
             layoutStatusBar(displayFrames, mBarContentFrames.get(TYPE_STATUS_BAR));
             return;
         }
+        if (win.mActivityRecord != null && win.mActivityRecord.mWaitForEnteringPinnedMode) {
+            // Skip layout of the window when in transition to pip mode.
+            return;
+        }
         final WindowManager.LayoutParams attrs = win.getAttrs();
 
         final int type = attrs.type;
