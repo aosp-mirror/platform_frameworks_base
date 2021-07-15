@@ -118,8 +118,8 @@ public class ScreenshotView extends FrameLayout implements
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
     private static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
     private static final long SCREENSHOT_ACTIONS_ALPHA_DURATION_MS = 100;
-    private static final long SCREENSHOT_DISMISS_Y_DURATION_MS = 350;
-    private static final long SCREENSHOT_DISMISS_ALPHA_DURATION_MS = 183;
+    private static final long SCREENSHOT_DISMISS_X_DURATION_MS = 350;
+    private static final long SCREENSHOT_DISMISS_ALPHA_DURATION_MS = 350;
     private static final long SCREENSHOT_DISMISS_ALPHA_OFFSET_MS = 50; // delay before starting fade
     private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
     private static final float ROUNDED_CORNER_RADIUS = .25f;
@@ -978,7 +978,6 @@ public class ScreenshotView extends FrameLayout implements
         mScrollingScrim.setVisibility(View.GONE);
         mScrollablePreview.setVisibility(View.GONE);
         mScreenshotStatic.setTranslationX(0);
-        mScreenshotPreview.setTranslationY(0);
         mScreenshotPreview.setContentDescription(
                 mContext.getResources().getString(R.string.screenshot_preview_description));
         mScreenshotPreview.setOnClickListener(null);
@@ -994,9 +993,6 @@ public class ScreenshotView extends FrameLayout implements
         mSmartChips.clear();
         mQuickShareChip = null;
         setAlpha(1);
-        mDismissButton.setTranslationY(0);
-        mActionsContainer.setTranslationY(0);
-        mActionsContainerBackground.setTranslationY(0);
         mScreenshotSelectorView.stop();
     }
 
@@ -1024,22 +1020,19 @@ public class ScreenshotView extends FrameLayout implements
             setAlpha(1 - animation.getAnimatedFraction());
         });
 
-        ValueAnimator yAnim = ValueAnimator.ofFloat(0, 1);
-        yAnim.setInterpolator(mAccelerateInterpolator);
-        yAnim.setDuration(SCREENSHOT_DISMISS_Y_DURATION_MS);
-        float screenshotStartY = mScreenshotPreview.getTranslationY();
-        float dismissStartY = mDismissButton.getTranslationY();
-        yAnim.addUpdateListener(animation -> {
-            float yDelta = MathUtils.lerp(0, mDismissDeltaY, animation.getAnimatedFraction());
-            mScreenshotPreview.setTranslationY(screenshotStartY + yDelta);
-            mScreenshotPreviewBorder.setTranslationY(screenshotStartY + yDelta);
-            mDismissButton.setTranslationY(dismissStartY + yDelta);
-            mActionsContainer.setTranslationY(yDelta);
-            mActionsContainerBackground.setTranslationY(yDelta);
+        ValueAnimator xAnim = ValueAnimator.ofFloat(0, 1);
+        xAnim.setInterpolator(mAccelerateInterpolator);
+        xAnim.setDuration(SCREENSHOT_DISMISS_X_DURATION_MS);
+        float deltaX = mDirectionLTR
+                    ? -1 * (mScreenshotPreviewBorder.getX() + mScreenshotPreviewBorder.getWidth())
+                    : (mDisplayMetrics.widthPixels - mScreenshotPreviewBorder.getX());
+        xAnim.addUpdateListener(animation -> {
+            float currXDelta = MathUtils.lerp(0, deltaX, animation.getAnimatedFraction());
+            mScreenshotStatic.setTranslationX(currXDelta);
         });
 
         AnimatorSet animSet = new AnimatorSet();
-        animSet.play(yAnim).with(alphaAnim);
+        animSet.play(xAnim).with(alphaAnim);
 
         return animSet;
     }
