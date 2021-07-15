@@ -42,6 +42,7 @@ import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -536,6 +537,27 @@ class ActivityClientController extends IActivityClientController.Stub {
         synchronized (mGlobalLock) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
         }
+    }
+
+    @Override
+    @Nullable
+    public IBinder getActivityTokenBelow(IBinder activityToken) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
+                if (ar == null) {
+                    return null;
+                }
+                final ActivityRecord below = ar.getTask().getActivityBelow(ar);
+                if (below != null && below.getUid() == ar.getUid()) {
+                    return below.appToken.asBinder();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return null;
     }
 
     @Override
