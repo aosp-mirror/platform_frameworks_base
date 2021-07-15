@@ -1208,6 +1208,12 @@ class Task extends TaskFragment {
         }
 
         if (newParent != null) {
+            // Surface of Task that will not be organized should be shown by default.
+            // See Task#showSurfaceOnCreation
+            if (!mCreatedByOrganizer && !canBeOrganized()) {
+                getSyncTransaction().show(mSurfaceControl);
+            }
+
             // TODO: Ensure that this is actually necessary here
             // Notify the voice session if required
             if (voiceSession != null) {
