@@ -414,21 +414,30 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
     }
 
-    void updateDisplayCutoutMargins(DisplayCutout cutout) {
+    void updateInsets(WindowInsets insets) {
         int orientation = mContext.getResources().getConfiguration().orientation;
         mOrientationPortrait = (orientation == ORIENTATION_PORTRAIT);
         FrameLayout.LayoutParams p =
                 (FrameLayout.LayoutParams) mScreenshotStatic.getLayoutParams();
+        DisplayCutout cutout = insets.getDisplayCutout();
+        Insets navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars());
         if (cutout == null) {
-            p.setMargins(0, 0, 0, 0);
+            p.setMargins(0, 0, 0, navBarInsets.bottom);
         } else {
             Insets waterfall = cutout.getWaterfallInsets();
             if (mOrientationPortrait) {
-                p.setMargins(waterfall.left, Math.max(cutout.getSafeInsetTop(), waterfall.top),
-                        waterfall.right, Math.max(cutout.getSafeInsetBottom(), waterfall.bottom));
+                p.setMargins(
+                        waterfall.left,
+                        Math.max(cutout.getSafeInsetTop(), waterfall.top),
+                        waterfall.right,
+                        Math.max(cutout.getSafeInsetBottom(),
+                                Math.max(navBarInsets.bottom, waterfall.bottom)));
             } else {
-                p.setMargins(Math.max(cutout.getSafeInsetLeft(), waterfall.left), waterfall.top,
-                        Math.max(cutout.getSafeInsetRight(), waterfall.right), waterfall.bottom);
+                p.setMargins(
+                        Math.max(cutout.getSafeInsetLeft(), waterfall.left),
+                        waterfall.top,
+                        Math.max(cutout.getSafeInsetRight(), waterfall.right),
+                        Math.max(navBarInsets.bottom, waterfall.bottom));
             }
         }
         mStaticLeftMargin = p.leftMargin;
@@ -436,10 +445,10 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotStatic.requestLayout();
     }
 
-    void updateOrientation(DisplayCutout cutout) {
+    void updateOrientation(WindowInsets insets) {
         int orientation = mContext.getResources().getConfiguration().orientation;
         mOrientationPortrait = (orientation == ORIENTATION_PORTRAIT);
-        updateDisplayCutoutMargins(cutout);
+        updateInsets(insets);
         int screenshotFixedSize =
                 mContext.getResources().getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
         ViewGroup.LayoutParams params = mScreenshotPreview.getLayoutParams();
