@@ -69,6 +69,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -121,6 +122,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Nullable private final UdfpsHbmProvider mHbmProvider;
+    @NonNull private final KeyguardBypassController mKeyguardBypassController;
     @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -398,7 +400,10 @@ public class UdfpsController implements DozeReceiver {
                     handled = true;
                 }
                 if ((withinSensorArea || fromUdfpsView) && shouldTryToDismissKeyguard()) {
-                    Log.v(TAG, "onTouch | dismiss keyguard from ACTION_DOWN");
+                    Log.v(TAG, "onTouch | dismiss keyguard ACTION_DOWN");
+                    if (!mOnFingerDown) {
+                        playStartHaptic();
+                    }
                     mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
                     mAttemptedToDismissKeyguard = true;
                 }
@@ -415,6 +420,16 @@ public class UdfpsController implements DozeReceiver {
                     boolean actionMoveWithinSensorArea =
                             isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
                                 fromUdfpsView);
+                    if ((fromUdfpsView || actionMoveWithinSensorArea)
+                            && shouldTryToDismissKeyguard()) {
+                        Log.v(TAG, "onTouch | dismiss keyguard ACTION_MOVE");
+                        if (!mOnFingerDown) {
+                            playStartHaptic();
+                        }
+                        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+                        mAttemptedToDismissKeyguard = true;
+                        break;
+                    }
                     if (actionMoveWithinSensorArea) {
                         if (mVelocityTracker == null) {
                             // touches could be injected, so the velocity tracker may not have
@@ -449,12 +464,6 @@ public class UdfpsController implements DozeReceiver {
                     } else {
                         Log.v(TAG, "onTouch | finger outside");
                         onFingerUp();
-                    }
-                    if ((fromUdfpsView || actionMoveWithinSensorArea)
-                            && shouldTryToDismissKeyguard()) {
-                        Log.v(TAG, "onTouch | dismiss keyguard from ACTION_MOVE");
-                        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
-                        mAttemptedToDismissKeyguard = true;
                     }
                 }
                 Trace.endSection();
@@ -511,6 +520,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider,
             @NonNull KeyguardStateController keyguardStateController,
+            @NonNull KeyguardBypassController keyguardBypassController,
             @NonNull DisplayManager displayManager,
             @Main Handler mainHandler) {
         mContext = context;
@@ -546,6 +556,7 @@ public class UdfpsController implements DozeReceiver {
                 },
                 displayManager,
                 mainHandler);
+        mKeyguardBypassController = keyguardBypassController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -872,12 +883,17 @@ public class UdfpsController implements DozeReceiver {
 
     private void onFingerDown(int x, int y, float minor, float major) {
         mExecution.assertIsMainThread();
+        mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
         if (!mOnFingerDown) {
             playStartHaptic();
+
+            if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
+                mKeyguardUpdateMonitor.requestFaceAuth(/* userInitiatedRequest */ false);
+            }
         }
         mOnFingerDown = true;
         mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
