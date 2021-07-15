@@ -184,7 +184,7 @@ public class ModuleInfoProvider {
         List<PackageInfo> allPackages;
         try {
             allPackages = mPackageManager.getInstalledPackages(
-                    flags | PackageManager.MATCH_APEX, UserHandle.USER_SYSTEM).getList();
+                    flags | PackageManager.MATCH_APEX, UserHandle.getCallingUserId()).getList();
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to retrieve all package names", e);
             return Collections.emptyList();

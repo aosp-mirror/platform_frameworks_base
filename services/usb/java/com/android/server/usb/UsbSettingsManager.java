@@ -124,6 +124,7 @@ class UsbSettingsManager {
             if (mSettingsByProfileGroup.indexOfKey(userToRemove.getIdentifier()) >= 0) {
                 // The user to remove is the parent user of the group. The parent is the last user
                 // that gets removed. All state will be removed with the user
+                mSettingsByProfileGroup.get(userToRemove.getIdentifier()).unregisterReceivers();
                 mSettingsByProfileGroup.remove(userToRemove.getIdentifier());
             } else {
                 // We cannot find the parent user of the user that is removed, hence try to remove

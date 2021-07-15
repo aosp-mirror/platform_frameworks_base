@@ -32,6 +32,7 @@ import android.content.pm.ServiceInfo
 import android.os.Bundle
 import android.os.Debug
 import android.os.Environment
+import android.os.Process
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageManagerService
@@ -54,7 +55,7 @@ open class AndroidPackageParsingTestBase {
 
         private const val VERIFY_ALL_APKS = true
 
-        /** For auditing memory usage differences */
+        // For auditing memory usage differences to /sdcard/AndroidPackageParsingTestBase.hprof
         private const val DUMP_HPROF_TO_EXTERNAL = false
 
         val context: Context = InstrumentationRegistry.getInstrumentation().getContext()
@@ -96,30 +97,38 @@ open class AndroidPackageParsingTestBase {
                     anyString(), anyInt())) { true }
         }
 
-        lateinit var oldPackages: List<PackageParser.Package>
+        val oldPackages = mutableListOf<PackageParser.Package>()
 
-        lateinit var newPackages: List<AndroidPackage>
+        val newPackages = mutableListOf<AndroidPackage>()
 
         @Suppress("ConstantConditionIf")
         @JvmStatic
         @BeforeClass
         fun setUpPackages() {
-            this.oldPackages = apks.mapNotNull {
+            var uid = Process.FIRST_APPLICATION_UID
+            apks.mapNotNull {
                 try {
-                    packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                    packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false) to
+                            packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR,
+                                    false)
                 } catch (ignored: Exception) {
-                    // Parsing issues will be caught by SystemPartitionParseTest
+                    // It is intentional that a failure of either call here will result in failing
+                    // both. Having null on one side would mean nothing to compare. Due to the
+                    // nature of presubmit, this may not be caused by the change being tested, so
+                    // it's unhelpful to consider it a failure. Actual parsing issues will be
+                    // reported by SystemPartitionParseTest in postsubmit.
                     null
                 }
-            }
+            }.forEach { (old, new) ->
+                // Assign an arbitrary UID. This is normally done after parsing completes, inside
+                // PackageManagerService, but since that code isn't run here, need to mock it. This
+                // is equivalent to what the system would assign.
+                old.applicationInfo.uid = uid
+                new.uid = uid
+                uid++
 
-            this.newPackages = apks.mapNotNull {
-                try {
-                    packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
-                } catch (ignored: Exception) {
-                    // Parsing issues will be caught by SystemPartitionParseTest
-                    null
-                }
+                oldPackages += old
+                newPackages += new.hideAsFinal()
             }
 
             if (DUMP_HPROF_TO_EXTERNAL) {
@@ -132,12 +141,29 @@ open class AndroidPackageParsingTestBase {
             }
         }
 
-        fun oldAppInfo(pkg: PackageParser.Package, flags: Int = 0): ApplicationInfo? {
-            return PackageParser.generateApplicationInfo(pkg, flags, dummyUserState, 0)
+        fun oldAppInfo(
+            pkg: PackageParser.Package,
+            flags: Int = 0,
+            userId: Int = 0
+        ): ApplicationInfo? {
+            return PackageParser.generateApplicationInfo(pkg, flags, dummyUserState, userId)
         }
 
-        fun newAppInfo(pkg: AndroidPackage, flags: Int = 0): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, 0,
+        fun newAppInfo(
+            pkg: AndroidPackage,
+            flags: Int = 0,
+            userId: Int = 0
+        ): ApplicationInfo? {
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
+                    mockPkgSetting(pkg))
+        }
+
+        fun newAppInfoWithoutState(
+            pkg: AndroidPackage,
+            flags: Int = 0,
+            userId: Int = 0
+        ): ApplicationInfo? {
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
                     mockPkgSetting(pkg))
         }
 
@@ -153,6 +179,7 @@ open class AndroidPackageParsingTestBase {
 
         private fun mockPkgSetting(aPkg: AndroidPackage) = mockThrowOnUnmocked<PackageSetting> {
             this.pkg = aPkg
+            this.appId = aPkg.uid
             whenever(pkgState) { PackageStateUnserialized() }
             whenever(readUserState(anyInt())) { dummyUserState }
         }
@@ -211,7 +238,11 @@ open class AndroidPackageParsingTestBase {
             nativeLibraryRootDir=${this.nativeLibraryRootDir}
             nativeLibraryRootRequiresIsa=${this.nativeLibraryRootRequiresIsa}
             networkSecurityConfigRes=${this.networkSecurityConfigRes}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             permission=${this.permission}
             primaryCpuAbi=${this.primaryCpuAbi}
@@ -221,6 +252,7 @@ open class AndroidPackageParsingTestBase {
             .ignored("Deferred pre-R, but assigned immediately in R")}
             requiresSmallestWidthDp=${this.requiresSmallestWidthDp}
             resourceDirs=${this.resourceDirs?.contentToString()}
+            overlayPaths=${this.overlayPaths?.contentToString()}
             roundIconRes=${this.roundIconRes}
             scanPublicSourceDir=${this.scanPublicSourceDir
             .ignored("Deferred pre-R, but assigned immediately in R")}
@@ -272,7 +304,11 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData}
             name=${this.name}
             nativeLibraryDir=${this.nativeLibraryDir}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             primaryCpuAbi=${this.primaryCpuAbi}
             publicSourceDir=${this.publicSourceDir}
@@ -294,7 +330,8 @@ open class AndroidPackageParsingTestBase {
             configChanges=${this.configChanges}
             descriptionRes=${this.descriptionRes}
             directBootAware=${this.directBootAware}
-            documentLaunchMode=${this.documentLaunchMode}
+            documentLaunchMode=${this.documentLaunchMode
+            .ignored("Update for fixing b/128526493 and the testing is no longer valid")}
             enabled=${this.enabled}
             exported=${this.exported}
             flags=${Integer.toBinaryString(this.flags)}
@@ -309,12 +346,19 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData.dumpToString()}
             minAspectRatio=${this.minAspectRatio}
             name=${this.name}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             parentActivityName=${this.parentActivityName}
             permission=${this.permission}
             persistableMode=${this.persistableMode.ignored("Could be dropped pre-R, fixed in R")}
-            privateFlags=${this.privateFlags}
+            privateFlags=${
+                // Strip flag added in S
+                this.privateFlags and (ActivityInfo.PRIVATE_FLAG_HOME_TRANSITION_SOUND.inv())
+            }
             processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
             requestedVrComponent=${this.requestedVrComponent}
             resizeMode=${this.resizeMode}
@@ -352,7 +396,11 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData.dumpToString()}
             name=${this.name}
             nonLocalizedDescription=${this.nonLocalizedDescription}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             protectionLevel=${this.protectionLevel}
             requestRes=${this.requestRes}
@@ -378,7 +426,11 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData.dumpToString()}
             multiprocess=${this.multiprocess}
             name=${this.name}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             pathPermissions=${this.pathPermissions?.joinToString {
         "readPermission=${it.readPermission}\nwritePermission=${it.writePermission}"
@@ -405,7 +457,11 @@ open class AndroidPackageParsingTestBase {
             mForegroundServiceType"${this.mForegroundServiceType}
             metaData=${this.metaData.dumpToString()}
             name=${this.name}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             permission=${this.permission}
             processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
@@ -453,7 +509,13 @@ open class AndroidPackageParsingTestBase {
             .ignored("Checked separately in test")}
             reqFeatures=${this.reqFeatures?.joinToString { it.dumpToString() }}
             requestedPermissions=${this.requestedPermissions?.contentToString()}
-            requestedPermissionsFlags=${this.requestedPermissionsFlags?.contentToString()}
+            requestedPermissionsFlags=${
+                this.requestedPermissionsFlags?.map {
+                    // Newer flags are stripped
+                    it and (PackageInfo.REQUESTED_PERMISSION_REQUIRED
+                            or PackageInfo.REQUESTED_PERMISSION_GRANTED)
+                }?.joinToString()
+            }
             requiredAccountType=${this.requiredAccountType}
             requiredForAllUsers=${this.requiredForAllUsers}
             restrictedAccountType=${this.restrictedAccountType}

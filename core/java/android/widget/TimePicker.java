@@ -24,9 +24,11 @@ import android.annotation.Widget;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.icu.text.DateFormatSymbols;
 import android.icu.util.Calendar;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -38,8 +40,6 @@ import android.view.autofill.AutofillValue;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
-
-import libcore.icu.LocaleData;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -421,11 +421,13 @@ public class TimePicker extends FrameLayout {
 
     static String[] getAmPmStrings(Context context) {
         final Locale locale = context.getResources().getConfiguration().locale;
-        final LocaleData d = LocaleData.get(locale);
+        DateFormatSymbols dfs = DateFormat.getIcuDateFormatSymbols(locale);
+        String[] amPm = dfs.getAmPmStrings();
+        String[] narrowAmPm = dfs.getAmpmNarrowStrings();
 
         final String[] result = new String[2];
-        result[0] = d.amPm[0].length() > 4 ? d.narrowAm : d.amPm[0];
-        result[1] = d.amPm[1].length() > 4 ? d.narrowPm : d.amPm[1];
+        result[0] = amPm[0].length() > 4 ? narrowAmPm[0] : amPm[0];
+        result[1] = amPm[1].length() > 4 ? narrowAmPm[1] : amPm[1];
         return result;
     }
 

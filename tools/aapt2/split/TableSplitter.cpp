@@ -185,7 +185,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
     // Initialize all packages for splits.
     for (size_t idx = 0; idx < split_count; idx++) {
       ResourceTable* split_table = splits_[idx].get();
-      split_table->CreatePackage(pkg->name, pkg->id);
+      split_table->FindOrCreatePackage(pkg->name);
     }
 
     for (auto& type : pkg->types) {
@@ -229,6 +229,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
         for (size_t idx = 0; idx < split_count; idx++) {
           const SplitConstraints& split_constraint = split_constraints_[idx];
           ResourceTable* split_table = splits_[idx].get();
+          CloningValueTransformer cloner(&split_table->string_pool);
 
           // Select the values we want from this entry for this split.
           SplitValueSelector selector(split_constraint);
@@ -241,10 +242,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
             // not have actual values for each type/entry.
             ResourceTablePackage* split_pkg = split_table->FindPackage(pkg->name);
             ResourceTableType* split_type = split_pkg->FindOrCreateType(type->type);
-            if (!split_type->id) {
-              split_type->id = type->id;
-              split_type->visibility_level = type->visibility_level;
-            }
+            split_type->visibility_level = type->visibility_level;
 
             ResourceEntry* split_entry = split_type->FindOrCreateEntry(entry->name);
             if (!split_entry->id) {
@@ -257,8 +255,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
             for (ResourceConfigValue* config_value : selected_values) {
               ResourceConfigValue* new_config_value =
                   split_entry->FindOrCreateValue(config_value->config, config_value->product);
-              new_config_value->value = std::unique_ptr<Value>(
-                  config_value->value->Clone(&split_table->string_pool));
+              new_config_value->value = config_value->value->Transform(cloner);
             }
           }
         }

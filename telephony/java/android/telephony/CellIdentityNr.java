@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,7 +39,7 @@ public final class CellIdentityNr extends CellIdentity {
     private static final String TAG = "CellIdentityNr";
 
     private static final int MAX_PCI = 1007;
-    private static final int MAX_TAC = 65535;
+    private static final int MAX_TAC = 16777215; // 0xffffff
     private static final int MAX_NRARFCN = 3279165;
     private static final long MAX_NCI = 68719476735L;
 
@@ -50,10 +52,22 @@ public final class CellIdentityNr extends CellIdentity {
     // a list of additional PLMN-IDs reported for this cell
     private final ArraySet<String> mAdditionalPlmns;
 
+    /** @hide */
+    public CellIdentityNr() {
+        super(TAG, CellInfo.TYPE_NR, null, null, null, null);
+        mNrArfcn = CellInfo.UNAVAILABLE;
+        mPci = CellInfo.UNAVAILABLE;
+        mTac = CellInfo.UNAVAILABLE;
+        mNci = CellInfo.UNAVAILABLE;
+        mBands = new int[] {};
+        mAdditionalPlmns = new ArraySet();
+        mGlobalCellId = null;
+    }
+
     /**
      *
      * @param pci Physical Cell Id in range [0, 1007].
-     * @param tac 16-bit Tracking Area Code.
+     * @param tac 24-bit Tracking Area Code.
      * @param nrArfcn NR Absolute Radio Frequency Channel Number, in range [0, 3279165].
      * @param bands Bands used by the cell. Band number defined in 3GPP TS 38.101-1 and TS 38.101-2.
      * @param mccStr 3-digit Mobile Country Code in string format.
@@ -104,7 +118,7 @@ public final class CellIdentityNr extends CellIdentity {
     @Override
     public @NonNull CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mNrArfcn,
-                mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort,
+                mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE_LONG, mAlphaLong, mAlphaShort,
                 mAdditionalPlmns);
     }
 
@@ -116,7 +130,7 @@ public final class CellIdentityNr extends CellIdentity {
 
         if (mNci == CellInfo.UNAVAILABLE_LONG) return;
 
-        mGlobalCellId = plmn + String.format("%09x", mNci);
+        mGlobalCellId = plmn + formatSimple("%09x", mNci);
     }
 
     /**
@@ -126,7 +140,11 @@ public final class CellIdentityNr extends CellIdentity {
     @NonNull
     @Override
     public CellLocation asCellLocation() {
-        return new GsmCellLocation();
+        GsmCellLocation cl = new GsmCellLocation();
+        int tac = mTac != CellInfo.UNAVAILABLE ? mTac : -1;
+        cl.setLacAndCid(tac, -1);
+        cl.setPsc(0);
+        return cl;
     }
 
     @Override
@@ -199,9 +217,9 @@ public final class CellIdentityNr extends CellIdentity {
 
     /**
      * Get the tracking area code.
-     * @return a 16 bit integer or {@link CellInfo#UNAVAILABLE} if unknown.
+     * @return a 24 bit integer or {@link CellInfo#UNAVAILABLE} if unknown.
      */
-    @IntRange(from = 0, to = 65535)
+    @IntRange(from = 0, to = 16777215)
     public int getTac() {
         return mTac;
     }
@@ -215,7 +233,7 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /**
-     * @return Mobile Network Code in string fomrat, or {@code null} if unknown.
+     * @return Mobile Network Code in string format, or {@code null} if unknown.
      */
     @Nullable
     public String getMncString() {

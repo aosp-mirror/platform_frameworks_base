@@ -3,11 +3,12 @@
 #include "Bitmap.h"
 
 #include "SkBitmap.h"
+#include "SkCanvas.h"
+#include "SkColor.h"
+#include "SkColorSpace.h"
 #include "SkPixelRef.h"
 #include "SkImageEncoder.h"
 #include "SkImageInfo.h"
-#include "SkColor.h"
-#include "SkColorSpace.h"
 #include "GraphicsJNI.h"
 #include "SkStream.h"
 #include "SkWebpEncoder.h"
@@ -19,12 +20,19 @@
 #include <utils/Color.h>
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
+#include <android-base/unique_fd.h>
+#include <android/binder_parcel.h>
+#include <android/binder_parcel_jni.h>
+#include <android/binder_parcel_platform.h>
+#include <android/binder_parcel_utils.h>
 #include <private/android/AHardwareBufferHelpers.h>
-#include <binder/Parcel.h>
+#include <cutils/ashmem.h>
 #include <dlfcn.h>
 #include <renderthread/RenderProxy.h>
+#include <sys/mman.h>
 #endif
 
+#include <inttypes.h>
 #include <string.h>
 #include <memory>
 #include <string>
@@ -567,152 +575,296 @@ static void Bitmap_setHasMipMap(JNIEnv* env, jobject, jlong bitmapHandle,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODO: Move somewhere else
 #ifdef __ANDROID__ // Layoutlib does not support parcel
-static struct parcel_offsets_t
-{
-  jclass clazz;
-  jfieldID mNativePtr;
-} gParcelOffsets;
 
-static Parcel* parcelForJavaObject(JNIEnv* env, jobject obj) {
-    if (obj) {
-        Parcel* p = (Parcel*)env->GetLongField(obj, gParcelOffsets.mNativePtr);
-        if (p != NULL) {
-            return p;
-        }
-        jniThrowException(env, "java/lang/IllegalStateException", "Parcel has been finalized!");
+class ScopedParcel {
+public:
+    explicit ScopedParcel(JNIEnv* env, jobject parcel) {
+        mParcel = AParcel_fromJavaParcel(env, parcel);
     }
-    return NULL;
+
+    ~ScopedParcel() { AParcel_delete(mParcel); }
+
+    int32_t readInt32() {
+        int32_t temp = 0;
+        // TODO: This behavior-matches what android::Parcel does
+        // but this should probably be better
+        if (AParcel_readInt32(mParcel, &temp) != STATUS_OK) {
+            temp = 0;
+        }
+        return temp;
+    }
+
+    uint32_t readUint32() {
+        uint32_t temp = 0;
+        // TODO: This behavior-matches what android::Parcel does
+        // but this should probably be better
+        if (AParcel_readUint32(mParcel, &temp) != STATUS_OK) {
+            temp = 0;
+        }
+        return temp;
+    }
+
+    void writeInt32(int32_t value) { AParcel_writeInt32(mParcel, value); }
+
+    void writeUint32(uint32_t value) { AParcel_writeUint32(mParcel, value); }
+
+    bool allowFds() const { return AParcel_getAllowFds(mParcel); }
+
+    std::optional<sk_sp<SkData>> readData() {
+        struct Data {
+            void* ptr = nullptr;
+            size_t size = 0;
+        } data;
+        auto error = AParcel_readByteArray(mParcel, &data,
+                                           [](void* arrayData, int32_t length,
+                                              int8_t** outBuffer) -> bool {
+                                               Data* data = reinterpret_cast<Data*>(arrayData);
+                                               if (length > 0) {
+                                                   data->ptr = sk_malloc_canfail(length);
+                                                   if (!data->ptr) {
+                                                       return false;
+                                                   }
+                                                   *outBuffer =
+                                                           reinterpret_cast<int8_t*>(data->ptr);
+                                                   data->size = length;
+                                               }
+                                               return true;
+                                           });
+        if (error != STATUS_OK || data.size <= 0) {
+            sk_free(data.ptr);
+            return std::nullopt;
+        } else {
+            return SkData::MakeFromMalloc(data.ptr, data.size);
+        }
+    }
+
+    void writeData(const std::optional<sk_sp<SkData>>& optData) {
+        if (optData) {
+            const auto& data = *optData;
+            AParcel_writeByteArray(mParcel, reinterpret_cast<const int8_t*>(data->data()),
+                                   data->size());
+        } else {
+            AParcel_writeByteArray(mParcel, nullptr, -1);
+        }
+    }
+
+    AParcel* get() { return mParcel; }
+
+private:
+    AParcel* mParcel;
+};
+
+enum class BlobType : int32_t {
+    IN_PLACE,
+    ASHMEM,
+};
+
+#define ON_ERROR_RETURN(X) \
+    if ((error = (X)) != STATUS_OK) return error
+
+template <typename T, typename U>
+static binder_status_t readBlob(AParcel* parcel, T inPlaceCallback, U ashmemCallback) {
+    binder_status_t error = STATUS_OK;
+    BlobType type;
+    static_assert(sizeof(BlobType) == sizeof(int32_t));
+    ON_ERROR_RETURN(AParcel_readInt32(parcel, (int32_t*)&type));
+    if (type == BlobType::IN_PLACE) {
+        struct Data {
+            std::unique_ptr<int8_t[]> ptr = nullptr;
+            int32_t size = 0;
+        } data;
+        ON_ERROR_RETURN(
+                AParcel_readByteArray(parcel, &data,
+                                      [](void* arrayData, int32_t length, int8_t** outBuffer) {
+                                          Data* data = reinterpret_cast<Data*>(arrayData);
+                                          if (length > 0) {
+                                              data->ptr = std::make_unique<int8_t[]>(length);
+                                              data->size = length;
+                                              *outBuffer = data->ptr.get();
+                                          }
+                                          return data->ptr != nullptr;
+                                      }));
+        inPlaceCallback(std::move(data.ptr), data.size);
+        return STATUS_OK;
+    } else if (type == BlobType::ASHMEM) {
+        int rawFd = -1;
+        int32_t size = 0;
+        ON_ERROR_RETURN(AParcel_readInt32(parcel, &size));
+        ON_ERROR_RETURN(AParcel_readParcelFileDescriptor(parcel, &rawFd));
+        android::base::unique_fd fd(rawFd);
+        ashmemCallback(std::move(fd), size);
+        return STATUS_OK;
+    } else {
+        // Although the above if/else was "exhaustive" guard against unknown types
+        return STATUS_UNKNOWN_ERROR;
+    }
 }
-#endif
+
+static constexpr size_t BLOB_INPLACE_LIMIT = 12 * 1024;
+// Fail fast if we can't use ashmem and the size exceeds this limit - the binder transaction
+// wouldn't go through, anyway
+// TODO: Can we get this from somewhere?
+static constexpr size_t BLOB_MAX_INPLACE_LIMIT = 1 * 1024 * 1024;
+static constexpr bool shouldUseAshmem(AParcel* parcel, int32_t size) {
+    return size > BLOB_INPLACE_LIMIT && AParcel_getAllowFds(parcel);
+}
+
+static binder_status_t writeBlobFromFd(AParcel* parcel, int32_t size, int fd) {
+    binder_status_t error = STATUS_OK;
+    ON_ERROR_RETURN(AParcel_writeInt32(parcel, static_cast<int32_t>(BlobType::ASHMEM)));
+    ON_ERROR_RETURN(AParcel_writeInt32(parcel, size));
+    ON_ERROR_RETURN(AParcel_writeParcelFileDescriptor(parcel, fd));
+    return STATUS_OK;
+}
+
+static binder_status_t writeBlob(AParcel* parcel, const int32_t size, const void* data, bool immutable) {
+    if (size <= 0 || data == nullptr) {
+        return STATUS_NOT_ENOUGH_DATA;
+    }
+    binder_status_t error = STATUS_OK;
+    if (shouldUseAshmem(parcel, size)) {
+        // Create new ashmem region with read/write priv
+        base::unique_fd fd(ashmem_create_region("bitmap", size));
+        if (fd.get() < 0) {
+            return STATUS_NO_MEMORY;
+        }
+
+        {
+            void* dest = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd.get(), 0);
+            if (dest == MAP_FAILED) {
+                return STATUS_NO_MEMORY;
+            }
+            memcpy(dest, data, size);
+            munmap(dest, size);
+        }
+
+        if (immutable && ashmem_set_prot_region(fd.get(), PROT_READ) < 0) {
+            return STATUS_UNKNOWN_ERROR;
+        }
+        // Workaround b/149851140 in AParcel_writeParcelFileDescriptor
+        int rawFd = fd.release();
+        error = writeBlobFromFd(parcel, size, rawFd);
+        close(rawFd);
+        return error;
+    } else {
+        if (size > BLOB_MAX_INPLACE_LIMIT) {
+            return STATUS_FAILED_TRANSACTION;
+        }
+        ON_ERROR_RETURN(AParcel_writeInt32(parcel, static_cast<int32_t>(BlobType::IN_PLACE)));
+        ON_ERROR_RETURN(AParcel_writeByteArray(parcel, static_cast<const int8_t*>(data), size));
+        return STATUS_OK;
+    }
+}
+
+#undef ON_ERROR_RETURN
+
+#endif // __ANDROID__ // Layoutlib does not support parcel
 
 // This is the maximum possible size because the SkColorSpace must be
 // representable (and therefore serializable) using a matrix and numerical
 // transfer function.  If we allow more color space representations in the
 // framework, we may need to update this maximum size.
-static constexpr uint32_t kMaxColorSpaceSerializedBytes = 80;
+static constexpr size_t kMaxColorSpaceSerializedBytes = 80;
+
+static constexpr auto RuntimeException = "java/lang/RuntimeException";
+
+static bool validateImageInfo(const SkImageInfo& info, int32_t rowBytes) {
+    // TODO: Can we avoid making a SkBitmap for this?
+    return SkBitmap().setInfo(info, rowBytes);
+}
 
 static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 #ifdef __ANDROID__ // Layoutlib does not support parcel
     if (parcel == NULL) {
-        SkDebugf("-------- unparcel parcel is NULL\n");
+        jniThrowNullPointerException(env, "parcel cannot be null");
         return NULL;
     }
 
-    android::Parcel* p = parcelForJavaObject(env, parcel);
+    ScopedParcel p(env, parcel);
 
-    const bool        isMutable = p->readInt32() != 0;
-    const SkColorType colorType = (SkColorType)p->readInt32();
-    const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
-    const uint32_t    colorSpaceSize = p->readUint32();
+    const bool isMutable = p.readInt32();
+    const SkColorType colorType = static_cast<SkColorType>(p.readInt32());
+    const SkAlphaType alphaType = static_cast<SkAlphaType>(p.readInt32());
     sk_sp<SkColorSpace> colorSpace;
-    if (colorSpaceSize > 0) {
-        if (colorSpaceSize > kMaxColorSpaceSerializedBytes) {
+    const auto optColorSpaceData = p.readData();
+    if (optColorSpaceData) {
+        const auto& colorSpaceData = *optColorSpaceData;
+        if (colorSpaceData->size() > kMaxColorSpaceSerializedBytes) {
             ALOGD("Bitmap_createFromParcel: Serialized SkColorSpace is larger than expected: "
-                    "%d bytes\n", colorSpaceSize);
+                  "%zu bytes (max: %zu)\n",
+                  colorSpaceData->size(), kMaxColorSpaceSerializedBytes);
         }
 
-        const void* data = p->readInplace(colorSpaceSize);
-        if (data) {
-            colorSpace = SkColorSpace::Deserialize(data, colorSpaceSize);
-        } else {
-            ALOGD("Bitmap_createFromParcel: Unable to read serialized SkColorSpace data\n");
-        }
+        colorSpace = SkColorSpace::Deserialize(colorSpaceData->data(), colorSpaceData->size());
     }
-    const int         width = p->readInt32();
-    const int         height = p->readInt32();
-    const int         rowBytes = p->readInt32();
-    const int         density = p->readInt32();
+    const int32_t width = p.readInt32();
+    const int32_t height = p.readInt32();
+    const int32_t rowBytes = p.readInt32();
+    const int32_t density = p.readInt32();
 
     if (kN32_SkColorType != colorType &&
             kRGBA_F16_SkColorType != colorType &&
             kRGB_565_SkColorType != colorType &&
             kARGB_4444_SkColorType != colorType &&
             kAlpha_8_SkColorType != colorType) {
-        SkDebugf("Bitmap_createFromParcel unknown colortype: %d\n", colorType);
+        jniThrowExceptionFmt(env, RuntimeException,
+                             "Bitmap_createFromParcel unknown colortype: %d\n", colorType);
         return NULL;
     }
 
-    std::unique_ptr<SkBitmap> bitmap(new SkBitmap);
-    if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType, colorSpace),
-            rowBytes)) {
+    auto imageInfo = SkImageInfo::Make(width, height, colorType, alphaType, colorSpace);
+    size_t allocationSize = 0;
+    if (!validateImageInfo(imageInfo, rowBytes)) {
+        jniThrowRuntimeException(env, "Received bad SkImageInfo");
         return NULL;
     }
-
-    // Read the bitmap blob.
-    size_t size = bitmap->computeByteSize();
-    android::Parcel::ReadableBlob blob;
-    android::status_t status = p->readBlob(size, &blob);
-    if (status) {
-        doThrowRE(env, "Could not read bitmap blob.");
+    if (!Bitmap::computeAllocationSize(rowBytes, height, &allocationSize)) {
+        jniThrowExceptionFmt(env, RuntimeException,
+                             "Received bad bitmap size: width=%d, height=%d, rowBytes=%d", width,
+                             height, rowBytes);
         return NULL;
     }
-
-    // Map the bitmap in place from the ashmem region if possible otherwise copy.
     sk_sp<Bitmap> nativeBitmap;
-    // If the blob is mutable we have ownership of the region and can always use it
-    // If the blob is immutable _and_ we're immutable, we can then still use it
-    if (blob.fd() >= 0 && (blob.isMutable() || !isMutable)) {
-#if DEBUG_PARCEL
-        ALOGD("Bitmap.createFromParcel: mapped contents of bitmap from %s blob "
-                "(fds %s)",
-                blob.isMutable() ? "mutable" : "immutable",
-                p->allowFds() ? "allowed" : "forbidden");
-#endif
-        // Dup the file descriptor so we can keep a reference to it after the Parcel
-        // is disposed.
-        int dupFd = fcntl(blob.fd(), F_DUPFD_CLOEXEC, 0);
-        if (dupFd < 0) {
-            ALOGE("Error allocating dup fd. Error:%d", errno);
-            blob.release();
-            doThrowRE(env, "Could not allocate dup blob fd.");
-            return NULL;
-        }
-
-        // Map the pixels in place and take ownership of the ashmem region. We must also respect the
-        // rowBytes value already set on the bitmap instead of attempting to compute our own.
-        nativeBitmap = Bitmap::createFrom(bitmap->info(), bitmap->rowBytes(), dupFd,
-                                          const_cast<void*>(blob.data()), size, !isMutable);
-        if (!nativeBitmap) {
-            close(dupFd);
-            blob.release();
-            doThrowRE(env, "Could not allocate ashmem pixel ref.");
-            return NULL;
-        }
-
-        // Clear the blob handle, don't release it.
-        blob.clear();
-    } else {
-#if DEBUG_PARCEL
-        if (blob.fd() >= 0) {
-            ALOGD("Bitmap.createFromParcel: copied contents of mutable bitmap "
-                    "from immutable blob (fds %s)",
-                    p->allowFds() ? "allowed" : "forbidden");
-        } else {
-            ALOGD("Bitmap.createFromParcel: copied contents from %s blob "
-                    "(fds %s)",
-                    blob.isMutable() ? "mutable" : "immutable",
-                    p->allowFds() ? "allowed" : "forbidden");
-        }
-#endif
-
-        // Copy the pixels into a new buffer.
-        nativeBitmap = Bitmap::allocateHeapBitmap(bitmap.get());
-        if (!nativeBitmap) {
-            blob.release();
-            doThrowRE(env, "Could not allocate java pixel ref.");
-            return NULL;
-        }
-        memcpy(bitmap->getPixels(), blob.data(), size);
-
-        // Release the blob handle.
-        blob.release();
+    binder_status_t error = readBlob(
+            p.get(),
+            // In place callback
+            [&](std::unique_ptr<int8_t[]> buffer, int32_t size) {
+                nativeBitmap = Bitmap::allocateHeapBitmap(allocationSize, imageInfo, rowBytes);
+                if (nativeBitmap) {
+                    memcpy(nativeBitmap->pixels(), buffer.get(), size);
+                }
+            },
+            // Ashmem callback
+            [&](android::base::unique_fd fd, int32_t size) {
+                int flags = PROT_READ;
+                if (isMutable) {
+                    flags |= PROT_WRITE;
+                }
+                void* addr = mmap(nullptr, size, flags, MAP_SHARED, fd.get(), 0);
+                if (addr == MAP_FAILED) {
+                    const int err = errno;
+                    ALOGW("mmap failed, error %d (%s)", err, strerror(err));
+                    return;
+                }
+                nativeBitmap =
+                        Bitmap::createFrom(imageInfo, rowBytes, fd.release(), addr, size, !isMutable);
+            });
+    if (error != STATUS_OK) {
+        // TODO: Stringify the error, see signalExceptionForError in android_util_Binder.cpp
+        jniThrowExceptionFmt(env, RuntimeException, "Failed to read from Parcel, error=%d", error);
+        return nullptr;
+    }
+    if (!nativeBitmap) {
+        jniThrowRuntimeException(env, "Could not allocate java pixel ref.");
+        return nullptr;
     }
 
-    return createBitmap(env, nativeBitmap.release(),
-            getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
+    return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(isMutable), nullptr,
+                        nullptr, density);
 #else
-    doThrowRE(env, "Cannot use parcels outside of Android");
+    jniThrowRuntimeException(env, "Cannot use parcels outside of Android");
     return NULL;
 #endif
 }
@@ -725,48 +877,38 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         return JNI_FALSE;
     }
 
-    android::Parcel* p = parcelForJavaObject(env, parcel);
+    ScopedParcel p(env, parcel);
     SkBitmap bitmap;
 
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
     bitmapWrapper->getSkBitmap(&bitmap);
 
-    p->writeInt32(!bitmap.isImmutable());
-    p->writeInt32(bitmap.colorType());
-    p->writeInt32(bitmap.alphaType());
+    p.writeInt32(!bitmap.isImmutable());
+    p.writeInt32(bitmap.colorType());
+    p.writeInt32(bitmap.alphaType());
     SkColorSpace* colorSpace = bitmap.colorSpace();
     if (colorSpace != nullptr) {
-        sk_sp<SkData> data = colorSpace->serialize();
-        size_t size = data->size();
-        p->writeUint32(size);
-        if (size > 0) {
-            if (size > kMaxColorSpaceSerializedBytes) {
-                ALOGD("Bitmap_writeToParcel: Serialized SkColorSpace is larger than expected: "
-                        "%zu bytes\n", size);
-            }
-
-            p->write(data->data(), size);
-        }
+        p.writeData(colorSpace->serialize());
     } else {
-        p->writeUint32(0);
+        p.writeData(std::nullopt);
     }
-    p->writeInt32(bitmap.width());
-    p->writeInt32(bitmap.height());
-    p->writeInt32(bitmap.rowBytes());
-    p->writeInt32(density);
+    p.writeInt32(bitmap.width());
+    p.writeInt32(bitmap.height());
+    p.writeInt32(bitmap.rowBytes());
+    p.writeInt32(density);
 
     // Transfer the underlying ashmem region if we have one and it's immutable.
-    android::status_t status;
+    binder_status_t status;
     int fd = bitmapWrapper->bitmap().getAshmemFd();
-    if (fd >= 0 && bitmap.isImmutable() && p->allowFds()) {
+    if (fd >= 0 && p.allowFds() && bitmap.isImmutable()) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
-                "immutable blob (fds %s)",
-                p->allowFds() ? "allowed" : "forbidden");
+              "immutable blob (fds %s)",
+              p.allowFds() ? "allowed" : "forbidden");
 #endif
 
-        status = p->writeDupImmutableBlobFileDescriptor(fd);
-        if (status) {
+        status = writeBlobFromFd(p.get(), bitmapWrapper->bitmap().getAllocationByteCount(), fd);
+        if (status != STATUS_OK) {
             doThrowRE(env, "Could not write bitmap blob file descriptor.");
             return JNI_FALSE;
         }
@@ -776,26 +918,15 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     // Copy the bitmap to a new blob.
 #if DEBUG_PARCEL
     ALOGD("Bitmap.writeToParcel: copying bitmap into new blob (fds %s)",
-            p->allowFds() ? "allowed" : "forbidden");
+          p.allowFds() ? "allowed" : "forbidden");
 #endif
 
-    const bool mutableCopy = !bitmap.isImmutable();
     size_t size = bitmap.computeByteSize();
-    android::Parcel::WritableBlob blob;
-    status = p->writeBlob(size, mutableCopy, &blob);
+    status = writeBlob(p.get(), size, bitmap.getPixels(), bitmap.isImmutable());
     if (status) {
         doThrowRE(env, "Could not copy bitmap to parcel blob.");
         return JNI_FALSE;
     }
-
-    const void* pSrc =  bitmap.getPixels();
-    if (pSrc == NULL) {
-        memset(blob.data(), 0, size);
-    } else {
-        memcpy(blob.data(), pSrc, size);
-    }
-
-    blob.release();
     return JNI_TRUE;
 #else
     doThrowRE(env, "Cannot use parcels outside of Android");
@@ -1074,13 +1205,16 @@ static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject har
 static jobject Bitmap_getHardwareBuffer(JNIEnv* env, jobject, jlong bitmapPtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
     LocalScopedBitmap bitmapHandle(bitmapPtr);
-    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
+    if (!bitmapHandle->isHardware()) {
+        jniThrowException(env, "java/lang/IllegalStateException",
             "Hardware config is only supported config in Bitmap_getHardwareBuffer");
+        return nullptr;
+    }
 
     Bitmap& bitmap = bitmapHandle->bitmap();
     return AHardwareBuffer_toHardwareBuffer(env, bitmap.hardwareBuffer());
 #else
-    return NULL;
+    return nullptr;
 #endif
 }
 
@@ -1089,6 +1223,14 @@ static jboolean Bitmap_isImmutable(CRITICAL_JNI_PARAMS_COMMA jlong bitmapHandle)
     if (!bitmapHolder.valid()) return JNI_FALSE;
 
     return bitmapHolder->bitmap().isImmutable() ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean Bitmap_isBackedByAshmem(CRITICAL_JNI_PARAMS_COMMA jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return JNI_FALSE;
+
+    return bitmapHolder->bitmap().pixelStorageType() == PixelStorageType::Ashmem ? JNI_TRUE
+                                                                                 : JNI_FALSE;
 }
 
 static void Bitmap_setImmutable(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -1157,11 +1299,10 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeSetImmutable",       "(J)V", (void*)Bitmap_setImmutable},
 
     // ------------ @CriticalNative ----------------
-    {   "nativeIsImmutable",        "(J)Z", (void*)Bitmap_isImmutable}
+    {   "nativeIsImmutable",        "(J)Z", (void*)Bitmap_isImmutable},
+    {   "nativeIsBackedByAshmem",   "(J)Z", (void*)Bitmap_isBackedByAshmem}
 
 };
-
-const char* const kParcelPathName = "android/os/Parcel";
 
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
@@ -1180,9 +1321,6 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     AHardwareBuffer_toHardwareBuffer = (AHB_to_HB)dlsym(handle_, "AHardwareBuffer_toHardwareBuffer");
     LOG_ALWAYS_FATAL_IF(AHardwareBuffer_toHardwareBuffer == nullptr,
                         " Failed to find required symbol AHardwareBuffer_toHardwareBuffer!");
-
-    gParcelOffsets.clazz = MakeGlobalRefOrDie(env, FindClassOrDie(env, kParcelPathName));
-    gParcelOffsets.mNativePtr = GetFieldIDOrDie(env, gParcelOffsets.clazz, "mNativePtr", "J");
 #endif
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));

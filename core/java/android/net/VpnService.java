@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 
+import com.android.internal.net.NetworkUtilsInternal;
 import com.android.internal.net.VpnConfig;
 
 import java.net.DatagramSocket;
@@ -119,7 +120,7 @@ import java.util.Set;
  * <p> The Android system starts a VPN in the background by calling
  * {@link android.content.Context#startService startService()}. In Android 8.0
  * (API level 26) and higher, the system places VPN apps on the temporary
- * whitelist for a short period so the app can start in the background. The VPN
+ * allowlist for a short period so the app can start in the background. The VPN
  * app must promote itself to the foreground after it's launched or the system
  * will shut down the app.
  *
@@ -170,12 +171,11 @@ public class VpnService extends Service {
             "android.net.VpnService.SUPPORTS_ALWAYS_ON";
 
     /**
-     * Use IConnectivityManager since those methods are hidden and not
-     * available in ConnectivityManager.
+     * Use IVpnManager since those methods are hidden and not available in VpnManager.
      */
-    private static IConnectivityManager getService() {
-        return IConnectivityManager.Stub.asInterface(
-                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+    private static IVpnManager getService() {
+        return IVpnManager.Stub.asInterface(
+                ServiceManager.getService(Context.VPN_MANAGEMENT_SERVICE));
     }
 
     /**
@@ -226,15 +226,15 @@ public class VpnService extends Service {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CONTROL_VPN)
     public static void prepareAndAuthorize(Context context) {
-        IConnectivityManager cm = getService();
+        IVpnManager vm = getService();
         String packageName = context.getPackageName();
         try {
             // Only prepare if we're not already prepared.
             int userId = context.getUserId();
-            if (!cm.prepareVpn(packageName, null, userId)) {
-                cm.prepareVpn(null, packageName, userId);
+            if (!vm.prepareVpn(packageName, null, userId)) {
+                vm.prepareVpn(null, packageName, userId);
             }
-            cm.setVpnPackageAuthorization(packageName, userId, VpnManager.TYPE_VPN_SERVICE);
+            vm.setVpnPackageAuthorization(packageName, userId, VpnManager.TYPE_VPN_SERVICE);
         } catch (RemoteException e) {
             // ignore
         }
@@ -255,7 +255,7 @@ public class VpnService extends Service {
      * @return {@code true} on success.
      */
     public boolean protect(int socket) {
-        return NetworkUtils.protectFromVpn(socket);
+        return NetworkUtilsInternal.protectFromVpn(socket);
     }
 
     /**
@@ -597,7 +597,8 @@ public class VpnService extends Service {
                     }
                 }
             }
-            mRoutes.add(new RouteInfo(new IpPrefix(address, prefixLength), null));
+            mRoutes.add(new RouteInfo(new IpPrefix(address, prefixLength), null, null,
+                RouteInfo.RTN_UNICAST));
             mConfig.updateAllowedFamilies(address);
             return this;
         }

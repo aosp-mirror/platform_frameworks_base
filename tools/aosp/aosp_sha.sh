@@ -4,6 +4,9 @@ LOCAL_DIR="$( dirname "${BASH_SOURCE}" )"
 if git branch -vv | grep -q -P "^\*[^\[]+\[aosp/"; then
     # Change appears to be in AOSP
     exit 0
+elif git log -n 1 --format='%B' $1 | grep -q -E "^Ignore-AOSP-First: .+" ; then
+    # Change is explicitly marked as ok to skip AOSP
+    exit 0
 else
     # Change appears to be non-AOSP; search for files
     count=0
@@ -11,7 +14,7 @@ else
         if (( count == 0 )); then
             echo
         fi
-        echo -e "\033[0;31mThe source of truth for '$file' is in AOSP.\033[0m"
+        echo -e "\033[0;31;47mThe source of truth for '$file' is in AOSP.\033[0m"
         (( count++ ))
     done < <(git show --name-only --pretty=format: $1 | grep -- "$2")
     if (( count != 0 )); then

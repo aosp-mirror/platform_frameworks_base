@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2021 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+  -->
+
+<resources>
+    <!-- Only using in Settings application -->
+    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" >
+        <item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle.SettingsLib</item>
+        <item name="android:listPreferredItemPaddingStart">24dp</item>
+        <item name="android:listPreferredItemPaddingLeft">24dp</item>
+        <item name="android:listPreferredItemPaddingEnd">16dp</item>
+        <item name="android:listPreferredItemPaddingRight">16dp</item>
+        <item name="preferenceTheme">@style/PreferenceTheme.SettingsLib</item>
+        <item name="android:switchStyle">@style/Switch.SettingsLib</item>
+        <item name="android:progressBarStyleHorizontal">@style/HorizontalProgressBar.SettingsLib</item>
+    </style>
+
+    <!-- Using in SubSettings page including injected settings page -->
+    <style name="Theme.SubSettingsBase" parent="Theme.SettingsBase">
+        <!-- Suppress the built-in action bar -->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!-- Set up edge-to-edge configuration for top app bar -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorControlNormal">?android:attr/colorControlNormal</item>
+        <!-- For AndroidX AlertDialog -->
+        <item name="alertDialogTheme">@style/Theme.AlertDialog.SettingsLib</item>
+    </style>
+
+    <style name="Theme.AlertDialog.SettingsLib" parent="@style/Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorAccent">@color/settingslib_dialog_accent</item>
+        <item name="android:colorError">@color/settingslib_dialog_colorError</item>
+        <item name="android:colorBackground">@color/settingslib_dialog_background</item>
+
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:clipToPadding">true</item>
+        <item name="android:clipChildren">true</item>
+
+        <item name="dialogCornerRadius">@*android:dimen/config_dialogCornerRadius</item>
+    </style>
+</resources>

@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
@@ -186,7 +187,7 @@ public class CallerInfo {
     private boolean mIsVoiceMail;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public CallerInfo() {
         // TODO: Move all the basic initialization here?
         mIsEmergency = false;
@@ -347,7 +348,7 @@ public class CallerInfo {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static CallerInfo getCallerInfo(Context context, Uri contactRef) {
         CallerInfo info = null;
         ContentResolver cr = CallerInfoAsyncQuery.getCurrentProfileContentResolver(context);
@@ -374,7 +375,7 @@ public class CallerInfo {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static CallerInfo getCallerInfo(Context context, String number) {
         if (VDBG) Log.v(TAG, "getCallerInfo() based on number...");
 
@@ -395,7 +396,7 @@ public class CallerInfo {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static CallerInfo getCallerInfo(Context context, String number, int subId) {
 
         if (TextUtils.isEmpty(number)) {
@@ -405,7 +406,8 @@ public class CallerInfo {
         // Change the callerInfo number ONLY if it is an emergency number
         // or if it is the voicemail number.  If it is either, take a
         // shortcut and skip the query.
-        if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
+        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        if (tm.isEmergencyNumber(number)) {
             return new CallerInfo().markAsEmergency(context);
         } else if (PhoneNumberUtils.isVoiceMailNumber(null, subId, number)) {
             return new CallerInfo().markAsVoiceMail(context, subId);

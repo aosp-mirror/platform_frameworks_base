@@ -17,7 +17,6 @@
 package com.android.systemui.log
 
 import android.util.Log
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.dagger.LogModule
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
@@ -58,7 +57,7 @@ import java.util.Locale
  * In either case, `level` can be any of `verbose`, `debug`, `info`, `warn`, `error`, `assert`, or
  * the first letter of any of the previous.
  *
- * Buffers are provided by [LogModule].
+ * Buffers are provided by [LogModule]. Instances should be created using a [LogBufferFactory].
  *
  * @param name The name of this buffer
  * @param maxLogs The maximum number of messages to keep in memory at any one time, including the
@@ -76,10 +75,6 @@ class LogBuffer(
 
     var frozen = false
         private set
-
-    fun attach(dumpManager: DumpManager) {
-        dumpManager.registerBuffer(name, this)
-    }
 
     /**
      * Logs a message to the log buffer
@@ -217,10 +212,10 @@ class LogBuffer(
     private fun dumpMessage(message: LogMessage, pw: PrintWriter) {
         pw.print(DATE_FORMAT.format(message.timestamp))
         pw.print(" ")
-        pw.print(message.level)
+        pw.print(message.level.shortString)
         pw.print(" ")
         pw.print(message.tag)
-        pw.print(" ")
+        pw.print(": ")
         pw.println(message.printer(message))
     }
 

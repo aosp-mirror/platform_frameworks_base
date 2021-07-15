@@ -28,6 +28,7 @@ import android.graphics.ColorFilter
 import android.graphics.Outline
 import android.graphics.Paint
 import android.graphics.PixelFormat
+import android.graphics.Xfermode
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.MathUtils
@@ -35,8 +36,8 @@ import android.view.View
 import androidx.annotation.Keep
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.ColorUtils.blendARGB
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import org.xmlpull.v1.XmlPullParser
 
 private const val BACKGROUND_ANIM_DURATION = 370L
@@ -48,7 +49,15 @@ private const val BACKGROUND_ANIM_DURATION = 370L
 class IlluminationDrawable : Drawable() {
 
     private var themeAttrs: IntArray? = null
-    private var cornerRadius = 0f
+    private var cornerRadiusOverride = -1f
+    var cornerRadius = 0f
+    get() {
+        return if (cornerRadiusOverride >= 0) {
+            cornerRadiusOverride
+        } else {
+            field
+        }
+    }
     private var highlightColor = Color.TRANSPARENT
     private var tmpHsl = floatArrayOf(0f, 0f, 0f)
     private var paint = Paint()
@@ -122,8 +131,28 @@ class IlluminationDrawable : Drawable() {
         throw UnsupportedOperationException("Color filters are not supported")
     }
 
-    override fun setAlpha(value: Int) {
-        throw UnsupportedOperationException("Alpha is not supported")
+    override fun setAlpha(alpha: Int) {
+        if (alpha == paint.alpha) {
+            return
+        }
+
+        paint.alpha = alpha
+        invalidateSelf()
+
+        lightSources.forEach { it.alpha = alpha }
+    }
+
+    override fun getAlpha(): Int {
+        return paint.alpha
+    }
+
+    override fun setXfermode(mode: Xfermode?) {
+        if (mode == paint.xfermode) {
+            return
+        }
+
+        paint.xfermode = mode
+        invalidateSelf()
     }
 
     /**
@@ -171,9 +200,19 @@ class IlluminationDrawable : Drawable() {
 
     fun registerLightSource(lightSource: View) {
         if (lightSource.background is LightSourceDrawable) {
-            lightSources.add(lightSource.background as LightSourceDrawable)
+            registerLightSource(lightSource.background as LightSourceDrawable)
         } else if (lightSource.foreground is LightSourceDrawable) {
-            lightSources.add(lightSource.foreground as LightSourceDrawable)
+            registerLightSource(lightSource.foreground as LightSourceDrawable)
         }
+    }
+
+    private fun registerLightSource(lightSource: LightSourceDrawable) {
+        lightSource.alpha = paint.alpha
+        lightSources.add(lightSource)
+    }
+
+    /** Set or remove the corner radius override. This is typically set during animations. */
+    fun setCornerRadiusOverride(cornerRadius: Float?) {
+        cornerRadiusOverride = cornerRadius ?: -1f
     }
 }

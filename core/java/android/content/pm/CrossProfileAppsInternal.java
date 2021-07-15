@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager.Mode;
 import android.os.UserHandle;
 
 import java.util.List;
@@ -62,4 +63,14 @@ public abstract class CrossProfileAppsInternal {
      */
     public abstract List<UserHandle> getTargetUserProfiles(
             String packageName, @UserIdInt int userId);
+
+    /**
+     * Sets the app-op for {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES} that is
+     * configurable by users in Settings. This configures it for the profile group of the given
+     * user.
+     *
+     * @see CrossProfileApps#setInteractAcrossProfilesAppOp(String, int)
+     */
+    public abstract void setInteractAcrossProfilesAppOp(
+            String packageName, @Mode int newMode, @UserIdInt int userId);
 }

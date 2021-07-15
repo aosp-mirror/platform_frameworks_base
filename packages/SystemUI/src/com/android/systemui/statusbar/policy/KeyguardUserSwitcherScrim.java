@@ -26,7 +26,6 @@ import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.util.LayoutDirection;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -38,13 +37,14 @@ public class KeyguardUserSwitcherScrim extends Drawable
         implements View.OnLayoutChangeListener {
 
     private static final float OUTER_EXTENT = 2.5f;
-    private static final float INNER_EXTENT = 0.75f;
+    private static final float INNER_EXTENT = 0.25f;
 
     private int mDarkColor;
-    private int mTop;
     private int mAlpha = 255;
     private Paint mRadialGradientPaint = new Paint();
-    private int mLayoutWidth;
+    private int mCircleX;
+    private int mCircleY;
+    private int mSize;
 
     public KeyguardUserSwitcherScrim(Context context) {
         mDarkColor = context.getColor(
@@ -53,14 +53,11 @@ public class KeyguardUserSwitcherScrim extends Drawable
 
     @Override
     public void draw(Canvas canvas) {
-        boolean isLtr = getLayoutDirection() == LayoutDirection.LTR;
+        if (mAlpha == 0) {
+            return;
+        }
         Rect bounds = getBounds();
-        float width = bounds.width() * OUTER_EXTENT;
-        float height = (mTop + bounds.height()) * OUTER_EXTENT;
-        canvas.translate(0, -mTop);
-        canvas.scale(1, height / width);
-        canvas.drawRect(isLtr ? bounds.right - width : 0, 0,
-                isLtr ? bounds.right : bounds.left + width, width, mRadialGradientPaint);
+        canvas.drawRect(bounds.left, bounds.top, bounds.right, bounds.bottom, mRadialGradientPaint);
     }
 
     @Override
@@ -88,24 +85,36 @@ public class KeyguardUserSwitcherScrim extends Drawable
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
         if (left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom) {
-            mLayoutWidth = right - left;
-            mTop = top;
+            int width = right - left;
+            int height = bottom - top;
+            mSize = Math.max(width, height);
             updatePaint();
         }
     }
 
     private void updatePaint() {
-        if (mLayoutWidth == 0) {
+        if (mSize == 0) {
             return;
         }
-        float radius = mLayoutWidth * OUTER_EXTENT;
-        boolean isLtr = getLayoutDirection() == LayoutDirection.LTR;
+        float outerRadius = mSize * OUTER_EXTENT;
         mRadialGradientPaint.setShader(
-                new RadialGradient(isLtr ? mLayoutWidth : 0, 0, radius,
+                new RadialGradient(mCircleX, mCircleY, outerRadius,
                         new int[] { Color.argb(
                                         (int) (Color.alpha(mDarkColor) * mAlpha / 255f), 0, 0, 0),
                                 Color.TRANSPARENT },
-                        new float[] { Math.max(0f, mLayoutWidth * INNER_EXTENT / radius), 1f },
+                        new float[] { Math.max(0f, INNER_EXTENT / OUTER_EXTENT), 1f },
                         Shader.TileMode.CLAMP));
+    }
+
+    /**
+     * Sets the center of the radial gradient used as a background
+     *
+     * @param x
+     * @param y
+     */
+    public void setGradientCenter(int x, int y) {
+        mCircleX = x;
+        mCircleY = y;
+        updatePaint();
     }
 }

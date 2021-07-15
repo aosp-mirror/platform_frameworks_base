@@ -34,6 +34,7 @@ public final class CategoryKey {
     public static final String CATEGORY_DISPLAY = "com.android.settings.category.ia.display";
     public static final String CATEGORY_SOUND = "com.android.settings.category.ia.sound";
     public static final String CATEGORY_STORAGE = "com.android.settings.category.ia.storage";
+    public static final String CATEGORY_EMERGENCY = "com.android.settings.category.ia.emergency";
     public static final String CATEGORY_SECURITY = "com.android.settings.category.ia.security";
     public static final String CATEGORY_SECURITY_LOCKSCREEN =
             "com.android.settings.category.ia.lockscreen";

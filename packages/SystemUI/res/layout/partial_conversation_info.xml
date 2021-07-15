@@ -24,16 +24,17 @@
     android:clipChildren="false"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:paddingStart="@*android:dimen/notification_content_margin_start">
+    android:paddingStart="@dimen/notification_shade_content_margin_horizontal">
 
     <!-- Package Info -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:clipToPadding="false">
+        android:paddingTop="@dimen/notification_guts_header_top_padding"
+        android:clipToPadding="true">
         <ImageView
             android:id="@+id/icon"
             android:layout_width="@dimen/notification_guts_conversation_icon_size"
@@ -92,7 +93,7 @@
         android:id="@+id/inline_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingEnd="@*android:dimen/notification_content_margin_end"
+        android:paddingEnd="@dimen/notification_shade_content_margin_horizontal"
         android:layout_marginTop="@dimen/notification_guts_option_vertical_padding"
         android:clipChildren="false"
         android:clipToPadding="false"
@@ -128,6 +129,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:textDirection="locale"
                     style="@style/TextAppearance.NotificationImportanceChannelGroup" />
             </LinearLayout>
         </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>

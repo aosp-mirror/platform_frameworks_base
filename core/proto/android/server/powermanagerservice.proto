@@ -58,6 +58,9 @@ message PowerManagerServiceDumpProto {
         optional bool is_screen_bright = 1;
         optional bool is_screen_dim = 2;
         optional bool is_screen_dream = 3;
+        optional int64 last_user_activity_time_ms = 4;
+        optional int64 last_user_activity_time_no_change_lights_ms = 5;
+        optional int32 display_group_id = 6;
     }
     // A com.android.server.power.PowerManagerService.UidState object.
     message UidStateProto {
@@ -109,7 +112,7 @@ message PowerManagerServiceDumpProto {
     // The time we decided to do next long check. (In milliseconds timestamp)
     optional int64 notify_long_next_check_ms = 19;
     // Summarizes the effect of the user activity timer.
-    optional UserActivityProto user_activity = 20;
+    repeated UserActivityProto user_activity = 20;
     // If true, instructs the display controller to wait for the proximity
     // sensor to go negative before turning the screen on.
     optional bool is_request_wait_for_negative_proximity = 21;
@@ -134,8 +137,8 @@ message PowerManagerServiceDumpProto {
     // Timestamp of the last time the device was put to sleep.
     optional int64 last_sleep_time_ms = 30;
     // Timestamp of the last call to user activity.
-    optional int64 last_user_activity_time_ms = 31;
-    optional int64 last_user_activity_time_no_change_lights_ms = 32;
+    optional int64 last_user_activity_time_ms = 31 [deprecated = true];
+    optional int64 last_user_activity_time_no_change_lights_ms = 32 [deprecated = true];
     // Timestamp of last interactive power hint.
     optional int64 last_interactive_power_hint_time_ms = 33;
     // Timestamp of the last screen brightness boost.
@@ -174,6 +177,16 @@ message PowerManagerServiceDumpProto {
     optional BatterySaverStateMachineProto battery_saver_state_machine = 50;
     // Attentive timeout in ms. The timeout is disabled if it is set to -1.
     optional sint32 attentive_timeout_ms = 51;
+    // The time (in the elapsed realtime timebase) at which the battery level will reach 0%. This
+    // is provided as an enhanced estimate and only valid if
+    // last_enhanced_discharge_time_updated_elapsed is greater than 0.
+    optional int64 enhanced_discharge_time_elapsed = 52;
+    // Timestamp (in the elapsed realtime timebase) of last update to enhanced battery estimate
+    // data.
+    optional int64 last_enhanced_discharge_time_updated_elapsed = 53;
+    // Whether or not the current enhanced discharge prediction is personalized based on device
+    // usage or not.
+    optional bool is_enhanced_discharge_prediction_personalized = 54;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.

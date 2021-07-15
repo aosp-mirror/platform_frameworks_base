@@ -19,6 +19,7 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"ドイツ語（スイス）"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"ベルギー語"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ブルガリア語"</string>
+    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"ブルガリア語（表音）"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"イタリア語"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"デンマーク語"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ノルウェー語"</string>
@@ -26,6 +27,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"フィンランド語"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"クロアチア語"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"チェコ語"</string>
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"QWERTY スタイル（チェコ語）"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"エストニア語"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ハンガリー語"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"アイスランド語"</string>
@@ -34,6 +36,7 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"スロバキア語"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"スロベニア語"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"トルコ語"</string>
+    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"トルコ語 F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ウクライナ語"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"アラビア語"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"ギリシャ語"</string>
@@ -44,4 +47,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"ペルシャ語"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"アゼルバイジャン語"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"ポーランド語"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"ベラルーシ語"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"モンゴル語"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ジョージア語"</string>
 </resources>

@@ -16,11 +16,6 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import android.media.ICaptureStateListener;
-import android.os.IBinder;
-import android.os.Parcel;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
 import java.util.concurrent.Semaphore;
@@ -78,7 +73,11 @@ class ExternalCaptureStateTracker {
      * @param active true when external capture is active.
      */
     private void setCaptureState(boolean active) {
-        mListener.accept(active);
+        try {
+            mListener.accept(active);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception caught while setting capture state", e);
+        }
     }
 
     /**

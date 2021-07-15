@@ -139,12 +139,12 @@ public final class PdfEditor {
             getPageSize(pageIndex, size);
 
             synchronized (PdfRenderer.sPdfiumLock) {
-                nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.native_instance,
+                nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.ni(),
                         0, 0, size.x, size.y);
             }
         } else {
             synchronized (PdfRenderer.sPdfiumLock) {
-                nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.native_instance,
+                nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.ni(),
                         clip.left, clip.top, clip.right, clip.bottom);
             }
         }

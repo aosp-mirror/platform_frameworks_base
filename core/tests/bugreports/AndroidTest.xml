@@ -21,11 +21,16 @@
     <option name="config-descriptor:metadata" key="parameter" value="not_instant_app" />
     <option name="config-descriptor:metadata" key="parameter" value="not_multi_abi" />
 
-    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-        <option name="cleanup-apks" value="true"/>
-        <option name="test-file-name" value="BugreportManagerTestCases.apk"/>
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="push-file" key="test-sysconfig.xml" value="/system/etc/sysconfig/allow-br-from-tests.xml" />
+        <option name="push-file" key="BugreportManagerTestCases.apk" value="/system/priv-app/BugreportManagerTestCases.apk" />
+        <option name="abort-on-push-failure" value="true" />
+        <option name="cleanup" value="true" />
+        <option name="remount-system" value="true" />
     </target_preparer>
-
+    <target_preparer class="com.android.tradefed.targetprep.RebootTargetPreparer" />
+￼
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
         <option name="package" value="com.android.os.bugreports.tests"/>
         <!-- test-timeout unit is ms, value = 30 min -->

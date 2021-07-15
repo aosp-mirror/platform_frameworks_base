@@ -14,72 +14,15 @@
  * limitations under the License.
  */
 
-#include <dirent.h>
-#include <fcntl.h>
-
-#include <set>
 #include <string>
 
 #include "TestHelpers.h"
-#include "android-base/macros.h"
 #include "android-base/stringprintf.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "idmap2/FileUtils.h"
 #include "private/android_filesystem_config.h"
 
-using ::testing::NotNull;
-
 namespace android::idmap2::utils {
-
-TEST(FileUtilsTests, FindFilesFindEverythingNonRecursive) {
-  const auto& root = GetTestDataPath();
-  auto v = utils::FindFiles(root, false,
-                            [](unsigned char type ATTRIBUTE_UNUSED,
-                               const std::string& path ATTRIBUTE_UNUSED) -> bool { return true; });
-  ASSERT_THAT(v, NotNull());
-  ASSERT_EQ(v->size(), 7U);
-  ASSERT_EQ(std::set<std::string>(v->begin(), v->end()), std::set<std::string>({
-                                                             root + "/.",
-                                                             root + "/..",
-                                                             root + "/overlay",
-                                                             root + "/target",
-                                                             root + "/signature-overlay",
-                                                             root + "/system-overlay",
-                                                             root + "/system-overlay-invalid",
-                                                         }));
-}
-
-TEST(FileUtilsTests, FindFilesFindApkFilesRecursive) {
-  const auto& root = GetTestDataPath();
-  auto v = utils::FindFiles(root, true, [](unsigned char type, const std::string& path) -> bool {
-    return type == DT_REG && path.size() > 4 && path.compare(path.size() - 4, 4, ".apk") == 0;
-  });
-  ASSERT_THAT(v, NotNull());
-  ASSERT_EQ(v->size(), 11U);
-  ASSERT_EQ(std::set<std::string>(v->begin(), v->end()),
-            std::set<std::string>(
-                {root + "/target/target.apk", root + "/target/target-no-overlayable.apk",
-                 root + "/overlay/overlay.apk", root + "/overlay/overlay-no-name.apk",
-                 root + "/overlay/overlay-no-name-static.apk", root + "/overlay/overlay-shared.apk",
-                 root + "/overlay/overlay-static-1.apk", root + "/overlay/overlay-static-2.apk",
-                 root + "/signature-overlay/signature-overlay.apk",
-                 root + "/system-overlay/system-overlay.apk",
-                 root + "/system-overlay-invalid/system-overlay-invalid.apk"}));
-}
-
-TEST(FileUtilsTests, ReadFile) {
-  int pipefd[2];
-  ASSERT_EQ(pipe2(pipefd, O_CLOEXEC), 0);
-
-  ASSERT_EQ(write(pipefd[1], "foobar", 6), 6);
-  close(pipefd[1]);
-
-  auto data = ReadFile(pipefd[0]);
-  ASSERT_THAT(data, NotNull());
-  ASSERT_EQ(*data, "foobar");
-  close(pipefd[0]);
-}
 
 #ifdef __ANDROID__
 TEST(FileUtilsTests, UidHasWriteAccessToPath) {

@@ -57,7 +57,7 @@ public final class CardEmulation {
     /**
      * Activity action: ask the user to change the default
      * card emulation service for a certain category. This will
-     * show a dialog that asks the user whether he wants to
+     * show a dialog that asks the user whether they want to
      * replace the current default service with the service
      * identified with the ComponentName specified in
      * {@link #EXTRA_SERVICE_COMPONENT}, for the category
@@ -113,7 +113,7 @@ public final class CardEmulation {
      *
      * <p>In this mode, when using ISO-DEP card emulation with {@link HostApduService}
      *    or {@link OffHostApduService}, whenever an Application ID (AID) of this category
-     *    is selected, the user is asked which service he wants to use to handle
+     *    is selected, the user is asked which service they want to use to handle
      *    the transaction, even if there is only one matching service.
      */
     public static final int SELECTION_MODE_ALWAYS_ASK = 1;
@@ -286,7 +286,7 @@ public final class CardEmulation {
      * <p>{@link #SELECTION_MODE_PREFER_DEFAULT} the user has requested a default
      *    service for this category, which will be preferred.
      * <p>{@link #SELECTION_MODE_ALWAYS_ASK} the user has requested to be asked
-     *    every time what service he would like to use in this category.
+     *    every time what service they would like to use in this category.
      * <p>{@link #SELECTION_MODE_ASK_IF_CONFLICT} the user will only be asked
      *    to pick a service if there is a conflict.
      * @param category The category, for example {@link #CATEGORY_PAYMENT}
@@ -294,9 +294,23 @@ public final class CardEmulation {
      */
     public int getSelectionModeForCategory(String category) {
         if (CATEGORY_PAYMENT.equals(category)) {
-            String defaultComponent = Settings.Secure.getString(mContext.getContentResolver(),
-                    Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT);
-            if (defaultComponent != null) {
+            boolean paymentRegistered = false;
+            try {
+                paymentRegistered = sService.isDefaultPaymentRegistered();
+            } catch (RemoteException e) {
+                recoverService();
+                if (sService == null) {
+                    Log.e(TAG, "Failed to recover CardEmulationService.");
+                    return SELECTION_MODE_ALWAYS_ASK;
+                }
+                try {
+                    paymentRegistered = sService.isDefaultPaymentRegistered();
+                } catch (RemoteException ee) {
+                    Log.e(TAG, "Failed to reach CardEmulationService.");
+                    return SELECTION_MODE_ALWAYS_ASK;
+                }
+            }
+            if (paymentRegistered) {
                 return SELECTION_MODE_PREFER_DEFAULT;
             } else {
                 return SELECTION_MODE_ALWAYS_ASK;
