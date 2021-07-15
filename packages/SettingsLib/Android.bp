@@ -37,6 +37,7 @@ android_library {
         "SettingsLibProgressBar",
         "SettingsLibAdaptiveIcon",
         "SettingsLibRadioButtonPreference",
+        "SettingsLibSelectorWithWidgetPreference",
         "SettingsLibDisplayDensityUtils",
         "SettingsLibUtils",
         "SettingsLibEmergencyNumber",
