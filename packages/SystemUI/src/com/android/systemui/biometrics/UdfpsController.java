@@ -69,6 +69,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -106,6 +107,7 @@ public class UdfpsController implements DozeReceiver {
     private final DelayableExecutor mFgExecutor;
     @NonNull private final StatusBar mStatusBar;
     @NonNull private final StatusBarStateController mStatusBarStateController;
+    @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -148,6 +150,7 @@ public class UdfpsController implements DozeReceiver {
     private boolean mScreenOn;
     private Runnable mAodInterruptRunnable;
     private boolean mOnFingerDown;
+    private boolean mAttemptedToDismissKeyguard;
 
     @VisibleForTesting
     public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
@@ -379,14 +382,23 @@ public class UdfpsController implements DozeReceiver {
                     // ACTION_DOWN, in that case we should just reuse the old instance.
                     mVelocityTracker.clear();
                 }
-                if (isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView)) {
+
+                boolean withinSensorArea =
+                        isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView);
+                if (withinSensorArea) {
                     Trace.beginAsyncSection("UdfpsController.e2e.onPointerDown", 0);
+                    Log.v(TAG, "onTouch | action down");
                     // The pointer that causes ACTION_DOWN is always at index 0.
                     // We need to persist its ID to track it during ACTION_MOVE that could include
                     // data for many other pointers because of multi-touch support.
                     mActivePointerId = event.getPointerId(0);
                     mVelocityTracker.addMovement(event);
                     handled = true;
+                }
+                if ((withinSensorArea || fromUdfpsView) && shouldTryToDismissKeyguard()) {
+                    Log.v(TAG, "onTouch | dismiss keyguard from ACTION_DOWN");
+                    mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+                    mAttemptedToDismissKeyguard = true;
                 }
                 Trace.endSection();
                 break;
@@ -398,8 +410,10 @@ public class UdfpsController implements DozeReceiver {
                         ? event.getPointerId(0)
                         : event.findPointerIndex(mActivePointerId);
                 if (idx == event.getActionIndex()) {
-                    if (isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
-                            fromUdfpsView)) {
+                    boolean actionMoveWithinSensorArea =
+                            isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
+                                fromUdfpsView);
+                    if (actionMoveWithinSensorArea) {
                         if (mVelocityTracker == null) {
                             // touches could be injected, so the velocity tracker may not have
                             // been initialized (via ACTION_DOWN).
@@ -434,6 +448,12 @@ public class UdfpsController implements DozeReceiver {
                         Log.v(TAG, "onTouch | finger outside");
                         onFingerUp();
                     }
+                    if ((fromUdfpsView || actionMoveWithinSensorArea)
+                            && shouldTryToDismissKeyguard()) {
+                        Log.v(TAG, "onTouch | dismiss keyguard from ACTION_MOVE");
+                        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+                        mAttemptedToDismissKeyguard = true;
+                    }
                 }
                 Trace.endSection();
                 break;
@@ -448,6 +468,7 @@ public class UdfpsController implements DozeReceiver {
                     mVelocityTracker = null;
                 }
                 Log.v(TAG, "onTouch | finger up");
+                mAttemptedToDismissKeyguard = false;
                 onFingerUp();
                 mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
                 Trace.endSection();
@@ -457,6 +478,13 @@ public class UdfpsController implements DozeReceiver {
                 // Do nothing.
         }
         return handled;
+    }
+
+    private boolean shouldTryToDismissKeyguard() {
+        return mView.getAnimationViewController() != null
+            && mView.getAnimationViewController() instanceof UdfpsKeyguardViewController
+            && mKeyguardStateController.canDismissLockScreen()
+            && !mAttemptedToDismissKeyguard;
     }
 
     @Inject
@@ -479,7 +507,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull ScreenLifecycle screenLifecycle,
             @Nullable Vibrator vibrator,
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
-            @NonNull Optional<UdfpsHbmProvider> hbmProvider) {
+            @NonNull Optional<UdfpsHbmProvider> hbmProvider,
+            @NonNull KeyguardStateController keyguardStateController) {
         mContext = context;
         mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
@@ -493,6 +522,7 @@ public class UdfpsController implements DozeReceiver {
         mFgExecutor = fgExecutor;
         mStatusBar = statusBar;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardStateController = keyguardStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -667,6 +697,7 @@ public class UdfpsController implements DozeReceiver {
                 mView.setSensorProperties(mSensorProps);
                 mView.setHbmProvider(mHbmProvider);
                 UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
+                mAttemptedToDismissKeyguard = false;
                 animation.init();
                 mView.setAnimationViewController(animation);
                 mOrientationListener.enable();
