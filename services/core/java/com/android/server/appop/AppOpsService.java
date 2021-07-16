@@ -5099,13 +5099,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                     String lastPkg = null;
                     for (int i=0; i<allOps.size(); i++) {
                         AppOpsManager.PackageOps pkg = allOps.get(i);
-                        if (!pkg.getPackageName().equals(lastPkg)) {
+                        if (!Objects.equals(pkg.getPackageName(), lastPkg)) {
                             if (lastPkg != null) {
                                 out.endTag(null, "pkg");
                             }
                             lastPkg = pkg.getPackageName();
-                            out.startTag(null, "pkg");
-                            out.attribute(null, "n", lastPkg);
+                            if (lastPkg != null) {
+                                out.startTag(null, "pkg");
+                                out.attribute(null, "n", lastPkg);
+                            }
                         }
                         out.startTag(null, "uid");
                         out.attributeInt(null, "n", pkg.getUid());
