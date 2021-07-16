@@ -139,6 +139,8 @@ public final class Phone {
      */
     private final int mTargetSdkVersion;
 
+    private final Object mLock = new Object();
+
     Phone(InCallAdapter adapter, String callingPackage, int targetSdkVersion) {
         mInCallAdapter = adapter;
         mCallingPackage = callingPackage;
@@ -156,8 +158,12 @@ public final class Phone {
         if (call == null) {
             call = new Call(this, parcelableCall.getId(), mInCallAdapter,
                     parcelableCall.getState(), mCallingPackage, mTargetSdkVersion);
-            mCallByTelecomCallId.put(parcelableCall.getId(), call);
-            mCalls.add(call);
+
+            synchronized (mLock) {
+                mCallByTelecomCallId.put(parcelableCall.getId(), call);
+                mCalls.add(call);
+            }
+
             checkCallTree(parcelableCall);
             call.internalUpdate(parcelableCall, mCallByTelecomCallId);
             fireCallAdded(call);
@@ -169,8 +175,10 @@ public final class Phone {
     }
 
     final void internalRemoveCall(Call call) {
-        mCallByTelecomCallId.remove(call.internalGetCallId());
-        mCalls.remove(call);
+        synchronized (mLock) {
+            mCallByTelecomCallId.remove(call.internalGetCallId());
+            mCalls.remove(call);
+        }
 
         InCallService.VideoCall videoCall = call.getVideoCall();
         if (videoCall != null) {
