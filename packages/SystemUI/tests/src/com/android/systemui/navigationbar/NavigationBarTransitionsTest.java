@@ -16,6 +16,8 @@
 
 package com.android.systemui.navigationbar;
 
+import static com.android.systemui.Dependency.EDGE_BACK_GESTURE_HANDLER_PROVIDER;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -58,7 +60,8 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
+        mDependency.injectTestDependency(EDGE_BACK_GESTURE_HANDLER_PROVIDER,
+                () -> mock(EdgeBackGestureHandler.class));
         doReturn(mContext)
                 .when(mDependency.injectMockDependency(NavigationModeController.class))
                 .getCurrentUserContext();

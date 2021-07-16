@@ -24,6 +24,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
+import static com.android.systemui.Dependency.EDGE_BACK_GESTURE_HANDLER_PROVIDER;
 import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 
 import static org.junit.Assert.assertEquals;
@@ -135,7 +136,8 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
         mOverviewProxyService = mDependency.injectMockDependency(OverviewProxyService.class);
-        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
+        mDependency.injectTestDependency(EDGE_BACK_GESTURE_HANDLER_PROVIDER,
+                () -> mock(EdgeBackGestureHandler.class));
         TestableLooper.get(this).runWithLooper(() -> {
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
