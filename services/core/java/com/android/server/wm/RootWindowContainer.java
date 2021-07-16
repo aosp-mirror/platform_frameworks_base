@@ -508,6 +508,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
     }
 
+    @Override
+    boolean isAttached() {
+        return true;
+    }
+
     /**
      * Called when DisplayWindowSettings values may change.
      */
@@ -2192,6 +2197,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(intermediateWindowingMode);
+            r.mWaitForEnteringPinnedMode = true;
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             rootTask.setDeferTaskAppear(false);
 
