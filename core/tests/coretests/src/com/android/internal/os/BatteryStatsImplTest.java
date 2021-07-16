@@ -69,11 +69,11 @@ public class BatteryStatsImplTest {
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         mBatteryStatsImpl = new MockBatteryStatsImpl()
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
-                .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader);
+                .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
+                .setTrackingCpuByProcStateEnabled(true);
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testUpdateProcStateCpuTimes() {
         mBatteryStatsImpl.setOnBatteryInternal(true);
         mBatteryStatsImpl.updateTimeBasesLocked(false, Display.STATE_ON, 0, 0);
@@ -231,7 +231,6 @@ public class BatteryStatsImplTest {
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testCopyFromAllUidsCpuTimes() {
         mBatteryStatsImpl.setOnBatteryInternal(false);
         mBatteryStatsImpl.updateTimeBasesLocked(false, Display.STATE_ON, 0, 0);
