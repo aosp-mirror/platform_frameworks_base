@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -47,6 +48,7 @@ import android.content.pm.LauncherApps;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
@@ -172,6 +174,10 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private ExpandableNotificationRow mNonBubbleNotifRow;
     private BubbleEntry mBubbleEntry;
     private BubbleEntry mBubbleEntry2;
+
+    private BubbleEntry mBubbleEntryUser11;
+    private BubbleEntry mBubbleEntry2User11;
+
     @Mock
     private Bubbles.BubbleExpandListener mBubbleExpandListener;
     @Mock
@@ -240,6 +246,13 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();
         mBubbleEntry = BubblesManager.notifToBubbleEntry(mRow);
         mBubbleEntry2 = BubblesManager.notifToBubbleEntry(mRow2);
+
+        UserHandle handle = mock(UserHandle.class);
+        when(handle.getIdentifier()).thenReturn(11);
+        mBubbleEntryUser11 = BubblesManager.notifToBubbleEntry(
+                mNotificationTestHelper.createBubble(handle));
+        mBubbleEntry2User11 = BubblesManager.notifToBubbleEntry(
+                mNotificationTestHelper.createBubble(handle));
 
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
@@ -906,6 +919,65 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertTrue(mBubbleController.getImplCachedState().isBubbleNotificationSuppressedFromShade(
                 groupSummary.getEntry().getKey(),
                 groupSummary.getEntry().getSbn().getGroupKey()));
+    }
+
+
+    /**
+     * Verifies that when the user changes, the bubbles in the overflow list is cleared. Doesn't
+     * test the loading from the repository which would be a nice thing to add.
+     */
+    @Test
+    public void testOnUserChanged_overflowState() {
+        int firstUserId = mBubbleEntry.getStatusBarNotification().getUser().getIdentifier();
+        int secondUserId = mBubbleEntryUser11.getStatusBarNotification().getUser().getIdentifier();
+
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.updateBubble(mBubbleEntry2);
+        assertTrue(mBubbleController.hasBubbles());
+        mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
+
+        // Verify these are in the overflow
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry.getKey())).isNotNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2.getKey())).isNotNull();
+
+        // Switch users
+        mBubbleController.onUserChanged(secondUserId);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        // Give this user some bubbles
+        mBubbleController.updateBubble(mBubbleEntryUser11);
+        mBubbleController.updateBubble(mBubbleEntry2User11);
+        assertTrue(mBubbleController.hasBubbles());
+        mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
+
+        // Verify these are in the overflow
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntryUser11.getKey())).isNotNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2User11.getKey())).isNotNull();
+
+        // Would have loaded bubbles twice because of user switch
+        verify(mDataRepository, times(2)).loadBubbles(anyInt(), any());
+    }
+
+    /**
+     * Verifies we only load the overflow data once.
+     */
+    @Test
+    public void testOverflowLoadedOnce() {
+        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
+                .thenReturn(mRow);
+        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
+                .thenReturn(mRow2);
+
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+
+        mEntryListener.onEntryRemoved(mRow, REASON_APP_CANCEL);
+        mEntryListener.onEntryRemoved(mRow2, REASON_APP_CANCEL);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        verify(mDataRepository, times(1)).loadBubbles(anyInt(), any());
     }
 
     /**
