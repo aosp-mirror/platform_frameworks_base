@@ -32,6 +32,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Space;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
@@ -40,6 +42,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+
+import java.util.List;
 
 /**
  * View that contains the top-most bits of the QS panel (primarily the status bar with date, time,
@@ -86,18 +90,13 @@ public class QuickStatusBarHeader extends FrameLayout {
     private float mKeyguardExpansionFraction;
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
-    private boolean mProviderModel;
 
-    private final String mMobileSlotName;
-    private final String mNoCallingSlotName;
-    private final String mCallStrengthSlotName;
+    @NonNull
+    private List<String> mRssiIgnoredSlots;
+    private boolean mIsSingleCarrier;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_mobile);
-        mNoCallingSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
-        mCallStrengthSlotName =
-                context.getString(com.android.internal.R.string.status_bar_call_strength);
     }
 
     /**
@@ -148,9 +147,9 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     void onAttach(TintedIconManager iconManager,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
-            boolean providerModel) {
-        mProviderModel = providerModel;
+            List<String> rssiIgnoredSlots) {
         mTintedIconManager = iconManager;
+        mRssiIgnoredSlots = rssiIgnoredSlots;
         int fillColor = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.textColorPrimary);
 
@@ -159,6 +158,11 @@ public class QuickStatusBarHeader extends FrameLayout {
 
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         updateAnimators();
+    }
+
+    void setIsSingleCarrier(boolean isSingleCarrier) {
+        mIsSingleCarrier = isSingleCarrier;
+        updateAlphaAnimator();
     }
 
     public QuickQSPanel getHeaderQsPanel() {
@@ -267,39 +271,26 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .setListener(new TouchAnimator.ListenerAdapter() {
                     @Override
                     public void onAnimationAtEnd() {
-                        // TODO(b/185580157): Remove the mProviderModel if the mobile slot can be
-                        // hidden in Provider model.
-                        if (mProviderModel) {
-                            mIconContainer.addIgnoredSlot(mNoCallingSlotName);
-                            mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-                        } else {
-                            mIconContainer.addIgnoredSlot(mMobileSlotName);
+                        super.onAnimationAtEnd();
+                        if (!mIsSingleCarrier) {
+                            mIconContainer.addIgnoredSlots(mRssiIgnoredSlots);
                         }
                     }
 
                     @Override
                     public void onAnimationStarted() {
-                        if (mProviderModel) {
-                            mIconContainer.addIgnoredSlot(mNoCallingSlotName);
-                            mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-                        } else {
-                            mIconContainer.addIgnoredSlot(mMobileSlotName);
-                        }
-
                         setSeparatorVisibility(false);
+                        if (!mIsSingleCarrier) {
+                            mIconContainer.addIgnoredSlots(mRssiIgnoredSlots);
+                        }
                     }
 
                     @Override
                     public void onAnimationAtStart() {
                         super.onAnimationAtStart();
-                        if (mProviderModel) {
-                            mIconContainer.removeIgnoredSlot(mNoCallingSlotName);
-                            mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-                        } else {
-                            mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                        }
-
                         setSeparatorVisibility(mShowClockIconsSeparator);
+                        // In QQS we never ignore RSSI.
+                        mIconContainer.removeIgnoredSlots(mRssiIgnoredSlots);
                     }
                 });
         mAlphaAnimator = builder.build();
