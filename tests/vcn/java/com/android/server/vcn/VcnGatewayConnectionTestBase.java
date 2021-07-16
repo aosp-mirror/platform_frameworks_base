@@ -127,7 +127,9 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
             new TelephonySubscriptionSnapshot(
-                    Collections.singletonMap(TEST_SUB_ID, TEST_SUB_INFO), Collections.EMPTY_MAP);
+                    TEST_SUB_ID,
+                    Collections.singletonMap(TEST_SUB_ID, TEST_SUB_INFO),
+                    Collections.EMPTY_MAP);
 
     @NonNull protected final Context mContext;
     @NonNull protected final TestLooper mTestLooper;
