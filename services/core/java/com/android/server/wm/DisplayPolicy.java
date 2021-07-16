@@ -16,13 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.util.RotationUtils.deltaRotation;
@@ -175,6 +171,8 @@ import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.InputMonitor.EventReceiverInputConsumer;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -316,24 +314,39 @@ public class DisplayPolicy {
 
     private WindowState mSystemUiControllingWindow;
 
-    // Candidate window to determine the color of navigation bar.
+    // Candidate window to determine the color of navigation bar. The window needs to be top
+    // fullscreen-app windows or dim layers that are intersecting with the window frame of status
+    // bar.
     private WindowState mNavBarColorWindowCandidate;
 
     // The window to determine opacity and background of translucent navigation bar. The window
     // needs to be opaque.
     private WindowState mNavBarBackgroundWindow;
 
+    /**
+     * Windows to determine the color of status bar. See {@link #mNavBarColorWindowCandidate} for
+     * the conditions of being candidate window.
+     */
+    private final ArrayList<WindowState> mStatusBarColorWindows = new ArrayList<>();
+
+    /**
+     * Windows to determine opacity and background of translucent status bar. The window needs to be
+     * opaque
+     */
+    private final ArrayList<WindowState> mStatusBarBackgroundWindows = new ArrayList<>();
+
     private String mFocusedApp;
     private int mLastDisableFlags;
     private int mLastAppearance;
-    private int mLastFullscreenAppearance;
-    private int mLastDockedAppearance;
     private int mLastBehavior;
     private final InsetsState mRequestedState = new InsetsState();
-    private final Rect mNonDockedRootTaskBounds = new Rect();
-    private final Rect mDockedRootTaskBounds = new Rect();
-    private final Rect mLastNonDockedRootTaskBounds = new Rect();
-    private final Rect mLastDockedRootTaskBounds = new Rect();
+    private AppearanceRegion[] mLastStatusBarAppearanceRegions;
+
+    /** The union of checked bounds while fetching {@link #mStatusBarColorWindows}. */
+    private final Rect mStatusBarColorCheckedBounds = new Rect();
+
+    /** The union of checked bounds while fetching {@link #mStatusBarBackgroundWindows}. */
+    private final Rect mStatusBarBackgroundCheckedBounds = new Rect();
 
     // What we last reported to input dispatcher about whether the focused window is fullscreen.
     private boolean mLastFocusIsFullscreen = false;
@@ -351,9 +364,6 @@ public class DisplayPolicy {
     private static final Rect sTmpDisplayFrameBounds = new Rect();
 
     private WindowState mTopFullscreenOpaqueWindowState;
-    private WindowState mTopFullscreenOpaqueOrDimmingWindowState;
-    private WindowState mTopDockedOpaqueWindowState;
-    private WindowState mTopDockedOpaqueOrDimmingWindowState;
     private boolean mTopIsFullscreen;
     private boolean mForceStatusBar;
     private int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
@@ -1648,6 +1658,10 @@ public class DisplayPolicy {
             layoutStatusBar(displayFrames, mBarContentFrames.get(TYPE_STATUS_BAR));
             return;
         }
+        if (win.mActivityRecord != null && win.mActivityRecord.mWaitForEnteringPinnedMode) {
+            // Skip layout of the window when in transition to pip mode.
+            return;
+        }
         final WindowManager.LayoutParams attrs = win.getLayoutingAttrs(displayFrames.mRotation);
 
         final int type = attrs.type;
@@ -1799,11 +1813,12 @@ public class DisplayPolicy {
      */
     public void beginPostLayoutPolicyLw() {
         mTopFullscreenOpaqueWindowState = null;
-        mTopFullscreenOpaqueOrDimmingWindowState = null;
-        mTopDockedOpaqueWindowState = null;
-        mTopDockedOpaqueOrDimmingWindowState = null;
         mNavBarColorWindowCandidate = null;
         mNavBarBackgroundWindow = null;
+        mStatusBarColorWindows.clear();
+        mStatusBarBackgroundWindows.clear();
+        mStatusBarColorCheckedBounds.setEmpty();
+        mStatusBarBackgroundCheckedBounds.setEmpty();
         mForceStatusBar = false;
 
         mAllowLockscreenWhenOn = false;
@@ -1823,15 +1838,22 @@ public class DisplayPolicy {
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
         applyKeyguardPolicy(win, imeTarget);
-        final int fl = attrs.flags;
+
+        // Check if the freeform window overlaps with the navigation bar area.
+        final boolean isOverlappingWithNavBar = isOverlappingWithNavBar(win, mNavigationBar);
+        if (isOverlappingWithNavBar && !mIsFreeformWindowOverlappingWithNavBar
+                && win.inFreeformWindowingMode()) {
+            mIsFreeformWindowOverlappingWithNavBar = true;
+        }
+
+        if (!affectsSystemUi) {
+            return;
+        }
 
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                 && attrs.type < FIRST_SYSTEM_WINDOW;
-        final int windowingMode = win.getWindowingMode();
-        final boolean inFullScreenOrSplitScreenSecondaryWindowingMode =
-                windowingMode == WINDOWING_MODE_FULLSCREEN
-                        || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-        if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi) {
+        if (mTopFullscreenOpaqueWindowState == null) {
+            final int fl = attrs.flags;
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             }
@@ -1844,91 +1866,60 @@ public class DisplayPolicy {
                 }
             }
 
-            // For app windows that are not attached, we decide if all windows in the app they
-            // represent should be hidden or if we should hide the lockscreen. For attached app
-            // windows we defer the decision to the window it is attached to.
-            if (appWindow && attached == null) {
-                if (attrs.isFullscreen() && inFullScreenOrSplitScreenSecondaryWindowingMode) {
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
-                    mTopFullscreenOpaqueWindowState = win;
-                    if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
-                        mTopFullscreenOpaqueOrDimmingWindowState = win;
-                    }
-                    if ((fl & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
-                        mAllowLockscreenWhenOn = true;
-                    }
-                }
+            if (appWindow && attached == null && attrs.isFullscreen()
+                    && (fl & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
+                mAllowLockscreenWhenOn = true;
             }
         }
 
-        // Voice interaction overrides both top fullscreen and top docked.
-        if (affectsSystemUi && attrs.type == TYPE_VOICE_INTERACTION && attrs.isFullscreen()) {
+        // Check the windows that overlap with system bars to determine system bars' appearance.
+        if ((appWindow && attached == null && attrs.isFullscreen())
+                || attrs.type == TYPE_VOICE_INTERACTION) {
+            // Record the top-fullscreen-app-window which will be used to determine system UI
+            // controlling window.
             if (mTopFullscreenOpaqueWindowState == null) {
                 mTopFullscreenOpaqueWindowState = win;
-                if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
-                    mTopFullscreenOpaqueOrDimmingWindowState = win;
+            }
+
+            // Cache app windows that is overlapping with the status bar to determine appearance
+            // of status bar.
+            if (mStatusBar != null
+                    && sTmpRect.setIntersect(win.getFrame(), mStatusBar.getFrame())
+                    && !mStatusBarBackgroundCheckedBounds.contains(sTmpRect)) {
+                mStatusBarBackgroundWindows.add(win);
+                mStatusBarBackgroundCheckedBounds.union(sTmpRect);
+                if (!mStatusBarColorCheckedBounds.contains(sTmpRect)) {
+                    mStatusBarColorWindows.add(win);
+                    mStatusBarColorCheckedBounds.union(sTmpRect);
                 }
             }
-            if (mTopDockedOpaqueWindowState == null) {
-                mTopDockedOpaqueWindowState = win;
-                if (mTopDockedOpaqueOrDimmingWindowState == null) {
-                    mTopDockedOpaqueOrDimmingWindowState = win;
+
+            // Cache app window that overlaps with the navigation bar area to determine opacity
+            // and appearance of the navigation bar. We only need to cache one window because
+            // there should be only one overlapping window if it's not in gesture navigation
+            // mode; if it's in gesture navigation mode, the navigation bar will be
+            // NAV_BAR_FORCE_TRANSPARENT and its appearance won't be decided by overlapping
+            // windows.
+            if (isOverlappingWithNavBar) {
+                if (mNavBarColorWindowCandidate == null) {
+                    mNavBarColorWindowCandidate = win;
+                }
+                if (mNavBarBackgroundWindow == null) {
+                    mNavBarBackgroundWindow = win;
                 }
             }
-        }
-
-        // Keep track of the window if it's dimming but not necessarily fullscreen.
-        if (mTopFullscreenOpaqueOrDimmingWindowState == null && affectsSystemUi
-                && win.isDimming() && inFullScreenOrSplitScreenSecondaryWindowingMode) {
-            mTopFullscreenOpaqueOrDimmingWindowState = win;
-        }
-
-        // We need to keep track of the top "fullscreen" opaque window for the docked root task
-        // separately, because both the "real fullscreen" opaque window and the one for the docked
-        // root task can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
-        if (mTopDockedOpaqueWindowState == null && affectsSystemUi && appWindow && attached == null
-                && attrs.isFullscreen() && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            mTopDockedOpaqueWindowState = win;
-            if (mTopDockedOpaqueOrDimmingWindowState == null) {
-                mTopDockedOpaqueOrDimmingWindowState = win;
+        } else if (win.isDimming()) {
+            // For dimming window whose host bounds is overlapping with system bars, it can be
+            // used to determine colors but not opacity of system bars.
+            if (mStatusBar != null
+                    && sTmpRect.setIntersect(win.getBounds(), mStatusBar.getFrame())
+                    && !mStatusBarColorCheckedBounds.contains(sTmpRect)) {
+                mStatusBarColorWindows.add(win);
+                mStatusBarColorCheckedBounds.union(sTmpRect);
             }
-        }
-
-        final WindowState navBarWin = hasNavigationBar() ? mNavigationBar : null;
-        if (isOverlappingWithNavBar(win, navBarWin)) {
-            // Check if the freeform window overlaps with the navigation bar area.
-            if (!mIsFreeformWindowOverlappingWithNavBar && win.inFreeformWindowingMode()) {
-                mIsFreeformWindowOverlappingWithNavBar = true;
+            if (isOverlappingWithNavBar && mNavigationBar == null) {
+                mNavBarColorWindowCandidate = win;
             }
-            // Cache app window that overlaps with the navigation bar area to determine opacity and
-            // appearance of the navigation bar. We only need to cache one window because there
-            // should be only one overlapping window if it's not in gesture navigation mode; if it's
-            // in gesture navigation mode, the navigation bar will be NAV_BAR_FORCE_TRANSPARENT and
-            // its appearance won't be decided by overlapping windows.
-            if (affectsSystemUi) {
-                if ((appWindow && attached == null && attrs.isFullscreen())
-                        || attrs.type == TYPE_VOICE_INTERACTION) {
-                    if (mNavBarColorWindowCandidate == null) {
-                        mNavBarColorWindowCandidate = win;
-                    }
-                    if (mNavBarBackgroundWindow == null) {
-                        mNavBarBackgroundWindow = win;
-                    }
-                } else if (win.isDimming()) {
-                    // For dimming window with it's host bounds overlapping with navigation bar, it
-                    // can be used to determine navigation bar's color but not opacity.
-                    if (mNavBarColorWindowCandidate == null) {
-                        mNavBarColorWindowCandidate = win;
-                    }
-                }
-            }
-        }
-
-        // Also keep track of any windows that are dimming but not necessarily fullscreen in the
-        // docked root task.
-        if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
-                && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            mTopDockedOpaqueOrDimmingWindowState = win;
         }
     }
 
@@ -2655,21 +2646,6 @@ public class DisplayPolicy {
         final WindowState win = winCandidate;
         mSystemUiControllingWindow = win;
 
-        final boolean inSplitScreen =
-                mService.mRoot.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
-        if (inSplitScreen) {
-            mService.getRootTaskBounds(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
-                    mDockedRootTaskBounds);
-        } else {
-            mDockedRootTaskBounds.setEmpty();
-        }
-        mService.getRootTaskBounds(inSplitScreen ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                        : WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_UNDEFINED, mNonDockedRootTaskBounds);
-        final int fullscreenAppearance = getStatusBarAppearance(mTopFullscreenOpaqueWindowState,
-                mTopFullscreenOpaqueOrDimmingWindowState);
-        final int dockedAppearance = getStatusBarAppearance(mTopDockedOpaqueWindowState,
-                mTopDockedOpaqueOrDimmingWindowState);
         final int disableFlags = win.getDisableFlags();
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
         final WindowState navColorWin = chooseNavigationColorWindowLw(mNavBarColorWindowCandidate,
@@ -2681,16 +2657,23 @@ public class DisplayPolicy {
         final int behavior = win.mAttrs.insetsFlags.behavior;
         final boolean isFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR)
                 || !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
+
+        final AppearanceRegion[] appearanceRegions =
+                new AppearanceRegion[mStatusBarColorWindows.size()];
+        for (int i = mStatusBarColorWindows.size() - 1; i >= 0; i--) {
+            final WindowState windowState = mStatusBarColorWindows.get(i);
+            appearanceRegions[i] = new AppearanceRegion(
+                    getStatusBarAppearance(windowState, windowState),
+                    new Rect(windowState.getFrame()));
+        }
+
         if (mLastDisableFlags == disableFlags
                 && mLastAppearance == appearance
-                && mLastFullscreenAppearance == fullscreenAppearance
-                && mLastDockedAppearance == dockedAppearance
                 && mLastBehavior == behavior
                 && mRequestedState.equals(win.getRequestedState())
                 && Objects.equals(mFocusedApp, win.mAttrs.packageName)
                 && mLastFocusIsFullscreen == isFullscreen
-                && mLastNonDockedRootTaskBounds.equals(mNonDockedRootTaskBounds)
-                && mLastDockedRootTaskBounds.equals(mDockedRootTaskBounds)) {
+                && Arrays.equals(mLastStatusBarAppearanceRegions, appearanceRegions)) {
             return false;
         }
         if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
@@ -2700,23 +2683,12 @@ public class DisplayPolicy {
         }
         mLastDisableFlags = disableFlags;
         mLastAppearance = appearance;
-        mLastFullscreenAppearance = fullscreenAppearance;
-        mLastDockedAppearance = dockedAppearance;
         mLastBehavior = behavior;
         mRequestedState.set(win.getRequestedState(), true /* copySources */);
         mFocusedApp = win.mAttrs.packageName;
         mLastFocusIsFullscreen = isFullscreen;
-        mLastNonDockedRootTaskBounds.set(mNonDockedRootTaskBounds);
-        mLastDockedRootTaskBounds.set(mDockedRootTaskBounds);
-        final Rect fullscreenRootTaskBounds = new Rect(mNonDockedRootTaskBounds);
-        final Rect dockedRootTaskBounds = new Rect(mDockedRootTaskBounds);
-        final AppearanceRegion[] appearanceRegions = inSplitScreen
-                ? new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, fullscreenRootTaskBounds),
-                        new AppearanceRegion(dockedAppearance, dockedRootTaskBounds)}
-                : new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, fullscreenRootTaskBounds)};
-        String cause = win.toString();
+        mLastStatusBarAppearanceRegions = appearanceRegions;
+        final String cause = win.toString();
         mHandler.post(() -> {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
@@ -2899,17 +2871,19 @@ public class DisplayPolicy {
 
     /** @return the current visibility flags with the status bar opacity related flags toggled. */
     private int configureStatusBarOpacity(int appearance) {
-        final boolean fullscreenDrawsBackground =
-                drawsBarBackground(mTopFullscreenOpaqueWindowState);
-        final boolean dockedDrawsBackground =
-                drawsBarBackground(mTopDockedOpaqueWindowState);
+        boolean drawBackground = true;
+        boolean isFullyTransparentAllowed = true;
+        for (int i = mStatusBarBackgroundWindows.size() - 1; i >= 0; i--) {
+            final WindowState window = mStatusBarBackgroundWindows.get(i);
+            drawBackground &= drawsBarBackground(window);
+            isFullyTransparentAllowed &= isFullyTransparentAllowed(window, TYPE_STATUS_BAR);
+        }
 
-        if (fullscreenDrawsBackground && dockedDrawsBackground) {
+        if (drawBackground) {
             appearance &= ~APPEARANCE_OPAQUE_STATUS_BARS;
         }
 
-        if (!isFullyTransparentAllowed(mTopFullscreenOpaqueWindowState, TYPE_STATUS_BAR)
-                || !isFullyTransparentAllowed(mTopDockedOpaqueWindowState, TYPE_STATUS_BAR)) {
+        if (!isFullyTransparentAllowed) {
             appearance |= APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
         }
 
@@ -3049,6 +3023,7 @@ public class DisplayPolicy {
     void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.println("DisplayPolicy");
         prefix += "  ";
+        final String prefixInner = prefix + "  ";
         pw.print(prefix);
         pw.print("mCarDockEnablesAccelerometer="); pw.print(mCarDockEnablesAccelerometer);
         pw.print(" mDeskDockEnablesAccelerometer=");
@@ -3116,10 +3091,6 @@ public class DisplayPolicy {
             pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
             pw.println(mTopFullscreenOpaqueWindowState);
         }
-        if (mTopFullscreenOpaqueOrDimmingWindowState != null) {
-            pw.print(prefix); pw.print("mTopFullscreenOpaqueOrDimmingWindowState=");
-            pw.println(mTopFullscreenOpaqueOrDimmingWindowState);
-        }
         if (mNavBarColorWindowCandidate != null) {
             pw.print(prefix); pw.print("mNavBarColorWindowCandidate=");
             pw.println(mNavBarColorWindowCandidate);
@@ -3127,6 +3098,20 @@ public class DisplayPolicy {
         if (mNavBarBackgroundWindow != null) {
             pw.print(prefix); pw.print("mNavBarBackgroundWindow=");
             pw.println(mNavBarBackgroundWindow);
+        }
+        if (!mStatusBarColorWindows.isEmpty()) {
+            pw.print(prefix); pw.println("mStatusBarColorWindows=");
+            for (int i = mStatusBarColorWindows.size() - 1; i >= 0; i--) {
+                final WindowState win = mStatusBarColorWindows.get(i);
+                pw.print(prefixInner); pw.println(win);
+            }
+        }
+        if (!mStatusBarBackgroundWindows.isEmpty()) {
+            pw.print(prefix); pw.println("mStatusBarBackgroundWindows=");
+            for (int i = mStatusBarBackgroundWindows.size() - 1; i >= 0; i--) {
+                final WindowState win = mStatusBarBackgroundWindows.get(i);
+                pw.print(prefixInner);  pw.println(win);
+            }
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
