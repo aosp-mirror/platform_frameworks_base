@@ -202,6 +202,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
@@ -775,7 +776,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         /** Clean up event */
         public void finish() {
-            mClientId.unlinkToDeath(this, 0);
+            try {
+                mClientId.unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                // Either not linked, or already unlinked. Either way, nothing to do.
+            }
         }
 
         @Override
