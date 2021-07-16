@@ -54,6 +54,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
+import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.ITransitionPlayer;
@@ -110,7 +111,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     final TransitionController mTransitionController;
     /**
      * A Map which manages the relationship between
-     * {@link TaskFragmentCreationParams.mFragmentToken fragmentToken} and {@link TaskFragment}
+     * {@link TaskFragmentCreationParams#getFragmentToken()} and {@link TaskFragment}
      */
     private final ArrayMap<IBinder, TaskFragment> mLaunchTaskFragments = new ArrayMap<>();
 
@@ -139,10 +140,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     @Override
     public void applyTransaction(WindowContainerTransaction t) {
-        enforceTaskPermission("applyTransaction()");
         if (t == null) {
-            throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
+            throw new IllegalArgumentException("Null transaction passed to applyTransaction");
         }
+        enforceTaskPermission("applyTransaction()", t);
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -157,10 +158,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @Override
     public int applySyncTransaction(WindowContainerTransaction t,
             IWindowContainerTransactionCallback callback) {
-        enforceTaskPermission("applySyncTransaction()");
         if (t == null) {
             throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
         }
+        enforceTaskPermission("applySyncTransaction()", t);
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -620,7 +621,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
                 final WindowContainer oldParent = WindowContainer.fromBinder(hop.getContainer());
-                final WindowContainer newParent = WindowContainer.fromBinder(hop.getNewParent());
+                final WindowContainer newParent = hop.getNewParent() != null
+                        ? WindowContainer.fromBinder(hop.getNewParent())
+                        : null;
                 if (oldParent == null || !oldParent.isAttached()) {
                     Slog.e(TAG, "Attempt to operate on unknown or detached container: "
                             + oldParent);
@@ -904,6 +907,102 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private void enforceTaskPermission(String func) {
         mService.enforceTaskPermission(func);
+    }
+
+    private void enforceTaskPermission(String func, WindowContainerTransaction t) {
+        if (t == null || t.getTaskFragmentOrganizer() == null) {
+            enforceTaskPermission(func);
+            return;
+        }
+
+        // Apps may not have the permission to manage Tasks, but we are allowing apps to manage
+        // TaskFragments belonging to their own Task.
+        enforceOperationsAllowedForTaskFragmentOrganizer(func, t);
+    }
+
+    /**
+     * Makes sure that the transaction only contains operations that are allowed for the
+     * {@link WindowContainerTransaction#getTaskFragmentOrganizer()}.
+     */
+    private void enforceOperationsAllowedForTaskFragmentOrganizer(
+            String func, WindowContainerTransaction t) {
+        final ITaskFragmentOrganizer organizer = t.getTaskFragmentOrganizer();
+
+        // Configuration changes
+        final Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
+                t.getChanges().entrySet().iterator();
+        while (entries.hasNext()) {
+            final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
+            // Only allow to apply changes to TaskFragment that is created by this organizer.
+            enforceTaskFragmentOrganized(func, WindowContainer.fromBinder(entry.getKey()),
+                    organizer);
+        }
+
+        // Hierarchy changes
+        final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
+        for (int i = hops.size() - 1; i >= 0; i--) {
+            final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
+            final int type = hop.getType();
+            // Check for each type of the operations that are allowed for TaskFragmentOrganizer.
+            switch (type) {
+                case HIERARCHY_OP_TYPE_REORDER:
+                case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT:
+                    enforceTaskFragmentOrganized(func,
+                            WindowContainer.fromBinder(hop.getContainer()), organizer);
+                    break;
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
+                    enforceTaskFragmentOrganized(func,
+                            WindowContainer.fromBinder(hop.getContainer()), organizer);
+                    enforceTaskFragmentOrganized(func,
+                            WindowContainer.fromBinder(hop.getAdjacentRoot()),
+                            organizer);
+                    break;
+                case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
+                    // We are allowing organizer to create TaskFragment. We will check the
+                    // ownerToken in #createTaskFragment, and trigger error callback if that is not
+                    // valid.
+                case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
+                case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
+                    // We are allowing organizer to start/reparent activity to a TaskFragment it
+                    // created. Nothing to check here because the TaskFragment may not be created
+                    // yet, but will be created in the same transaction.
+                    break;
+                case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
+                    enforceTaskFragmentOrganized(func,
+                            WindowContainer.fromBinder(hop.getContainer()), organizer);
+                    if (hop.getNewParent() != null) {
+                        enforceTaskFragmentOrganized(func,
+                                WindowContainer.fromBinder(hop.getNewParent()),
+                                organizer);
+                    }
+                    break;
+                default:
+                    // Other types of hierarchy changes are not allowed.
+                    String msg = "Permission Denial: " + func + " from pid="
+                            + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                            + " trying to apply a hierarchy change that is not allowed for"
+                            + " TaskFragmentOrganizer=" + organizer;
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+            }
+        }
+    }
+
+    private void enforceTaskFragmentOrganized(String func, @Nullable WindowContainer wc,
+            ITaskFragmentOrganizer organizer) {
+        if (wc == null) {
+            Slog.e(TAG, "Attempt to operate on window that no longer exists");
+            return;
+        }
+
+        final TaskFragment tf = wc.asTaskFragment();
+        if (tf == null || !tf.hasTaskFragmentOrganizer(organizer)) {
+            String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid() + " trying to modify window container not"
+                    + " belonging to the TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
     }
 
     void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams) {
