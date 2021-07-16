@@ -141,7 +141,8 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         throws RemoteException {
                             attributionSource.enforceCallingUid();
                             if (!attributionSource.isTrusted(mMaster.getContext())) {
-                                mMaster.getContext().getSystemService(PermissionManager.class)
+                                attributionSource = mMaster.getContext()
+                                        .getSystemService(PermissionManager.class)
                                         .registerAttributionSource(attributionSource);
                             }
                             service.startListening(recognizerIntent, listener, attributionSource);
