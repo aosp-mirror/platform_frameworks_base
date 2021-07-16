@@ -329,9 +329,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken,
-            int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
+    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
+            @NonNull byte[] hardwareAuthToken, int userId,
+            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
+            @FingerprintManager.EnrollReason int enrollReason,
             @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             final int maxTemplatesPerUser = mSensors.get(sensorId).getSensorProperties()
