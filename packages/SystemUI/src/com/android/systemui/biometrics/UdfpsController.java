@@ -40,6 +40,7 @@ import android.media.AudioAttributes;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -569,7 +570,12 @@ public class UdfpsController implements DozeReceiver {
     @VisibleForTesting
     public void playStartHaptic() {
         if (mVibrator != null) {
-            mVibrator.vibrate(EFFECT_CLICK, VIBRATION_SONIFICATION_ATTRIBUTES);
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    mContext.getOpPackageName(),
+                    EFFECT_CLICK,
+                    "udfps-onStart",
+                    VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
 

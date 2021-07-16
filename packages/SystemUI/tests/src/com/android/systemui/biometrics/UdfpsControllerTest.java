@@ -23,6 +23,8 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -444,7 +446,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
         moveEvent.recycle();
 
         // THEN click haptic is played
-        verify(mVibrator).vibrate(mUdfpsController.EFFECT_CLICK,
-                UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
+        verify(mVibrator).vibrate(
+                anyInt(),
+                anyString(),
+                eq(mUdfpsController.EFFECT_CLICK),
+                eq("udfps-onStart"),
+                eq(UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES));
     }
 }
