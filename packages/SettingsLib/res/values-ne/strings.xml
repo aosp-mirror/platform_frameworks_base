@@ -450,7 +450,7 @@
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै छ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै छ"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"बिस्तारै चार्ज गरिँदै"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ढिलो चार्ज हुँदै छ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज भइरहेको छैन"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लगइन गरिएको छ, अहिले नै चार्ज गर्न सकिँदैन"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"पूर्ण चार्ज भएको स्थिति"</string>
