@@ -317,6 +317,7 @@ java_defaults {
         "icu4j-platform-compat-config",
         "protolog.conf.json.gz",
         "services-platform-compat-config",
+        "TeleService-platform-compat-config",
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
     ],
