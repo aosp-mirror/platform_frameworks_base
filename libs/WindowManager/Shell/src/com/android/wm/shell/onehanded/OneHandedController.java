@@ -445,6 +445,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mOneHandedSettingsUtil.registerSettingsKeyObserver(
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 mContext.getContentResolver(), mShortcutEnabledObserver, newUserId);
+        mOneHandedSettingsUtil.registerSettingsKeyObserver(
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                mContext.getContentResolver(), mShortcutEnabledObserver, newUserId);
     }
 
     private void unregisterSettingObservers() {
