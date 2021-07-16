@@ -20,11 +20,18 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.res.Resources;
+import android.media.AudioRecord;
 import android.media.MediaSyncEvent;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
+import com.android.internal.R;
 import com.android.internal.util.DataClass;
+import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * Represents a result supporting the hotword detection.
@@ -82,6 +89,12 @@ public final class HotwordDetectedResult implements Parcelable {
     /** Represents unset value for the triggered audio channel. */
     public static final int AUDIO_CHANNEL_UNSET = -1;
 
+    /** Limits the max value for the hotword offset. */
+    private static final int LIMIT_HOTWORD_OFFSET_MAX_VALUE = 60 * 60 * 1000; // 1 hour
+
+    /** Limits the max value for the triggered audio channel. */
+    private static final int LIMIT_AUDIO_CHANNEL_MAX_VALUE = 63;
+
     /** Confidence level in the trigger outcome. */
     @HotwordConfidenceLevelValue
     private final int mConfidenceLevel;
@@ -100,6 +113,8 @@ public final class HotwordDetectedResult implements Parcelable {
     /**
      * Offset in milliseconds the audio stream when the trigger event happened (end of hotword
      * phrase).
+     *
+     * <p>Only value between 0 and 3600000 (inclusive) is accepted.
      */
     private int mHotwordOffsetMillis = HOTWORD_OFFSET_UNSET;
 
@@ -111,7 +126,11 @@ public final class HotwordDetectedResult implements Parcelable {
      */
     private int mHotwordDurationMillis = 0;
 
-    /** Audio channel containing the highest-confidence hotword signal. **/
+    /**
+     * Audio channel containing the highest-confidence hotword signal.
+     *
+     * <p>Only value between 0 and 63 (inclusive) is accepted.
+     */
     private int mAudioChannel = AUDIO_CHANNEL_UNSET;
 
     /**
@@ -187,16 +206,20 @@ public final class HotwordDetectedResult implements Parcelable {
         return new PersistableBundle();
     }
 
+    private static int sMaxBundleSize = -1;
+
     /**
      * Returns the maximum byte size of the information contained in the bundle.
      *
-     * <p>The total size will be calculated as a sum of byte sizes over all bundle keys.
-     *
-     * <p>For example, for a bundle containing a single key: {@code "example_key" -> 42.0f}, the
-     * bundle size will be {@code 11 + Float.BYTES = 15} bytes.
+     * <p>The total size will be calculated by how much bundle data should be written into the
+     * Parcel.
      */
     public static int getMaxBundleSize() {
-        return 50;
+        if (sMaxBundleSize < 0) {
+            sMaxBundleSize = Resources.getSystem().getInteger(
+                    R.integer.config_hotwordDetectedResultMaxBundleSize);
+        }
+        return sMaxBundleSize;
     }
 
     /**
@@ -210,6 +233,91 @@ public final class HotwordDetectedResult implements Parcelable {
     // @NonNull only, and by default codegen would use the same javadoc on both.
     public @Nullable MediaSyncEvent getMediaSyncEvent() {
         return mMediaSyncEvent;
+    }
+
+    /**
+     * Returns how many bytes should be written into the Parcel
+     *
+     * @hide
+     */
+    public static int getParcelableSize(@NonNull Parcelable parcelable) {
+        final Parcel p = Parcel.obtain();
+        parcelable.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        final int size = p.dataSize();
+        p.recycle();
+        return size;
+    }
+
+    /**
+     * Returns how many bits have been written into the HotwordDetectedResult.
+     *
+     * @hide
+     */
+    public static int getUsageSize(@NonNull HotwordDetectedResult hotwordDetectedResult) {
+        int totalBits = 0;
+
+        if (hotwordDetectedResult.getConfidenceLevel() != defaultConfidenceLevel()) {
+            totalBits += bitCount(CONFIDENCE_LEVEL_VERY_HIGH);
+        }
+        if (hotwordDetectedResult.getHotwordOffsetMillis() != HOTWORD_OFFSET_UNSET) {
+            totalBits += bitCount(LIMIT_HOTWORD_OFFSET_MAX_VALUE);
+        }
+        if (hotwordDetectedResult.getHotwordDurationMillis() != 0) {
+            totalBits += bitCount(AudioRecord.getMaxSharedAudioHistoryMillis());
+        }
+        if (hotwordDetectedResult.getAudioChannel() != AUDIO_CHANNEL_UNSET) {
+            totalBits += bitCount(LIMIT_AUDIO_CHANNEL_MAX_VALUE);
+        }
+
+        // Add one bit for HotwordDetectionPersonalized
+        totalBits += 1;
+
+        if (hotwordDetectedResult.getScore() != defaultScore()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxScore());
+        }
+        if (hotwordDetectedResult.getPersonalizedScore() != defaultPersonalizedScore()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxScore());
+        }
+        if (hotwordDetectedResult.getHotwordPhraseId() != defaultHotwordPhraseId()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxHotwordPhraseId());
+        }
+        PersistableBundle persistableBundle = hotwordDetectedResult.getExtras();
+        if (!persistableBundle.isEmpty()) {
+            totalBits += getParcelableSize(persistableBundle) * Byte.SIZE;
+        }
+        return totalBits;
+    }
+
+    private static int bitCount(long value) {
+        int bits = 0;
+        while (value > 0) {
+            bits++;
+            value = value >> 1;
+        }
+        return bits;
+    }
+
+    private void onConstructed() {
+        Preconditions.checkArgumentInRange(mScore, 0, getMaxScore(), "score");
+        Preconditions.checkArgumentInRange(mPersonalizedScore, 0, getMaxScore(),
+                "personalizedScore");
+        Preconditions.checkArgumentInRange(mHotwordPhraseId, 0, getMaxHotwordPhraseId(),
+                "hotwordPhraseId");
+        Preconditions.checkArgumentInRange((long) mHotwordDurationMillis, 0,
+                AudioRecord.getMaxSharedAudioHistoryMillis(), "hotwordDurationMillis");
+        if (mHotwordOffsetMillis != HOTWORD_OFFSET_UNSET) {
+            Preconditions.checkArgumentInRange(mHotwordOffsetMillis, 0,
+                    LIMIT_HOTWORD_OFFSET_MAX_VALUE, "hotwordOffsetMillis");
+        }
+        if (mAudioChannel != AUDIO_CHANNEL_UNSET) {
+            Preconditions.checkArgumentInRange(mAudioChannel, 0, LIMIT_AUDIO_CHANNEL_MAX_VALUE,
+                    "audioChannel");
+        }
+        if (!mExtras.isEmpty()) {
+            Preconditions.checkArgumentInRange(getParcelableSize(mExtras), 0, getMaxBundleSize(),
+                    "extras");
+        }
     }
 
 
@@ -263,6 +371,27 @@ public final class HotwordDetectedResult implements Parcelable {
         }
     }
 
+    /** @hide */
+    @IntDef(prefix = "LIMIT_", value = {
+        LIMIT_HOTWORD_OFFSET_MAX_VALUE,
+        LIMIT_AUDIO_CHANNEL_MAX_VALUE
+    })
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @DataClass.Generated.Member
+    /* package-private */ @interface Limit {}
+
+    /** @hide */
+    @DataClass.Generated.Member
+    /* package-private */ static String limitToString(@Limit int value) {
+        switch (value) {
+            case LIMIT_HOTWORD_OFFSET_MAX_VALUE:
+                    return "LIMIT_HOTWORD_OFFSET_MAX_VALUE";
+            case LIMIT_AUDIO_CHANNEL_MAX_VALUE:
+                    return "LIMIT_AUDIO_CHANNEL_MAX_VALUE";
+            default: return Integer.toHexString(value);
+        }
+    }
+
     @DataClass.Generated.Member
     /* package-private */ HotwordDetectedResult(
             @HotwordConfidenceLevelValue int confidenceLevel,
@@ -290,7 +419,7 @@ public final class HotwordDetectedResult implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mExtras);
 
-        // onConstructed(); // You can define this method to get a callback
+        onConstructed();
     }
 
     /**
@@ -304,6 +433,8 @@ public final class HotwordDetectedResult implements Parcelable {
     /**
      * Offset in milliseconds the audio stream when the trigger event happened (end of hotword
      * phrase).
+     *
+     * <p>Only value between 0 and 3600000 (inclusive) is accepted.
      */
     @DataClass.Generated.Member
     public int getHotwordOffsetMillis() {
@@ -322,7 +453,9 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     /**
-     * Audio channel containing the highest-confidence hotword signal. *
+     * Audio channel containing the highest-confidence hotword signal.
+     *
+     * <p>Only value between 0 and 63 (inclusive) is accepted.
      */
     @DataClass.Generated.Member
     public int getAudioChannel() {
@@ -422,7 +555,7 @@ public final class HotwordDetectedResult implements Parcelable {
         //noinspection PointlessBooleanExpression
         return true
                 && mConfidenceLevel == that.mConfidenceLevel
-                && java.util.Objects.equals(mMediaSyncEvent, that.mMediaSyncEvent)
+                && Objects.equals(mMediaSyncEvent, that.mMediaSyncEvent)
                 && mHotwordOffsetMillis == that.mHotwordOffsetMillis
                 && mHotwordDurationMillis == that.mHotwordDurationMillis
                 && mAudioChannel == that.mAudioChannel
@@ -430,7 +563,7 @@ public final class HotwordDetectedResult implements Parcelable {
                 && mScore == that.mScore
                 && mPersonalizedScore == that.mPersonalizedScore
                 && mHotwordPhraseId == that.mHotwordPhraseId
-                && java.util.Objects.equals(mExtras, that.mExtras);
+                && Objects.equals(mExtras, that.mExtras);
     }
 
     @Override
@@ -441,7 +574,7 @@ public final class HotwordDetectedResult implements Parcelable {
 
         int _hash = 1;
         _hash = 31 * _hash + mConfidenceLevel;
-        _hash = 31 * _hash + java.util.Objects.hashCode(mMediaSyncEvent);
+        _hash = 31 * _hash + Objects.hashCode(mMediaSyncEvent);
         _hash = 31 * _hash + mHotwordOffsetMillis;
         _hash = 31 * _hash + mHotwordDurationMillis;
         _hash = 31 * _hash + mAudioChannel;
@@ -449,13 +582,13 @@ public final class HotwordDetectedResult implements Parcelable {
         _hash = 31 * _hash + mScore;
         _hash = 31 * _hash + mPersonalizedScore;
         _hash = 31 * _hash + mHotwordPhraseId;
-        _hash = 31 * _hash + java.util.Objects.hashCode(mExtras);
+        _hash = 31 * _hash + Objects.hashCode(mExtras);
         return _hash;
     }
 
     @Override
     @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
@@ -481,7 +614,7 @@ public final class HotwordDetectedResult implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ HotwordDetectedResult(@NonNull android.os.Parcel in) {
+    /* package-private */ HotwordDetectedResult(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
@@ -512,7 +645,7 @@ public final class HotwordDetectedResult implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mExtras);
 
-        // onConstructed(); // You can define this method to get a callback
+        onConstructed();
     }
 
     @DataClass.Generated.Member
@@ -524,7 +657,7 @@ public final class HotwordDetectedResult implements Parcelable {
         }
 
         @Override
-        public HotwordDetectedResult createFromParcel(@NonNull android.os.Parcel in) {
+        public HotwordDetectedResult createFromParcel(@NonNull Parcel in) {
             return new HotwordDetectedResult(in);
         }
     };
@@ -579,6 +712,8 @@ public final class HotwordDetectedResult implements Parcelable {
         /**
          * Offset in milliseconds the audio stream when the trigger event happened (end of hotword
          * phrase).
+         *
+         * <p>Only value between 0 and 3600000 (inclusive) is accepted.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setHotwordOffsetMillis(int value) {
@@ -603,7 +738,9 @@ public final class HotwordDetectedResult implements Parcelable {
         }
 
         /**
-         * Audio channel containing the highest-confidence hotword signal. *
+         * Audio channel containing the highest-confidence hotword signal.
+         *
+         * <p>Only value between 0 and 63 (inclusive) is accepted.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setAudioChannel(int value) {
@@ -745,10 +882,10 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621943150502L,
+            time = 1625541522353L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordDetectedResult.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate static final  int LIMIT_HOTWORD_OFFSET_MAX_VALUE\nprivate static final  int LIMIT_AUDIO_CHANNEL_MAX_VALUE\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

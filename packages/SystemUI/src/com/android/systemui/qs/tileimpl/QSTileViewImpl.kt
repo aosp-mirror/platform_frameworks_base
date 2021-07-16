@@ -189,6 +189,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         secondaryLabel = labelContainer.requireViewById(R.id.app_label)
         if (collapsed) {
             labelContainer.ignoreLastView = true
+            // Ideally, it'd be great if the parent could set this up when measuring just this child
+            // instead of the View class having to support this. However, due to the mysteries of
+            // LinearLayout's double measure pass, we cannot overwrite `measureChild` or any of its
+            // sibling methods to have special behavior for labelContainer.
+            labelContainer.forceUnspecifiedMeasure = true
             secondaryLabel.alpha = 0f
             // Do not marque in QQS
             label.ellipsize = TextUtils.TruncateAt.END

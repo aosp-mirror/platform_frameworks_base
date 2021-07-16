@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS አገልግሎት"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"የዳሳሽ ማሳወቂያ አገልግሎት"</string>
     <string name="twilight_service" msgid="8964898045693187224">"የውጋገን አገልግሎት"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"የሰዓት ሰቅ አንባቢ (ግንኙነት የለም)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"የGNSS ጊዜ ዝመኔ አገልግሎት"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"የሙዚቃ ለይቶ ማወቅ አስተዳዳሪ አገልግሎት"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"የእርስዎ መሣሪያ ይደመሰሳል"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ሌላ የጣት አሻራ ይሞክሩ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"በጣም ብርሃናማ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ለማስተካከል ይሞክሩ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"በእያንዳንዱ ጊዜ የጣትዎን ቦታ በትንሹ ይለዋውጡ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"የጣት አሻራ ትክክለኛነት ተረጋግጧል"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ምንም የጣት አሻራዎች አልተመዘገቡም።"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ይህ መሣሪያ የጣት አሻራ ዳሳሽ የለውም።"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ዳሳሽ ለጊዜው ተሰናክሏል።"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"የጣት አሻራ ዳሳሽን መጠቀም አይቻልም። የጥገና አገልግሎት ሰጪን ይጎብኙ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ጣት <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"የጣት አሻራ ይጠቀሙ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"የጣት አሻራ ወይም የማያ ገጽ መቆለፊያ ይጠቀሙ"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"የጣት አሻራ አዶ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"በመልክ መክፈት"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"የእርስዎን ፊት ዳግመኛ ያስመዝግቡ"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ማንነትን ለይቶ ማወቅን ለማሻሻል፣ እባክዎ የእርስዎን ፊት ዳግም ያስመዝግቡ"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ከመልክ መክፈት ጋር በተያያዘ ችግር"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"የእርስዎ የመልክ ሞዴል ለመሰረዝ መታ ያድርጉ፣ ከዚያ መልክዎን እንደገና ያክሉ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"በመልክ መክፈትን ያዋቅሩ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ስልክዎን በመመልከት ያስከፍቱት"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"የሚከፍቱባቸው ተጨማሪ መንገዶችን ያቀናብሩ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"የጣት አሻራን ለማከል መታ ያድርጉ"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"በጣት አሻራ መክፈቻ"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"የጣት አሻራ ዳሳሽን መጠቀም አይቻልም"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"የጥገና አገልግሎት ሰጪን ይጎብኙ።"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ትክክለኛ የፊት ውሂብ ማንሳት አልተቻለም። እንደገና ይሞክሩ።"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ከልክ በላይ ፈካ ያለ። ይበልጥ ረጋ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ከልክ በላይ ጨለማ ነው። ከዚህ ፈካ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"ያስተባብሉ"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ፈቃድ ተጠይቋል"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">\n" ለ<xliff:g id="ACCOUNT">%s</xliff:g> መለያ ፈቃድ ተጠይቋል"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"ለመለያ <xliff:g id="ACCOUNT">%2$s</xliff:g>\nበ<xliff:g id="APP">%1$s</xliff:g> የተጠየቀ ፈቃድ።"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"ከስራ መገለጫዎ ውጪ ሆነው መተግበሪያ እየተጠቀሙ ነው"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"ይህን መተግበሪያ በእርስዎ የስራ መገለጫ ላይ እየተጠቀሙበት ነው"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ግቤት ስልት"</string>

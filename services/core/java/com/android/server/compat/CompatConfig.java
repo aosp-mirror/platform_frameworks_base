@@ -16,6 +16,8 @@
 
 package com.android.server.compat;
 
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+
 import android.annotation.Nullable;
 import android.app.compat.ChangeIdStateCache;
 import android.app.compat.PackageOverride;
@@ -603,6 +605,10 @@ final class CompatConfig {
 
         try (InputStream in = new BufferedInputStream(new FileInputStream(overridesFile))) {
             Overrides overrides = com.android.server.compat.overrides.XmlParser.read(in);
+            if (overrides == null) {
+                Slog.w(TAG, "Parsing " + overridesFile.getPath() + " failed");
+                return;
+            }
             for (ChangeOverrides changeOverrides : overrides.getChangeOverrides()) {
                 long changeId = changeOverrides.getChangeId();
                 CompatChange compatChange = mChanges.get(changeId);
@@ -689,7 +695,7 @@ final class CompatConfig {
     private Long getVersionCodeOrNull(String packageName) {
         try {
             ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
-                    packageName, 0);
+                    packageName, MATCH_ANY_USER);
             return applicationInfo.longVersionCode;
         } catch (PackageManager.NameNotFoundException e) {
             return null;

@@ -431,19 +431,6 @@ public class ActivityClient {
         }
     }
 
-    /**
-     * Restart the process and activity to adopt the latest configuration for size compat mode.
-     * This only takes effect for visible activity because invisible background activity can be
-     * restarted naturally when it becomes visible.
-     */
-    public void restartActivityProcessIfVisible(IBinder token) {
-        try {
-            getActivityClientController().restartActivityProcessIfVisible(token);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
     /** Removes the snapshot of home task. */
     public void invalidateHomeTaskSnapshot(IBinder homeToken) {
         try {

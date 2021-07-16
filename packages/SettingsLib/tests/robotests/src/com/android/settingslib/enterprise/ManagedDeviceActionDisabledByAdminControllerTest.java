@@ -116,7 +116,7 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
     private ManagedDeviceActionDisabledByAdminController createController(String url) {
         ManagedDeviceActionDisabledByAdminController controller =
                 new ManagedDeviceActionDisabledByAdminController(
-                        new FakeDeviceAdminStringProvider(url));
+                        new FakeDeviceAdminStringProvider(url), mContext.getUser());
         controller.initialize(mTestUtils.createLearnMoreButtonLauncher());
         controller.updateEnforcedAdmin(ENFORCED_ADMIN, ENFORCEMENT_ADMIN_USER_ID);
         return controller;

@@ -663,7 +663,12 @@ public class TelephonyCallback {
          * levels of location information stripped from it depending on the location permissions
          * that your app holds.
          * Only apps holding the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission will
-         * receive all the information in {@link ServiceState}.
+         * receive all the information in {@link ServiceState}, otherwise the cellIdentity
+         * will be null if apps only holding the {@link Manifest.permission#ACCESS_COARSE_LOCATION}
+         * permission.
+         * Network operator name in long/short alphanumeric format and numeric id will be null if
+         * apps holding neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+         * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
          *
          * @see ServiceState#STATE_EMERGENCY_ONLY
          * @see ServiceState#STATE_IN_SERVICE

@@ -74,7 +74,10 @@ abstract class UdfpsAnimationView extends FrameLayout {
         return false;
     }
 
-    protected void updateAlpha() {
+    /**
+     * @return current alpha
+     */
+    protected int updateAlpha() {
         int alpha = calculateAlpha();
         getDrawable().setAlpha(alpha);
 
@@ -84,6 +87,8 @@ abstract class UdfpsAnimationView extends FrameLayout {
         } else {
             ((ViewGroup) getParent()).setVisibility(View.VISIBLE);
         }
+
+        return alpha;
     }
 
     int calculateAlpha() {

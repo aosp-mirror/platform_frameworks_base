@@ -209,6 +209,7 @@ final class HistoricalRegistry {
         mMode = other.mMode;
         mBaseSnapshotInterval = other.mBaseSnapshotInterval;
         mIntervalCompressionMultiplier = other.mIntervalCompressionMultiplier;
+        mDiscreteRegistry = other.mDiscreteRegistry;
     }
 
     void systemReady(@NonNull ContentResolver resolver) {
@@ -369,7 +370,7 @@ final class HistoricalRegistry {
             @Nullable String attributionTag, @Nullable String[] opNames,
             @OpHistoryFlags int historyFlags, @HistoricalOpsRequestFilter int filter,
             long beginTimeMillis, long endTimeMillis, @OpFlags int flags,
-            @NonNull RemoteCallback callback) {
+            String[] attributionExemptedPackages, @NonNull RemoteCallback callback) {
         if (!isApiEnabled()) {
             callback.sendResult(new Bundle());
             return;
@@ -395,7 +396,7 @@ final class HistoricalRegistry {
         if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
             mDiscreteRegistry.addFilteredDiscreteOpsToHistoricalOps(result, beginTimeMillis,
                     endTimeMillis, filter, uid, packageName, opNames, attributionTag,
-                    flags);
+                    flags, new ArraySet<>(attributionExemptedPackages));
         }
 
         final Bundle payload = new Bundle();
@@ -406,7 +407,8 @@ final class HistoricalRegistry {
     void getHistoricalOps(int uid, @Nullable String packageName, @Nullable String attributionTag,
             @Nullable String[] opNames, @OpHistoryFlags int historyFlags,
             @HistoricalOpsRequestFilter int filter, long beginTimeMillis, long endTimeMillis,
-            @OpFlags int flags, @NonNull RemoteCallback callback) {
+            @OpFlags int flags, @Nullable String[] attributionExemptPkgs,
+            @NonNull RemoteCallback callback) {
         if (!isApiEnabled()) {
             callback.sendResult(new Bundle());
             return;
@@ -428,7 +430,8 @@ final class HistoricalRegistry {
 
         if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
             mDiscreteRegistry.addFilteredDiscreteOpsToHistoricalOps(result, beginTimeMillis,
-                    endTimeMillis, filter, uid, packageName, opNames, attributionTag, flags);
+                    endTimeMillis, filter, uid, packageName, opNames, attributionTag, flags,
+                    new ArraySet<>(attributionExemptPkgs));
         }
 
         if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {

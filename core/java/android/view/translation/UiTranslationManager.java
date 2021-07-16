@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.assist.ActivityId;
+import android.content.ComponentName;
 import android.content.Context;
 import android.icu.util.ULocale;
 import android.os.Binder;
@@ -305,6 +306,26 @@ public final class UiTranslationManager {
                 throw e.rethrowFromSystemServer();
             }
             mCallbacks.remove(callback);
+        }
+    }
+
+    /**
+     * Notify apps the translation is finished because {@link #finishTranslation(ActivityId)} is
+     * called or Activity is destroyed.
+     *
+     * @param activityDestroyed if the ui translation is finished because of activity destroyed.
+     * @param activityId the identifier for the Activity which needs ui translation
+     * @param componentName the ui translated Activity componentName.
+     *
+     * @hide
+     */
+    public void onTranslationFinished(boolean activityDestroyed, ActivityId activityId,
+            ComponentName componentName) {
+        try {
+            mService.onTranslationFinished(activityDestroyed,
+                    activityId.getToken(), componentName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

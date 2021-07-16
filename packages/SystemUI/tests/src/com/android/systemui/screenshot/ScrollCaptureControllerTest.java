@@ -92,14 +92,16 @@ public class ScrollCaptureControllerTest extends SysuiTestCase {
         // Each tile is cropped to the visible page size, which is inset 5px from the TOP
         // requested    result
         //   0,   50       5,   50
-        // -45,    5     -40,    5   <-- clear previous /  top
-        //   5,   55       5,   55   (not cropped, target is positioned fully within visible range)
-        //  55,  105      55,  105
-        // 105,  155     105,  155
-        // 155,  205     155,  205   <-- bottom
+        // -45,    5     -40,    5
+        // -90,  -40     -85,  -40   <-- clear previous /  top
+        // -40,   10     -40,   10   (not cropped, target is positioned fully within visible range)
+        //  10,   60      10,   60
+        //  60,  110      60,  110
+        // 110,  160     110,  160
+        // 160,  210     160,  210   <-- bottom
 
-        assertEquals("top", -40, screenshot.getTop());
-        assertEquals("bottom", 205, screenshot.getBottom());
+        assertEquals("top", -85, screenshot.getTop());
+        assertEquals("bottom", 210, screenshot.getBottom());
     }
 
     @Test
@@ -119,13 +121,14 @@ public class ScrollCaptureControllerTest extends SysuiTestCase {
         // requested      result
         //    0,   50        0,   50   // not cropped, positioned within visible range
         //  -50,    0      -50,    0   <-- clear previous/reverse
-        //    0,   50     -  0,   45   // target now positioned at page bottom, bottom cropped
+        //    0,   50        0,   45   // target now positioned at page bottom, bottom cropped
         //   45,   95,      45,   90
         //   90,  140,     140,  135
-        //  135,  185      185,  180   <-- bottom
+        //  135,  185      185,  180
+        //  180,  230      180,  225   <-- bottom
 
         assertEquals("top", -50, screenshot.getTop());
-        assertEquals("bottom", 180, screenshot.getBottom());
+        assertEquals("bottom", 225, screenshot.getBottom());
     }
 
     @Test
@@ -265,7 +268,8 @@ public class ScrollCaptureControllerTest extends SysuiTestCase {
                 mLocalVisibleBottom = mPageHeight;
             }
             Session session = new FakeSession(mPageHeight, mMaxPages, mTileHeight,
-                    mLocalVisibleTop, mLocalVisibleBottom, mAvailableTop, mAvailableBottom);
+                    mLocalVisibleTop, mLocalVisibleBottom, mAvailableTop, mAvailableBottom,
+                    /* maxTiles */ 30);
             ScrollCaptureClient client = mock(ScrollCaptureClient.class);
             when(client.start(/* response */ any(), /* maxPages */ anyFloat()))
                     .thenReturn(immediateFuture(session));

@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.widget.Button;
@@ -52,7 +51,7 @@ import org.mockito.MockitoAnnotations;
 public class SizeCompatHintPopupTest extends ShellTestCase {
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
-    @Mock private IBinder mActivityToken;
+    @Mock private SizeCompatUIController.SizeCompatUICallback mCallback;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private DisplayLayout mDisplayLayout;
 
@@ -64,8 +63,9 @@ public class SizeCompatHintPopupTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
 
         final int taskId = 1;
-        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mContext, new Configuration(),
-                taskId, mActivityToken, mTaskListener, mDisplayLayout, false /* hasShownHint*/);
+        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mCallback, mContext,
+                new Configuration(), taskId, mTaskListener, mDisplayLayout,
+                false /* hasShownHint */);
         mHint = (SizeCompatHintPopup)
                 LayoutInflater.from(mContext).inflate(R.layout.size_compat_mode_hint, null);
         mHint.inject(mLayout);

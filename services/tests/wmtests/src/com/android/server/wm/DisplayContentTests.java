@@ -100,7 +100,6 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 
-import android.annotation.SuppressLint;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.FixedRotationAdjustmentsItem;
@@ -792,15 +791,9 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    @SuppressLint("InlinedApi")
     public void testOrientationDefinedByKeyguard() {
-        final DisplayContent dc = createNewDisplay();
-
-        // When display content is created its configuration is not yet initialized, which could
-        // cause unnecessary configuration propagation, so initialize it here.
-        final Configuration config = new Configuration();
-        dc.computeScreenConfiguration(config);
-        dc.onRequestedOverrideConfigurationChanged(config);
+        final DisplayContent dc = mDisplayContent;
+        dc.getDisplayPolicy().setAwake(true);
 
         // Create a window that requests landscape orientation. It will define device orientation
         // by default.
@@ -815,10 +808,12 @@ public class DisplayContentTests extends WindowTestsBase {
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
 
         keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        mAtm.mKeyguardController.setKeyguardShown(true /* keyguardShowing */,
+                false /* aodShowing */);
         assertEquals("Visible keyguard must influence device orientation",
                 SCREEN_ORIENTATION_PORTRAIT, dc.getOrientation());
 
-        mWm.setKeyguardGoingAway(true);
+        mAtm.mKeyguardController.keyguardGoingAway(0 /* flags */);
         assertEquals("Keyguard that is going away must not influence device orientation",
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
     }

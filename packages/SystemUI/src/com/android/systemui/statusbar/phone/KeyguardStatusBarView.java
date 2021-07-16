@@ -50,6 +50,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
@@ -105,6 +106,7 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     private int mLayoutState = LAYOUT_NONE;
 
     private SystemStatusAnimationScheduler mAnimationScheduler;
+    private FeatureFlags mFeatureFlags;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -142,6 +144,7 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         loadBlockList();
         mBatteryController = Dependency.get(BatteryController.class);
         mAnimationScheduler = Dependency.get(SystemStatusAnimationScheduler.class);
+        mFeatureFlags = Dependency.get(FeatureFlags.class);
     }
 
     @Override
@@ -364,7 +367,7 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         userInfoController.addCallback(this);
         userInfoController.reloadUserInfo();
         Dependency.get(ConfigurationController.class).addCallback(this);
-        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
+        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons), mFeatureFlags);
         mIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         mAnimationScheduler.addCallback(this);

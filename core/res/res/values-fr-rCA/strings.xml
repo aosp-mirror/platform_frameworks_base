@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Service GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Service de notification de capteur"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Service de crépuscule"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Détecteur de fuseau horaire (aucune connectivité)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Service d\'actualisation de l\'heure GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Service de gestion de la reconnaissance musicale"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Le contenu de votre appareil sera effacé"</string>
@@ -542,10 +541,10 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permet à l\'application d\'envoyer des annonces aux appareils Bluetooth à proximité"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Autorisez l\'application à déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information sur le service préféré de paiement NFC"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir de l\'information sur le service préféré de paiement NFC comme les aides enregistrées et la route de destination."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information sur le service préféré de paiement CCP"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir de l\'information sur le service préféré de paiement CCP comme les aides enregistrées et la route de destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"gérer la communication en champ proche"</string>
-    <string name="permdesc_nfc" msgid="8352737680695296741">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie NFC (communication en champ proche)."</string>
+    <string name="permdesc_nfc" msgid="8352737680695296741">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie CCP (communication en champ proche)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"demander la complexité du verrouillage d\'écran"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Essayez une autre empreinte digitale"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Trop lumineux"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Essayez de l\'ajuster"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Modifiez légèrement la position de votre doigt chaque fois"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Aucune empreinte digitale enregistrée."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Cet appareil ne possède pas de capteur d\'empreintes digitales."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Le capteur a été désactivé temporairement."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Impossible utiliser capteur empreinte digitale. Consultez un fournisseur de services de réparation"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Doigt <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utiliser l\'empreinte digitale"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utiliser l\'empreinte digitale ou le verrouillage de l\'écran"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icône d\'empreinte digitale"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Déverrouillage par reconnaissance faciale"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Inscrivez votre visage à nouveau"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problème avec la fonctionnalité de déverrouillage par reconnaissance faciale"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Touchez pour supprimer votre modèle facial, puis ajoutez votre visage de nouveau"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Touchez pour ajouter une empreinte digitale"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Déverrouillage par empreinte digitale"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Impossible d\'utiliser le capteur d\'empreintes digitales"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Consultez un fournisseur de services de réparation."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Imposs. capt. données visage précises. Réessayez."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Trop lumineux. Essayez un éclairage plus faible."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Trop sombre. Essayez avec un éclairage plus fort."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Refuser"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Autorisation demandée"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Autorisation demandée\npour le compte \"<xliff:g id="ACCOUNT">%s</xliff:g>\""</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Autorisation demandée par <xliff:g id="APP">%1$s</xliff:g>\npour le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Vous utilisez cette application en dehors de votre profil professionnel"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Vous utilisez cette application dans votre profil professionnel"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Mode de saisie"</string>
@@ -1508,7 +1511,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Touchez pour quitter l\'application de conduite."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Précédent"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Suivante"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"Passer"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"Ignorer"</string>
     <string name="no_matches" msgid="6472699895759164599">"Aucune partie"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Rechercher sur la page"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
@@ -2096,7 +2099,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponse, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponses, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La pile pourrait s\'épuiser avant la charge habituelle"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Le mode Économiseur de pile est activé afin de prolonger l\'autonomie"</string>

@@ -32,6 +32,7 @@ import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_FGS_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
+import static android.os.PowerExemptionManager.REASON_CURRENT_INPUT_METHOD;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
@@ -328,23 +329,11 @@ public final class ActiveServices {
      * Watch for apps being put into forced app standby, so we can step their fg
      * services down.
      */
-    class ForcedStandbyListener implements AppStateTracker.ForcedAppStandbyListener {
+    class ForcedStandbyListener implements AppStateTracker.ServiceStateListener {
         @Override
-        public void updateForceAppStandbyForUidPackage(int uid, String packageName,
-                boolean standby) {
+        public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                if (standby) {
-                    stopAllForegroundServicesLocked(uid, packageName);
-                }
-                mAm.mProcessList.updateForceAppStandbyForUidPackageLocked(
-                        uid, packageName, standby);
-            }
-        }
-
-        @Override
-        public void updateForcedAppStandbyForAllApps() {
-            synchronized (mAm) {
-                mAm.mProcessList.updateForcedAppStandbyForAllAppsLocked();
+                stopAllForegroundServicesLocked(uid, packageName);
             }
         }
     }
@@ -530,7 +519,7 @@ public final class ActiveServices {
 
     void systemServicesReady() {
         AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        ast.addForcedAppStandbyListener(new ForcedStandbyListener());
+        ast.addServiceStateListener(new ForcedStandbyListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
     }
@@ -1976,7 +1965,7 @@ public final class ActiveServices {
                 r.foregroundId = 0;
                 r.foregroundNoti = null;
             } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
-                r.stripForegroundServiceFlagFromNotification();
+                dropFgsNotificationStateLocked(r);
                 if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
                     r.foregroundId = 0;
                     r.foregroundNoti = null;
@@ -2008,11 +1997,17 @@ public final class ActiveServices {
     }
 
     ServiceNotificationPolicy applyForegroundServiceNotificationLocked(Notification notification,
-            final int id, final String pkg, final int userId) {
+            final String tag, final int id, final String pkg, final int userId) {
+        // By nature of the FGS API, all FGS notifications have a null tag
+        if (tag != null) {
+            return ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
+        }
+
         if (DEBUG_FOREGROUND_SERVICE) {
             Slog.d(TAG_SERVICE, "Evaluating FGS policy for id=" + id
                     + " pkg=" + pkg + " not=" + notification);
         }
+
         // Is there an FGS using this notification?
         final ServiceMap smap = mServiceMap.get(userId);
         if (smap == null) {
@@ -2494,7 +2489,7 @@ public final class ActiveServices {
     }
 
     private void cancelForegroundNotificationLocked(ServiceRecord r) {
-        if (r.foregroundId != 0) {
+        if (r.foregroundNoti != null) {
             // First check to see if this app has any other active foreground services
             // with the same notification ID.  If so, we shouldn't actually cancel it,
             // because that would wipe away the notification that still needs to be shown
@@ -2503,9 +2498,16 @@ public final class ActiveServices {
             if (sm != null) {
                 for (int i = sm.mServicesByInstanceName.size() - 1; i >= 0; i--) {
                     ServiceRecord other = sm.mServicesByInstanceName.valueAt(i);
-                    if (other != r && other.foregroundId == r.foregroundId
+                    if (other != r
+                            && other.isForeground
+                            && other.foregroundId == r.foregroundId
                             && other.packageName.equals(r.packageName)) {
-                        // Found one!  Abort the cancel.
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.i(TAG_SERVICE, "FGS notification for " + r
+                                    + " shared by " + other
+                                    + " (isForeground=" + other.isForeground + ")"
+                                    + " - NOT cancelling");
+                        }
                         return;
                     }
                 }
@@ -4225,9 +4227,10 @@ public final class ActiveServices {
         }
 
         r.isForeground = false;
+        r.mFgsNotificationWasDeferred = false;
+        dropFgsNotificationStateLocked(r);
         r.foregroundId = 0;
         r.foregroundNoti = null;
-        r.mFgsNotificationWasDeferred = false;
         resetFgsRestrictionLocked(r);
 
         // Clear start entries.
@@ -4289,6 +4292,39 @@ public final class ActiveServices {
         }
 
         smap.ensureNotStartingBackgroundLocked(r);
+    }
+
+    private void dropFgsNotificationStateLocked(ServiceRecord r) {
+        if (r.foregroundNoti == null) {
+            return;
+        }
+
+        // If this is the only FGS using this notification, clear its FGS flag
+        boolean shared = false;
+        final ServiceMap smap = mServiceMap.get(r.userId);
+        if (smap != null) {
+            // Is any other FGS using this notification?
+            final int numServices = smap.mServicesByInstanceName.size();
+            for (int i = 0; i < numServices; i++) {
+                final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+                if (sr == r) {
+                    continue;
+                }
+                if (sr.isForeground
+                        && r.foregroundId == sr.foregroundId
+                        && r.appInfo.packageName.equals(sr.appInfo.packageName)) {
+                    shared = true;
+                    break;
+                }
+            }
+        } else {
+            Slog.wtf(TAG, "FGS " + r + " not found!");
+        }
+
+        // No other FGS is sharing this notification, so we're done with it
+        if (!shared) {
+            r.stripForegroundServiceFlagFromNotification();
+        }
     }
 
     void removeConnectionLocked(ConnectionRecord c, ProcessRecord skipApp,
@@ -6144,6 +6180,20 @@ public final class ActiveServices {
                 ret = REASON_OP_ACTIVATE_PLATFORM_VPN;
             }
         }
+
+        if (ret == REASON_DENIED) {
+            final String inputMethod =
+                    Settings.Secure.getStringForUser(mAm.mContext.getContentResolver(),
+                            Settings.Secure.DEFAULT_INPUT_METHOD,
+                            UserHandle.getUserId(callingUid));
+            if (inputMethod != null) {
+                final ComponentName cn = ComponentName.unflattenFromString(inputMethod);
+                if (cn != null && cn.getPackageName().equals(callingPackage)) {
+                    ret = REASON_CURRENT_INPUT_METHOD;
+                }
+            }
+        }
+
         if (ret == REASON_DENIED) {
             if (mAm.mConstants.mFgsAllowOptOut
                     && targetService != null
@@ -6165,8 +6215,10 @@ public final class ActiveServices {
                 && code != REASON_UID_VISIBLE;
     }
 
-    // TODO: remove this notification after feature development is done
     private void showFgsBgRestrictedNotificationLocked(ServiceRecord r) {
+        if (!mAm.mConstants.mFgsStartRestrictionNotificationEnabled /* default is false */) {
+            return;
+        }
         final Context context = mAm.mContext;
         final String title = "Foreground Service BG-Launch Restricted";
         final String content = "App restricted: " + r.mRecentCallingPackage;

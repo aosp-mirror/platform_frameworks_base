@@ -84,6 +84,8 @@ float Properties::defaultSdrWhitePoint = 200.f;
 bool Properties::useHintManager = true;
 int Properties::targetCpuTimePercentage = 70;
 
+bool Properties::enableWebViewOverlays = false;
+
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
 bool Properties::load() {
@@ -136,6 +138,8 @@ bool Properties::load() {
     useHintManager = base::GetBoolProperty(PROPERTY_USE_HINT_MANAGER, true);
     targetCpuTimePercentage = base::GetIntProperty(PROPERTY_TARGET_CPU_TIME_PERCENTAGE, 70);
     if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
+
+    enableWebViewOverlays = base::GetBoolProperty(PROPERTY_WEBVIEW_OVERLAYS_ENABLED, false);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

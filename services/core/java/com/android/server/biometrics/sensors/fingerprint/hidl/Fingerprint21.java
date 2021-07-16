@@ -632,6 +632,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
+        Slog.d(TAG, "cancelAuthentication, sensorId: " + sensorId);
         mHandler.post(() -> mScheduler.cancelAuthenticationOrDetection(token));
     }
 

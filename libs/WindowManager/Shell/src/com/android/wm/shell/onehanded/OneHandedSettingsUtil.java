@@ -16,11 +16,14 @@
 
 package com.android.wm.shell.onehanded;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ONE_HANDED_COMPONENT_NAME;
+
 import android.annotation.IntDef;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
@@ -33,6 +36,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class OneHandedSettingsUtil {
     private static final String TAG = "OneHandedSettingsUtil";
+
+    private static final String ONE_HANDED_MODE_TARGET_NAME =
+            ONE_HANDED_COMPONENT_NAME.getShortClassName();
 
     @IntDef(prefix = {"ONE_HANDED_TIMEOUT_"}, value = {
             ONE_HANDED_TIMEOUT_NEVER,
@@ -155,6 +161,17 @@ public final class OneHandedSettingsUtil {
     public int getTutorialShownCounts(ContentResolver resolver, int userId) {
         return Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0, userId);
+    }
+
+    /**
+     * Queries one-handed mode shortcut enabled in settings or not.
+     *
+     * @return true if user enabled one-handed shortcut in settings, false otherwise.
+     */
+    public boolean getShortcutEnabled(ContentResolver resolver, int userId) {
+        final String targets = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
+        return TextUtils.isEmpty(targets) ? false : targets.contains(ONE_HANDED_MODE_TARGET_NAME);
     }
 
     /**

@@ -39,6 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -53,6 +54,8 @@ import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -65,6 +68,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final Rect mQsBounds = new Rect();
     private final StatusBarStateController mStatusBarStateController;
+    private final FalsingManager mFalsingManager;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
     private boolean mStackScrollerOverscrolling;
@@ -106,6 +110,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
+    private ScrollListener mScrollListener;
     private FeatureFlags mFeatureFlags;
     /**
      * When true, QS will translate from outside the screen. It will be clipped with parallax
@@ -130,7 +135,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
             QSDetailDisplayer qsDetailDisplayer, @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
-            QSFragmentComponent.Factory qsComponentFactory, FeatureFlags featureFlags) {
+            QSFragmentComponent.Factory qsComponentFactory, FeatureFlags featureFlags,
+            FalsingManager falsingManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
         mCommandQueue = commandQueue;
@@ -141,6 +147,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
         mFeatureFlags = featureFlags;
+        mFalsingManager = falsingManager;
         mStatusBarStateController = statusBarStateController;
     }
 
@@ -169,9 +176,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 });
         mQSPanelScrollView.setOnScrollChangeListener(
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            // Lazily update animators whenever the scrolling changes
-            mQSAnimator.onQsScrollingChanged();
-            mHeader.setExpandedScrollAmount(scrollY);
+                    // Lazily update animators whenever the scrolling changes
+                    mQSAnimator.requestAnimatorUpdate();
+                    mHeader.setExpandedScrollAmount(scrollY);
+                    if (mScrollListener != null) {
+                        mScrollListener.onQsPanelScrollChanged(scrollY);
+                    }
         });
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
@@ -184,7 +194,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
 
-        mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter);
+        mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter, mFalsingManager);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
 
         mQSCustomizerController = qsFragmentComponent.getQSCustomizerController();
@@ -209,6 +219,19 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                         setQsExpansion(mLastQSExpansion, mLastHeaderTranslation);
                     }
                 });
+        mQSPanelController.setUsingHorizontalLayoutChangeListener(
+                () -> {
+                    // The hostview may be faded out in the horizontal layout. Let's make sure to
+                    // reset the alpha when switching layouts. This is fine since the animator will
+                    // update the alpha if it's not supposed to be 1.0f
+                    mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
+                    mQSAnimator.requestAnimatorUpdate();
+                });
+    }
+
+    @Override
+    public void setScrollListener(ScrollListener listener) {
+        mScrollListener = listener;
     }
 
     @Override
@@ -220,6 +243,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSCustomizerController.setQs(null);
         mQsDetailDisplayer.setQsPanelController(null);
+        mScrollListener = null;
     }
 
     @Override
@@ -281,6 +305,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         return mLastQSExpansion == 0.0f || mLastQSExpansion == -1;
     }
 
+    @Override
+    public void setCollapsedMediaVisibilityChangedListener(Consumer<Boolean> listener) {
+        mQuickQSPanelController.setMediaVisibilityChangedListener(listener);
+    }
+
     private void setEditLocation(View view) {
         View edit = view.findViewById(android.R.id.edit);
         int[] loc = edit.getLocationOnScreen();
@@ -293,6 +322,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setContainer(ViewGroup container) {
         if (container instanceof NotificationsQuickSettingsContainer) {
             mQSCustomizerController.setContainer((NotificationsQuickSettingsContainer) container);
+            mQSDetail.setContainer((NotificationsQuickSettingsContainer) container);
         }
     }
 

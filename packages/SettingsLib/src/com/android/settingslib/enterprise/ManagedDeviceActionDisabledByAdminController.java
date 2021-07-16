@@ -16,12 +16,17 @@
 
 package com.android.settingslib.enterprise;
 
+import static java.util.Objects.requireNonNull;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
+
+import java.util.Objects;
 
 
 /**
@@ -30,8 +35,17 @@ import androidx.annotation.Nullable;
 final class ManagedDeviceActionDisabledByAdminController
         extends BaseActionDisabledByAdminController {
 
-    ManagedDeviceActionDisabledByAdminController(DeviceAdminStringProvider stringProvider) {
+    private final UserHandle mUserHandle;
+
+    /**
+     * Constructs a {@link ManagedDeviceActionDisabledByAdminController}
+     * @param userHandle - user on which to launch the help web page, if necessary
+     */
+    ManagedDeviceActionDisabledByAdminController(
+            DeviceAdminStringProvider stringProvider,
+            UserHandle userHandle) {
         super(stringProvider);
+        mUserHandle = requireNonNull(userHandle);
     }
 
     @Override
@@ -43,7 +57,7 @@ final class ManagedDeviceActionDisabledByAdminController
             mLauncher.setupLearnMoreButtonToShowAdminPolicies(context, mEnforcementAdminUserId,
                     mEnforcedAdmin);
         } else {
-            mLauncher.setupLearnMoreButtonToLaunchHelpPage(context, url);
+            mLauncher.setupLearnMoreButtonToLaunchHelpPage(context, url, mUserHandle);
         }
     }
 

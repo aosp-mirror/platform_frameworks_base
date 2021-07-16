@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS қызметі"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Датчик хабарландыруы қызметі"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight қызметі"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Уақыт белдеуін анықтағыш (қосылу мүмкіндігі жоқ)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS уақыт жаңарту жүйесі"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Музыканы анықтау менеджері қызметі"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Құрылғыңыздағы деректер өшіріледі"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Қолданбаға статус жолағын жаюға емесе тасалауға рұқсат береді."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсету"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Қолданбаның құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсетуіне рұқсат береді."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"төте пернелерді орнату"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"таңбаша орнату"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"төте пернелерді алып тастау"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз алып тастау мүмкіндігін береді."</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Басқа саусақ ізін байқап көріңіз."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Дұрыстап қойып көріңіз."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың қалпын аздап өзгертіп тұрыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Саусақ ізі аутентификацияланды"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Саусақ іздері тіркелмеген."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бұл құрылғыда саусақ ізін оқу сканері жоқ."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик уақытша өшірулі."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Саусақ ізін оқу сканерін пайдалану мүмкін емес. Жөндеу қызметіне барыңыз."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-саусақ"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Саусақ ізін пайдалану"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Саусақ ізін немесе экран құлпын пайдалану"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Бет тану"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Бетті қайта тіркеу"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Бет тану функциясына қатысты мәселе шықты"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Бет үлгісін жою үшін түртіңіз, содан соң жаңа бет үлгісін қосыңыз."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Бет тану функциясын реттеу"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефоныңызға қарап, оның құлпын ашыңыз."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Құлыпты ашудың басқа тәсілдерін реттеу"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Саусақ ізін қосу үшін түртіңіз."</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Құлыпты саусақ ізімен ашу"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Саусақ ізін оқу сканерін пайдалану мүмкін емес"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Жөндеу қызметіне барыңыз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Тым ашық. Күңгірттеу жарық керек."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Тым қараңғы. Молырақ жарық керек."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Тыйым салу"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Рұқсат өтінілді"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Рұқсат \nесептік жазба үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы үшін <xliff:g id="APP">%1$s</xliff:g>\nқолданбасы арқылы рұқсат сұралды."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Осы қолданбаны жұмыс профиліңізден тыс пайдаланып жатырсыз"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Осы қолданбаны жұмыс профиліңізде пайдаланып жатырсыз"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Енгізу әдісі"</string>
@@ -2096,7 +2099,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Жарайды"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өшіру"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде кеңейтілген хабарландырулар функциясы бейімделетін хабарландырулар функциясын алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарлар) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беру және \"Мазаламау\" режимін басқару) болады."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде кеңейтілген хабарландырулар функциясы бейімделетін хабарландырулар функциясын алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарлар) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беру және Мазаламау режимін басқару) болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>

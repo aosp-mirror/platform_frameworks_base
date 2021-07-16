@@ -662,16 +662,18 @@ static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
         auto globalCallbackRef =
                 std::make_shared<JWeakGlobalRefHolder>(vm, aSurfaceTransactionCallback);
         proxy->setASurfaceTransactionCallback(
-                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) {
+                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) -> bool {
                     JNIEnv* env = getenv(globalCallbackRef->vm());
                     jobject localref = env->NewLocalRef(globalCallbackRef->ref());
                     if (CC_UNLIKELY(!localref)) {
-                        return;
+                        return false;
                     }
-                    env->CallVoidMethod(localref, gASurfaceTransactionCallback.onMergeTransaction,
-                                        static_cast<jlong>(transObj), static_cast<jlong>(scObj),
-                                        static_cast<jlong>(frameNr));
+                    jboolean ret = env->CallBooleanMethod(
+                            localref, gASurfaceTransactionCallback.onMergeTransaction,
+                            static_cast<jlong>(transObj), static_cast<jlong>(scObj),
+                            static_cast<jlong>(frameNr));
                     env->DeleteLocalRef(localref);
+                    return ret;
                 });
     }
 }
@@ -760,9 +762,11 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
 
     // Create an ImageReader wired up to a BufferItemConsumer
     AImageReader* rawReader;
+    constexpr auto usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+                           AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER |
+                           AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY;
     media_status_t result =
-            AImageReader_newWithUsage(width, height, AIMAGE_FORMAT_RGBA_8888,
-                                      AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE, 2, &rawReader);
+            AImageReader_newWithUsage(width, height, AIMAGE_FORMAT_RGBA_8888, usage, 2, &rawReader);
     std::unique_ptr<AImageReader, decltype(&AImageReader_delete)> reader(rawReader,
                                                                          AImageReader_delete);
 
@@ -931,6 +935,11 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
     env->ReleaseStringUTFChars(skiaDiskCachePath, skiaCacheArray);
 }
 
+static jboolean android_view_ThreadedRenderer_isWebViewOverlaysEnabled(JNIEnv* env, jobject clazz) {
+    // this value is valid only after loadSystemProperties() is called
+    return Properties::enableWebViewOverlays;
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -1023,6 +1032,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
         {"nInitDisplayInfo", "(IIFIJJ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
+        {"isWebViewOverlaysEnabled", "()Z",
+         (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
 };
 
 static JavaVM* mJvm = nullptr;
@@ -1064,7 +1075,7 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     jclass aSurfaceTransactionCallbackClass =
             FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
     gASurfaceTransactionCallback.onMergeTransaction =
-            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)V");
+            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)Z");
 
     jclass prepareSurfaceControlForWebviewCallbackClass = FindClassOrDie(
             env, "android/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback");

@@ -66,7 +66,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -130,7 +129,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
     private String mRestingIndication;
     private String mAlignmentIndication;
     private CharSequence mTransientIndication;
-    private boolean mTransientTextIsError;
     protected ColorStateList mInitialTextColorState;
     private boolean mVisible;
     private boolean mHideTransientMessageOnScreenOff;
@@ -382,8 +380,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
 
     private void updateTransient() {
         if (!TextUtils.isEmpty(mTransientIndication)) {
-            mRotateTextViewController.showTransient(mTransientIndication,
-                    mTransientTextIsError);
+            mRotateTextViewController.showTransient(mTransientIndication);
         } else {
             mRotateTextViewController.hideTransient();
         }
@@ -421,7 +418,8 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     INDICATION_TYPE_ALIGNMENT,
                     new KeyguardIndication.Builder()
                             .setMessage(mAlignmentIndication)
-                            .setTextColor(Utils.getColorError(mContext))
+                            .setTextColor(ColorStateList.valueOf(
+                                    mContext.getColor(R.color.misalignment_text_color)))
                             .build(),
                     true);
         } else {
@@ -594,14 +592,13 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             boolean isError, boolean hideOnScreenOff) {
         mTransientIndication = transientIndication;
         mHideTransientMessageOnScreenOff = hideOnScreenOff && transientIndication != null;
-        mTransientTextIsError = isError;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         mHandler.removeMessages(MSG_SWIPE_UP_TO_UNLOCK);
         if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
             // Make sure this doesn't get stuck and burns in. Acquire wakelock until its cleared.
             mWakeLock.setAcquired(true);
-            hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
         }
+        hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
 
         updateIndication(false);
     }
@@ -800,18 +797,20 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         }
 
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-            String message = mContext.getString(R.string.keyguard_retry);
-            mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
+            if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+                return; // udfps affordance is highlighted, no need to surface face auth error
+            } else {
+                String message = mContext.getString(R.string.keyguard_retry);
+                mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
+            }
         } else if (mKeyguardUpdateMonitor.isScreenOn()) {
             showTransientIndication(mContext.getString(R.string.keyguard_unlock),
                     false /* isError */, true /* hideOnScreenOff */);
-            hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
         }
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationController:");
-        pw.println("  mTransientTextIsError: " + mTransientTextIsError);
         pw.println("  mInitialTextColorState: " + mInitialTextColorState);
         pw.println("  mPowerPluggedInWired: " + mPowerPluggedInWired);
         pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
@@ -866,7 +865,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {
                     showTransientIndication(computePowerIndication());
-                    hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 } else if (wasPluggedIn && !mPowerPluggedIn) {
                     hideTransientIndication();
                 }
@@ -885,16 +883,20 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)) {
                 return;
             }
+
             boolean showSwipeToUnlock =
                     msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
-                showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
-                if (!showSwipeToUnlock) {
-                    hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
+                if (biometricSourceType == BiometricSourceType.FACE
+                        && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
+                    // suggest trying fingerprint
+                    showTransientIndication(R.string.keyguard_try_fingerprint);
+                    return;
                 }
+                showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
             }
             if (showSwipeToUnlock) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SWIPE_UP_TO_UNLOCK),
@@ -908,13 +910,27 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             if (shouldSuppressBiometricError(msgId, biometricSourceType, mKeyguardUpdateMonitor)) {
                 return;
             }
+            if (biometricSourceType == BiometricSourceType.FACE
+                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
+                    && !mStatusBarKeyguardViewManager.isBouncerShowing()
+                    && mKeyguardUpdateMonitor.isScreenOn()) {
+                // suggest trying fingerprint
+                showTransientIndication(R.string.keyguard_try_fingerprint);
+                return;
+            }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 // The face timeout message is not very actionable, let's ask the user to
                 // manually retry.
                 if (!mStatusBarKeyguardViewManager.isBouncerShowing()
-                        && mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
+                        && mKeyguardUpdateMonitor.isUdfpsEnrolled()
+                        && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
                     // suggest trying fingerprint
                     showTransientIndication(R.string.keyguard_try_fingerprint);
+                } else if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+                    mStatusBarKeyguardViewManager.showBouncerMessage(
+                            mContext.getResources().getString(R.string.keyguard_try_fingerprint),
+                            mInitialTextColorState
+                    );
                 } else {
                     // suggest swiping up to unlock (try face auth again or swipe up to bouncer)
                     showSwipeUpToUnlock();
@@ -924,8 +940,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
                 showTransientIndication(errString, /* isError */ true,
                     /* hideOnScreenOff */ true);
-                // We want to keep this message around in case the screen was off
-                hideTransientIndicationDelayed(HIDE_DELAY_MS);
             } else {
                 mMessageToShowOnScreenOn = errString;
             }
@@ -950,6 +964,15 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     && msgId != FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
+        }
+
+        private boolean shouldSuppressFaceMsgAndShowTryFingerprintMsg() {
+            // For dual biometric, don't show face auth messages unless face auth was explicitly
+            // requested by the user.
+            return mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
+                && !mKeyguardUpdateMonitor.isFaceAuthUserRequested()
+                && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                    true /* isStrongBiometric */);
         }
 
         private boolean shouldSuppressFaceError(int msgId, KeyguardUpdateMonitor updateMonitor) {

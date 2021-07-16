@@ -197,6 +197,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                                 ANIMATION_TYPE_STARTING_REVEAL);
                         windowAnimationLeash = adaptor.mAnimationLeash;
                         mainFrame = mainWindow.getRelativeFrame();
+                        t.setPosition(windowAnimationLeash, mainFrame.left, mainFrame.top);
                     }
                 }
             }
@@ -915,6 +916,34 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     mInterceptBackPressedOnRootTasks.add(task.mTaskId);
                 } else {
                     mInterceptBackPressedOnRootTasks.remove(task.mTaskId);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void restartTaskTopActivityProcessIfVisible(WindowContainerToken token) {
+        enforceTaskPermission("restartTopActivityProcessIfVisible()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+                if (wc == null) {
+                    Slog.w(TAG, "Could not resolve window from token");
+                    return;
+                }
+                final Task task = wc.asTask();
+                if (task == null) {
+                    Slog.w(TAG, "Could not resolve task from token");
+                    return;
+                }
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                        "Restart top activity process of Task taskId=%d", task.mTaskId);
+                final ActivityRecord activity = task.getTopNonFinishingActivity();
+                if (activity != null) {
+                    activity.restartProcessIfVisible();
                 }
             }
         } finally {

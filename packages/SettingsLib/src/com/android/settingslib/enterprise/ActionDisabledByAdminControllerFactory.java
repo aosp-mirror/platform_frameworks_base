@@ -33,15 +33,17 @@ public final class ActionDisabledByAdminControllerFactory {
 
     /**
      * Returns the relevant instance of {@link ActionDisabledByAdminController}.
+     * @param userHandle user on which to launch the help page, if necessary
      */
     public static ActionDisabledByAdminController createInstance(Context context,
-            String restriction, DeviceAdminStringProvider stringProvider) {
+            String restriction, DeviceAdminStringProvider stringProvider,
+            UserHandle userHandle) {
         if (doesBiometricRequireParentalConsent(context, restriction)) {
             return new BiometricActionDisabledByAdminController(stringProvider);
         } else if (isFinancedDevice(context)) {
             return new FinancedDeviceActionDisabledByAdminController(stringProvider);
         } else {
-            return new ManagedDeviceActionDisabledByAdminController(stringProvider);
+            return new ManagedDeviceActionDisabledByAdminController(stringProvider, userHandle);
         }
     }
 

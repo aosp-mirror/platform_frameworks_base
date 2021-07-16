@@ -54,11 +54,12 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
     /**
      * Sets up a "learn more" button which launches a help page
      */
-    public final void setupLearnMoreButtonToLaunchHelpPage(Context context, String url) {
+    public final void setupLearnMoreButtonToLaunchHelpPage(
+            Context context, String url, UserHandle userHandle) {
         requireNonNull(context, "context cannot be null");
         requireNonNull(url, "url cannot be null");
 
-        setLearnMoreButton(() -> showHelpPage(context, url));
+        setLearnMoreButton(() -> showHelpPage(context, url, userHandle));
     }
 
     /**
@@ -105,8 +106,8 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
      * Shows the help page using the given {@code url}.
      */
     @VisibleForTesting
-    public void showHelpPage(Context context, String url) {
-        context.startActivityAsUser(createLearnMoreIntent(url), UserHandle.of(context.getUserId()));
+    public void showHelpPage(Context context, String url, UserHandle userHandle) {
+        context.startActivityAsUser(createLearnMoreIntent(url), userHandle);
         finishSelf();
     }
 

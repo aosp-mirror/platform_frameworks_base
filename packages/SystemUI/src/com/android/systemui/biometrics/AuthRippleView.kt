@@ -23,11 +23,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
-import android.media.AudioAttributes
-import android.os.VibrationEffect
-import android.os.Vibrator
 import android.util.AttributeSet
-import android.util.MathUtils
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.internal.graphics.ColorUtils
@@ -36,26 +32,25 @@ import com.android.systemui.statusbar.charging.RippleShader
 
 private const val RIPPLE_ANIMATION_DURATION: Long = 1533
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
-private const val RIPPLE_VIBRATION_PRIMITIVE: Int = VibrationEffect.Composition.PRIMITIVE_LOW_TICK
-private const val RIPPLE_VIBRATION_SIZE: Int = 60
-private const val RIPPLE_VIBRATION_SCALE_START: Float = 0.6f
-private const val RIPPLE_VIBRATION_SCALE_DECAY: Float = -0.1f
 
 /**
  * Expanding ripple effect on the transition from biometric authentication success to showing
  * launcher.
  */
 class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
-    private val vibrator: Vibrator? = context?.getSystemService(Vibrator::class.java)
     private var rippleInProgress: Boolean = false
     private val rippleShader = RippleShader()
     private val ripplePaint = Paint()
-    private val rippleVibrationEffect = createVibrationEffect(vibrator)
-    private val rippleVibrationAttrs =
-            AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                    .build()
+    private var radius: Float = 0.0f
+        set(value) {
+            rippleShader.radius = value
+            field = value
+        }
+    private var origin: PointF = PointF()
+        set(value) {
+            rippleShader.origin = value
+            field = value
+        }
 
     init {
         rippleShader.color = 0xffffffff.toInt() // default color
@@ -66,8 +61,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     }
 
     fun setSensorLocation(location: PointF) {
-        rippleShader.origin = location
-        rippleShader.radius = maxOf(location.x, location.y, width - location.x, height - location.y)
+        origin = location
+        radius = maxOf(location.x, location.y, width - location.x, height - location.y)
             .toFloat()
     }
 
@@ -141,8 +136,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
                 }
             })
         }
-        // TODO (b/185124905):  custom haptic TBD
-        // vibrate()
         animatorSet.start()
     }
 
@@ -151,26 +144,11 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     }
 
     override fun onDraw(canvas: Canvas?) {
-        // draw over the entire screen
-        canvas?.drawRect(0f, 0f, width.toFloat(), height.toFloat(), ripplePaint)
-    }
-
-    private fun vibrate() {
-        if (rippleVibrationEffect != null) {
-            vibrator?.vibrate(rippleVibrationEffect, rippleVibrationAttrs)
-        }
-    }
-
-    private fun createVibrationEffect(vibrator: Vibrator?): VibrationEffect? {
-        if (vibrator?.areAllPrimitivesSupported(RIPPLE_VIBRATION_PRIMITIVE) == false) {
-            return null
-        }
-        val composition = VibrationEffect.startComposition()
-        for (i in 0 until RIPPLE_VIBRATION_SIZE) {
-            val scale =
-                    RIPPLE_VIBRATION_SCALE_START * MathUtils.exp(RIPPLE_VIBRATION_SCALE_DECAY * i)
-            composition.addPrimitive(RIPPLE_VIBRATION_PRIMITIVE, scale, 0 /* delay */)
-        }
-        return composition.compose()
+        // To reduce overdraw, we mask the effect to a circle whose radius is big enough to cover
+        // the active effect area. Values here should be kept in sync with the
+        // animation implementation in the ripple shader.
+        val maskRadius = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
+            (1 - rippleShader.progress)) * radius * 1.5f
+        canvas?.drawCircle(origin.x, origin.y, maskRadius, ripplePaint)
     }
 }

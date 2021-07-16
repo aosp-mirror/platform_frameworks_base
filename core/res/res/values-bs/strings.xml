@@ -204,7 +204,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Usluga GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Usluga obavještavanja putem senzora"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Usluga Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detektor vremenske zone (nije povezan)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS usluga za ažuriranje vremena"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Usluga upravitelja prepoznavanja muzike"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti izbrisan"</string>
@@ -352,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Dozvoljava aplikaciji proširivanje ili sužavanje statusne trake."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"prikaz obavještenja kao aktivnosti preko cijelog ekrana na zaključanom uređaju"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Dozvoljava aplikaciji da prikazuje obavještenja kao aktivnosti preko cijelog ekrana na zaključanom uređaju"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instaliranje prečica"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instaliranje prečica"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Omogućava aplikaciji dodavanje prečice za početni ekran bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"uklanjanje prečica"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Omogućava aplikaciji uklanjanje prečice početnog ekrana bez intervencije korisnika."</string>
@@ -588,6 +587,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Pokušajte s drugim otiskom prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Presvijetlo"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Pokušajte podesiti"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Svaki put blago promijenite položaj prsta"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
@@ -604,8 +604,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nije prijavljen nijedan otisak prsta."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ovaj uređaj nema senzor za otisak prsta."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzor je privremeno onemogućen."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nije moguće koristiti senzor za otisak prsta. Posjetite pružaoca usluga za popravke"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Koristi otisak prsta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Koristi otisak prsta ili zaključavanje ekrana"</string>
@@ -615,12 +614,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona za otisak prsta"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Ponovo registrirajte lice"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Ponovo registrirajte lice da poboljšate prepoznavanje"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem s otključavanjem licem"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dodirnite da izbrišete model lica, a zatim ponovo dodajte lice"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Postavite otključavanje licem"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Otključajte telefon gledajući u njega"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Postavite više načina otključavanja"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dodirnite da dodate otisak prsta"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Otključavanje otiskom prsta"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nije moguće koristiti senzor za otisak prsta"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Posjetite pružaoca usluga za popravke."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Lice nije snimljeno precizno. Pokušajte ponovo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Previše svijetlo. Probajte s blažim osvjetljenjem."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Previše je tamno. Pokušajte s jačim osvjetljenjem."</string>
@@ -1500,6 +1502,7 @@
     <string name="deny" msgid="6632259981847676572">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Upućen zahtjev za odobrenje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Upućen zahtjev za dozvolu\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Odobrenje je zatražila aplikacija <xliff:g id="APP">%1$s</xliff:g>\nza račun <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Aplikaciju koristite van poslovnog profila"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Aplikaciju koristite u poslovnom profilu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Način unosa"</string>
@@ -1894,7 +1897,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je vaš administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje Tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije i neke mrežne veze."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje Tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>

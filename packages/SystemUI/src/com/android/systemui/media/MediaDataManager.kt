@@ -430,7 +430,11 @@ class MediaDataManager(
         notifyMediaDataRemoved(key)
     }
 
-    fun dismissMediaData(key: String, delay: Long) {
+    /**
+     * Dismiss a media entry. Returns false if the key was not found.
+     */
+    fun dismissMediaData(key: String, delay: Long): Boolean {
+        val existed = mediaEntries[key] != null
         backgroundExecutor.execute {
             mediaEntries[key]?.let { mediaData ->
                 if (mediaData.isLocalSession) {
@@ -442,6 +446,7 @@ class MediaDataManager(
             }
         }
         foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
+        return existed
     }
 
     /**

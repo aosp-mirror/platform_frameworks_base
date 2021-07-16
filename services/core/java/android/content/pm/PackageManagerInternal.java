@@ -566,6 +566,12 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId);
 
     /**
+    * Resolves a content provider intent.
+    */
+    public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId,
+            int callingUid);
+
+    /**
      * Track the creator of a new isolated uid.
      * @param isolatedUid The newly created isolated uid.
      * @param ownerUid The uid of the app that created the isolated process.
@@ -1151,6 +1157,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
     /**
      * Deletes the OAT artifacts of a package.
+     * @param packageName a specific package
+     * @return the number of freed bytes or -1 if there was an error in the process.
      */
-    public abstract void deleteOatArtifactsOfPackage(String packageName);
+    public abstract long deleteOatArtifactsOfPackage(String packageName);
 }

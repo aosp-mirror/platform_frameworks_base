@@ -131,4 +131,12 @@ public final class BLASTBufferQueue {
         nativeMergeWithNextTransaction(mNativeObject, t.mNativeObject, frameNumber);
     }
 
+    /**
+     * Merge the transaction passed in to the next transaction in BlastBufferQueue.
+     * @param nativeTransaction native handle passed from native c/c++ code.
+     */
+    public void mergeWithNextTransaction(long nativeTransaction, long frameNumber) {
+        nativeMergeWithNextTransaction(mNativeObject, nativeTransaction, frameNumber);
+    }
+
 }

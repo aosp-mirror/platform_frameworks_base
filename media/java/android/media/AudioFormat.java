@@ -310,6 +310,10 @@ public final class AudioFormat implements Parcelable {
     public static final int ENCODING_LEGACY_SHORT_ARRAY_THRESHOLD = ENCODING_OPUS;
 
     /** Audio data format: PCM 24 bit per sample packed as 3 bytes.
+     *
+     * The bytes are in little-endian order, so the least significant byte
+     * comes first in the byte array.
+     *
      * Not guaranteed to be supported by devices, may be emulated if not supported. */
     public static final int ENCODING_PCM_24BIT_PACKED = 21;
     /** Audio data format: PCM 32 bit per sample.

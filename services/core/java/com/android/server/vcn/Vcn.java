@@ -518,7 +518,11 @@ public class Vcn extends Handler {
     }
 
     private String getLogPrefix() {
-        return "[" + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup) + "] ";
+        return "["
+                + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
+                + "-"
+                + System.identityHashCode(this)
+                + "] ";
     }
 
     private void logVdbg(String msg) {

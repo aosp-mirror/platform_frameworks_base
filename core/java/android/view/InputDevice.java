@@ -444,13 +444,6 @@ public final class InputDevice implements Parcelable {
 
     private static final int VIBRATOR_ID_ALL = -1;
 
-    /**
-     * The device id of input events generated inside accessibility service.
-     * @hide
-     */
-    @TestApi
-    public static final int ACCESSIBILITY_DEVICE_ID = -2;
-
     public static final @android.annotation.NonNull Parcelable.Creator<InputDevice> CREATOR =
             new Parcelable.Creator<InputDevice>() {
         public InputDevice createFromParcel(Parcel in) {

@@ -59,7 +59,10 @@ import java.util.List;
  *
  * The caller must initialize this class as soon as activity object is ready to use (for example, in
  * onAttach() for Fragment), call create() in onCreate() and call destroy() in onDestroy().
+ *
+ * @deprecated Please use BatteryStatsManager.getBatteryUsageStats instead.
  */
+@Deprecated
 public class BatteryStatsHelper {
     static final boolean DEBUG = false;
 

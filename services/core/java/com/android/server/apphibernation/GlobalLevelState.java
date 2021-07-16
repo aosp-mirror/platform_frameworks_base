@@ -29,6 +29,8 @@ final class GlobalLevelState {
 
     public String packageName;
     public boolean hibernated;
+    // The number of saved bytes from the current hibernation. It will be 0 if not in hibernation.
+    public long savedByte;
     @CurrentTimeMillisLong
     public long lastUnhibernatedMs;
 
@@ -37,6 +39,7 @@ final class GlobalLevelState {
         return "GlobalLevelState{"
                 + "packageName='" + packageName + '\''
                 + ", hibernated=" + hibernated + '\''
+                + ", savedByte=" + savedByte + '\''
                 + ", lastUnhibernated=" + DATE_FORMAT.format(lastUnhibernatedMs)
                 + '}';
     }

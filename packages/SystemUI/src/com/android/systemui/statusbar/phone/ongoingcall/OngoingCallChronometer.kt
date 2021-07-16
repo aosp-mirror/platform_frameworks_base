@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 
 import android.widget.Chronometer
+import androidx.annotation.UiThread
 
 /**
  * A [Chronometer] specifically for the ongoing call chip in the status bar.
@@ -46,10 +47,10 @@ class OngoingCallChronometer @JvmOverloads constructor(
 
     // Minimum width that the text view can be. Corresponds with the largest number width seen so
     // far.
-    var minimumTextWidth: Int = 0
+    private var minimumTextWidth: Int = 0
 
     // True if the text is too long for the space available, so the text should be hidden.
-    var shouldHideText: Boolean = false
+    private var shouldHideText: Boolean = false
 
     override fun setBase(base: Long) {
         // These variables may have changed during the previous call, so re-set them before the new
@@ -58,6 +59,13 @@ class OngoingCallChronometer @JvmOverloads constructor(
         shouldHideText = false
         visibility = VISIBLE
         super.setBase(base)
+    }
+
+    /** Sets whether this view should hide its text or not. */
+    @UiThread
+    fun setShouldHideText(shouldHideText: Boolean) {
+        this.shouldHideText = shouldHideText
+        requestLayout()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

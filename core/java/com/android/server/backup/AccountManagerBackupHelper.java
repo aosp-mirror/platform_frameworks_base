@@ -56,7 +56,7 @@ public class AccountManagerBackupHelper extends BlobBackupHelper {
                 }
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Unable to store payload " + key);
+            Slog.e(TAG, "Unable to store payload " + key, e);
         }
 
         return new byte[0];
@@ -79,7 +79,7 @@ public class AccountManagerBackupHelper extends BlobBackupHelper {
                 }
             }
         } catch (Exception e) {
-            Slog.w(TAG, "Unable to restore key " + key);
+            Slog.e(TAG, "Unable to restore key " + key, e);
         }
     }
 }

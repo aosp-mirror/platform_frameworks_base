@@ -14,9 +14,10 @@
   ~ limitations under the License.
   -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/item"
+    android:id="@android:id/background"
     android:theme="@android:style/Theme.DeviceDefault.DayNight"
     android:background="@drawable/people_tile_empty_background"
+    android:clipToOutline="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 

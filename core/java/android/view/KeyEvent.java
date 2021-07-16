@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
@@ -1220,6 +1221,14 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * keys when numlock is off).
      */
     public static final int FLAG_FALLBACK = 0x400;
+
+    /**
+     * This flag indicates that this event was modified by or generated from an accessibility
+     * service. Value = 0x800
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_IS_ACCESSIBILITY_EVENT = INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 
     /**
      * Signifies that the key is being predispatched.

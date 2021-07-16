@@ -27,7 +27,6 @@ import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.logging.InstanceId;
@@ -52,6 +51,7 @@ import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -123,7 +123,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
-            CustomTileStatePersister customTileStatePersister) {
+            CustomTileStatePersister customTileStatePersister
+    ) {
         mIconController = iconController;
         mContext = context;
         mUserContext = context;
@@ -517,7 +518,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         //   --WiFiTile
         //   --CellularTIle
         if (tiles.contains("internet") || tiles.contains("wifi") || tiles.contains("cell")) {
-            if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            if (FeatureFlags.isProviderModelSettingEnabled(context)) {
                 if (!tiles.contains("internet")) {
                     if (tiles.contains("wifi")) {
                         // Replace the WiFi with Internet, and remove the Cell
@@ -559,7 +560,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         }
         // TODO(b/174753536): Change the config file directly.
         // Filter out unused tiles from the default QS config.
-        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+        if (FeatureFlags.isProviderModelSettingEnabled(context)) {
             tiles.remove("cell");
             tiles.remove("wifi");
         } else {

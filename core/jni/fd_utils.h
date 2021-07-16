@@ -69,6 +69,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FileDescriptorAllowlist);
 };
 
+// Returns the set of file descriptors currently open by the process.
+std::unique_ptr<std::set<int>> GetOpenFds(fail_fn_t fail_fn);
+
 // A FileDescriptorTable is a collection of FileDescriptorInfo objects
 // keyed by their FDs.
 class FileDescriptorTable {
@@ -79,6 +82,14 @@ class FileDescriptorTable {
   static FileDescriptorTable* Create(const std::vector<int>& fds_to_ignore,
                                      fail_fn_t fail_fn);
 
+  ~FileDescriptorTable();
+
+  // Checks that the currently open FDs did not change their metadata from
+  // stat(2), readlink(2) etc. Ignores FDs from |fds_to_ignore|.
+  //
+  // Temporary: allows newly open FDs if they pass the same checks as in
+  // Create(). This will be further restricted. See TODOs in the
+  // implementation.
   void Restat(const std::vector<int>& fds_to_ignore, fail_fn_t fail_fn);
 
   // Reopens all file descriptors that are contained in the table. Returns true
@@ -90,8 +101,6 @@ class FileDescriptorTable {
   explicit FileDescriptorTable(const std::unordered_map<int, FileDescriptorInfo*>& map);
 
   void RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn);
-
-  static int ParseFd(dirent* e, int dir_fd);
 
   // Invariant: All values in this unordered_map are non-NULL.
   std::unordered_map<int, FileDescriptorInfo*> open_fd_map_;

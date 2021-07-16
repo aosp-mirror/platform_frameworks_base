@@ -118,7 +118,8 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
                     Manifest.permission.LOG_COMPAT_CHANGE,
                     Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG,
                     Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD,
-                    Manifest.permission.READ_COMPAT_CHANGE_CONFIG);
+                    Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         }
     }
 }

@@ -25,7 +25,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.statusbar.CircleReveal
-import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
@@ -116,9 +115,6 @@ class AuthRippleController @Inject constructor(
             /* end runnable */
             Runnable {
                 notificationShadeWindowController.setForcePluginOpen(false, this)
-                if (useCircleReveal) {
-                    lightRevealScrim?.revealEffect = LiftReveal
-                }
             },
             /* circleReveal */
             if (useCircleReveal) {

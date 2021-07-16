@@ -56,6 +56,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Rule
     public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
     private static final String SHIM_V2 = "com.android.apex.cts.shim.v2.apex";
+    private static final String APEX_WRONG_SHA = "com.android.apex.cts.shim.v2_wrong_sha.apex";
     private static final String APK_A = "TestAppAv1.apk";
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
 
@@ -84,7 +85,9 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
         deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
-                "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex");
+                "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex",
+                "/system/apex/test.rebootless_apex_v1.apex",
+                "/data/apex/active/test.apex.rebootless*.apex");
     }
 
     @Before
@@ -123,9 +126,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
     }
 
-    private void pushTestApex() throws Exception {
+    private void pushTestApex(String fileName) throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
-        final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
         final File apex = buildHelper.getTestFile(fileName);
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
@@ -141,7 +143,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Test
     @LargeTest
     public void testDuplicateApkInApexShouldFail() throws Exception {
-        pushTestApex();
+        pushTestApex(APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
         runPhase("testDuplicateApkInApexShouldFail_Commit");
         getDevice().reboot();
         runPhase("testDuplicateApkInApexShouldFail_Verify");
@@ -320,6 +322,33 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         getDevice().reboot();
 
         runPhase("testFailStagedSessionIfStagingDirectoryDeleted_Verify");
+    }
+
+    @Test
+    public void testApexActivationFailureIsCapturedInSession() throws Exception {
+        // We initiate staging a normal apex update which passes pre-reboot verification.
+        // Then we replace the valid apex waiting in /data/app-staging with something
+        // that cannot be activated and reboot. The apex should fail to activate, which
+        // is what we want for this test.
+        runPhase("testApexActivationFailureIsCapturedInSession_Commit");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+        // Now replace the valid staged apex with something invalid
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("rm /data/app-staging/session_" + sessionId + "/*");
+        final File invalidApexFile = mHostUtils.getTestFile(APEX_WRONG_SHA);
+        getDevice().pushFile(invalidApexFile,
+                "/data/app-staging/session_" + sessionId + "/base.apex");
+        getDevice().reboot();
+
+        runPhase("testApexActivationFailureIsCapturedInSession_Verify");
+    }
+
+    @Test
+    public void testRebootlessUpdates() throws Exception {
+        pushTestApex("test.rebootless_apex_v1.apex");
+        runPhase("testRebootlessUpdates");
     }
 
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {

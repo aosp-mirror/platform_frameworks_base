@@ -49,9 +49,6 @@
           "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
         }
       ]
-    },
-    {
-      "name": "CtsPackageManagerBootTestCases"
     }
   ]
 }

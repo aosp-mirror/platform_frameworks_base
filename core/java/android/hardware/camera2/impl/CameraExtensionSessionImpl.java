@@ -34,6 +34,7 @@ import android.hardware.camera2.extension.CaptureBundle;
 import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
+import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
 import android.hardware.camera2.extension.ParcelImage;
@@ -48,6 +49,8 @@ import android.media.ImageWriter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.annotation.NonNull;
@@ -80,6 +83,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private final HandlerThread mHandlerThread;
     private final StateCallback mCallbacks;
     private final List<Size> mSupportedPreviewSizes;
+    private final InitializeSessionHandler mInitializeHandler;
 
     private CameraCaptureSession mCaptureSession = null;
     private Surface mCameraRepeatingSurface, mClientRepeatingRequestSurface;
@@ -216,6 +220,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mInitialized = false;
+        mInitializeHandler = new InitializeSessionHandler();
     }
 
     private void initializeRepeatingRequestPipeline() throws RemoteException {
@@ -621,7 +626,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     public void release() {
         synchronized (mInterfaceLock) {
             mInternalRepeatingRequestEnabled = false;
-            mInitialized = false;
             mHandlerThread.quitSafely();
 
             try {
@@ -634,7 +638,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
+                if (mInitialized) {
+                    CameraExtensionCharacteristics.releaseSession();
+                }
             }
+            mInitialized = false;
 
             if (mRepeatingRequestImageCallback != null) {
                 mRepeatingRequestImageCallback.close();
@@ -739,35 +747,62 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
         @Override
         public void onConfigured(@NonNull CameraCaptureSession session) {
-            boolean status = true;
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
-
-                ArrayList<CaptureStageImpl> initialRequestList = compileInitialRequestList();
-                if (!initialRequestList.isEmpty()) {
-                    try {
-                        setInitialCaptureRequest(initialRequestList,
-                                new InitialRequestHandler(mRepeatingRequestImageCallback));
-                    } catch (CameraAccessException e) {
-                        Log.e(TAG, "Failed to initialize the initial capture request!");
-                        status = false;
-                    }
-                } else {
-                    try {
-                        setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                                new RepeatingRequestHandler(null, null, null,
-                                        mRepeatingRequestImageCallback));
-                    } catch (CameraAccessException | RemoteException e) {
-                        Log.e(TAG, "Failed to initialize internal repeating request!");
-                        status = false;
-                    }
-
+                try {
+                    CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to initialize session! Extension service does"
+                            + " not respond!");
+                    notifyConfigurationFailure();
                 }
+            }
+        }
+    }
+
+    private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
+        @Override
+        public void onSuccess() {
+            boolean status = true;
+            ArrayList<CaptureStageImpl> initialRequestList =
+                    compileInitialRequestList();
+            if (!initialRequestList.isEmpty()) {
+                try {
+                    setInitialCaptureRequest(initialRequestList,
+                            new InitialRequestHandler(
+                                    mRepeatingRequestImageCallback));
+                } catch (CameraAccessException e) {
+                    Log.e(TAG,
+                            "Failed to initialize the initial capture "
+                                    + "request!");
+                    status = false;
+                }
+            } else {
+                try {
+                    setRepeatingRequest(mPreviewExtender.getCaptureStage(),
+                            new RepeatingRequestHandler(null, null, null,
+                                    mRepeatingRequestImageCallback));
+                } catch (CameraAccessException | RemoteException e) {
+                    Log.e(TAG,
+                            "Failed to initialize internal repeating "
+                                    + "request!");
+                    status = false;
+                }
+
             }
 
             if (!status) {
                 notifyConfigurationFailure();
             }
+        }
+
+        @Override
+        public void onFailure() {
+            mCaptureSession.close();
+            Log.e(TAG, "Failed to initialize proxy service session!"
+                    + " This can happen when trying to configure multiple "
+                    + "concurrent extension sessions!");
+            notifyConfigurationFailure();
         }
     }
 

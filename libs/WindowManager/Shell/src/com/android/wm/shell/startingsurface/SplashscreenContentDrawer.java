@@ -18,6 +18,9 @@ package com.android.wm.shell.startingsurface;
 
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
@@ -47,6 +50,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.window.SplashScreenView;
+import android.window.StartingWindowInfo.StartingWindowType;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -77,6 +81,13 @@ public class SplashscreenContentDrawer {
     // For example, an icon with the foreground 108*108 opaque pixels and it's background
     // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
     private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
+
+    /**
+     * If the developer doesn't specify a background for the icon, we slightly scale it up.
+     *
+     * The background is either manually specified in the theme or the Adaptive Icon
+     * background is used if it's different from the window background.
+     */
     private static final float NO_BACKGROUND_SCALE = 192f / 160;
     private final Context mContext;
     private final IconProvider mIconProvider;
@@ -115,24 +126,26 @@ public class SplashscreenContentDrawer {
      * view on background thread so the view and the drawable can be create and pre-draw in
      * parallel.
      *
-     * @param emptyView Create a splash screen view without icon on it.
-     * @param consumer Receiving the SplashScreenView object, which will also be executed
-     *                 on splash screen thread. Note that the view can be null if failed.
+     * @param suggestType Suggest type to create the splash screen view.
+     * @param splashScreenViewConsumer Receiving the SplashScreenView object, which will also be
+     *                                 executed on splash screen thread. Note that the view can be
+     *                                 null if failed.
+     * @param bgColorConsumer Receiving the background color once it's estimated complete.
      */
-    void createContentView(Context context, boolean emptyView, ActivityInfo info, int taskId,
-            Consumer<SplashScreenView> consumer) {
+    void createContentView(Context context, @StartingWindowType int suggestType, ActivityInfo info,
+            int taskId, Consumer<SplashScreenView> splashScreenViewConsumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
             try {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "makeSplashScreenContentView");
-                contentView = makeSplashScreenContentView(context, info, emptyView);
+                contentView = makeSplashScreenContentView(context, info, suggestType);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "failed creating starting window content at taskId: "
                         + taskId, e);
                 contentView = null;
             }
-            consumer.accept(contentView);
+            splashScreenViewConsumer.accept(contentView);
         });
     }
 
@@ -149,7 +162,10 @@ public class SplashscreenContentDrawer {
                 com.android.wm.shell.R.dimen.starting_surface_exit_animation_window_shift_length);
     }
 
-    private static int getSystemBGColor() {
+    /**
+     * @return Current system background color.
+     */
+    public static int getSystemBGColor() {
         final Context systemContext = ActivityThread.currentApplication();
         if (systemContext == null) {
             Slog.e(TAG, "System context does not exist!");
@@ -159,12 +175,22 @@ public class SplashscreenContentDrawer {
         return res.getColor(com.android.wm.shell.R.color.splash_window_background_default);
     }
 
+    /**
+     * Estimate the background color of the app splash screen, this may take a while so use it only
+     * if there is no starting window exists for that context.
+     **/
+    int estimateTaskBackgroundColor(Context context) {
+        final SplashScreenWindowAttrs windowAttrs = new SplashScreenWindowAttrs();
+        getWindowAttrs(context, windowAttrs);
+        return peekWindowBGColor(context, windowAttrs);
+    }
+
     private static Drawable createDefaultBackgroundDrawable() {
         return new ColorDrawable(getSystemBGColor());
     }
 
     /** Extract the window background color from {@code attrs}. */
-    public static int peekWindowBGColor(Context context, SplashScreenWindowAttrs attrs) {
+    private static int peekWindowBGColor(Context context, SplashScreenWindowAttrs attrs) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "peekWindowBGColor");
         final Drawable themeBGDrawable;
         if (attrs.mWindowBgColor != 0) {
@@ -192,20 +218,43 @@ public class SplashscreenContentDrawer {
         }
     }
 
+    private static Drawable peekLegacySplashscreenContent(Context context,
+            SplashScreenWindowAttrs attrs) {
+        final TypedArray a = context.obtainStyledAttributes(R.styleable.Window);
+        final int resId = safeReturnAttrDefault((def) ->
+                a.getResourceId(R.styleable.Window_windowSplashscreenContent, def), 0);
+        a.recycle();
+        if (resId != 0) {
+            return context.getDrawable(resId);
+        }
+        if (attrs.mWindowBgResId != 0) {
+            return context.getDrawable(attrs.mWindowBgResId);
+        }
+        return null;
+    }
+
     private SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai,
-            boolean emptyView) {
+            @StartingWindowType int suggestType) {
         updateDensity();
 
         getWindowAttrs(context, mTmpAttrs);
         mLastPackageContextConfigHash = context.getResources().getConfiguration().hashCode();
-        final int themeBGColor = mColorCache.getWindowColor(ai.packageName,
-                mLastPackageContextConfigHash, mTmpAttrs.mWindowBgColor, mTmpAttrs.mWindowBgResId,
-                () -> peekWindowBGColor(context, mTmpAttrs)).mBgColor;
-        // TODO (b/173975965) Tracking the performance on improved splash screen.
+
+        final Drawable legacyDrawable = suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+                ? peekLegacySplashscreenContent(context, mTmpAttrs) : null;
+        final int themeBGColor = legacyDrawable != null
+                ? getBGColorFromCache(ai, () -> estimateWindowBGColor(legacyDrawable))
+                : getBGColorFromCache(ai, () -> peekWindowBGColor(context, mTmpAttrs));
         return new StartingWindowViewBuilder(context, ai)
                 .setWindowBGColor(themeBGColor)
-                .makeEmptyView(emptyView)
+                .overlayDrawable(legacyDrawable)
+                .chooseStyle(suggestType)
                 .build();
+    }
+
+    private int getBGColorFromCache(ActivityInfo ai, IntSupplier windowBgColorSupplier) {
+        return mColorCache.getWindowColor(ai.packageName, mLastPackageContextConfigHash,
+                mTmpAttrs.mWindowBgColor, mTmpAttrs.mWindowBgResId, windowBgColorSupplier).mBgColor;
     }
 
     private static <T> T safeReturnAttrDefault(UnaryOperator<T> getMethod, T def) {
@@ -221,14 +270,14 @@ public class SplashscreenContentDrawer {
      * Get the {@link SplashScreenWindowAttrs} from {@code context} and fill them into
      * {@code attrs}.
      */
-    public static void getWindowAttrs(Context context, SplashScreenWindowAttrs attrs) {
+    private static void getWindowAttrs(Context context, SplashScreenWindowAttrs attrs) {
         final TypedArray typedArray = context.obtainStyledAttributes(
                 com.android.internal.R.styleable.Window);
         attrs.mWindowBgResId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
         attrs.mWindowBgColor = safeReturnAttrDefault((def) -> typedArray.getColor(
                 R.styleable.Window_windowSplashScreenBackground, def),
                 Color.TRANSPARENT);
-        attrs.mReplaceIcon = safeReturnAttrDefault((def) -> typedArray.getDrawable(
+        attrs.mSplashScreenIcon = safeReturnAttrDefault((def) -> typedArray.getDrawable(
                 R.styleable.Window_windowSplashScreenAnimatedIcon), null);
         attrs.mAnimationDuration = safeReturnAttrDefault((def) -> typedArray.getInt(
                 R.styleable.Window_windowSplashScreenAnimationDuration, def), 0);
@@ -241,7 +290,7 @@ public class SplashscreenContentDrawer {
         if (DEBUG) {
             Slog.d(TAG, "window attributes color: "
                     + Integer.toHexString(attrs.mWindowBgColor)
-                    + " icon " + attrs.mReplaceIcon + " duration " + attrs.mAnimationDuration
+                    + " icon " + attrs.mSplashScreenIcon + " duration " + attrs.mAnimationDuration
                     + " brandImage " + attrs.mBrandingImage);
         }
     }
@@ -250,7 +299,7 @@ public class SplashscreenContentDrawer {
     public static class SplashScreenWindowAttrs {
         private int mWindowBgResId = 0;
         private int mWindowBgColor = Color.TRANSPARENT;
-        private Drawable mReplaceIcon = null;
+        private Drawable mSplashScreenIcon = null;
         private Drawable mBrandingImage = null;
         private int mIconBgColor = Color.TRANSPARENT;
         private int mAnimationDuration = 0;
@@ -260,7 +309,8 @@ public class SplashscreenContentDrawer {
         private final Context mContext;
         private final ActivityInfo mActivityInfo;
 
-        private boolean mEmptyView;
+        private Drawable mOverlayDrawable;
+        private int mSuggestType;
         private int mThemeColor;
         private Drawable mFinalIconDrawable;
         private int mFinalIconSize = mIconSize;
@@ -275,22 +325,33 @@ public class SplashscreenContentDrawer {
             return this;
         }
 
-        StartingWindowViewBuilder makeEmptyView(boolean empty) {
-            mEmptyView = empty;
+        StartingWindowViewBuilder overlayDrawable(Drawable overlay) {
+            mOverlayDrawable = overlay;
+            return this;
+        }
+
+        StartingWindowViewBuilder chooseStyle(int suggestType) {
+            mSuggestType = suggestType;
             return this;
         }
 
         SplashScreenView build() {
             Drawable iconDrawable;
             final int animationDuration;
-            if (mEmptyView) {
-                // empty splash screen case
+            if (mSuggestType == STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+                    || mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
+                // empty or legacy splash screen case
                 animationDuration = 0;
                 mFinalIconSize = 0;
-            } else if (mTmpAttrs.mReplaceIcon != null) {
+            } else if (mTmpAttrs.mSplashScreenIcon != null) {
                 // replaced icon, don't process
-                iconDrawable = mTmpAttrs.mReplaceIcon;
+                iconDrawable = mTmpAttrs.mSplashScreenIcon;
                 animationDuration = mTmpAttrs.mAnimationDuration;
+
+                // There is no background below the icon, so scale the icon up
+                if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT) {
+                    mFinalIconSize *= NO_BACKGROUND_SCALE;
+                }
                 createIconDrawable(iconDrawable, false);
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
@@ -391,13 +452,15 @@ public class SplashscreenContentDrawer {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
             final SplashScreenView.Builder builder = new SplashScreenView.Builder(mContext);
             builder.setBackgroundColor(mThemeColor);
+            builder.setOverlayDrawable(mOverlayDrawable);
             if (iconDrawable != null) {
                 builder.setIconSize(iconSize)
                         .setIconBackground(mTmpAttrs.mIconBgColor)
                         .setCenterViewDrawable(iconDrawable)
                         .setAnimationDurationMillis(animationDuration);
             }
-            if (mTmpAttrs.mBrandingImage != null) {
+            if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
+                    && mTmpAttrs.mBrandingImage != null) {
                 builder.setBrandingDrawable(mTmpAttrs.mBrandingImage, mBrandingImageWidth,
                         mBrandingImageHeight);
             }
@@ -405,20 +468,22 @@ public class SplashscreenContentDrawer {
             if (DEBUG) {
                 Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);
             }
-            if (mEmptyView) {
-                splashScreenView.setNotCopyable();
-            }
-            splashScreenView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    SplashScreenView.applySystemBarsContrastColor(v.getWindowInsetsController(),
-                            splashScreenView.getInitBackgroundColor());
-                }
+            if (mSuggestType != STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
+                splashScreenView.addOnAttachStateChangeListener(
+                        new View.OnAttachStateChangeListener() {
+                            @Override
+                            public void onViewAttachedToWindow(View v) {
+                                SplashScreenView.applySystemBarsContrastColor(
+                                        v.getWindowInsetsController(),
+                                        splashScreenView.getInitBackgroundColor());
+                            }
 
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                }
-            });
+                            @Override
+                            public void onViewDetachedFromWindow(View v) {
+                            }
+                        });
+            }
+
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return splashScreenView;
         }

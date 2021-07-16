@@ -671,6 +671,14 @@ public abstract class Connection extends Conferenceable {
     public @interface AudioCodec {}
 
     /**
+     * Contains the same value as {@link #getCallerNumberVerificationStatus()}, except will be
+     * present in the {@link #getExtras()} using this key.
+     * @hide
+     */
+    public static final String EXTRA_CALLER_NUMBER_VERIFICATION_STATUS =
+            "android.telecom.extra.CALLER_NUMBER_VERIFICATION_STATUS";
+
+    /**
      * Connection extra key used to store the last forwarded number associated with the current
      * connection.  Used to communicate to the user interface that the connection was forwarded via
      * the specified number.

@@ -500,6 +500,36 @@ public final class Zygote {
     }
 
     /**
+     * Scans file descriptors in /proc/self/fd/, stores their metadata from readlink(2)/stat(2) when
+     * available. Saves this information in a global on native side, to be used by subsequent call
+     * to allowFilesOpenedByPreload(). Fatally fails if the FDs are of unsupported type and are not
+     * explicitly allowed. Ignores repeated invocations.
+     *
+     * Inspecting the FDs is more permissive than in forkAndSpecialize() because preload is invoked
+     * earlier and hence needs to allow a few open sockets. The checks in forkAndSpecialize()
+     * enforce that these sockets are closed when forking.
+     */
+    static void markOpenedFilesBeforePreload() {
+        nativeMarkOpenedFilesBeforePreload();
+    }
+
+    private static native void nativeMarkOpenedFilesBeforePreload();
+
+    /**
+     * By scanning /proc/self/fd/ determines file descriptor numbers in this process opened since
+     * the first call to markOpenedFilesBeforePreload(). These FDs are treated as 'owned' by the
+     * custom preload of the App Zygote - the app is responsible for not sharing data with its other
+     * processes using these FDs, including by lseek(2). File descriptor types and file names are
+     * not checked. Changes in FDs recorded by markOpenedFilesBeforePreload() are not expected and
+     * kill the current process.
+     */
+    static void allowFilesOpenedByPreload() {
+        nativeAllowFilesOpenedByPreload();
+    }
+
+    private static native void nativeAllowFilesOpenedByPreload();
+
+    /**
      * Installs a seccomp filter that limits setresuid()/setresgid() to the passed-in range
      * @param uidGidMin The smallest allowed uid/gid
      * @param uidGidMax The largest allowed uid/gid

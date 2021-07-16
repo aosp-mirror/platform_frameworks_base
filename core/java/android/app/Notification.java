@@ -5380,14 +5380,15 @@ public class Notification implements Parcelable
 
         private void bindExpandButton(RemoteViews contentView, StandardTemplateParams p) {
             // set default colors
-            int textColor = getPrimaryTextColor(p);
-            int pillColor = getColors(p).getProtectionColor();
+            int bgColor = getBackgroundColor(p);
+            int pillColor = Colors.flattenAlpha(getColors(p).getProtectionColor(), bgColor);
+            int textColor = Colors.flattenAlpha(getPrimaryTextColor(p), pillColor);
             contentView.setInt(R.id.expand_button, "setDefaultTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
-                textColor = getBackgroundColor(p);
-                pillColor = getPrimaryAccentColor(p);
+                pillColor = Colors.flattenAlpha(getPrimaryAccentColor(p), bgColor);
+                textColor = Colors.flattenAlpha(bgColor, pillColor);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -6344,11 +6345,10 @@ public class Notification implements Parcelable
             ApplicationInfo applicationInfo = n.extras.getParcelable(
                     EXTRA_BUILDER_APPLICATION_INFO);
             Context builderContext;
-            if (applicationInfo != null && applicationInfo.packageName != null) {
+            if (applicationInfo != null) {
                 try {
-                    builderContext = context.createPackageContextAsUser(applicationInfo.packageName,
-                            Context.CONTEXT_RESTRICTED,
-                            UserHandle.getUserHandleForUid(applicationInfo.uid));
+                    builderContext = context.createApplicationContext(applicationInfo,
+                            Context.CONTEXT_RESTRICTED);
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
                     builderContext = context;  // try with our context

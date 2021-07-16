@@ -42,21 +42,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 public class FakeSessionTest extends SysuiTestCase {
     @Test
-    public void testMaxTiles() {
-        FakeSession session = new FakeSession(
-                /* pageHeight */ 100,
-                /* maxPages */ 2.25f,
-                /* tileHeight */ 10,
-                /* visiblePageTop */ 0,
-                /* visiblePageBottom */ 100,
-                /* availableTop */ -250,
-                /* availableBottom */ 250);
-
-        // (pageHeight * maxPages) / tileHeight
-        assertEquals("getMaxTiles()", 23, session.getMaxTiles());
-    }
-
-    @Test
     public void testNonEmptyResult_hasImage() {
         FakeSession session = new FakeSession(
                 /* pageHeight */ 100,
@@ -65,7 +50,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ 0,
-                /* availableBottom */ 100);
+                /* availableBottom */ 100,
+                /* max Tiles */ 30);
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(0));
         assertNotNull("result.image", result.image);
         assertNotNull("result.image.getHardwareBuffer()", result.image.getHardwareBuffer());
@@ -80,7 +66,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ 0,
-                /* availableBottom */ 100);
+                /* availableBottom */ 100,
+                /* max Tiles */ 30);
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(-100));
         assertNull("result.image", result.image);
     }
@@ -94,7 +81,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -250,
-                /* availableBottom */ 250);
+                /* availableBottom */ 250,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(0));
         assertEquals("requested top", 0, result.requested.top);
@@ -113,7 +101,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -250,
-                /* availableBottom */ 250);
+                /* availableBottom */ 250,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(90));
         assertEquals("requested top", 90, result.requested.top);
@@ -132,7 +121,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -250,
-                /* availableBottom */ 250);
+                /* availableBottom */ 250,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(-100));
         assertEquals("requested top", -100, result.requested.top);
@@ -151,7 +141,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -250,
-                /* availableBottom */ 250);
+                /* availableBottom */ 250,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(150));
         assertEquals("requested top", 150, result.requested.top);
@@ -170,7 +161,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -100,
-                /* availableBottom */ 100);
+                /* availableBottom */ 100,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(-125));
         assertEquals("requested top", -125, result.requested.top);
@@ -189,7 +181,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -100,
-                /* availableBottom */ 100);
+                /* availableBottom */ 100,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(75));
         assertEquals("requested top", 75, result.requested.top);
@@ -211,7 +204,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 25,  // <<--
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -150,
-                /* availableBottom */ 150);
+                /* availableBottom */ 150,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(-150));
         assertEquals("requested top", -150, result.requested.top);
@@ -233,7 +227,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 75,
                 /* availableTop */ -150,
-                /* availableBottom */ 150);
+                /* availableBottom */ 150,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(50));
         assertEquals("requested top", 50, result.requested.top);
@@ -252,7 +247,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -100,
-                /* availableBottom */ 200);
+                /* availableBottom */ 200,
+                /* max Tiles */ 30);
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(-150));
         assertTrue("captured rect is empty", result.captured.isEmpty());
     }
@@ -266,7 +262,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 0,
                 /* visiblePageBottom */ 100,
                 /* availableTop */ -100,
-                /* availableBottom */ 200);
+                /* availableBottom */ 200,
+                /* max Tiles */ 30);
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(200));
         assertTrue("captured rect is empty", result.captured.isEmpty());
     }
@@ -280,7 +277,8 @@ public class FakeSessionTest extends SysuiTestCase {
                 /* visiblePageTop */ 60,  // <<---
                 /* visiblePageBottom */ 0,
                 /* availableTop */ -150,
-                /* availableBottom */ 150);
+                /* availableBottom */ 150,
+                /* max Tiles */ 30);
 
         ScrollCaptureClient.CaptureResult result = getUnchecked(session.requestTile(0));
         assertEquals("requested top", 0, result.requested.top);

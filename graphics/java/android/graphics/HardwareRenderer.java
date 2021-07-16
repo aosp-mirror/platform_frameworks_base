@@ -912,7 +912,7 @@ public class HardwareRenderer {
          * @param aSurfaceControlNativeObj ASurfaceControl native object handle
          * @param frame The id of the frame being drawn.
          */
-        void onMergeTransaction(long aSurfaceTranactionNativeObj,
+        boolean onMergeTransaction(long aSurfaceTranactionNativeObj,
                                 long aSurfaceControlNativeObj, long frame);
     }
 
@@ -1303,6 +1303,11 @@ public class HardwareRenderer {
      * @hide
      */
     public static native void preload();
+
+    /**
+     * @hide
+     */
+    public static native boolean isWebViewOverlaysEnabled();
 
     /** @hide */
     protected static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);

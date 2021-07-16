@@ -5003,7 +5003,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
                     res.key.type);
         } else {
-            throw new IllegalArgumentException();
+            return new PendingIntentInfo(null, -1, false, ActivityManager.INTENT_SENDER_UNKNOWN);
         }
     }
 
@@ -7619,6 +7619,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         t.traceEnd();
 
         t.traceBegin("ActivityManagerStartApps");
+        mBatteryStatsService.onSystemReady();
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
@@ -11047,9 +11048,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-                if (gpuDmaBufUsage >= 0) {
-                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+                if (gpuPrivateUsage >= 0) {
+                    final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                     pw.print("      GPU: ");
                     pw.print(stringifyKBSize(gpuUsage));
                     pw.print(" (");
@@ -12422,6 +12423,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Register receiver " + filter + ": " + sticky);
         if (receiver == null) {
             return sticky;
+        }
+
+        // SafetyNet logging for b/177931370. If any process other than system_server tries to
+        // listen to this broadcast action, then log it.
+        if (callingPid != Process.myPid()) {
+            if (filter.hasAction("com.android.server.net.action.SNOOZE_WARNING")
+                    || filter.hasAction("com.android.server.net.action.SNOOZE_RAPID")) {
+                EventLog.writeEvent(0x534e4554, "177931370", callingUid, "");
+            }
         }
 
         synchronized (this) {
@@ -14372,10 +14382,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int capability = uidRec != null ? uidRec.getSetCapability() : 0;
         final boolean ephemeral = uidRec != null ? uidRec.isEphemeral() : isEphemeralLocked(uid);
 
-        if (uidRec != null && uidRec.isIdle() && (change & UidRecord.CHANGE_IDLE) != 0) {
-            mProcessList.killAppIfForceStandbyAndCachedIdleLocked(uidRec);
-        }
-
         if (uidRec != null && !uidRec.isIdle() && (change & UidRecord.CHANGE_GONE) != 0) {
             // If this uid is going away, and we haven't yet reported it is gone,
             // then do so now.
@@ -15551,13 +15557,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public List<ProcessMemoryState> getMemoryStateForProcesses() {
             List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
-            synchronized (mProcLock) {
-                synchronized (mPidsSelfLocked) {
-                    for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
-                        final ProcessRecord r = mPidsSelfLocked.valueAt(i);
-                        processMemoryStates.add(new ProcessMemoryState(
-                                r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
-                    }
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    processMemoryStates.add(new ProcessMemoryState(
+                            r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
                 }
             }
             return processMemoryStates;
@@ -16125,10 +16129,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public ServiceNotificationPolicy applyForegroundServiceNotification(
-                Notification notification, int id, String pkg, int userId) {
+                Notification notification, String tag, int id, String pkg, int userId) {
             synchronized (ActivityManagerService.this) {
                 return mServices.applyForegroundServiceNotificationLocked(notification,
-                        id, pkg, userId);
+                        tag, id, pkg, userId);
             }
         }
 
@@ -16321,6 +16325,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         public @TempAllowListType int getPushMessagingOverQuotaBehavior() {
             synchronized (ActivityManagerService.this) {
                 return mConstants.mPushMessagingOverQuotaBehavior;
+            }
+        }
+
+        @Override
+        public int getUidCapability(int uid) {
+            synchronized (ActivityManagerService.this) {
+                UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+                if (uidRecord == null) {
+                    throw new IllegalArgumentException("uid record for " + uid + " not found");
+                }
+                return uidRecord.getCurCapability();
+            }
+        }
+
+        /**
+         * @return The PID list of the isolated process with packages matching the given uid.
+         */
+        @Nullable
+        public List<Integer> getIsolatedProcesses(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mProcessList.getIsolatedProcessesLocked(uid);
             }
         }
     }

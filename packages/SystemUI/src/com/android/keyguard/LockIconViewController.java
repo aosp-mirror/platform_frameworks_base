@@ -18,17 +18,24 @@ package com.android.keyguard;
 
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
-import static com.android.systemui.classifier.Classifier.DISABLED_UDFPS_AFFORDANCE;
+import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.util.Log;
+import android.media.AudioAttributes;
+import android.os.Process;
+import android.os.Vibrator;
+import android.util.DisplayMetrics;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -40,6 +47,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -64,6 +72,13 @@ import javax.inject.Inject;
  */
 @StatusBarComponent.StatusBarScope
 public class LockIconViewController extends ViewController<LockIconView> implements Dumpable {
+
+    private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .build();
+
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
     @NonNull private final StatusBarStateController mStatusBarStateController;
@@ -73,17 +88,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final DelayableExecutor mExecutor;
-
-    private boolean mHasUdfpsOrFaceAuthFeatures;
     private boolean mUdfpsEnrolled;
-    private boolean mFaceAuthEnrolled;
 
-    @NonNull private final Drawable mButton;
-    @NonNull private final Drawable mUnlockIcon;
+    @NonNull private final AnimatedVectorDrawable mFpToUnlockIcon;
+    @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
-    @NonNull private final CharSequence mDisabledLabel;
     @NonNull private final CharSequence mUnlockedLabel;
     @NonNull private final CharSequence mLockedLabel;
+    @Nullable private final Vibrator mVibrator;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
@@ -95,9 +107,18 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mUserUnlockedWithBiometric;
     private Runnable mCancelDelayedUpdateVisibilityRunnable;
 
-    private boolean mShowButton;
+    private boolean mHasUdfps;
+    private float mHeightPixels;
+    private float mWidthPixels;
+    private float mDensity;
+    private int mAmbientIndicationHeight; // in pixels
+    private int mKgIndicationHeight; // in pixels
+
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
+
+    private boolean mDownDetected;
+    private final Rect mSensorTouchLocation = new Rect();
 
     @Inject
     public LockIconViewController(
@@ -111,7 +132,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull DumpManager dumpManager,
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull ConfigurationController configurationController,
-            @NonNull @Main DelayableExecutor executor
+            @NonNull @Main DelayableExecutor executor,
+            @Nullable Vibrator vibrator
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -123,20 +145,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mAccessibilityManager = accessibilityManager;
         mConfigurationController = configurationController;
         mExecutor = executor;
+        mVibrator = vibrator;
 
         final Context context = view.getContext();
-        mButton = context.getResources().getDrawable(
-                com.android.systemui.R.drawable.circle_white, context.getTheme());
-        mUnlockIcon = new InsetDrawable(context.getResources().getDrawable(
-                com.android.internal.R.drawable.ic_lock_open, context.getTheme()),
-                context.getResources().getDimensionPixelSize(
-                        com.android.systemui.R.dimen.udfps_unlock_icon_inset));
-        mLockIcon = new InsetDrawable(context.getResources().getDrawable(
-                com.android.internal.R.drawable.ic_lock, context.getTheme()),
-                context.getResources().getDimensionPixelSize(
-                        com.android.systemui.R.dimen.udfps_unlock_icon_inset));
-        mDisabledLabel = context.getResources().getString(
-                R.string.accessibility_udfps_disabled_button);
+        mLockIcon = mView.getContext().getResources().getDrawable(
+                R.anim.lock_to_unlock,
+                mView.getContext().getTheme());
+        mFpToUnlockIcon = (AnimatedVectorDrawable) mView.getContext().getResources().getDrawable(
+                R.anim.fp_to_unlock, mView.getContext().getTheme());
+        mLockToUnlockIcon = (AnimatedVectorDrawable) mView.getContext().getResources().getDrawable(
+                R.anim.lock_to_unlock,
+                mView.getContext().getTheme());
         mUnlockedLabel = context.getResources().getString(R.string.accessibility_unlock_button);
         mLockedLabel = context.getResources().getString(R.string.accessibility_lock_icon);
         dumpManager.registerDumpable("LockIconViewController", this);
@@ -149,37 +168,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Override
     protected void onViewAttached() {
-        // we check this here instead of onInit since the FingeprintManager + FaceManager may not
+        // we check this here instead of onInit since the FingerprintManager + FaceManager may not
         // have started up yet onInit
-        final boolean hasFaceAuth = mAuthController.getFaceAuthSensorLocation() != null;
-        final boolean hasUdfps = mAuthController.getUdfpsSensorLocation() != null;
-        mHasUdfpsOrFaceAuthFeatures = hasFaceAuth || hasUdfps;
-        if (!mHasUdfpsOrFaceAuthFeatures) {
-            // Posting since removing a view in the middle of onAttach can lead to a crash in the
-            // iteration loop when the view isn't last
-            mView.setVisibility(View.GONE);
-            mView.post(() -> {
-                mView.setVisibility(View.VISIBLE);
-                ((ViewGroup) mView.getParent()).removeView(mView);
-            });
-            return;
-        }
+        mHasUdfps = mAuthController.getUdfpsSensorLocation() != null;
 
-        if (hasUdfps) {
-            FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
-            mView.setLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
-                    props.sensorRadius);
-        } else {
-            int[] props = mView.getContext().getResources().getIntArray(
-                    com.android.systemui.R.array.config_lock_icon_props);
-            if (props == null || props.length < 3) {
-                Log.e("LockIconViewController", "lock icon position should be "
-                        + "setup in config under config_lock_icon_props");
-                props = new int[]{0, 0, 0};
-            }
-            mView.setLocation(new PointF(props[0], props[1]), props[2]);
-        }
-
+        updateConfiguration();
         updateKeyguardShowing();
         mUserUnlockedWithBiometric = false;
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
@@ -194,9 +187,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
-        mAccessibilityManager.addTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
-
+        mDownDetected = false;
         updateVisibility();
     }
 
@@ -206,8 +197,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
-        mAccessibilityManager.removeTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
 
         if (mCancelDelayedUpdateVisibilityRunnable != null) {
             mCancelDelayedUpdateVisibilityRunnable.run();
@@ -217,18 +206,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     public float getTop() {
         return mView.getLocationTop();
-    }
-
-    private boolean onAffordanceClick() {
-        if (mFalsingManager.isFalseTouch(DISABLED_UDFPS_AFFORDANCE)) {
-            return false;
-        }
-
-        // pre-emptively set to true to hide view
-        mIsBouncerShowing = true;
-        updateVisibility();
-        mKeyguardViewController.showBouncer(/* scrim */ true);
-        return true;
     }
 
     /**
@@ -245,32 +222,34 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mCancelDelayedUpdateVisibilityRunnable = null;
         }
 
-        if (!mIsKeyguardShowing || (!mUdfpsEnrolled && !mFaceAuthEnrolled)) {
+        if (!mIsKeyguardShowing) {
             mView.setVisibility(View.INVISIBLE);
             return;
         }
 
-        // these three states are mutually exclusive:
-        mShowButton = mUdfpsEnrolled && !mCanDismissLockScreen && !mRunningFPS
-                && !mUserUnlockedWithBiometric && isLockScreen();
-        mShowUnlockIcon = mFaceAuthEnrolled & mCanDismissLockScreen && isLockScreen();
-        mShowLockIcon = !mUdfpsEnrolled && !mCanDismissLockScreen && isLockScreen()
-            && mFaceAuthEnrolled;
+        boolean wasShowingFpIcon = mHasUdfps && !mShowUnlockIcon && !mShowLockIcon;
+        boolean wasShowingLockIcon = mShowLockIcon;
+        mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
+            && (!mUdfpsEnrolled || !mRunningFPS);
+        mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
 
-        updateClickListener();
         final CharSequence prevContentDescription = mView.getContentDescription();
-        if (mShowButton) {
-            mView.setImageDrawable(mButton);
-            mView.setVisibility(View.VISIBLE);
-            mView.setContentDescription(mDisabledLabel);
-        } else if (mShowUnlockIcon) {
-            mView.setImageDrawable(mUnlockIcon);
-            mView.setVisibility(View.VISIBLE);
-            mView.setContentDescription(mUnlockedLabel);
-        } else if (mShowLockIcon) {
+        if (mShowLockIcon) {
             mView.setImageDrawable(mLockIcon);
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mLockedLabel);
+        } else if (mShowUnlockIcon) {
+            if (wasShowingFpIcon) {
+                mView.setImageDrawable(mFpToUnlockIcon);
+                mFpToUnlockIcon.forceAnimationOnUI();
+                mFpToUnlockIcon.start();
+            } else if (wasShowingLockIcon) {
+                mView.setImageDrawable(mLockToUnlockIcon);
+                mLockToUnlockIcon.forceAnimationOnUI();
+                mLockToUnlockIcon.start();
+            }
+            mView.setVisibility(View.VISIBLE);
+            mView.setContentDescription(mUnlockedLabel);
         } else {
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
@@ -293,10 +272,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         getResources().getString(R.string.accessibility_enter_hint));
         public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(v, info);
-            if (mShowButton || mShowLockIcon) {
-                info.addAction(mAccessibilityAuthenticateHint);
-            } else if (mShowUnlockIcon) {
-                info.addAction(mAccessibilityEnterHint);
+            if (isClickable()) {
+                if (mShowLockIcon) {
+                    info.addAction(mAccessibilityAuthenticateHint);
+                } else if (mShowUnlockIcon) {
+                    info.addAction(mAccessibilityEnterHint);
+                }
             }
         }
     };
@@ -308,18 +289,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 && mStatusBarState == StatusBarState.KEYGUARD;
     }
 
-    private void updateClickListener() {
-        if (mView != null) {
-            mView.setOnClickListener(v -> onAffordanceClick());
-            if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                mView.setOnLongClickListener(null);
-                mView.setLongClickable(false);
-            } else {
-                mView.setOnLongClickListener(v -> onAffordanceClick());
-            }
-        }
-    }
-
     private void updateKeyguardShowing() {
         mIsKeyguardShowing = mKeyguardStateController.isShowing()
                 && !mKeyguardStateController.isKeyguardGoingAway();
@@ -328,17 +297,53 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private void updateColors() {
         final int color = Utils.getColorAttrDefaultColor(mView.getContext(),
                 R.attr.wallpaperTextColorAccent);
-        mUnlockIcon.setTint(color);
+        mFpToUnlockIcon.setTint(color);
+        mLockToUnlockIcon.setTint(color);
         mLockIcon.setTint(color);
+    }
+
+    private void updateConfiguration() {
+        final DisplayMetrics metrics = mView.getContext().getResources().getDisplayMetrics();
+        mWidthPixels = metrics.widthPixels;
+        mHeightPixels = metrics.heightPixels;
+        mDensity = metrics.density;
+        mKgIndicationHeight = mView.getContext().getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_margin_bottom)
+            + mView.getContext().getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_bottom_padding);
+        updateLockIconLocation();
+    }
+
+    private void updateLockIconLocation() {
+        if (mHasUdfps) {
+            FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
+            mView.setCenterLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
+                    props.sensorRadius);
+        } else {
+            final float distAboveKgBottomArea = 12 * mDensity;
+            final float radius = 36 * mDensity;
+            final int kgBottomAreaHeight = Math.max(mKgIndicationHeight, mAmbientIndicationHeight);
+            mView.setCenterLocation(
+                    new PointF(mWidthPixels / 2,
+                        mHeightPixels - kgBottomAreaHeight - distAboveKgBottomArea
+                            - radius / 2), (int) radius);
+        }
+
+        mView.getHitRect(mSensorTouchLocation);
+    }
+
+    /**
+     * Set the location of ambient indication if showing (ie: now playing)
+     */
+    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
+        mAmbientIndicationHeight = ambientIndicationBottomPadding;
+        updateLockIconLocation();
     }
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mHasUdfpsOrFaceAuthFeatures: " + mHasUdfpsOrFaceAuthFeatures);
         pw.println("mUdfpsEnrolled: " + mUdfpsEnrolled);
-        pw.println("mFaceAuthEnrolled: " + mFaceAuthEnrolled);
         pw.println("mIsKeyguardShowing: " + mIsKeyguardShowing);
-        pw.println(" mShowBouncerButton: " + mShowButton);
         pw.println(" mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println(" mShowLockIcon: " + mShowLockIcon);
         pw.println("  mIsDozing: " + mIsDozing);
@@ -348,6 +353,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
         pw.println("  mQsExpanded: " + mQsExpanded);
+
+        if (mView != null) {
+            mView.dump(fd, pw, args);
+        }
     }
 
     private StatusBarStateController.StateListener mStatusBarStateListener =
@@ -420,7 +429,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         public void onKeyguardShowingChanged() {
             updateKeyguardShowing();
             mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
-            mFaceAuthEnrolled = mKeyguardUpdateMonitor.isFaceEnrolled();
             updateVisibility();
         }
 
@@ -447,10 +455,103 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         public void onOverlayChanged() {
             updateColors();
         }
+
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            updateConfiguration();
+        }
     };
 
-    private final AccessibilityManager.TouchExplorationStateChangeListener
-            mTouchExplorationStateChangeListener = enabled -> updateClickListener();
+    private final GestureDetector mGestureDetector =
+            new GestureDetector(new SimpleOnGestureListener() {
+                public boolean onDown(MotionEvent e) {
+                    if (!isClickable()) {
+                        mDownDetected = false;
+                        return false;
+                    }
+
+                    // intercept all following touches until we see MotionEvent.ACTION_CANCEL UP or
+                    // MotionEvent.ACTION_UP (see #onTouchEvent)
+                    mDownDetected = true;
+                    if (mVibrator != null) {
+                        mVibrator.vibrate(
+                                Process.myUid(),
+                                getContext().getOpPackageName(),
+                                UdfpsController.EFFECT_CLICK,
+                                "lockIcon-onDown",
+                                VIBRATION_SONIFICATION_ATTRIBUTES);
+                    }
+                    return true;
+                }
+
+                public void onLongPress(MotionEvent e) {
+                    if (!wasClickableOnDownEvent()) {
+                        return;
+                    }
+
+                    if (mVibrator != null) {
+                        mVibrator.vibrate(
+                                Process.myUid(),
+                                getContext().getOpPackageName(),
+                                UdfpsController.EFFECT_CLICK,
+                                "lockIcon-onLongPress",
+                                VIBRATION_SONIFICATION_ATTRIBUTES);
+                    }
+                    onAffordanceClick();
+                }
+
+                public boolean onSingleTapUp(MotionEvent e) {
+                    if (!wasClickableOnDownEvent()) {
+                        return false;
+                    }
+
+                    onAffordanceClick();
+                    return true;
+                }
+
+                private boolean wasClickableOnDownEvent() {
+                    return mDownDetected;
+                }
+
+                private void onAffordanceClick() {
+                    if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
+                        return;
+                    }
+
+                    // pre-emptively set to true to hide view
+                    mIsBouncerShowing = true;
+                    updateVisibility();
+                    mKeyguardViewController.showBouncer(/* scrim */ true);
+                }
+            });
+
+    /**
+     * Send touch events to this view and handles it if the touch is within this view and we are
+     * in a 'clickable' state
+     * @return whether to intercept the touch event
+     */
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
+                && mView.getVisibility() == View.VISIBLE) {
+            mGestureDetector.onTouchEvent(event);
+        }
+
+        // we continue to intercept all following touches until we see MotionEvent.ACTION_CANCEL UP
+        // or MotionEvent.ACTION_UP. this is to avoid passing the touch to NPV
+        // after the lock icon disappears on device entry
+        if (mDownDetected) {
+            if (event.getAction() == MotionEvent.ACTION_CANCEL
+                    || event.getAction() == MotionEvent.ACTION_UP) {
+                mDownDetected = false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isClickable() {
+        return mUdfpsEnrolled || mShowUnlockIcon;
+    }
 
     /**
      * Set the alpha of this view.

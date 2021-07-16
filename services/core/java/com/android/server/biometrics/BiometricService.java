@@ -1369,11 +1369,11 @@ public class BiometricService extends SystemService {
     /**
      * handleAuthenticate() (above) which is called from BiometricPrompt determines which
      * modality/modalities to start authenticating with. authenticateInternal() should only be
-     * used for:
-     * 1) Preparing <Biometric>Services for authentication when BiometricPrompt#authenticate is,
-     * invoked, shortly after which BiometricPrompt is shown and authentication starts
-     * 2) Preparing <Biometric>Services for authentication when BiometricPrompt is already shown
-     * and the user has pressed "try again"
+     * used for preparing <Biometric>Services for authentication when BiometricPrompt#authenticate
+     * is invoked, shortly after which BiometricPrompt is shown and authentication starts.
+     *
+     * Note that this path is NOT invoked when the BiometricPrompt "Try again" button is pressed.
+     * In that case, see {@link #handleOnTryAgainPressed()}.
      */
     private void authenticateInternal(IBinder token, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo,

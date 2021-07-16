@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
@@ -39,7 +40,6 @@ import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -48,6 +48,7 @@ import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
@@ -68,12 +69,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
 
-    private static final ArraySet<String> sExpectedTags = new ArraySet<>(new String[] {
-            "awareness_provider", "activity_recognition_provider", "network_location_provider",
-            "network_location_calibration", "fused_location_provider", "geofencer_provider"});
-
     @NonNull
     private final Object mLock = new Object();
+
+    @NonNull
+    private final IBinder mToken = new Binder();
 
     @NonNull
     private final Context mContext;
@@ -83,6 +83,12 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     @NonNull
     private final VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
+
+    /**
+     * Whether this device allows only the HotwordDetectionService to use OP_RECORD_AUDIO_HOTWORD
+     * which doesn't incur the privacy indicator.
+     */
+    private final boolean mIsHotwordDetectionServiceRequired;
 
     /**
      * The locking policy around the location tags is a bit special. Since we want to
@@ -118,6 +124,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         mRoleManager = mContext.getSystemService(RoleManager.class);
         mVoiceInteractionManagerInternal = LocalServices.getService(
                 VoiceInteractionManagerInternal.class);
+        mIsHotwordDetectionServiceRequired = isHotwordDetectionServiceRequired(
+                mContext.getPackageManager());
 
         final LocationManagerInternal locationManagerInternal = LocalServices.getService(
                 LocationManagerInternal.class);
@@ -176,6 +184,21 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }, UserHandle.SYSTEM);
 
         initializeActivityRecognizersTags();
+
+        // If this device does not have telephony, restrict the phone call ops
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+            appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_MICROPHONE, true, mToken,
+                    null, UserHandle.USER_ALL);
+            appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_CAMERA, true, mToken,
+                    null, UserHandle.USER_ALL);
+        }
+    }
+
+    private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
+        // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
+        return !(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK));
     }
 
     @Override
@@ -243,6 +266,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
+    public void finishOperation(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag,
+            @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+        superImpl.accept(clientId, resolveDatasourceOp(code, uid, packageName, attributionTag),
+                resolveUid(code, uid), packageName, attributionTag);
+    }
+
+    @Override
     public void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
             boolean skipProxyOperation, @NonNull TriFunction<Integer, AttributionSource,
             Boolean, Void> superImpl) {
@@ -253,6 +284,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
+        code = resolveRecordAudioOp(code, uid);
         if (attributionTag == null) {
             return code;
         }
@@ -260,32 +292,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         if (resolvedCode != code) {
             if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                     mLocationTags)) {
-                if (packageName.equals("com.google.android.gms")
-                        && !sExpectedTags.contains(attributionTag)) {
-                    Log.i("AppOpsDebugRemapping", "remapping " + packageName + " location "
-                            + "for tag " + attributionTag);
-                }
                 return resolvedCode;
-            } else if (packageName.equals("com.google.android.gms")
-                    && sExpectedTags.contains(attributionTag)) {
-                Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName + " code "
-                        + code + " for tag " + attributionTag);
             }
         } else {
             resolvedCode = resolveArOp(code);
             if (resolvedCode != code) {
                 if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                         mActivityRecognitionTags)) {
-                    if (packageName.equals("com.google.android.gms")
-                            && !sExpectedTags.contains(attributionTag)) {
-                        Log.i("AppOpsDebugRemapping", "remapping " + packageName + " "
-                                + "activity recognition for tag " + attributionTag);
-                    }
                     return resolvedCode;
-                } else if (packageName.equals("com.google.android.gms")
-                        && sExpectedTags.contains(attributionTag)) {
-                    Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName
-                            + " code " + code + " for tag " + attributionTag);
                 }
             }
         }
@@ -369,6 +383,24 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static int resolveArOp(int code) {
         if (code == AppOpsManager.OP_ACTIVITY_RECOGNITION) {
             return AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
+        }
+        return code;
+    }
+
+    private int resolveRecordAudioOp(int code, int uid) {
+        if (code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD) {
+            if (!mIsHotwordDetectionServiceRequired) {
+                return code;
+            }
+            // Only the HotwordDetectionService can use the HOTWORD op which doesn't incur the
+            // privacy indicator. Downgrade to standard RECORD_AUDIO for other processes.
+            final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
+                    mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
+            if (hotwordDetectionServiceIdentity != null
+                    && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                return code;
+            }
+            return AppOpsManager.OP_RECORD_AUDIO;
         }
         return code;
     }

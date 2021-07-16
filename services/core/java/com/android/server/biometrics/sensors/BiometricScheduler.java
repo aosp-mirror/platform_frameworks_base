@@ -110,11 +110,21 @@ public class BiometricScheduler {
         @Nullable final BaseClientMonitor.Callback mClientCallback;
         @OperationState int mState;
 
-        Operation(@NonNull BaseClientMonitor clientMonitor,
-                @Nullable BaseClientMonitor.Callback callback) {
-            this.mClientMonitor = clientMonitor;
-            this.mClientCallback = callback;
-            mState = STATE_WAITING_IN_QUEUE;
+        Operation(
+                @NonNull BaseClientMonitor clientMonitor,
+                @Nullable BaseClientMonitor.Callback callback
+        ) {
+            this(clientMonitor, callback, STATE_WAITING_IN_QUEUE);
+        }
+
+        protected Operation(
+                @NonNull BaseClientMonitor clientMonitor,
+                @Nullable BaseClientMonitor.Callback callback,
+                @OperationState int state
+        ) {
+            mClientMonitor = clientMonitor;
+            mClientCallback = callback;
+            mState = state;
         }
 
         public boolean isHalOperation() {
@@ -568,6 +578,9 @@ public class BiometricScheduler {
         }
         final boolean isCorrectClient = isAuthenticationOrDetectionOperation(mCurrentOperation);
         final boolean tokenMatches = mCurrentOperation.mClientMonitor.getToken() == token;
+
+        Slog.d(getTag(), "cancelAuthenticationOrDetection, isCorrectClient: " + isCorrectClient
+                + ", tokenMatches: " + tokenMatches);
 
         if (isCorrectClient && tokenMatches) {
             Slog.d(getTag(), "Cancelling: " + mCurrentOperation);

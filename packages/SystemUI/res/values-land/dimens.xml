@@ -64,4 +64,6 @@
     <!-- (footer_height -48dp)/2 -->
     <dimen name="controls_management_footer_top_margin">4dp</dimen>
     <dimen name="controls_management_favorites_top_margin">8dp</dimen>
+
+    <dimen name="wallet_card_carousel_container_top_margin">24dp</dimen>
 </resources>
