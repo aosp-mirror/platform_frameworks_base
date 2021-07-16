@@ -61,6 +61,8 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -4105,6 +4107,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
+        info.displayCutoutInsets = getDisplayCutoutInsets(top);
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
@@ -4137,6 +4140,18 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityRecord topVisibleActivity = top.getTopVisibleActivity();
         return (topVisibleActivity == null || topVisibleActivity.pictureInPictureArgs.empty())
                 ? null : new PictureInPictureParams(topVisibleActivity.pictureInPictureArgs);
+    }
+
+    private Rect getDisplayCutoutInsets(Task top) {
+        if (top == null || top.mDisplayContent == null
+                || top.getDisplayInfo().displayCutout == null) return null;
+        final WindowState w = top.getTopVisibleAppMainWindow();
+        final int displayCutoutMode = w == null
+                ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+                : w.getAttrs().layoutInDisplayCutoutMode;
+        return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
+                ? null : top.getDisplayInfo().displayCutout.getSafeInsets();
     }
 
     /**
