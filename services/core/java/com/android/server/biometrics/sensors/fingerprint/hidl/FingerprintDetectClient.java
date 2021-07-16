@@ -56,8 +56,8 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
             int sensorId, @Nullable IUdfpsOverlayController udfpsOverlayController,
             boolean isStrongBiometric, int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                statsClient);
+                true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mUdfpsOverlayController = udfpsOverlayController;
         mIsStrongBiometric = isStrongBiometric;
     }
