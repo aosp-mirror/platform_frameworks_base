@@ -8396,14 +8396,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         // assume our apps are happy - lazy create the list
         final List<ActivityManager.ProcessErrorStateInfo>[] errList = new List[1];
 
+        final int callingUid = Binder.getCallingUid();
         final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
-                Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED;
-        int userId = UserHandle.getUserId(Binder.getCallingUid());
+                callingUid) == PackageManager.PERMISSION_GRANTED;
+        int userId = UserHandle.getUserId(callingUid);
+
+        final boolean hasDumpPermission = ActivityManager.checkUidPermission(
+                android.Manifest.permission.DUMP, callingUid) == PackageManager.PERMISSION_GRANTED;
 
         synchronized (mProcLock) {
             // iterate across all processes
             mProcessList.forEachLruProcessesLOSP(false, app -> {
                 if (!allUsers && app.userId != userId) {
+                    return;
+                }
+                if (!hasDumpPermission && app.info.uid != callingUid) {
                     return;
                 }
                 final ProcessErrorStateRecord errState = app.mErrorState;
