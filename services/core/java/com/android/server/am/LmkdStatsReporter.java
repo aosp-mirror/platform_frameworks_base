@@ -43,6 +43,7 @@ public final class LmkdStatsReporter {
     private static final int LOW_MEM_AND_THRASHING = 4;
     private static final int DIRECT_RECL_AND_THRASHING = 5;
     private static final int LOW_MEM_AND_SWAP_UTIL = 6;
+    private static final int LOW_FILECACHE_AFTER_THRASHING = 7;
 
     /**
      * Processes the LMK_KILL_OCCURRED packet data
@@ -100,6 +101,8 @@ public final class LmkdStatsReporter {
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__DIRECT_RECL_AND_THRASHING;
             case LOW_MEM_AND_SWAP_UTIL:
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__LOW_MEM_AND_SWAP_UTIL;
+            case LOW_FILECACHE_AFTER_THRASHING:
+                return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__LOW_FILECACHE_AFTER_THRASHING;
             default:
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__UNKNOWN;
         }
