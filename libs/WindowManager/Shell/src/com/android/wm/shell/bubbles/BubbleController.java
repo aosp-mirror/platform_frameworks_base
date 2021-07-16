@@ -906,8 +906,7 @@ public class BubbleController {
      * Fills the overflow bubbles by loading them from disk.
      */
     void loadOverflowBubblesFromDisk() {
-        if (!mBubbleData.getOverflowBubbles().isEmpty() && !mOverflowDataLoadNeeded) {
-            // we don't need to load overflow bubbles from disk if it is already in memory
+        if (!mOverflowDataLoadNeeded) {
             return;
         }
         mOverflowDataLoadNeeded = false;
