@@ -73,7 +73,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutCache, allowBackgroundAuthentication);
+                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */);
         mUsageStats = usageStats;
         mLockoutCache = lockoutCache;
         mNotificationManager = context.getSystemService(NotificationManager.class);
