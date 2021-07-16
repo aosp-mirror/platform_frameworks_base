@@ -3444,7 +3444,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public IWindowOrganizerController getWindowOrganizerController() {
-        enforceTaskPermission("getWindowOrganizerController()");
         return mWindowOrganizerController;
     }
 
