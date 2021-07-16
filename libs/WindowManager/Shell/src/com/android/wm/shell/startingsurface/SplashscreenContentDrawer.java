@@ -37,6 +37,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -57,6 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
+import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.TransactionPool;
 
@@ -368,8 +370,14 @@ public class SplashscreenContentDrawer {
                     if (DEBUG) {
                         Slog.d(TAG, "The icon is not an AdaptiveIconDrawable");
                     }
-                    // TODO process legacy icon(bitmap)
-                    createIconDrawable(iconDrawable, true);
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "legacy_icon_factory");
+                    final ShapeIconFactory factory = new ShapeIconFactory(
+                            SplashscreenContentDrawer.this.mContext,
+                            scaledIconDpi, mFinalIconSize);
+                    final Bitmap bitmap = factory.createScaledBitmapWithoutShadow(
+                            iconDrawable, true /* shrinkNonAdaptiveIcons */);
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    createIconDrawable(new BitmapDrawable(bitmap), true);
                 }
                 animationDuration = 0;
             }
@@ -377,11 +385,15 @@ public class SplashscreenContentDrawer {
             return fillViewWithIcon(mFinalIconSize, mFinalIconDrawable, animationDuration);
         }
 
+        private class ShapeIconFactory extends BaseIconFactory {
+            protected ShapeIconFactory(Context context, int fillResIconDpi, int iconBitmapSize) {
+                super(context, fillResIconDpi, iconBitmapSize, true /* shapeDetection */);
+            }
+        }
+
         private void createIconDrawable(Drawable iconDrawable, boolean legacy) {
             if (legacy) {
                 mFinalIconDrawable = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
-                        mTmpAttrs.mIconBgColor != Color.TRANSPARENT
-                                ? mTmpAttrs.mIconBgColor : Color.WHITE,
                         iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
             } else {
                 mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
