@@ -520,12 +520,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @GuardedBy("mLock")
     private void stopVcnLocked(@NonNull ParcelUuid uuidToTeardown) {
-        final Vcn vcnToTeardown = mVcns.remove(uuidToTeardown);
+        // Remove in 2 steps. Make sure teardownAsync is triggered before removing from the map.
+        final Vcn vcnToTeardown = mVcns.get(uuidToTeardown);
         if (vcnToTeardown == null) {
             return;
         }
 
         vcnToTeardown.teardownAsynchronously();
+        mVcns.remove(uuidToTeardown);
 
         // Now that the VCN is removed, notify all registered listeners to refresh their
         // UnderlyingNetworkPolicy.
@@ -1011,18 +1013,15 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     private void logVdbg(String msg) {
         if (VDBG) {
             Slog.v(TAG, msg);
-            LOCAL_LOG.log(TAG + " VDBG: " + msg);
         }
     }
 
     private void logDbg(String msg) {
         Slog.d(TAG, msg);
-        LOCAL_LOG.log(TAG + " DBG: " + msg);
     }
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, msg, tr);
-        LOCAL_LOG.log(TAG + " DBG: " + msg + tr);
     }
 
     private void logErr(String msg) {
