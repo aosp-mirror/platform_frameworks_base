@@ -228,12 +228,16 @@ public class KeyguardPasswordViewController
                 super.onPause();
             });
         }
-        mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        if (mPasswordEntry.isAttachedToWindow()) {
+            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
     }
 
     @Override
     public void onStartingToHide() {
-        mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        if (mPasswordEntry.isAttachedToWindow()) {
+            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
     }
 
     private void updateSwitchImeButton() {
