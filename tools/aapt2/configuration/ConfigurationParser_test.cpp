@@ -31,11 +31,6 @@ using ::android::ConfigDescription;
 namespace aapt {
 
 namespace configuration {
-void PrintTo(const AndroidSdk& sdk, std::ostream* os) {
-  *os << "SDK: min=" << sdk.min_sdk_version
-      << ", target=" << sdk.target_sdk_version.value_or_default(-1)
-      << ", max=" << sdk.max_sdk_version.value_or_default(-1);
-}
 
 bool operator==(const ConfiguredArtifact& lhs, const ConfiguredArtifact& rhs) {
   return lhs.name == rhs.name && lhs.abi_group == rhs.abi_group &&
@@ -43,20 +38,6 @@ bool operator==(const ConfiguredArtifact& lhs, const ConfiguredArtifact& rhs) {
          lhs.locale_group == rhs.locale_group && lhs.android_sdk == rhs.android_sdk &&
          lhs.device_feature_group == rhs.device_feature_group &&
          lhs.gl_texture_group == rhs.gl_texture_group;
-}
-
-std::ostream& operator<<(std::ostream& out, const Maybe<std::string>& value) {
-  PrintTo(value, &out);
-  return out;
-}
-
-void PrintTo(const ConfiguredArtifact& artifact, std::ostream* os) {
-  *os << "\n{"
-      << "\n  name: " << artifact.name << "\n  sdk: " << artifact.android_sdk
-      << "\n  abi: " << artifact.abi_group << "\n  density: " << artifact.screen_density_group
-      << "\n  locale: " << artifact.locale_group
-      << "\n  features: " << artifact.device_feature_group
-      << "\n  textures: " << artifact.gl_texture_group << "\n}\n";
 }
 
 namespace handler {
@@ -186,7 +167,7 @@ TEST_F(ConfigurationParserTest, ForPath_NoFile) {
 }
 
 TEST_F(ConfigurationParserTest, ExtractConfiguration) {
-  Maybe<PostProcessingConfiguration> maybe_config =
+  std::optional<PostProcessingConfiguration> maybe_config =
       ExtractConfiguration(kValidConfig, "fake.xml", &diag_);
 
   PostProcessingConfiguration config = maybe_config.value();
@@ -928,7 +909,8 @@ TEST(ArtifactTest, Nesting) {
 
   EXPECT_FALSE(x86.ToArtifactName("something.${abi${density}}.apk", "", &diag));
 
-  const Maybe<std::string>& name = x86.ToArtifactName("something.${abi${abi}}.apk", "", &diag);
+  const std::optional<std::string>& name =
+      x86.ToArtifactName("something.${abi${abi}}.apk", "", &diag);
   ASSERT_TRUE(name);
   EXPECT_EQ(name.value(), "something.${abix86}.apk");
 }

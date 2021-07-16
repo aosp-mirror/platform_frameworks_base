@@ -120,7 +120,7 @@ bool Reference::Flatten(android::Res_value* out_value) const {
     return false;
   }
 
-  const ResourceId resid = id.value_or_default(ResourceId(0));
+  const ResourceId resid = id.value_or(ResourceId(0));
   const bool dynamic = resid.is_valid() && is_dynamic;
 
   if (reference_type == Reference::Type::kResource) {
@@ -1040,7 +1040,7 @@ void Macro::Print(std::ostream* out) const {
 }
 
 bool operator<(const Reference& a, const Reference& b) {
-  int cmp = a.name.value_or_default({}).compare(b.name.value_or_default({}));
+  int cmp = a.name.value_or(ResourceName{}).compare(b.name.value_or(ResourceName{}));
   if (cmp != 0) return cmp < 0;
   return a.id < b.id;
 }

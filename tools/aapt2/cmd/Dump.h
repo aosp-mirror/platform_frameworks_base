@@ -43,17 +43,17 @@ class DumpApkCommand : public Command {
     return diag_;
   }
 
-  Maybe<std::string> GetPackageName(LoadedApk* apk) {
+  std::optional<std::string> GetPackageName(LoadedApk* apk) {
     xml::Element* manifest_el = apk->GetManifest()->root.get();
     if (!manifest_el) {
       GetDiagnostics()->Error(DiagMessage() << "No AndroidManifest.");
-      return Maybe<std::string>();
+      return {};
     }
 
     xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
     if (!attr) {
       GetDiagnostics()->Error(DiagMessage() << "No package name.");
-      return Maybe<std::string>();
+      return {};
     }
     return attr->value;
   }

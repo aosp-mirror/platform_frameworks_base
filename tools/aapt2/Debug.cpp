@@ -280,8 +280,7 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
       printer->Indent();
       for (const ResourceTableEntryView& entry : type.entries) {
         printer->Print("resource ");
-        printer->Print(ResourceId(package.id.value_or_default(0), type.id.value_or_default(0),
-                                  entry.id.value_or_default(0))
+        printer->Print(ResourceId(package.id.value_or(0), type.id.value_or(0), entry.id.value_or(0))
                            .to_string());
         printer->Print(" ");
 
@@ -362,7 +361,7 @@ void Debug::PrintStyleGraph(ResourceTable* table, const ResourceName& target_sty
       continue;
     }
 
-    Maybe<ResourceTable::SearchResult> result = table->FindResource(style_name);
+    std::optional<ResourceTable::SearchResult> result = table->FindResource(style_name);
     if (result) {
       ResourceEntry* entry = result.value().entry;
       for (const auto& value : entry->values) {
@@ -482,8 +481,7 @@ class XmlPrinter : public xml::ConstVisitor {
 
       if (attr.compiled_attribute) {
         printer_->Print("(");
-        printer_->Print(
-            attr.compiled_attribute.value().id.value_or_default(ResourceId(0)).to_string());
+        printer_->Print(attr.compiled_attribute.value().id.value_or(ResourceId(0)).to_string());
         printer_->Print(")");
       }
       printer_->Print("=");

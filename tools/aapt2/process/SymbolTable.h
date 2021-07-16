@@ -56,7 +56,7 @@ class SymbolTable {
   struct Symbol {
     Symbol() = default;
 
-    explicit Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr = {},
+    explicit Symbol(const std::optional<ResourceId>& i, const std::shared_ptr<Attribute>& attr = {},
                     bool pub = false)
         : id(i), attribute(attr), is_public(pub) {
     }
@@ -66,7 +66,7 @@ class SymbolTable {
     Symbol& operator=(const Symbol&) = default;
     Symbol& operator=(Symbol&&) = default;
 
-    Maybe<ResourceId> id;
+    std::optional<ResourceId> id;
     std::shared_ptr<Attribute> attribute;
     bool is_public = false;
     bool is_dynamic = false;
