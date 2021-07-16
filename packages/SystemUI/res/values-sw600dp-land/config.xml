@@ -18,6 +18,10 @@
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">2</integer>
 
+    <integer name="quick_settings_num_columns">2</integer>
+    <integer name="quick_qs_panel_max_rows">4</integer>
+    <integer name="quick_qs_panel_max_tiles">8</integer>
+
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">true</bool>
 </resources>
