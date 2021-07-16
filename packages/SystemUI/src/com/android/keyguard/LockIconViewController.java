@@ -93,6 +93,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AnimatedVectorDrawable mFpToUnlockIcon;
     @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
+    @NonNull private final Drawable mUnlockIcon;
     @NonNull private final CharSequence mUnlockedLabel;
     @NonNull private final CharSequence mLockedLabel;
     @Nullable private final Vibrator mVibrator;
@@ -148,6 +149,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mVibrator = vibrator;
 
         final Context context = view.getContext();
+        mUnlockIcon = mView.getContext().getResources().getDrawable(
+            R.anim.lock_to_unlock,
+            mView.getContext().getTheme());
+        ((AnimatedVectorDrawable) mUnlockIcon).start();
         mLockIcon = mView.getContext().getResources().getDrawable(
                 R.anim.lock_to_unlock,
                 mView.getContext().getTheme());
@@ -227,8 +232,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             return;
         }
 
-        boolean wasShowingFpIcon = mHasUdfps && !mShowUnlockIcon && !mShowLockIcon;
+        boolean wasShowingFpIcon = mUdfpsEnrolled && !mShowUnlockIcon && !mShowLockIcon;
         boolean wasShowingLockIcon = mShowLockIcon;
+        boolean wasShowingUnlockIcon = mShowUnlockIcon;
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
             && (!mUdfpsEnrolled || !mRunningFPS);
         mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
@@ -239,14 +245,18 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mLockedLabel);
         } else if (mShowUnlockIcon) {
-            if (wasShowingFpIcon) {
-                mView.setImageDrawable(mFpToUnlockIcon);
-                mFpToUnlockIcon.forceAnimationOnUI();
-                mFpToUnlockIcon.start();
-            } else if (wasShowingLockIcon) {
-                mView.setImageDrawable(mLockToUnlockIcon);
-                mLockToUnlockIcon.forceAnimationOnUI();
-                mLockToUnlockIcon.start();
+            if (!wasShowingUnlockIcon) {
+                if (wasShowingFpIcon) {
+                    mView.setImageDrawable(mFpToUnlockIcon);
+                    mFpToUnlockIcon.forceAnimationOnUI();
+                    mFpToUnlockIcon.start();
+                } else if (wasShowingLockIcon) {
+                    mView.setImageDrawable(mLockToUnlockIcon);
+                    mLockToUnlockIcon.forceAnimationOnUI();
+                    mLockToUnlockIcon.start();
+                } else {
+                    mView.setImageDrawable(mUnlockIcon);
+                }
             }
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mUnlockedLabel);
@@ -300,6 +310,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mFpToUnlockIcon.setTint(color);
         mLockToUnlockIcon.setTint(color);
         mLockIcon.setTint(color);
+        mUnlockIcon.setTint(color);
     }
 
     private void updateConfiguration() {
@@ -427,7 +438,16 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
         @Override
         public void onKeyguardShowingChanged() {
+            // Reset values in case biometrics were removed (ie: pin/pattern/password => swipe).
+            // If biometrics were removed, local vars mCanDismissLockScreen and
+            // mUserUnlockedWithBiometric may not be updated.
+            mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
             updateKeyguardShowing();
+            if (mIsKeyguardShowing) {
+                mUserUnlockedWithBiometric =
+                    mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                        KeyguardUpdateMonitor.getCurrentUser());
+            }
             mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
             updateVisibility();
         }
