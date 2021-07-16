@@ -65,10 +65,9 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             @Nullable IUdfpsOverlayController udfpsOvelayController,
             @Nullable ISidefpsController sidefpsController,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
-        // UDFPS enroll vibrations are handled in SystemUI
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
+                true /* shouldVibrate */);
         mSensorProps = sensorProps;
         mUdfpsOverlayController = udfpsOvelayController;
         mSidefpsController = sidefpsController;
