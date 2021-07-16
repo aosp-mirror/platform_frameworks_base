@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
@@ -47,7 +46,7 @@ import java.io.File;
 import java.util.List;
 
 /**
- * The v2 of {@link PackageParser} for use when parsing is initiated in the server and must
+ * The v2 of package parsing for use when parsing is initiated in the server and must
  * contain state contained by the server.
  *
  * The {@link AutoCloseable} helps signal that this class contains resources that must be freed.

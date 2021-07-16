@@ -88,7 +88,7 @@ public final class SharedUserSetting extends SettingBase {
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
         packages = new ArraySet(orig.packages);
-        // A PackageParser.SigningDetails seems to consist solely of final attributes, so
+        // A SigningDetails seems to consist solely of final attributes, so
         // it is safe to copy the reference.
         signatures.mSigningDetails = orig.signatures.mSigningDetails;
         signaturesChanged = orig.signaturesChanged;

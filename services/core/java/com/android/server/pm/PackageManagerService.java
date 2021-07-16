@@ -211,7 +211,6 @@ import android.content.pm.PackageManager.PropertyLocation;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
-import android.content.pm.PackageParser;
 import android.content.pm.PackagePartitions;
 import android.content.pm.PackagePartitions.SystemPartition;
 import android.content.pm.PackageStats;

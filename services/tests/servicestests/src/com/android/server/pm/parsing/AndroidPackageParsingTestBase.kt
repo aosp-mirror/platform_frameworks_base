@@ -29,6 +29,7 @@ import android.content.pm.PackageUserState
 import android.content.pm.PermissionInfo
 import android.content.pm.ProviderInfo
 import android.content.pm.ServiceInfo
+import android.content.pm.parsing.ParsingPackageUtils
 import android.os.Bundle
 import android.os.Debug
 import android.os.Environment
@@ -109,7 +110,7 @@ open class AndroidPackageParsingTestBase {
             apks.mapNotNull {
                 try {
                     packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false) to
-                            packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR,
+                            packageParser2.parsePackage(it, ParsingPackageUtils.PARSE_IS_SYSTEM_DIR,
                                     false)
                 } catch (ignored: Exception) {
                     // It is intentional that a failure of either call here will result in failing
