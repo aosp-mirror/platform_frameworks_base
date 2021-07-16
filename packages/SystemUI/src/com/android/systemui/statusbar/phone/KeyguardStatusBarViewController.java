@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.keyguard.CarrierTextController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -24,12 +25,35 @@ import javax.inject.Inject;
 /** View Controller for {@link com.android.systemui.statusbar.phone.KeyguardStatusBarView}. */
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
     private final CarrierTextController mCarrierTextController;
+    private final ConfigurationController mConfigurationController;
+
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onDensityOrFontScaleChanged() {
+                    mView.loadDimens();
+                }
+
+                @Override
+                public void onOverlayChanged() {
+                    KeyguardStatusBarViewController.this.onThemeChanged();
+                    mView.onOverlayChanged();
+                }
+
+                @Override
+                public void onThemeChanged() {
+                    KeyguardStatusBarViewController.this.onThemeChanged();
+                }
+            };
 
     @Inject
     public KeyguardStatusBarViewController(
-            KeyguardStatusBarView view, CarrierTextController carrierTextController) {
+            KeyguardStatusBarView view,
+            CarrierTextController carrierTextController,
+            ConfigurationController configurationController) {
         super(view);
         mCarrierTextController = carrierTextController;
+        mConfigurationController = configurationController;
     }
 
     @Override
@@ -40,9 +64,17 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     @Override
     protected void onViewAttached() {
+        mConfigurationController.addCallback(mConfigurationListener);
+        onThemeChanged();
     }
 
     @Override
     protected void onViewDetached() {
+        mConfigurationController.removeCallback(mConfigurationListener);
+    }
+
+    /** Should be called when the theme changes. */
+    public void onThemeChanged() {
+        mView.onThemeChanged();
     }
 }

@@ -344,7 +344,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     private KeyguardStatusBarView mKeyguardStatusBar;
-    private KeyguardStatusBarViewController mKeyguarStatusBarViewController;
+    private KeyguardStatusBarViewController mKeyguardStatusBarViewController;
     private ViewGroup mBigClockContainer;
     @VisibleForTesting QS mQs;
     private FrameLayout mQsFrame;
@@ -976,9 +976,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
         KeyguardStatusBarViewComponent statusBarViewComponent =
                 mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
-        mKeyguarStatusBarViewController =
+        mKeyguardStatusBarViewController =
                 statusBarViewComponent.getKeyguardStatusBarViewController();
-        mKeyguarStatusBarViewController.init();
+        mKeyguardStatusBarViewController.init();
 
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
@@ -1154,10 +1154,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
         mStatusBarStateListener.onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
                 mStatusBarStateController.getInterpolatedDozeAmount());
-
-        if (mKeyguardStatusBar != null) {
-            mKeyguardStatusBar.onThemeChanged();
-        }
 
         mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
                 mBarState,
