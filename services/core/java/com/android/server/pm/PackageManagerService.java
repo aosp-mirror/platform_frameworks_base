@@ -7955,12 +7955,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
-                    final int[] userIds = mUserManager.getUserIds();
-                    for (final int userId : userIds) {
-                        mPermissionManager.onPackageInstalled(pkg,
-                                PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
-                                userId);
-                    }
+                    mPermissionManager.onPackageInstalled(pkg,
+                            PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
+                            UserHandle.USER_ALL);
                     writeSettingsLPrTEMP();
                 }
             } catch (PackageManagerException e) {
@@ -19213,12 +19210,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 final int autoRevokePermissionsMode = installArgs.autoRevokePermissionsMode;
                 permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
-                for (int currentUserId : allUsersList) {
-                    if (ps.getInstalled(currentUserId)) {
-                        mPermissionManager.onPackageInstalled(pkg, permissionParamsBuilder.build(),
-                                currentUserId);
-                    }
-                }
+                mPermissionManager.onPackageInstalled(pkg, permissionParamsBuilder.build(), userId);
             }
             res.name = pkgName;
             res.uid = pkg.getUid();
@@ -21862,10 +21854,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (sharedUserPkgs == null) {
                             sharedUserPkgs = Collections.emptyList();
                         }
-                        for (final int userId : allUserHandles) {
-                            mPermissionManager.onPackageUninstalled(packageName, deletedPs.appId,
-                                    deletedPs.pkg, sharedUserPkgs, userId);
-                        }
+                        mPermissionManager.onPackageUninstalled(packageName, deletedPs.appId,
+                                deletedPs.pkg, sharedUserPkgs, UserHandle.USER_ALL);
                     }
                     clearPackagePreferredActivitiesLPw(
                             deletedPs.name, changedUsers, UserHandle.USER_ALL);
@@ -22082,11 +22072,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
+            // The method below will take care of removing obsolete permissions and granting
+            // install permissions.
+            mPermissionManager.onPackageInstalled(pkg,
+                    PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
+                    UserHandle.USER_ALL);
             for (final int userId : allUserHandles) {
-                // The method below will take care of removing obsolete permissions and granting
-                // install permissions.
-                mPermissionManager.onPackageInstalled(pkg,
-                        PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT, userId);
                 if (applyUserRestrictions) {
                     mSettings.writePermissionStateForUserLPr(userId, false);
                 }
@@ -22409,10 +22400,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
             clearPackagePreferredActivities(ps.name, nextUserId);
-            mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs,
-                    nextUserId);
             mDomainVerificationManager.clearPackageForUser(ps.name, nextUserId);
         }
+        mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs, userId);
 
         if (outInfo != null) {
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
