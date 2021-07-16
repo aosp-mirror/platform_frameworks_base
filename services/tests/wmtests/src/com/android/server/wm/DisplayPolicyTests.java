@@ -203,13 +203,15 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar));
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
     @Test
     public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
         attrs.x = attrs.y = 0;
         attrs.height = attrs.width = WindowManager.LayoutParams.MATCH_PARENT;
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        policy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
+
         policy.applyPostLayoutPolicyLw(
                 mAppWindow, attrs, null /* attached */, null /* imeTarget */);
 

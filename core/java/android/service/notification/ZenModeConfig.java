@@ -19,9 +19,11 @@ package android.service.notification;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_NONE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -79,7 +81,7 @@ public class ZenModeConfig implements Parcelable {
     public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;
     public static final int SOURCE_STAR = Policy.PRIORITY_SENDERS_STARRED;
     public static final int MAX_SOURCE = SOURCE_STAR;
-    private static final int DEFAULT_SOURCE = SOURCE_CONTACT;
+    private static final int DEFAULT_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_CALLS_SOURCE = SOURCE_STAR;
 
     public static final String MANUAL_RULE_ID = "MANUAL_RULE";
@@ -103,14 +105,17 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_MEDIA = true;
     private static final boolean DEFAULT_ALLOW_SYSTEM = false;
     private static final boolean DEFAULT_ALLOW_CALLS = true;
-    private static final boolean DEFAULT_ALLOW_MESSAGES = false;
+    private static final boolean DEFAULT_ALLOW_MESSAGES = true;
     private static final boolean DEFAULT_ALLOW_REMINDERS = false;
     private static final boolean DEFAULT_ALLOW_EVENTS = false;
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = true;
-    private static final boolean DEFAULT_ALLOW_CONV = false;
-    private static final int DEFAULT_ALLOW_CONV_FROM = ZenPolicy.CONVERSATION_SENDERS_NONE;
+    private static final boolean DEFAULT_ALLOW_CONV = true;
+    private static final int DEFAULT_ALLOW_CONV_FROM = ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
     private static final boolean DEFAULT_CHANNELS_BYPASSING_DND = false;
-    private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS = 0;
+    // Default setting here is 010011101 = 157
+    private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS =
+            SUPPRESSED_EFFECT_SCREEN_OFF | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                    | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT;
 
     public static final int XML_VERSION = 8;
     public static final String ZEN_TAG = "zen";
@@ -568,16 +573,22 @@ public class ZenModeConfig implements Parcelable {
 
                     // migrate old suppressed visual effects fields, if they still exist in the xml
                     Boolean allowWhenScreenOff = unsafeBoolean(parser, ALLOW_ATT_SCREEN_OFF);
-                    if (allowWhenScreenOff != null) {
+                    Boolean allowWhenScreenOn = unsafeBoolean(parser, ALLOW_ATT_SCREEN_ON);
+                    if (allowWhenScreenOff != null || allowWhenScreenOn != null) {
+                        // If either setting exists, then reset the suppressed visual effects field
+                        // to 0 (all allowed) so that only the relevant bits are disallowed by
+                        // the migrated settings.
                         readSuppressedEffects = true;
+                        rt.suppressedVisualEffects = 0;
+                    }
+                    if (allowWhenScreenOff != null) {
                         if (!allowWhenScreenOff) {
                             rt.suppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS
-                                    | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                                    | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                                    | SUPPRESSED_EFFECT_AMBIENT;
                         }
                     }
-                    Boolean allowWhenScreenOn = unsafeBoolean(parser, ALLOW_ATT_SCREEN_ON);
                     if (allowWhenScreenOn != null) {
-                        readSuppressedEffects = true;
                         if (!allowWhenScreenOn) {
                             rt.suppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
                         }
@@ -1001,7 +1012,7 @@ public class ZenModeConfig implements Parcelable {
             builder.showBadges(
                     (suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_BADGE) == 0);
             builder.showInAmbientDisplay(
-                    (suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_AMBIENT) == 0);
+                    (suppressedVisualEffects & SUPPRESSED_EFFECT_AMBIENT) == 0);
             builder.showInNotificationList(
                     (suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST) == 0);
         }
@@ -1085,7 +1096,7 @@ public class ZenModeConfig implements Parcelable {
 
         boolean suppressAmbient = !zenPolicy.isVisualEffectAllowed(
                 ZenPolicy.VISUAL_EFFECT_AMBIENT,
-                isVisualEffectAllowed(Policy.SUPPRESSED_EFFECT_AMBIENT,
+                isVisualEffectAllowed(SUPPRESSED_EFFECT_AMBIENT,
                         defaultPolicy));
 
         if (suppressFullScreenIntent && suppressLights && suppressAmbient) {
@@ -1120,7 +1131,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         if (suppressAmbient) {
-            suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+            suppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
         }
 
         if (!zenPolicy.isVisualEffectAllowed(ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST,

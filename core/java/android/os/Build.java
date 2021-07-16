@@ -1130,6 +1130,11 @@ public class Build {
          * S.
          */
         public static final int S = 31;
+
+        /**
+         * T.
+         */
+        public static final int T = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */

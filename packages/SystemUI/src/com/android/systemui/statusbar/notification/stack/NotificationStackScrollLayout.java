@@ -4890,25 +4890,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setQsCustomizerShowing(boolean isShowing) {
-        mAmbientState.setQsCustomizerShowing(isShowing);
-        requestChildrenUpdate();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setHeadsUpGoingAwayAnimationsAllowed(boolean headsUpGoingAwayAnimationsAllowed) {
         mHeadsUpGoingAwayAnimationsAllowed = headsUpGoingAwayAnimationsAllowed;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
+        pw.println(String.format("[%s: pulsing=%s visibility=%s"
                         + " alpha=%f scrollY:%d maxTopPadding=%d showShelfOnly=%s"
                         + " qsExpandFraction=%f"
                         + " hideAmount=%f]",
                 this.getClass().getSimpleName(),
                 mPulsing ? "T" : "f",
-                mAmbientState.isQsCustomizerShowing() ? "T" : "f",
                 getVisibility() == View.VISIBLE ? "visible"
                         : getVisibility() == View.GONE ? "gone"
                                 : "invisible",

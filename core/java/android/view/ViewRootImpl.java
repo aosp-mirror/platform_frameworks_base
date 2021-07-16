@@ -253,11 +253,11 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
-     * Whether or not to report end-to-end input latency. Disabled temporarily as a
+     * Whether or not to report end-to-end input latency. Can be disabled temporarily as a
      * risk mitigation against potential jank caused by acquiring a weak reference
-     * per frame
+     * per frame.
      */
-    private static final boolean ENABLE_INPUT_LATENCY_TRACKING = false;
+    private static final boolean ENABLE_INPUT_LATENCY_TRACKING = true;
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -403,6 +403,8 @@ public final class ViewRootImpl implements ViewParent,
     View mView;
 
     View mAccessibilityFocusedHost;
+    // Accessibility-focused virtual view. The bounds and sourceNodeId of
+    // mAccessibilityFocusedVirtualView is up-to-date while other fields may be stale.
     AccessibilityNodeInfo mAccessibilityFocusedVirtualView;
 
     // True if the window currently has pointer capture enabled.
@@ -4828,6 +4830,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Get accessibility-focused virtual view. The bounds and sourceNodeId of the returned node is
+     * up-to-date while other fields may be stale.
+     *
      * @hide
      */
     @UnsupportedAppUsage
