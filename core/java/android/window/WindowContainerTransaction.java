@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a collection of operations on some WindowContainers that should be applied all at
@@ -52,12 +53,16 @@ public final class WindowContainerTransaction implements Parcelable {
     @Nullable
     private IBinder mErrorCallbackToken;
 
+    @Nullable
+    private ITaskFragmentOrganizer mTaskFragmentOrganizer;
+
     public WindowContainerTransaction() {}
 
     private WindowContainerTransaction(Parcel in) {
         in.readMap(mChanges, null /* loader */);
         in.readList(mHierarchyOps, null /* loader */);
         mErrorCallbackToken = in.readStrongBinder();
+        mTaskFragmentOrganizer = ITaskFragmentOrganizer.Stub.asInterface(in.readStrongBinder());
     }
 
     private Change getOrCreateChange(IBinder token) {
@@ -473,7 +478,7 @@ public final class WindowContainerTransaction implements Parcelable {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN)
                         .setContainer(oldParent.asBinder())
-                        .setReparentContainer(newParent.asBinder())
+                        .setReparentContainer(newParent != null ? newParent.asBinder() : null)
                         .build();
         mHierarchyOps.add(hierarchyOp);
         return this;
@@ -493,6 +498,23 @@ public final class WindowContainerTransaction implements Parcelable {
             throw new IllegalStateException("Can't set multiple error token for one transaction.");
         }
         mErrorCallbackToken = errorCallbackToken;
+        return this;
+    }
+
+    /**
+     * Sets the {@link TaskFragmentOrganizer} that applies this {@link WindowContainerTransaction}.
+     * When this is set, the server side will not check for the permission of
+     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}, but will ensure this WCT only
+     * contains operations that are allowed for this organizer, such as modifying TaskFragments that
+     * are organized by this organizer.
+     * @hide
+     */
+    @NonNull
+    WindowContainerTransaction setTaskFragmentOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
+        if (mTaskFragmentOrganizer != null) {
+            throw new IllegalStateException("Can't set multiple organizers for one transaction.");
+        }
+        mTaskFragmentOrganizer = organizer;
         return this;
     }
 
@@ -519,7 +541,17 @@ public final class WindowContainerTransaction implements Parcelable {
         }
         if (mErrorCallbackToken != null && other.mErrorCallbackToken != null && mErrorCallbackToken
                 != other.mErrorCallbackToken) {
-            throw new IllegalArgumentException("Can't merge two WCT with different error token");
+            throw new IllegalArgumentException("Can't merge two WCTs with different error token");
+        }
+        final IBinder taskFragmentOrganizerAsBinder = mTaskFragmentOrganizer != null
+                ? mTaskFragmentOrganizer.asBinder()
+                : null;
+        final IBinder otherTaskFragmentOrganizerAsBinder = other.mTaskFragmentOrganizer != null
+                ? other.mTaskFragmentOrganizer.asBinder()
+                : null;
+        if (!Objects.equals(taskFragmentOrganizerAsBinder, otherTaskFragmentOrganizerAsBinder)) {
+            throw new IllegalArgumentException(
+                    "Can't merge two WCTs from different TaskFragmentOrganizers");
         }
         mErrorCallbackToken = mErrorCallbackToken != null
                 ? mErrorCallbackToken
@@ -547,11 +579,21 @@ public final class WindowContainerTransaction implements Parcelable {
         return mErrorCallbackToken;
     }
 
+    /** @hide */
+    @Nullable
+    public ITaskFragmentOrganizer getTaskFragmentOrganizer() {
+        return mTaskFragmentOrganizer;
+    }
+
     @Override
     @NonNull
     public String toString() {
-        return "WindowContainerTransaction { changes = " + mChanges + " hops = " + mHierarchyOps
-                + " errorCallbackToken=" + mErrorCallbackToken + " }";
+        return "WindowContainerTransaction {"
+                + " changes = " + mChanges
+                + " hops = " + mHierarchyOps
+                + " errorCallbackToken=" + mErrorCallbackToken
+                + " taskFragmentOrganizer=" + mTaskFragmentOrganizer
+                + " }";
     }
 
     @Override
@@ -560,6 +602,7 @@ public final class WindowContainerTransaction implements Parcelable {
         dest.writeMap(mChanges);
         dest.writeList(mHierarchyOps);
         dest.writeStrongBinder(mErrorCallbackToken);
+        dest.writeStrongInterface(mTaskFragmentOrganizer);
     }
 
     @Override

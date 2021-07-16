@@ -265,6 +265,7 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     };
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     private IDisplayAreaOrganizerController getController() {
         try {
             return getWindowOrganizerController().getDisplayAreaOrganizerController();
@@ -272,5 +273,4 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
             return null;
         }
     }
-
 }

@@ -120,6 +120,19 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public void onTaskFragmentError(
             @NonNull IBinder errorCallbackToken, @NonNull Throwable exception) {}
 
+    @Override
+    public void applyTransaction(@NonNull WindowContainerTransaction t) {
+        t.setTaskFragmentOrganizer(mInterface);
+        super.applyTransaction(t);
+    }
+
+    @Override
+    public int applySyncTransaction(@NonNull WindowContainerTransaction t,
+            @NonNull WindowContainerTransactionCallback callback) {
+        t.setTaskFragmentOrganizer(mInterface);
+        return super.applySyncTransaction(t, callback);
+    }
+
     private final ITaskFragmentOrganizer mInterface = new ITaskFragmentOrganizer.Stub() {
         @Override
         public void onTaskFragmentAppeared(@NonNull TaskFragmentAppearedInfo taskFragmentInfo) {
