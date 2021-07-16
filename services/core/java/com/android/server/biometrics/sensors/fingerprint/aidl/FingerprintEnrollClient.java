@@ -65,9 +65,10 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             @Nullable IUdfpsOverlayController udfpsOvelayController,
             @Nullable ISidefpsController sidefpsController,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
+        // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                true /* shouldVibrate */);
+                !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
         mSensorProps = sensorProps;
         mUdfpsOverlayController = udfpsOvelayController;
         mSidefpsController = sidefpsController;
@@ -103,6 +104,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
         // See AcquiredInfo#GOOD and AcquiredInfo#RETRYING_CAPTURE
         if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
                 && mSensorProps.isAnyUdfpsType()) {
+            vibrateSuccess();
             UdfpsHelper.onAcquiredGood(getSensorId(), mUdfpsOverlayController);
         }
 
