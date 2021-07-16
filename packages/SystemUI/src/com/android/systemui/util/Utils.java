@@ -29,7 +29,6 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FeatureFlags;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -161,13 +160,11 @@ public class Utils {
     }
 
     /**
-     * Returns true if the device should use the split notification shade, based on feature flags,
-     * orientation and screen width.
+     * Returns true if the device should use the split notification shade, based on orientation and
+     * screen width.
      */
-    public static boolean shouldUseSplitNotificationShade(FeatureFlags featureFlags,
-            Resources resources) {
-        return featureFlags.isTwoColumnNotificationShadeEnabled()
-                && resources.getBoolean(R.bool.config_use_split_notification_shade);
+    public static boolean shouldUseSplitNotificationShade(Resources resources) {
+        return resources.getBoolean(R.bool.config_use_split_notification_shade);
     }
 
     /**

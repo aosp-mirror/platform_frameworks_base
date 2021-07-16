@@ -35,7 +35,6 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -67,7 +66,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
-    private final FeatureFlags mFeatureFlags;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected boolean mShouldUseSplitNotificationShade;
 
@@ -85,7 +83,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
-                            Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
+                            Utils.shouldUseSplitNotificationShade(getResources());
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
                         onScreenRotated();
@@ -118,8 +116,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             QSLogger qsLogger,
-            DumpManager dumpManager,
-            FeatureFlags featureFlags
+            DumpManager dumpManager
     ) {
         super(view);
         mHost = host;
@@ -130,9 +127,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUiEventLogger = uiEventLogger;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
-        mFeatureFlags = featureFlags;
         mShouldUseSplitNotificationShade =
-                Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
+                Utils.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override

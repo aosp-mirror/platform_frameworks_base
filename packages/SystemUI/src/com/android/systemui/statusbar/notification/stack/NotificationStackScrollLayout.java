@@ -81,7 +81,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -527,7 +526,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationEntry mTopHeadsUpEntry;
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
-    private final FeatureFlags mFeatureFlags;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private boolean mShouldUseSplitNotificationShade;
 
@@ -573,12 +571,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
             AmbientState ambientState,
-            FeatureFlags featureFlags,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
         mSectionsManager = notificationSectionsManager;
-        mFeatureFlags = featureFlags;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         updateSplitNotificationShade();
         mSectionsManager.initialize(this, LayoutInflater.from(context));
@@ -5403,7 +5399,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void updateSplitNotificationShade() {
-        boolean split = shouldUseSplitNotificationShade(mFeatureFlags, getResources());
+        boolean split = shouldUseSplitNotificationShade(getResources());
         if (split != mShouldUseSplitNotificationShade) {
             mShouldUseSplitNotificationShade = split;
             updateDismissBehavior();

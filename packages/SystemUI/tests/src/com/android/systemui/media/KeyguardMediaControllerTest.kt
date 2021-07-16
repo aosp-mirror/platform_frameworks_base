@@ -16,13 +16,12 @@
 
 package com.android.systemui.media
 
+import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
-import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -52,8 +51,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock
     private lateinit var configurationController: ConfigurationController
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
+
     @Mock
     private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @JvmField @Rule
@@ -77,7 +75,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
             bypassController,
             statusBarStateController,
             notificationLockscreenUserManager,
-            featureFlags,
             context,
             configurationController
         )

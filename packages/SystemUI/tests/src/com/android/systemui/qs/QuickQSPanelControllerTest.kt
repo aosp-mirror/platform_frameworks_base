@@ -16,8 +16,8 @@
 
 package com.android.systemui.qs
 
+import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
-import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
@@ -77,6 +77,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
 
         `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
         `when`(quickQSPanel.dumpableTag).thenReturn("")
+        `when`(quickQSPanel.resources).thenReturn(mContext.resources)
         `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
 
         controller = QuickQSPanelController(
@@ -89,7 +90,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 qsLogger,
                 dumpManager,
-                featureFlags,
                 quickQsBrightnessController
         )
 

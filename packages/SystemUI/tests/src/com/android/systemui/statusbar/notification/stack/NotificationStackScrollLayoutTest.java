@@ -52,7 +52,6 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -106,7 +105,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
-    @Mock private FeatureFlags mFeatureFlags;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     @Before
@@ -146,7 +144,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mGroupMembershipManger,
                 mGroupExpansionManager,
                 mAmbientState,
-                mFeatureFlags,
                 mUnlockedScreenOffAnimationController);
         mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper);
         mStackScroller = spy(mStackScrollerInternal);
@@ -230,21 +227,24 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testSetExpandedHeight_withSplitShade_doesntInterpolateStackHeight() {
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
         final int[] expectedStackHeight = {0};
 
         mStackScroller.addOnExpandedHeightChangedListener((expandedHeight, appear) -> {
             assertWithMessage("Given shade enabled: %s",
-                    mFeatureFlags.isTwoColumnNotificationShadeEnabled())
+                    true)
                     .that(mStackScroller.getHeight())
                     .isEqualTo(expectedStackHeight[0]);
         });
 
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);
         expectedStackHeight[0] = 0;
         mStackScroller.setExpandedHeight(100f);
 
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
         expectedStackHeight[0] = 100;
         mStackScroller.setExpandedHeight(100f);
     }
