@@ -34,6 +34,7 @@ class SplitShadeHeaderController @Inject constructor(
     featureFlags: FeatureFlags
 ) {
 
+    // TODO(b/194178072) Handle RSSI hiding when multi carrier
     private val iconManager: StatusBarIconController.IconManager
     private val qsCarrierGroupController: QSCarrierGroupController
     private var visible = false
