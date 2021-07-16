@@ -1132,9 +1132,9 @@ public class Build {
         public static final int S = 31;
 
         /**
-         * T.
+         * Tiramisu.
          */
-        public static final int T = CUR_DEVELOPMENT;
+        public static final int TIRAMISU = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
