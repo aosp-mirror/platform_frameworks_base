@@ -68,9 +68,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
             int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
             int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication) {
+            @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
+            boolean shouldVibrate) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+                shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE,
+                statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
@@ -204,7 +206,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
                 mAlreadyDone = true;
 
-                if (listener != null) {
+                if (listener != null && mShouldVibrate) {
                     vibrateSuccess();
                 }
 
@@ -250,7 +252,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                     Slog.w(TAG, "Client not listening");
                 }
             } else {
-                if (listener != null) {
+                if (listener != null && mShouldVibrate) {
                     vibrateError();
                 }
 

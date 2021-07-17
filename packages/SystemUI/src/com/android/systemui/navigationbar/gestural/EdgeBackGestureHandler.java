@@ -58,7 +58,6 @@ import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarView;
@@ -92,7 +91,6 @@ import javax.inject.Inject;
 /**
  * Utility class to handle edge swipes for back gesture
  */
-@SysUISingleton
 public class EdgeBackGestureHandler extends CurrentUserTracker
         implements PluginListener<NavigationEdgeBackPlugin>, ProtoTraceable<SystemUiTraceProto> {
 

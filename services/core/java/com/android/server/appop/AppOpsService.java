@@ -202,6 +202,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
@@ -775,7 +776,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         /** Clean up event */
         public void finish() {
-            mClientId.unlinkToDeath(this, 0);
+            try {
+                mClientId.unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                // Either not linked, or already unlinked. Either way, nothing to do.
+            }
         }
 
         @Override
@@ -5099,13 +5104,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                     String lastPkg = null;
                     for (int i=0; i<allOps.size(); i++) {
                         AppOpsManager.PackageOps pkg = allOps.get(i);
-                        if (!pkg.getPackageName().equals(lastPkg)) {
+                        if (!Objects.equals(pkg.getPackageName(), lastPkg)) {
                             if (lastPkg != null) {
                                 out.endTag(null, "pkg");
                             }
                             lastPkg = pkg.getPackageName();
-                            out.startTag(null, "pkg");
-                            out.attribute(null, "n", lastPkg);
+                            if (lastPkg != null) {
+                                out.startTag(null, "pkg");
+                                out.attribute(null, "n", lastPkg);
+                            }
                         }
                         out.startTag(null, "uid");
                         out.attributeInt(null, "n", pkg.getUid());
