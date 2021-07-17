@@ -138,141 +138,160 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
         final ClientMonitorCallbackConverter listener = getListener();
 
-        try {
-            if (DEBUG) Slog.v(TAG, "onAuthenticated(" + authenticated + ")"
-                    + ", ID:" + identifier.getBiometricId()
-                    + ", Owner: " + getOwnerString()
-                    + ", isBP: " + isBiometricPrompt()
-                    + ", listener: " + listener
-                    + ", requireConfirmation: " + mRequireConfirmation
-                    + ", user: " + getTargetUserId());
+        if (DEBUG) Slog.v(TAG, "onAuthenticated(" + authenticated + ")"
+                + ", ID:" + identifier.getBiometricId()
+                + ", Owner: " + getOwnerString()
+                + ", isBP: " + isBiometricPrompt()
+                + ", listener: " + listener
+                + ", requireConfirmation: " + mRequireConfirmation
+                + ", user: " + getTargetUserId());
 
-            final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
-            if (isCryptoOperation()) {
-                pm.incrementCryptoAuthForUser(getTargetUserId(), authenticated);
+        final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
+        if (isCryptoOperation()) {
+            pm.incrementCryptoAuthForUser(getTargetUserId(), authenticated);
+        } else {
+            pm.incrementAuthForUser(getTargetUserId(), authenticated);
+        }
+
+        if (mAllowBackgroundAuthentication) {
+            Slog.w(TAG, "Allowing background authentication,"
+                    + " this is allowed only for platform or test invocations");
+        }
+
+        // Ensure authentication only succeeds if the client activity is on top.
+        boolean isBackgroundAuth = false;
+        if (!mAllowBackgroundAuthentication && authenticated
+                && !Utils.isKeyguard(getContext(), getOwnerString())
+                && !Utils.isSystem(getContext(), getOwnerString())) {
+            final List<ActivityManager.RunningTaskInfo> tasks =
+                    mActivityTaskManager.getTasks(1);
+            if (tasks == null || tasks.isEmpty()) {
+                Slog.e(TAG, "No running tasks reported");
+                isBackgroundAuth = true;
             } else {
-                pm.incrementAuthForUser(getTargetUserId(), authenticated);
-            }
-
-            if (mAllowBackgroundAuthentication) {
-                Slog.w(TAG, "Allowing background authentication,"
-                        + " this is allowed only for platform or test invocations");
-            }
-
-            // Ensure authentication only succeeds if the client activity is on top.
-            boolean isBackgroundAuth = false;
-            if (!mAllowBackgroundAuthentication && authenticated
-                    && !Utils.isKeyguard(getContext(), getOwnerString())
-                    && !Utils.isSystem(getContext(), getOwnerString())) {
-                final List<ActivityManager.RunningTaskInfo> tasks =
-                        mActivityTaskManager.getTasks(1);
-                if (tasks == null || tasks.isEmpty()) {
-                    Slog.e(TAG, "No running tasks reported");
+                final ComponentName topActivity = tasks.get(0).topActivity;
+                if (topActivity == null) {
+                    Slog.e(TAG, "Unable to get top activity");
                     isBackgroundAuth = true;
                 } else {
-                    final ComponentName topActivity = tasks.get(0).topActivity;
-                    if (topActivity == null) {
-                        Slog.e(TAG, "Unable to get top activity");
+                    final String topPackage = topActivity.getPackageName();
+                    if (!topPackage.contentEquals(getOwnerString())) {
+                        Slog.e(TAG, "Background authentication detected, top: " + topPackage
+                                + ", client: " + getOwnerString());
                         isBackgroundAuth = true;
-                    } else {
-                        final String topPackage = topActivity.getPackageName();
-                        if (!topPackage.contentEquals(getOwnerString())) {
-                            Slog.e(TAG, "Background authentication detected, top: " + topPackage
-                                    + ", client: " + getOwnerString());
-                            isBackgroundAuth = true;
-                        }
                     }
                 }
             }
+        }
 
-            // Fail authentication if we can't confirm the client activity is on top.
+        // Fail authentication if we can't confirm the client activity is on top.
+        if (isBackgroundAuth) {
+            Slog.e(TAG, "Failing possible background authentication");
+            authenticated = false;
+
+            // SafetyNet logging for exploitation attempts of b/159249069.
+            final ApplicationInfo appInfo = getContext().getApplicationInfo();
+            EventLog.writeEvent(0x534e4554, "159249069", appInfo != null ? appInfo.uid : -1,
+                    "Attempted background authentication");
+        }
+
+        if (authenticated) {
+            // SafetyNet logging for b/159249069 if constraint is violated.
             if (isBackgroundAuth) {
-                Slog.e(TAG, "Failing possible background authentication");
-                authenticated = false;
-
-                // SafetyNet logging for exploitation attempts of b/159249069.
                 final ApplicationInfo appInfo = getContext().getApplicationInfo();
                 EventLog.writeEvent(0x534e4554, "159249069", appInfo != null ? appInfo.uid : -1,
-                        "Attempted background authentication");
+                        "Successful background authentication!");
             }
 
-            if (authenticated) {
-                // SafetyNet logging for b/159249069 if constraint is violated.
-                if (isBackgroundAuth) {
-                    final ApplicationInfo appInfo = getContext().getApplicationInfo();
-                    EventLog.writeEvent(0x534e4554, "159249069", appInfo != null ? appInfo.uid : -1,
-                            "Successful background authentication!");
-                }
+            mAlreadyDone = true;
 
-                mAlreadyDone = true;
+            if (mTaskStackListener != null) {
+                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+            }
 
-                if (listener != null && mShouldVibrate) {
-                    vibrateSuccess();
-                }
+            final byte[] byteToken = new byte[hardwareAuthToken.size()];
+            for (int i = 0; i < hardwareAuthToken.size(); i++) {
+                byteToken[i] = hardwareAuthToken.get(i);
+            }
 
-                if (mTaskStackListener != null) {
-                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                }
+            if (mIsStrongBiometric) {
+                mBiometricManager.resetLockoutTimeBound(getToken(),
+                        getContext().getOpPackageName(),
+                        getSensorId(), getTargetUserId(), byteToken);
+            }
 
-                final byte[] byteToken = new byte[hardwareAuthToken.size()];
-                for (int i = 0; i < hardwareAuthToken.size(); i++) {
-                    byteToken[i] = hardwareAuthToken.get(i);
-                }
-
-                if (mIsStrongBiometric) {
-                    mBiometricManager.resetLockoutTimeBound(getToken(),
-                            getContext().getOpPackageName(),
-                            getSensorId(), getTargetUserId(), byteToken);
-                }
-
-                if (isBiometricPrompt() && listener != null) {
-                    // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
-                            getTargetUserId(), mIsStrongBiometric);
-                } else if (!isBiometricPrompt() && listener != null) {
-                    if (mIsStrongBiometric) {
+            final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+            coordinator.onAuthenticationSucceeded(this, new CoexCoordinator.Callback() {
+                @Override
+                public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                    if (addAuthTokenIfStrong && mIsStrongBiometric) {
                         final int result = KeyStore.getInstance().addAuthToken(byteToken);
                         Slog.d(TAG, "addAuthToken: " + result);
                     } else {
                         Slog.d(TAG, "Skipping addAuthToken");
                     }
 
-                    // Explicitly have if/else here to make it super obvious in case the code is
-                    // touched in the future.
-                    if (!mIsRestricted) {
-                        listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
-                                getTargetUserId(), mIsStrongBiometric);
-                    } else {
-                        listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
-                                byteToken, getTargetUserId(), mIsStrongBiometric);
-                    }
-
-                } else {
-                    // Client not listening
-                    Slog.w(TAG, "Client not listening");
-                }
-            } else {
-                if (listener != null && mShouldVibrate) {
-                    vibrateError();
-                }
-
-                // Allow system-defined limit of number of attempts before giving up
-                final @LockoutTracker.LockoutMode int lockoutMode =
-                        handleFailedAttempt(getTargetUserId());
-                if (lockoutMode == LockoutTracker.LOCKOUT_NONE) {
-                    // Don't send onAuthenticationFailed if we're in lockout, it causes a
-                    // janky UI on Keyguard/BiometricPrompt since "authentication failed"
-                    // will show briefly and be replaced by "device locked out" message.
                     if (listener != null) {
-                        listener.onAuthenticationFailed(getSensorId());
+                        try {
+                            // Explicitly have if/else here to make it super obvious in case the
+                            // code is touched in the future.
+                            if (!mIsRestricted) {
+                                listener.onAuthenticationSucceeded(getSensorId(),
+                                        identifier,
+                                        byteToken,
+                                        getTargetUserId(),
+                                        mIsStrongBiometric);
+                            } else {
+                                listener.onAuthenticationSucceeded(getSensorId(),
+                                        null /* identifier */,
+                                        byteToken,
+                                        getTargetUserId(),
+                                        mIsStrongBiometric);
+                            }
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Unable to notify listener", e);
+                        }
+                    } else {
+                        Slog.w(TAG, "Client not listening");
                     }
-                } else {
-                    mAlreadyDone = true;
                 }
+
+                @Override
+                public void sendHapticFeedback() {
+                    if (listener != null && mShouldVibrate) {
+                        vibrateSuccess();
+                    }
+                }
+            });
+        } else {
+            // Allow system-defined limit of number of attempts before giving up
+            final @LockoutTracker.LockoutMode int lockoutMode =
+                    handleFailedAttempt(getTargetUserId());
+            if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+                mAlreadyDone = true;
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to notify listener, finishing", e);
-            mCallback.onClientFinished(this, false /* success */);
+
+            final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+            coordinator.onAuthenticationRejected(this, lockoutMode,
+                    new CoexCoordinator.Callback() {
+                @Override
+                public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                    if (listener != null) {
+                        try {
+                            listener.onAuthenticationFailed(getSensorId());
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Unable to notify listener", e);
+                        }
+                    }
+                }
+
+                @Override
+                public void sendHapticFeedback() {
+                    if (listener != null && mShouldVibrate) {
+                        vibrateError();
+                    }
+                }
+            });
         }
     }
 
