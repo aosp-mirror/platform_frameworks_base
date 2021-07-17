@@ -88,7 +88,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.communal.CommunalHostView;
 import com.android.systemui.communal.CommunalHostViewController;
+import com.android.systemui.communal.CommunalSource;
+import com.android.systemui.communal.CommunalSourceMonitor;
 import com.android.systemui.communal.dagger.CommunalViewComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -138,6 +141,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 @SmallTest
@@ -254,6 +258,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private CommunalHostViewController mCommunalHostViewController;
     @Mock
+    private CommunalSourceMonitor mCommunalSourceMonitor;
+    @Mock
+    private CommunalSource mCommunalSource;
+    @Mock
+    private CommunalHostView mCommunalHostView;
+    @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
     private KeyguardStatusViewController mKeyguardStatusViewController;
@@ -341,6 +351,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
+        when(mView.findViewById(R.id.communal_host)).thenReturn(mCommunalHostView);
         when(mNotificationStackScrollLayout.getController())
                 .thenReturn(mNotificationStackScrollLayoutController);
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(1000);
@@ -419,7 +430,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mDozeLog,
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
-                mMetricsLogger, mActivityManager, mConfigurationController,
+                mCommunalSourceMonitor, mMetricsLogger, mActivityManager, mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
@@ -808,6 +819,28 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         verify(mKeyguardStatusViewController, never()).displayClock(LARGE);
     }
 
+    @Test
+    public void testCommunalSourceListening() {
+        final ArgumentCaptor<CommunalSourceMonitor.Callback> monitorCallback =
+                ArgumentCaptor.forClass(CommunalSourceMonitor.Callback.class);
+
+        givenViewAttached();
+        verify(mCommunalSourceMonitor).addCallback(monitorCallback.capture());
+
+        final ArgumentCaptor<WeakReference<CommunalSource>> sourceCapture =
+                ArgumentCaptor.forClass(WeakReference.class);
+
+        monitorCallback.getValue().onSourceAvailable(new WeakReference<>(mCommunalSource));
+        verify(mCommunalHostViewController).show(sourceCapture.capture());
+        assertThat(sourceCapture.getValue().get()).isEqualTo(mCommunalSource);
+
+        clearInvocations(mCommunalHostViewController);
+        givenViewDetached();
+        verify(mCommunalSourceMonitor).removeCallback(any());
+        verify(mCommunalHostViewController).show(sourceCapture.capture());
+        assertThat(sourceCapture.getValue()).isEqualTo(null);
+    }
+
     private void triggerPositionClockAndNotifications() {
         mNotificationPanelViewController.closeQs();
     }
@@ -825,6 +858,13 @@ public class NotificationPanelViewTest extends SysuiTestCase {
             listener.onViewAttachedToWindow(mView);
         }
     }
+
+    private void givenViewDetached() {
+        for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
+            listener.onViewDetachedFromWindow(mView);
+        }
+    }
+
 
     private View newViewWithId(int id) {
         View view = new View(mContext);
