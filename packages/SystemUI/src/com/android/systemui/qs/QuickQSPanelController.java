@@ -43,7 +43,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             newConfig -> {
-                int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+                int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
                 if (newMaxTiles != mView.getNumQuickTiles()) {
                     setMaxTiles(newMaxTiles);
                 }

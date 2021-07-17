@@ -858,6 +858,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Send any pending task-info changes that were queued-up during a layout deferment
         mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        mWmService.mAtmService.mTaskFragmentOrganizerController.dispatchPendingEvents();
         mWmService.mSyncEngine.onSurfacePlacement();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 

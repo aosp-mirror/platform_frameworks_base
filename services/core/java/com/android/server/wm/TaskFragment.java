@@ -82,6 +82,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentInfo;
 
@@ -159,6 +160,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     // The TaskFragment that adjacent to this one.
     private TaskFragment mAdjacentTaskFragment;
+
+    /**
+     * Prevents duplicate calls to onTaskAppeared.
+     */
+    boolean mTaskFragmentAppearedSent;
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -281,6 +287,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void setTaskFragmentOrganizer(ITaskFragmentOrganizer organizer, int pid) {
         mTaskFragmentOrganizer = organizer;
         mTaskFragmentOrganizerPid = pid;
+    }
+
+    /** Whether this TaskFragment is organized by the given {@code organizer}. */
+    boolean hasTaskFragmentOrganizer(ITaskFragmentOrganizer organizer) {
+        return organizer != null && mTaskFragmentOrganizer != null
+                && organizer.asBinder().equals(mTaskFragmentOrganizer.asBinder());
     }
 
     TaskFragment getAdjacentTaskFragment() {
@@ -1970,18 +1982,24 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
+        sendTaskFragmentInfoChanged();
+    }
 
+    @Override
+    void setSurfaceControl(SurfaceControl sc) {
+        super.setSurfaceControl(sc);
+        // If the TaskFragmentOrganizer was set before we created the SurfaceControl, we need to
+        // emit the callbacks now.
+        sendTaskFragmentAppeared();
+    }
+
+    void sendTaskFragmentInfoChanged() {
         if (mTaskFragmentOrganizer != null) {
-            // Parent config may have changed. The controller will check if there is any important
-            // config change for the organizer.
-            mTaskFragmentOrganizerController
-                    .onTaskFragmentParentInfoChanged(mTaskFragmentOrganizer, this);
             mTaskFragmentOrganizerController
                     .onTaskFragmentInfoChanged(mTaskFragmentOrganizer, this);
         }
     }
 
-    // TODO(b/190433129) call when TaskFragment is created from WCT#createTaskFragment
     private void sendTaskFragmentAppeared() {
         if (mTaskFragmentOrganizer != null) {
             mTaskFragmentOrganizerController.onTaskFragmentAppeared(mTaskFragmentOrganizer, this);

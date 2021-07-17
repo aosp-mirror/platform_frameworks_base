@@ -44,6 +44,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 import dagger.Lazy;
 
 @SmallTest
@@ -80,7 +82,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
                 mLockscreenUserManager, mSmartReplyController, mEntryManager,
-                () -> mock(StatusBar.class),
+                () -> Optional.of(mock(StatusBar.class)),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
@@ -265,7 +267,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
-                Lazy<StatusBar> statusBarLazy,
+                Lazy<Optional<StatusBar>> statusBarOptionalLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
                 RemoteInputUriController remoteInputUriController,
@@ -276,7 +278,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     lockscreenUserManager,
                     smartReplyController,
                     notificationEntryManager,
-                    statusBarLazy,
+                    statusBarOptionalLazy,
                     statusBarStateController,
                     mainHandler,
                     remoteInputUriController,

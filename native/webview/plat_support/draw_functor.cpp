@@ -77,7 +77,18 @@ void draw_gl(int functor, void* data,
              const uirenderer::DrawGlInfo& draw_gl_params,
              const uirenderer::WebViewOverlayData& overlay_params) {
   float gabcdef[7];
-  draw_gl_params.color_space_ptr->transferFn(gabcdef);
+  if (draw_gl_params.color_space_ptr) {
+      draw_gl_params.color_space_ptr->transferFn(gabcdef);
+  } else {
+      // Assume sRGB.
+      gabcdef[0] = SkNamedTransferFn::kSRGB.g;
+      gabcdef[1] = SkNamedTransferFn::kSRGB.a;
+      gabcdef[2] = SkNamedTransferFn::kSRGB.b;
+      gabcdef[3] = SkNamedTransferFn::kSRGB.c;
+      gabcdef[4] = SkNamedTransferFn::kSRGB.d;
+      gabcdef[5] = SkNamedTransferFn::kSRGB.e;
+      gabcdef[6] = SkNamedTransferFn::kSRGB.f;
+  }
   AwDrawFn_DrawGLParams params = {
       .version = kAwDrawFnVersion,
       .clip_left = draw_gl_params.clipLeft,
@@ -147,7 +158,18 @@ void drawVk(int functor, void* data,
             const uirenderer::WebViewOverlayData& overlay_params) {
   SupportData* support = static_cast<SupportData*>(data);
   float gabcdef[7];
-  draw_vk_params.color_space_ptr->transferFn(gabcdef);
+  if (draw_vk_params.color_space_ptr) {
+      draw_vk_params.color_space_ptr->transferFn(gabcdef);
+  } else {
+      // Assume sRGB.
+      gabcdef[0] = SkNamedTransferFn::kSRGB.g;
+      gabcdef[1] = SkNamedTransferFn::kSRGB.a;
+      gabcdef[2] = SkNamedTransferFn::kSRGB.b;
+      gabcdef[3] = SkNamedTransferFn::kSRGB.c;
+      gabcdef[4] = SkNamedTransferFn::kSRGB.d;
+      gabcdef[5] = SkNamedTransferFn::kSRGB.e;
+      gabcdef[6] = SkNamedTransferFn::kSRGB.f;
+  }
   AwDrawFn_DrawVkParams params{
       .version = kAwDrawFnVersion,
       .width = draw_vk_params.width,

@@ -126,7 +126,7 @@ public interface NotificationsModule {
     @Provides
     static NotificationGutsManager provideNotificationGutsManager(
             Context context,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -145,7 +145,7 @@ public interface NotificationsModule {
             ShadeController shadeController) {
         return new NotificationGutsManager(
                 context,
-                statusBarLazy,
+                statusBarOptionalLazy,
                 mainHandler,
                 bgHandler,
                 accessibilityManager,

@@ -104,7 +104,7 @@ public class NavigationBarController implements Callbacks,
     private final Optional<Pip> mPipOptional;
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final ShadeController mShadeController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final SystemActions mSystemActions;
@@ -146,7 +146,7 @@ public class NavigationBarController implements Callbacks,
             Optional<Pip> pipOptional,
             Optional<LegacySplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
@@ -175,7 +175,7 @@ public class NavigationBarController implements Callbacks,
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mShadeController = shadeController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mNotificationShadeDepthController = notificationShadeDepthController;
@@ -369,7 +369,7 @@ public class NavigationBarController implements Callbacks,
                 mPipOptional,
                 mSplitScreenOptional,
                 mRecentsOptional,
-                mStatusBarLazy,
+                mStatusBarOptionalLazy,
                 mShadeController,
                 mNotificationRemoteInputManager,
                 mNotificationShadeDepthController,
