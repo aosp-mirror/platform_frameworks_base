@@ -28,6 +28,9 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.media.AudioAttributes;
+import android.os.Process;
+import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -44,6 +47,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -68,6 +72,13 @@ import javax.inject.Inject;
  */
 @StatusBarComponent.StatusBarScope
 public class LockIconViewController extends ViewController<LockIconView> implements Dumpable {
+
+    private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .build();
+
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
     @NonNull private final StatusBarStateController mStatusBarStateController;
@@ -84,6 +95,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final Drawable mLockIcon;
     @NonNull private final CharSequence mUnlockedLabel;
     @NonNull private final CharSequence mLockedLabel;
+    @Nullable private final Vibrator mVibrator;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
@@ -120,7 +132,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull DumpManager dumpManager,
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull ConfigurationController configurationController,
-            @NonNull @Main DelayableExecutor executor
+            @NonNull @Main DelayableExecutor executor,
+            @Nullable Vibrator vibrator
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -132,6 +145,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mAccessibilityManager = accessibilityManager;
         mConfigurationController = configurationController;
         mExecutor = executor;
+        mVibrator = vibrator;
 
         final Context context = view.getContext();
         mLockIcon = mView.getContext().getResources().getDrawable(
@@ -459,6 +473,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     // intercept all following touches until we see MotionEvent.ACTION_CANCEL UP or
                     // MotionEvent.ACTION_UP (see #onTouchEvent)
                     mDownDetected = true;
+                    if (mVibrator != null) {
+                        mVibrator.vibrate(
+                                Process.myUid(),
+                                getContext().getOpPackageName(),
+                                UdfpsController.EFFECT_CLICK,
+                                "lockIcon-onDown",
+                                VIBRATION_SONIFICATION_ATTRIBUTES);
+                    }
                     return true;
                 }
 
@@ -467,6 +489,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         return;
                     }
 
+                    if (mVibrator != null) {
+                        mVibrator.vibrate(
+                                Process.myUid(),
+                                getContext().getOpPackageName(),
+                                UdfpsController.EFFECT_CLICK,
+                                "lockIcon-onLongPress",
+                                VIBRATION_SONIFICATION_ATTRIBUTES);
+                    }
                     onAffordanceClick();
                 }
 

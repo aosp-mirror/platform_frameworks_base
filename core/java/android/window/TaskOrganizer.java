@@ -290,6 +290,7 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     };
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     private ITaskOrganizerController getController() {
         try {
             return getWindowOrganizerController().getTaskOrganizerController();

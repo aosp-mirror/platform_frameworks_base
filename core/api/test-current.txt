@@ -1427,6 +1427,7 @@ package android.media {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
@@ -3256,8 +3257,8 @@ package android.window {
 
   public class WindowOrganizer {
     ctor public WindowOrganizer();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
+    method @RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
+    method @RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
   }
 
   @UiContext public abstract class WindowProviderService extends android.app.Service {

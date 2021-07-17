@@ -1917,7 +1917,7 @@ public class DisplayPolicy {
                 mStatusBarColorWindows.add(win);
                 mStatusBarColorCheckedBounds.union(sTmpRect);
             }
-            if (isOverlappingWithNavBar && mNavigationBar == null) {
+            if (isOverlappingWithNavBar && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
             }
         }

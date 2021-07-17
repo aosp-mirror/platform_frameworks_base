@@ -42,7 +42,6 @@ import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
-import com.android.systemui.util.animation.UniqueObjectHostView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -316,7 +315,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         super.onConfigurationChanged(newConfig);
         mOnConfigurationChangedListeners.forEach(
                 listener -> listener.onConfigurationChange(newConfig));
-        switchSecurityFooter();
     }
 
     @Override
@@ -359,25 +357,21 @@ public class QSPanel extends LinearLayout implements Tunable {
             switchToParent(mFooter, parent, index);
             index++;
         }
-
-        // The security footer is switched on orientation changes
     }
 
-    private void switchSecurityFooter() {
-        if (mSecurityFooter != null) {
-            if (mContext.getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_LANDSCAPE && mHeaderContainer != null) {
-                // Adding the security view to the header, that enables us to avoid scrolling
-                switchToParent(mSecurityFooter, mHeaderContainer, 0);
-            } else {
-                // Where should this go? If there's media, right before it. Otherwise, at the end.
-                View mediaView = findViewByPredicate(v -> v instanceof UniqueObjectHostView);
-                int index = -1;
-                if (mediaView != null) {
-                    index = indexOfChild(mediaView);
-                }
-                switchToParent(mSecurityFooter, this, index);
-            }
+    /** Switch the security footer between top and bottom of QS depending on orientation. */
+    public void switchSecurityFooter(boolean shouldUseSplitNotificationShade) {
+        if (mSecurityFooter == null) return;
+
+        if (!shouldUseSplitNotificationShade
+                && mContext.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE && mHeaderContainer != null) {
+            // Adding the security view to the header, that enables us to avoid scrolling
+            switchToParent(mSecurityFooter, mHeaderContainer, 0);
+        } else {
+            // Add after the footer
+            int index = indexOfChild(mFooter);
+            switchToParent(mSecurityFooter, this, index + 1);
         }
     }
 
@@ -652,9 +646,14 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mListening;
     }
 
-    public void setSecurityFooter(View view) {
+    /**
+     * Set the security footer view and switch it into the right place
+     * @param view the view in question
+     * @param shouldUseSplitNotificationShade if QS is in split shade mode
+     */
+    public void setSecurityFooter(View view, boolean shouldUseSplitNotificationShade) {
         mSecurityFooter = view;
-        switchSecurityFooter();
+        switchSecurityFooter(shouldUseSplitNotificationShade);
     }
 
     protected void setPageMargin(int pageMargin) {

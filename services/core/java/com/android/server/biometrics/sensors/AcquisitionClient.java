@@ -188,18 +188,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
-    protected boolean successHapticsEnabled() {
-        return true;
-    }
-
-    protected boolean errorHapticsEnabled() {
-        return true;
-    }
-
     protected final void vibrateSuccess() {
-        if (!successHapticsEnabled()) {
-            return;
-        }
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
             vibrator.vibrate(SUCCESS_VIBRATION_EFFECT, VIBRATION_SONIFICATION_ATTRIBUTES);
@@ -207,9 +196,6 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     }
 
     protected final void vibrateError() {
-        if (!errorHapticsEnabled()) {
-            return;
-        }
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
             vibrator.vibrate(ERROR_VIBRATION_EFFECT, VIBRATION_SONIFICATION_ATTRIBUTES);

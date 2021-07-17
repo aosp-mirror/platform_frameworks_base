@@ -7,6 +7,7 @@ import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.app.AppGlobals
 import android.app.PendingIntent
+import android.app.TaskInfo
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.PorterDuff
@@ -30,8 +31,6 @@ import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
-import com.android.wm.shell.startingsurface.SplashscreenContentDrawer
-import com.android.wm.shell.startingsurface.StartingSurface
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityLaunchAnimator"
@@ -41,8 +40,7 @@ private const val TAG = "ActivityLaunchAnimator"
  * nicely into the starting window.
  */
 class ActivityLaunchAnimator(
-    private val keyguardHandler: KeyguardHandler,
-    private val startingSurface: StartingSurface?,
+    private val callback: Callback,
     context: Context
 ) {
     companion object {
@@ -120,7 +118,7 @@ class ActivityLaunchAnimator(
 
         Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
-        val isOnKeyguard = keyguardHandler.isOnKeyguard()
+        val isOnKeyguard = callback.isOnKeyguard()
 
         // Pass the RemoteAnimationAdapter to the intent starter only if we are not on the keyguard.
         val animationAdapter = if (!isOnKeyguard) {
@@ -163,7 +161,7 @@ class ActivityLaunchAnimator(
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
             if (isOnKeyguard) {
-                keyguardHandler.hideKeyguardWithAnimation(runner)
+                callback.hideKeyguardWithAnimation(runner)
             }
         }
     }
@@ -212,7 +210,7 @@ class ActivityLaunchAnimator(
         fun startPendingIntent(animationAdapter: RemoteAnimationAdapter?): Int
     }
 
-    interface KeyguardHandler {
+    interface Callback {
         /** Whether we are currently on the keyguard or not. */
         fun isOnKeyguard(): Boolean
 
@@ -221,6 +219,9 @@ class ActivityLaunchAnimator(
 
         /** Enable/disable window blur so they don't overlap with the window launch animation **/
         fun setBlursDisabledForAppLaunch(disabled: Boolean)
+
+        /* Get the background color of [task]. */
+        fun getBackgroundColor(task: TaskInfo): Int
     }
 
     /**
@@ -484,12 +485,7 @@ class ActivityLaunchAnimator(
             // which is usually the same color of the app background. We first fade in this layer
             // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
             // launch container and reveal the opening window.
-            val windowBackgroundColor = if (startingSurface != null) {
-                startingSurface.getBackgroundColor(window.taskInfo)
-            } else {
-                Log.w(TAG, "No starting surface, defaulting to SystemBGColor")
-                SplashscreenContentDrawer.getSystemBGColor()
-            }
+            val windowBackgroundColor = callback.getBackgroundColor(window.taskInfo)
             val windowBackgroundLayer = GradientDrawable().apply {
                 setColor(windowBackgroundColor)
                 alpha = 0
@@ -505,7 +501,7 @@ class ActivityLaunchAnimator(
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     Log.d(TAG, "Animation started")
-                    keyguardHandler.setBlursDisabledForAppLaunch(true)
+                    callback.setBlursDisabledForAppLaunch(true)
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
 
                     // Add the drawable to the launch container overlay. Overlays always draw
@@ -516,7 +512,7 @@ class ActivityLaunchAnimator(
 
                 override fun onAnimationEnd(animation: Animator?) {
                     Log.d(TAG, "Animation ended")
-                    keyguardHandler.setBlursDisabledForAppLaunch(false)
+                    callback.setBlursDisabledForAppLaunch(false)
                     iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                     launchContainerOverlay.remove(windowBackgroundLayer)
