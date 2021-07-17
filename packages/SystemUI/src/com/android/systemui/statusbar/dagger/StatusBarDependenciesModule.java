@@ -92,7 +92,7 @@ public interface StatusBarDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
@@ -103,7 +103,7 @@ public interface StatusBarDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 notificationEntryManager,
-                statusBarLazy,
+                statusBarOptionalLazy,
                 statusBarStateController,
                 mainHandler,
                 remoteInputUriController,
@@ -116,7 +116,7 @@ public interface StatusBarDependenciesModule {
     @Provides
     static NotificationMediaManager provideNotificationMediaManager(
             Context context,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
@@ -129,7 +129,7 @@ public interface StatusBarDependenciesModule {
             MediaDataManager mediaDataManager) {
         return new NotificationMediaManager(
                 context,
-                statusBarLazy,
+                statusBarOptionalLazy,
                 notificationShadeWindowController,
                 notificationEntryManager,
                 mediaArtworkProcessor,

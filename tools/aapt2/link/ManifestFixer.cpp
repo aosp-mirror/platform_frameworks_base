@@ -52,7 +52,7 @@ static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
   // We allow unqualified class names (ie: .HelloActivity)
   // Since we don't know the package name, we can just make a fake one here and
   // the test will be identical as long as the real package name is valid too.
-  Maybe<std::string> fully_qualified_class_name =
+  std::optional<std::string> fully_qualified_class_name =
       util::GetFullyQualifiedClassName("a", attr->value);
 
   StringPiece qualified_class_name = fully_qualified_class_name
@@ -146,7 +146,7 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
     // Now inject the android:isFeatureSplit="true" attribute.
     xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kIsFeatureSplit);
     if (attr != nullptr) {
-      if (!ResourceUtils::ParseBool(attr->value).value_or_default(false)) {
+      if (!ResourceUtils::ParseBool(attr->value).value_or(false)) {
         // The isFeatureSplit attribute is false, which conflicts with the use
         // of "featureSplit".
         diag->Error(DiagMessage(el->line_number)
@@ -523,7 +523,8 @@ static void FullyQualifyClassName(const StringPiece& package, const StringPiece&
                                   const StringPiece& attr_name, xml::Element* el) {
   xml::Attribute* attr = el->FindAttribute(attr_ns, attr_name);
   if (attr != nullptr) {
-    if (Maybe<std::string> new_value = util::GetFullyQualifiedClassName(package, attr->value)) {
+    if (std::optional<std::string> new_value =
+            util::GetFullyQualifiedClassName(package, attr->value)) {
       attr->value = std::move(new_value.value());
     }
   }

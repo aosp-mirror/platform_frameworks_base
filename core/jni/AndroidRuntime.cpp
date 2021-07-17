@@ -22,6 +22,7 @@
 #include <android-base/properties.h>
 #include <android/graphics/jni_runtime.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/vm.h>
 #include <assert.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
@@ -1329,6 +1330,10 @@ void AndroidRuntime::onVmCreated(JNIEnv* env)
 
 /*static*/ JavaVM* AndroidRuntime::getJavaVM() {
     return AndroidRuntime::mJavaVM;
+}
+
+extern "C" JavaVM* AndroidRuntimeGetJavaVM() {
+    return AndroidRuntime::getJavaVM();
 }
 
 /*

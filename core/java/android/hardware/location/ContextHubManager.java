@@ -931,6 +931,9 @@ public final class ContextHubManager {
      * on the provided PendingIntent, then the client will be automatically unregistered by the
      * service.
      *
+     * Note that the {@link PendingIntent} supplied to this API must be mutable for Intent
+     * notifications to work.
+     *
      * @param context       the context of the application. If a PendingIntent client is recreated,
      * the latest state in the context will be used and old state will be discarded
      * @param hubInfo       the hub to attach this client to
@@ -938,7 +941,8 @@ public final class ContextHubManager {
      * @param nanoAppId     the ID of the nanoapp that Intent events will be generated for
      * @return the registered client object
      *
-     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or an immutable
+     *                                  PendingIntent was supplied
      * @throws IllegalStateException    if there were too many registered clients at the service
      * @throws NullPointerException     if pendingIntent or hubInfo is null
      */
@@ -951,6 +955,9 @@ public final class ContextHubManager {
             @NonNull PendingIntent pendingIntent, long nanoAppId) {
         Objects.requireNonNull(pendingIntent);
         Objects.requireNonNull(hubInfo);
+        if (pendingIntent.isImmutable()) {
+            throw new IllegalArgumentException("PendingIntent must be mutable");
+        }
 
         ContextHubClient client = new ContextHubClient(hubInfo, true /* persistent */);
 

@@ -27,6 +27,7 @@ import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -227,12 +228,16 @@ public class KeyguardPasswordViewController
                 super.onPause();
             });
         }
-        mInputMethodManager.hideSoftInputFromWindow(mView.getWindowToken(), 0);
+        if (mPasswordEntry.isAttachedToWindow()) {
+            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
     }
 
     @Override
     public void onStartingToHide() {
-        mInputMethodManager.hideSoftInputFromWindow(mView.getWindowToken(), 0);
+        if (mPasswordEntry.isAttachedToWindow()) {
+            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
     }
 
     private void updateSwitchImeButton() {

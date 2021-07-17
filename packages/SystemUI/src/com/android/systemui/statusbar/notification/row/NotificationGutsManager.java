@@ -116,7 +116,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     private final Optional<BubblesManager> mBubblesManagerOptional;
@@ -135,7 +135,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
      * Injected constructor. See {@link NotificationsModule}.
      */
     public NotificationGutsManager(Context context,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -153,7 +153,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             OnUserInteractionCallback onUserInteractionCallback,
             ShadeController shadeController) {
         mContext = context;
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mAccessibilityManager = accessibilityManager;
@@ -564,13 +564,13 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 Runnable r = () -> mMainHandler.post(
                         () -> openGutsInternal(view, x, y, menuItem));
 
-                mStatusBarLazy.get().executeRunnableDismissingKeyguard(
-                        r,
-                        null /* cancelAction */,
-                        false /* dismissShade */,
-                        true /* afterKeyguardGone */,
-                        true /* deferred */);
-
+                mStatusBarOptionalLazy.get().ifPresent(
+                        statusBar -> statusBar.executeRunnableDismissingKeyguard(
+                                r,
+                                null /* cancelAction */,
+                                false /* dismissShade */,
+                                true /* afterKeyguardGone */,
+                                true /* deferred */));
                 return true;
             }
         }

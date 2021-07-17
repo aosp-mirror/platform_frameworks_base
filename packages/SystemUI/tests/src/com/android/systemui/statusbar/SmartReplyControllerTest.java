@@ -51,6 +51,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
@@ -90,7 +92,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
                 mock(NotificationLockscreenUserManager.class), mSmartReplyController,
-                mNotificationEntryManager, () -> mock(StatusBar.class),
+                mNotificationEntryManager, () -> Optional.of(mock(StatusBar.class)),
                 mStatusBarStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,

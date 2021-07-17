@@ -141,7 +141,8 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         throws RemoteException {
                             attributionSource.enforceCallingUid();
                             if (!attributionSource.isTrusted(mMaster.getContext())) {
-                                mMaster.getContext().getSystemService(PermissionManager.class)
+                                attributionSource = mMaster.getContext()
+                                        .getSystemService(PermissionManager.class)
                                         .registerAttributionSource(attributionSource);
                             }
                             service.startListening(recognizerIntent, listener, attributionSource);
@@ -255,8 +256,8 @@ final class SpeechRecognitionManagerServiceImpl extends
 
     private boolean componentMapsToRecognitionService(@NonNull ComponentName serviceComponent) {
         List<ResolveInfo> resolveInfos =
-                getContext().getPackageManager().queryIntentServices(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
+                getContext().getPackageManager().queryIntentServicesAsUser(
+                        new Intent(RecognitionService.SERVICE_INTERFACE), 0, getUserId());
         if (resolveInfos == null) {
             return false;
         }

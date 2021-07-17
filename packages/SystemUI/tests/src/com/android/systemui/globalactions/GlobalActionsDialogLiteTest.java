@@ -74,6 +74,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -154,7 +155,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mSysUiState,
                 mHandler,
                 mPackageManager,
-                mStatusBar
+                Optional.of(mStatusBar)
         );
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
