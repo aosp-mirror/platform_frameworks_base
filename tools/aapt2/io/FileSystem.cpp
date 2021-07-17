@@ -21,11 +21,10 @@
 #include "android-base/errors.h"
 #include "androidfw/StringPiece.h"
 #include "utils/FileMap.h"
-
 #include "Source.h"
 #include "io/FileStream.h"
 #include "util/Files.h"
-#include "util/Maybe.h"
+
 #include "util/Util.h"
 
 using ::android::StringPiece;
@@ -38,7 +37,7 @@ RegularFile::RegularFile(const Source& source) : source_(source) {}
 
 std::unique_ptr<IData> RegularFile::OpenAsData() {
   android::FileMap map;
-  if (Maybe<android::FileMap> map = file::MmapPath(source_.path, nullptr)) {
+  if (std::optional<android::FileMap> map = file::MmapPath(source_.path, nullptr)) {
     if (map.value().getDataPtr() && map.value().getDataLength() > 0) {
       return util::make_unique<MmappedData>(std::move(map.value()));
     }

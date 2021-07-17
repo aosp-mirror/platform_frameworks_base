@@ -44,6 +44,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     private var hasFaceFeature: Boolean
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
+    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
 
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()

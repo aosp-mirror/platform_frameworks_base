@@ -924,6 +924,7 @@ package android.app.admin {
   }
 
   public class DevicePolicyManager {
+    method @Nullable public android.content.Intent createProvisioningIntentFromNfcIntent(@NonNull android.content.Intent);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public boolean getBluetoothContactSharingDisabled(@NonNull android.os.UserHandle);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getDeviceOwner();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, "android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"}) public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
@@ -972,6 +973,7 @@ package android.app.admin {
     field public static final int FLAG_SUPPORTED_MODES_PERSONALLY_OWNED = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_CLOUD_ENROLLMENT = 1; // 0x1
     field public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4; // 0x4
+    field public static final int PROVISIONING_TRIGGER_NFC = 5; // 0x5
     field @Deprecated public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
     field public static final int PROVISIONING_TRIGGER_QR_CODE = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0; // 0x0

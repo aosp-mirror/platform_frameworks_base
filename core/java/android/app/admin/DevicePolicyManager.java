@@ -56,6 +56,7 @@ import android.graphics.Bitmap;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -1216,7 +1217,8 @@ public class DevicePolicyManager {
             PROVISIONING_TRIGGER_CLOUD_ENROLLMENT,
             PROVISIONING_TRIGGER_QR_CODE,
             PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER,
-            PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+            PROVISIONING_TRIGGER_MANAGED_ACCOUNT,
+            PROVISIONING_TRIGGER_NFC
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProvisioningTrigger {}
@@ -1254,6 +1256,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1265,6 +1268,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1276,6 +1280,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1295,6 +1300,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1308,10 +1314,23 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
     public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning is
+     * triggered by tapping an NFC tag.
+     * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
+     * @see #PROVISIONING_TRIGGER_QR_CODE
+     * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_NFC = 5;
 
     /**
      * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
@@ -14008,5 +14027,34 @@ public class DevicePolicyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Creates a {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent
+     * from the provided {@code nfcIntent}.
+     *
+     * <p>Prerequisites to create the provisioning intent:
+     *
+     * <ul>
+     * <li>{@code nfcIntent}'s action is {@link NfcAdapter#ACTION_NDEF_DISCOVERED}</li>
+     * <li>{@code nfcIntent}'s NFC properties contain either
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} or
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} </li>
+     * </ul>
+     *
+     * This method returns {@code null} if the prerequisites are not met or if an error occurs
+     * when reading the NFC properties.
+     *
+     * @param nfcIntent the nfc intent generated from scanning a NFC tag
+     * @return a {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent with
+     * intent extras as read by {@code nfcIntent}'s NFC properties or {@code null} if the
+     * prerequisites are not met or if an error occurs when reading the NFC properties.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public Intent createProvisioningIntentFromNfcIntent(@NonNull Intent nfcIntent) {
+        return ProvisioningIntentHelper.createProvisioningIntentFromNfcIntent(nfcIntent);
     }
 }

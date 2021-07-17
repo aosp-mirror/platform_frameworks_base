@@ -77,6 +77,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
                 refreshAllTiles();
             }
             updateBrightnessMirror();
+            mView.switchSecurityFooter(mShouldUseSplitNotificationShade);
         }
     };
 
@@ -141,7 +142,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             refreshAllTiles();
         }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mView.setSecurityFooter(mQsSecurityFooter.getView());
+        mView.setSecurityFooter(mQsSecurityFooter.getView(), mShouldUseSplitNotificationShade);
         switchTileLayout(true);
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);

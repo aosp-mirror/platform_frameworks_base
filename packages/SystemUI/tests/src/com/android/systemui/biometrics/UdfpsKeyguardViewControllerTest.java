@@ -49,6 +49,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -103,7 +104,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
-                mStatusBar,
+                Optional.of(mStatusBar),
                 mStatusBarKeyguardViewManager,
                 mKeyguardUpdateMonitor,
                 mExecutor,

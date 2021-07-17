@@ -84,6 +84,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import dagger.Lazy;
@@ -132,7 +133,7 @@ public class NotificationMediaManager implements Dumpable {
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
     private final ArrayList<MediaListener> mMediaListeners;
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final MediaArtworkProcessor mMediaArtworkProcessor;
     private final Set<AsyncTask<?, ?, ?>> mProcessArtworkTasks = new ArraySet<>();
 
@@ -177,7 +178,7 @@ public class NotificationMediaManager implements Dumpable {
      */
     public NotificationMediaManager(
             Context context,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
@@ -197,7 +198,7 @@ public class NotificationMediaManager implements Dumpable {
         mMediaSessionManager = (MediaSessionManager) mContext.getSystemService(
                 Context.MEDIA_SESSION_SERVICE);
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mEntryManager = notificationEntryManager;
         mMainExecutor = mainExecutor;
@@ -694,7 +695,8 @@ public class NotificationMediaManager implements Dumpable {
 
         NotificationShadeWindowController windowController =
                 mNotificationShadeWindowController.get();
-        boolean hideBecauseOccluded = mStatusBarLazy.get().isOccluded();
+        boolean hideBecauseOccluded =
+                mStatusBarOptionalLazy.get().map(StatusBar::isOccluded).orElse(false);
 
         final boolean hasArtwork = artworkDrawable != null;
         mColorExtractor.setHasMediaArtwork(hasMediaArtwork);

@@ -61,7 +61,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
@@ -166,13 +165,11 @@ import android.graphics.Region.Op;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManagerInternal;
 import android.metrics.LogMaker;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -197,7 +194,6 @@ import android.view.ISystemGestureExclusionListener;
 import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
-import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
@@ -641,8 +637,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private WindowState mParentWindow;
 
     private Point mLocationInParentWindow = new Point();
-    private SurfaceControl mParentSurfaceControl;
-    private InputWindowHandle mPortalWindowHandle;
 
     /** Corner radius that windows should have in order to match the display. */
     private final float mWindowCornerRadius;
@@ -4372,14 +4366,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private void updateBounds() {
         calculateBounds(mDisplayInfo, mTmpBounds);
         setBounds(mTmpBounds);
-        if (mPortalWindowHandle != null && mParentSurfaceControl != null) {
-            mPortalWindowHandle.touchableRegion.getBounds(mTmpRect);
-            if (!mTmpBounds.equals(mTmpRect)) {
-                mPortalWindowHandle.touchableRegion.set(mTmpBounds);
-                getPendingTransaction().setInputWindowInfo(
-                        mParentSurfaceControl, mPortalWindowHandle);
-            }
-        }
     }
 
     // Determines the current display bounds based on the current state
@@ -5373,30 +5359,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void unregisterSystemGestureExclusionListener(ISystemGestureExclusionListener listener) {
         mSystemGestureExclusionListeners.unregister(listener);
-    }
-
-    /**
-     * Create a portal window handle for input. This window transports any touch to the display
-     * indicated by {@link InputWindowHandle#portalToDisplayId} if the touch hits this window.
-     *
-     * @param name The name of the portal window handle.
-     * @return the new portal window handle.
-     */
-    private InputWindowHandle createPortalWindowHandle(String name) {
-        // Let surface flinger to set the display ID of this input window handle because we don't
-        // know which display the parent surface control is on.
-        final InputWindowHandle portalWindowHandle = new InputWindowHandle(
-                null /* inputApplicationHandle */, INVALID_DISPLAY);
-        portalWindowHandle.name = name;
-        portalWindowHandle.token = new Binder();
-        portalWindowHandle.layoutParamsFlags =
-                FLAG_SPLIT_TOUCH | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL;
-        getBounds(mTmpBounds);
-        portalWindowHandle.touchableRegion.set(mTmpBounds);
-        portalWindowHandle.scaleFactor = 1f;
-        portalWindowHandle.ownerPid = Process.myPid();
-        portalWindowHandle.ownerUid = Process.myUid();
-        return portalWindowHandle;
     }
 
     /**

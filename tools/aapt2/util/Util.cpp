@@ -28,7 +28,6 @@
 #include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
 #include "util/BigBuffer.h"
-#include "util/Maybe.h"
 #include "utils/Unicode.h"
 
 using ::aapt::text::Utf8Iterator;
@@ -193,8 +192,8 @@ bool IsAndroidSplitName(const StringPiece& str) {
   return IsAndroidNameImpl(str) > 0;
 }
 
-Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
-                                              const StringPiece& classname) {
+std::optional<std::string> GetFullyQualifiedClassName(const StringPiece& package,
+                                                      const StringPiece& classname) {
   if (classname.empty()) {
     return {};
   }

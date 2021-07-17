@@ -174,6 +174,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
+    public MockBatteryStatsImpl setTrackingCpuByProcStateEnabled(boolean enabled) {
+        mConstants.TRACK_CPU_TIMES_BY_PROC_STATE = enabled;
+        return this;
+    }
+
     public SparseIntArray getPendingUids() {
         return mPendingUids;
     }

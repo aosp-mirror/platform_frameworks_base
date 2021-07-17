@@ -38,4 +38,6 @@
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">4</integer>
 
+    <!-- How many lines to show in the security footer -->
+    <integer name="qs_security_footer_maxLines">1</integer>
 </resources>

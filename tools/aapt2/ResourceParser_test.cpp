@@ -567,12 +567,12 @@ TEST_F(ResourceParserTest, ParseStyle) {
   Style* style = test::GetValue<Style>(&table_, "style/foo");
   ASSERT_THAT(style, NotNull());
   ASSERT_TRUE(style->parent);
-  EXPECT_THAT(style->parent.value().name, Eq(make_value(test::ParseNameOrDie("style/fu"))));
+  EXPECT_THAT(style->parent.value().name, Eq(test::ParseNameOrDie("style/fu")));
   ASSERT_THAT(style->entries, SizeIs(3));
 
-  EXPECT_THAT(style->entries[0].key.name, Eq(make_value(test::ParseNameOrDie("attr/bar"))));
-  EXPECT_THAT(style->entries[1].key.name, Eq(make_value(test::ParseNameOrDie("attr/bat"))));
-  EXPECT_THAT(style->entries[2].key.name, Eq(make_value(test::ParseNameOrDie("attr/baz"))));
+  EXPECT_THAT(style->entries[0].key.name, Eq(test::ParseNameOrDie("attr/bar")));
+  EXPECT_THAT(style->entries[1].key.name, Eq(test::ParseNameOrDie("attr/bat")));
+  EXPECT_THAT(style->entries[2].key.name, Eq(test::ParseNameOrDie("attr/baz")));
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithShorthandParent) {
@@ -581,7 +581,7 @@ TEST_F(ResourceParserTest, ParseStyleWithShorthandParent) {
   Style* style = test::GetValue<Style>(&table_, "style/foo");
   ASSERT_THAT(style, NotNull());
   ASSERT_TRUE(style->parent);
-  EXPECT_THAT(style->parent.value().name, Eq(make_value(test::ParseNameOrDie("com.app:style/Theme"))));
+  EXPECT_THAT(style->parent.value().name, Eq(test::ParseNameOrDie("com.app:style/Theme")));
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedParent) {
@@ -594,7 +594,7 @@ TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedParent) {
   ASSERT_THAT(style, NotNull());
   ASSERT_TRUE(style->parent);
   ASSERT_TRUE(style->parent.value().name);
-  EXPECT_THAT(style->parent.value().name, Eq(make_value(test::ParseNameOrDie("android:style/Theme"))));
+  EXPECT_THAT(style->parent.value().name, Eq(test::ParseNameOrDie("android:style/Theme")));
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
@@ -607,7 +607,7 @@ TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
   Style* style = test::GetValue<Style>(&table_, "style/foo");
   ASSERT_THAT(style, NotNull());
   ASSERT_THAT(style->entries, SizeIs(1));
-  EXPECT_THAT(style->entries[0].key.name, Eq(make_value(test::ParseNameOrDie("android:attr/bar"))));
+  EXPECT_THAT(style->entries[0].key.name, Eq(test::ParseNameOrDie("android:attr/bar")));
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithRawStringItem) {
@@ -634,7 +634,7 @@ TEST_F(ResourceParserTest, ParseStyleWithInferredParent) {
   Style* style = test::GetValue<Style>(&table_, "style/foo.bar");
   ASSERT_THAT(style, NotNull());
   ASSERT_TRUE(style->parent);
-  EXPECT_THAT(style->parent.value().name, Eq(make_value(test::ParseNameOrDie("style/foo"))));
+  EXPECT_THAT(style->parent.value().name, Eq(test::ParseNameOrDie("style/foo")));
   EXPECT_TRUE(style->parent_inferred);
 }
 
@@ -672,7 +672,7 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
       </declare-styleable>)";
   ASSERT_TRUE(TestParse(input));
 
-  Maybe<ResourceTable::SearchResult> result =
+  std::optional<ResourceTable::SearchResult> result =
       table_.FindResource(test::ParseNameOrDie("styleable/foo"));
   ASSERT_TRUE(result);
   EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
@@ -695,9 +695,9 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
   ASSERT_THAT(styleable, NotNull());
   ASSERT_THAT(styleable->entries, SizeIs(3));
 
-  EXPECT_THAT(styleable->entries[0].name, Eq(make_value(test::ParseNameOrDie("attr/bar"))));
-  EXPECT_THAT(styleable->entries[1].name, Eq(make_value(test::ParseNameOrDie("attr/bat"))));
-  EXPECT_THAT(styleable->entries[2].name, Eq(make_value(test::ParseNameOrDie("attr/baz"))));
+  EXPECT_THAT(styleable->entries[0].name, Eq(test::ParseNameOrDie("attr/bar")));
+  EXPECT_THAT(styleable->entries[1].name, Eq(test::ParseNameOrDie("attr/bat")));
+  EXPECT_THAT(styleable->entries[2].name, Eq(test::ParseNameOrDie("attr/baz")));
 }
 
 TEST_F(ResourceParserTest, ParseDeclareStyleablePreservingVisibility) {
@@ -913,7 +913,8 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
       </public-group>)";
   ASSERT_TRUE(TestParse(input));
 
-  Maybe<ResourceTable::SearchResult> result = table_.FindResource(test::ParseNameOrDie("attr/foo"));
+  std::optional<ResourceTable::SearchResult> result =
+      table_.FindResource(test::ParseNameOrDie("attr/foo"));
   ASSERT_TRUE(result);
   ASSERT_TRUE(result.value().entry->id);
   EXPECT_THAT(result.value().entry->id.value(), Eq(ResourceId(0x01010040)));
@@ -932,7 +933,8 @@ TEST_F(ResourceParserTest, StagingPublicGroup) {
       </staging-public-group>)";
   ASSERT_TRUE(TestParse(input));
 
-  Maybe<ResourceTable::SearchResult> result = table_.FindResource(test::ParseNameOrDie("attr/foo"));
+  std::optional<ResourceTable::SearchResult> result =
+      table_.FindResource(test::ParseNameOrDie("attr/foo"));
   ASSERT_TRUE(result);
 
   ASSERT_TRUE(result.value().entry->id);
@@ -959,7 +961,7 @@ TEST_F(ResourceParserTest, StrongestSymbolVisibilityWins) {
       <java-symbol type="string" name="foo" />)";
   ASSERT_TRUE(TestParse(input));
 
-  Maybe<ResourceTable::SearchResult> result =
+  std::optional<ResourceTable::SearchResult> result =
       table_.FindResource(test::ParseNameOrDie("string/foo"));
   ASSERT_TRUE(result);
 
@@ -977,7 +979,7 @@ TEST_F(ResourceParserTest, ExternalTypesShouldOnlyBeReferences) {
 TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol) {
   ASSERT_TRUE(TestParse(R"(<add-resource name="bar" type="string" />)"));
 
-  Maybe<ResourceTable::SearchResult> result =
+  std::optional<ResourceTable::SearchResult> result =
       table_.FindResource(test::ParseNameOrDie("string/bar"));
   ASSERT_TRUE(result);
   const ResourceEntry* entry = result.value().entry;

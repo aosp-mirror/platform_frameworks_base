@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -142,7 +143,7 @@ public class SystemActions extends SystemUI {
     private final Recents mRecents;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<StatusBar> mStatusBar;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
@@ -150,7 +151,7 @@ public class SystemActions extends SystemUI {
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
-            Lazy<StatusBar> statusBar,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Recents recents) {
         super(context);
         mRecents = recents;
@@ -163,7 +164,7 @@ public class SystemActions extends SystemUI {
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
         mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
                 registerOrUnregisterDismissNotificationShadeAction();
-        mStatusBar = statusBar;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
     }
 
     @Override
@@ -242,8 +243,9 @@ public class SystemActions extends SystemUI {
 
         // Saving state in instance variable since this callback is called quite often to avoid
         // binder calls
-        StatusBar statusBar = mStatusBar.get();
-        if (statusBar.isPanelExpanded() && !statusBar.isKeyguardShowing()) {
+        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
+        if (statusBarOptional.map(StatusBar::isPanelExpanded).orElse(false)
+                && !statusBarOptional.get().isKeyguardShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
                         createRemoteAction(
@@ -372,11 +374,12 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleNotifications() {
-        mStatusBar.get().animateExpandNotificationsPanel();
+        mStatusBarOptionalLazy.get().ifPresent(StatusBar::animateExpandNotificationsPanel);
     }
 
     private void handleQuickSettings() {
-        mStatusBar.get().animateExpandSettingsPanel(null);
+        mStatusBarOptionalLazy.get().ifPresent(
+                statusBar -> statusBar.animateExpandSettingsPanel(null));
     }
 
     private void handlePowerDialog() {
@@ -425,7 +428,9 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleAccessibilityDismissNotificationShade() {
-        mStatusBar.get().animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, false /* force */);
+        mStatusBarOptionalLazy.get().ifPresent(
+                statusBar -> statusBar.animateCollapsePanels(
+                        CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
     }
 
     private class SystemActionsBroadcastReceiver extends BroadcastReceiver {

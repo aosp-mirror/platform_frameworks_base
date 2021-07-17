@@ -17,7 +17,10 @@
 #ifndef AAPT2_COMPILE_H
 #define AAPT2_COMPILE_H
 
-#include "androidfw/StringPiece.h"
+#include <optional>
+
+#include <androidfw/StringPiece.h>
+
 #include "format/Archive.h"
 #include "process/IResourceTableConsumer.h"
 #include "Command.h"
@@ -28,11 +31,11 @@ namespace aapt {
 
 struct CompileOptions {
   std::string output_path;
-  Maybe<std::string> source_path;
-  Maybe<std::string> res_dir;
-  Maybe<std::string> res_zip;
-  Maybe<std::string> generate_text_symbols_path;
-  Maybe<Visibility::Level> visibility;
+  std::optional<std::string> source_path;
+  std::optional<std::string> res_dir;
+  std::optional<std::string> res_zip;
+  std::optional<std::string> generate_text_symbols_path;
+  std::optional<Visibility::Level> visibility;
   bool pseudolocalize = false;
   bool no_png_crunch = false;
   bool legacy_mode = false;
@@ -80,8 +83,8 @@ class CompileCommand : public Command {
  private:
   IDiagnostics* diagnostic_;
   CompileOptions options_;
-  Maybe<std::string> visibility_;
-  Maybe<std::string> trace_folder_;
+  std::optional<std::string> visibility_;
+  std::optional<std::string> trace_folder_;
 };
 
 int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* output_writer,
