@@ -395,7 +395,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     operationId, restricted, opPackageName, cookie,
                     false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                     mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
-                    mUdfpsOverlayController, allowBackgroundAuthentication);
+                    mUdfpsOverlayController, allowBackgroundAuthentication,
+                    mSensors.get(sensorId).getSensorProperties());
             scheduleForSensor(sensorId, client, fingerprintStateCallback);
         });
     }

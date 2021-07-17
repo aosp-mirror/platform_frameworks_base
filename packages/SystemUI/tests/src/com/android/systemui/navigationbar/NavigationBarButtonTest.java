@@ -16,8 +16,11 @@
 
 package com.android.systemui.navigationbar;
 
+import static com.android.systemui.Dependency.EDGE_BACK_GESTURE_HANDLER_PROVIDER;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -68,7 +71,8 @@ public class NavigationBarButtonTest extends SysuiTestCase {
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
+        mDependency.injectTestDependency(EDGE_BACK_GESTURE_HANDLER_PROVIDER,
+                () -> mock(EdgeBackGestureHandler.class));
         mNavBar = new NavigationBarView(context, null);
     }
 
