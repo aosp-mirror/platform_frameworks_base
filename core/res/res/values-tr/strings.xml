@@ -1953,8 +1953,8 @@
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Reddet"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Kapat"</string>
-    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Gelen çağrı"</string>
-    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Devam eden çağrı"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Gelen arama"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Devam eden arama"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Gelen arama süzülüyor"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> öğe seçildi</item>
