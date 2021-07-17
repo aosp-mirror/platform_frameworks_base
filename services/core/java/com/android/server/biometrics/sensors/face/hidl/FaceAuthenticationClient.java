@@ -65,7 +65,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutTracker, allowBackgroundAuthentication);
+                lockoutTracker, allowBackgroundAuthentication, true /* shouldVibrate */);
         mUsageStats = usageStats;
 
         final Resources resources = getContext().getResources();

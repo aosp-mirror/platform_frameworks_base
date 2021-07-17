@@ -43,6 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
@@ -92,6 +93,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AnimatedVectorDrawable mFpToUnlockIcon;
     @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
+    @NonNull private final Drawable mUnlockIcon;
     @NonNull private final CharSequence mUnlockedLabel;
     @NonNull private final CharSequence mLockedLabel;
     @Nullable private final Vibrator mVibrator;
@@ -147,6 +149,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mVibrator = vibrator;
 
         final Context context = view.getContext();
+        mUnlockIcon = mView.getContext().getResources().getDrawable(
+            R.anim.lock_to_unlock,
+            mView.getContext().getTheme());
+        ((AnimatedVectorDrawable) mUnlockIcon).start();
         mLockIcon = mView.getContext().getResources().getDrawable(
                 R.anim.lock_to_unlock,
                 mView.getContext().getTheme());
@@ -158,7 +164,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mUnlockedLabel = context.getResources().getString(R.string.accessibility_unlock_button);
         mLockedLabel = context.getResources().getString(R.string.accessibility_lock_icon);
         dumpManager.registerDumpable("LockIconViewController", this);
-
     }
 
     @Override
@@ -227,8 +232,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             return;
         }
 
-        boolean wasShowingFpIcon = mHasUdfps && !mShowUnlockIcon && !mShowLockIcon;
+        boolean wasShowingFpIcon = mUdfpsEnrolled && !mShowUnlockIcon && !mShowLockIcon;
         boolean wasShowingLockIcon = mShowLockIcon;
+        boolean wasShowingUnlockIcon = mShowUnlockIcon;
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
             && (!mUdfpsEnrolled || !mRunningFPS);
         mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
@@ -238,22 +244,23 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setImageDrawable(mLockIcon);
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mLockedLabel);
-            mView.hideBg();
         } else if (mShowUnlockIcon) {
-            if (wasShowingFpIcon) {
-                mView.setImageDrawable(mFpToUnlockIcon);
-                mFpToUnlockIcon.forceAnimationOnUI();
-                mFpToUnlockIcon.start();
-            } else if (wasShowingLockIcon) {
-                mView.setImageDrawable(mLockToUnlockIcon);
-                mLockToUnlockIcon.forceAnimationOnUI();
-                mLockToUnlockIcon.start();
+            if (!wasShowingUnlockIcon) {
+                if (wasShowingFpIcon) {
+                    mView.setImageDrawable(mFpToUnlockIcon);
+                    mFpToUnlockIcon.forceAnimationOnUI();
+                    mFpToUnlockIcon.start();
+                } else if (wasShowingLockIcon) {
+                    mView.setImageDrawable(mLockToUnlockIcon);
+                    mLockToUnlockIcon.forceAnimationOnUI();
+                    mLockToUnlockIcon.start();
+                } else {
+                    mView.setImageDrawable(mUnlockIcon);
+                }
             }
-            mView.animateBg();
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mUnlockedLabel);
         } else {
-            mView.hideBg();
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
         }
@@ -298,7 +305,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateColors() {
-        mView.updateColor();
+        final int color = Utils.getColorAttrDefaultColor(mView.getContext(),
+                R.attr.wallpaperTextColorAccent);
+        mFpToUnlockIcon.setTint(color);
+        mLockToUnlockIcon.setTint(color);
+        mLockIcon.setTint(color);
+        mUnlockIcon.setTint(color);
     }
 
     private void updateConfiguration() {
@@ -426,7 +438,16 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
         @Override
         public void onKeyguardShowingChanged() {
+            // Reset values in case biometrics were removed (ie: pin/pattern/password => swipe).
+            // If biometrics were removed, local vars mCanDismissLockScreen and
+            // mUserUnlockedWithBiometric may not be updated.
+            mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
             updateKeyguardShowing();
+            if (mIsKeyguardShowing) {
+                mUserUnlockedWithBiometric =
+                    mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                        KeyguardUpdateMonitor.getCurrentUser());
+            }
             mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
             updateVisibility();
         }
@@ -458,7 +479,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onConfigChanged(Configuration newConfig) {
             updateConfiguration();
-            updateColors();
         }
     };
 
