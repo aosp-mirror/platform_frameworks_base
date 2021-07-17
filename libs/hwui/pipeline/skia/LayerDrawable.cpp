@@ -75,7 +75,7 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
                               const SkRect* dstRect,
                               bool useLayerTransform) {
     if (context == nullptr) {
-        SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
+        ALOGD("Attempting to draw LayerDrawable into an unsupported surface");
         return false;
     }
     // transform the matrix based on the layer
