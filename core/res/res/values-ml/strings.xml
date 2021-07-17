@@ -1955,7 +1955,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"കോൾ നിർത്തുക"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ഇൻകമിംഗ് കോൾ"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"സജീവമായ കോൾ"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"ഇൻകമിംഗ് കോൾ സ്‌ക്രീൻ ചെയ്യൽ"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"ഇൻകമിംഗ് കോൾ സ്‌ക്രീൻ ചെയ്യുന്നു"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>

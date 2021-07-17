@@ -256,8 +256,8 @@ final class SpeechRecognitionManagerServiceImpl extends
 
     private boolean componentMapsToRecognitionService(@NonNull ComponentName serviceComponent) {
         List<ResolveInfo> resolveInfos =
-                getContext().getPackageManager().queryIntentServices(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
+                getContext().getPackageManager().queryIntentServicesAsUser(
+                        new Intent(RecognitionService.SERVICE_INTERFACE), 0, getUserId());
         if (resolveInfos == null) {
             return false;
         }
