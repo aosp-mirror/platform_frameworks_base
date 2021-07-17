@@ -23,8 +23,6 @@ Landroid/media/IVolumeController$Stub;->asInterface(Landroid/os/IBinder;)Landroi
 Landroid/net/INetworkPolicyListener$Stub;-><init>()V
 Landroid/net/nsd/INsdManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/nsd/INsdManager;
 Landroid/net/sip/ISipSession$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/sip/ISipSession;
-Landroid/net/wifi/IWifiManager$Stub;->TRANSACTION_getScanResults:I
-Landroid/net/wifi/p2p/IWifiP2pManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/wifi/p2p/IWifiP2pManager;
 Landroid/nfc/INfcAdapter$Stub;->TRANSACTION_enable:I
 Landroid/os/IPowerManager$Stub;->TRANSACTION_acquireWakeLock:I
 Landroid/os/IPowerManager$Stub;->TRANSACTION_goToSleep:I
