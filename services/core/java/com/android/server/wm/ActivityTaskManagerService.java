@@ -5604,7 +5604,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ActivityTokens getTopActivityForTask(int taskId) {
             synchronized (mGlobalLock) {
-                final Task task = mRootWindowContainer.anyTaskForId(taskId);
+                final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
                             + " Requested task not found");
@@ -6471,12 +6472,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
                         return;
                     }
-                    if (wpc.getNightMode() == mNightMode) {
-                        return;
-                    }
-                    if (!wpc.setOverrideNightMode(mNightMode)) {
-                        return;
-                    }
+                    wpc.setOverrideNightMode(mNightMode);
                     wpc.updateNightModeForAllActivities(mNightMode);
                     mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
                 } finally {

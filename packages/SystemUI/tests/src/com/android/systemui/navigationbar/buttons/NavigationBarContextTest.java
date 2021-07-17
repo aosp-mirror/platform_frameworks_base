@@ -16,6 +16,8 @@
 
 package com.android.systemui.navigationbar.buttons;
 
+import static com.android.systemui.Dependency.EDGE_BACK_GESTURE_HANDLER_PROVIDER;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -38,6 +40,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.navigationbar.buttons.ContextualButton;
 import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -65,6 +68,8 @@ public class NavigationBarContextTest extends SysuiTestCase {
     @Before
     public void setup() {
         mDependency.injectMockDependency(AssistManager.class);
+        mDependency.injectTestDependency(EDGE_BACK_GESTURE_HANDLER_PROVIDER,
+                () -> mock(EdgeBackGestureHandler.class));
 
         mGroup = new ContextualButtonGroup(GROUP_ID);
         mBtn0 = new ContextualButton(BUTTON_0_ID, mContext, ICON_RES_ID);

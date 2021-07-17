@@ -42,6 +42,7 @@ import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.media.permission.Identity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -125,6 +126,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) {
+                Slog.d(TAG, "onServiceConnected to " + name + " for user(" + mUser + ")");
+            }
             synchronized (mServiceStub) {
                 mService = IVoiceInteractionService.Stub.asInterface(service);
                 try {
@@ -136,7 +140,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mService = null;
+            if (DEBUG) {
+                Slog.d(TAG, "onServiceDisconnected to " + name);
+            }
+            synchronized (mServiceStub) {
+                mService = null;
+                resetHotwordDetectionConnectionLocked();
+            }
         }
     };
 
@@ -405,8 +415,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
-    public void updateStateLocked(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+    public void updateStateLocked(
+            @NonNull Identity voiceInteractorIdentity,
+            @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory,
+            IHotwordRecognitionStatusCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "updateStateLocked");
         }
@@ -447,8 +460,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
-                    mInfo.getServiceInfo().applicationInfo.uid, mHotwordDetectionComponentName,
-                    mUser, /* bindInstantServiceAllowed= */ false, options, sharedMemory, callback);
+                    mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
+                    mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
+                    options, sharedMemory, callback);
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
@@ -568,6 +582,20 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             return;
         }
         mHotwordDetectionConnection.forceRestart();
+    }
+
+    void resetHotwordDetectionConnectionLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "resetHotwordDetectionConnectionLocked");
+        }
+        if (mHotwordDetectionConnection == null) {
+            if (DEBUG) {
+                Slog.w(TAG, "reset, but no hotword detection connection");
+            }
+            return;
+        }
+        mHotwordDetectionConnection.cancelLocked();
+        mHotwordDetectionConnection = null;
     }
 
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {

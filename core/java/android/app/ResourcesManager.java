@@ -1158,8 +1158,14 @@ public class ResourcesManager {
                 } else {
                     activityResources.overrideConfig.unset();
                 }
+
                 // Update the Activity's override display id.
                 activityResources.overrideDisplayId = displayId;
+
+                // If a application info update was scheduled to occur in this process but has not
+                // occurred yet, apply it now so the resources objects will have updated paths if
+                // the assets sequence changed.
+                applyAllPendingAppInfoUpdates();
 
                 if (DEBUG) {
                     Throwable here = new Throwable();

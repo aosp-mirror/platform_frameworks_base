@@ -580,11 +580,11 @@ public class BstatsCpuTimesValidationTest {
             final long[] cpuTimesMs4 = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
             assertCpuTimesValid(cpuTimesMs4);
             actualCpuTimeMs = 0;
-            for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
-                actualCpuTimeMs += cpuTimesMs[i];
+            for (int i = 0; i < cpuTimesMs4.length / 2; ++i) {
+                actualCpuTimeMs += cpuTimesMs4[i];
             }
             assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
-                    WORK_DURATION_MS, actualCpuTimeMs);
+                    2 * WORK_DURATION_MS, actualCpuTimeMs);
 
             batteryOffScreenOn();
         } finally {

@@ -86,6 +86,7 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -1221,6 +1222,20 @@ class ActivityStarter {
         mController.onExecutionComplete(this);
     }
 
+    private boolean isHomeApp(int uid, @Nullable String packageName) {
+        if (mService.mHomeProcess != null) {
+            // Fast check
+            return uid == mService.mHomeProcess.mUid;
+        }
+        if (packageName == null) {
+            return false;
+        }
+        ComponentName activity =
+                mService.getPackageManagerInternalLocked().getDefaultHomeActivity(
+                        UserHandle.getUserId(uid));
+        return activity != null && packageName.equals(activity.getPackageName());
+    }
+
     boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, int realCallingPid,
             WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
@@ -1236,7 +1251,7 @@ class ActivityStarter {
         }
 
         // Always allow home application to start activities.
-        if (mService.mHomeProcess != null && callingUid == mService.mHomeProcess.mUid) {
+        if (isHomeApp(callingUid, callingPackage)) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "Activity start allowed for home app callingUid (" + callingUid + ")");
             }

@@ -130,6 +130,12 @@ void DrawFrameTask::run() {
     if (CC_LIKELY(canDrawThisFrame)) {
         dequeueBufferDuration = context->draw();
     } else {
+        // Do a flush in case syncFrameState performed any texture uploads. Since we skipped
+        // the draw() call, those uploads (or deletes) will end up sitting in the queue.
+        // Do them now
+        if (GrDirectContext* grContext = mRenderThread->getGrContext()) {
+            grContext->flushAndSubmit();
+        }
         // wait on fences so tasks don't overlap next frame
         context->waitOnFences();
     }

@@ -801,6 +801,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
 
+    // Entering PiP is usually done in two phases, we put the task into pinned mode first and
+    // SystemUi sets the pinned mode on activity after transition is done.
+    boolean mWaitForEnteringPinnedMode;
+
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -4721,7 +4725,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private void postApplyAnimation(boolean visible) {
         final boolean delayed = isAnimating(PARENTS | CHILDREN,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
+                        | ANIMATION_TYPE_RECENTS);
         if (!delayed) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
@@ -4741,7 +4746,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // updated.
         // If we're becoming invisible, update the client visibility if we are not running an
         // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
+        if (visible || !isAnimating(PARENTS,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
             setClientVisible(visible);
         }
 
@@ -5029,6 +5035,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        if (isClientVisible()) {
+            // Though this is usually unlikely to happen, still make sure the client is invisible.
+            setClientVisible(false);
+        }
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -7701,6 +7711,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // mode (see RootWindowContainer#moveActivityToPinnedRootTask). So once the windowing mode
         // of activity is changed, it is the signal of the last step to update the PiP states.
         if (!wasInPictureInPicture && inPinnedWindowingMode() && task != null) {
+            mWaitForEnteringPinnedMode = false;
             mTaskSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, task.getBounds());
         }
 
