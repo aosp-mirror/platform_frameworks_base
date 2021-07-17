@@ -30,13 +30,14 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.DetectionConsumer;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
 /**
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
  * have the same haptic, lockout counter is not increased).
  */
-class FingerprintDetectClient extends AcquisitionClient<ISession> {
+class FingerprintDetectClient extends AcquisitionClient<ISession> implements DetectionConsumer {
 
     private static final String TAG = "FingerprintDetectClient";
 
@@ -51,8 +52,8 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
             @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric,
             int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                statsClient);
+                true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mUdfpsOverlayController = udfpsOverlayController;
     }
@@ -88,7 +89,8 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
         }
     }
 
-    void onInteractionDetected() {
+    @Override
+    public void onInteractionDetected() {
         vibrateSuccess();
 
         try {

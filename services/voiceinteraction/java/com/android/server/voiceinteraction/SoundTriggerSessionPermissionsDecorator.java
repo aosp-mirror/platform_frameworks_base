@@ -124,7 +124,7 @@ final class SoundTriggerSessionPermissionsDecorator implements
      * @param identity   The identity to check.
      * @param permission The identifier of the permission we want to check.
      */
-    private static void enforcePermissionForPreflight(@NonNull Context context,
+    static void enforcePermissionForPreflight(@NonNull Context context,
             @NonNull Identity identity, @NonNull String permission) {
         final int status = PermissionUtil.checkPermissionForPreflight(context, identity,
                 permission);
@@ -144,7 +144,7 @@ final class SoundTriggerSessionPermissionsDecorator implements
         }
     }
 
-    private static String toString(Identity identity) {
+    static String toString(Identity identity) {
         return "{uid=" + identity.uid
                 + " pid=" + identity.pid
                 + " packageName=" + identity.packageName

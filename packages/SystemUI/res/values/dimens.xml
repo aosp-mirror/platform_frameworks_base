@@ -681,6 +681,9 @@
     <!-- The height of the divider between the individual notifications. -->
     <dimen name="notification_divider_height">2dp</dimen>
 
+    <!-- The min distance the notifications should be from the lock icon on the lock screen. -->
+    <dimen name="min_lock_icon_padding">48dp</dimen>
+
     <!-- The corner radius of the shadow behind the notification. -->
     <dimen name="notification_shadow_radius">0dp</dimen>
 
@@ -1243,7 +1246,7 @@
 
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>
-    <dimen name="max_window_blur_radius">72px</dimen>
+    <dimen name="max_window_blur_radius">23px</dimen>
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
@@ -1477,6 +1480,8 @@
     <dimen name="content_text_size_for_large">14sp</dimen>
     <dimen name="below_name_text_padding">16dp</dimen>
     <dimen name="above_notification_text_padding">22dp</dimen>
+    <dimen name="before_messages_count_padding">40dp</dimen>
+    <dimen name="before_predefined_icon_padding">30dp</dimen>
     <dimen name="regular_predefined_icon">18dp</dimen>
     <dimen name="larger_predefined_icon">24dp</dimen>
     <dimen name="largest_predefined_icon">32dp</dimen>

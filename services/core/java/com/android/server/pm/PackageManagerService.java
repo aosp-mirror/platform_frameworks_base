@@ -112,8 +112,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-import static com.android.internal.util.ArrayUtils.emptyIfNull;
-import static com.android.internal.util.ArrayUtils.filter;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME;
@@ -7957,12 +7955,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
-                    final int[] userIds = mUserManager.getUserIds();
-                    for (final int userId : userIds) {
-                        mPermissionManager.onPackageInstalled(pkg,
-                                PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
-                                userId);
-                    }
+                    mPermissionManager.onPackageInstalled(pkg,
+                            PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
+                            UserHandle.USER_ALL);
                     writeSettingsLPrTEMP();
                 }
             } catch (PackageManagerException e) {
@@ -17362,6 +17357,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } catch (PackageManagerException e) {
             request.installResult.setError("APEX installation failed", e);
         }
+        invalidatePackageInfoCache();
         notifyInstallObserver(request.installResult, request.args.observer);
     }
 
@@ -19214,12 +19210,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 final int autoRevokePermissionsMode = installArgs.autoRevokePermissionsMode;
                 permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
-                for (int currentUserId : allUsersList) {
-                    if (ps.getInstalled(currentUserId)) {
-                        mPermissionManager.onPackageInstalled(pkg, permissionParamsBuilder.build(),
-                                currentUserId);
-                    }
-                }
+                mPermissionManager.onPackageInstalled(pkg, permissionParamsBuilder.build(), userId);
             }
             res.name = pkgName;
             res.uid = pkg.getUid();
@@ -21863,10 +21854,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (sharedUserPkgs == null) {
                             sharedUserPkgs = Collections.emptyList();
                         }
-                        for (final int userId : allUserHandles) {
-                            mPermissionManager.onPackageUninstalled(packageName, deletedPs.appId,
-                                    deletedPs.pkg, sharedUserPkgs, userId);
-                        }
+                        mPermissionManager.onPackageUninstalled(packageName, deletedPs.appId,
+                                deletedPs.pkg, sharedUserPkgs, UserHandle.USER_ALL);
                     }
                     clearPackagePreferredActivitiesLPw(
                             deletedPs.name, changedUsers, UserHandle.USER_ALL);
@@ -22083,11 +22072,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
+            // The method below will take care of removing obsolete permissions and granting
+            // install permissions.
+            mPermissionManager.onPackageInstalled(pkg,
+                    PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
+                    UserHandle.USER_ALL);
             for (final int userId : allUserHandles) {
-                // The method below will take care of removing obsolete permissions and granting
-                // install permissions.
-                mPermissionManager.onPackageInstalled(pkg,
-                        PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT, userId);
                 if (applyUserRestrictions) {
                     mSettings.writePermissionStateForUserLPr(userId, false);
                 }
@@ -22410,10 +22400,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
             clearPackagePreferredActivities(ps.name, nextUserId);
-            mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs,
-                    nextUserId);
             mDomainVerificationManager.clearPackageForUser(ps.name, nextUserId);
         }
+        mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs, userId);
 
         if (outInfo != null) {
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
@@ -23634,18 +23623,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return ensureSystemPackageName(
                 getPackageFromComponentString(R.string.config_defaultAppPredictionService));
     }
-
-    private @NonNull String[] dropNonSystemPackages(@NonNull String[] pkgNames) {
-        return emptyIfNull(filter(pkgNames, String[]::new, mIsSystemPackage), String.class);
-    }
-
-    private Predicate<String> mIsSystemPackage = (pkgName) -> {
-        if ("android".equals(pkgName)) {
-            return true;
-        }
-        AndroidPackage pkg = mPackages.get(pkgName);
-        return pkg != null && pkg.isSystem();
-    };
 
     @Override
     public String getSystemCaptionsServicePackageName() {
@@ -27270,7 +27247,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public @NonNull String[] getKnownPackageNames(int knownPackage, int userId) {
-            return dropNonSystemPackages(getKnownPackageNamesInternal(knownPackage, userId));
+            return getKnownPackageNamesInternal(knownPackage, userId);
         }
 
         private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {
