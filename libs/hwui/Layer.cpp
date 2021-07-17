@@ -20,6 +20,8 @@
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
 
+#include <log/log.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -90,7 +92,7 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
 void Layer::draw(SkCanvas* canvas) {
     GrRecordingContext* context = canvas->recordingContext();
     if (context == nullptr) {
-        SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
+        ALOGD("Attempting to draw LayerDrawable into an unsupported surface");
         return;
     }
     SkMatrix layerTransform = getTransform();
