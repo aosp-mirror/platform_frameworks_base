@@ -431,7 +431,7 @@
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kumotaanko laitteen kameran ja mikrofonin esto?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää mikrofoniasi."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää kameraasi."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää kameraasi tai mikrofoniasi."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tämä kumoaa eston kaikkien sellaisten sovellusten ja palveluiden osalta, joilla on lupa käyttää kameraasi tai mikrofoniasi."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Laite"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Vaihda sovellusta pyyhkäisemällä ylös"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Vaihda sovellusta nopeasti vetämällä oikealle"</string>
@@ -1149,8 +1149,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> lähetti viestin: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> lähetti kuvan"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> on päivittänyt tilansa: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"Saatavilla"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Ongelma akkumittarin lukemisessa"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Saat lisätietoja napauttamalla"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ei herätyksiä"</string>
