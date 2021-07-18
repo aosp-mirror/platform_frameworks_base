@@ -15,6 +15,8 @@
 
 #include "gif_lib.h"
 
+#include <log/log.h>
+
 #if GIFLIB_MAJOR < 5 || (GIFLIB_MAJOR == 5 && GIFLIB_MINOR == 0)
 #define DGifCloseFile(a, b) DGifCloseFile(a)
 #endif
@@ -244,7 +246,7 @@ static void drawFrame(SkBitmap* bm, const SavedImage* frame, const ColorMapObjec
     }
 
     if (cmap == nullptr || cmap->ColorCount != (1 << cmap->BitsPerPixel)) {
-        SkDEBUGFAIL("bad colortable setup");
+        ALOGD("bad colortable setup");
         return;
     }
 
