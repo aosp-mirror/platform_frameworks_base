@@ -209,8 +209,8 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"信号强度为两格。"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"信号强度为三格。"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"信号满格。"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"开启。"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"关闭。"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"已开启。"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"已关闭。"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"已连接。"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"正在连接。"</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
@@ -231,7 +231,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"移动数据已开启"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"移动数据网络已关闭"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"未设置为使用移动数据"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"关闭"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"已关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"飞行模式。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 已开启。"</string>
@@ -684,8 +684,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"不静音"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"不静音也不屏蔽"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"高级通知设置"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"开启"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"关闭"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"已开启"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"已关闭"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"利用高级通知设置，您可以为应用通知设置从 0 级到 5 级的重要程度等级。\n\n"<b>"5 级"</b>" \n- 在通知列表顶部显示 \n- 允许全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"4 级"</b>" \n- 禁止全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"3 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n\n"<b>"2 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n\n"<b>"1 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n- 不在锁定屏幕和状态栏中显示 \n- 在通知列表底部显示 \n\n"<b>"0 级"</b>" \n- 屏蔽应用的所有通知"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"您将不会再看到这些通知"</string>
