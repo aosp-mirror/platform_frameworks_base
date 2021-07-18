@@ -20,13 +20,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.Prefs.Key.DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT;
-import static com.android.systemui.Prefs.Key.HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE;
-import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING;
 import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING;
-import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_FROM_HOME_COUNT;
 import static com.android.systemui.shared.system.LauncherEventUtil.DISMISS;
-import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_SWIPE_UP_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.VISIBLE;
 
@@ -88,8 +84,6 @@ public class RecentsOnboarding {
     private static final long HIDE_DURATION_MS = 100;
     // Show swipe-up tips after opening overview from home this number of times.
     private static final int SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT = 3;
-    // Show quick scrub tips after opening overview this number of times.
-    private static final int QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT = 10;
     // Maximum number of dismissals while still showing swipe-up tips.
     private static final int MAX_DISMISSAL_ON_SWIPE_UP_SHOW = 2;
     // Number of dismissals for swipe-up tips when exponential backoff starts.
@@ -119,9 +113,7 @@ public class RecentsOnboarding {
     private boolean mTaskListenerRegistered;
     private boolean mLayoutAttachedToWindow;
     private boolean mHasDismissedSwipeUpTip;
-    private boolean mHasDismissedQuickScrubTip;
     private int mNumAppsLaunchedSinceSwipeUpTipDismiss;
-    private int mOverviewOpenedCountSinceQuickScrubTipDismiss;
 
     private final TaskStackChangeListener mTaskListener = new TaskStackChangeListener() {
         private String mLastPackageName;
@@ -137,6 +129,10 @@ public class RecentsOnboarding {
         }
 
         private void onAppLaunch() {
+            if (!isRecentsOnboardingEnabled()) {
+                onDisconnectedFromLauncher();
+                return;
+            }
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
                     .getRunningTask();
             if (info == null || info.baseActivity == null) {
@@ -153,8 +149,7 @@ public class RecentsOnboarding {
             int activityType = info.configuration.windowConfiguration.getActivityType();
             if (activityType == ACTIVITY_TYPE_STANDARD) {
                 boolean alreadySeenSwipeUpOnboarding = hasSeenSwipeUpOnboarding();
-                boolean alreadySeenQuickScrubsOnboarding = hasSeenQuickScrubOnboarding();
-                if (alreadySeenSwipeUpOnboarding && alreadySeenQuickScrubsOnboarding) {
+                if (alreadySeenSwipeUpOnboarding) {
                     onDisconnectedFromLauncher();
                     return;
                 }
@@ -188,22 +183,6 @@ public class RecentsOnboarding {
                             notifyOnTip(VISIBLE, RECENTS_SWIPE_UP_ONBOARDING_TIP);
                         }
                     }
-                } else {
-                    if (getOpenedOverviewCount() >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
-                        if (mHasDismissedQuickScrubTip) {
-                            if (mOverviewOpenedCountSinceQuickScrubTipDismiss
-                                    >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
-                                mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
-                                shouldLog = show(R.string.recents_quick_scrub_onboarding);
-                            }
-                        } else {
-                            shouldLog = show(R.string.recents_quick_scrub_onboarding);
-                        }
-                        if (shouldLog) {
-                            notifyOnTip(VISIBLE, RECENTS_QUICK_SCRUB_ONBOARDING_TIP);
-                        }
-                    }
-
                 }
             } else {
                 hide(false);
@@ -221,26 +200,11 @@ public class RecentsOnboarding {
                     if (fromHome) {
                         incrementOpenedOverviewFromHomeCount();
                     }
-                    incrementOpenedOverviewCount();
-
-                    if (getOpenedOverviewCount() >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
-                        if (mHasDismissedQuickScrubTip) {
-                            mOverviewOpenedCountSinceQuickScrubTipDismiss++;
-                        }
-                    }
                 }
 
                 @Override
                 public void onQuickStepStarted() {
                     hide(true);
-                }
-
-                @Override
-                public void onQuickScrubStarted() {
-                    boolean alreadySeenQuickScrubsOnboarding = hasSeenQuickScrubOnboarding();
-                    if (!alreadySeenQuickScrubsOnboarding) {
-                        setHasSeenQuickScrubOnboarding(true);
-                    }
                 }
             };
 
@@ -258,8 +222,6 @@ public class RecentsOnboarding {
                 mLayoutAttachedToWindow = true;
                 if (view.getTag().equals(R.string.recents_swipe_up_onboarding)) {
                     mHasDismissedSwipeUpTip = false;
-                } else {
-                    mHasDismissedQuickScrubTip = false;
                 }
             }
         }
@@ -268,17 +230,6 @@ public class RecentsOnboarding {
         public void onViewDetachedFromWindow(View view) {
             if (view == mLayout) {
                 mLayoutAttachedToWindow = false;
-                if (view.getTag().equals(R.string.recents_quick_scrub_onboarding)) {
-                    mHasDismissedQuickScrubTip = true;
-                    if (hasDismissedQuickScrubOnboardingOnce()) {
-                        // If user dismisses the quick scrub tip twice, we consider user has seen it
-                        // and do not show it again.
-                        setHasSeenQuickScrubOnboarding(true);
-                    } else {
-                        setHasDismissedQuickScrubOnboardingOnce(true);
-                    }
-                    mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
-                }
                 mBroadcastDispatcher.unregisterReceiver(mReceiver);
             }
         }
@@ -314,8 +265,6 @@ public class RecentsOnboarding {
                     setHasSeenSwipeUpOnboarding(true);
                 }
                 notifyOnTip(DISMISS, RECENTS_SWIPE_UP_ONBOARDING_TIP);
-            } else {
-                notifyOnTip(DISMISS, RECENTS_QUICK_SCRUB_ONBOARDING_TIP);
             }
         });
 
@@ -330,10 +279,7 @@ public class RecentsOnboarding {
 
         if (RESET_PREFS_FOR_DEBUG) {
             setHasSeenSwipeUpOnboarding(false);
-            setHasSeenQuickScrubOnboarding(false);
             setDismissedSwipeUpOnboardingCount(0);
-            setHasDismissedQuickScrubOnboardingOnce(false);
-            setOpenedOverviewCount(0);
             setOpenedOverviewFromHomeCount(0);
         }
     }
@@ -353,11 +299,11 @@ public class RecentsOnboarding {
     }
 
     public void onConnectedToLauncher() {
-        if (!ONBOARDING_ENABLED || QuickStepContract.isGesturalMode(mNavBarMode)) {
+        if (!isRecentsOnboardingEnabled()) {
             return;
         }
 
-        if (hasSeenSwipeUpOnboarding() && hasSeenQuickScrubOnboarding()) {
+        if (hasSeenSwipeUpOnboarding()) {
             return;
         }
 
@@ -372,7 +318,6 @@ public class RecentsOnboarding {
     }
 
     public void onDisconnectedFromLauncher() {
-
         if (mOverviewProxyListenerRegistered) {
             mOverviewProxyService.removeCallback(mOverviewProxyListener);
             mOverviewProxyListenerRegistered = false;
@@ -383,9 +328,7 @@ public class RecentsOnboarding {
         }
 
         mHasDismissedSwipeUpTip = false;
-        mHasDismissedQuickScrubTip = false;
         mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
-        mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
         hide(true);
     }
 
@@ -472,16 +415,11 @@ public class RecentsOnboarding {
         pw.println("  mOverviewProxyListenerRegistered: " + mOverviewProxyListenerRegistered);
         pw.println("  mLayoutAttachedToWindow: " + mLayoutAttachedToWindow);
         pw.println("  mHasDismissedSwipeUpTip: " + mHasDismissedSwipeUpTip);
-        pw.println("  mHasDismissedQuickScrubTip: " + mHasDismissedQuickScrubTip);
         pw.println("  mNumAppsLaunchedSinceSwipeUpTipDismiss: "
                 + mNumAppsLaunchedSinceSwipeUpTipDismiss);
         pw.println("  hasSeenSwipeUpOnboarding: " + hasSeenSwipeUpOnboarding());
-        pw.println("  hasSeenQuickScrubOnboarding: " + hasSeenQuickScrubOnboarding());
         pw.println("  getDismissedSwipeUpOnboardingCount: "
                 + getDismissedSwipeUpOnboardingCount());
-        pw.println("  hasDismissedQuickScrubOnboardingOnce: "
-                + hasDismissedQuickScrubOnboardingOnce());
-        pw.println("  getOpenedOverviewCount: " + getOpenedOverviewCount());
         pw.println("  getOpenedOverviewFromHomeCount: " + getOpenedOverviewFromHomeCount());
     }
 
@@ -501,25 +439,17 @@ public class RecentsOnboarding {
         return lp;
     }
 
+    private boolean isRecentsOnboardingEnabled() {
+        return ONBOARDING_ENABLED && !QuickStepContract.isGesturalMode(mNavBarMode);
+    }
+
     private boolean hasSeenSwipeUpOnboarding() {
         return Prefs.getBoolean(mContext, HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING, false);
     }
 
     private void setHasSeenSwipeUpOnboarding(boolean hasSeenSwipeUpOnboarding) {
         Prefs.putBoolean(mContext, HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING, hasSeenSwipeUpOnboarding);
-        if (hasSeenSwipeUpOnboarding && hasSeenQuickScrubOnboarding()) {
-            onDisconnectedFromLauncher();
-        }
-    }
-
-    private boolean hasSeenQuickScrubOnboarding() {
-        return Prefs.getBoolean(mContext, HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING, false);
-    }
-
-    private void setHasSeenQuickScrubOnboarding(boolean hasSeenQuickScrubOnboarding) {
-        Prefs.putBoolean(mContext, HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING,
-                hasSeenQuickScrubOnboarding);
-        if (hasSeenQuickScrubOnboarding && hasSeenSwipeUpOnboarding()) {
+        if (hasSeenSwipeUpOnboarding) {
             onDisconnectedFromLauncher();
         }
     }
@@ -531,16 +461,6 @@ public class RecentsOnboarding {
     private void setDismissedSwipeUpOnboardingCount(int dismissedSwipeUpOnboardingCount) {
         Prefs.putInt(mContext, DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT,
                 dismissedSwipeUpOnboardingCount);
-    }
-
-    private boolean hasDismissedQuickScrubOnboardingOnce() {
-        return Prefs.getBoolean(mContext, HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE, false);
-    }
-
-    private void setHasDismissedQuickScrubOnboardingOnce(
-            boolean hasDismissedQuickScrubOnboardingOnce) {
-        Prefs.putBoolean(mContext, HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE,
-                hasDismissedQuickScrubOnboardingOnce);
     }
 
     private int getOpenedOverviewFromHomeCount() {
@@ -557,22 +477,6 @@ public class RecentsOnboarding {
 
     private void setOpenedOverviewFromHomeCount(int openedOverviewFromHomeCount) {
         Prefs.putInt(mContext, OVERVIEW_OPENED_FROM_HOME_COUNT, openedOverviewFromHomeCount);
-    }
-
-    private int getOpenedOverviewCount() {
-        return Prefs.getInt(mContext, OVERVIEW_OPENED_COUNT, 0);
-    }
-
-    private void incrementOpenedOverviewCount() {
-        int openedOverviewCount = getOpenedOverviewCount();
-        if (openedOverviewCount >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
-            return;
-        }
-        setOpenedOverviewCount(openedOverviewCount + 1);
-    }
-
-    private void setOpenedOverviewCount(int openedOverviewCount) {
-        Prefs.putInt(mContext, OVERVIEW_OPENED_COUNT, openedOverviewCount);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
