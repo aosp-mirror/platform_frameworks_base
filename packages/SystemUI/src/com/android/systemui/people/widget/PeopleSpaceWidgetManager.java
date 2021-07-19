@@ -450,7 +450,7 @@ public class PeopleSpaceWidgetManager {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
             if (!PeopleTileKey.isValid(key)) {
-                Log.d(TAG, "Sbn doesn't contain valid PeopleTileKey: " + key.toString());
+                if (DEBUG) Log.d(TAG, "Sbn doesn't contain valid PeopleTileKey: " + key.toString());
                 return;
             }
             int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
