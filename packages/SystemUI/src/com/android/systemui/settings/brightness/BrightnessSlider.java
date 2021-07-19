@@ -180,6 +180,16 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
         return mView.getValue();
     }
 
+    @Override
+    public void hideView() {
+        mView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showView() {
+        mView.setVisibility(View.VISIBLE);
+    }
+
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
             new SeekBar.OnSeekBarChangeListener() {
         @Override
