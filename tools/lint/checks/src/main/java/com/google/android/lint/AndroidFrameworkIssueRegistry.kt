@@ -26,17 +26,18 @@ import com.google.auto.service.AutoService
 @Suppress("UnstableApiUsage")
 class AndroidFrameworkIssueRegistry : IssueRegistry() {
     override val issues = listOf(
-            CallingIdentityTokenDetector.ISSUE_UNUSED_TOKEN,
-            CallingIdentityTokenDetector.ISSUE_NON_FINAL_TOKEN,
-            CallingIdentityTokenDetector.ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
-            CallingIdentityTokenDetector.ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
-            CallingIdentityTokenDetector.ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
-            CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
-            CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED,
-            EnforcePermissionDetector.ISSUE_MISSING_ENFORCE_PERMISSION,
-            EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
-            SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
-            PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
+        CallingIdentityTokenDetector.ISSUE_UNUSED_TOKEN,
+        CallingIdentityTokenDetector.ISSUE_NON_FINAL_TOKEN,
+        CallingIdentityTokenDetector.ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
+        CallingIdentityTokenDetector.ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
+        CallingIdentityTokenDetector.ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
+        CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
+        CallingIdentityTokenDetector.ISSUE_RESULT_OF_CLEAR_IDENTITY_CALL_NOT_STORED_IN_VARIABLE,
+        CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED,
+        EnforcePermissionDetector.ISSUE_MISSING_ENFORCE_PERMISSION,
+        EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
+        SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
+        PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS
     )
 
     override val api: Int
@@ -46,8 +47,8 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         get() = 8
 
     override val vendor: Vendor = Vendor(
-            vendorName = "Android",
-            feedbackUrl = "http://b/issues/new?component=315013",
-            contact = "brufino@google.com"
+        vendorName = "Android",
+        feedbackUrl = "http://b/issues/new?component=315013",
+        contact = "brufino@google.com"
     )
 }
