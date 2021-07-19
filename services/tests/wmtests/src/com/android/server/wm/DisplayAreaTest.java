@@ -57,7 +57,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -556,7 +555,6 @@ public class DisplayAreaTest extends WindowTestsBase {
         final DisplayArea<WindowContainer> displayArea = new DisplayArea<>(
                 mWm, BELOW_TASKS, "NewArea", FEATURE_VENDOR_FIRST);
         final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
-        doReturn(mock(IBinder.class)).when(mockDisplayAreaOrganizer).asBinder();
         displayArea.mOrganizer = mockDisplayAreaOrganizer;
         spyOn(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController);
         mDisplayContent.addChild(displayArea, 0);
