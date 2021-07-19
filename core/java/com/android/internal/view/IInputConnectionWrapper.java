@@ -79,7 +79,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_SPELL_CHECK = 110;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
-    private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
+    private static final int DO_REQUEST_CURSOR_UPDATES = 140;
     private static final int DO_CLOSE_CONNECTION = 150;
     private static final int DO_COMMIT_CONTENT = 160;
     private static final int DO_GET_SURROUNDING_TEXT = 41;
@@ -309,8 +309,8 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
     }
 
-    public void requestUpdateCursorAnchorInfo(int cursorUpdateMode, IIntResultCallback callback) {
-        dispatchMessage(mH.obtainMessage(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO, cursorUpdateMode,
+    public void requestCursorUpdates(int cursorUpdateMode, IIntResultCallback callback) {
+        dispatchMessage(mH.obtainMessage(DO_REQUEST_CURSOR_UPDATES, cursorUpdateMode,
                 0 /* unused */, callback));
     }
 
@@ -794,7 +794,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
+            case DO_REQUEST_CURSOR_UPDATES: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#requestCursorUpdates");
                 try {
                     final IIntResultCallback callback = (IIntResultCallback) msg.obj;

@@ -471,7 +471,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#requestUpdateCursorAnchorInfo(int, IIntResultCallback)}.
+     * Invokes {@link IInputContext#requestCursorUpdates(int, IIntResultCallback)}.
      *
      * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
      * @return {@link Completable.Int} that can be used to retrieve the invocation result.
@@ -479,11 +479,10 @@ public final class IInputContextInvoker {
      */
     @AnyThread
     @NonNull
-    public Completable.Int requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+    public Completable.Int requestCursorUpdates(int cursorUpdateMode) {
         final Completable.Int value = Completable.createInt();
         try {
-            mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode,
-                    ResultCallbacks.of(value));
+            mIInputContext.requestCursorUpdates(cursorUpdateMode, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             value.onError(ThrowableHolder.of(e));
         }
