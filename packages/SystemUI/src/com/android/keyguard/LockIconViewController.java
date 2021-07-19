@@ -119,6 +119,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mShowLockIcon;
 
     private boolean mDownDetected;
+    private boolean mDetectedLongPress;
     private final Rect mSensorTouchLocation = new Rect();
 
     @Inject
@@ -485,6 +486,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private final GestureDetector mGestureDetector =
             new GestureDetector(new SimpleOnGestureListener() {
                 public boolean onDown(MotionEvent e) {
+                    mDetectedLongPress = false;
                     if (!isClickable()) {
                         mDownDetected = false;
                         return false;
@@ -517,6 +519,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                                 "lockIcon-onLongPress",
                                 VIBRATION_SONIFICATION_ATTRIBUTES);
                     }
+                    mDetectedLongPress = true;
                     onAffordanceClick();
                 }
 
@@ -559,7 +562,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         // we continue to intercept all following touches until we see MotionEvent.ACTION_CANCEL UP
         // or MotionEvent.ACTION_UP. this is to avoid passing the touch to NPV
         // after the lock icon disappears on device entry
-        if (mDownDetected) {
+        if (mDownDetected && mDetectedLongPress) {
             if (event.getAction() == MotionEvent.ACTION_CANCEL
                     || event.getAction() == MotionEvent.ACTION_UP) {
                 mDownDetected = false;
