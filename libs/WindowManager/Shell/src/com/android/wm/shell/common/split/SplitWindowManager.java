@@ -95,7 +95,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
                 .setName(TAG)
-                .setHidden(false)
+                .setHidden(true)
                 .setCallsite("SplitWindowManager#attachToParentSurface");
         mParentContainerCallbacks.attachToParentSurface(builder);
         mLeash = builder.build();

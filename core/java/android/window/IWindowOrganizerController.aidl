@@ -19,6 +19,7 @@ package android.window;
 import android.view.SurfaceControl;
 
 import android.os.IBinder;
+import android.view.RemoteAnimationAdapter;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
@@ -59,6 +60,17 @@ interface IWindowOrganizerController {
      */
     IBinder startTransition(int type, in @nullable IBinder transitionToken,
             in @nullable WindowContainerTransaction t);
+
+    /**
+     * Starts a legacy transition.
+     * @param type The transition type.
+     * @param adapter The animation to use.
+     * @param syncCallback A sync callback for the contents of `t`
+     * @param t Operations that are part of the transition.
+     * @return sync-id or -1 if this no-op'd because a transition is already running.
+     */
+    int startLegacyTransition(int type, in RemoteAnimationAdapter adapter,
+            in IWindowContainerTransactionCallback syncCallback, in WindowContainerTransaction t);
 
     /**
      * Finishes a transition. This must be called for all created transitions.
