@@ -45,7 +45,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder {
                         private void testMethod() {
                             final long token1 = Binder.clearCallingIdentity();
                             try {
@@ -57,9 +57,14 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                             } finally {
                                 android.os.Binder.restoreCallingIdentity(token2);
                             }
+                            final long token3 = clearCallingIdentity();
+                            try {
+                            } finally {
+                                restoreCallingIdentity(token3);
+                            }
                         }
                     }
-                    """
+                   """
                 ).indented(),
                 *stubs
         )
@@ -75,7 +80,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder {
                         private void testMethodImported() {
                             final long token1 = Binder.clearCallingIdentity();
                             try {
@@ -84,6 +89,12 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         }
                         private void testMethodFullClass() {
                             final long token2 = android.os.Binder.clearCallingIdentity();
+                            try {
+                            } finally {
+                            }
+                        }
+                        private void testMethodChildOfBinder() {
+                            final long token3 = clearCallingIdentity();
                             try {
                             } finally {
                             }
@@ -108,7 +119,13 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         remove token2. [UnusedTokenOfOriginalCallingIdentity]
                                 final long token2 = android.os.Binder.clearCallingIdentity();
                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        0 errors, 2 warnings
+                        src/test/pkg/TestClass1.java:17: Warning: token3 has not been used to \
+                        restore the calling identity. Introduce a try-finally after the \
+                        declaration and call Binder.restoreCallingIdentity(token3) in finally or \
+                        remove token3. [UnusedTokenOfOriginalCallingIdentity]
+                                final long token3 = clearCallingIdentity();
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        0 errors, 3 warnings
                         """.addLineContinuation()
                 )
     }
@@ -234,7 +251,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder {
                         private void testMethod() {
                             long token1 = Binder.clearCallingIdentity();
                             try {
@@ -245,6 +262,11 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                             try {
                             } finally {
                                 android.os.Binder.restoreCallingIdentity(token2);
+                            }
+                            long token3 = clearCallingIdentity();
+                            try {
+                            } finally {
+                                restoreCallingIdentity(token3);
                             }
                         }
                     }
@@ -265,7 +287,12 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         [NonFinalTokenOfOriginalCallingIdentity]
                                 long token2 = android.os.Binder.clearCallingIdentity();
                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        0 errors, 2 warnings
+                        src/test/pkg/TestClass1.java:15: Warning: token3 is a non-final token from \
+                        Binder.clearCallingIdentity(). Add final keyword to token3. \
+                        [NonFinalTokenOfOriginalCallingIdentity]
+                                long token3 = clearCallingIdentity();
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        0 errors, 3 warnings
                         """.addLineContinuation()
                 )
     }
@@ -279,16 +306,16 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder {
                         private void testMethod() {
                             final long token1 = Binder.clearCallingIdentity();
                             try {
                                 final long token2 = android.os.Binder.clearCallingIdentity();
                                 try {
-                                    final long token3 = Binder.clearCallingIdentity();
+                                    final long token3 = clearCallingIdentity();
                                     try {
                                     } finally {
-                                        Binder.restoreCallingIdentity(token3);
+                                        restoreCallingIdentity(token3);
                                     }
                                 } finally {
                                     android.os.Binder.restoreCallingIdentity(token2);
@@ -316,8 +343,8 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         been cleared and returned into token1. Move token3 declaration after \
                         restoring the calling identity with Binder.restoreCallingIdentity(token1). \
                         [NestedClearCallingIdentityCalls]
-                                        final long token3 = Binder.clearCallingIdentity();
-                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                        final long token3 = clearCallingIdentity();
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             src/test/pkg/TestClass1.java:5: Location of the token1 declaration.
                         0 errors, 2 warnings
                         """.addLineContinuation()
@@ -332,7 +359,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder{
                         private void testMethodNoTry() {
                             final long token = Binder.clearCallingIdentity();
                             Binder.restoreCallingIdentity(token);
@@ -346,10 +373,10 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                             }
                         }
                         private void testMethodLocalVariableBetweenClearAndTry() {
-                            final long token = Binder.clearCallingIdentity(), num = 0;
+                            final long token = clearCallingIdentity(), num = 0;
                             try {
                             } finally {
-                                Binder.restoreCallingIdentity(token);
+                                restoreCallingIdentity(token);
                             }
                         }
                         private void testMethodTryCatch() {
@@ -398,8 +425,8 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         to ensure a safe restore of the calling identity by calling \
                         Binder.restoreCallingIdentity(token) and making it an immediate child of \
                         the finally block. [ClearIdentityCallNotFollowedByTryFinally]
-                                final long token = Binder.clearCallingIdentity(), num = 0;
-                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                final long token = clearCallingIdentity(), num = 0;
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:24: Warning: You cleared the calling identity \
                         and returned the result into token, but the next statement is not a \
                         try-finally statement. Define a try-finally block after token declaration \
@@ -429,7 +456,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder {
                         private void testMethodImported() {
                             final long token = Binder.clearCallingIdentity();
                             try {
@@ -446,10 +473,10 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                             android.os.Binder.restoreCallingIdentity(token);
                         }
                         private void testMethodRestoreInCatch() {
-                            final long token = Binder.clearCallingIdentity();
+                            final long token = clearCallingIdentity();
                             try {
                             } catch (Exception e) {
-                                Binder.restoreCallingIdentity(token);
+                                restoreCallingIdentity(token);
                             } finally {
                             }
                         }
@@ -480,8 +507,8 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         finally block of the try statement after token declaration. Surround the c\
                         all with finally block and call it unconditionally. \
                         [RestoreIdentityCallNotInFinallyBlock]
-                                    Binder.restoreCallingIdentity(token);
-                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                    restoreCallingIdentity(token);
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 3 warnings
                         """.addLineContinuation()
                 )
@@ -493,7 +520,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                     """
                     package test.pkg;
                     import android.os.Binder;
-                    public class TestClass1 {
+                    public class TestClass1 extends Binder {
                         private void testMethodOutsideFinally() {
                             final long token1 = Binder.clearCallingIdentity();
                             try {
@@ -525,14 +552,10 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                     }
                                 }
                             }
-                            final long token2 = android.os.Binder.clearCallingIdentity();
+                            final long token2 = clearCallingIdentity();
                             try {
                             } finally {
-                                {
-                                    {
-                                        android.os.Binder.restoreCallingIdentity(token2);
-                                    }
-                                }
+                                if (true) restoreCallingIdentity(token2);
                             }
                         }
                     }
@@ -564,13 +587,13 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         [RestoreIdentityCallNotInFinallyBlock]
                                             Binder.restoreCallingIdentity(token1);
                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        src/test/pkg/TestClass1.java:40: Warning: \
+                        src/test/pkg/TestClass1.java:38: Warning: \
                         Binder.restoreCallingIdentity(token2) is not an immediate child of the \
                         finally block of the try statement after token2 declaration. Surround the \
                         call with finally block and call it unconditionally. \
                         [RestoreIdentityCallNotInFinallyBlock]
-                                            android.os.Binder.restoreCallingIdentity(token2);
-                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                    if (true) restoreCallingIdentity(token2);
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 4 warnings
                         """.addLineContinuation()
                 )
@@ -617,7 +640,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                         """
                         src/test/pkg/TestClass1.java:8: Warning: You cleared the original identity \
                         with Binder.clearCallingIdentity() and returned into token, so \
-                        Binder.getCallingPid() will be using your own identity instead of the \
+                        getCallingPid() will be using your own identity instead of the \
                         caller's. Either explicitly query your own identity or move it after \
                         restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -625,7 +648,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                ~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:9: Warning: You cleared the original identity \
                         with Binder.clearCallingIdentity() and returned into token, so \
-                        android.os.Binder.getCallingPid() will be using your own identity instead \
+                        getCallingPid() will be using your own identity instead \
                         of the caller's. Either explicitly query your own identity or move it \
                         after restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -633,7 +656,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:10: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        Binder.getCallingUid() will be using your own identity instead of the \
+                        getCallingUid() will be using your own identity instead of the \
                         caller's. Either explicitly query your own identity or move it after \
                         restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -641,7 +664,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                ~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:11: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        android.os.Binder.getCallingUid() will be using your own identity instead \
+                        getCallingUid() will be using your own identity instead \
                         of the caller's. Either explicitly query your own identity or move it \
                         after restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -649,7 +672,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:12: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        Binder.getCallingUidOrThrow() will be using your own identity instead of \
+                        getCallingUidOrThrow() will be using your own identity instead of \
                         the caller's. Either explicitly query your own identity or move it after \
                         restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -657,7 +680,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:13: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        android.os.Binder.getCallingUidOrThrow() will be using your own identity \
+                        getCallingUidOrThrow() will be using your own identity \
                         instead of the caller's. Either explicitly query your own identity or move \
                         it after restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -665,7 +688,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:14: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        Binder.getCallingUserHandle() will be using your own identity instead of \
+                        getCallingUserHandle() will be using your own identity instead of \
                         the caller's. Either explicitly query your own identity or move it after \
                         restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -673,7 +696,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:15: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        android.os.Binder.getCallingUserHandle() will be using your own identity \
+                        getCallingUserHandle() will be using your own identity \
                         instead of the caller's. Either explicitly query your own identity or move \
                         it after restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -681,7 +704,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:17: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        UserHandle.getCallingAppId() will be using your own identity instead of \
+                        getCallingAppId() will be using your own identity instead of \
                         the caller's. Either explicitly query your own identity or move it after \
                         restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -689,7 +712,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:18: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        android.os.UserHandle.getCallingAppId() will be using your own identity \
+                        getCallingAppId() will be using your own identity \
                         instead of the caller's. Either explicitly query your own identity or move \
                         it after restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -697,7 +720,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:19: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        UserHandle.getCallingUserId() will be using your own identity instead of \
+                        getCallingUserId() will be using your own identity instead of \
                         the caller's. Either explicitly query your own identity or move it after \
                         restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]
@@ -705,7 +728,7 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         src/test/pkg/TestClass1.java:20: Warning: You cleared the original \
                         identity with Binder.clearCallingIdentity() and returned into token, so \
-                        android.os.UserHandle.getCallingUserId() will be using your own identity \
+                        getCallingUserId() will be using your own identity \
                         instead of the caller's. Either explicitly query your own identity or move \
                         it after restoring the identity with Binder.restoreCallingIdentity(token). \
                         [UseOfCallerAwareMethodsWithClearedIdentity]

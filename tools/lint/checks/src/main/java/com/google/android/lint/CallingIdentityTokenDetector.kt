@@ -27,7 +27,6 @@ import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
-import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.PsiSearchScopeUtil
 import com.intellij.psi.search.SearchScope
 import org.jetbrains.uast.UBlockExpression
@@ -35,10 +34,11 @@ import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UDeclarationsExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.ULocalVariable
-import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.UTryExpression
 import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.getQualifiedParentOrThis
+import org.jetbrains.uast.getUCallExpression
 
 /**
  * Lint Detector that finds issues with improper usages of the token returned by
@@ -50,7 +50,7 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
     private val tokensMap = mutableMapOf<String, Token>()
 
     override fun getApplicableUastTypes(): List<Class<out UElement?>> =
-            listOf(ULocalVariable::class.java, UQualifiedReferenceExpression::class.java)
+            listOf(ULocalVariable::class.java, UCallExpression::class.java)
 
     override fun createUastHandler(context: JavaContext): UElementHandler =
             TokenUastHandler(context)
@@ -87,7 +87,7 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
          * - Stores token variable name, scope in the file, location and finally block in tokensMap
          */
         override fun visitLocalVariable(node: ULocalVariable) {
-            val rhsExpression = node.uastInitializer as? UQualifiedReferenceExpression ?: return
+            val rhsExpression = node.uastInitializer?.getUCallExpression() ?: return
             if (!isMethodCall(rhsExpression, Method.BINDER_CLEAR_CALLING_IDENTITY)) return
             val location = context.getLocation(node as UElement)
             val variableName = node.getName()
@@ -142,13 +142,13 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
         }
 
         /**
-         * For every class.method():
+         * For every method():
          * - Checks use of caller-aware methods issue
          * For every call of Binder.restoreCallingIdentity(token):
          * - Checks for restoreCallingIdentity() not in the finally block issue
          * - Removes token from tokensMap if token is within the scope of the method
          */
-        override fun visitQualifiedReferenceExpression(node: UQualifiedReferenceExpression) {
+        override fun visitCallExpression(node: UCallExpression) {
             val token = findFirstTokenInScope(node)
             if (isCallerAwareMethod(node) && token != null) {
                 context.report(
@@ -162,8 +162,7 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                 return
             }
             if (!isMethodCall(node, Method.BINDER_RESTORE_CALLING_IDENTITY)) return
-            val selector = node.selector as UCallExpression
-            val arg = selector.valueArguments[0] as? USimpleNameReferenceExpression ?: return
+            val arg = node.valueArguments[0] as? USimpleNameReferenceExpression ?: return
             val variableName = arg.identifier
             val originalScope = tokensMap[variableName]?.scope ?: return
             val psi = arg.sourcePsi ?: return
@@ -171,11 +170,15 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             // token declaration. If not within the scope, no action is needed because the token is
             // irrelevant i.e. not in the same scope or was not declared with clearCallingIdentity()
             if (!PsiSearchScopeUtil.isInScope(originalScope, psi)) return
-            // We do not report "restore identity call not in finally" issue when there is no
+            // - We do not report "restore identity call not in finally" issue when there is no
             // finally block because that case is already handled by "clear identity call not
             // followed by try-finally" issue
+            // - UCallExpression can be a child of UQualifiedReferenceExpression, i.e.
+            // receiver.selector, so to get the call's immediate parent we need to get the topmost
+            // parent qualified reference expression and access its parent
             if (tokensMap[variableName]?.finallyBlock != null &&
-                    node.uastParent != tokensMap[variableName]?.finallyBlock) {
+                    node.getQualifiedParentOrThis().uastParent !=
+                        tokensMap[variableName]?.finallyBlock) {
                 context.report(
                         ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
                         context.getLocation(node),
@@ -185,14 +188,14 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             tokensMap.remove(variableName)
         }
 
-        private fun isCallerAwareMethod(expression: UQualifiedReferenceExpression): Boolean =
+        private fun isCallerAwareMethod(expression: UCallExpression): Boolean =
                 callerAwareMethods.any { method -> isMethodCall(expression, method) }
 
         private fun isMethodCall(
-            expression: UQualifiedReferenceExpression,
+            expression: UCallExpression,
             method: Method
         ): Boolean {
-            val psiMethod = expression.resolve() as? PsiMethod ?: return false
+            val psiMethod = expression.resolve() ?: return false
             return psiMethod.getName() == method.methodName &&
                     context.evaluator.methodMatches(
                             psiMethod,
