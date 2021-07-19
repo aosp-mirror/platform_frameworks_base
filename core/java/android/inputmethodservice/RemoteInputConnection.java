@@ -247,15 +247,15 @@ final class RemoteInputConnection implements InputConnection {
 
     @AnyThread
     public boolean commitCompletion(CompletionInfo text) {
-        if (isMethodMissing(MissingMethodFlags.COMMIT_CORRECTION)) {
-            // This method is not implemented.
-            return false;
-        }
         return mInvoker.commitCompletion(text);
     }
 
     @AnyThread
     public boolean commitCorrection(CorrectionInfo correctionInfo) {
+        if (isMethodMissing(MissingMethodFlags.COMMIT_CORRECTION)) {
+            // This method is not implemented.
+            return false;
+        }
         return mInvoker.commitCorrection(correctionInfo);
     }
 
