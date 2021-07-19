@@ -32,7 +32,7 @@
     android:paddingStart="0dp"
     android:elevation="4dp" >
 
-    <!-- Date and privacy. Only visible in QS -->
+    <!-- Date and privacy. Only visible in QS when not in split shade -->
     <include layout="@layout/quick_status_bar_header_date_privacy"/>
 
     <RelativeLayout
@@ -42,7 +42,7 @@
         android:layout_gravity="top"
         android:clipChildren="false"
         android:clipToPadding="false">
-        <!-- Time, icons and Carrier (only in QS) -->
+        <!-- Time, icons and Carrier (only in QS when not in split shade) -->
         <include layout="@layout/quick_qs_status_icons"/>
 
         <com.android.systemui.qs.QuickQSPanel
