@@ -126,7 +126,6 @@ class UiAutomationManager {
             mUiAutomationServiceOwner = owner;
             mUiAutomationServiceInfo = accessibilityServiceInfo;
             mUiAutomationService.mServiceInterface = serviceClient;
-            mUiAutomationService.onAdded();
             try {
                 mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
                         0);
@@ -135,6 +134,8 @@ class UiAutomationManager {
                 destroyUiAutomationService();
                 return;
             }
+
+            mUiAutomationService.onAdded();
 
             mUiAutomationService.connectServiceUnknownThread();
         }
