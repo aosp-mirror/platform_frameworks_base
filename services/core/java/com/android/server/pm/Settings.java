@@ -747,6 +747,15 @@ public final class Settings implements Watchable, Snappable {
         mRenamedPackages.remove(pkgName);
     }
 
+    void pruneRenamedPackagesLPw() {
+        for (int i = mRenamedPackages.size() - 1; i >= 0; i--) {
+            PackageSetting ps = mPackages.get(mRenamedPackages.valueAt(i));
+            if (ps == null) {
+                mRenamedPackages.removeAt(i);
+            }
+        }
+    }
+
     /** Gets and optionally creates a new shared user id. */
     SharedUserSetting getSharedUserLPw(String name, int pkgFlags, int pkgPrivateFlags,
             boolean create) throws PackageManagerException {
