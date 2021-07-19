@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -385,6 +386,24 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction startTask(int taskId, @Nullable Bundle options) {
         mHierarchyOps.add(HierarchyOp.createForTaskLaunch(taskId, options));
+        return this;
+    }
+
+    /**
+     * Sends a pending intent in sync.
+     * @param sender The PendingIntent sender.
+     * @param intent The fillIn intent to patch over the sender's base intent.
+     * @param options bundle containing ActivityOptions for the task's top activity.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction sendPendingIntent(PendingIntent sender, Intent intent,
+            @Nullable Bundle options) {
+        mHierarchyOps.add(new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT)
+                .setLaunchOptions(options)
+                .setPendingIntent(sender)
+                .setActivityIntent(intent)
+                .build());
         return this;
     }
 
@@ -886,6 +905,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT = 9;
         public static final int HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT = 10;
         public static final int HIERARCHY_OP_TYPE_REPARENT_CHILDREN = 11;
+        public static final int HIERARCHY_OP_TYPE_PENDING_INTENT = 12;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -919,6 +939,9 @@ public final class WindowContainerTransaction implements Parcelable {
         // Used as options for WindowContainerTransaction#createTaskFragment().
         @Nullable
         private TaskFragmentCreationParams mTaskFragmentCreationOptions;
+
+        @Nullable
+        private PendingIntent mPendingIntent;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -998,6 +1021,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = copy.mLaunchOptions;
             mActivityIntent = copy.mActivityIntent;
             mTaskFragmentCreationOptions = copy.mTaskFragmentCreationOptions;
+            mPendingIntent = copy.mPendingIntent;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -1010,6 +1034,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = in.readBundle();
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mTaskFragmentCreationOptions = in.readTypedObject(TaskFragmentCreationParams.CREATOR);
+            mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
         }
 
         public int getType() {
@@ -1060,6 +1085,11 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         public TaskFragmentCreationParams getTaskFragmentCreationOptions() {
             return mTaskFragmentCreationOptions;
+        }
+
+        @Nullable
+        public PendingIntent getPendingIntent() {
+            return mPendingIntent;
         }
 
         @Override
@@ -1117,6 +1147,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBundle(mLaunchOptions);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeTypedObject(mTaskFragmentCreationOptions, flags);
+            dest.writeTypedObject(mPendingIntent, flags);
         }
 
         @Override
@@ -1163,6 +1194,9 @@ public final class WindowContainerTransaction implements Parcelable {
             @Nullable
             private TaskFragmentCreationParams mTaskFragmentCreationOptions;
 
+            @Nullable
+            private PendingIntent mPendingIntent;
+
             Builder(int type) {
                 mType = type;
             }
@@ -1202,6 +1236,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setPendingIntent(@Nullable PendingIntent sender) {
+                mPendingIntent = sender;
+                return this;
+            }
+
             Builder setTaskFragmentCreationOptions(
                     @Nullable TaskFragmentCreationParams taskFragmentCreationOptions) {
                 mTaskFragmentCreationOptions = taskFragmentCreationOptions;
@@ -1221,6 +1260,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mToTop = mToTop;
                 hierarchyOp.mLaunchOptions = mLaunchOptions;
                 hierarchyOp.mActivityIntent = mActivityIntent;
+                hierarchyOp.mPendingIntent = mPendingIntent;
                 hierarchyOp.mTaskFragmentCreationOptions = mTaskFragmentCreationOptions;
 
                 return hierarchyOp;

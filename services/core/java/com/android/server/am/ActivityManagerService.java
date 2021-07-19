@@ -16390,6 +16390,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mProcessList.getIsolatedProcessesLocked(uid);
             }
         }
+
+        /** @see ActivityManagerService#sendIntentSender */
+        @Override
+        public int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
+                Intent intent, String resolvedType,
+                IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+            return ActivityManagerService.this.sendIntentSender(target, allowlistToken, code,
+                    intent, resolvedType, finishedReceiver, requiredPermission, options);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
