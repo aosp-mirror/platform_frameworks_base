@@ -5966,7 +5966,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         final VerificationParams params = state.getVerificationParams();
                         final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
-                        Slog.i(TAG, "Verification timed out for " + originUri);
+                        String errorMsg = "Verification timed out for " + originUri;
+                        Slog.i(TAG, errorMsg);
 
                         final UserHandle user = params.getUser();
                         if (getDefaultVerificationResponse(user)
@@ -5982,7 +5983,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                     PackageManager.VERIFICATION_REJECT, null,
                                     params.mDataLoaderType, user);
                             params.setReturnCode(
-                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
+                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_REJECT);
                         }
@@ -6007,7 +6008,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         final VerificationParams params = state.getVerificationParams();
                         final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
-                        Slog.i(TAG, "Integrity verification timed out for " + originUri);
+                        String errorMsg = "Integrity verification timed out for " + originUri;
+                        Slog.i(TAG, errorMsg);
 
                         state.setIntegrityVerificationResult(
                                 getDefaultIntegrityVerificationResponse());
@@ -6017,7 +6019,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.i(TAG, "Integrity check times out, continuing with " + originUri);
                         } else {
                             params.setReturnCode(
-                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
+                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                                    errorMsg);
                         }
 
                         if (state.areAllVerificationsComplete()) {
@@ -6057,7 +6060,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                     response.code, null, params.mDataLoaderType, params.getUser());
                         } else {
                             params.setReturnCode(
-                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
+                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                                    "Install not allowed");
                         }
 
                         if (state.areAllVerificationsComplete()) {
@@ -6092,7 +6096,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.i(TAG, "Integrity check passed for " + originUri);
                     } else {
                         params.setReturnCode(
-                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
+                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                                "Integrity check failed for " + originUri);
                     }
 
                     if (state.areAllVerificationsComplete()) {
@@ -18035,8 +18040,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // state can change within this delay and hence we need to re-verify certain conditions.
             boolean isStaged = (installFlags & INSTALL_STAGED) != 0;
             if (isStaged) {
-                mRet = verifyReplacingVersionCode(
+                Pair<Integer, String> ret = verifyReplacingVersionCode(
                         pkgLite, requiredInstalledVersionCode, installFlags);
+                mRet = ret.first;
                 if (mRet != INSTALL_SUCCEEDED) {
                     return;
                 }
@@ -18117,17 +18123,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 return;
             }
             int completeStatus = PackageManager.INSTALL_SUCCEEDED;
-            for (Integer status : mVerificationState.values()) {
+            String errorMsg = null;
+            for (VerificationParams params : mVerificationState.keySet()) {
+                int status = params.mRet;
                 if (status == PackageManager.INSTALL_UNKNOWN) {
                     return;
                 } else if (status != PackageManager.INSTALL_SUCCEEDED) {
                     completeStatus = status;
+                    errorMsg = params.mErrorMessage;
                     break;
                 }
             }
             try {
                 mObserver.onPackageInstalled(null, completeStatus,
-                        "Package Verification Result", new Bundle());
+                        errorMsg, new Bundle());
             } catch (RemoteException e) {
                 Slog.i(TAG, "Observer no longer exists.");
             }
@@ -18150,7 +18159,8 @@ public class PackageManagerService extends IPackageManager.Stub
         private boolean mWaitForVerificationToComplete;
         private boolean mWaitForIntegrityVerificationToComplete;
         private boolean mWaitForEnableRollbackToComplete;
-        private int mRet;
+        private int mRet = PackageManager.INSTALL_SUCCEEDED;
+        private String mErrorMessage = null;
 
         final PackageLite mPackageLite;
 
@@ -18187,7 +18197,9 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     mPackageLite, origin.resolvedPath, installFlags, packageAbiOverride);
 
-            mRet = verifyReplacingVersionCode(pkgLite, requiredInstalledVersionCode, installFlags);
+            Pair<Integer, String> ret = verifyReplacingVersionCode(
+                    pkgLite, requiredInstalledVersionCode, installFlags);
+            setReturnCode(ret.first, ret.second);
             if (mRet != INSTALL_SUCCEEDED) {
                 return;
             }
@@ -18213,7 +18225,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mPendingVerification.append(verificationId, verificationState);
 
             sendIntegrityVerificationRequest(verificationId, pkgLite, verificationState);
-            mRet = sendPackageVerificationRequest(
+            sendPackageVerificationRequest(
                     verificationId, pkgLite, verificationState);
 
             // If both verifications are skipped, we should remove the state.
@@ -18325,14 +18337,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         /**
-         * Send a request to verifier(s) to verify the package if necessary, and return
-         * {@link PackageManager#INSTALL_SUCCEEDED} if succeeded.
+         * Send a request to verifier(s) to verify the package if necessary.
          */
-        int sendPackageVerificationRequest(
+        void sendPackageVerificationRequest(
                 int verificationId,
                 PackageInfoLite pkgLite,
                 PackageVerificationState verificationState) {
-            int ret = INSTALL_SUCCEEDED;
 
             // TODO: http://b/22976637
             // Apps installed for "all" users use the device owner to verify the app
@@ -18415,8 +18425,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (sufficientVerifiers != null) {
                     final int n = sufficientVerifiers.size();
                     if (n == 0) {
-                        Slog.i(TAG, "Additional verifiers required, but none installed.");
-                        ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
+                        String errorMsg = "Additional verifiers required, but none installed.";
+                        Slog.i(TAG, errorMsg);
+                        setReturnCode(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
                     } else {
                         for (int i = 0; i < n; i++) {
                             final ComponentName verifierComponent = sufficientVerifiers.get(i);
@@ -18474,7 +18485,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 verificationState.setVerifierResponse(
                         requiredUid, PackageManager.VERIFICATION_ALLOW);
             }
-            return ret;
         }
 
         void populateInstallerExtras(Intent intent) {
@@ -18501,11 +18511,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        void setReturnCode(int ret) {
+        void setReturnCode(int ret, String message) {
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                 // Only update mRet if it was previously INSTALL_SUCCEEDED to
                 // ensure we do not overwrite any previous failure results.
                 mRet = ret;
+                mErrorMessage = message;
             }
         }
 
@@ -18541,7 +18552,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mParentVerificationParams.trySendVerificationCompleteNotification(this, mRet);
             } else {
                 try {
-                    observer.onPackageInstalled(null, mRet, "Package Verification Result",
+                    observer.onPackageInstalled(null, mRet, mErrorMessage,
                             new Bundle());
                 } catch (RemoteException e) {
                     Slog.i(TAG, "Observer no longer exists.");
@@ -26727,7 +26738,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private int verifyReplacingVersionCode(PackageInfoLite pkgLite,
+    private Pair<Integer, String> verifyReplacingVersionCode(PackageInfoLite pkgLite,
             long requiredInstalledVersionCode, int installFlags) {
         if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
             return verifyReplacingVersionCodeForApex(
@@ -26750,18 +26761,22 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
                 if (dataOwnerPkg == null) {
-                    Slog.w(TAG, "Required installed version code was "
+                    String errorMsg = "Required installed version code was "
                             + requiredInstalledVersionCode
-                            + " but package is not installed");
-                    return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+                            + " but package is not installed";
+                    Slog.w(TAG, errorMsg);
+                    return Pair.create(
+                            PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION, errorMsg);
                 }
 
                 if (dataOwnerPkg.getLongVersionCode() != requiredInstalledVersionCode) {
-                    Slog.w(TAG, "Required installed version code was "
+                    String errorMsg = "Required installed version code was "
                             + requiredInstalledVersionCode
                             + " but actual installed version is "
-                            + dataOwnerPkg.getLongVersionCode());
-                    return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+                            + dataOwnerPkg.getLongVersionCode();
+                    Slog.w(TAG, errorMsg);
+                    return Pair.create(
+                            PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION, errorMsg);
                 }
             }
 
@@ -26771,33 +26786,37 @@ public class PackageManagerService extends IPackageManager.Stub
                     try {
                         checkDowngrade(dataOwnerPkg, pkgLite);
                     } catch (PackageManagerException e) {
-                        Slog.w(TAG, "Downgrade detected: " + e.getMessage());
-                        return PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+                        String errorMsg = "Downgrade detected: " + e.getMessage();
+                        Slog.w(TAG, errorMsg);
+                        return Pair.create(
+                                PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
                     }
                 }
             }
         }
-        return PackageManager.INSTALL_SUCCEEDED;
+        return Pair.create(PackageManager.INSTALL_SUCCEEDED, null);
     }
 
-    private int verifyReplacingVersionCodeForApex(PackageInfoLite pkgLite,
+    private Pair<Integer, String> verifyReplacingVersionCodeForApex(PackageInfoLite pkgLite,
             long requiredInstalledVersionCode, int installFlags) {
         String packageName = pkgLite.packageName;
 
         final PackageInfo activePackage = mApexManager.getPackageInfo(packageName,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         if (activePackage == null) {
-            Slog.w(TAG, "Attempting to install new APEX package " + packageName);
-            return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+            String errorMsg = "Attempting to install new APEX package " + packageName;
+            Slog.w(TAG, errorMsg);
+            return Pair.create(PackageManager.INSTALL_FAILED_PACKAGE_CHANGED, errorMsg);
         }
 
         final long activeVersion = activePackage.getLongVersionCode();
         if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST
                 && activeVersion != requiredInstalledVersionCode) {
-            Slog.w(TAG, "Installed version of APEX package " + packageName
+            String errorMsg = "Installed version of APEX package " + packageName
                     + " does not match required. Active version: " + activeVersion
-                    + " required: " + requiredInstalledVersionCode);
-            return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+                    + " required: " + requiredInstalledVersionCode;
+            Slog.w(TAG, errorMsg);
+            return Pair.create(PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION, errorMsg);
         }
 
         final boolean isAppDebuggable = (activePackage.applicationInfo.flags
@@ -26805,13 +26824,14 @@ public class PackageManagerService extends IPackageManager.Stub
         final long newVersionCode = pkgLite.getLongVersionCode();
         if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags, isAppDebuggable)
                 && newVersionCode < activeVersion) {
-            Slog.w(TAG, "Downgrade of APEX package " + packageName
+            String errorMsg = "Downgrade of APEX package " + packageName
                     + " is not allowed. Active version: " + activeVersion
-                    + " attempted: " + newVersionCode);
-            return PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+                    + " attempted: " + newVersionCode;
+            Slog.w(TAG, errorMsg);
+            return Pair.create(PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
         }
 
-        return PackageManager.INSTALL_SUCCEEDED;
+        return Pair.create(PackageManager.INSTALL_SUCCEEDED, null);
     }
 
     /**
