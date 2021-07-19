@@ -187,6 +187,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
                     .setPosition(mTaskLeash2, mTaskInfo2.positionInParent.x,
                             mTaskInfo2.positionInParent.y)
                     .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
+                    .show(dividerLeash)
                     .show(mRootTaskLeash)
                     .show(mTaskLeash1)
                     .show(mTaskLeash2);
@@ -212,9 +213,12 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
             }
             mRootTaskInfo = taskInfo;
 
-            if (mSplitLayout != null
-                    && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
-                onBoundsChanged(mSplitLayout);
+            if (mSplitLayout != null) {
+                if (mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
+                    onBoundsChanged(mSplitLayout);
+                }
+                // updateConfiguration re-inits the dividerbar, so show it now
+                mSyncQueue.runInSync(t -> t.show(mSplitLayout.getDividerLeash()));
             }
         } else if (taskInfo.taskId == getTaskId1()) {
             mTaskInfo1 = taskInfo;

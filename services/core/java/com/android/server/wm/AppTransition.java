@@ -213,6 +213,7 @@ public class AppTransition implements Dump {
     private int mNextAppTransitionEnter;
     private int mNextAppTransitionExit;
     private int mNextAppTransitionInPlace;
+    private boolean mNextAppTransitionIsSync;
 
     // Keyed by WindowContainer hashCode.
     private final SparseArray<AppTransitionAnimationSpec> mNextAppTransitionAnimationsSpecs
@@ -348,6 +349,13 @@ public class AppTransition implements Dump {
         fetchAppTransitionSpecsFromFuture();
     }
 
+    void abort() {
+        if (mRemoteAnimationController != null) {
+            mRemoteAnimationController.cancelAnimation("aborted");
+        }
+        clear();
+    }
+
     boolean isRunning() {
         return mAppTransitionState == APP_STATE_RUNNING;
     }
@@ -466,6 +474,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
+        mNextAppTransitionIsSync = false;
     }
 
     void freeze() {
@@ -1146,13 +1155,19 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter) {
+        overridePendingAppTransitionRemote(remoteAnimationAdapter, false /* sync */);
+    }
+
+    void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter,
+            boolean sync) {
         ProtoLog.i(WM_DEBUG_APP_TRANSITIONS, "Override pending remote transitionSet=%b adapter=%s",
                         isTransitionSet(), remoteAnimationAdapter);
-        if (isTransitionSet()) {
+        if (isTransitionSet() && !mNextAppTransitionIsSync) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;
             mRemoteAnimationController = new RemoteAnimationController(mService, mDisplayContent,
                     remoteAnimationAdapter, mHandler);
+            mNextAppTransitionIsSync = sync;
         }
     }
 

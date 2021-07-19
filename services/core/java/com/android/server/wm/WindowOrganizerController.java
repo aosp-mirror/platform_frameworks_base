@@ -17,10 +17,12 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
@@ -39,6 +41,8 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -52,6 +56,7 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskFragmentOrganizer;
@@ -235,6 +240,44 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public int startLegacyTransition(int type, @NonNull RemoteAnimationAdapter adapter,
+            @NonNull IWindowContainerTransactionCallback callback,
+            @NonNull WindowContainerTransaction t) {
+        enforceTaskPermission("startLegacyTransition()");
+        final CallerInfo caller = new CallerInfo();
+        final long ident = Binder.clearCallingIdentity();
+        int syncId;
+        try {
+            synchronized (mGlobalLock) {
+                if (type < 0) {
+                    throw new IllegalArgumentException("Can't create transition with no type");
+                }
+                if (mTransitionController.getTransitionPlayer() != null) {
+                    throw new IllegalArgumentException("Can't use legacy transitions in"
+                            + " when shell transitions are enabled.");
+                }
+                final DisplayContent dc =
+                        mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
+                if (dc.mAppTransition.isTransitionSet()) {
+                    // a transition already exists, so the callback probably won't be called.
+                    return -1;
+                }
+                adapter.setCallingPidUid(caller.mPid, caller.mUid);
+                dc.prepareAppTransition(type);
+                dc.mAppTransition.overridePendingAppTransitionRemote(adapter, true /* sync */);
+                syncId = startSyncWithOrganizer(callback);
+                applyTransaction(t, syncId, null /* transition */, caller);
+                setSyncReady(syncId);
+                mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY)
+                        .executeAppTransition();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return syncId;
     }
 
     @Override
@@ -577,6 +620,37 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         : SafeActivityOptions.fromBundle(launchOpts);
                 mService.mTaskSupervisor.startActivityFromRecents(caller.mPid, caller.mUid,
                         taskId, safeOptions);
+                break;
+            case HIERARCHY_OP_TYPE_PENDING_INTENT:
+                String resolvedType = hop.getActivityIntent() != null
+                        ? hop.getActivityIntent().resolveTypeIfNeeded(
+                                mService.mContext.getContentResolver())
+                        : null;
+
+                Bundle options = null;
+                if (hop.getPendingIntent().isActivity()) {
+                    // Set the context display id as preferred for this activity launches, so that
+                    // it can land on caller's display. Or just brought the task to front at the
+                    // display where it was on since it has higher preference.
+                    ActivityOptions activityOptions = hop.getLaunchOptions() != null
+                            ? new ActivityOptions(hop.getLaunchOptions())
+                            : ActivityOptions.makeBasic();
+                    activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
+                    options = activityOptions.toBundle();
+                }
+
+                int res = mService.mAmInternal.sendIntentSender(hop.getPendingIntent().getTarget(),
+                        hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
+                        hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
+                        null /* requiredPermission */, options);
+                if (res != ActivityManager.START_SUCCESS
+                        && res != ActivityManager.START_TASK_TO_FRONT) {
+                    if (!mTransitionController.isShellTransitionsEnabled()) {
+                        final DisplayContent dc =
+                                mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
+                        dc.cancelAppTransition();
+                    }
+                }
                 break;
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
