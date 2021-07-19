@@ -44,7 +44,7 @@ import org.junit.Test
 
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    protected val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
+    protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
         withTestName { testSpec.name }
