@@ -361,9 +361,9 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final Completable.Int value = mInvoker.requestCursorUpdates(cursorUpdateMode);
-        return Completable.getResultOrZero(value, TAG, "requestCursorUpdates()",
-                mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
+        final Completable.Boolean value = mInvoker.requestCursorUpdates(cursorUpdateMode);
+        return Completable.getResultOrFalse(value, TAG, "requestCursorUpdates()",
+                mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
 
     @AnyThread
@@ -397,9 +397,9 @@ final class RemoteInputConnection implements InputConnection {
             inputMethodService.exposeContent(inputContentInfo, this);
         }
 
-        final Completable.Int value = mInvoker.commitContent(inputContentInfo, flags, opts);
-        return Completable.getResultOrZero(
-                value, TAG, "commitContent()", mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
+        final Completable.Boolean value = mInvoker.commitContent(inputContentInfo, flags, opts);
+        return Completable.getResultOrFalse(
+                value, TAG, "commitContent()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
 
     /**
