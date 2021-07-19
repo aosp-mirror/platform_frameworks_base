@@ -3129,7 +3129,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void setListening(boolean listening) {
-        mKeyguardStatusBar.setListening(listening);
+        mKeyguardStatusBarViewController.setBatteryListening(listening);
         if (mQs == null) return;
         mQs.setListening(listening);
     }
@@ -3776,8 +3776,8 @@ public class NotificationPanelViewController extends PanelViewController {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
         pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect());
-        if (mKeyguardStatusBar != null) {
-            mKeyguardStatusBar.dump(fd, pw, args);
+        if (mKeyguardStatusBarViewController != null) {
+            mKeyguardStatusBarViewController.dump(fd, pw, args);
         }
     }
 
