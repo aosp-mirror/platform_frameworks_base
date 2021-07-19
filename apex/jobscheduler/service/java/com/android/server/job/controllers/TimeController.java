@@ -23,6 +23,7 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.content.Context;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -272,7 +273,7 @@ public final class TimeController extends StateController {
             long nextDelayTime = Long.MAX_VALUE;
             int nextDelayUid = 0;
             String nextDelayPackageName = null;
-            boolean ready = false;
+            final ArraySet<JobStatus> changedJobs = new ArraySet<>();
             Iterator<JobStatus> it = mTrackedJobs.iterator();
             final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             while (it.hasNext()) {
@@ -284,9 +285,7 @@ public final class TimeController extends StateController {
                     if (canStopTrackingJobLocked(job)) {
                         it.remove();
                     }
-                    if (job.isReady()) {
-                        ready = true;
-                    }
+                    changedJobs.add(job);
                 } else {
                     if (!wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
                         if (DEBUG) {
@@ -304,8 +303,8 @@ public final class TimeController extends StateController {
                     }
                 }
             }
-            if (ready) {
-                mStateChangedListener.onControllerStateChanged();
+            if (changedJobs.size() > 0) {
+                mStateChangedListener.onControllerStateChanged(changedJobs);
             }
             setDelayExpiredAlarmLocked(nextDelayTime,
                     mService.deriveWorkSource(nextDelayUid, nextDelayPackageName));

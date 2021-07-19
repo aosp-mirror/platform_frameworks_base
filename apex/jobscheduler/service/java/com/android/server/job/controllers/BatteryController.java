@@ -112,7 +112,7 @@ public final class BatteryController extends RestrictingController {
         } else if (reportChange) {
             // Otherwise, just let the job scheduler know the state has changed and take care of it
             // as it thinks is best.
-            mStateChangedListener.onControllerStateChanged();
+            mStateChangedListener.onControllerStateChanged(mTrackedTasks);
         }
     }
 
