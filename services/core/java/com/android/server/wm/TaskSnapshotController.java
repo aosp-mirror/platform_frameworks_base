@@ -683,7 +683,8 @@ class TaskSnapshotController {
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
-        return state.calculateInsets(frame, Type.systemBars(), false /* ignoreVisibility */);
+        return state.calculateInsets(
+                frame, Type.systemBars(), false /* ignoreVisibility */).toRect();
     }
 
     void dump(PrintWriter pw, String prefix) {

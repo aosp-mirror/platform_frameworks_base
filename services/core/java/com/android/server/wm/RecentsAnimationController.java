@@ -586,7 +586,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 contentInsets = targetAppMainWindow
                         .getInsetsStateWithVisibilityOverride()
                         .calculateInsets(mTargetActivityRecord.getBounds(), Type.systemBars(),
-                                false /* ignoreVisibility */);
+                                false /* ignoreVisibility */).toRect();
             } else {
                 // If the window for the activity had not yet been created, use the display insets.
                 mService.getStableInsets(mDisplayId, mTmpRect);
@@ -1186,7 +1186,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 return null;
             }
             final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
-                    mBounds, Type.systemBars(), false /* ignoreVisibility */);
+                    mBounds, Type.systemBars(), false /* ignoreVisibility */).toRect();
             InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
             final int mode = topApp.getActivityType() == mTargetActivityType
                     ? MODE_OPENING

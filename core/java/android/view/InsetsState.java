@@ -301,7 +301,7 @@ public class InsetsState implements Parcelable {
         return mPrivacyIndicatorBounds.inset(insetLeft, insetTop, insetRight, insetBottom);
     }
 
-    public Rect calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
+    public Insets calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
@@ -314,10 +314,10 @@ public class InsetsState implements Parcelable {
             }
             insets = Insets.max(source.calculateInsets(frame, ignoreVisibility), insets);
         }
-        return insets.toRect();
+        return insets;
     }
 
-    public Rect calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
+    public Insets calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
@@ -332,7 +332,7 @@ public class InsetsState implements Parcelable {
             }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);
         }
-        return insets.toRect();
+        return insets;
     }
 
     /**

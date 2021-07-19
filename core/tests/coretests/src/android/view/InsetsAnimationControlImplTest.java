@@ -111,7 +111,7 @@ public class InsetsAnimationControlImplTest {
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),
                 0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */);
-        mController.mReadyDispatched = true;
+        mController.setReadyDispatched(true);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class InsetsAnimationControlImplTest {
 
     @Test
     public void testCancelled_beforeReadyDispatched() {
-        mController.mReadyDispatched = false;
+        mController.setReadyDispatched(false);
         mController.cancel();
         assertFalse(mController.isReady());
         assertFalse(mController.isFinished());

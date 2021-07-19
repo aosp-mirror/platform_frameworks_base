@@ -105,7 +105,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private float mCurrentAlpha = 1.0f;
     private float mPendingAlpha = 1.0f;
     @VisibleForTesting(visibility = PACKAGE)
-    public boolean mReadyDispatched;
+    private boolean mReadyDispatched;
     private Boolean mPerceptible;
 
     @VisibleForTesting
@@ -167,6 +167,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     public boolean hasZeroInsetsIme() {
         return mHasZeroInsetsIme;
+    }
+
+    @Override
+    public void setReadyDispatched(boolean dispatched) {
+        mReadyDispatched = dispatched;
     }
 
     @Override
