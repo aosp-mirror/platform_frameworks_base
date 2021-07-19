@@ -917,6 +917,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mGestureLogInsideInsets=" + String.join("\n", mGestureLogInsideInsets));
         pw.println("  mGestureLogOutsideInsets=" + String.join("\n", mGestureLogOutsideInsets));
         pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
+        if (mEdgeBackPlugin != null) {
+            mEdgeBackPlugin.dump(pw);
+        }
     }
 
     private boolean isGestureBlockingActivityRunning() {
