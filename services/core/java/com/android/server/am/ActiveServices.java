@@ -3334,7 +3334,13 @@ public final class ActiveServices {
         }
     }
 
-    private final void bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why) {
+    /**
+     * Bump the given service record into executing state.
+     * @param oomAdjReason The caller requests it to perform the oomAdjUpdate if it's not null.
+     * @return {@code true} if it performed oomAdjUpdate.
+     */
+    private boolean bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why,
+            @Nullable String oomAdjReason) {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, ">>> EXECUTING "
                 + why + " of " + r + " in app " + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG_SERVICE_EXECUTING, ">>> EXECUTING "
@@ -3383,9 +3389,19 @@ public final class ActiveServices {
                 }
             }
         }
+        boolean oomAdjusted = false;
+        if (oomAdjReason != null && r.app != null
+                && r.app.mState.getCurProcState() > ActivityManager.PROCESS_STATE_SERVICE) {
+            // Force an immediate oomAdjUpdate, so the client app could be in the correct process
+            // state before doing any service related transactions
+            mAm.enqueueOomAdjTargetLocked(r.app);
+            mAm.updateOomAdjPendingTargetsLocked(oomAdjReason);
+            oomAdjusted = true;
+        }
         r.executeFg |= fg;
         r.executeNesting++;
         r.executingStart = now;
+        return oomAdjusted;
     }
 
     private final boolean requestServiceBindingLocked(ServiceRecord r, IntentBindRecord i,
@@ -3398,8 +3414,8 @@ public final class ActiveServices {
                 + " rebind=" + rebind);
         if ((!i.requested || rebind) && i.apps.size() > 0) {
             try {
-                bumpServiceExecutingLocked(r, execInFg, "bind");
-                r.app.mState.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
+                bumpServiceExecutingLocked(r, execInFg, "bind",
+                        OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
                 r.app.getThread().scheduleBindService(r, i.intent.getIntent(), rebind,
                         r.app.mState.getReportedProcState());
                 if (!rebind) {
@@ -3867,14 +3883,13 @@ public final class ActiveServices {
 
         final ProcessServiceRecord psr = app.mServices;
         final boolean newService = psr.startService(r);
-        bumpServiceExecutingLocked(r, execInFg, "create");
+        bumpServiceExecutingLocked(r, execInFg, "create", null /* oomAdjReason */);
         mAm.updateLruProcessLocked(app, false, null);
         updateServiceForegroundLocked(psr, /* oomAdj= */ false);
-        if (enqueueOomAdj) {
-            mAm.enqueueOomAdjTargetLocked(app);
-        } else {
-            mAm.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
-        }
+        // Force an immediate oomAdjUpdate, so the client app could be in the correct process state
+        // before doing any service related transactions
+        mAm.enqueueOomAdjTargetLocked(app);
+        mAm.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
 
         boolean created = false;
         try {
@@ -3895,7 +3910,6 @@ public final class ActiveServices {
             mAm.mBatteryStatsService.noteServiceStartLaunch(uid, packageName, serviceName);
             mAm.notifyPackageUse(r.serviceInfo.packageName,
                                  PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
-            app.mState.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
             thread.scheduleCreateService(r, r.serviceInfo,
                     mAm.compatibilityInfoForPackage(r.serviceInfo.applicationInfo),
                     app.mState.getReportedProcState());
@@ -3995,11 +4009,7 @@ public final class ActiveServices {
             mAm.grantImplicitAccess(r.userId, si.intent, si.callingId,
                     UserHandle.getAppId(r.appInfo.uid)
             );
-            bumpServiceExecutingLocked(r, execInFg, "start");
-            if (!oomAdjusted) {
-                oomAdjusted = true;
-                mAm.updateOomAdjLocked(r.app, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
-            }
+            bumpServiceExecutingLocked(r, execInFg, "start", null /* oomAdjReason */);
             if (r.fgRequired && !r.fgWaiting) {
                 if (!r.isForeground) {
                     if (DEBUG_BACKGROUND_CHECK) {
@@ -4023,6 +4033,10 @@ public final class ActiveServices {
             args.add(new ServiceStartArgs(si.taskRemoved, si.id, flags, si.intent));
         }
 
+        if (!oomAdjusted) {
+            mAm.enqueueOomAdjTargetLocked(r.app);
+            mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
+        }
         ParceledListSlice<ServiceStartArgs> slice = new ParceledListSlice<>(args);
         slice.setInlineCountLimit(4);
         Exception caughtException = null;
@@ -4117,7 +4131,7 @@ public final class ActiveServices {
             }
         }
 
-        boolean needOomAdj = false;
+        boolean oomAdjusted = false;
         // Tell the service that it has been unbound.
         if (r.app != null && r.app.getThread() != null) {
             for (int i = r.bindings.size() - 1; i >= 0; i--) {
@@ -4126,8 +4140,8 @@ public final class ActiveServices {
                         + ": hasBound=" + ibr.hasBound);
                 if (ibr.hasBound) {
                     try {
-                        bumpServiceExecutingLocked(r, false, "bring down unbind");
-                        needOomAdj = true;
+                        oomAdjusted |= bumpServiceExecutingLocked(r, false, "bring down unbind",
+                                OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                         ibr.hasBound = false;
                         ibr.requested = false;
                         r.app.getThread().scheduleUnbindService(r,
@@ -4135,7 +4149,6 @@ public final class ActiveServices {
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when unbinding service "
                                 + r.shortInstanceName, e);
-                        needOomAdj = false;
                         serviceProcessGoneLocked(r, enqueueOomAdj);
                         break;
                     }
@@ -4247,10 +4260,10 @@ public final class ActiveServices {
                 mAm.updateLruProcessLocked(r.app, false, null);
                 updateServiceForegroundLocked(r.app.mServices, false);
                 try {
-                    bumpServiceExecutingLocked(r, false, "destroy");
+                    oomAdjusted |= bumpServiceExecutingLocked(r, false, "destroy",
+                            oomAdjusted ? null : OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     mDestroyingServices.add(r);
                     r.destroying = true;
-                    needOomAdj = true;
                     r.app.getThread().scheduleStopService(r);
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when destroying service "
@@ -4266,11 +4279,10 @@ public final class ActiveServices {
                 TAG_SERVICE, "Removed service that is not running: " + r);
         }
 
-        if (needOomAdj) {
-            if (enqueueOomAdj) {
-                mAm.enqueueOomAdjTargetLocked(r.app);
-            } else {
-                mAm.updateOomAdjLocked(r.app, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+        if (!oomAdjusted) {
+            mAm.enqueueOomAdjTargetLocked(r.app);
+            if (!enqueueOomAdj) {
+                mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             }
         }
         if (r.bindings.size() > 0) {
@@ -4387,18 +4399,14 @@ public final class ActiveServices {
             if (s.app != null && s.app.getThread() != null && b.intent.apps.size() == 0
                     && b.intent.hasBound) {
                 try {
-                    bumpServiceExecutingLocked(s, false, "unbind");
+                    bumpServiceExecutingLocked(s, false, "unbind",
+                            OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     if (b.client != s.app && (c.flags&Context.BIND_WAIVE_PRIORITY) == 0
                             && s.app.mState.getSetProcState() <= PROCESS_STATE_HEAVY_WEIGHT) {
                         // If this service's process is not already in the cached list,
                         // then update it in the LRU list here because this may be causing
                         // it to go down there and we want it to start out near the top.
                         mAm.updateLruProcessLocked(s.app, false, null);
-                    }
-                    if (enqueueOomAdj) {
-                        mAm.enqueueOomAdjTargetLocked(s.app);
-                    } else {
-                        mAm.updateOomAdjLocked(s.app, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     }
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;

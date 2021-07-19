@@ -285,7 +285,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     protected boolean mTelephonyCapable;
 
-    private final boolean mAcquiredHapticEnabled;
+    private final boolean mAcquiredHapticEnabled = false;
     @Nullable private final Vibrator mVibrator;
 
     // Device provisioning state
@@ -1413,11 +1413,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     public void playAcquiredHaptic() {
         if (mAcquiredHapticEnabled && mVibrator != null) {
-            String effect = Settings.Global.getString(
-                    mContext.getContentResolver(),
-                    "udfps_acquired_type");
-            mVibrator.vibrate(UdfpsController.getVibration(effect,
-                    UdfpsController.EFFECT_TICK),
+            mVibrator.vibrate(UdfpsController.EFFECT_CLICK,
                     UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
@@ -1432,32 +1428,42 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     final FaceManager.AuthenticationCallback mFaceAuthenticationCallback
             = new FaceManager.AuthenticationCallback() {
 
-        @Override
-        public void onAuthenticationFailed() {
-            handleFaceAuthFailed();
-        }
+                @Override
+                public void onAuthenticationFailed() {
+                    handleFaceAuthFailed();
+                    if (mKeyguardBypassController != null) {
+                        mKeyguardBypassController.setUserHasDeviceEntryIntent(false);
+                    }
+                }
 
-        @Override
-        public void onAuthenticationSucceeded(FaceManager.AuthenticationResult result) {
-            Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
-            handleFaceAuthenticated(result.getUserId(), result.isStrongBiometric());
-            Trace.endSection();
-        }
+                @Override
+                public void onAuthenticationSucceeded(FaceManager.AuthenticationResult result) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
+                    handleFaceAuthenticated(result.getUserId(), result.isStrongBiometric());
+                    Trace.endSection();
 
-        @Override
-        public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
-            handleFaceHelp(helpMsgId, helpString.toString());
-        }
+                    if (mKeyguardBypassController != null) {
+                        mKeyguardBypassController.setUserHasDeviceEntryIntent(false);
+                    }
+                }
 
-        @Override
-        public void onAuthenticationError(int errMsgId, CharSequence errString) {
-            handleFaceError(errMsgId, errString.toString());
-        }
+                @Override
+                public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+                    handleFaceHelp(helpMsgId, helpString.toString());
+                }
 
-        @Override
-        public void onAuthenticationAcquired(int acquireInfo) {
-            handleFaceAcquired(acquireInfo);
-        }
+                @Override
+                public void onAuthenticationError(int errMsgId, CharSequence errString) {
+                    handleFaceError(errMsgId, errString.toString());
+                    if (mKeyguardBypassController != null) {
+                        mKeyguardBypassController.setUserHasDeviceEntryIntent(false);
+                    }
+                }
+
+                @Override
+                public void onAuthenticationAcquired(int acquireInfo) {
+                    handleFaceAcquired(acquireInfo);
+                }
     };
 
     private CancellationSignal mFingerprintCancelSignal;
@@ -1730,8 +1736,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
-        mAcquiredHapticEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-            "udfps_acquired", 0) == 1;
         mVibrator = vibrator;
 
         mHandler = new Handler(mainLooper) {

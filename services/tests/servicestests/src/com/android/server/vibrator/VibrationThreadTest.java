@@ -246,6 +246,81 @@ public class VibrationThreadTest {
     }
 
     @Test
+    public void vibrate_singleVibratorRepeatingShortAlwaysOnWaveform_turnsVibratorOnForASecond()
+            throws Exception {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        int[] amplitudes = new int[]{1, 2, 3};
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{1, 10, 100}, amplitudes, 0);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+
+        assertTrue(waitUntil(t -> !fakeVibrator.getAmplitudes().isEmpty(), thread,
+                TEST_TIMEOUT_MILLIS));
+        thread.cancel();
+        waitForCompletion(thread);
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(expectedOneShot(1000)), fakeVibrator.getEffectSegments());
+    }
+
+    @Test
+    public void vibrate_singleVibratorRepeatingLongAlwaysOnWaveform_turnsVibratorOnForACycle()
+            throws Exception {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        int[] amplitudes = new int[]{1, 2, 3};
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{5000, 500, 50}, amplitudes, 0);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+
+        assertTrue(waitUntil(t -> !fakeVibrator.getAmplitudes().isEmpty(), thread,
+                TEST_TIMEOUT_MILLIS));
+        thread.cancel();
+        waitForCompletion(thread);
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(expectedOneShot(5550)), fakeVibrator.getEffectSegments());
+    }
+
+
+    @Test
+    public void vibrate_singleVibratorRepeatingAlwaysOnWaveform_turnsVibratorBackOn()
+            throws Exception {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        int[] amplitudes = new int[]{1, 2};
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{900, 50}, amplitudes, 0);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+
+        assertTrue(waitUntil(t -> fakeVibrator.getAmplitudes().size() > 2 * amplitudes.length,
+                thread, 1000 + TEST_TIMEOUT_MILLIS));
+        thread.cancel();
+        waitForCompletion(thread);
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(2, fakeVibrator.getEffectSegments().size());
+        // First time turn vibrator ON for minimum of 1s.
+        assertEquals(1000L, fakeVibrator.getEffectSegments().get(0).getDuration());
+        // Vibrator turns off in the middle of the second execution of first step, turn it back ON
+        // for another 1s + remaining of 850ms.
+        assertEquals(1850, fakeVibrator.getEffectSegments().get(1).getDuration(), /* delta= */ 20);
+        // Set amplitudes for a cycle {1, 2}, start second loop then turn it back on to same value.
+        assertEquals(expectedAmplitudes(1, 2, 1, 1),
+                mVibratorProviders.get(VIBRATOR_ID).getAmplitudes().subList(0, 4));
+    }
+
+    @Test
     public void vibrate_singleVibratorPredefinedCancel_cancelsVibrationImmediately()
             throws Exception {
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
