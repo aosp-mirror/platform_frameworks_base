@@ -12633,6 +12633,7 @@ package android.content.pm {
     method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public abstract void setApplicationEnabledSetting(@NonNull String, int, int);
     method @RequiresPermission(value="android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS", conditional=true) public boolean setAutoRevokeWhitelisted(@NonNull String, boolean);
     method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public abstract void setComponentEnabledSetting(@NonNull android.content.ComponentName, int, int);
+    method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public void setComponentEnabledSettings(@NonNull java.util.List<android.content.pm.PackageManager.ComponentEnabledSetting>);
     method public abstract void setInstallerPackageName(@NonNull String, @Nullable String);
     method public void setMimeGroup(@NonNull String, @NonNull java.util.Set<java.lang.String>);
     method public abstract void updateInstantAppCookie(@Nullable byte[]);
@@ -12827,6 +12828,16 @@ package android.content.pm {
     field public static final int VERIFICATION_ALLOW = 1; // 0x1
     field public static final int VERIFICATION_REJECT = -1; // 0xffffffff
     field public static final int VERSION_CODE_HIGHEST = -1; // 0xffffffff
+  }
+
+  public static final class PackageManager.ComponentEnabledSetting implements android.os.Parcelable {
+    ctor public PackageManager.ComponentEnabledSetting(@NonNull android.content.ComponentName, int, int);
+    method public int describeContents();
+    method @Nullable public android.content.ComponentName getComponentName();
+    method public int getEnabledFlags();
+    method public int getEnabledState();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageManager.ComponentEnabledSetting> CREATOR;
   }
 
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
