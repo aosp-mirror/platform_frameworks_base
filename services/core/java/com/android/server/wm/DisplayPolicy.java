@@ -1686,7 +1686,7 @@ public class DisplayPolicy {
             // frame set for the simulated layout for this case.
             computeWindowBounds(attrs, state, df, df);
         } else {
-            computeWindowBounds(attrs, state, win.mToken.getBounds(), df);
+            computeWindowBounds(attrs, state, win.getBounds(), df);
         }
         if (attached == null) {
             pf.set(df);

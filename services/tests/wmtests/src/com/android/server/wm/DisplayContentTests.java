@@ -590,7 +590,9 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.setImeLayeringTarget(ws);
 
         // Adjust bounds so that matchesRootDisplayAreaBounds() returns false.
-        ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
+        final Rect bounds = new Rect(dc.getBounds());
+        bounds.scale(0.5f);
+        ws.mActivityRecord.setBounds(bounds);
         assertFalse("matchesRootDisplayAreaBounds() should return false",
                 ws.matchesDisplayAreaBounds());
 
