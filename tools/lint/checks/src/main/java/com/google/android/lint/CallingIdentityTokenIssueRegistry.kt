@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.lint
+package com.google.android.lint
 
 import com.android.tools.lint.client.api.IssueRegistry
-// TODO: uncomment when lint API in Soong becomes 30.0+
-// import com.android.tools.lint.client.api.Vendor
+import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Implementation
@@ -45,12 +44,11 @@ class CallingIdentityTokenIssueRegistry : IssueRegistry() {
     override val minApi: Int
         get() = 8
 
-//    TODO: uncomment when lint API in Soong becomes 30.0+
-//    override val vendor: Vendor = Vendor(
-//            vendorName = "Android Open Source Project",
-//            feedbackUrl = "http://b/issues/new?component=315013",
-//            contact = "brufino@google.com"
-//    )
+    override val vendor: Vendor = Vendor(
+            vendorName = "Android",
+            feedbackUrl = "http://b/issues/new?component=315013",
+            contact = "brufino@google.com"
+    )
 
     companion object {
         /** Issue: unused token from Binder.clearCallingIdentity() */
