@@ -140,7 +140,7 @@ public class SystemActions extends SystemUI {
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     private final SystemActionsBroadcastReceiver mReceiver;
-    private final Recents mRecents;
+    private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
     private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
@@ -152,9 +152,9 @@ public class SystemActions extends SystemUI {
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
-            Recents recents) {
+            Optional<Recents> recentsOptional) {
         super(context);
-        mRecents = recents;
+        mRecentsOptional = recentsOptional;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
         mA11yManager = (AccessibilityManager) mContext.getSystemService(
@@ -370,7 +370,7 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleRecents() {
-        mRecents.toggleRecentApps();
+        mRecentsOptional.ifPresent(Recents::toggleRecentApps);
     }
 
     private void handleNotifications() {
