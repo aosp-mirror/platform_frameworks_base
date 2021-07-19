@@ -935,7 +935,18 @@ public final class ActiveServices {
     void killMisbehavingService(ServiceRecord r,
             int appUid, int appPid, String localPackageName) {
         synchronized (mAm) {
-            stopServiceLocked(r);
+            if (!r.destroying) {
+                // This service is still alive, stop it.
+                stopServiceLocked(r);
+            } else {
+                // Check if there is another instance of it being started in parallel,
+                // if so, stop that too to avoid spamming the system.
+                final ServiceMap smap = getServiceMapLocked(r.userId);
+                final ServiceRecord found = smap.mServicesByInstanceName.remove(r.instanceName);
+                if (found != null) {
+                    stopServiceLocked(found);
+                }
+            }
             mAm.crashApplication(appUid, appPid, localPackageName, -1,
                     "Bad notification for startForeground", true /*force*/);
         }
