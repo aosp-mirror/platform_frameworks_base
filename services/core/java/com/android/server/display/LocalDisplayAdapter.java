@@ -326,7 +326,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (mActiveModeId != NO_DISPLAY_MODE_ID
                     && mActiveModeId != activeRecord.mMode.getModeId()) {
                 Slog.d(TAG, "The active mode was changed from SurfaceFlinger or the display"
-                        + "device.");
+                        + " device to " + activeRecord.mMode);
                 mActiveModeId = activeRecord.mMode.getModeId();
                 activeModeChanged = true;
                 sendTraversalRequestLocked();
