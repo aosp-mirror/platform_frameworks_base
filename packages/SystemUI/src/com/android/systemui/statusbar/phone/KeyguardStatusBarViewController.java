@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.ViewController;
 
 import java.io.FileDescriptor;
@@ -41,6 +42,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final ConfigurationController mConfigurationController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final BatteryController mBatteryController;
+    private final UserInfoController mUserInfoController;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -89,6 +91,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 }
             };
 
+    private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
+            (name, picture, userAccount) -> mView.onUserInfoChanged(picture);
+
     private boolean mBatteryListening;
 
     @Inject
@@ -97,12 +102,14 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             CarrierTextController carrierTextController,
             ConfigurationController configurationController,
             SystemStatusAnimationScheduler animationScheduler,
-            BatteryController batteryController) {
+            BatteryController batteryController,
+            UserInfoController userInfoController) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
         mAnimationScheduler = animationScheduler;
         mBatteryController = batteryController;
+        mUserInfoController = userInfoController;
     }
 
     @Override
@@ -115,6 +122,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     protected void onViewAttached() {
         mConfigurationController.addCallback(mConfigurationListener);
         mAnimationScheduler.addCallback(mAnimationCallback);
+        mUserInfoController.addCallback(mOnUserInfoChangedListener);
         onThemeChanged();
     }
 
@@ -122,6 +130,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
         mAnimationScheduler.removeCallback(mAnimationCallback);
+        mUserInfoController.removeCallback(mOnUserInfoChangedListener);
     }
 
     /** Should be called when the theme changes. */
