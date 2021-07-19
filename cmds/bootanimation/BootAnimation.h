@@ -31,7 +31,7 @@
 #include <binder/IBinder.h>
 
 #include <EGL/egl.h>
-#include <GLES2/gl2.h>
+#include <GLES/gl.h>
 
 namespace android {
 
@@ -166,7 +166,6 @@ private:
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
     status_t initTexture(FileMap* map, int* width, int* height);
     status_t initFont(Font* font, const char* fallback);
-    void initShaders();
     bool android();
     bool movie();
     void drawText(const char* str, const Font& font, bool bold, int* x, int* y);
@@ -174,7 +173,6 @@ private:
     void drawProgress(int percent, const Font& font, const int xPos, const int yPos);
     void fadeFrame(int frameLeft, int frameBottom, int frameWidth, int frameHeight,
                    const Animation::Part& part, int fadedFramesCount);
-    void drawTexturedQuad(float xStart, float yStart, float width, float height);
     bool validClock(const Animation::Part& part);
     Animation* loadAnimation(const String8&);
     bool playAnimation(const Animation&);
@@ -220,12 +218,6 @@ private:
     sp<TimeCheckThread> mTimeCheckThread = nullptr;
     sp<Callbacks> mCallbacks;
     Animation* mAnimation = nullptr;
-    GLuint mImageShader;
-    GLuint mTextShader;
-    GLuint mImageFadeLocation;
-    GLuint mImageTextureLocation;
-    GLuint mTextCropAreaLocation;
-    GLuint mTextTextureLocation;
 };
 
 // ---------------------------------------------------------------------------
