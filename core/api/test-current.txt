@@ -1037,7 +1037,7 @@ package android.os {
 
   public static class Build.VERSION {
     field public static final String[] ACTIVE_CODENAMES;
-    field public static final int FIRST_SDK_INT;
+    field public static final int DEVICE_INITIAL_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
   }
 
