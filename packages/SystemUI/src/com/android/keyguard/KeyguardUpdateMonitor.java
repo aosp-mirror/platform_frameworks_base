@@ -1058,9 +1058,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || isSimPinSecure());
     }
 
+    private boolean getIsFaceAuthenticated() {
+        boolean faceAuthenticated = false;
+        BiometricAuthenticated bioFaceAuthenticated = mUserFaceAuthenticated.get(getCurrentUser());
+        if (bioFaceAuthenticated != null) {
+            faceAuthenticated = bioFaceAuthenticated.mAuthenticated;
+        }
+        return faceAuthenticated;
+    }
+
     private void requireStrongAuthIfAllLockedOut() {
         final boolean faceLock =
-                mFaceLockedOutPermanent || !shouldListenForFace();
+                (mFaceLockedOutPermanent || !shouldListenForFace()) && !getIsFaceAuthenticated();
         final boolean fpLock =
                 mFingerprintLockedOutPermanent || !shouldListenForFingerprint(isUdfpsEnrolled());
 
@@ -2240,6 +2249,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             strongAuthAllowsScanning = false;
         }
 
+        // If the face has recently been authenticated do not attempt to authenticate again.
+        boolean faceAuthenticated = getIsFaceAuthenticated();
+
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen =
@@ -2248,7 +2260,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mBiometricEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
-                && (!mSecureCameraLaunched || mOccludingAppRequestingFace);
+                && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
+                && !faceAuthenticated;
 
         // Aggregate relevant fields for debug logging.
         if (DEBUG_FACE || DEBUG_SPEW) {
@@ -2269,7 +2282,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mLockIconPressed,
                     strongAuthAllowsScanning,
                     mIsPrimaryUser,
-                    mSecureCameraLaunched);
+                    mSecureCameraLaunched,
+                    faceAuthenticated);
             maybeLogFaceListenerModelData(model);
         }
 
