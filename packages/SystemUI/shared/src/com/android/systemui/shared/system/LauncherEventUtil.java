@@ -24,6 +24,5 @@ public class LauncherEventUtil {
 
     // Constants for the Target (View)
     public static final int RECENTS_SWIPE_UP_ONBOARDING_TIP = 0;
-    public static final int RECENTS_QUICK_SCRUB_ONBOARDING_TIP = 1;
 
 }
