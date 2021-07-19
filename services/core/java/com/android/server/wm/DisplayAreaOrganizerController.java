@@ -26,7 +26,6 @@ import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.IDisplayAreaOrganizer;
@@ -50,8 +49,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     final ActivityTaskManagerService mService;
     private final WindowManagerGlobalLock mGlobalLock;
-    private final HashMap<Integer, DisplayAreaOrganizerState> mOrganizersByFeatureIds =
-            new HashMap();
+    private final HashMap<Integer, IDisplayAreaOrganizer> mOrganizersByFeatureIds = new HashMap();
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         int mFeature;
@@ -65,38 +63,9 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                mOrganizersByFeatureIds.remove(mFeature).destroy();
+                mOrganizersByFeatureIds.remove(mFeature);
+                removeOrganizer(mOrganizer);
             }
-        }
-    }
-
-    private class DisplayAreaOrganizerState {
-        private final IDisplayAreaOrganizer mOrganizer;
-        private final DeathRecipient mDeathRecipient;
-
-        DisplayAreaOrganizerState(IDisplayAreaOrganizer organizer, int feature) {
-            mOrganizer = organizer;
-            mDeathRecipient = new DeathRecipient(organizer, feature);
-            try {
-                organizer.asBinder().linkToDeath(mDeathRecipient, 0);
-            } catch (RemoteException e) {
-                // Oh well...
-            }
-        }
-
-        void destroy() {
-            IBinder organizerBinder = mOrganizer.asBinder();
-            mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
-                if (da.mOrganizer != null && da.mOrganizer.asBinder().equals(organizerBinder)) {
-                    if (da.isTaskDisplayArea() && da.asTaskDisplayArea().mCreatedByOrganizer) {
-                        // Delete the organizer created TDA when unregister.
-                        deleteTaskDisplayArea(da.asTaskDisplayArea());
-                    } else {
-                        da.setOrganizer(null);
-                    }
-                }
-            });
-            organizerBinder.unlinkToDeath(mDeathRecipient, 0);
         }
     }
 
@@ -111,8 +80,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     @Nullable
     IDisplayAreaOrganizer getOrganizerByFeature(int featureId) {
-        final DisplayAreaOrganizerState state = mOrganizersByFeatureIds.get(featureId);
-        return state != null ? state.mOrganizer : null;
+        return mOrganizersByFeatureIds.get(featureId);
     }
 
     @Override
@@ -126,18 +94,17 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register display organizer=%s uid=%d",
                         organizer.asBinder(), uid);
                 if (mOrganizersByFeatureIds.get(feature) != null) {
-                    if (mOrganizersByFeatureIds.get(feature).mOrganizer.asBinder()
-                            .isBinderAlive()) {
-                        throw new IllegalStateException(
-                                "Replacing existing organizer currently unsupported");
-                    }
-
-                    mOrganizersByFeatureIds.remove(feature).destroy();
-                    Slog.d(TAG, "Replacing dead organizer for feature=" + feature);
+                    throw new IllegalStateException(
+                            "Replacing existing organizer currently unsupported");
                 }
 
-                final DisplayAreaOrganizerState state = new DisplayAreaOrganizerState(organizer,
-                        feature);
+                final DeathRecipient dr = new DeathRecipient(organizer, feature);
+                try {
+                    organizer.asBinder().linkToDeath(dr, 0);
+                } catch (RemoteException e) {
+                    // Oh well...
+                }
+
                 final List<DisplayAreaAppearedInfo> displayAreaInfos = new ArrayList<>();
                 mService.mRootWindowContainer.forAllDisplays(dc -> {
                     if (!dc.isTrusted()) {
@@ -153,7 +120,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                     });
                 });
 
-                mOrganizersByFeatureIds.put(feature, state);
+                mOrganizersByFeatureIds.put(feature, organizer);
                 return new ParceledListSlice<>(displayAreaInfos);
             }
         } finally {
@@ -170,11 +137,9 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Unregister display organizer=%s uid=%d",
                         organizer.asBinder(), uid);
-                mOrganizersByFeatureIds.values().forEach((state) -> {
-                    if (state.mOrganizer.asBinder() == organizer.asBinder()) {
-                        state.destroy();
-                    }
-                });
+                mOrganizersByFeatureIds.entrySet().removeIf(
+                        entry -> entry.getValue().asBinder() == organizer.asBinder());
+                removeOrganizer(organizer);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -225,15 +190,19 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                 }
 
                 final int taskDisplayAreaFeatureId = mNextTaskDisplayAreaFeatureId++;
-                final DisplayAreaOrganizerState state = new DisplayAreaOrganizerState(organizer,
-                        taskDisplayAreaFeatureId);
+                final DeathRecipient dr = new DeathRecipient(organizer, taskDisplayAreaFeatureId);
+                try {
+                    organizer.asBinder().linkToDeath(dr, 0);
+                } catch (RemoteException e) {
+                    // Oh well...
+                }
 
                 final TaskDisplayArea tda = parentRoot != null
                         ? createTaskDisplayArea(parentRoot, name, taskDisplayAreaFeatureId)
                         : createTaskDisplayArea(parentTda, name, taskDisplayAreaFeatureId);
                 final DisplayAreaAppearedInfo tdaInfo = organizeDisplayArea(organizer, tda,
                         "DisplayAreaOrganizerController.createTaskDisplayArea");
-                mOrganizersByFeatureIds.put(taskDisplayAreaFeatureId, state);
+                mOrganizersByFeatureIds.put(taskDisplayAreaFeatureId, organizer);
                 return tdaInfo;
             }
         } finally {
@@ -261,7 +230,8 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                                     + "TaskDisplayArea=" + taskDisplayArea);
                 }
 
-                mOrganizersByFeatureIds.remove(taskDisplayArea.mFeatureId).destroy();
+                mOrganizersByFeatureIds.remove(taskDisplayArea.mFeatureId);
+                deleteTaskDisplayArea(taskDisplayArea);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -281,10 +251,6 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     void onDisplayAreaVanished(IDisplayAreaOrganizer organizer, DisplayArea da) {
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "DisplayArea vanished name=%s", da.getName());
-        if (!organizer.asBinder().isBinderAlive()) {
-            Slog.d(TAG, "Organizer died before sending onDisplayAreaVanished");
-            return;
-        }
         try {
             organizer.onDisplayAreaVanished(da.getDisplayAreaInfo());
         } catch (RemoteException e) {
@@ -299,6 +265,20 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         } catch (RemoteException e) {
             // Oh well...
         }
+    }
+
+    private void removeOrganizer(IDisplayAreaOrganizer organizer) {
+        IBinder organizerBinder = organizer.asBinder();
+        mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
+            if (da.mOrganizer != null && da.mOrganizer.asBinder().equals(organizerBinder)) {
+                if (da.isTaskDisplayArea() && da.asTaskDisplayArea().mCreatedByOrganizer) {
+                    // Delete the organizer created TDA when unregister.
+                    deleteTaskDisplayArea(da.asTaskDisplayArea());
+                } else {
+                    da.setOrganizer(null);
+                }
+            }
+        });
     }
 
     private DisplayAreaAppearedInfo organizeDisplayArea(IDisplayAreaOrganizer organizer,
