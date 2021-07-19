@@ -4168,7 +4168,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(mCameraLaunchGestureVibrationEffect);
+        mVibrator.vibrate(mCameraLaunchGestureVibrationEffect, VIBRATION_ATTRIBUTES);
     }
 
     private static VibrationEffect getCameraGestureVibrationEffect(Vibrator vibrator,
