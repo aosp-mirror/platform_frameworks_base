@@ -361,8 +361,8 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final Completable.Int value = mInvoker.requestUpdateCursorAnchorInfo(cursorUpdateMode);
-        return Completable.getResultOrZero(value, TAG, "requestUpdateCursorAnchorInfo()",
+        final Completable.Int value = mInvoker.requestCursorUpdates(cursorUpdateMode);
+        return Completable.getResultOrZero(value, TAG, "requestCursorUpdates()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
     }
 

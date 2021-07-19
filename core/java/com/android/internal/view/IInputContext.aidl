@@ -78,7 +78,7 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
 
     void getSelectedText(int flags, ICharSequenceResultCallback callback);
 
-    void requestUpdateCursorAnchorInfo(int cursorUpdateMode, IIntResultCallback callback);
+    void requestCursorUpdates(int cursorUpdateMode, IIntResultCallback callback);
 
     void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
             IIntResultCallback callback);
