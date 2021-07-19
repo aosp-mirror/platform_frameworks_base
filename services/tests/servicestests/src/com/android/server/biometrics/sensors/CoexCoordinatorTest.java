@@ -154,4 +154,25 @@ public class CoexCoordinatorTest {
         verify(mCallback, never()).sendHapticFeedback();
         verify(mCallback, never()).sendAuthenticationResult(anyBoolean());
     }
+
+    @Test
+    public void testKeyguard_udfpsAuthSuccess_whileFaceScanning() {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
+        when(faceClient.isKeyguard()).thenReturn(true);
+
+        AuthenticationClient<?> udfpsClient = mock(AuthenticationClient.class,
+                withSettings().extraInterfaces(Udfps.class));
+        when(udfpsClient.isKeyguard()).thenReturn(true);
+        when(((Udfps) udfpsClient).isPointerDown()).thenReturn(true);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_UDFPS, udfpsClient);
+
+        mCoexCoordinator.onAuthenticationSucceeded(udfpsClient, mCallback);
+        verify(mCallback).sendHapticFeedback();
+        verify(mCallback).sendAuthenticationResult(eq(true));
+        verify(faceClient).cancel();
+    }
 }
