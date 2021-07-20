@@ -1620,6 +1620,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // TODO(193941146): Currently unregistering a receiver through BroadcastDispatcher is
+            // async, but we've already cleared the fields. Just return early in this case.
+            if (mNavigationBarView == null) {
+                return;
+            }
             String action = intent.getAction();
             if (Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
