@@ -43,6 +43,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     @BypassOverride private val bypassOverride: Int
     private var hasFaceFeature: Boolean
     private var pendingUnlock: PendingUnlock? = null
+    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
 
     @IntDef(
         FACE_UNLOCK_BYPASS_NO_OVERRIDE,

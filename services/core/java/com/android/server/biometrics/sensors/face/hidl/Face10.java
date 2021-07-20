@@ -355,7 +355,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public Face10(@NonNull Context context, @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         this(context, sensorProps, lockoutResetDispatcher,
-                new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */));
+                new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
+                        null /* gestureAvailabilityTracker */));
     }
 
     @Override

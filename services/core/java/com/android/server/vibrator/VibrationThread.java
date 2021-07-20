@@ -59,7 +59,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
      * Extra timeout added to the end of each vibration step to ensure it finishes even when
      * vibrator callbacks are lost.
      */
-    private static final long CALLBACKS_EXTRA_TIMEOUT = 100;
+    private static final long CALLBACKS_EXTRA_TIMEOUT = 1_000;
 
     /** Threshold to prevent the ramp off steps from trying to set extremely low amplitudes. */
     private static final float RAMP_OFF_AMPLITUDE_MIN = 1e-3f;
@@ -341,6 +341,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         private final PriorityQueue<Step> mNextSteps = new PriorityQueue<>();
         @GuardedBy("mLock")
         private final Queue<Step> mPendingOnVibratorCompleteSteps = new LinkedList<>();
+        @GuardedBy("mLock")
+        private final Queue<Integer> mNotifiedVibrators = new LinkedList<>();
 
         @GuardedBy("mLock")
         private int mPendingVibrateSteps;
@@ -348,6 +350,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         private int mConsumedStartVibrateSteps;
         @GuardedBy("mLock")
         private int mSuccessfulVibratorOnSteps;
+        @GuardedBy("mLock")
+        private boolean mWaitToProcessVibratorCallbacks;
 
         public void offer(@NonNull Step step) {
             synchronized (mLock) {
@@ -398,30 +402,122 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         /**
          * Play and remove the step at the top of this queue, and also adds the next steps generated
          * to be played next.
-         *
-         * @return the number of steps played
          */
         public void consumeNext() {
-            Step nextStep = pollNext();
-            if (nextStep != null) {
-                // This might turn on the vibrator and have a HAL latency. Execute this outside any
-                // lock to avoid blocking other interactions with the thread.
-                List<Step> nextSteps = nextStep.play();
-                synchronized (mLock) {
-                    if (nextStep.getVibratorOnDuration() > 0) {
-                        mSuccessfulVibratorOnSteps++;
+            // Vibrator callbacks should wait until the polled step is played and the next steps are
+            // added back to the queue, so they can handle the callback.
+            markWaitToProcessVibratorCallbacks();
+            try {
+                Step nextStep = pollNext();
+                if (nextStep != null) {
+                    // This might turn on the vibrator and have a HAL latency. Execute this outside
+                    // any lock to avoid blocking other interactions with the thread.
+                    List<Step> nextSteps = nextStep.play();
+                    synchronized (mLock) {
+                        if (nextStep.getVibratorOnDuration() > 0) {
+                            mSuccessfulVibratorOnSteps++;
+                        }
+                        if (nextStep instanceof StartVibrateStep) {
+                            mConsumedStartVibrateSteps++;
+                        }
+                        if (!nextStep.isCleanUp()) {
+                            mPendingVibrateSteps--;
+                        }
+                        for (int i = 0; i < nextSteps.size(); i++) {
+                            mPendingVibrateSteps += nextSteps.get(i).isCleanUp() ? 0 : 1;
+                        }
+                        mNextSteps.addAll(nextSteps);
                     }
-                    if (nextStep instanceof StartVibrateStep) {
-                        mConsumedStartVibrateSteps++;
-                    }
-                    if (!nextStep.isCleanUp()) {
-                        mPendingVibrateSteps--;
-                    }
-                    for (int i = 0; i < nextSteps.size(); i++) {
-                        mPendingVibrateSteps += nextSteps.get(i).isCleanUp() ? 0 : 1;
-                    }
-                    mNextSteps.addAll(nextSteps);
                 }
+            } finally {
+                synchronized (mLock) {
+                    processVibratorCallbacks();
+                }
+            }
+        }
+
+        /**
+         * Notify the vibrator completion.
+         *
+         * <p>This is a lightweight method that do not trigger any operation from {@link
+         * VibratorController}, so it can be called directly from a native callback.
+         */
+        @GuardedBy("mLock")
+        public void notifyVibratorComplete(int vibratorId) {
+            mNotifiedVibrators.offer(vibratorId);
+            if (!mWaitToProcessVibratorCallbacks) {
+                // No step is being played or cancelled now, process the callback right away.
+                processVibratorCallbacks();
+            }
+        }
+
+        /**
+         * Cancel the current queue, replacing all remaining steps with respective clean-up steps.
+         *
+         * <p>This will remove all steps and replace them with respective
+         * {@link Step#cancel()}.
+         */
+        public void cancel() {
+            // Vibrator callbacks should wait until all steps from the queue are properly cancelled
+            // and clean up steps are added back to the queue, so they can handle the callback.
+            markWaitToProcessVibratorCallbacks();
+            try {
+                List<Step> cleanUpSteps = new ArrayList<>();
+                Step step;
+                while ((step = pollNext()) != null) {
+                    cleanUpSteps.addAll(step.cancel());
+                }
+                synchronized (mLock) {
+                    // All steps generated by Step.cancel() should be clean-up steps.
+                    mPendingVibrateSteps = 0;
+                    mNextSteps.addAll(cleanUpSteps);
+                }
+            } finally {
+                synchronized (mLock) {
+                    processVibratorCallbacks();
+                }
+            }
+        }
+
+        /**
+         * Cancel the current queue immediately, clearing all remaining steps and skipping clean-up.
+         *
+         * <p>This will remove and trigger {@link Step#cancelImmediately()} in all steps, in order.
+         */
+        public void cancelImmediately() {
+            // Vibrator callbacks should wait until all steps from the queue are properly cancelled.
+            markWaitToProcessVibratorCallbacks();
+            try {
+                Step step;
+                while ((step = pollNext()) != null) {
+                    // This might turn off the vibrator and have a HAL latency. Execute this outside
+                    // any lock to avoid blocking other interactions with the thread.
+                    step.cancelImmediately();
+                }
+                synchronized (mLock) {
+                    mPendingVibrateSteps = 0;
+                }
+            } finally {
+                synchronized (mLock) {
+                    processVibratorCallbacks();
+                }
+            }
+        }
+
+        @Nullable
+        private Step pollNext() {
+            synchronized (mLock) {
+                // Prioritize the steps anticipated by a vibrator complete callback.
+                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                    return mPendingOnVibratorCompleteSteps.poll();
+                }
+                return mNextSteps.poll();
+            }
+        }
+
+        private void markWaitToProcessVibratorCallbacks() {
+            synchronized (mLock) {
+                mWaitToProcessVibratorCallbacks = true;
             }
         }
 
@@ -436,62 +532,19 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
          * first step found will be anticipated by this method, in no particular order.
          */
         @GuardedBy("mLock")
-        public void notifyVibratorComplete(int vibratorId) {
-            Iterator<Step> it = mNextSteps.iterator();
-            while (it.hasNext()) {
-                Step step = it.next();
-                if (step.shouldPlayWhenVibratorComplete(vibratorId)) {
-                    it.remove();
-                    mPendingOnVibratorCompleteSteps.offer(step);
-                    break;
+        private void processVibratorCallbacks() {
+            mWaitToProcessVibratorCallbacks = false;
+            while (!mNotifiedVibrators.isEmpty()) {
+                int vibratorId = mNotifiedVibrators.poll();
+                Iterator<Step> it = mNextSteps.iterator();
+                while (it.hasNext()) {
+                    Step step = it.next();
+                    if (step.shouldPlayWhenVibratorComplete(vibratorId)) {
+                        it.remove();
+                        mPendingOnVibratorCompleteSteps.offer(step);
+                        break;
+                    }
                 }
-            }
-        }
-
-        /**
-         * Cancel the current queue, replacing all remaining steps with respective clean-up steps.
-         *
-         * <p>This will remove all steps and replace them with respective
-         * {@link Step#cancel()}.
-         */
-        public void cancel() {
-            List<Step> cleanUpSteps = new ArrayList<>();
-            Step step;
-            while ((step = pollNext()) != null) {
-                cleanUpSteps.addAll(step.cancel());
-            }
-            synchronized (mLock) {
-                // All steps generated by Step.cancel() should be clean-up steps.
-                mPendingVibrateSteps = 0;
-                mNextSteps.addAll(cleanUpSteps);
-            }
-        }
-
-        /**
-         * Cancel the current queue immediately, clearing all remaining steps and skipping clean-up.
-         *
-         * <p>This will remove and trigger {@link Step#cancelImmediately()} in all steps, in order.
-         */
-        public void cancelImmediately() {
-            Step step;
-            while ((step = pollNext()) != null) {
-                // This might turn off the vibrator and have a HAL latency. Execute this outside
-                // any lock to avoid blocking other interactions with the thread.
-                step.cancelImmediately();
-            }
-            synchronized (mLock) {
-                mPendingVibrateSteps = 0;
-            }
-        }
-
-        @Nullable
-        private Step pollNext() {
-            synchronized (mLock) {
-                // Prioritize the steps anticipated by a vibrator complete callback.
-                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
-                    return mPendingOnVibratorCompleteSteps.poll();
-                }
-                return mNextSteps.poll();
             }
         }
     }
@@ -894,9 +947,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 // Vibration was not started, so just skip the played segments and keep timings.
                 return skipToNextSteps(segmentsPlayed);
             }
-            long nextVibratorOffTimeout =
-                    SystemClock.uptimeMillis() + mVibratorOnResult + CALLBACKS_EXTRA_TIMEOUT;
-            return nextSteps(nextVibratorOffTimeout, nextVibratorOffTimeout, segmentsPlayed);
+            long nextStartTime = SystemClock.uptimeMillis() + mVibratorOnResult;
+            long nextVibratorOffTimeout = nextStartTime + CALLBACKS_EXTRA_TIMEOUT;
+            return nextSteps(nextStartTime, nextVibratorOffTimeout, segmentsPlayed);
         }
 
         /**
