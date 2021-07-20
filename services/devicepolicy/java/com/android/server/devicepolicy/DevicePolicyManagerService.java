@@ -4567,7 +4567,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle,
             boolean deviceWideOnly) {
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle)
+                && (isSystemUid(caller) || hasCallingOrSelfPermission(
+                permission.SET_INITIAL_LOCK)));
         return getPasswordMinimumMetricsUnchecked(userHandle, deviceWideOnly);
     }
 
