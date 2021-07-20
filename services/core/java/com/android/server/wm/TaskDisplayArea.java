@@ -800,10 +800,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             }
             return SCREEN_ORIENTATION_UNSPECIFIED;
         } else {
-            // Apps and their containers are not allowed to specify an orientation of full screen
-            // tasks created by organizer. The organizer handles the orientation instead.
-            final Task task = getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
-            if (task != null && task.isVisible() && task.mCreatedByOrganizer) {
+            // Apps and their containers are not allowed to specify an orientation of non floating
+            // visible tasks created by organizer. The organizer handles the orientation instead.
+            final Task nonFloatingTopTask =
+                    getRootTask(t -> !t.getWindowConfiguration().tasksAreFloating());
+            if (nonFloatingTopTask != null && nonFloatingTopTask.mCreatedByOrganizer
+                    && nonFloatingTopTask.isVisible()) {
                 return SCREEN_ORIENTATION_UNSPECIFIED;
             }
         }
