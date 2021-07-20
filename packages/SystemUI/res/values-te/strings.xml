@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"పరికరం"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"యాప్‌లను మార్చడం కోసం ఎగువకు స్వైప్ చేయండి"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"యాప్‌లను శీఘ్రంగా స్విచ్ చేయడానికి కుడి వైపుకు లాగండి"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ఛార్జ్ చేయబడింది"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ఛార్జ్ అవుతోంది"</string>

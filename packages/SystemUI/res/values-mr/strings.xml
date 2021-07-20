@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"हे तुमचा कॅमेरा वापरण्याची परवानगी असलेल्या सर्व ॲप्स आणि सेवांसाठी अ‍ॅक्सेस अनब्लॉक करते."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"हे तुमचा कॅमेरा आणि मायक्रोफोन वापरण्याची परवानगी असलेल्या सर्व ॲप्स व सेवांसाठी अ‍ॅक्सेस अनब्लॉक करते."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"डिव्हाइस"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"अ‍ॅप्स स्विच करण्यासाठी वर स्वाइप करा"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"अ‍ॅप्स वर झटपट स्विच करण्यासाठी उजवीकडे ड्रॅग करा"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"अवलोकन टॉगल करा."</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज झाली"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज होत आहे"</string>
