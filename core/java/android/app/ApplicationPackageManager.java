@@ -1057,7 +1057,7 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         try {
             int uid = mPM.getUidForSharedUser(sharedUserName);
-            if(uid != -1) {
+            if (uid != Process.INVALID_UID) {
                 return uid;
             }
         } catch (RemoteException e) {
