@@ -2110,11 +2110,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 continue;
             }
             if (!running.isReady()) {
-                // If a restricted job doesn't have dynamic constraints satisfied, assume that's
-                // the reason the job is being stopped, instead of because of other constraints
-                // not being satisfied.
                 if (running.getEffectiveStandbyBucket() == RESTRICTED_INDEX
-                        && !running.areDynamicConstraintsSatisfied()) {
+                        && running.getStopReason() == JobParameters.STOP_REASON_APP_STANDBY) {
                     serviceContext.cancelExecutingJobLocked(
                             running.getStopReason(),
                             JobParameters.INTERNAL_STOP_REASON_RESTRICTED_BUCKET,
