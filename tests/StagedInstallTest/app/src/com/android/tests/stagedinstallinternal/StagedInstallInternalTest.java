@@ -196,6 +196,47 @@ public class StagedInstallInternalTest {
     }
 
     @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback_Prepare() throws Exception {
+        int sessionId = Install.single(TestApp.Apex2).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback_Commit() throws Exception {
+        // Verify apex installed during preparation was successful
+        int sessionId = retrieveLastSessionId();
+        assertSessionApplied(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(2);
+        // Commit a new staged session
+        sessionId = Install.single(TestApp.Apex3).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback_VerifyPostReboot() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        assertSessionFailed(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(2);
+    }
+
+    @Test
+    public void testApexIsNotActivatedIfNotInCheckpointMode_Commit() throws Exception {
+        int sessionId = Install.single(TestApp.Apex2).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+    }
+
+    @Test
+    public void testApexIsNotActivatedIfNotInCheckpointMode_VerifyPostReboot() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        assertSessionFailed(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+    }
+
+    @Test
     public void testRebootlessUpdates() throws Exception {
         InstallUtils.dropShellPermissionIdentity();
         InstallUtils.adoptShellPermissionIdentity(Manifest.permission.INSTALL_PACKAGE_UPDATES);
@@ -255,6 +296,18 @@ public class StagedInstallInternalTest {
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
         }
+    }
+
+    private static void assertSessionApplied(int sessionId) {
+        assertSessionState(sessionId, (session) -> {
+            assertThat(session.isStagedSessionApplied()).isTrue();
+        });
+    }
+
+    private static void assertSessionFailed(int sessionId) {
+        assertSessionState(sessionId, (session) -> {
+            assertThat(session.isStagedSessionFailed()).isTrue();
+        });
     }
 
     private static void assertSessionFailedWithMessage(int sessionId, String msg) {
