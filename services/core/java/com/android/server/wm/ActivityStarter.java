@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.START_ABORTED;
@@ -2717,6 +2718,31 @@ class ActivityStarter {
         mIntentDelivered = true;
     }
 
+    /**
+     * Return {@code true} if the {@param task} has child {@code TaskFragment}s and the
+     * {@param activity} can be embedded in. Otherwise, return {@code false}
+     */
+    private boolean canActivityBeEmbedded(@NonNull ActivityRecord activity, @NonNull Task task) {
+        if (task.isLeafTaskFragment()) {
+            return false;
+        }
+
+        final int taskUid = task.effectiveUid;
+        // Allowing the activity be embedded into leaf TaskFragment if the task is owned by system.
+        if (taskUid == Process.SYSTEM_UID) {
+            return true;
+        }
+
+        // Allowing embedding if the task is owned by an app that has the ACTIVITY_EMBEDDING
+        // permission
+        if (mService.checkPermission(ACTIVITY_EMBEDDING, -1, taskUid) == PERMISSION_GRANTED) {
+            return true;
+        }
+
+        // Allowing embedding if the activity is from the same app that owned the task
+        return activity.isUid(taskUid);
+    }
+
     private void addOrReparentStartingActivity(@NonNull Task task, String reason) {
         TaskFragment newParent = task;
         if (mInTaskFragment != null) {
@@ -2728,7 +2754,12 @@ class ActivityStarter {
             } else {
                 newParent = mInTaskFragment;
             }
+        } else if (canActivityBeEmbedded(mStartActivity, task)) {
+            // Use the child TaskFragment (if any) as the new parent if the activity can be embedded
+            final ActivityRecord top = task.topRunningActivity();
+            newParent = top != null ? top.getTaskFragment() : task;
         }
+
         if (mStartActivity.getTaskFragment() == null
                 || mStartActivity.getTaskFragment() == newParent) {
             newParent.addChild(mStartActivity, POSITION_TOP);
