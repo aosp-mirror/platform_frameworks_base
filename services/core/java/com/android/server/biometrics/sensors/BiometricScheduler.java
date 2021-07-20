@@ -359,7 +359,8 @@ public class BiometricScheduler {
      * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
      *                                      (such as fingerprint swipe).
      */
-    public BiometricScheduler(@NonNull String tag, @SensorType int sensorType,
+    public BiometricScheduler(@NonNull String tag,
+            @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         this(tag, sensorType, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
                 ServiceManager.getService(Context.BIOMETRIC_SERVICE)), LOG_NUM_RECENT_OPERATIONS,
