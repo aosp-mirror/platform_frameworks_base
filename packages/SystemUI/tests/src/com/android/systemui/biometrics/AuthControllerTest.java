@@ -20,9 +20,7 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -50,12 +48,14 @@ import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
@@ -110,6 +110,10 @@ public class AuthControllerTest extends SysuiTestCase {
     private UdfpsController mUdfpsController;
     @Mock
     private SidefpsController mSidefpsController;
+    @Mock
+    private DisplayManager mDisplayManager;
+    @Mock
+    private Handler mHandler;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
 
@@ -544,13 +548,12 @@ public class AuthControllerTest extends SysuiTestCase {
 
     @Test
     public void testSubscribesToOrientationChangesWhenShowingDialog() {
-        assertFalse(mAuthController.mOrientationListener.getEnabled());
-
         showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
-        assertTrue(mAuthController.mOrientationListener.getEnabled());
+
+        verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler));
 
         mAuthController.hideAuthenticationDialog();
-        assertFalse(mAuthController.mOrientationListener.getEnabled());
+        verify(mDisplayManager).unregisterDisplayListener(any());
     }
 
     // Helpers
@@ -603,7 +606,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 Provider<SidefpsController> sidefpsControllerFactory) {
             super(context, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
-                    sidefpsControllerFactory);
+                    sidefpsControllerFactory, mDisplayManager, mHandler);
         }
 
         @Override

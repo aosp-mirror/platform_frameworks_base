@@ -37,6 +37,7 @@ import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
@@ -57,6 +58,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.ui.DisplayUtils;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -423,7 +425,9 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory,
-            Provider<SidefpsController> sidefpsControllerFactory) {
+            Provider<SidefpsController> sidefpsControllerFactory,
+            @NonNull DisplayManager displayManager,
+            @Main Handler handler) {
         super(context);
         mCommandQueue = commandQueue;
         mActivityTaskManager = activityTaskManager;
@@ -432,10 +436,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mUdfpsControllerFactory = udfpsControllerFactory;
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
-        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
-            onOrientationChanged();
-            return Unit.INSTANCE;
-        });
+        mOrientationListener = new BiometricOrientationEventListener(context,
+                () -> {
+                    onOrientationChanged();
+                    return Unit.INSTANCE;
+                },
+                displayManager,
+                handler);
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 

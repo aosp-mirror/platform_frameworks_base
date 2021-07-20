@@ -17,8 +17,6 @@
 package com.android.systemui.biometrics;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -33,11 +31,13 @@ import static org.mockito.Mockito.when;
 import android.content.res.TypedArray;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Vibrator;
@@ -139,6 +139,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private DisplayManager mDisplayManager;
+    @Mock
+    private Handler mHandler;
 
     private FakeExecutor mFgExecutor;
 
@@ -208,7 +212,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUdfpsHapticsSimulator,
                 Optional.of(mHbmProvider),
                 mKeyguardStateController,
-                mKeyguardBypassController);
+                mKeyguardBypassController,
+                mDisplayManager,
+                mHandler);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -324,18 +330,16 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
-        assertFalse(mUdfpsController.mOrientationListener.getEnabled());
-
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
-        assertTrue(mUdfpsController.mOrientationListener.getEnabled());
+        verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler));
 
         mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
 
-        assertFalse(mUdfpsController.mOrientationListener.getEnabled());
+        verify(mDisplayManager).unregisterDisplayListener(any());
     }
 
     @Test
