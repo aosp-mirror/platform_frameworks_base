@@ -3289,22 +3289,22 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Determines whether a String Bluetooth address, such as "00:43:A8:23:10:F0"
+     * Determines whether a String Bluetooth address, such as "F0:43:A8:23:10:00"
      * is a RANDOM STATIC address.
      *
-     * RANDOM STATIC: (addr & 0b11) == 0b11
-     * RANDOM RESOLVABLE: (addr & 0b11) == 0b10
-     * RANDOM non-RESOLVABLE: (addr & 0b11) == 0b00
+     * RANDOM STATIC: (addr & 0xC0) == 0xC0
+     * RANDOM RESOLVABLE: (addr &  0xC0) == 0x40
+     * RANDOM non-RESOLVABLE: (addr &  0xC0) == 0x00
      *
      * @param address Bluetooth address as string
-     * @return true if the 2 Least Significant Bits of the address equals 0b11.
+     * @return true if the 2 Most Significant Bits of the address equals 0xC0.
      *
      * @hide
      */
     public static boolean isAddressRandomStatic(@NonNull String address) {
         requireNonNull(address);
         return checkBluetoothAddress(address)
-                && (Integer.parseInt(address.split(":")[5], 16) & 0b11) == 0b11;
+                && (Integer.parseInt(address.split(":")[0], 16) & 0xC0) == 0xC0;
     }
 
     @UnsupportedAppUsage
