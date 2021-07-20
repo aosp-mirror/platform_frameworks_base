@@ -2151,7 +2151,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     rootTask.setLastRecentsAnimationTransaction(
                             task.mLastRecentsAnimationTransaction,
                             task.mLastRecentsAnimationOverlay);
-                    task.clearLastRecentsAnimationTransaction();
+                    task.clearLastRecentsAnimationTransaction(false /* forceRemoveOverlay */);
                 }
 
                 // There are multiple activities in the task and moving the top activity should
