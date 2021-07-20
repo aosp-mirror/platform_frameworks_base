@@ -619,10 +619,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
         }
 
-        if (!mService.isPowerStandbyOrTransient()) {
-            addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
-                    activeSource.physicalAddress, deviceType));
-        }
+        addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
+                activeSource.physicalAddress, deviceType));
     }
 
     private boolean handleNewDeviceAtTheTailOfActivePath(int path) {
@@ -798,14 +796,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
-        if (!mService.isPowerStandbyOrTransient()) {
-            addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-            if (!isDirectConnectAddress(avr.getPhysicalAddress())) {
-                startArcAction(false);
-            } else if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
-                    && !hasAction(SetArcTransmissionStateAction.class)) {
-                startArcAction(true);
-            }
+        addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
+        if (!isDirectConnectAddress(avr.getPhysicalAddress())) {
+            startArcAction(false);
+        } else if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
+                && !hasAction(SetArcTransmissionStateAction.class)) {
+            startArcAction(true);
         }
     }
 
