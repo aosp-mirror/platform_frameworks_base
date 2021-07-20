@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlags
@@ -87,6 +88,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var privacyDialogController: PrivacyDialogController
     @Mock
+    private lateinit var batteryMeterViewController: BatteryMeterViewController
+    @Mock
     private lateinit var clock: Clock
     @Mock
     private lateinit var mockView: View
@@ -133,6 +136,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 colorExtractor,
                 privacyDialogController,
                 qsExpansionPathInterpolator,
+                batteryMeterViewController,
                 featureFlags
         )
     }

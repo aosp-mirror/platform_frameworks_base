@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -50,6 +51,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final UserInfoController mUserInfoController;
     private final StatusBarIconController mStatusBarIconController;
     private final StatusBarIconController.TintedIconManager.Factory mTintedIconManagerFactory;
+    private final BatteryMeterViewController mBatteryMeterViewController;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -115,7 +117,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             BatteryController batteryController,
             UserInfoController userInfoController,
             StatusBarIconController statusBarIconController,
-            StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory) {
+            StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory,
+            BatteryMeterViewController batteryMeterViewController) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
@@ -124,6 +127,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mUserInfoController = userInfoController;
         mStatusBarIconController = statusBarIconController;
         mTintedIconManagerFactory = tintedIconManagerFactory;
+        mBatteryMeterViewController = batteryMeterViewController;
 
         Resources r = getResources();
         mBlockedIcons = Collections.unmodifiableList(Arrays.asList(
@@ -136,6 +140,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     protected void onInit() {
         super.onInit();
         mCarrierTextController.init();
+        mBatteryMeterViewController.init();
     }
 
     @Override
