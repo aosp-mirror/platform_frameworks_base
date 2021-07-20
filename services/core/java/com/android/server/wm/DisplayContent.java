@@ -1901,7 +1901,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
             }, true /* traverseTopToBottom */);
-            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction);
+            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
         }
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
