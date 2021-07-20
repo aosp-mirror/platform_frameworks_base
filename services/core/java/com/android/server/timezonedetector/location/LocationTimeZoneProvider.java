@@ -48,6 +48,10 @@ import com.android.server.timezonedetector.ReferenceWithHistory;
 import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 import com.android.server.timezonedetector.location.ThreadingDomain.SingleRunnableQueue;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,34 +105,36 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                 value = { PROVIDER_STATE_UNKNOWN, PROVIDER_STATE_STARTED_INITIALIZING,
                 PROVIDER_STATE_STARTED_CERTAIN, PROVIDER_STATE_STARTED_UNCERTAIN,
                 PROVIDER_STATE_STOPPED, PROVIDER_STATE_PERM_FAILED, PROVIDER_STATE_DESTROYED })
+        @Retention(RetentionPolicy.SOURCE)
+        @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
         @interface ProviderStateEnum {}
 
         /**
          * Uninitialized value. Must not be used afte {@link LocationTimeZoneProvider#initialize}.
          */
-        static final int PROVIDER_STATE_UNKNOWN = 0;
+        static final @ProviderStateEnum int PROVIDER_STATE_UNKNOWN = 0;
 
         /**
          * The provider is started and has not reported its first event.
          */
-        static final int PROVIDER_STATE_STARTED_INITIALIZING = 1;
+        static final @ProviderStateEnum int PROVIDER_STATE_STARTED_INITIALIZING = 1;
 
         /**
          * The provider is started and most recently reported a "suggestion" event.
          */
-        static final int PROVIDER_STATE_STARTED_CERTAIN = 2;
+        static final @ProviderStateEnum int PROVIDER_STATE_STARTED_CERTAIN = 2;
 
         /**
          * The provider is started and most recently reported an "uncertain" event.
          */
-        static final int PROVIDER_STATE_STARTED_UNCERTAIN = 3;
+        static final @ProviderStateEnum int PROVIDER_STATE_STARTED_UNCERTAIN = 3;
 
         /**
          * The provider is stopped.
          *
          * This is the state after {@link #initialize} is called.
          */
-        static final int PROVIDER_STATE_STOPPED = 4;
+        static final @ProviderStateEnum int PROVIDER_STATE_STOPPED = 4;
 
         /**
          * The provider has failed and cannot be restarted. This is a terminated state triggered by
@@ -136,16 +142,16 @@ abstract class LocationTimeZoneProvider implements Dumpable {
          *
          * Providers may enter this state any time after a provider is started.
          */
-        static final int PROVIDER_STATE_PERM_FAILED = 5;
+        static final @ProviderStateEnum int PROVIDER_STATE_PERM_FAILED = 5;
 
         /**
          * The provider has been destroyed by the controller and cannot be restarted. Similar to
          * {@link #PROVIDER_STATE_PERM_FAILED} except that a provider is set into this state.
          */
-        static final int PROVIDER_STATE_DESTROYED = 6;
+        static final @ProviderStateEnum int PROVIDER_STATE_DESTROYED = 6;
 
         /** The {@link LocationTimeZoneProvider} the state is for. */
-        public final @NonNull LocationTimeZoneProvider provider;
+        @NonNull public final LocationTimeZoneProvider provider;
 
         /** The state enum value of the current state. */
         public final @ProviderStateEnum int stateEnum;

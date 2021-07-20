@@ -28,8 +28,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
@@ -63,6 +65,7 @@ public final class ServerFlags {
             KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
             KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
     })
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     @Retention(RetentionPolicy.SOURCE)
     @interface DeviceConfigKey {}
 
@@ -72,40 +75,39 @@ public final class ServerFlags {
      * {@link ServiceConfigAccessor#isGeoTimeZoneDetectionFeatureSupportedInConfig()} and {@link
      * ServiceConfigAccessor#isGeoTimeZoneDetectionFeatureSupported()}.
      */
-    @DeviceConfigKey
-    public static final String KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED =
+    public static final @DeviceConfigKey String KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED =
             "location_time_zone_detection_feature_supported";
 
     /**
      * The key for the server flag that can override the device config for whether the primary
      * location time zone provider is enabled, disabled, or (for testing) in simulation mode.
      */
-    @DeviceConfigKey
-    public static final String KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
+    public static final @DeviceConfigKey String
+            KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
             "primary_location_time_zone_provider_mode_override";
 
     /**
      * The key for the server flag that can override the device config for whether the secondary
      * location time zone provider is enabled or disabled, or (for testing) in simulation mode.
      */
-    @DeviceConfigKey
-    public static final String KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
+    public static final @DeviceConfigKey String
+            KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
             "secondary_location_time_zone_provider_mode_override";
 
     /**
      * The key for the minimum delay after location time zone detection has been enabled before the
      * location time zone manager can report it is uncertain about the time zone.
      */
-    @DeviceConfigKey
-    public static final String KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS =
+    public static final @DeviceConfigKey String
+            KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS =
             "location_time_zone_detection_uncertainty_delay_millis";
 
     /**
      * The key for the timeout passed to a location time zone provider that tells it how long it has
      * to provide an explicit first suggestion without being declared uncertain.
      */
-    @DeviceConfigKey
-    public static final String KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS =
+    public static final @DeviceConfigKey String
+            KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS =
             "ltpz_init_timeout_millis";
 
     /**
@@ -113,8 +115,8 @@ public final class ServerFlags {
      * #KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS} by the location time zone
      * manager before the location time zone provider will actually be declared uncertain.
      */
-    @DeviceConfigKey
-    public static final String KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS =
+    public static final @DeviceConfigKey String
+            KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS =
             "ltpz_init_timeout_fuzz_millis";
 
     /**
@@ -123,16 +125,16 @@ public final class ServerFlags {
      * disable the feature by turning off the master location switch, or by disabling automatic time
      * zone detection.
      */
-    @DeviceConfigKey
-    public static final String KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE =
+    public static final @DeviceConfigKey String
+            KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE =
             "location_time_zone_detection_setting_enabled_override";
 
     /**
      * The key for the default value used to determine whether location time zone detection is
      * enabled when the user hasn't explicitly set it yet.
      */
-    @DeviceConfigKey
-    public static final String KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT =
+    public static final @DeviceConfigKey String
+            KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT =
             "location_time_zone_detection_setting_enabled_default";
 
     /**
@@ -140,16 +142,14 @@ public final class ServerFlags {
      * of strings that will be passed to {@link TimeDetectorStrategy#stringToOrigin(String)}.
      * All values must be recognized or the override value will be ignored.
      */
-    @DeviceConfigKey
-    public static final String KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE =
+    public static final @DeviceConfigKey String KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE =
             "time_detector_origin_priorities_override";
 
     /**
      * The key to override the time detector lower bound configuration. The values is the number of
      * milliseconds since the beginning of the Unix epoch.
      */
-    @DeviceConfigKey
-    public static final String KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE =
+    public static final @DeviceConfigKey String KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE =
             "time_detector_lower_bound_millis_override";
 
     @GuardedBy("mListeners")
