@@ -83,7 +83,6 @@ import com.android.systemui.navigationbar.gestural.FloatingRotationButton;
 import com.android.systemui.navigationbar.gestural.RegionSamplingHelper;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -166,7 +165,6 @@ public class NavigationBarView extends FrameLayout implements
     private Configuration mTmpLastConfiguration;
 
     private NavigationBarInflaterView mNavigationInflaterView;
-    private RecentsOnboarding mRecentsOnboarding;
     private Optional<Recents> mRecentsOptional = Optional.empty();
     private NotificationPanelViewController mPanelView;
     private RotationContextButton mRotationContextButton;
@@ -335,7 +333,6 @@ public class NavigationBarView extends FrameLayout implements
         updateRotationButton();
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -713,7 +710,6 @@ public class NavigationBarView extends FrameLayout implements
 
         updateNavButtonIcons();
         updateSlippery();
-        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
         updateDisabledSystemUiStateFlags();
     }
 
@@ -889,7 +885,6 @@ public class NavigationBarView extends FrameLayout implements
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
-        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
         WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(!showSwipeUpUI);
         getHomeButton().setAccessibilityDelegate(
                 showSwipeUpUI ? mQuickStepAccessibilityDelegate : null);
@@ -933,7 +928,6 @@ public class NavigationBarView extends FrameLayout implements
         mNavBarMode = mode;
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
         mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
-        mRecentsOnboarding.onNavigationModeChanged(mNavBarMode);
         updateRotationButton();
 
         if (isGesturalMode(mNavBarMode)) {
@@ -947,10 +941,6 @@ public class NavigationBarView extends FrameLayout implements
         mLongClickableAccessibilityButton = longClickable;
         getAccessibilityButton().setLongClickable(longClickable);
         mContextualButtonGroup.setButtonVisibility(R.id.accessibility_button, visible);
-    }
-
-    void hideRecentsOnboarding() {
-        mRecentsOnboarding.hide(true);
     }
 
     @Override
@@ -997,7 +987,6 @@ public class NavigationBarView extends FrameLayout implements
         super.onLayout(changed, left, top, right, bottom);
 
         notifyActiveTouchRegions();
-        mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
 
     /**
@@ -1213,7 +1202,6 @@ public class NavigationBarView extends FrameLayout implements
         updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
         mEdgeBackGestureHandler.onConfigurationChanged(mConfiguration);
-        mRecentsOnboarding.onConfigurationChanged(mConfiguration);
         if (uiCarModeChanged || mTmpLastConfiguration.densityDpi != mConfiguration.densityDpi
                 || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
@@ -1277,7 +1265,6 @@ public class NavigationBarView extends FrameLayout implements
         requestApplyInsets();
         reorient();
         onNavigationModeChanged(mNavBarMode);
-        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
         if (mRotationButtonController != null) {
             mRotationButtonController.registerListeners();
         }
@@ -1293,7 +1280,6 @@ public class NavigationBarView extends FrameLayout implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(NavigationModeController.class).removeListener(this);
-        setUpSwipeUpOnboarding(false);
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();
         }
@@ -1308,14 +1294,6 @@ public class NavigationBarView extends FrameLayout implements
         mEdgeBackGestureHandler.onNavBarDetached();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mOnComputeInternalInsetsListener);
-    }
-
-    private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {
-        if (connectedToOverviewProxy) {
-            mRecentsOnboarding.onConnectedToLauncher();
-        } else {
-            mRecentsOnboarding.onDisconnectedFromLauncher();
-        }
     }
 
     public void dump(PrintWriter pw) {
@@ -1361,7 +1339,6 @@ public class NavigationBarView extends FrameLayout implements
         }
         mBarTransitions.dump(pw);
         mContextualButtonGroup.dump(pw);
-        mRecentsOnboarding.dump(pw);
         mRegionSamplingHelper.dump(pw);
         mEdgeBackGestureHandler.dump(pw);
     }

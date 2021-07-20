@@ -1027,10 +1027,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     // Returns true if the bar mode is changed.
     private boolean updateBarMode(int barMode) {
         if (mNavigationBarMode != barMode) {
-            if (mNavigationBarMode == MODE_TRANSPARENT
-                    || mNavigationBarMode == MODE_LIGHTS_OUT_TRANSPARENT) {
-                mNavigationBarView.hideRecentsOnboarding();
-            }
             mNavigationBarMode = barMode;
             checkNavBarModes();
             if (mAutoHideController != null) {
