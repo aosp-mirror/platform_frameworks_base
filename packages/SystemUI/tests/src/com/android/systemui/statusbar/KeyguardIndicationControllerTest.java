@@ -154,6 +154,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
     @Captor
     private ArgumentCaptor<KeyguardIndication> mKeyguardIndicationCaptor;
+    @Captor
+    private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
+    private KeyguardStateController.Callback mKeyguardStateControllerCallback;
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private BroadcastReceiver mBroadcastReceiver;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
@@ -223,6 +226,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.mRotateTextViewController = mRotateTextViewController;
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         clearInvocations(mIBatteryStats);
+
+        verify(mKeyguardStateController).addCallback(
+                mKeyguardStateControllerCallbackCaptor.capture());
+        mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
     }
 
     @Test
@@ -529,7 +536,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         reset(mKeyguardUpdateMonitor);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        mController.onUnlockedChanged();
+        mKeyguardStateControllerCallback.onUnlockedChanged();
         verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
     }
 
@@ -572,7 +579,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void updateMonitor_listener() {
         createController();
-        verify(mKeyguardStateController).addCallback(eq(mController));
+        verify(mKeyguardStateController).addCallback(any());
         verify(mKeyguardUpdateMonitor, times(2)).registerCallback(any());
     }
 
