@@ -141,6 +141,7 @@ public class CoexCoordinator {
             } else {
                 // Multi sensor authentication
                 AuthenticationClient<?> udfps = mClientMap.getOrDefault(SENSOR_TYPE_UDFPS, null);
+                AuthenticationClient<?> face = mClientMap.getOrDefault(SENSOR_TYPE_FACE, null);
                 if (isCurrentFaceAuth(client)) {
                     if (isPointerDown(udfps)) {
                         // Face auth success while UDFPS pointer down. No callback, no haptic.
@@ -149,6 +150,14 @@ public class CoexCoordinator {
                         callback.sendHapticFeedback();
                         callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
                     }
+                } else if (isCurrentUdfps(client)) {
+                    if (isFaceScanning()) {
+                        // UDFPS succeeds while face is still scanning
+                        // Cancel face auth and/or prevent it from invoking haptics/callbacks after
+                        face.cancel();
+                    }
+                    callback.sendHapticFeedback();
+                    callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
                 }
             }
         } else {
@@ -175,7 +184,15 @@ public class CoexCoordinator {
         return client == mClientMap.getOrDefault(SENSOR_TYPE_FACE, null);
     }
 
-    private boolean isPointerDown(@Nullable AuthenticationClient<?> client) {
+    private boolean isCurrentUdfps(@NonNull AuthenticationClient<?> client) {
+        return client == mClientMap.getOrDefault(SENSOR_TYPE_UDFPS, null);
+    }
+
+    private boolean isFaceScanning() {
+        return mClientMap.containsKey(SENSOR_TYPE_FACE);
+    }
+
+    private static boolean isPointerDown(@Nullable AuthenticationClient<?> client) {
         if (client instanceof Udfps) {
             return ((Udfps) client).isPointerDown();
         }
