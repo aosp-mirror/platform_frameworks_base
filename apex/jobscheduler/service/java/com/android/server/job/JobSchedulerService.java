@@ -1712,6 +1712,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         return false;
     }
 
+    /** Return {@code true} if the specified job is currently executing. */
+    @GuardedBy("mLock")
+    public boolean isCurrentlyRunningLocked(JobStatus job) {
+        return mConcurrencyManager.isJobRunningLocked(job);
+    }
+
     void noteJobsPending(List<JobStatus> jobs) {
         for (int i = jobs.size() - 1; i >= 0; i--) {
             JobStatus job = jobs.get(i);
@@ -1719,10 +1725,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private void noteJobNonPending(JobStatus job) {
+        mJobPackageTracker.noteNonpending(job);
+    }
+
     void noteJobsNonpending(List<JobStatus> jobs) {
         for (int i = jobs.size() - 1; i >= 0; i--) {
-            JobStatus job = jobs.get(i);
-            mJobPackageTracker.noteNonpending(job);
+            noteJobNonPending(jobs.get(i));
         }
     }
 
@@ -2214,14 +2223,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Functor method invoked for each job via JobStore.forEachJob()
         @Override
         public void accept(JobStatus job) {
-            if (isReadyToBeExecutedLocked(job)) {
+            final boolean isRunning = isCurrentlyRunningLocked(job);
+            if (isReadyToBeExecutedLocked(job, false)) {
                 if (mActivityManagerInternal.isAppStartModeDisabled(job.getUid(),
                         job.getJob().getService().getPackageName())) {
                     Slog.w(TAG, "Aborting job " + job.getUid() + ":"
                             + job.getJob().toString() + " -- package not allowed to start");
-                    mHandler.obtainMessage(MSG_STOP_JOB,
-                            JobParameters.STOP_REASON_BACKGROUND_RESTRICTION, 0, job)
-                            .sendToTarget();
+                    if (isRunning) {
+                        mHandler.obtainMessage(MSG_STOP_JOB,
+                                JobParameters.STOP_REASON_BACKGROUND_RESTRICTION, 0, job)
+                                .sendToTarget();
+                    } else if (mPendingJobs.remove(job)) {
+                        noteJobNonPending(job);
+                    }
                     return;
                 }
 
@@ -2254,7 +2268,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 } else {
                     unbatchedCount++;
                 }
-                runnableJobs.add(job);
+                if (!isRunning) {
+                    runnableJobs.add(job);
+                }
             } else {
                 evaluateControllerStatesLocked(job);
             }
