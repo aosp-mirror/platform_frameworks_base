@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -71,6 +72,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private final FeatureFlags mFeatureFlags;
+    private final BatteryMeterViewController mBatteryMeterViewController;
 
     private final VariableDateViewController mVariableDateViewControllerDateView;
     private final VariableDateViewController mVariableDateViewControllerClockDateView;
@@ -139,7 +141,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             PrivacyDialogController privacyDialogController,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
             FeatureFlags featureFlags,
-            VariableDateViewController.Factory variableDateViewControllerFactory) {
+            VariableDateViewController.Factory variableDateViewControllerFactory,
+            BatteryMeterViewController batteryMeterViewController) {
         super(view);
         mPrivacyItemController = privacyItemController;
         mActivityStarter = activityStarter;
@@ -151,6 +154,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         mFeatureFlags = featureFlags;
+        mBatteryMeterViewController = batteryMeterViewController;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
@@ -178,6 +182,11 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mCameraSlot = getResources().getString(com.android.internal.R.string.status_bar_camera);
         mMicSlot = getResources().getString(com.android.internal.R.string.status_bar_microphone);
         mLocationSlot = getResources().getString(com.android.internal.R.string.status_bar_location);
+    }
+
+    @Override
+    protected void onInit() {
+        mBatteryMeterViewController.init();
     }
 
     @Override
