@@ -372,6 +372,11 @@ public class BiometricSchedulerTest {
         protected void startHalOperation() {
 
         }
+
+        @Override
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
+
+        }
     }
 
     private static class TestAuthenticationClient extends AuthenticationClient<Object> {
@@ -393,6 +398,11 @@ public class BiometricSchedulerTest {
 
         @Override
         protected void startHalOperation() {
+
+        }
+
+        @Override
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
 
         }
     }
