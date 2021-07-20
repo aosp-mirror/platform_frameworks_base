@@ -38,8 +38,8 @@ import java.util.List;
 public final class TaskFragmentInfo implements Parcelable {
 
     /**
-     * Client assigned unique token in {@link TaskFragmentCreationParams#mFragmentToken} to create
-     * this TaskFragment with.
+     * Client assigned unique token in {@link TaskFragmentCreationParams#getFragmentToken()} to
+     * create this TaskFragment with.
      */
     @NonNull
     private final IBinder mFragmentToken;
@@ -50,8 +50,11 @@ public final class TaskFragmentInfo implements Parcelable {
     @NonNull
     private final Configuration mConfiguration = new Configuration();
 
-    /** Whether the TaskFragment contains any child Activity. */
+    /** Whether the TaskFragment contains any child Window Container. */
     private final boolean mIsEmpty;
+
+    /** Whether the TaskFragment contains any running Activity. */
+    private final boolean mHasRunningActivity;
 
     /** Whether this TaskFragment is visible on the window hierarchy. */
     private final boolean mIsVisible;
@@ -67,12 +70,13 @@ public final class TaskFragmentInfo implements Parcelable {
 
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
-            @NonNull Configuration configuration, boolean isEmpty, boolean isVisible,
-            List<IBinder> activities, @NonNull Point positionInParent) {
+            @NonNull Configuration configuration, boolean isEmpty, boolean hasRunningActivity,
+            boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
         mIsEmpty = isEmpty;
+        mHasRunningActivity = hasRunningActivity;
         mIsVisible = isVisible;
         mActivities.addAll(activities);
         mPositionInParent = requireNonNull(positionInParent);
@@ -92,6 +96,10 @@ public final class TaskFragmentInfo implements Parcelable {
 
     public boolean isEmpty() {
         return mIsEmpty;
+    }
+
+    public boolean hasRunningActivity() {
+        return mHasRunningActivity;
     }
 
     public boolean isVisible() {
@@ -125,6 +133,7 @@ public final class TaskFragmentInfo implements Parcelable {
         return mFragmentToken.equals(that.mFragmentToken)
                 && mToken.equals(that.mToken)
                 && mIsEmpty == that.mIsEmpty
+                && mHasRunningActivity == that.mHasRunningActivity
                 && mIsVisible == that.mIsVisible
                 && getWindowingMode() == that.getWindowingMode()
                 && mActivities.equals(that.mActivities)
@@ -136,6 +145,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mToken = in.readTypedObject(WindowContainerToken.CREATOR);
         mConfiguration.readFromParcel(in);
         mIsEmpty = in.readBoolean();
+        mHasRunningActivity = in.readBoolean();
         mIsVisible = in.readBoolean();
         in.readBinderList(mActivities);
         mPositionInParent = requireNonNull(in.readTypedObject(Point.CREATOR));
@@ -147,6 +157,7 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeTypedObject(mToken, flags);
         mConfiguration.writeToParcel(dest, flags);
         dest.writeBoolean(mIsEmpty);
+        dest.writeBoolean(mHasRunningActivity);
         dest.writeBoolean(mIsVisible);
         dest.writeBinderList(mActivities);
         dest.writeTypedObject(mPositionInParent, flags);
@@ -172,6 +183,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " fragmentToken=" + mFragmentToken
                 + " token=" + mToken
                 + " isEmpty=" + mIsEmpty
+                + " hasRunningActivity=" + mHasRunningActivity
                 + " isVisible=" + mIsVisible
                 + " positionInParent=" + mPositionInParent
                 + "}";

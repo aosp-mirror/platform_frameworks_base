@@ -3445,6 +3445,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         finishing = true;
+        final TaskFragment taskFragment = getTaskFragment();
+        if (taskFragment != null) {
+            taskFragment.sendTaskFragmentInfoChanged();
+        }
         if (stopped) {
             abortAndClearOptionsAnimation();
         }
