@@ -3341,7 +3341,7 @@ class Task extends TaskFragment {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
-        info.displayCutoutInsets = getDisplayCutoutInsets(top);
+        info.displayCutoutInsets = top != null ? top.getDisplayCutoutInsets() : null;
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
@@ -3377,16 +3377,15 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(topMostActivity.pictureInPictureArgs);
     }
 
-    private Rect getDisplayCutoutInsets(Task top) {
-        if (top == null || top.mDisplayContent == null
-                || top.getDisplayInfo().displayCutout == null) return null;
-        final WindowState w = top.getTopVisibleAppMainWindow();
+    Rect getDisplayCutoutInsets() {
+        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
+        final WindowState w = getTopVisibleAppMainWindow();
         final int displayCutoutMode = w == null
                 ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
                 : w.getAttrs().layoutInDisplayCutoutMode;
         return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                 || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
-                ? null : top.getDisplayInfo().displayCutout.getSafeInsets();
+                ? null : getDisplayInfo().displayCutout.getSafeInsets();
     }
 
     /**
