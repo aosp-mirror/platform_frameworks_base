@@ -20,6 +20,8 @@ import android.app.WallpaperColors;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -29,7 +31,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
-import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
@@ -90,7 +91,7 @@ public class ImageWallpaper extends WallpaperService {
         mMiniBitmap = null;
     }
 
-    class GLEngine extends Engine {
+    class GLEngine extends Engine implements DisplayListener {
         // Surface is rejected if size below a threshold on some devices (ie. 8px on elfin)
         // set min to 64 px (CTS covers this), please refer to ag/4867989 for detail.
         @VisibleForTesting
@@ -102,15 +103,15 @@ public class ImageWallpaper extends WallpaperService {
         private EglHelper mEglHelper;
         private final Runnable mFinishRenderingTask = this::finishRendering;
         private boolean mNeedRedraw;
-        private int mWidth = 1;
-        private int mHeight = 1;
+
+        private boolean mDisplaySizeValid = false;
+        private int mDisplayWidth = 1;
+        private int mDisplayHeight = 1;
+
         private int mImgWidth = 1;
         private int mImgHeight = 1;
-        private float mPageWidth = 1.f;
-        private float mPageOffset = 1.f;
 
-        GLEngine() {
-        }
+        GLEngine() { }
 
         @VisibleForTesting
         GLEngine(Handler handler) {
@@ -124,13 +125,23 @@ public class ImageWallpaper extends WallpaperService {
             mRenderer = getRendererInstance();
             setFixedSizeAllowed(true);
             updateSurfaceSize();
-            Rect window = getDisplayContext()
-                    .getSystemService(WindowManager.class)
-                    .getCurrentWindowMetrics()
-                    .getBounds();
-            mHeight = window.height();
-            mWidth = window.width();
+
             mRenderer.setOnBitmapChanged(this::updateMiniBitmap);
+            getDisplayContext().getSystemService(DisplayManager.class)
+                    .registerDisplayListener(this, mWorker.getThreadHandler());
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) { }
+
+        @Override
+        public void onDisplayRemoved(int displayId) { }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (displayId == getDisplayContext().getDisplayId()) {
+                mDisplaySizeValid = false;
+            }
         }
 
         EglHelper getEglHelperInstance() {
@@ -154,24 +165,8 @@ public class ImageWallpaper extends WallpaperService {
             if (pages == mPages) return;
             mPages = pages;
             if (mMiniBitmap == null || mMiniBitmap.isRecycled()) return;
-            updateShift();
             mWorker.getThreadHandler().post(() ->
                     computeAndNotifyLocalColors(new ArrayList<>(mColorAreas), mMiniBitmap));
-        }
-
-        private void updateShift() {
-            if (mImgHeight == 0) {
-                mPageOffset = 0;
-                mPageWidth = 1;
-                return;
-            }
-            // calculate shift
-            DisplayInfo displayInfo = new DisplayInfo();
-            getDisplayContext().getDisplay().getDisplayInfo(displayInfo);
-            int screenWidth = displayInfo.getNaturalWidth();
-            float imgWidth = Math.min(mImgWidth > 0 ? screenWidth / (float) mImgWidth : 1.f, 1.f);
-            mPageWidth = imgWidth;
-            mPageOffset = (1 - imgWidth) / (float) (mPages - 1);
         }
 
         private void updateMiniBitmap(Bitmap b) {
@@ -204,6 +199,8 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDestroy() {
+            getDisplayContext().getSystemService(DisplayManager.class)
+                    .unregisterDisplayListener(this);
             mMiniBitmap = null;
             mWorker.getThreadHandler().post(() -> {
                 mRenderer.finish();
@@ -268,6 +265,16 @@ public class ImageWallpaper extends WallpaperService {
          * (1-Wr)].
          */
         private RectF pageToImgRect(RectF area) {
+            if (!mDisplaySizeValid) {
+                Rect window = getDisplayContext()
+                        .getSystemService(WindowManager.class)
+                        .getCurrentWindowMetrics()
+                        .getBounds();
+                mDisplayWidth = window.width();
+                mDisplayHeight = window.height();
+                mDisplaySizeValid = true;
+            }
+
             // Width of a page for the caller of this API.
             float virtualPageWidth = 1f / (float) mPages;
             float leftPosOnPage = (area.left % virtualPageWidth) / virtualPageWidth;
@@ -275,12 +282,24 @@ public class ImageWallpaper extends WallpaperService {
             int currentPage = (int) Math.floor(area.centerX() / virtualPageWidth);
 
             RectF imgArea = new RectF();
+
+            if (mImgWidth == 0 || mImgHeight == 0 || mDisplayWidth <= 0 || mDisplayHeight <= 0) {
+                return imgArea;
+            }
+
             imgArea.bottom = area.bottom;
             imgArea.top = area.top;
+
+            float imageScale = Math.min(((float) mImgHeight) / mDisplayHeight, 1);
+            float mappedScreenWidth = mDisplayWidth * imageScale;
+            float pageWidth = Math.min(1.0f,
+                    mImgWidth > 0 ? mappedScreenWidth / (float) mImgWidth : 1.f);
+            float pageOffset = (1 - pageWidth) / (float) (mPages - 1);
+
             imgArea.left = MathUtils.constrain(
-                    leftPosOnPage * mPageWidth + currentPage * mPageOffset, 0, 1);
+                    leftPosOnPage * pageWidth + currentPage * pageOffset, 0, 1);
             imgArea.right = MathUtils.constrain(
-                    rightPosOnPage * mPageWidth + currentPage * mPageOffset, 0, 1);
+                    rightPosOnPage * pageWidth + currentPage * pageOffset, 0, 1);
             if (imgArea.left > imgArea.right) {
                 // take full page
                 imgArea.left = 0;
@@ -293,7 +312,6 @@ public class ImageWallpaper extends WallpaperService {
         private List<WallpaperColors> getLocalWallpaperColors(@NonNull List<RectF> areas,
                 Bitmap b) {
             List<WallpaperColors> colors = new ArrayList<>(areas.size());
-            updateShift();
             for (int i = 0; i < areas.size(); i++) {
                 RectF area = pageToImgRect(areas.get(i));
                 if (area == null || !LOCAL_COLOR_BOUNDS.contains(area)) {
