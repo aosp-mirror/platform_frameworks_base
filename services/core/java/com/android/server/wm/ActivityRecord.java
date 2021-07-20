@@ -831,6 +831,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
 
+    // Tracking indicated launch root in order to propagate it among trampoline activities.
+    WindowContainerToken mLaunchRootTask;
+
     // Entering PiP is usually done in two phases, we put the task into pinned mode first and
     // SystemUi sets the pinned mode on activity after transition is done.
     boolean mWaitForEnteringPinnedMode;
@@ -1040,6 +1043,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix);
             pw.print("launchCookie=");
             pw.println(mLaunchCookie);
+        }
+        if (mLaunchRootTask != null) {
+            pw.print(prefix);
+            pw.print("mLaunchRootTask=");
+            pw.println(mLaunchRootTask);
         }
         pw.print(prefix); pw.print("mHaveState="); pw.print(mHaveState);
                 pw.print(" mIcicle="); pw.println(mIcicle);
@@ -1795,6 +1803,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
+            mLaunchRootTask = options.getLaunchRootTask();
         }
 
         mPersistentState = persistentState;
@@ -5965,6 +5974,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task != null) {
             task.setHasBeenVisible(true);
         }
+        // Clear indicated launch root task because there's no trampoline activity to expect after
+        // the windows are drawn.
+        mLaunchRootTask = null;
     }
 
     /** Called when the windows associated app window container are visible. */
