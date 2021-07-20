@@ -60,7 +60,10 @@ abstract class Modifier {
         return price;
     }
 
-    void onSystemServicesReady() {
+    void setup() {
+    }
+
+    void tearDown() {
     }
 
     abstract void dump(IndentingPrintWriter pw);

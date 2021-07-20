@@ -13434,6 +13434,21 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
+         * Whether to enable the TARE subsystem as a whole or not.
+         * 1 means enable, 0 means disable.
+         *
+         * @hide
+         */
+        public static final String ENABLE_TARE = "enable_tare";
+
+        /**
+         * Default value for {@link #ENABLE_TARE}.
+         *
+         * @hide
+         */
+        public static final int DEFAULT_ENABLE_TARE = 0;
+
+        /**
          * Whether or not to enable the User Absent, Radios Off feature on small battery devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0

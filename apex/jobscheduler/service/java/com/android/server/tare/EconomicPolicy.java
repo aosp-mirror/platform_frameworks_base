@@ -157,11 +157,21 @@ public abstract class EconomicPolicy {
     }
 
     @CallSuper
-    void onSystemServicesReady() {
+    void setup() {
         for (int i = 0; i < NUM_COST_MODIFIERS; ++i) {
             final Modifier modifier = COST_MODIFIER_BY_INDEX[i];
             if (modifier != null) {
-                modifier.onSystemServicesReady();
+                modifier.setup();
+            }
+        }
+    }
+
+    @CallSuper
+    void tearDown() {
+        for (int i = 0; i < NUM_COST_MODIFIERS; ++i) {
+            final Modifier modifier = COST_MODIFIER_BY_INDEX[i];
+            if (modifier != null) {
+                modifier.tearDown();
             }
         }
     }

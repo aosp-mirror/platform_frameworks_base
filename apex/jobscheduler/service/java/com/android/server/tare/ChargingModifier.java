@@ -40,7 +40,16 @@ class ChargingModifier extends Modifier {
         super();
         mIrs = irs;
         mChargingTracker = new ChargingTracker();
-        mChargingTracker.startTracking(irs.getContext());
+    }
+
+    @Override
+    public void setup() {
+        mChargingTracker.startTracking(mIrs.getContext());
+    }
+
+    @Override
+    public void tearDown() {
+        mChargingTracker.stopTracking(mIrs.getContext());
     }
 
     @Override
@@ -82,6 +91,10 @@ class ChargingModifier extends Modifier {
             // Initialise tracker state.
             final BatteryManager batteryManager = context.getSystemService(BatteryManager.class);
             mCharging = batteryManager.isCharging();
+        }
+
+        public void stopTracking(@NonNull Context context) {
+            context.unregisterReceiver(this);
         }
 
         @Override
