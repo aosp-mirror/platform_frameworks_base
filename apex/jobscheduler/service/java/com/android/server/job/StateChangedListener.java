@@ -17,6 +17,8 @@
 package com.android.server.job;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.ArraySet;
 
 import com.android.server.job.controllers.JobStatus;
 
@@ -29,10 +31,10 @@ import java.util.List;
  */
 public interface StateChangedListener {
     /**
-     * Called by the controller to notify the JobManager that it should check on the state of a
-     * task.
+     * Called by the controller to notify the JobScheduler that it should check on the state of a
+     * set of jobs. If {@code changedJobs} is null, then all registered jobs will be evaluated.
      */
-    public void onControllerStateChanged();
+    void onControllerStateChanged(@Nullable ArraySet<JobStatus> changedJobs);
 
     /**
      * Called by the controller to notify the JobManager that regardless of the state of the task,
