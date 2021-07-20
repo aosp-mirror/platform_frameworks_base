@@ -385,6 +385,14 @@ public class BrightnessController implements ToggleSlider.Listener {
         });
     }
 
+    public void hideSlider() {
+        mControl.hideView();
+    }
+
+    public void showSlider() {
+        mControl.showView();
+    }
+
     private void setBrightness(float brightness) {
         mDisplayManager.setTemporaryBrightness(mDisplayId, brightness);
     }

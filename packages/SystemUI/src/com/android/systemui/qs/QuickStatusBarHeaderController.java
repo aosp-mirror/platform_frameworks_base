@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.VariableDateViewController;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final QSCarrierGroupController mQSCarrierGroupController;
-    private final QuickQSPanelController mHeaderQsPanelController;
+    private final QuickQSPanelController mQuickQSPanelController;
     private final OngoingPrivacyChip mPrivacyChip;
     private final Clock mClockView;
     private final StatusBarIconController mStatusBarIconController;
@@ -71,6 +72,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private final FeatureFlags mFeatureFlags;
+
+    private final VariableDateViewController mVariableDateViewControllerDateView;
+    private final VariableDateViewController mVariableDateViewControllerClockDateView;
 
     private boolean mListening;
     private boolean mMicCameraIndicatorsEnabled;
@@ -133,14 +137,15 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             SysuiColorExtractor colorExtractor,
             PrivacyDialogController privacyDialogController,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            VariableDateViewController.Factory variableDateViewControllerFactory) {
         super(view);
         mPrivacyItemController = privacyItemController;
         mActivityStarter = activityStarter;
         mUiEventLogger = uiEventLogger;
         mStatusBarIconController = statusBarIconController;
         mDemoModeController = demoModeController;
-        mHeaderQsPanelController = quickQSPanelController;
+        mQuickQSPanelController = quickQSPanelController;
         mPrivacyLogger = privacyLogger;
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
@@ -153,6 +158,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyChip = mView.findViewById(R.id.privacy_chip);
         mClockView = mView.findViewById(R.id.clock);
         mIconContainer = mView.findViewById(R.id.statusIcons);
+        mVariableDateViewControllerDateView = variableDateViewControllerFactory.create(
+                mView.requireViewById(R.id.date)
+        );
+        mVariableDateViewControllerClockDateView = variableDateViewControllerFactory.create(
+                mView.requireViewById(R.id.date_clock)
+        );
 
         mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, mFeatureFlags);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
@@ -182,6 +193,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
 
         mDemoModeController.addCallback(mDemoModeReceiver);
+
+        mVariableDateViewControllerDateView.init();
+        mVariableDateViewControllerClockDateView.init();
     }
 
     @Override
@@ -201,12 +215,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
         mListening = listening;
 
-        mHeaderQsPanelController.setListening(listening);
-        if (mHeaderQsPanelController.isListening()) {
-            mHeaderQsPanelController.refreshAllTiles();
+        mQuickQSPanelController.setListening(listening);
+        if (mQuickQSPanelController.isListening()) {
+            mQuickQSPanelController.refreshAllTiles();
         }
 
-        if (mHeaderQsPanelController.switchTileLayout(false)) {
+        if (mQuickQSPanelController.switchTileLayout(false)) {
             mView.updateResources();
         }
 
@@ -258,7 +272,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     }
 
     public void setContentMargins(int marginStart, int marginEnd) {
-        mHeaderQsPanelController.setContentMargins(marginStart, marginEnd);
+        mQuickQSPanelController.setContentMargins(marginStart, marginEnd);
     }
 
     private static class ClockDemoModeReceiver implements DemoMode {

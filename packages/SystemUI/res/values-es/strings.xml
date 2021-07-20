@@ -429,9 +429,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Desbloquear el micrófono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"¿Desbloquear la cámara del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"¿Desbloquear la cámara y el micrófono del dispositivo?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si lo haces, todos los servicios y todas las aplicaciones que tengan permiso podrán usar tu micrófono."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si lo haces, todos los servicios y todas las aplicaciones que tengan permiso podrán usar tu cámara."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si lo haces, todos los servicios y todas las aplicaciones que tengan permiso podrán usar tu cámara o tu micrófono."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu micrófono."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu cámara."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu cámara o tu micrófono."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Desliza el dedo hacia arriba para cambiar de aplicación"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra hacia la derecha para cambiar rápidamente de aplicación"</string>
@@ -1163,7 +1163,7 @@
     <string name="airplane_mode" msgid="2536350001462130668">"Modo avión"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
-    <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectada"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
     <string name="mobile_data_off_summary" msgid="5621158216585822679">"Internet no se conecta automáticamente"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sin conexión"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"No hay otras redes disponibles"</string>

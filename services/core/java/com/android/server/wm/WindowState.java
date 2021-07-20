@@ -1443,16 +1443,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    // TODO: Look into whether this override is still necessary.
-    @Override
-    public Rect getBounds() {
-        if (mActivityRecord != null) {
-            return mActivityRecord.getBounds();
-        } else {
-            return super.getBounds();
-        }
-    }
-
     /** Retrieves the current frame of the window that the application sees. */
     Rect getFrame() {
         return mWindowFrames.mFrame;

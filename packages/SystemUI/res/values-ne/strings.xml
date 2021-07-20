@@ -1149,7 +1149,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ले एउटा म्यासेज पठाउनुभएको छ: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ले एउटा फोटो पठाउनुभयो"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ले स्ट्याटस अपडेट गर्नुभएको छ: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <string name="person_available" msgid="2318599327472755472">"उपलब्ध"</string>
+    <string name="person_available" msgid="2318599327472755472">"उपलब्ध हुनुहुन्छ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"डिभाइसको ब्याट्रीको मिटर रिडिङ क्रममा समस्या भयो"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"थप जानकारी प्राप्त गर्न ट्याप गर्नुहोस्"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"अलार्म राखिएको छैन"</string>
@@ -1170,7 +1170,7 @@
     <string name="all_network_unavailable" msgid="4112774339909373349">"कुनै पनि नेटवर्क उपलब्ध छैन"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"नेटवर्कसम्बन्धी विवरण"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"इन्टरनेटमा कनेक्ट गर्नका लागि कुनै नेटवर्कमा ट्याप गर्नुहोस्"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"इन्टरनेट कनेक्ट गर्न कुनै नेटवर्कमा ट्याप गर्नुहोस्"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्कहरू खोजिँदै छन्…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कमा कनेक्ट गर्न सकिएन"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>

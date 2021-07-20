@@ -46,11 +46,6 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    public void setBrightnessView(View view) {
-        // Don't add brightness view
-    }
-
-    @Override
     void initialize() {
         super.initialize();
         if (mHorizontalContentContainer != null) {

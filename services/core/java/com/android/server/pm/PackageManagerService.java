@@ -7577,6 +7577,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             mExpectingBetter.clear();
 
+            mSettings.pruneRenamedPackagesLPw();
+
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName();
 
@@ -21867,6 +21869,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     clearPackagePreferredActivitiesLPw(
                             deletedPs.name, changedUsers, UserHandle.USER_ALL);
+
+                    mSettings.removeRenamedPackageLPw(deletedPs.realName);
                 }
                 if (changedUsers.size() > 0) {
                     updateDefaultHomeNotLocked(changedUsers);

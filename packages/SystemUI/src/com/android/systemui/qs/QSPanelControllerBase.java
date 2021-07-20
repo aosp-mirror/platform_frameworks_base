@@ -88,10 +88,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                             Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
+                        onScreenRotated();
                         switchTileLayout(false);
                     }
                 }
             };
+
+    protected void onScreenRotated() { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
