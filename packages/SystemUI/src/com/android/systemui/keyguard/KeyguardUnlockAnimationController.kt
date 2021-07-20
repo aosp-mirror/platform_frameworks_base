@@ -222,6 +222,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
             keyguardViewController.hide(startTime, 350)
             surfaceBehindEntryAnimator.start()
         }
+
+        // Finish the keyguard remote animation if the dismiss amount has crossed the threshold.
+        // Check it here in case there is no more change to the dismiss amount after the last change
+        // that starts the keyguard animation. @see #updateKeyguardViewMediatorIfThresholdsReached()
+        finishKeyguardExitRemoteAnimationIfReachThreshold()
     }
 
     fun notifyCancelKeyguardExitAnimation() {
@@ -353,16 +358,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         val dismissAmount = keyguardStateController.dismissAmount
-
-        // Hide the keyguard if we're fully dismissed, or if we're swiping to dismiss and have
-        // crossed the threshold to finish the dismissal.
-        val reachedHideKeyguardThreshold = (dismissAmount >= 1f ||
-                (keyguardStateController.isDismissingFromSwipe &&
-                        // Don't hide if we're flinging during a swipe, since we need to finish
-                        // animating it out. This will be called again after the fling ends.
-                        !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
-                        dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD))
-
         if (dismissAmount >= DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD &&
                 !keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
             // We passed the threshold, and we're not yet showing the surface behind the
@@ -375,9 +370,35 @@ class KeyguardUnlockAnimationController @Inject constructor(
             // out.
             keyguardViewMediator.get().hideSurfaceBehindKeyguard()
             fadeOutSurfaceBehind()
-        } else if (keyguardViewMediator.get()
-                        .isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe &&
-                reachedHideKeyguardThreshold) {
+        } else {
+            finishKeyguardExitRemoteAnimationIfReachThreshold()
+        }
+    }
+
+    /**
+     * Hides the keyguard if we're fully dismissed, or if we're swiping to dismiss and have crossed
+     * the threshold to finish the dismissal.
+     */
+    private fun finishKeyguardExitRemoteAnimationIfReachThreshold() {
+        // no-op if keyguard is not showing or animation is not enabled.
+        if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation ||
+                !keyguardViewController.isShowing) {
+            return
+        }
+
+        // no-op if animation is not requested yet.
+        if (!keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard() ||
+                !keyguardViewMediator.get().isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe) {
+            return
+        }
+
+        val dismissAmount = keyguardStateController.dismissAmount
+        if (dismissAmount >= 1f ||
+                (keyguardStateController.isDismissingFromSwipe &&
+                        // Don't hide if we're flinging during a swipe, since we need to finish
+                        // animating it out. This will be called again after the fling ends.
+                        !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
+                        dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD)) {
             keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(false /* cancelled */)
         }
     }
