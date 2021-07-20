@@ -154,15 +154,21 @@ public class StackScrollAlgorithm {
 
         shelf.updateState(algorithmState, ambientState);
 
-        // After the shelf has updated its yTranslation,
-        // explicitly hide views below the shelf to skip rendering them in the hardware layer.
+        // After the shelf has updated its yTranslation, explicitly set alpha=0 for view below shelf
+        // to skip rendering them in the hardware layer. We do not set them invisible because that
+        // runs invalidate & onDraw when these views return onscreen, which is more expensive.
         final float shelfTop = shelf.getViewState().yTranslation;
 
         for (ExpandableView view : algorithmState.visibleChildren) {
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                if (row.isHeadsUp() || row.isHeadsUpAnimatingAway()) {
+                    continue;
+                }
+            }
             final float viewTop = view.getViewState().yTranslation;
-
             if (viewTop >= shelfTop) {
-                view.getViewState().hidden = true;
+                view.getViewState().alpha = 0;
             }
         }
     }
