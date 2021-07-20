@@ -8844,7 +8844,7 @@ public final class Settings {
 
         /**
          * Control if rotation suggestions are sent to System UI when in rotation locked mode.
-         * Done to enable screen rotation while the the screen rotation is locked. Enabling will
+         * Done to enable screen rotation while the screen rotation is locked. Enabling will
          * poll the accelerometer in rotation locked mode.
          *
          * If 0, then rotation suggestions are not sent to System UI. If 1, suggestions are sent.
