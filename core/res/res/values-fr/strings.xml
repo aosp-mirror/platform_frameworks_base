@@ -1955,7 +1955,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Raccrocher"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Appel entrant"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Appel en cours"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrer un appel entrant"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrage d\'un appel entrant"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>
