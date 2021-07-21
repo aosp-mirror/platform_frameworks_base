@@ -79,6 +79,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // There is some accuracy error in wifi reports so allow some slop in the results.
     private static final long MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS = 750;
 
+    // Delay for clearing out battery stats for UIDs corresponding to a removed user
+    public static final int UID_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS = 10_000;
+
     private final ScheduledExecutorService mExecutorService =
             Executors.newSingleThreadScheduledExecutor(
                     (ThreadFactory) r -> {
@@ -346,6 +349,17 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
     }
 
+    @Override
+    public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            return mExecutorService.schedule(() -> {
+                synchronized (mStats) {
+                    mStats.clearRemovedUserUidsLocked(userId);
+                }
+            }, UID_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+        }
+    }
+
     /**
      * Schedule a sync {@param syncRunnable} with a delay. If there's already a scheduled sync, a
      * new sync won't be scheduled unless it is being scheduled to run immediately (delayMillis=0).
@@ -481,7 +495,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                         mStats.removeIsolatedUidLocked(uid, SystemClock.elapsedRealtime(),
                                 SystemClock.uptimeMillis());
                     }
-                    mStats.clearPendingRemovedUids();
+                    mStats.clearPendingRemovedUidsLocked();
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Error updating external stats: ", e);
