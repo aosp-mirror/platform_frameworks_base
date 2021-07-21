@@ -352,7 +352,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
             if (wt != null && !wt.isVisibleRequested()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "  Commit wallpaper becoming invisible: %s", ar);
+                        "  Commit wallpaper becoming invisible: %s", wt);
                 wt.commitVisibility(false /* visible */);
             }
         }
@@ -808,7 +808,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // of participants that should always be reported even if they aren't top.
         for (WindowContainer wc : participants) {
             // Don't include detached windows.
-            if (!wc.isAttached()) continue;
+            if (!wc.isAttached()) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "  Rejecting as detached: %s", wc);
+                continue;
+            }
 
             final ChangeInfo changeInfo = changes.get(wc);
 
