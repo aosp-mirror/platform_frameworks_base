@@ -145,5 +145,4 @@ public interface QSFragmentModule {
     static boolean providesQSUsingMediaPlayer(Context context) {
         return useQsMediaPlayer(context);
     }
-
 }
