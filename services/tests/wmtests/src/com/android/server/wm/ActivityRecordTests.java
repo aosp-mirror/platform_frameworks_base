@@ -2590,7 +2590,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                 false /* activityCreate */, false /* suggestEmpty */);
         waitUntilHandlersIdle();
         assertHasStartingWindow(activity);
-        activity.mStartingWindowState = ActivityRecord.STARTING_WINDOW_SHOWN;
 
         doCallRealMethod().when(task).startActivityLocked(
                 any(), any(), anyBoolean(), anyBoolean(), any(), any());

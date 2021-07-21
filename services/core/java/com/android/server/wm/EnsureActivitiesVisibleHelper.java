@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.Task.TAG_VISIBILITY;
 
@@ -141,6 +142,8 @@ class EnsureActivitiesVisibleHelper {
             } else {
                 mBehindFullyOccludedContainer = false;
             }
+        } else if (r.isState(INITIALIZING)) {
+            r.cancelInitializing();
         }
 
         if (reallyVisible) {
