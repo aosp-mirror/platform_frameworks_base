@@ -123,10 +123,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -469,16 +472,39 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         List<SubscriptionInfo> subscriptionInfos = getSubscriptionInfo(true /* forceReload */);
 
         // Hack level over 9000: Because the subscription id is not yet valid when we see the
-        // first update in handleSimStateChange, we need to force refresh all all SIM states
+        // first update in handleSimStateChange, we need to force refresh all SIM states
         // so the subscription id for them is consistent.
         ArrayList<SubscriptionInfo> changedSubscriptions = new ArrayList<>();
+        Set<Integer> activeSubIds = new HashSet<>();
         for (int i = 0; i < subscriptionInfos.size(); i++) {
             SubscriptionInfo info = subscriptionInfos.get(i);
+            activeSubIds.add(info.getSubscriptionId());
             boolean changed = refreshSimState(info.getSubscriptionId(), info.getSimSlotIndex());
             if (changed) {
                 changedSubscriptions.add(info);
             }
         }
+
+        // It is possible for active subscriptions to become invalid (-1), and these will not be
+        // present in the subscriptionInfo list
+        Iterator<Map.Entry<Integer, SimData>> iter = mSimDatas.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<Integer, SimData> simData = iter.next();
+            if (!activeSubIds.contains(simData.getKey())) {
+                Log.i(TAG, "Previously active sub id " + simData.getKey() + " is now invalid, "
+                        + "will remove");
+                iter.remove();
+
+                SimData data = simData.getValue();
+                for (int j = 0; j < mCallbacks.size(); j++) {
+                    KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+                    if (cb != null) {
+                        cb.onSimStateChanged(data.subId, data.slotId, data.simState);
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < changedSubscriptions.size(); i++) {
             SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
             for (int j = 0; j < mCallbacks.size(); j++) {
