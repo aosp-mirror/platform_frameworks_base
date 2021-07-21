@@ -3516,11 +3516,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return task;
     }
 
-    ActivityRecord isInAnyTask(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null && r.isDescendantOf(this)) ? r : null;
-    }
-
     @VisibleForTesting
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
             int flags, int callingUid, ArraySet<Integer> profileIds) {
