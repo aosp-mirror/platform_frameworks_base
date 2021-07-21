@@ -1980,8 +1980,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
-        if (mTaskSupervisor.inActivityVisibilityUpdate()
-                || mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+        if (mTaskSupervisor.inActivityVisibilityUpdate()) {
             // Don't do recursive work.
             return;
         }
