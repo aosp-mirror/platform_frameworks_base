@@ -75,7 +75,7 @@ interface IFaceService {
 
     // Start face enrollment
     void enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
-            String opPackageName, in int [] disabledFeatures, in Surface surface, boolean debugConsent);
+            String opPackageName, in int [] disabledFeatures, in Surface previewSurface, boolean debugConsent);
 
     // Start remote face enrollment
     void enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
