@@ -56,7 +56,6 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
     }
 
     @SmallTest
-    @SkipPresubmit("b/180015146")
     public void testEndSampleAndContinueWhenTimeOrCountDecreases() throws Exception {
         final MockClocks clocks = new MockClocks();
         final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);
@@ -72,7 +71,10 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
         assertEquals(0, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
 
         // This is less than we currently have, so we will end the sample. Time isn't running, so
-        // nothing should happen.
+        // nothing should happen, except that tracking will stop.
+        timer.update(0, 0, SystemClock.elapsedRealtime() * 1000);
+
+        // Start tracking again
         timer.update(0, 0, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
@@ -86,9 +88,13 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
         assertEquals(100, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(10, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
-        // This is less than we currently have, so we should end our sample and continue with the
-        // entire amount updated here.
-        timer.update(50, 5, SystemClock.elapsedRealtime() * 1000);
+        // This is less than we currently have, so we should end our sample.
+        timer.update(30, 3, SystemClock.elapsedRealtime() * 1000);
+
+        // Restart tracking
+        timer.update(30, 3, SystemClock.elapsedRealtime() * 1000);
+
+        timer.add(50, 5);
 
         assertEquals(150, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(15, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
