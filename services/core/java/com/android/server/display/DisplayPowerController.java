@@ -96,7 +96,6 @@ import java.io.PrintWriter;
  */
 final class DisplayPowerController implements AutomaticBrightnessController.Callbacks,
         DisplayWhiteBalanceController.Callbacks {
-    private static final String TAG = "DisplayPowerController";
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
 
@@ -148,6 +147,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
+
+    private final String TAG;
 
     private final Object mLock = new Object();
 
@@ -450,6 +451,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             Runnable onBrightnessChangeRunnable) {
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
+        TAG = "DisplayPowerController[" + mDisplayId + "]";
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         mUniqueDisplayId = logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
         mHandler = new DisplayControllerHandler(handler.getLooper());
