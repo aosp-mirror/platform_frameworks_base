@@ -53,6 +53,7 @@ public class MediaMetrics {
         public static final String AUDIO_VOLUME = AUDIO + SEPARATOR + "volume";
         public static final String AUDIO_VOLUME_EVENT = AUDIO_VOLUME + SEPARATOR + "event";
         public static final String AUDIO_MODE = AUDIO + SEPARATOR + "mode";
+        public static final String METRICS_MANAGER = "metrics" + SEPARATOR + "manager";
     }
 
     /**
@@ -120,10 +121,11 @@ public class MediaMetrics {
                 createKey("gainDb", Double.class);
         public static final Key<String> GROUP =
                 createKey("group", String.class);
-        // For volume
-        public static final Key<Integer> INDEX = createKey("index", Integer.class);
-        public static final Key<Integer> MAX_INDEX = createKey("maxIndex", Integer.class);
-        public static final Key<Integer> MIN_INDEX = createKey("minIndex", Integer.class);
+
+        public static final Key<Integer> INDEX = createKey("index", Integer.class); // volume
+        public static final Key<String> LOG_SESSION_ID = createKey("logSessionId", String.class);
+        public static final Key<Integer> MAX_INDEX = createKey("maxIndex", Integer.class); // vol
+        public static final Key<Integer> MIN_INDEX = createKey("minIndex", Integer.class); // vol
         public static final Key<String> MODE =
                 createKey("mode", String.class); // audio_mode
         public static final Key<String> MUTE =
