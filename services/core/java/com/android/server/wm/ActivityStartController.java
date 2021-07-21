@@ -495,13 +495,17 @@ public class ActivityStartController {
      * @param taskFragment TaskFragment {@link TaskFragment} to start the activity in.
      * @param activityIntent intent to start the activity.
      * @param activityOptions ActivityOptions to start the activity with.
+     * @param resultTo the caller activity
      * @return the start result.
      */
     int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
-            @NonNull Intent activityIntent, @Nullable Bundle activityOptions) {
+            @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
+            @Nullable IBinder resultTo) {
         return obtainStarter(activityIntent, "startActivityInTaskFragment")
                 .setActivityOptions(activityOptions)
                 .setInTaskFragment(taskFragment)
+                .setResultTo(resultTo)
+                .setRequestCode(-1)
                 .setCallingUid(Binder.getCallingUid())
                 .setCallingPid(Binder.getCallingPid())
                 .execute();
