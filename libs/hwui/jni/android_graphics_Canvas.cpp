@@ -188,14 +188,10 @@ static jboolean quickRejectPath(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jl
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-// SkRegion::Op and SkClipOp are numerically identical, so we can freely cast
-// from one to the other (though SkClipOp is destined to become a strict subset)
+// SkClipOp is a strict subset of SkRegion::Op and is castable back and forth for their
+// shared operations (intersect and difference).
 static_assert(SkRegion::kDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kDifference), "");
 static_assert(SkRegion::kIntersect_Op == static_cast<SkRegion::Op>(SkClipOp::kIntersect), "");
-static_assert(SkRegion::kUnion_Op == static_cast<SkRegion::Op>(SkClipOp::kUnion_deprecated), "");
-static_assert(SkRegion::kXOR_Op == static_cast<SkRegion::Op>(SkClipOp::kXOR_deprecated), "");
-static_assert(SkRegion::kReverseDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kReverseDifference_deprecated), "");
-static_assert(SkRegion::kReplace_Op == static_cast<SkRegion::Op>(SkClipOp::kReplace_deprecated), "");
 
 static jboolean clipRect(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
                          jfloat r, jfloat b, jint opHandle) {
@@ -203,15 +199,15 @@ static jboolean clipRect(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l,
     SkRegion::Op rgnOp = static_cast<SkRegion::Op>(opHandle);
     bool nonEmptyClip;
     switch (rgnOp) {
-        case SkRegion::Op::kReplace_Op:
-            // For now replace can still be handled as an SkClipOp but will be emulated in the
-            // future
-            [[fallthrough]];
         case SkRegion::Op::kIntersect_Op:
         case SkRegion::Op::kDifference_Op:
             // Intersect and difference are supported clip operations
             nonEmptyClip =
                     get_canvas(canvasHandle)->clipRect(l, t, r, b, static_cast<SkClipOp>(rgnOp));
+            break;
+        case SkRegion::Op::kReplace_Op:
+            // Replace is emulated to support legacy apps older than P
+            nonEmptyClip = get_canvas(canvasHandle)->replaceClipRect_deprecated(l, t, r, b);
             break;
         default:
             // All other operations would expand the clip and are no longer supported,
@@ -230,13 +226,12 @@ static jboolean clipPath(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong pat
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     bool nonEmptyClip;
     switch (rgnOp) {
-        case SkRegion::Op::kReplace_Op:
-            // For now replace can still be handled as an SkClipOp but will be emulated in the
-            // future
-            [[fallthrough]];
         case SkRegion::Op::kIntersect_Op:
         case SkRegion::Op::kDifference_Op:
             nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, static_cast<SkClipOp>(rgnOp));
+            break;
+        case SkRegion::Op::kReplace_Op:
+            nonEmptyClip = get_canvas(canvasHandle)->replaceClipPath_deprecated(path);
             break;
         default:
             ALOGW("Ignoring unsupported clip operation %d", opHandle);
