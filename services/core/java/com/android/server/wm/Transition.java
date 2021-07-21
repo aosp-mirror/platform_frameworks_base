@@ -46,11 +46,13 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_W
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -65,6 +67,7 @@ import android.window.TransitionInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -130,7 +133,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The final animation targets derived from participants after promotion. */
     private ArraySet<WindowContainer> mTargets = null;
 
+    /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
+    private IRemoteCallback mClientAnimationStartCallback = null;
+    private IRemoteCallback mClientAnimationFinishCallback = null;
 
     private @TransitionState int mState = STATE_COLLECTING;
     private final ReadyTracker mReadyTracker = new ReadyTracker();
@@ -226,13 +232,26 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mChanges.get(wc).mExistenceChanged = true;
     }
 
+    private void sendRemoteCallback(@Nullable IRemoteCallback callback) {
+        if (callback == null) return;
+        mController.mAtm.mH.sendMessage(PooledLambda.obtainMessage(cb -> {
+            try {
+                cb.sendResult(null);
+            } catch (RemoteException e) { }
+        }, callback));
+    }
+
     /**
      * Set animation options for collecting transition by ActivityRecord.
      * @param options AnimationOptions captured from ActivityOptions
      */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options) {
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+            @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mSyncId < 0) return;
         mOverrideOptions = options;
+        sendRemoteCallback(mClientAnimationStartCallback);
+        mClientAnimationStartCallback = startCallback;
+        mClientAnimationFinishCallback = finishCallback;
     }
 
     /**
@@ -363,6 +382,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     .scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
         }
 
+        sendRemoteCallback(mClientAnimationFinishCallback);
+
         legacyRestoreNavigationBarFromApp();
     }
 
@@ -425,6 +446,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
         reportStartReasonsToLogger();
+
+        // The callback is only populated for custom activity-level client animations
+        sendRemoteCallback(mClientAnimationStartCallback);
 
         // Manually show any activities that are visibleRequested. This is needed to properly
         // support simultaneous animation queueing/merging. Specifically, if transition A makes
