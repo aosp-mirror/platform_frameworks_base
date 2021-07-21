@@ -408,7 +408,6 @@ public final class InputMethodManager {
     /**
      * The InputConnection that was last retrieved from the served view.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     IInputConnectionWrapper mServedInputConnectionWrapper;
     /**
      * The completions that were last provided by the served view.
