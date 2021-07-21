@@ -6276,6 +6276,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return null;
     }
 
+    @Nullable
+    static ActivityRecord isInAnyTask(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        return (r != null && r.isAttached()) ? r : null;
+    }
+
     /**
      * @return display id to which this record is attached,
      *         {@link android.view.Display#INVALID_DISPLAY} if not attached.
