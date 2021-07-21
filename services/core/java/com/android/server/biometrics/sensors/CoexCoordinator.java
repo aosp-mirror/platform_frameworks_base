@@ -268,11 +268,18 @@ public class CoexCoordinator {
                 AuthenticationClient<?> udfps = mClientMap.getOrDefault(SENSOR_TYPE_UDFPS, null);
                 AuthenticationClient<?> face = mClientMap.getOrDefault(SENSOR_TYPE_FACE, null);
                 if (isCurrentFaceAuth(client)) {
-                    // UDFPS should still be running in this case, do not vibrate. However, we
-                    // should notify the callback and finish the client, so that Keyguard and
-                    // BiometricScheduler do not get stuck.
-                    Slog.d(TAG, "Face rejected in multi-sensor auth, udfps: " + udfps);
-                    callback.handleLifecycleAfterAuth();
+                    if (isUdfpsActivelyAuthing(udfps)) {
+                        // UDFPS should still be running in this case, do not vibrate. However, we
+                        // should notify the callback and finish the client, so that Keyguard and
+                        // BiometricScheduler do not get stuck.
+                        Slog.d(TAG, "Face rejected in multi-sensor auth, udfps: " + udfps);
+                        callback.handleLifecycleAfterAuth();
+                    } else {
+                        // UDFPS is not actively authenticating (finger not touching, already
+                        // rejected, etc).
+                        callback.sendHapticFeedback();
+                        callback.handleLifecycleAfterAuth();
+                    }
                 } else if (isCurrentUdfps(client)) {
                     // Face should either be running, or have already finished
                     SuccessfulAuth auth = popSuccessfulFaceAuthIfExists(currentTimeMillis);
