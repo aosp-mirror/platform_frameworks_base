@@ -3691,6 +3691,8 @@ class Task extends TaskFragment {
             }
             sb.append(" visible=");
             sb.append(shouldBeVisible(null /* starting */));
+            sb.append(" visibleRequested=");
+            sb.append(isVisibleRequested());
             sb.append(" mode=");
             sb.append(windowingModeToString(getWindowingMode()));
             sb.append(" translucent=");
