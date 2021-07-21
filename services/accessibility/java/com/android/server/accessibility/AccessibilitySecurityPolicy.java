@@ -444,8 +444,10 @@ public class AccessibilitySecurityPolicy {
     private boolean isValidPackageForUid(String packageName, int uid) {
         final long token = Binder.clearCallingIdentity();
         try {
+            // Since we treat calls from a profile as if made by its parent, using
+            // MATCH_ANY_USER to query the uid of the given package name.
             return uid == mPackageManager.getPackageUidAsUser(
-                    packageName, UserHandle.getUserId(uid));
+                    packageName, PackageManager.MATCH_ANY_USER, UserHandle.getUserId(uid));
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         } finally {
