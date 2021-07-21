@@ -437,6 +437,25 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar == null || !ar.mVisibleRequested) continue;
             transaction.show(ar.getSurfaceControl());
+
+            // Also manually show any non-reported parents. This is necessary in a few cases
+            // where a task is NOT organized but had its visibility changed within its direct
+            // parent. An example of this is if an alternate home leaf-task HB is started atop the
+            // normal home leaf-task HA: these are both in the Home root-task HR, so there will be a
+            // transition containing HA and HB where HA surface is hidden. If a standard task SA is
+            // launched on top, then HB finishes, no transition will happen since neither home is
+            // visible. When SA finishes, the transition contains HR rather than HA. Since home
+            // leaf-tasks are NOT organized, HA won't be in the transition and thus its surface
+            // wouldn't be shown. Just show is safe here since all other properties will have
+            // already been reset by the original hiding-transition's finishTransaction (we can't
+            // show in the finishTransaction because by then the activity doesn't hide until
+            // surface placement).
+            for (WindowContainer p = ar.getParent(); p != null && !mTargets.contains(p);
+                    p = p.getParent()) {
+                if (p.getSurfaceControl() != null) {
+                    transaction.show(p.getSurfaceControl());
+                }
+            }
         }
 
         mStartTransaction = transaction;
