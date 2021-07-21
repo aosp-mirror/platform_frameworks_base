@@ -49,11 +49,6 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2_rendering);
     }
 
-    /** b/171917882 */
-    public boolean isTwoColumnNotificationShadeEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_notification_twocolumn);
-    }
-
     public boolean isKeyguardLayoutEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
     }
