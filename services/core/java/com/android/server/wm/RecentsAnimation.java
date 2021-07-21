@@ -125,6 +125,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Updated config=%s",
                         targetActivity.getConfiguration());
             }
+        } else if (mDefaultTaskDisplayArea.getActivity(
+                ActivityRecord::occludesParent, false /* traverseTopToBottom */) == null) {
+            // Skip because none of above activities can occlude the target activity. The preload
+            // should be done silently in background without being visible.
+            return;
         } else {
             // Create the activity record. Because the activity is invisible, this doesn't really
             // start the client.
