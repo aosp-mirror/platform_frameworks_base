@@ -27125,6 +27125,18 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.filterAppAccess(uid, callingUid);
     }
 
+    private int[] getVisibilityAllowList(@NonNull String packageName, int userId) {
+        synchronized (mLock) {
+            final PackageSetting ps = getPackageSettingInternal(packageName, Process.SYSTEM_UID);
+            if (ps == null) {
+                return null;
+            }
+            final SparseArray<int[]> visibilityAllowList = mAppsFilter.getVisibilityAllowList(ps,
+                    new int[]{userId}, mSettings.getPackagesLocked());
+            return visibilityAllowList != null ? visibilityAllowList.get(userId) : null;
+        }
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
@@ -27210,6 +27222,11 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(int uid, int callingUid) {
             return PackageManagerService.this.filterAppAccess(uid, callingUid);
+        }
+
+        @Nullable
+        public int[] getVisibilityAllowList(@NonNull String packageName, int userId) {
+            return PackageManagerService.this.getVisibilityAllowList(packageName, userId);
         }
 
         @Override

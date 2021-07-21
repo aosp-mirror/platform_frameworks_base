@@ -3536,15 +3536,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                     intent.putExtra(Intent.EXTRA_UID, (appInfo != null) ? appInfo.uid : -1);
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
+                    final int[] visibilityAllowList =
+                            mPackageManagerInt.getVisibilityAllowList(packageName, resolvedUserId);
                     if (isInstantApp) {
                         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
                         broadcastIntentInPackage("android", null, SYSTEM_UID, uid, pid, intent,
                                 null, null, 0, null, null, permission.ACCESS_INSTANT_APPS, null,
-                                false, false, resolvedUserId, false, null);
+                                false, false, resolvedUserId, false, null, visibilityAllowList);
                     } else {
                         broadcastIntentInPackage("android", null, SYSTEM_UID, uid, pid, intent,
                                 null, null, 0, null, null, null, null, false, false, resolvedUserId,
-                                false, null);
+                                false, null, visibilityAllowList);
                     }
 
                     if (observer != null) {
@@ -13647,7 +13649,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
             String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
             int userId, boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken) {
+            @Nullable IBinder backgroundActivityStartsToken,
+            @Nullable int[] broadcastAllowList) {
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
 
@@ -13659,8 +13662,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
                         OP_NONE, bOptions, serialized, sticky, -1, uid, realCallingUid,
                         realCallingPid, userId, allowBackgroundActivityStarts,
-                        backgroundActivityStartsToken,
-                        null /* broadcastAllowList */);
+                        backgroundActivityStartsToken, broadcastAllowList);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -15845,13 +15847,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
                 String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
                 int userId, boolean allowBackgroundActivityStarts,
-                @Nullable IBinder backgroundActivityStartsToken) {
+                @Nullable IBinder backgroundActivityStartsToken,
+                @Nullable int[] broadcastAllowList) {
             synchronized (ActivityManagerService.this) {
                 return ActivityManagerService.this.broadcastIntentInPackage(packageName, featureId,
                         uid, realCallingUid, realCallingPid, intent, resolvedType, resultTo,
                         resultCode, resultData, resultExtras, requiredPermission, bOptions,
                         serialized, sticky, userId, allowBackgroundActivityStarts,
-                        backgroundActivityStartsToken);
+                        backgroundActivityStartsToken, broadcastAllowList);
             }
         }
 

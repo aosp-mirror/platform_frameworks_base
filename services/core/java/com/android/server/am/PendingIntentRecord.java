@@ -481,7 +481,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                 key.featureId, uid, callingUid, callingPid, finalIntent,
                                 resolvedType, finishedReceiver, code, null, null,
                                 requiredPermission, options, (finishedReceiver != null), false,
-                                userId, allowedByToken || allowTrampoline, bgStartsToken);
+                                userId, allowedByToken || allowTrampoline, bgStartsToken,
+                                null /* broadcastAllowList */);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }
