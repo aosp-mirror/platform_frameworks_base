@@ -3437,14 +3437,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }, true /* traverseTopToBottom */);
     }
 
-    void cancelInitializingActivities() {
-        forAllRootTasks(task -> {
-            // We don't want to clear starting window for activities that aren't occluded
-            // as we need to display their starting window until they are done initializing.
-            task.forAllOccludedActivities(ActivityRecord::cancelInitializing);
-        });
-    }
-
     Task anyTaskForId(int id) {
         return anyTaskForId(id, MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE);
     }
