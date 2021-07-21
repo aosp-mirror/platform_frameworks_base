@@ -4125,11 +4125,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
         if (appId < 0) {
-            try {
-                appId = UserHandle.getAppId(AppGlobals.getPackageManager()
-                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, 0));
-            } catch (RemoteException e) {
-            }
+            appId = UserHandle.getAppId(getPackageManagerInternal().getPackageUid(packageName,
+                    MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, UserHandle.USER_SYSTEM));
         }
 
         mProcessList.killAppZygotesLocked(packageName, appId, userId, true /* force */);
@@ -4146,11 +4143,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (appId < 0 && packageName != null) {
-            try {
-                appId = UserHandle.getAppId(AppGlobals.getPackageManager()
-                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, 0));
-            } catch (RemoteException e) {
-            }
+            appId = UserHandle.getAppId(getPackageManagerInternal().getPackageUid(packageName,
+                    MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, UserHandle.USER_SYSTEM));
         }
 
         boolean didSomething;
