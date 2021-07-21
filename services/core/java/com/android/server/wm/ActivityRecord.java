@@ -543,11 +543,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final ActivityTaskSupervisor mTaskSupervisor;
     final RootWindowContainer mRootWindowContainer;
 
-    static final int STARTING_WINDOW_NOT_SHOWN = 0;
-    static final int STARTING_WINDOW_SHOWN = 1;
-    static final int STARTING_WINDOW_REMOVED = 2;
-    int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
-
     // Tracking splash screen status from previous activity
     boolean mSplashScreenStyleEmpty = false;
 
@@ -888,19 +883,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     };
 
-    private static String startingWindowStateToString(int state) {
-        switch (state) {
-            case STARTING_WINDOW_NOT_SHOWN:
-                return "STARTING_WINDOW_NOT_SHOWN";
-            case STARTING_WINDOW_SHOWN:
-                return "STARTING_WINDOW_SHOWN";
-            case STARTING_WINDOW_REMOVED:
-                return "STARTING_WINDOW_REMOVED";
-            default:
-                return "unknown state=" + state;
-        }
-    }
-
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         final long now = SystemClock.uptimeMillis();
@@ -1057,9 +1039,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
-                pw.print(" idle="); pw.print(idle);
-                pw.print(" mStartingWindowState=");
-                pw.println(startingWindowStateToString(mStartingWindowState));
+                pw.print(" idle="); pw.println(idle);
         pw.print(prefix); pw.print("occludesParent="); pw.print(occludesParent());
                 pw.print(" noDisplay="); pw.print(noDisplay);
                 pw.print(" immersive="); pw.print(immersive);
@@ -2021,6 +2001,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @VisibleForTesting
     boolean addStartingWindow(String pkg, int resolvedTheme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
@@ -2356,13 +2337,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void removeStartingWindow() {
+        if (transferSplashScreenIfNeeded()) {
+            return;
+        }
         removeStartingWindowAnimation(true /* prepareAnimation */);
     }
 
     void removeStartingWindowAnimation(boolean prepareAnimation) {
-        if (transferSplashScreenIfNeeded()) {
-            return;
-        }
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
         if (mStartingWindow == null) {
             if (mStartingData != null) {
@@ -6498,13 +6479,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean newSingleActivity = !newTask && !activityCreated
                 && task.getActivity((r) -> !r.finishing && r != this) == null;
 
-        final boolean shown = addStartingWindow(packageName, resolvedTheme,
+        final boolean scheduled = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null,
                 newTask || newSingleActivity, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty);
-        if (shown) {
-            mStartingWindowState = STARTING_WINDOW_SHOWN;
+        if (DEBUG_STARTING_WINDOW_VERBOSE && scheduled) {
+            Slog.d(TAG, "Scheduled starting window for " + this);
         }
     }
 
@@ -6516,14 +6497,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * It should only be called if this activity is behind other fullscreen activity.
      */
     void cancelInitializing() {
-        if (mStartingWindowState == STARTING_WINDOW_SHOWN) {
+        if (mStartingData != null) {
             // Remove orphaned starting window.
             if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
-            mStartingWindowState = STARTING_WINDOW_REMOVED;
             removeStartingWindowAnimation(false /* prepareAnimation */);
         }
-        if (isState(INITIALIZING) && !shouldBeVisible(
-                true /* behindFullscreenActivity */, true /* ignoringKeyguard */)) {
+        if (!mDisplayContent.mUnknownAppVisibilityController.allResolved()) {
             // Remove the unknown visibility record because an invisible activity shouldn't block
             // the keyguard transition.
             mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
