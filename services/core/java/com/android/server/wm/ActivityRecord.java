@@ -272,6 +272,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -4317,6 +4318,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int animationType = pendingOptions.getAnimationType();
         final DisplayContent displayContent = getDisplayContent();
         AnimationOptions options = null;
+        IRemoteCallback startCallback = null;
+        IRemoteCallback finishCallback = null;
         switch (animationType) {
             case ANIM_CUSTOM:
                 displayContent.mAppTransition.overridePendingAppTransition(
@@ -4329,6 +4332,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 options = AnimationOptions.makeCustomAnimOptions(pendingOptions.getPackageName(),
                         pendingOptions.getCustomEnterResId(), pendingOptions.getCustomExitResId(),
                         pendingOptions.getOverrideTaskTransition());
+                startCallback = pendingOptions.getAnimationStartedListener();
+                finishCallback = pendingOptions.getAnimationFinishedListener();
                 break;
             case ANIM_CLIP_REVEAL:
                 displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
@@ -4368,6 +4373,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         scaleUp);
                 options = AnimationOptions.makeThumnbnailAnimOptions(buffer,
                         pendingOptions.getStartX(), pendingOptions.getStartY(), scaleUp);
+                startCallback = pendingOptions.getAnimationStartedListener();
                 if (intent.getSourceBounds() == null && buffer != null) {
                     intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                             pendingOptions.getStartY(),
@@ -4418,7 +4424,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (options != null) {
-            mAtmService.getTransitionController().setOverrideAnimation(options);
+            mAtmService.getTransitionController().setOverrideAnimation(options,
+                    startCallback, finishCallback);
         }
     }
 
