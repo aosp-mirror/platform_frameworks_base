@@ -45993,6 +45993,7 @@ package android.util {
     method public boolean contains(Object);
     method public boolean containsAll(java.util.Collection<?>);
     method public void ensureCapacity(int);
+    method public void forEach(java.util.function.Consumer<? super E>);
     method public int indexOf(Object);
     method public boolean isEmpty();
     method public java.util.Iterator<E> iterator();
