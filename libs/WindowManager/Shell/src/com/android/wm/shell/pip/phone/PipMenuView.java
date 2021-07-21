@@ -23,7 +23,6 @@ import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTR
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 
-import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 
@@ -203,7 +202,7 @@ public class PipMenuView extends FrameLayout {
 
             @Override
             public boolean performAccessibilityAction(View host, int action, Bundle args) {
-                if (action == ACTION_CLICK && mMenuState == MENU_STATE_CLOSE) {
+                if (action == ACTION_CLICK && mMenuState != MENU_STATE_FULL) {
                     mController.showMenu();
                 }
                 return super.performAccessibilityAction(host, action, args);
@@ -271,13 +270,12 @@ public class PipMenuView extends FrameLayout {
                     mDismissButton.getAlpha(), 1f);
             ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
                     mResizeHandle.getAlpha(),
-                    ENABLE_RESIZE_HANDLE && menuState == MENU_STATE_CLOSE && showResizeHandle
-                            ? 1f : 0f);
+                    ENABLE_RESIZE_HANDLE && showResizeHandle ? 1f : 0f);
             if (menuState == MENU_STATE_FULL) {
                 mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
                         resizeAnim);
             } else {
-                mMenuContainerAnimator.playTogether(dismissAnim, resizeAnim);
+                mMenuContainerAnimator.playTogether(resizeAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(ANIMATION_HIDE_DURATION_MS);
@@ -429,7 +427,7 @@ public class PipMenuView extends FrameLayout {
 
         FrameLayout.LayoutParams expandedLp =
                 (FrameLayout.LayoutParams) expandContainer.getLayoutParams();
-        if (mActions.isEmpty() || menuState == MENU_STATE_CLOSE || menuState == MENU_STATE_NONE) {
+        if (mActions.isEmpty() || menuState == MENU_STATE_NONE) {
             actionsContainer.setVisibility(View.INVISIBLE);
 
             // Update the expand container margin to adjust the center of the expand button to

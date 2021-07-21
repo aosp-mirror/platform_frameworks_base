@@ -60,8 +60,7 @@ public class PhonePipMenuController implements PipMenuController {
     private static final boolean DEBUG = false;
 
     public static final int MENU_STATE_NONE = 0;
-    public static final int MENU_STATE_CLOSE = 1;
-    public static final int MENU_STATE_FULL = 2;
+    public static final int MENU_STATE_FULL = 1;
 
     /**
      * A listener interface to receive notification on changes in PIP.
