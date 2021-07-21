@@ -1,10 +1,10 @@
 package com.android.systemui.statusbar
 
+import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.util.DisplayMetrics
-import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
@@ -67,7 +67,6 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var notificationPanelController: NotificationPanelViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
-    @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var depthController: NotificationShadeDepthController
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
@@ -92,11 +91,10 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             displayMetrics = displayMetrics,
             mediaHierarchyManager = mediaHierarchyManager,
             scrimController = scrimController,
-            featureFlags = featureFlags,
+            depthController = depthController,
             context = context,
             configurationController = configurationController,
-            falsingManager = falsingManager,
-            depthController = depthController
+            falsingManager = falsingManager
         )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
