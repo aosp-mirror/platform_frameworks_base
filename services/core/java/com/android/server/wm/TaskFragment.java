@@ -75,6 +75,7 @@ import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -1475,6 +1476,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
+    void onChildPositionChanged(WindowContainer child) {
+        super.onChildPositionChanged(child);
+
+        sendTaskFragmentInfoChanged();
+    }
+
     void executeAppTransition(ActivityOptions options) {
         // No app transition applied to the task fragment.
     }
@@ -2027,13 +2034,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 childActivities.add(wc.asActivityRecord().appToken);
             }
         }
+        final Point positionInParent = new Point();
+        getRelativePosition(positionInParent);
         return new TaskFragmentInfo(
                 mFragmentToken,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getChildCount() == 0,
                 isVisible(),
-                childActivities);
+                childActivities,
+                positionInParent);
     }
 
     @Nullable

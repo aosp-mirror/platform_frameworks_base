@@ -1885,6 +1885,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             task.setRootProcess(proc);
         }
         proc.addActivityIfNeeded(this);
+
+        // Update the associated task fragment after setting the process, since it's required for
+        // filtering to only report activities that belong to the same process.
+        final TaskFragment tf = getTaskFragment();
+        if (tf != null) {
+            tf.sendTaskFragmentInfoChanged();
+        }
     }
 
     boolean hasProcess() {
