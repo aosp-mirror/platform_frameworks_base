@@ -3684,7 +3684,7 @@ package android.hardware.location {
   public class ContextHubClient implements java.io.Closeable {
     method public void close();
     method @NonNull public android.hardware.location.ContextHubInfo getAttachedHub();
-    method @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int sendMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
   }
 
   public class ContextHubClientCallback {
@@ -3735,26 +3735,26 @@ package android.hardware.location {
   }
 
   public final class ContextHubManager {
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@Nullable android.content.Context, @NonNull android.hardware.location.ContextHubInfo, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.location.ContextHubClientCallback);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.ContextHubClientCallback, @NonNull java.util.concurrent.Executor);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.ContextHubClientCallback);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@Nullable android.content.Context, @NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> disableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> enableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
-    method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int[] findNanoAppOnHub(int, @NonNull android.hardware.location.NanoAppFilter);
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int[] getContextHubHandles();
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubInfo getContextHubInfo(int);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public java.util.List<android.hardware.location.ContextHubInfo> getContextHubs();
-    method @Deprecated @Nullable @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.NanoAppInstanceInfo getNanoAppInstanceInfo(int);
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int loadNanoApp(int, @NonNull android.hardware.location.NanoApp);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> loadNanoApp(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.NanoAppBinary);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.util.List<android.hardware.location.NanoAppState>> queryNanoApps(@NonNull android.hardware.location.ContextHubInfo);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubClient createClient(@Nullable android.content.Context, @NonNull android.hardware.location.ContextHubInfo, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.location.ContextHubClientCallback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.ContextHubClientCallback, @NonNull java.util.concurrent.Executor);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.ContextHubClientCallback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubClient createClient(@Nullable android.content.Context, @NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> disableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> enableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int[] findNanoAppOnHub(int, @NonNull android.hardware.location.NanoAppFilter);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int[] getContextHubHandles();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubInfo getContextHubInfo(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public java.util.List<android.hardware.location.ContextHubInfo> getContextHubs();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.NanoAppInstanceInfo getNanoAppInstanceInfo(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int loadNanoApp(int, @NonNull android.hardware.location.NanoApp);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> loadNanoApp(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.NanoAppBinary);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.util.List<android.hardware.location.NanoAppState>> queryNanoApps(@NonNull android.hardware.location.ContextHubInfo);
     method @Deprecated public int registerCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
     method @Deprecated public int registerCallback(android.hardware.location.ContextHubManager.Callback, android.os.Handler);
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int sendMessage(int, int, @NonNull android.hardware.location.ContextHubMessage);
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int unloadNanoApp(int);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> unloadNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessage(int, int, @NonNull android.hardware.location.ContextHubMessage);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int unloadNanoApp(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> unloadNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @Deprecated public int unregisterCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
     field public static final int AUTHORIZATION_DENIED = 0; // 0x0
     field public static final int AUTHORIZATION_DENIED_GRACE_PERIOD = 1; // 0x1
@@ -4933,6 +4933,7 @@ package android.location {
 
   public final class LastLocationRequest implements android.os.Parcelable {
     method public int describeContents();
+    method public boolean isAdasGnssBypass();
     method public boolean isHiddenFromAppOps();
     method public boolean isLocationSettingsIgnored();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -4943,6 +4944,7 @@ package android.location {
     ctor public LastLocationRequest.Builder();
     ctor public LastLocationRequest.Builder(@NonNull android.location.LastLocationRequest);
     method @NonNull public android.location.LastLocationRequest build();
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LastLocationRequest.Builder setHiddenFromAppOps(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
   }
@@ -4962,6 +4964,7 @@ package android.location {
     method @Deprecated public int getGnssBatchSize();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.location.Location getLastKnownLocation(@NonNull String, @NonNull android.location.LastLocationRequest);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
+    method public boolean isAdasGnssLocationEnabled();
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
@@ -4973,11 +4976,14 @@ package android.location {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAdasGnssLocationEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackage(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackageEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
+    field public static final String ACTION_ADAS_GNSS_ENABLED_CHANGED = "android.location.action.ADAS_GNSS_ENABLED_CHANGED";
+    field public static final String EXTRA_ADAS_GNSS_ENABLED = "android.location.extra.ADAS_GNSS_ENABLED";
   }
 
   public final class LocationRequest implements android.os.Parcelable {
@@ -4993,6 +4999,7 @@ package android.location {
     method @Deprecated @NonNull public String getProvider();
     method @Deprecated public float getSmallestDisplacement();
     method @NonNull public android.os.WorkSource getWorkSource();
+    method public boolean isAdasGnssBypass();
     method public boolean isHiddenFromAppOps();
     method public boolean isLocationSettingsIgnored();
     method public boolean isLowPower();
@@ -5018,6 +5025,7 @@ package android.location {
   }
 
   public static final class LocationRequest.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LocationRequest.Builder setHiddenFromAppOps(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public android.location.LocationRequest.Builder setLowPower(boolean);

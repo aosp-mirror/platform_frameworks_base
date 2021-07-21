@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.util.Log;
@@ -56,13 +57,18 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.statusbar.VibratorHelper;
 
+import java.io.PrintWriter;
+
 public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPlugin {
 
     private static final String TAG = "NavigationBarEdgePanel";
 
+    private static final boolean ENABLE_FAILSAFE = true;
+
     private static final long COLOR_ANIMATION_DURATION_MS = 120;
     private static final long DISAPPEAR_FADE_ANIMATION_DURATION_MS = 80;
     private static final long DISAPPEAR_ARROW_ANIMATION_DURATION_MS = 100;
+    private static final long FAILSAFE_DELAY_MS = 200;
 
     /**
      * The time required since the first vibration effect to automatically trigger a click
@@ -215,6 +221,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private long mVibrationTime;
     private int mScreenSize;
 
+    private final Handler mHandler = new Handler();
+    private final Runnable mFailsafeRunnable = this::onFailsafe;
+
     private DynamicAnimation.OnAnimationEndListener mSetGoneEndListener
             = new DynamicAnimation.OnAnimationEndListener() {
         @Override
@@ -364,6 +373,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
     @Override
     public void onDestroy() {
+        cancelFailsafe();
         mWindowManager.removeView(this);
         mRegionSamplingHelper.stop();
         mRegionSamplingHelper = null;
@@ -635,6 +645,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             animate().alpha(0f).setDuration(DISAPPEAR_FADE_ANIMATION_DURATION_MS)
                     .withEndAction(() -> setVisibility(GONE));
             mArrowDisappearAnimation.start();
+            // Schedule failsafe in case alpha end callback is not called
+            scheduleFailsafe();
         };
         if (mTranslationAnimation.isRunning()) {
             mTranslationAnimation.addEndListener(new DynamicAnimation.OnAnimationEndListener() {
@@ -648,6 +660,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                     }
                 }
             });
+            // Schedule failsafe in case mTranslationAnimation end callback is not called
+            scheduleFailsafe();
         } else {
             translationEnd.run();
         }
@@ -658,6 +672,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
         if (mTranslationAnimation.isRunning()) {
             mTranslationAnimation.addEndListener(mSetGoneEndListener);
+            // Schedule failsafe in case mTranslationAnimation end callback is not called
+            scheduleFailsafe();
         } else {
             setVisibility(GONE);
         }
@@ -683,6 +699,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         mTotalTouchDelta = 0;
         mVibrationTime = 0;
         setDesiredVerticalTransition(0, false /* animated */);
+        cancelFailsafe();
     }
 
     private void handleMoveEvent(MotionEvent event) {
@@ -867,7 +884,37 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         invalidate();
     }
 
+    private void scheduleFailsafe() {
+        if (!ENABLE_FAILSAFE) {
+            return;
+        }
+        cancelFailsafe();
+        mHandler.postDelayed(mFailsafeRunnable, FAILSAFE_DELAY_MS);
+    }
+
+    private void cancelFailsafe() {
+        mHandler.removeCallbacks(mFailsafeRunnable);
+    }
+
+    private void onFailsafe() {
+        setVisibility(GONE);
+    }
+
     private float dp(float dp) {
         return mDensity * dp;
+    }
+
+    @Override
+    public void dump(PrintWriter pw) {
+        pw.println("NavigationBarEdgePanel:");
+        pw.println("  mIsLeftPanel=" + mIsLeftPanel);
+        pw.println("  mTriggerBack=" + mTriggerBack);
+        pw.println("  mDragSlopPassed=" + mDragSlopPassed);
+        pw.println("  mCurrentAngle=" + mCurrentAngle);
+        pw.println("  mDesiredAngle=" + mDesiredAngle);
+        pw.println("  mCurrentTranslation=" + mCurrentTranslation);
+        pw.println("  mDesiredTranslation=" + mDesiredTranslation);
+        pw.println("  mTranslationAnimation running=" + mTranslationAnimation.isRunning());
+        mRegionSamplingHelper.dump(pw);
     }
 }

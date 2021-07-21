@@ -170,10 +170,13 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Unregister display organizer=%s uid=%d",
                         organizer.asBinder(), uid);
-                mOrganizersByFeatureIds.values().forEach((state) -> {
-                    if (state.mOrganizer.asBinder() == organizer.asBinder()) {
-                        state.destroy();
+                mOrganizersByFeatureIds.entrySet().removeIf((entry) -> {
+                    final boolean matches = entry.getValue().mOrganizer.asBinder()
+                            == organizer.asBinder();
+                    if (matches) {
+                        entry.getValue().destroy();
                     }
+                    return matches;
                 });
             }
         } finally {

@@ -467,9 +467,9 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void startProfileLocked(int userId) {
+        mRunningProfiles.add(userId);
         buildTvInputListLocked(userId, null);
         buildTvContentRatingSystemListLocked(userId);
-        mRunningProfiles.add(userId);
     }
 
     private void switchUser(int userId) {

@@ -27,4 +27,5 @@ public interface Udfps {
     void onPointerDown(int x, int y, float minor, float major);
     void onPointerUp();
     void onUiReady();
+    boolean isPointerDown();
 }

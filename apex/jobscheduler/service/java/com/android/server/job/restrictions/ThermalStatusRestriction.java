@@ -72,7 +72,7 @@ public class ThermalStatusRestriction extends JobRestriction {
                                 || (mThermalStatus < UPPER_THRESHOLD && status > UPPER_THRESHOLD);
                 mThermalStatus = status;
                 if (significantChange) {
-                    mService.onControllerStateChanged();
+                    mService.onControllerStateChanged(null);
                 }
             }
         });

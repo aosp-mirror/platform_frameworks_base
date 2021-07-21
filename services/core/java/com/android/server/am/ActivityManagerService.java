@@ -3355,7 +3355,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // control of all writes to the file in question.
 
         // We must complete all stack dumps within 20 seconds.
-        long remainingTime = 20 * 1000;
+        long remainingTime = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
         // As applications are usually interested with the ANR stack traces, but we can't share with
         // them the stack traces other than their own stacks. So after the very first PID is
@@ -5698,6 +5698,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Our own process gets to do everything.
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
+        }
+        if (uid != ROOT_UID) { // bypass the root
+            if (mPackageManagerInt.filterAppAccess(uid, Binder.getCallingUid())) {
+                return PackageManager.PERMISSION_DENIED;
+            }
         }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
@@ -8396,14 +8401,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         // assume our apps are happy - lazy create the list
         final List<ActivityManager.ProcessErrorStateInfo>[] errList = new List[1];
 
+        final int callingUid = Binder.getCallingUid();
         final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
-                Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED;
-        int userId = UserHandle.getUserId(Binder.getCallingUid());
+                callingUid) == PackageManager.PERMISSION_GRANTED;
+        int userId = UserHandle.getUserId(callingUid);
+
+        final boolean hasDumpPermission = ActivityManager.checkUidPermission(
+                android.Manifest.permission.DUMP, callingUid) == PackageManager.PERMISSION_GRANTED;
 
         synchronized (mProcLock) {
             // iterate across all processes
             mProcessList.forEachLruProcessesLOSP(false, app -> {
                 if (!allUsers && app.userId != userId) {
+                    return;
+                }
+                if (!hasDumpPermission && app.info.uid != callingUid) {
                     return;
                 }
                 final ProcessErrorStateRecord errState = app.mErrorState;
@@ -16389,6 +16401,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return mProcessList.getIsolatedProcessesLocked(uid);
             }
+        }
+
+        /** @see ActivityManagerService#sendIntentSender */
+        @Override
+        public int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
+                Intent intent, String resolvedType,
+                IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+            return ActivityManagerService.this.sendIntentSender(target, allowlistToken, code,
+                    intent, resolvedType, finishedReceiver, requiredPermission, options);
         }
     }
 

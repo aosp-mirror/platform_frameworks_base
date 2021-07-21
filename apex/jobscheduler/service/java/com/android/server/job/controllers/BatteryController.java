@@ -103,14 +103,8 @@ public final class BatteryController extends RestrictingController {
         boolean reportChange = false;
         for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
             final JobStatus ts = mTrackedTasks.valueAt(i);
-            boolean previous = ts.setChargingConstraintSatisfied(nowElapsed, stablePower);
-            if (previous != stablePower) {
-                reportChange = true;
-            }
-            previous = ts.setBatteryNotLowConstraintSatisfied(nowElapsed, batteryNotLow);
-            if (previous != batteryNotLow) {
-                reportChange = true;
-            }
+            reportChange |= ts.setChargingConstraintSatisfied(nowElapsed, stablePower);
+            reportChange |= ts.setBatteryNotLowConstraintSatisfied(nowElapsed, batteryNotLow);
         }
         if (stablePower || batteryNotLow) {
             // If one of our conditions has been satisfied, always schedule any newly ready jobs.
@@ -118,7 +112,7 @@ public final class BatteryController extends RestrictingController {
         } else if (reportChange) {
             // Otherwise, just let the job scheduler know the state has changed and take care of it
             // as it thinks is best.
-            mStateChangedListener.onControllerStateChanged();
+            mStateChangedListener.onControllerStateChanged(mTrackedTasks);
         }
     }
 

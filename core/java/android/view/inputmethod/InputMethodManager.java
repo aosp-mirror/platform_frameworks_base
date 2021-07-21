@@ -366,7 +366,7 @@ public final class InputMethodManager {
     final H mH;
 
     // Our generic input connection if the current target does not have its own.
-    final IInputContext mIInputContext;
+    private final IInputConnectionWrapper mIInputContext;
 
     private final int mDisplayId;
 
@@ -920,12 +920,9 @@ public final class InputMethodManager {
                             // that this happened and make sure our own editor's
                             // state is reset.
                             mRestartOnNextWindowFocus = true;
-                            try {
-                                // Note that finishComposingText() is allowed to run
-                                // even when we are not active.
-                                mIInputContext.finishComposingText();
-                            } catch (RemoteException e) {
-                            }
+                            // Note that finishComposingText() is allowed to run
+                            // even when we are not active.
+                            mIInputContext.finishComposingText();
                         }
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.

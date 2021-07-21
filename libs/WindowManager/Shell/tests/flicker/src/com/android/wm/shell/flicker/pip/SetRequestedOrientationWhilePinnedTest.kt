@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -83,13 +82,29 @@ class SetRequestedOrientationWhilePinnedTest(
 
     @FlakyTest
     @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    @FlakyTest
+    @Test
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    @FlakyTest
+    @Test
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
+
+    @FlakyTest
+    @Test
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
+
+    @FlakyTest
+    @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     @FlakyTest
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
@@ -97,7 +112,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun pipAppShowsOnTop() {
         testSpec.assertWmEnd {
@@ -105,7 +120,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
@@ -113,13 +128,13 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun pipAlwaysVisible() = testSpec.assertWm {
         this.isAppWindowVisible(pipApp.component)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {

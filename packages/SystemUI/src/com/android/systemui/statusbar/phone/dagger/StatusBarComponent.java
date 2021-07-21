@@ -89,8 +89,8 @@ public interface StatusBarComponent {
     AuthRippleController getAuthRippleController();
 
     /**
-     * Creates a SplitShadeStatusBarController.
+     * Creates a SplitShadeHeaderController.
      */
     @StatusBarScope
-    SplitShadeHeaderController getSplitShadeStatusBarController();
+    SplitShadeHeaderController getSplitShadeHeaderController();
 }

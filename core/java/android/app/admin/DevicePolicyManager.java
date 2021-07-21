@@ -10172,8 +10172,8 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is enabled on the work profile on supported
-     * carriers and devices. Admins can explicitly disable it with this API.
+     * By default, preferential network service is disabled on the work profile on supported
+     * carriers and devices. Admins can explicitly enable it with this API.
      * On fully-managed devices this method is unsupported because all traffic is considered
      * work traffic.
      *

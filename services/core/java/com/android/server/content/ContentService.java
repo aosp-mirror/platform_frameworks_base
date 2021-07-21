@@ -23,6 +23,7 @@ import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -823,6 +824,21 @@ public final class ContentService extends IContentService.Stub {
     }
 
     @Override
+    public String getSyncAdapterPackageAsUser(@NonNull String accountType,
+            @NonNull String authority, @UserIdInt int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read sync settings for user " + userId);
+        final int callingUid = Binder.getCallingUid();
+        final long identityToken = clearCallingIdentity();
+        try {
+            return getSyncManager().getSyncAdapterPackageAsUser(accountType, authority,
+                    callingUid, userId);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
     public boolean getSyncAutomatically(Account account, String providerName) {
         return getSyncAutomaticallyAsUser(account, providerName, UserHandle.getCallingUserId());
     }
@@ -1205,7 +1221,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null && callback != null) {
                 syncManager.getSyncStorageEngine().addStatusChangeListener(
-                        mask, UserHandle.getUserId(callingUid), callback);
+                        mask, callingUid, callback);
             }
         } finally {
             restoreCallingIdentity(identityToken);

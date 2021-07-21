@@ -1458,7 +1458,8 @@ public final class QuotaController extends StateController {
             final ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
             if (transactQuotaLocked(userId, packageName, nowElapsed, quota, credit)
                     && maybeUpdateConstraintForPkgLocked(nowElapsed, userId, packageName)) {
-                mStateChangedListener.onControllerStateChanged();
+                mStateChangedListener
+                        .onControllerStateChanged(mTrackedJobs.get(userId, packageName));
             }
         }
     }
@@ -1578,17 +1579,19 @@ public final class QuotaController extends StateController {
     }
 
     private void maybeUpdateAllConstraintsLocked() {
-        boolean changed = false;
+        final ArraySet<JobStatus> changedJobs = new ArraySet<>();
         final long nowElapsed = sElapsedRealtimeClock.millis();
         for (int u = 0; u < mTrackedJobs.numMaps(); ++u) {
             final int userId = mTrackedJobs.keyAt(u);
             for (int p = 0; p < mTrackedJobs.numElementsForKey(userId); ++p) {
                 final String packageName = mTrackedJobs.keyAt(u, p);
-                changed |= maybeUpdateConstraintForPkgLocked(nowElapsed, userId, packageName);
+                if (maybeUpdateConstraintForPkgLocked(nowElapsed, userId, packageName)) {
+                    changedJobs.addAll(mTrackedJobs.valueAt(u, p));
+                }
             }
         }
-        if (changed) {
-            mStateChangedListener.onControllerStateChanged();
+        if (changedJobs.size() > 0) {
+            mStateChangedListener.onControllerStateChanged(changedJobs);
         }
     }
 
@@ -1646,22 +1649,27 @@ public final class QuotaController extends StateController {
     private class UidConstraintUpdater implements Consumer<JobStatus> {
         private final SparseArrayMap<String, Integer> mToScheduleStartAlarms =
                 new SparseArrayMap<>();
-        public boolean wasJobChanged;
+        public final ArraySet<JobStatus> changedJobs = new ArraySet<>();
         long mUpdateTimeElapsed = 0;
 
         void prepare() {
             mUpdateTimeElapsed = sElapsedRealtimeClock.millis();
+            changedJobs.clear();
         }
 
         @Override
         public void accept(JobStatus jobStatus) {
-            wasJobChanged |= setConstraintSatisfied(
-                    jobStatus, mUpdateTimeElapsed, isWithinQuotaLocked(jobStatus));
+            if (setConstraintSatisfied(
+                    jobStatus, mUpdateTimeElapsed, isWithinQuotaLocked(jobStatus))) {
+                changedJobs.add(jobStatus);
+            }
             final boolean outOfEJQuota;
             if (jobStatus.isRequestedExpeditedJob()) {
                 final boolean isWithinEJQuota = isWithinEJQuotaLocked(jobStatus);
-                wasJobChanged |= setExpeditedConstraintSatisfied(
-                        jobStatus, mUpdateTimeElapsed, isWithinEJQuota);
+                if (setExpeditedConstraintSatisfied(
+                        jobStatus, mUpdateTimeElapsed, isWithinEJQuota)) {
+                    changedJobs.add(jobStatus);
+                }
                 outOfEJQuota = !isWithinEJQuota;
             } else {
                 outOfEJQuota = false;
@@ -1691,21 +1699,21 @@ public final class QuotaController extends StateController {
         }
 
         void reset() {
-            wasJobChanged = false;
             mToScheduleStartAlarms.clear();
         }
     }
 
     private final UidConstraintUpdater mUpdateUidConstraints = new UidConstraintUpdater();
 
-    private boolean maybeUpdateConstraintForUidLocked(final int uid) {
+    @GuardedBy("mLock")
+    @NonNull
+    private ArraySet<JobStatus> maybeUpdateConstraintForUidLocked(final int uid) {
         mUpdateUidConstraints.prepare();
         mService.getJobStore().forEachJobForSourceUid(uid, mUpdateUidConstraints);
 
         mUpdateUidConstraints.postProcess();
-        boolean changed = mUpdateUidConstraints.wasJobChanged;
         mUpdateUidConstraints.reset();
-        return changed;
+        return mUpdateUidConstraints.changedJobs;
     }
 
     /**
@@ -2320,7 +2328,8 @@ public final class QuotaController extends StateController {
                                 nowElapsed, debits, pendingReward)
                                 && maybeUpdateConstraintForPkgLocked(nowElapsed,
                                 mPkg.userId, mPkg.packageName)) {
-                            mStateChangedListener.onControllerStateChanged();
+                            mStateChangedListener.onControllerStateChanged(
+                                    mTrackedJobs.get(mPkg.userId, mPkg.packageName));
                         }
                     }
                     break;
@@ -2425,7 +2434,8 @@ public final class QuotaController extends StateController {
             }
             if (maybeUpdateConstraintForPkgLocked(sElapsedRealtimeClock.millis(),
                     userId, packageName)) {
-                mStateChangedListener.onControllerStateChanged();
+                mStateChangedListener
+                        .onControllerStateChanged(mTrackedJobs.get(userId, packageName));
             }
         }
         if (restrictedChanges.size() > 0) {
@@ -2459,8 +2469,9 @@ public final class QuotaController extends StateController {
                             t.onStateChangedLocked(nowElapsed, true);
                         }
                     }
-                    if (maybeUpdateConstraintForUidLocked(uid)) {
-                        mStateChangedListener.onControllerStateChanged();
+                    final ArraySet<JobStatus> changedJobs = maybeUpdateConstraintForUidLocked(uid);
+                    if (changedJobs.size() > 0) {
+                        mStateChangedListener.onControllerStateChanged(changedJobs);
                     }
                 }
             }
@@ -2558,7 +2569,8 @@ public final class QuotaController extends StateController {
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its quota.");
                             if (maybeUpdateConstraintForPkgLocked(sElapsedRealtimeClock.millis(),
                                     pkg.userId, pkg.packageName)) {
-                                mStateChangedListener.onControllerStateChanged();
+                                mStateChangedListener.onControllerStateChanged(
+                                        mTrackedJobs.get(pkg.userId, pkg.packageName));
                             }
                         } else {
                             // This could potentially happen if an old session phases out while a
@@ -2586,7 +2598,8 @@ public final class QuotaController extends StateController {
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its EJ quota.");
                             if (maybeUpdateConstraintForPkgLocked(sElapsedRealtimeClock.millis(),
                                     pkg.userId, pkg.packageName)) {
-                                mStateChangedListener.onControllerStateChanged();
+                                mStateChangedListener.onControllerStateChanged(
+                                        mTrackedJobs.get(pkg.userId, pkg.packageName));
                             }
                         } else {
                             // This could potentially happen if an old session phases out while a
@@ -2618,7 +2631,8 @@ public final class QuotaController extends StateController {
                         }
                         if (maybeUpdateConstraintForPkgLocked(sElapsedRealtimeClock.millis(),
                                 userId, packageName)) {
-                            mStateChangedListener.onControllerStateChanged();
+                            mStateChangedListener.onControllerStateChanged(
+                                    mTrackedJobs.get(userId, packageName));
                         }
                         break;
                     }
@@ -2680,8 +2694,10 @@ public final class QuotaController extends StateController {
                                     }
                                 }
                             }
-                            if (maybeUpdateConstraintForUidLocked(uid)) {
-                                mStateChangedListener.onControllerStateChanged();
+                            final ArraySet<JobStatus> changedJobs =
+                                    maybeUpdateConstraintForUidLocked(uid);
+                            if (changedJobs.size() > 0) {
+                                mStateChangedListener.onControllerStateChanged(changedJobs);
                             }
                         }
                         break;
@@ -2760,8 +2776,10 @@ public final class QuotaController extends StateController {
                                         t.onStateChangedLocked(nowElapsed, false);
                                     }
                                 }
-                                if (maybeUpdateConstraintForUidLocked(uid)) {
-                                    mStateChangedListener.onControllerStateChanged();
+                                final ArraySet<JobStatus> changedJobs =
+                                        maybeUpdateConstraintForUidLocked(uid);
+                                if (changedJobs.size() > 0) {
+                                    mStateChangedListener.onControllerStateChanged(changedJobs);
                                 }
                             }
                         }

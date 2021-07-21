@@ -83,6 +83,9 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type for removing PIP via the Shell, either via Dismiss bubble or Close. */
     public static final int TRANSIT_REMOVE_PIP = TRANSIT_FIRST_CUSTOM + 4;
 
+    /** Transition type for entering split by opening an app into side-stage. */
+    public static final int TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE = TRANSIT_FIRST_CUSTOM + 5;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;

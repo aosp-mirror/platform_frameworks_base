@@ -67,7 +67,6 @@ import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -362,7 +361,6 @@ public class Dependency {
     @Inject Lazy<DozeParameters> mDozeParameters;
     @Inject Lazy<IWallpaperManager> mWallpaperManager;
     @Inject Lazy<CommandQueue> mCommandQueue;
-    @Inject Lazy<Recents> mRecents;
     @Inject Lazy<RecordingController> mRecordingController;
     @Inject Lazy<ProtoTracer> mProtoTracer;
     @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
@@ -566,7 +564,6 @@ public class Dependency {
         mProviders.put(DozeParameters.class, mDozeParameters::get);
         mProviders.put(IWallpaperManager.class, mWallpaperManager::get);
         mProviders.put(CommandQueue.class, mCommandQueue::get);
-        mProviders.put(Recents.class, mRecents::get);
         mProviders.put(ProtoTracer.class, mProtoTracer::get);
         mProviders.put(DeviceConfigProxy.class, mDeviceConfigProxy::get);
         mProviders.put(TelephonyListenerManager.class, mTelephonyListenerManager::get);

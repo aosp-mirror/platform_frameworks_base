@@ -69,6 +69,10 @@
     <declare-styleable name="DateView">
         <attr name="datePattern" format="string" />
     </declare-styleable>
+    <declare-styleable name="VariableDateView">
+        <attr name="longDatePattern" format="string" />
+        <attr name="shortDatePattern" format="string" />
+    </declare-styleable>
     <declare-styleable name="PseudoGridView">
         <attr name="numColumns" format="integer" />
         <attr name="verticalSpacing" format="dimension" />
