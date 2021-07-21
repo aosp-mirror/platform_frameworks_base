@@ -815,7 +815,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
     /**
      * Perform the given action for each installed package for a user.
-     * Note that packages lock will be held while performin the actions.
+     * Note that packages lock will be held while performing the actions.
      */
     public abstract void forEachInstalledPackage(
             @NonNull Consumer<AndroidPackage> actionLocked, @UserIdInt int userId);

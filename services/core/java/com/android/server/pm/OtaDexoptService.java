@@ -23,6 +23,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.IOtaDexopt;
+import android.content.pm.PackageManagerInternal;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -33,6 +34,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -41,7 +43,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -371,8 +372,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             return;
         }
 
-        // Look into all packages.
-        Collection<AndroidPackage> pkgs = mPackageManagerService.getPackages();
+        // Make a copy of all packages and look into each package.
+        final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
+        final ArrayList<AndroidPackage> pkgs = new ArrayList<>();
+        pmInt.forEachPackage(pkgs::add);
         int packagePaths = 0;
         int pathsSuccessful = 0;
         for (AndroidPackage pkg : pkgs) {
@@ -398,7 +401,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 continue;
             }
 
-            PackageSetting pkgSetting = mPackageManagerService.getPackageSetting(pkg.getPackageName());
+            PackageSetting pkgSetting = pmInt.getPackageSetting(pkg.getPackageName());
             final String[] instructionSets = getAppDexInstructionSets(
                     AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
                     AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
