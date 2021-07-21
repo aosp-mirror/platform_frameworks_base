@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.DemuxAlpLengthType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -63,17 +63,17 @@ public final class AlpFilterConfiguration extends FilterConfiguration {
     /**
      * Length type not defined.
      */
-    public static final int LENGTH_TYPE_UNDEFINED = Constants.DemuxAlpLengthType.UNDEFINED;
+    public static final int LENGTH_TYPE_UNDEFINED = DemuxAlpLengthType.UNDEFINED;
     /**
      * Length does NOT include additional header.
      */
     public static final int LENGTH_TYPE_WITHOUT_ADDITIONAL_HEADER =
-            Constants.DemuxAlpLengthType.WITHOUT_ADDITIONAL_HEADER;
+            DemuxAlpLengthType.WITHOUT_ADDITIONAL_HEADER;
     /**
      * Length includes additional header.
      */
     public static final int LENGTH_TYPE_WITH_ADDITIONAL_HEADER =
-            Constants.DemuxAlpLengthType.WITH_ADDITIONAL_HEADER;
+            DemuxAlpLengthType.WITH_ADDITIONAL_HEADER;
 
 
     private final int mPacketType;

@@ -20,7 +20,6 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
@@ -56,25 +55,27 @@ public class DvrPlayback implements AutoCloseable {
     /**
      * The space of the playback is empty.
      */
-    public static final int PLAYBACK_STATUS_EMPTY = Constants.PlaybackStatus.SPACE_EMPTY;
+    public static final int PLAYBACK_STATUS_EMPTY =
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_EMPTY;
     /**
      * The space of the playback is almost empty.
      *
      * <p> the threshold is set in {@link DvrSettings}.
      */
     public static final int PLAYBACK_STATUS_ALMOST_EMPTY =
-            Constants.PlaybackStatus.SPACE_ALMOST_EMPTY;
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_ALMOST_EMPTY;
     /**
      * The space of the playback is almost full.
      *
      * <p> the threshold is set in {@link DvrSettings}.
      */
     public static final int PLAYBACK_STATUS_ALMOST_FULL =
-            Constants.PlaybackStatus.SPACE_ALMOST_FULL;
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_ALMOST_FULL;
     /**
      * The space of the playback is full.
      */
-    public static final int PLAYBACK_STATUS_FULL = Constants.PlaybackStatus.SPACE_FULL;
+    public static final int PLAYBACK_STATUS_FULL =
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_FULL;
 
     private static final String TAG = "TvTunerPlayback";
 

@@ -20,7 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendIsdbtBandwidth;
+import android.hardware.tv.tuner.FrontendIsdbtMode;
+import android.hardware.tv.tuner.FrontendIsdbtModulation;
 import android.media.tv.tuner.frontend.DvbtFrontendSettings.CodeRate;
 
 import java.lang.annotation.Retention;
@@ -44,27 +46,27 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     /**
      * Modulation undefined.
      */
-    public static final int MODULATION_UNDEFINED = Constants.FrontendIsdbtModulation.UNDEFINED;
+    public static final int MODULATION_UNDEFINED = FrontendIsdbtModulation.UNDEFINED;
     /**
      * Hardware is able to detect and set modulation automatically
      */
-    public static final int MODULATION_AUTO = Constants.FrontendIsdbtModulation.AUTO;
+    public static final int MODULATION_AUTO = FrontendIsdbtModulation.AUTO;
     /**
      * DQPSK Modulation.
      */
-    public static final int MODULATION_MOD_DQPSK = Constants.FrontendIsdbtModulation.MOD_DQPSK;
+    public static final int MODULATION_MOD_DQPSK = FrontendIsdbtModulation.MOD_DQPSK;
     /**
      * QPSK Modulation.
      */
-    public static final int MODULATION_MOD_QPSK = Constants.FrontendIsdbtModulation.MOD_QPSK;
+    public static final int MODULATION_MOD_QPSK = FrontendIsdbtModulation.MOD_QPSK;
     /**
      * 16QAM Modulation.
      */
-    public static final int MODULATION_MOD_16QAM = Constants.FrontendIsdbtModulation.MOD_16QAM;
+    public static final int MODULATION_MOD_16QAM = FrontendIsdbtModulation.MOD_16QAM;
     /**
      * 64QAM Modulation.
      */
-    public static final int MODULATION_MOD_64QAM = Constants.FrontendIsdbtModulation.MOD_64QAM;
+    public static final int MODULATION_MOD_64QAM = FrontendIsdbtModulation.MOD_64QAM;
 
 
     /** @hide */
@@ -77,23 +79,23 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     /**
      * Mode undefined.
      */
-    public static final int MODE_UNDEFINED = Constants.FrontendIsdbtMode.UNDEFINED;
+    public static final int MODE_UNDEFINED = FrontendIsdbtMode.UNDEFINED;
     /**
      * Hardware is able to detect and set Mode automatically.
      */
-    public static final int MODE_AUTO = Constants.FrontendIsdbtMode.AUTO;
+    public static final int MODE_AUTO = FrontendIsdbtMode.AUTO;
     /**
      * Mode 1
      */
-    public static final int MODE_1 = Constants.FrontendIsdbtMode.MODE_1;
+    public static final int MODE_1 = FrontendIsdbtMode.MODE_1;
     /**
      * Mode 2
      */
-    public static final int MODE_2 = Constants.FrontendIsdbtMode.MODE_2;
+    public static final int MODE_2 = FrontendIsdbtMode.MODE_2;
     /**
      * Mode 3
      */
-    public static final int MODE_3 = Constants.FrontendIsdbtMode.MODE_3;
+    public static final int MODE_3 = FrontendIsdbtMode.MODE_3;
 
 
     /** @hide */
@@ -107,23 +109,23 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     /**
      * Bandwidth undefined.
      */
-    public static final int BANDWIDTH_UNDEFINED = Constants.FrontendIsdbtBandwidth.UNDEFINED;
+    public static final int BANDWIDTH_UNDEFINED = FrontendIsdbtBandwidth.UNDEFINED;
     /**
      * Hardware is able to detect and set Bandwidth automatically.
      */
-    public static final int BANDWIDTH_AUTO = Constants.FrontendIsdbtBandwidth.AUTO;
+    public static final int BANDWIDTH_AUTO = FrontendIsdbtBandwidth.AUTO;
     /**
      * 8 MHz bandwidth.
      */
-    public static final int BANDWIDTH_8MHZ = Constants.FrontendIsdbtBandwidth.BANDWIDTH_8MHZ;
+    public static final int BANDWIDTH_8MHZ = FrontendIsdbtBandwidth.BANDWIDTH_8MHZ;
     /**
      * 7 MHz bandwidth.
      */
-    public static final int BANDWIDTH_7MHZ = Constants.FrontendIsdbtBandwidth.BANDWIDTH_7MHZ;
+    public static final int BANDWIDTH_7MHZ = FrontendIsdbtBandwidth.BANDWIDTH_7MHZ;
     /**
      * 6 MHz bandwidth.
      */
-    public static final int BANDWIDTH_6MHZ = Constants.FrontendIsdbtBandwidth.BANDWIDTH_6MHZ;
+    public static final int BANDWIDTH_6MHZ = FrontendIsdbtBandwidth.BANDWIDTH_6MHZ;
 
     private final int mModulation;
     private final int mBandwidth;

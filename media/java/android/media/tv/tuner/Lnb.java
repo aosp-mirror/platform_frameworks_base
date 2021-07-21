@@ -20,7 +20,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.LnbEventType;
+import android.hardware.tv.tuner.LnbPosition;
+import android.hardware.tv.tuner.LnbTone;
+import android.hardware.tv.tuner.LnbVoltage;
 import android.media.tv.tuner.Tuner.Result;
 
 import java.lang.annotation.Retention;
@@ -48,39 +51,39 @@ public class Lnb implements AutoCloseable {
     /**
      * LNB power voltage not set.
      */
-    public static final int VOLTAGE_NONE = Constants.LnbVoltage.NONE;
+    public static final int VOLTAGE_NONE = LnbVoltage.NONE;
     /**
      * LNB power voltage 5V.
      */
-    public static final int VOLTAGE_5V = Constants.LnbVoltage.VOLTAGE_5V;
+    public static final int VOLTAGE_5V = LnbVoltage.VOLTAGE_5V;
     /**
      * LNB power voltage 11V.
      */
-    public static final int VOLTAGE_11V = Constants.LnbVoltage.VOLTAGE_11V;
+    public static final int VOLTAGE_11V = LnbVoltage.VOLTAGE_11V;
     /**
      * LNB power voltage 12V.
      */
-    public static final int VOLTAGE_12V = Constants.LnbVoltage.VOLTAGE_12V;
+    public static final int VOLTAGE_12V = LnbVoltage.VOLTAGE_12V;
     /**
      * LNB power voltage 13V.
      */
-    public static final int VOLTAGE_13V = Constants.LnbVoltage.VOLTAGE_13V;
+    public static final int VOLTAGE_13V = LnbVoltage.VOLTAGE_13V;
     /**
      * LNB power voltage 14V.
      */
-    public static final int VOLTAGE_14V = Constants.LnbVoltage.VOLTAGE_14V;
+    public static final int VOLTAGE_14V = LnbVoltage.VOLTAGE_14V;
     /**
      * LNB power voltage 15V.
      */
-    public static final int VOLTAGE_15V = Constants.LnbVoltage.VOLTAGE_15V;
+    public static final int VOLTAGE_15V = LnbVoltage.VOLTAGE_15V;
     /**
      * LNB power voltage 18V.
      */
-    public static final int VOLTAGE_18V = Constants.LnbVoltage.VOLTAGE_18V;
+    public static final int VOLTAGE_18V = LnbVoltage.VOLTAGE_18V;
     /**
      * LNB power voltage 19V.
      */
-    public static final int VOLTAGE_19V = Constants.LnbVoltage.VOLTAGE_19V;
+    public static final int VOLTAGE_19V = LnbVoltage.VOLTAGE_19V;
 
     /** @hide */
     @IntDef(prefix = "TONE_",
@@ -91,11 +94,11 @@ public class Lnb implements AutoCloseable {
     /**
      * LNB tone mode not set.
      */
-    public static final int TONE_NONE = Constants.LnbTone.NONE;
+    public static final int TONE_NONE = LnbTone.NONE;
     /**
      * LNB continuous tone mode.
      */
-    public static final int TONE_CONTINUOUS = Constants.LnbTone.CONTINUOUS;
+    public static final int TONE_CONTINUOUS = LnbTone.CONTINUOUS;
 
     /** @hide */
     @IntDef(prefix = "POSITION_",
@@ -106,15 +109,15 @@ public class Lnb implements AutoCloseable {
     /**
      * LNB position is not defined.
      */
-    public static final int POSITION_UNDEFINED = Constants.LnbPosition.UNDEFINED;
+    public static final int POSITION_UNDEFINED = LnbPosition.UNDEFINED;
     /**
      * Position A of two-band LNBs
      */
-    public static final int POSITION_A = Constants.LnbPosition.POSITION_A;
+    public static final int POSITION_A = LnbPosition.POSITION_A;
     /**
      * Position B of two-band LNBs
      */
-    public static final int POSITION_B = Constants.LnbPosition.POSITION_B;
+    public static final int POSITION_B = LnbPosition.POSITION_B;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -126,22 +129,19 @@ public class Lnb implements AutoCloseable {
     /**
      * Outgoing Diseqc message overflow.
      */
-    public static final int EVENT_TYPE_DISEQC_RX_OVERFLOW =
-            Constants.LnbEventType.DISEQC_RX_OVERFLOW;
+    public static final int EVENT_TYPE_DISEQC_RX_OVERFLOW = LnbEventType.DISEQC_RX_OVERFLOW;
     /**
      * Outgoing Diseqc message isn't delivered on time.
      */
-    public static final int EVENT_TYPE_DISEQC_RX_TIMEOUT =
-            Constants.LnbEventType.DISEQC_RX_TIMEOUT;
+    public static final int EVENT_TYPE_DISEQC_RX_TIMEOUT = LnbEventType.DISEQC_RX_TIMEOUT;
     /**
      * Incoming Diseqc message has parity error.
      */
-    public static final int EVENT_TYPE_DISEQC_RX_PARITY_ERROR =
-            Constants.LnbEventType.DISEQC_RX_PARITY_ERROR;
+    public static final int EVENT_TYPE_DISEQC_RX_PARITY_ERROR = LnbEventType.DISEQC_RX_PARITY_ERROR;
     /**
      * LNB is overload.
      */
-    public static final int EVENT_TYPE_LNB_OVERLOAD = Constants.LnbEventType.LNB_OVERLOAD;
+    public static final int EVENT_TYPE_LNB_OVERLOAD = LnbEventType.LNB_OVERLOAD;
 
     private static final String TAG = "Lnb";
 
