@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcelable;
@@ -166,7 +167,7 @@ public class RemoteTransitionCompat implements Parcelable {
     }
 
     /** Adds a filter check that restricts this remote transition to home open transitions. */
-    public void addHomeOpenCheck() {
+    public void addHomeOpenCheck(ComponentName homeActivity) {
         if (mFilter == null) {
             mFilter = new TransitionFilter();
         }
@@ -174,6 +175,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 new TransitionFilter.Requirement[]{new TransitionFilter.Requirement(),
                         new TransitionFilter.Requirement()};
         mFilter.mRequirements[0].mActivityType = ACTIVITY_TYPE_HOME;
+        mFilter.mRequirements[0].mTopActivity = homeActivity;
         mFilter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
         mFilter.mRequirements[0].mOrder = CONTAINER_ORDER_TOP;
         mFilter.mRequirements[1].mActivityType = ACTIVITY_TYPE_STANDARD;
