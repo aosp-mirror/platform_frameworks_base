@@ -253,6 +253,7 @@ import android.app.servertransaction.TopResumedActivityChangeItem;
 import android.app.servertransaction.TransferSplashScreenViewStateItem;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
@@ -830,6 +831,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
 
+    // Tracking indicated launch root in order to propagate it among trampoline activities.
+    WindowContainerToken mLaunchRootTask;
+
     // Entering PiP is usually done in two phases, we put the task into pinned mode first and
     // SystemUi sets the pinned mode on activity after transition is done.
     boolean mWaitForEnteringPinnedMode;
@@ -1039,6 +1043,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix);
             pw.print("launchCookie=");
             pw.println(mLaunchCookie);
+        }
+        if (mLaunchRootTask != null) {
+            pw.print(prefix);
+            pw.print("mLaunchRootTask=");
+            pw.println(mLaunchRootTask);
         }
         pw.print(prefix); pw.print("mHaveState="); pw.print(mHaveState);
                 pw.print(" mIcicle="); pw.println(mIcicle);
@@ -1794,6 +1803,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
+            mLaunchRootTask = options.getLaunchRootTask();
         }
 
         mPersistentState = persistentState;
@@ -5962,6 +5972,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task != null) {
             task.setHasBeenVisible(true);
         }
+        // Clear indicated launch root task because there's no trampoline activity to expect after
+        // the windows are drawn.
+        mLaunchRootTask = null;
     }
 
     /** Called when the windows associated app window container are visible. */
@@ -6346,7 +6359,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void showStartingWindow(boolean taskSwitch) {
         showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
-                0 /* splashScreenTheme */, null);
+                false /* startActivity */, null);
     }
 
     /**
@@ -6381,7 +6394,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return null;
     }
 
-    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord) {
+    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord, boolean startActivity) {
+        if (sourceRecord == null && !startActivity) {
+            // Use empty style if this activity is not top activity. This could happen when adding
+            // a splash screen window to the warm start activity which is re-create because top is
+            // finishing.
+            final ActivityRecord above = task.getActivityAbove(this);
+            if (above != null) {
+                return true;
+            }
+        }
         if (mPendingOptions != null) {
             final int optionsStyle = mPendingOptions.getSplashScreenStyle();
             if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
@@ -6408,8 +6430,41 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return true;
     }
 
+    private int getSplashscreenTheme() {
+        // Find the splash screen theme. User can override the persisted theme by
+        // ActivityOptions.
+        String splashScreenThemeResName = mPendingOptions != null
+                ? mPendingOptions.getSplashScreenThemeResName() : null;
+        if (splashScreenThemeResName == null || splashScreenThemeResName.isEmpty()) {
+            try {
+                splashScreenThemeResName = mAtmService.getPackageManager()
+                        .getSplashScreenTheme(packageName, mUserId);
+            } catch (RemoteException ignore) {
+                // Just use the default theme
+            }
+        }
+        int splashScreenThemeResId = 0;
+        if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
+            try {
+                final Context packageContext = mAtmService.mContext
+                        .createPackageContext(packageName, 0);
+                splashScreenThemeResId = packageContext.getResources()
+                        .getIdentifier(splashScreenThemeResName, null, null);
+            } catch (PackageManager.NameNotFoundException
+                    | Resources.NotFoundException ignore) {
+                // Just use the default theme
+            }
+        }
+        return splashScreenThemeResId;
+    }
+
+    /**
+     * @param prev Previous activity which contains a starting window.
+     * @param startActivity Whether this activity is just created from starter.
+     * @param sourceRecord The source activity which start this activity.
+     */
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
-            int splashScreenTheme, ActivityRecord sourceRecord) {
+            boolean startActivity, ActivityRecord sourceRecord) {
         if (mTaskOverlay) {
             // We don't show starting window for overlay activities.
             return;
@@ -6423,8 +6478,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final CompatibilityInfo compatInfo =
                 mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo);
 
-        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord);
+        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord, startActivity);
 
+        final int splashScreenTheme = startActivity ? getSplashscreenTheme() : 0;
         final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
 

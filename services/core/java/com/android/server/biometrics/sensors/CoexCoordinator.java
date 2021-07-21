@@ -16,7 +16,13 @@
 
 package com.android.server.biometrics.sensors;
 
+import static com.android.server.biometrics.sensors.BiometricScheduler.sensorTypeToString;
+
 import android.annotation.NonNull;
+import android.util.Slog;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Singleton that contains the core logic for determining if haptics and authentication callbacks
@@ -27,6 +33,7 @@ import android.annotation.NonNull;
 public class CoexCoordinator {
 
     private static final String TAG = "BiometricCoexCoordinator";
+    private static final boolean DEBUG = true;
 
     /**
      * Callback interface notifying the owner of "results" from the CoexCoordinator's business
@@ -47,16 +54,49 @@ public class CoexCoordinator {
 
     private static CoexCoordinator sInstance;
 
-    private CoexCoordinator() {
-        // Singleton
-    }
-
     @NonNull
     static CoexCoordinator getInstance() {
         if (sInstance == null) {
             sInstance = new CoexCoordinator();
         }
         return sInstance;
+    }
+
+    // SensorType to AuthenticationClient map
+    private final Map<Integer, AuthenticationClient<?>> mClientMap;
+
+    private CoexCoordinator() {
+        // Singleton
+        mClientMap = new HashMap<>();
+    }
+
+    public void addAuthenticationClient(@BiometricScheduler.SensorType int sensorType,
+            @NonNull AuthenticationClient<?> client) {
+        if (DEBUG) {
+            Slog.d(TAG, "addAuthenticationClient(" + sensorTypeToString(sensorType) + ")"
+                    + ", client: " + client);
+        }
+
+        if (mClientMap.containsKey(sensorType)) {
+            Slog.w(TAG, "Overwriting existing client: " + mClientMap.get(sensorType)
+                    + " with new client: " + client);
+        }
+
+        mClientMap.put(sensorType, client);
+    }
+
+    public void removeAuthenticationClient(@BiometricScheduler.SensorType int sensorType,
+            @NonNull AuthenticationClient<?> client) {
+        if (DEBUG) {
+            Slog.d(TAG, "removeAuthenticationClient(" + sensorTypeToString(sensorType) + ")"
+                    + ", client: " + client);
+        }
+
+        if (!mClientMap.containsKey(sensorType)) {
+            Slog.e(TAG, "sensorType: " + sensorType + " does not exist in map. Client: " + client);
+            return;
+        }
+        mClientMap.remove(sensorType);
     }
 
     public void onAuthenticationSucceeded(@NonNull AuthenticationClient<?> client,

@@ -59,7 +59,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final QSCarrierGroupController mQSCarrierGroupController;
-    private final QuickQSPanelController mHeaderQsPanelController;
+    private final QuickQSPanelController mQuickQSPanelController;
     private final OngoingPrivacyChip mPrivacyChip;
     private final Clock mClockView;
     private final StatusBarIconController mStatusBarIconController;
@@ -140,7 +140,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mUiEventLogger = uiEventLogger;
         mStatusBarIconController = statusBarIconController;
         mDemoModeController = demoModeController;
-        mHeaderQsPanelController = quickQSPanelController;
+        mQuickQSPanelController = quickQSPanelController;
         mPrivacyLogger = privacyLogger;
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
@@ -201,12 +201,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
         mListening = listening;
 
-        mHeaderQsPanelController.setListening(listening);
-        if (mHeaderQsPanelController.isListening()) {
-            mHeaderQsPanelController.refreshAllTiles();
+        mQuickQSPanelController.setListening(listening);
+        if (mQuickQSPanelController.isListening()) {
+            mQuickQSPanelController.refreshAllTiles();
         }
 
-        if (mHeaderQsPanelController.switchTileLayout(false)) {
+        if (mQuickQSPanelController.switchTileLayout(false)) {
             mView.updateResources();
         }
 
@@ -258,7 +258,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     }
 
     public void setContentMargins(int marginStart, int marginEnd) {
-        mHeaderQsPanelController.setContentMargins(marginStart, marginEnd);
+        mQuickQSPanelController.setContentMargins(marginStart, marginEnd);
     }
 
     private static class ClockDemoModeReceiver implements DemoMode {

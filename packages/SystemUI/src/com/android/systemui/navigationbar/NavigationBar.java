@@ -1027,10 +1027,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     // Returns true if the bar mode is changed.
     private boolean updateBarMode(int barMode) {
         if (mNavigationBarMode != barMode) {
-            if (mNavigationBarMode == MODE_TRANSPARENT
-                    || mNavigationBarMode == MODE_LIGHTS_OUT_TRANSPARENT) {
-                mNavigationBarView.hideRecentsOnboarding();
-            }
             mNavigationBarMode = barMode;
             checkNavBarModes();
             if (mAutoHideController != null) {
@@ -1643,10 +1639,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // This receiver is unregistered when the view is detached, but on devices with multiple
-            // displays, it can sometimes still receive an ACTION_SCREEN_ON/ACTION_SCREEN_OFF on
-            // display switch, after it was detached, so this null check ensures no crash in that
-            // scenario.
+            // TODO(193941146): Currently unregistering a receiver through BroadcastDispatcher is
+            // async, but we've already cleared the fields. Just return early in this case.
             if (mNavigationBarView == null) {
                 return;
             }
