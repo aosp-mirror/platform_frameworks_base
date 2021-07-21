@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -509,7 +510,9 @@ public class UdfpsController implements DozeReceiver {
             @Nullable Vibrator vibrator,
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider,
-            @NonNull KeyguardStateController keyguardStateController) {
+            @NonNull KeyguardStateController keyguardStateController,
+            @NonNull DisplayManager displayManager,
+            @Main Handler mainHandler) {
         mContext = context;
         mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
@@ -535,10 +538,14 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
-        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
-            onOrientationChanged();
-            return Unit.INSTANCE;
-        });
+        mOrientationListener = new BiometricOrientationEventListener(
+                context,
+                () -> {
+                    onOrientationChanged();
+                    return Unit.INSTANCE;
+                },
+                displayManager,
+                mainHandler);
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -651,7 +658,8 @@ public class UdfpsController implements DozeReceiver {
         // Transform dimensions if the device is in landscape mode
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
-                if (animation instanceof UdfpsKeyguardViewController) {
+                if (animation instanceof UdfpsKeyguardViewController
+                        && mKeyguardUpdateMonitor.isGoingToSleep()) {
                     break;
                 }
                 mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
@@ -661,7 +669,8 @@ public class UdfpsController implements DozeReceiver {
                 break;
 
             case Surface.ROTATION_270:
-                if (animation instanceof UdfpsKeyguardViewController) {
+                if (animation instanceof UdfpsKeyguardViewController
+                        && mKeyguardUpdateMonitor.isGoingToSleep()) {
                     break;
                 }
                 mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
