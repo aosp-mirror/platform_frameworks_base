@@ -26,10 +26,14 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.app.TaskInfo;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.Choreographer;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -253,6 +257,7 @@ public class PipAnimationController {
                 mSurfaceControlTransactionFactory;
         private PipSurfaceTransactionHelper mSurfaceTransactionHelper;
         private @TransitionDirection int mTransitionDirection;
+        protected SurfaceControl mContentOverlay;
 
         private PipTransitionAnimator(TaskInfo taskInfo, SurfaceControl leash,
                 @AnimationType int animationType, Rect destinationBounds, T baseValue, T startValue,
@@ -329,6 +334,53 @@ public class PipAnimationController {
                 return mPipTransactionHandler.handlePipTransaction(leash, tx, destinationBounds);
             }
             return false;
+        }
+
+        SurfaceControl getContentOverlay() {
+            return mContentOverlay;
+        }
+
+        PipTransitionAnimator<T> setUseContentOverlay(Context context) {
+            final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
+            if (mContentOverlay != null) {
+                // remove existing content overlay if there is any.
+                tx.remove(mContentOverlay);
+                tx.apply();
+            }
+            mContentOverlay = new SurfaceControl.Builder(new SurfaceSession())
+                    .setCallsite("PipAnimation")
+                    .setName("PipContentOverlay")
+                    .setColorLayer()
+                    .build();
+            tx.show(mContentOverlay);
+            tx.setLayer(mContentOverlay, Integer.MAX_VALUE);
+            tx.setColor(mContentOverlay, getContentOverlayColor(context));
+            tx.setAlpha(mContentOverlay, 0f);
+            tx.reparent(mContentOverlay, mLeash);
+            tx.apply();
+            return this;
+        }
+
+        private float[] getContentOverlayColor(Context context) {
+            final TypedArray ta = context.obtainStyledAttributes(new int[] {
+                    android.R.attr.colorBackground });
+            try {
+                int colorAccent = ta.getColor(0, 0);
+                return new float[] {
+                        Color.red(colorAccent) / 255f,
+                        Color.green(colorAccent) / 255f,
+                        Color.blue(colorAccent) / 255f };
+            } finally {
+                ta.recycle();
+            }
+        }
+
+        /**
+         * Clears the {@link #mContentOverlay}, this should be done after the content overlay is
+         * faded out, such as in {@link PipTaskOrganizer#fadeOutAndRemoveOverlay}
+         */
+        void clearContentOverlay() {
+            mContentOverlay = null;
         }
 
         @VisibleForTesting
@@ -517,6 +569,9 @@ public class PipAnimationController {
                     final Rect base = getBaseValue();
                     final Rect start = getStartValue();
                     final Rect end = getEndValue();
+                    if (mContentOverlay != null) {
+                        tx.setAlpha(mContentOverlay, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);
+                    }
                     if (rotatedEndRect != null) {
                         // Animate the bounds in a different orientation. It only happens when
                         // switching between PiP and fullscreen.

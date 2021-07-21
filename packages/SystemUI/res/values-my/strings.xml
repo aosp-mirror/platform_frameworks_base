@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"၎င်းက သင့်ကင်မရာသုံးရန် ခွင့်ပြုထားသော အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် သုံးခွင့်ကို ပြန်ဖွင့်ပေးသည်။"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"၎င်းက သင့်ကင်မရာ (သို့) မိုက်ခရိုဖုန်းသုံးရန် ခွင့်ပြုထားသော အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် သုံးခွင့်ကို ပြန်ဖွင့်ပေးသည်။"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"စက်"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"အက်ပ်များကို ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"အက်ပ်များကို ပြောင်းရန် ညာဘက်သို့ ဖိဆွဲပါ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"အားသွင်းပြီး"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"အားသွင်းနေ"</string>
@@ -974,7 +972,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"မိုဘိုင်းဒေတာ"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> —<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>၊ <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ကို ပိတ်ထားသည်"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ပိတ်ထားသည်"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ဘလူးတုသ်ကို ပိတ်ထားသည်"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\"မနှောင့်ယှက်ရ\" ကို ပိတ်ထားသည်"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"မနှောင့်ယှက်ရ\" ကို အလိုအလျောက်စည်းမျဉ်း (<xliff:g id="ID_1">%s</xliff:g>) က ဖွင့်ခဲ့သည်။"</string>

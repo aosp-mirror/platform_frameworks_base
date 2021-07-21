@@ -55,6 +55,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @NonNull private final LockoutCache mLockoutCache;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ICancellationSignal mCancellationSignal;
+    private boolean mIsPointerDown;
 
     FingerprintAuthenticationClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
@@ -143,6 +144,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
+            mIsPointerDown = true;
             getFreshDaemon().onPointerDown(0 /* pointerId */, x, y, minor, major);
             if (getListener() != null) {
                 getListener().onUdfpsPointerDown(getSensorId());
@@ -155,6 +157,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @Override
     public void onPointerUp() {
         try {
+            mIsPointerDown = false;
             getFreshDaemon().onPointerUp(0 /* pointerId */);
             if (getListener() != null) {
                 getListener().onUdfpsPointerUp(getSensorId());
@@ -162,6 +165,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
+    }
+
+    @Override
+    public boolean isPointerDown() {
+        return mIsPointerDown;
     }
 
     @Override

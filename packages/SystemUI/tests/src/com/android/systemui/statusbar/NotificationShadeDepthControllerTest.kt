@@ -196,6 +196,13 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onDozeAmountChanged_appliesBlur() {
+        statusBarStateListener.onDozeAmountChanged(1f, 1f)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+    }
+
+    @Test
     fun setFullShadeTransition_appliesBlur_onlyIfSupported() {
         reset(blurUtils)
         `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->

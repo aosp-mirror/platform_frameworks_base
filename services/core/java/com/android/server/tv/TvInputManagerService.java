@@ -209,10 +209,11 @@ public final class TvInputManagerService extends SystemService {
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             private void buildTvInputList(String[] packages) {
+                int userId = getChangingUserId();
                 synchronized (mLock) {
-                    if (mCurrentUserId == getChangingUserId()) {
-                        buildTvInputListLocked(mCurrentUserId, packages);
-                        buildTvContentRatingSystemListLocked(mCurrentUserId);
+                    if (mCurrentUserId == userId || mRunningProfiles.contains(userId)) {
+                        buildTvInputListLocked(userId, packages);
+                        buildTvContentRatingSystemListLocked(userId);
                     }
                 }
             }
@@ -467,9 +468,9 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void startProfileLocked(int userId) {
+        mRunningProfiles.add(userId);
         buildTvInputListLocked(userId, null);
         buildTvContentRatingSystemListLocked(userId);
-        mRunningProfiles.add(userId);
     }
 
     private void switchUser(int userId) {

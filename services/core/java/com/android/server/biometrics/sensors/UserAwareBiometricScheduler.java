@@ -83,24 +83,26 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
     }
 
     @VisibleForTesting
-    UserAwareBiometricScheduler(@NonNull String tag,
+    UserAwareBiometricScheduler(@NonNull String tag, @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull IBiometricService biometricService,
             @NonNull CurrentUserRetriever currentUserRetriever,
-            @NonNull UserSwitchCallback userSwitchCallback) {
-        super(tag, gestureAvailabilityDispatcher, biometricService, LOG_NUM_RECENT_OPERATIONS);
+            @NonNull UserSwitchCallback userSwitchCallback,
+            @NonNull CoexCoordinator coexCoordinator) {
+        super(tag, sensorType, gestureAvailabilityDispatcher, biometricService,
+                LOG_NUM_RECENT_OPERATIONS, coexCoordinator);
 
         mCurrentUserRetriever = currentUserRetriever;
         mUserSwitchCallback = userSwitchCallback;
     }
 
-    public UserAwareBiometricScheduler(@NonNull String tag,
+    public UserAwareBiometricScheduler(@NonNull String tag, @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull CurrentUserRetriever currentUserRetriever,
             @NonNull UserSwitchCallback userSwitchCallback) {
-        this(tag, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
+        this(tag, sensorType, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
                 ServiceManager.getService(Context.BIOMETRIC_SERVICE)), currentUserRetriever,
-                userSwitchCallback);
+                userSwitchCallback, CoexCoordinator.getInstance());
     }
 
     @Override
