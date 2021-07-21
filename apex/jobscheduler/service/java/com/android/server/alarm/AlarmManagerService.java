@@ -2052,10 +2052,11 @@ public class AlarmManagerService extends SystemService {
                     + " -- package not allowed to start");
             return;
         }
+        final int callerProcState = mActivityManagerInternal.getUidProcessState(callingUid);
         removeLocked(operation, directReceiver, REMOVE_REASON_UNDEFINED);
         incrementAlarmCount(a.uid);
         setImplLocked(a);
-        MetricsHelper.pushAlarmScheduled(a);
+        MetricsHelper.pushAlarmScheduled(a, callerProcState);
     }
 
     /**
