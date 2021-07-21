@@ -149,6 +149,7 @@ import android.app.IActivityController;
 import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
 import android.app.TaskInfo;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -2032,6 +2033,156 @@ class Task extends TaskFragment {
             // placed properly when always on top state changes.
             taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */);
         }
+    }
+
+    void resolveLeafTaskOnlyOverrideConfigs(Configuration newParentConfig, Rect previousBounds) {
+        if (!isLeafTask()) {
+            return;
+        }
+
+        int windowingMode =
+                getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+        if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+            windowingMode = newParentConfig.windowConfiguration.getWindowingMode();
+        }
+        // Commit the resolved windowing mode so the canSpecifyOrientation won't get the old
+        // mode that may cause the bounds to be miscalculated, e.g. letterboxed.
+        getConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+        Rect outOverrideBounds = getResolvedOverrideConfiguration().windowConfiguration.getBounds();
+
+        if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // Use empty bounds to indicate "fill parent".
+            outOverrideBounds.setEmpty();
+            // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
+            // the parent or display is smaller than the size, the content may be cropped.
+            return;
+        }
+
+        adjustForMinimalTaskDimensions(outOverrideBounds, previousBounds, newParentConfig);
+        if (windowingMode == WINDOWING_MODE_FREEFORM) {
+            computeFreeformBounds(outOverrideBounds, newParentConfig);
+            return;
+        }
+    }
+
+    void adjustForMinimalTaskDimensions(@NonNull Rect bounds, @NonNull Rect previousBounds,
+            @NonNull Configuration parentConfig) {
+        int minWidth = mMinWidth;
+        int minHeight = mMinHeight;
+        // If the task has no requested minimal size, we'd like to enforce a minimal size
+        // so that the user can not render the task fragment too small to manipulate. We don't need
+        // to do this for the root pinned task as the bounds are controlled by the system.
+        if (!inPinnedWindowingMode()) {
+            final int defaultMinSizeDp = mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp;
+            final float density = (float) parentConfig.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+            final int defaultMinSize = (int) (defaultMinSizeDp * density);
+
+            if (minWidth == INVALID_MIN_SIZE) {
+                minWidth = defaultMinSize;
+            }
+            if (minHeight == INVALID_MIN_SIZE) {
+                minHeight = defaultMinSize;
+            }
+        }
+        if (bounds.isEmpty()) {
+            // If inheriting parent bounds, check if parent bounds adhere to minimum size. If they
+            // do, we can just skip.
+            final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
+            if (parentBounds.width() >= minWidth && parentBounds.height() >= minHeight) {
+                return;
+            }
+            bounds.set(parentBounds);
+        }
+        final boolean adjustWidth = minWidth > bounds.width();
+        final boolean adjustHeight = minHeight > bounds.height();
+        if (!(adjustWidth || adjustHeight)) {
+            return;
+        }
+
+        if (adjustWidth) {
+            if (!previousBounds.isEmpty() && bounds.right == previousBounds.right) {
+                bounds.left = bounds.right - minWidth;
+            } else {
+                // Either left bounds match, or neither match, or the previous bounds were
+                // fullscreen and we default to keeping left.
+                bounds.right = bounds.left + minWidth;
+            }
+        }
+        if (adjustHeight) {
+            if (!previousBounds.isEmpty() && bounds.bottom == previousBounds.bottom) {
+                bounds.top = bounds.bottom - minHeight;
+            } else {
+                // Either top bounds match, or neither match, or the previous bounds were
+                // fullscreen and we default to keeping top.
+                bounds.bottom = bounds.top + minHeight;
+            }
+        }
+    }
+
+    /** Computes bounds for {@link WindowConfiguration#WINDOWING_MODE_FREEFORM}. */
+    private void computeFreeformBounds(@NonNull Rect outBounds,
+            @NonNull Configuration newParentConfig) {
+        // by policy, make sure the window remains within parent somewhere
+        final float density =
+                ((float) newParentConfig.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
+        final Rect parentBounds =
+                new Rect(newParentConfig.windowConfiguration.getBounds());
+        final DisplayContent display = getDisplayContent();
+        if (display != null) {
+            // If a freeform window moves below system bar, there is no way to move it again
+            // by touch. Because its caption is covered by system bar. So we exclude them
+            // from root task bounds. and then caption will be shown inside stable area.
+            final Rect stableBounds = new Rect();
+            display.getStableRect(stableBounds);
+            parentBounds.intersect(stableBounds);
+        }
+
+        fitWithinBounds(outBounds, parentBounds,
+                (int) (density * WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP),
+                (int) (density * WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP));
+
+        // Prevent to overlap caption with stable insets.
+        final int offsetTop = parentBounds.top - outBounds.top;
+        if (offsetTop > 0) {
+            outBounds.offset(0, offsetTop);
+        }
+    }
+
+    /**
+     * Adjusts bounds to stay within root task bounds.
+     *
+     * Since bounds might be outside of root task bounds, this method tries to move the bounds in
+     * a way that keep them unchanged, but be contained within the root task bounds.
+     *
+     * @param bounds Bounds to be adjusted.
+     * @param rootTaskBounds Bounds within which the other bounds should remain.
+     * @param overlapPxX The amount of px required to be visible in the X dimension.
+     * @param overlapPxY The amount of px required to be visible in the Y dimension.
+     */
+    private static void fitWithinBounds(Rect bounds, Rect rootTaskBounds, int overlapPxX,
+            int overlapPxY) {
+        if (rootTaskBounds == null || rootTaskBounds.isEmpty() || rootTaskBounds.contains(bounds)) {
+            return;
+        }
+
+        // For each side of the parent (eg. left), check if the opposing side of the window (eg.
+        // right) is at least overlap pixels away. If less, offset the window by that difference.
+        int horizontalDiff = 0;
+        // If window is smaller than overlap, use it's smallest dimension instead
+        int overlapLR = Math.min(overlapPxX, bounds.width());
+        if (bounds.right < (rootTaskBounds.left + overlapLR)) {
+            horizontalDiff = overlapLR - (bounds.right - rootTaskBounds.left);
+        } else if (bounds.left > (rootTaskBounds.right - overlapLR)) {
+            horizontalDiff = -(overlapLR - (rootTaskBounds.right - bounds.left));
+        }
+        int verticalDiff = 0;
+        int overlapTB = Math.min(overlapPxY, bounds.width());
+        if (bounds.bottom < (rootTaskBounds.top + overlapTB)) {
+            verticalDiff = overlapTB - (bounds.bottom - rootTaskBounds.top);
+        } else if (bounds.top > (rootTaskBounds.bottom - overlapTB)) {
+            verticalDiff = -(overlapTB - (rootTaskBounds.bottom - bounds.top));
+        }
+        bounds.offset(horizontalDiff, verticalDiff);
     }
 
     /**
