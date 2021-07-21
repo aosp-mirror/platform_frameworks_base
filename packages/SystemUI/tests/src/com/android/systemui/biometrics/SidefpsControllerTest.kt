@@ -17,11 +17,13 @@
 package com.android.systemui.biometrics
 
 import android.hardware.biometrics.SensorProperties
+import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManagerGlobal
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.ISidefpsController
+import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
@@ -34,14 +36,15 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
-import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.any
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
@@ -64,6 +67,10 @@ class SidefpsControllerTest : SysuiTestCase() {
     lateinit var windowManager: WindowManager
     @Mock
     lateinit var sidefpsView: SidefpsView
+    @Mock
+    lateinit var displayManager: DisplayManager
+    @Mock
+    lateinit var handler: Handler
 
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var overlayController: ISidefpsController
@@ -94,7 +101,8 @@ class SidefpsControllerTest : SysuiTestCase() {
         )
 
         sideFpsController = SidefpsController(
-                mContext, layoutInflater, fingerprintManager, windowManager, executor
+                mContext, layoutInflater, fingerprintManager, windowManager, executor,
+                displayManager, handler
         )
 
         overlayController = ArgumentCaptor.forClass(ISidefpsController::class.java).apply {
@@ -104,14 +112,13 @@ class SidefpsControllerTest : SysuiTestCase() {
 
     @Test
     fun testSubscribesToOrientationChangesWhenShowingOverlay() {
-        assertThat(sideFpsController.mOrientationListener.enabled).isFalse()
-
         overlayController.show()
         executor.runAllReady()
-        assertThat(sideFpsController.mOrientationListener.enabled).isTrue()
+
+        verify(displayManager).registerDisplayListener(any(), eq(handler))
 
         overlayController.hide()
         executor.runAllReady()
-        assertThat(sideFpsController.mOrientationListener.enabled).isFalse()
+        verify(displayManager).unregisterDisplayListener(any())
     }
 }
