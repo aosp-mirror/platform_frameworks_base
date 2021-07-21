@@ -347,12 +347,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      */
     private int mVisibilityTransactionDepth;
 
-    /**
-     * Whether to the visibility updates that started from {@code RootWindowContainer} should be
-     * deferred.
-     */
-    private boolean mDeferRootVisibilityUpdate;
-
     private ActivityMetricsLogger mActivityMetricsLogger;
 
     /** Check if placing task or activity on specified display is allowed. */
@@ -2267,14 +2261,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /** Returns {@code true} if the caller is on the path to update visibility. */
     boolean inActivityVisibilityUpdate() {
         return mVisibilityTransactionDepth > 0;
-    }
-
-    void setDeferRootVisibilityUpdate(boolean deferUpdate) {
-        mDeferRootVisibilityUpdate = deferUpdate;
-    }
-
-    boolean isRootVisibilityUpdateDeferred() {
-        return mDeferRootVisibilityUpdate;
     }
 
     /**

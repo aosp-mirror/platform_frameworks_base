@@ -4500,10 +4500,8 @@ class Task extends TaskFragment {
             mAtmService.continueWindowLayout();
         }
 
-        if (!mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
-            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            mRootWindowContainer.resumeFocusedTasksTopActivities();
-        }
+        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+        mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     void resumeNextFocusAfterReparent() {
