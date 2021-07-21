@@ -293,6 +293,40 @@ public class CoexCoordinatorTest {
     }
 
     @Test
+    public void testKeyguard_udfpsRejected_thenFaceRejected() {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
+        when(faceClient.isKeyguard()).thenReturn(true);
+        when(faceClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+
+        AuthenticationClient<?> udfpsClient = mock(AuthenticationClient.class,
+                withSettings().extraInterfaces(Udfps.class));
+        when(udfpsClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+        when(udfpsClient.isKeyguard()).thenReturn(true);
+        when(((Udfps) udfpsClient).isPointerDown()).thenReturn(true);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_UDFPS, udfpsClient);
+
+        mCoexCoordinator.onAuthenticationRejected(0 /* currentTimeMillis */, udfpsClient,
+                LockoutTracker.LOCKOUT_NONE, mCallback);
+        // Client becomes paused, but finger does not necessarily lift, since we suppress the haptic
+        when(udfpsClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED_PAUSED);
+        verify(mCallback, never()).sendHapticFeedback();
+        verify(mCallback).handleLifecycleAfterAuth();
+
+        // Then face rejected. Note that scheduler leaves UDFPS in the CoexCoordinator since
+        // unlike face, its lifecycle becomes "paused" instead of "finished".
+        CoexCoordinator.Callback faceCallback = mock(CoexCoordinator.Callback.class);
+        mCoexCoordinator.onAuthenticationRejected(1 /* currentTimeMillis */, faceClient,
+                LockoutTracker.LOCKOUT_NONE, faceCallback);
+        verify(faceCallback).sendHapticFeedback();
+        verify(faceCallback).sendAuthenticationResult(eq(false) /* addAuthTokenIfStrong */);
+        verify(mCallback, never()).sendHapticFeedback();
+    }
+
+    @Test
     public void testNonKeyguard_rejectAndNotLockedOut() {
         mCoexCoordinator.reset();
 
