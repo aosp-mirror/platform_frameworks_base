@@ -179,14 +179,12 @@ import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -4163,26 +4161,25 @@ class Task extends WindowContainer<WindowContainer> {
         return info;
     }
 
-    StartingWindowInfo getStartingWindowInfo() {
+    /**
+     * Returns a {@link StartingWindowInfo} with information from this task and the target activity.
+     * @param activity Target activity which to show the starting window.
+     */
+    StartingWindowInfo getStartingWindowInfo(ActivityRecord activity) {
         final StartingWindowInfo info = new StartingWindowInfo();
         info.taskInfo = getTaskInfo();
 
         info.isKeyguardOccluded =
             mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
-        final ActivityRecord topActivity = getTopMostActivity();
-        if (topActivity != null) {
-            info.startingWindowTypeParameter =
-                    topActivity.mStartingData != null
-                            ? topActivity.mStartingData.mTypeParams
-                            : 0;
-            final WindowState mainWindow = topActivity.findMainWindow();
-            if (mainWindow != null) {
-                info.mainWindowLayoutParams = mainWindow.getAttrs();
-            }
-            // If the developer has persist a different configuration, we need to override it to the
-            // starting window because persisted configuration does not effect to Task.
-            info.taskInfo.configuration.setTo(topActivity.getConfiguration());
+
+        info.startingWindowTypeParameter = activity.mStartingData.mTypeParams;
+        final WindowState mainWindow = activity.findMainWindow();
+        if (mainWindow != null) {
+            info.mainWindowLayoutParams = mainWindow.getAttrs();
         }
+        // If the developer has persist a different configuration, we need to override it to the
+        // starting window because persisted configuration does not effect to Task.
+        info.taskInfo.configuration.setTo(activity.getConfiguration());
         final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
         if (topFullscreenActivity != null) {
             final WindowState topFullscreenOpaqueWindow =
@@ -6691,33 +6688,8 @@ class Task extends WindowContainer<WindowContainer> {
                     }
                 }
 
-                // Find the splash screen theme. User can override the persisted theme by
-                // ActivityOptions.
-                String splashScreenThemeResName = options != null
-                        ? options.getSplashScreenThemeResName() : null;
-                if (splashScreenThemeResName == null || splashScreenThemeResName.isEmpty()) {
-                    try {
-                        splashScreenThemeResName = mAtmService.getPackageManager()
-                                .getSplashScreenTheme(r.packageName, r.mUserId);
-                    } catch (RemoteException ignore) {
-                        // Just use the default theme
-                    }
-                }
-                int splashScreenThemeResId = 0;
-                if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
-                    try {
-                        final Context packageContext = mAtmService.mContext
-                                .createPackageContext(r.packageName, 0);
-                        splashScreenThemeResId = packageContext.getResources()
-                                .getIdentifier(splashScreenThemeResName, null, null);
-                    } catch (PackageManager.NameNotFoundException
-                            | Resources.NotFoundException ignore) {
-                        // Just use the default theme
-                    }
-                }
-
                 r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
-                        splashScreenThemeResId, sourceRecord);
+                        true /* startActivity */, sourceRecord);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
