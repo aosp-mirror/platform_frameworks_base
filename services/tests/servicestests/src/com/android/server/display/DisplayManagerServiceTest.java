@@ -67,6 +67,8 @@ import com.android.server.lights.LightsManager;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import com.google.common.collect.ImmutableMap;
+
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -82,6 +84,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
@@ -223,7 +226,8 @@ public class DisplayManagerServiceTest {
                     break;
                 }
                 case DisplayViewport.VIEWPORT_EXTERNAL: {
-                    fail("EXTERNAL viewport should not exist.");
+                    // External view port is present for auto devices in the form of instrument
+                    // cluster.
                     break;
                 }
                 case DisplayViewport.VIEWPORT_VIRTUAL: {
@@ -259,9 +263,14 @@ public class DisplayManagerServiceTest {
         final int displayIds[] = bs.getDisplayIds();
         final int size = displayIds.length;
         assertTrue(size > 0);
+
+        Map<Integer, Integer> expectedDisplayTypeToViewPortTypeMapping = ImmutableMap.of(
+                Display.TYPE_INTERNAL, DisplayViewport.VIEWPORT_INTERNAL,
+                Display.TYPE_EXTERNAL, DisplayViewport.VIEWPORT_EXTERNAL
+        );
         for (int i = 0; i < size; i++) {
             DisplayInfo info = bs.getDisplayInfo(displayIds[i]);
-            assertEquals(info.type, Display.TYPE_INTERNAL);
+            assertTrue(expectedDisplayTypeToViewPortTypeMapping.keySet().contains(info.type));
         }
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
@@ -281,13 +290,13 @@ public class DisplayManagerServiceTest {
         // Now verify that each viewport's displayId is valid.
         Arrays.sort(displayIds);
         for (int i = 0; i < viewportSize; i++) {
-            DisplayViewport internalViewport = viewports.get(i);
-
-            // INTERNAL is the only one actual display.
-            assertNotNull(internalViewport);
-            assertEquals(DisplayViewport.VIEWPORT_INTERNAL, internalViewport.type);
-            assertTrue(internalViewport.valid);
-            assertTrue(Arrays.binarySearch(displayIds, internalViewport.displayId) >= 0);
+            DisplayViewport viewport = viewports.get(i);
+            assertNotNull(viewport);
+            DisplayInfo displayInfo = bs.getDisplayInfo(viewport.displayId);
+            assertTrue(expectedDisplayTypeToViewPortTypeMapping.get(displayInfo.type)
+                    == viewport.type);
+            assertTrue(viewport.valid);
+            assertTrue(Arrays.binarySearch(displayIds, viewport.displayId) >= 0);
         }
     }
 
