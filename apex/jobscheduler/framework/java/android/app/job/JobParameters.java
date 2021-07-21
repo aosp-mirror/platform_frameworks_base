@@ -44,6 +44,9 @@ import java.lang.annotation.RetentionPolicy;
 public class JobParameters implements Parcelable {
 
     /** @hide */
+    public static final int INTERNAL_STOP_REASON_UNKNOWN = -1;
+
+    /** @hide */
     public static final int INTERNAL_STOP_REASON_CANCELED =
             JobProtoEnums.INTERNAL_STOP_REASON_CANCELLED; // 0.
     /** @hide */
@@ -106,6 +109,7 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public static final int[] JOB_STOP_REASON_CODES = {
+            INTERNAL_STOP_REASON_UNKNOWN,
             INTERNAL_STOP_REASON_CANCELED,
             INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
             INTERNAL_STOP_REASON_PREEMPT,
@@ -269,7 +273,7 @@ public class JobParameters implements Parcelable {
     private final Network network;
 
     private int mStopReason = STOP_REASON_UNDEFINED;
-    private int mInternalStopReason; // Default value is REASON_CANCELED
+    private int mInternalStopReason = INTERNAL_STOP_REASON_UNKNOWN;
     private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */

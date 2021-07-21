@@ -785,6 +785,24 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         verify(mKeyguardStatusViewController, never()).displayClock(SMALL);
     }
 
+    @Test
+    public void testDisplaysSmallClockOnLockscreenInSplitShadeWhenMediaIsPlaying() {
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade();
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+
+        // one notification + media player visible
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        triggerPositionClockAndNotifications();
+        verify(mKeyguardStatusViewController).displayClock(SMALL);
+
+        // only media player visible
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        triggerPositionClockAndNotifications();
+        verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL);
+        verify(mKeyguardStatusViewController, never()).displayClock(LARGE);
+    }
+
     private void triggerPositionClockAndNotifications() {
         mNotificationPanelViewController.closeQs();
     }

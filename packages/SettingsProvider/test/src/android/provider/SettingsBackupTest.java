@@ -652,7 +652,9 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.COMPANION_NAME,
                     Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
                     Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
-                    Settings.Global.Wearable.COMPANION_OS_VERSION);
+                    Settings.Global.Wearable.COMPANION_OS_VERSION,
+                    Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
+                    Settings.Global.Wearable.SETUP_LOCALE);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

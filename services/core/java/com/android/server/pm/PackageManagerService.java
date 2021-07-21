@@ -240,6 +240,7 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
@@ -2131,6 +2132,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @LiveImplementation(override = LiveImplementation.MANDATORY)
         boolean filterAppAccess(String packageName, int callingUid, int userId);
         @LiveImplementation(override = LiveImplementation.MANDATORY)
+        boolean filterAppAccess(int uid, int callingUid);
+        @LiveImplementation(override = LiveImplementation.MANDATORY)
         void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
     }
 
@@ -2623,8 +2626,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         a, flags, ps.readUserState(userId), userId, ps);
             }
             if (resolveComponentName().equals(component)) {
-                return PackageParser.generateActivityInfo(
-                        mResolveActivity, flags, new PackageUserState(), userId);
+                return PackageInfoWithoutStateUtils.generateDelegateActivityInfo(mResolveActivity,
+                        flags, new PackageUserState(), userId);
             }
             return null;
         }
@@ -3274,8 +3277,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 return result;
             }
             final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-            ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
-                    instantAppInstallerActivity(), 0, ps.readUserState(userId), userId);
+            ephemeralInstaller.activityInfo =
+                    PackageInfoWithoutStateUtils.generateDelegateActivityInfo(
+                            instantAppInstallerActivity(), 0 /*flags*/, ps.readUserState(userId),
+                            userId);
             ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                     | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
             // add a non-generic filter
@@ -3358,8 +3363,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ai.setVersionCode(ps.versionCode);
                 ai.flags = ps.pkgFlags;
                 ai.privateFlags = ps.pkgPrivateFlags;
-                pi.applicationInfo =
-                        PackageParser.generateApplicationInfo(ai, flags, state, userId);
+                pi.applicationInfo = PackageInfoWithoutStateUtils.generateDelegateApplicationInfo(
+                        ai, flags, state, userId);
 
                 if (DEBUG_PACKAGE_INFO) Log.v(TAG, "ps.pkg is n/a for ["
                         + ps.name + "]. Provides a minimum info.");
@@ -4654,6 +4659,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     userId);
         }
 
+        public boolean filterAppAccess(int uid, int callingUid) {
+            final int userId = UserHandle.getUserId(uid);
+            final int appId = UserHandle.getAppId(uid);
+            final Object setting = mSettings.getSettingLPr(appId);
+
+            if (setting instanceof SharedUserSetting) {
+                return shouldFilterApplicationLocked(
+                        (SharedUserSetting) setting, callingUid, userId);
+            } else if (setting == null
+                    || setting instanceof PackageSetting) {
+                return shouldFilterApplicationLocked(
+                        (PackageSetting) setting, callingUid, userId);
+            }
+            return false;
+        }
+
         public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
             final String packageName = dumpState.getTargetPackageName();
             final boolean checkin = dumpState.isCheckIn();
@@ -4998,6 +5019,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public final boolean filterAppAccess(String packageName, int callingUid, int userId) {
             synchronized (mLock) {
                 return super.filterAppAccess(packageName, callingUid, userId);
+            }
+        }
+        public final boolean filterAppAccess(int uid, int callingUid) {
+            synchronized (mLock) {
+                return super.filterAppAccess(uid, callingUid);
             }
         }
         public final void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
@@ -5366,6 +5392,14 @@ public class PackageManagerService extends IPackageManager.Stub
             ThreadComputer current = snapshot();
             try {
                 return current.mComputer.filterAppAccess(packageName, callingUid, userId);
+            } finally {
+                current.release();
+            }
+        }
+        public final boolean filterAppAccess(int uid, int callingUid) {
+            ThreadComputer current = snapshot();
+            try {
+                return current.mComputer.filterAppAccess(uid, callingUid);
             } finally {
                 current.release();
             }
@@ -24440,7 +24474,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
                 android.provider.Settings.Global.COMPATIBILITY_MODE, 1) == 1;
-        PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
+        ParsingPackageUtils.setCompatibilityModeEnabled(compatibilityModeEnabled);
 
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
@@ -27088,6 +27122,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.filterAppAccess(packageName, callingUid, userId);
     }
 
+    private boolean filterAppAccess(int uid, int callingUid) {
+        return mComputer.filterAppAccess(uid, callingUid);
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
@@ -27168,6 +27206,11 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(String packageName, int callingUid, int userId) {
             return PackageManagerService.this.filterAppAccess(packageName, callingUid, userId);
+        }
+
+        @Override
+        public boolean filterAppAccess(int uid, int callingUid) {
+            return PackageManagerService.this.filterAppAccess(uid, callingUid);
         }
 
         @Override

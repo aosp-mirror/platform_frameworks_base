@@ -660,7 +660,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @hide
      */
-    // TODO: @SystemApi
+    @SystemApi
     public boolean isAdasGnssBypass() {
         return mAdasGnssBypass;
     }
@@ -1139,7 +1139,7 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        // TODO: @SystemApi
+        @SystemApi
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;

@@ -31,7 +31,7 @@
             android:directBootAware="true">
 
         <receiver android:name=".TemporaryFileManager"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -76,7 +76,7 @@
 
         <receiver android:name=".InstallEventReceiver"
                 android:permission="android.permission.INSTALL_PACKAGES"
-                android:exported="true">
+                android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="com.android.packageinstaller.ACTION_INSTALL_COMMIT" />
             </intent-filter>
@@ -106,14 +106,14 @@
 
         <receiver android:name=".UninstallEventReceiver"
             android:permission="android.permission.INSTALL_PACKAGES"
-            android:exported="true">
+            android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="com.android.packageinstaller.ACTION_UNINSTALL_COMMIT" />
             </intent-filter>
         </receiver>
 
         <receiver android:name=".PackageInstalledReceiver"
-                android:exported="true">
+                android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <data android:scheme="package" />

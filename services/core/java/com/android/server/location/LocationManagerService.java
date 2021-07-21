@@ -771,14 +771,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         // sanitize request
         LocationRequest.Builder sanitized = new LocationRequest.Builder(request);
 
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
-                && GPS_PROVIDER.equals(provider)
-                && ArrayUtils.contains(mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_locationDriverAssistancePackageNames),
-                identity.getPackageName())) {
-            sanitized.setAdasGnssBypass(true);
-        }
-
         if (!CompatChanges.isChangeEnabled(LOW_POWER_EXCEPTIONS, Binder.getCallingUid())) {
             if (mContext.checkCallingPermission(permission.LOCATION_HARDWARE)
                     != PERMISSION_GRANTED) {
@@ -913,14 +905,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
             CallerIdentity identity) {
         // sanitize request
         LastLocationRequest.Builder sanitized = new LastLocationRequest.Builder(request);
-
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
-                && GPS_PROVIDER.equals(provider)
-                && ArrayUtils.contains(mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_locationDriverAssistancePackageNames),
-                identity.getPackageName())) {
-            sanitized.setAdasGnssBypass(true);
-        }
 
         request = sanitized.build();
 

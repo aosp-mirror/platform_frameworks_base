@@ -48,6 +48,10 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -56,6 +60,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings;
 import com.android.settingslib.net.SignalStrengthUtil;
+import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -77,10 +82,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 public class InternetDialogController implements WifiEntry.DisconnectCallback,
         NetworkController.AccessPointController.AccessPointCallback {
@@ -104,7 +105,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
     private WifiManager mWifiManager;
     private Context mContext;
-    private ActivityStarter mActivityStarter;
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
     private ConnectivityManager mConnectivityManager;
@@ -118,13 +118,16 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private IntentFilter mWifiStateFilter;
     private InternetDialogCallback mCallback;
     private List<WifiEntry> mWifiEntry;
-    private WifiEntry mConnectedEntry;
     private UiEventLogger mUiEventLogger;
     private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+    @VisibleForTesting
+    protected ActivityStarter mActivityStarter;
+    @VisibleForTesting
+    protected WifiEntry mConnectedEntry;
     @VisibleForTesting
     protected SubscriptionManager.OnSubscriptionsChangedListener mOnSubscriptionsChangedListener;
     @VisibleForTesting
@@ -224,6 +227,17 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     @VisibleForTesting
     protected Intent getSettingsIntent() {
         return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    protected Intent getWifiDetailsSettingsIntent() {
+        String key = mConnectedEntry == null ? null : mConnectedEntry.getKey();
+        if (TextUtils.isEmpty(key)) {
+            if (DEBUG) {
+                Log.d(TAG, "connected entry's key is empty");
+            }
+            return null;
+        }
+        return WifiUtils.getWifiDetailsSettingsIntent(key);
     }
 
     CharSequence getDialogTitleText() {
@@ -531,6 +545,14 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     void launchNetworkSetting() {
         mCallback.dismissDialog();
         mActivityStarter.postStartActivityDismissingKeyguard(getSettingsIntent(), 0);
+    }
+
+    void launchWifiNetworkDetailsSetting() {
+        Intent intent = getWifiDetailsSettingsIntent();
+        if (intent != null) {
+            mCallback.dismissDialog();
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
+        }
     }
 
     void connectCarrierNetwork() {

@@ -3648,7 +3648,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         inOrder.verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         synchronized (mQuotaController.mLock) {
             assertEquals(remainingTimeMs / 2,
                     mQuotaController.getRemainingExecutionTimeLocked(jobBg));
@@ -3660,7 +3660,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(remainingTimeMs / 2 + 1);
         inOrder.verify(mJobSchedulerService,
                 timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         // Top job should still be allowed to run.
         assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
@@ -3674,7 +3674,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         trackJobs(jobFg, jobTop);
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobTop);
@@ -3693,7 +3693,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         // App is now in background and out of quota. Fg should now change to out of quota since it
         // wasn't started. Top should remain in quota since it started when the app was in TOP.
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
@@ -3731,7 +3731,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         assertEquals(JobSchedulerService.sElapsedRealtimeClock.millis(),
                 jobStatus.getWhenStandbyDeferred());
@@ -3775,7 +3775,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         assertTrue(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         // The job used up the remaining quota, but in that time, the same amount of time in the
         // old TimingSession also fell out of the quota window, so it should still have the same
@@ -3797,7 +3797,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(12 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         verify(handler, never()).sendMessageDelayed(any(), anyInt());
     }
@@ -5404,7 +5404,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         inOrder.verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         synchronized (mQuotaController.mLock) {
             assertEquals(remainingTimeMs / 2,
                     mQuotaController.getRemainingEJExecutionTimeLocked(
@@ -5415,7 +5415,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(remainingTimeMs / 2 + 1);
         inOrder.verify(mJobSchedulerService,
                 timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         // Top should still be "in quota" since it started before the app ran on top out of quota.
         assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
@@ -5440,7 +5440,7 @@ public class QuotaControllerTest {
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         // Confirm QC recognizes that jobUnstarted has changed from out-of-quota to in-quota.
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         trackJobs(jobTop2, jobFg);
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobTop2);
@@ -5461,7 +5461,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         // App is now in background and out of quota. Fg should now change to out of quota since it
         // wasn't started. Top should remain in quota since it started when the app was in TOP.
         assertTrue(jobTop2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
@@ -5601,7 +5601,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged();
+                .onControllerStateChanged(any());
         assertTrue(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         // The job used up the remaining quota, but in that time, the same amount of time in the
         // old TimingSession also fell out of the quota window, so it should still have the same

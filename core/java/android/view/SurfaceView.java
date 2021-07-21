@@ -1081,7 +1081,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             || mWindowSpaceTop != mLocation[1];
         final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
             || getHeight() != mScreenRect.height();
-        final boolean hintChanged = viewRoot.getSurfaceTransformHint() != mTransformHint;
+        final boolean hintChanged = (viewRoot.getSurfaceTransformHint() != mTransformHint)
+                && mRequestedVisible;
 
         if (creating || formatChanged || sizeChanged || visibleChanged ||
                 (mUseAlpha && alphaChanged) || windowVisibleChanged ||
@@ -1227,7 +1228,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             // Therefore, we must explicitly recreate the {@link Surface} in these
             // cases.
             if (mUseBlastAdapter) {
-                mSurface.transferFrom(mBlastBufferQueue.createSurfaceWithHandle());
+                if (mBlastBufferQueue != null) {
+                    mSurface.transferFrom(mBlastBufferQueue.createSurfaceWithHandle());
+                }
             } else {
                 mSurface.createFrom(mSurfaceControl);
             }
@@ -1237,7 +1240,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void setBufferSize(Transaction transaction) {
         if (mUseBlastAdapter) {
             mBlastSurfaceControl.setTransformHint(mTransformHint);
-            mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
+            if (mBlastBufferQueue != null) {
+                mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight,
+                        mFormat);
+            }
         } else {
             transaction.setBufferSize(mSurfaceControl, mSurfaceWidth, mSurfaceHeight);
         }

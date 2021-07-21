@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -307,6 +308,13 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                 dataOutputStream.writeLong(pkg.getLongVersionCode());
                 dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
                         pkg.getPackageName(), userId));
+
+                final List<String> requestedPermissions = pkg.getRequestedPermissions();
+                final int requestedPermissionsSize = requestedPermissions.size();
+                dataOutputStream.writeInt(requestedPermissionsSize);
+                for (int i = 0; i < requestedPermissionsSize; i++) {
+                    dataOutputStream.writeUTF(requestedPermissions.get(i));
+                }
 
                 final ArraySet<String> enabledComponents =
                         packageManagerInternal.getEnabledComponents(pkg.getPackageName(), userId);

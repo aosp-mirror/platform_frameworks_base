@@ -21,6 +21,7 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -191,8 +192,8 @@ public final class BackgroundJobsController extends StateController {
             ));
         }
 
-        if (mUpdateJobFunctor.mChanged) {
-            mStateChangedListener.onControllerStateChanged();
+        if (mUpdateJobFunctor.mChangedJobs.size() > 0) {
+            mStateChangedListener.onControllerStateChanged(mUpdateJobFunctor.mChangedJobs);
         }
     }
 
@@ -222,7 +223,7 @@ public final class BackgroundJobsController extends StateController {
 
     private final class UpdateJobFunctor implements Consumer<JobStatus> {
         int mActiveState;
-        boolean mChanged = false;
+        final ArraySet<JobStatus> mChangedJobs = new ArraySet<>();
         int mTotalCount = 0;
         int mCheckedCount = 0;
         long mUpdateTimeElapsed = 0;
@@ -230,7 +231,7 @@ public final class BackgroundJobsController extends StateController {
         void prepare(int newActiveState) {
             mActiveState = newActiveState;
             mUpdateTimeElapsed = sElapsedRealtimeClock.millis();
-            mChanged = false;
+            mChangedJobs.clear();
             mTotalCount = 0;
             mCheckedCount = 0;
         }
@@ -240,7 +241,7 @@ public final class BackgroundJobsController extends StateController {
             mTotalCount++;
             mCheckedCount++;
             if (updateSingleJobRestrictionLocked(jobStatus, mUpdateTimeElapsed, mActiveState)) {
-                mChanged = true;
+                mChangedJobs.add(jobStatus);
             }
         }
     }

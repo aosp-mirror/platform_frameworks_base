@@ -544,6 +544,24 @@ public final class Completable {
     }
 
     /**
+     * Await the result by the {@link Completable.Boolean}, and log it if there is no result after
+     * given timeout.
+     *
+     * @return the result once {@link ValueBase#onComplete()}
+     */
+    @AnyThread
+    public static boolean getResultOrFalse(@NonNull Completable.Boolean value, String tag,
+            @NonNull String methodName, @Nullable CancellationGroup cancellationGroup,
+            int maxWaitTime) {
+        final boolean timedOut = value.await(maxWaitTime, TimeUnit.MILLISECONDS, cancellationGroup);
+        if (value.hasValue()) {
+            return value.getValue();
+        }
+        logInternal(tag, methodName, timedOut, maxWaitTime, 0);
+        return false;
+    }
+
+    /**
      * Await the result by the {@link Completable.Int}, and log it if there is no result after
      * given timeout.
      *

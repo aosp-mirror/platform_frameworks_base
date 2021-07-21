@@ -325,7 +325,7 @@ public class LocationManager {
      *
      * @hide
      */
-    // TODO: @SystemApi
+    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ADAS_GNSS_ENABLED_CHANGED =
             "android.location.action.ADAS_GNSS_ENABLED_CHANGED";
@@ -338,7 +338,7 @@ public class LocationManager {
      *
      * @hide
      */
-    // TODO: @SystemApi
+    @SystemApi
     public static final String EXTRA_ADAS_GNSS_ENABLED = "android.location.extra.ADAS_GNSS_ENABLED";
 
     /**
@@ -656,7 +656,7 @@ public class LocationManager {
      *
      * @hide
      */
-    //TODO: @SystemApi
+    @SystemApi
     public boolean isAdasGnssLocationEnabled() {
         try {
             return mService.isAdasGnssLocationEnabledForUser(mContext.getUser().getIdentifier());
@@ -673,7 +673,7 @@ public class LocationManager {
      *
      * @hide
      */
-    // TODO: @SystemApi
+    @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setAdasGnssLocationEnabled(boolean enabled) {
         try {

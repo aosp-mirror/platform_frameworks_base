@@ -3193,6 +3193,21 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
+     * Returns the package name of the syncadapter that matches a given account type, authority
+     * and user.
+     * @hide
+     */
+    @Nullable
+    public static String getSyncAdapterPackageAsUser(@NonNull String accountType,
+            @NonNull String authority, @UserIdInt int userId) {
+        try {
+            return getContentService().getSyncAdapterPackageAsUser(accountType, authority, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Check if the provider should be synced when a network tickle is received
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.

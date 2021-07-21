@@ -210,11 +210,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
 
     /*
-     * True if the application creating the client has the ACCESS_CONTEXT_HUB permission.
-     */
-    private final boolean mHasAccessContextHubPermission;
-
-    /*
      * Map containing all nanoapps this client has a messaging channel with and whether it is
      * allowed to communicate over that channel. A channel is defined to have been opened if the
      * client has sent or received messages from the particular nanoapp.
@@ -327,8 +322,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
         mPid = Binder.getCallingPid();
         mUid = Binder.getCallingUid();
-        mHasAccessContextHubPermission = context.checkCallingPermission(
-                Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         startMonitoringOpChanges();
@@ -827,9 +820,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
         try {
-            String requiredPermission = mHasAccessContextHubPermission
-                    ? Manifest.permission.ACCESS_CONTEXT_HUB
-                    : Manifest.permission.LOCATION_HARDWARE;
+            String requiredPermission = Manifest.permission.ACCESS_CONTEXT_HUB;
             pendingIntent.send(
                     mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
                     requiredPermission, null /* options */);

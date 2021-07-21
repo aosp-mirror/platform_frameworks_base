@@ -55,6 +55,10 @@ import android.widget.Space;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.VisibleForTesting;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.Utils;
@@ -66,10 +70,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
-
-import androidx.annotation.VisibleForTesting;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Dialog for showing mobile network, connected Wi-Fi network and Wi-Fi networks.
@@ -298,9 +298,7 @@ public class InternetDialog extends SystemUIDialog implements
                                 isChecked, false);
                     }
                 });
-        mConnectedWifListLayout.setOnClickListener(v -> {
-            // TODO(b/191475923): Need to launch the detailed page of Wi-Fi entry.
-        });
+        mConnectedWifListLayout.setOnClickListener(v -> onClickConnectedWifi());
         mSeeAllLayout.setOnClickListener(v -> onClickSeeMoreButton());
         mWiFiToggle.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
@@ -352,6 +350,10 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
         mConnectedWifListLayout.setBackground(mBackgroundOn);
+    }
+
+    void onClickConnectedWifi() {
+        mInternetDialogController.launchWifiNetworkDetailsSetting();
     }
 
     void onClickSeeMoreButton() {

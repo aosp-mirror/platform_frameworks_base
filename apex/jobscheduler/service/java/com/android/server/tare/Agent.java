@@ -46,9 +46,12 @@ import android.util.Slog;
 import android.util.SparseArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
+
+import libcore.util.EmptyArray;
 
 import java.util.List;
 import java.util.Objects;
@@ -77,8 +80,8 @@ class Agent {
      */
     private static final long MAX_TRANSACTION_AGE_MS = 24 * HOUR_IN_MILLIS;
 
+    private static final String ALARM_TAG_AFFORDABILITY_CHECK = "*tare.affordability_check*";
     private static final String ALARM_TAG_LEDGER_CLEANUP = "*tare.ledger_cleanup*";
-    private static final String ALARM_TAG_SOLVENCY_CHECK = "*tare.solvency_check*";
 
     private final Object mLock;
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
@@ -94,6 +97,18 @@ class Agent {
     private final SparseArrayMap<String, SparseArrayMap<String, OngoingEvent>>
             mCurrentOngoingEvents = new SparseArrayMap<>();
 
+    /**
+     * Set of {@link ActionAffordabilityNote}s keyed by userId-pkgName.
+     *
+     * Note: it would be nice/better to sort by base price since that doesn't change and simply
+     * look at the change in the "insertion" of what would be affordable, but since CTP
+     * is factored into the final price, the sorting order (by modified price) could be different
+     * and that method wouldn't work >:(
+     */
+    @GuardedBy("mLock")
+    private final SparseArrayMap<String, ArraySet<ActionAffordabilityNote>>
+            mActionAffordabilityNotes = new SparseArrayMap<>();
+
     @GuardedBy("mLock")
     private long mCurrentNarcsInCirculation;
 
@@ -105,11 +120,12 @@ class Agent {
             new LedgerCleanupAlarmListener();
 
     /**
-     * Listener to track and manage when apps will cross the solvency threshold (in both
-     * directions).
+     * Listener to track and manage when apps will cross the closest affordability threshold (in
+     * both directions).
      */
     @GuardedBy("mLock")
-    private final SolvencyAlarmListener mSolvencyAlarmListener = new SolvencyAlarmListener();
+    private final BalanceThresholdAlarmListener mBalanceThresholdAlarmListener =
+            new BalanceThresholdAlarmListener();
 
     private static final int MSG_CHECK_BALANCE = 0;
     private static final int MSG_CLEAN_LEDGER = 1;
@@ -189,7 +205,7 @@ class Agent {
                         mCompleteEconomicPolicy.getCostOfAction(eventId, userId, pkgName);
 
                 recordTransactionLocked(userId, pkgName, ledger,
-                        new Ledger.Transaction(now, now, eventId, tag, -actionCost));
+                        new Ledger.Transaction(now, now, eventId, tag, -actionCost), true);
                 break;
 
             case TYPE_REWARD:
@@ -199,7 +215,7 @@ class Agent {
                     final long rewardVal = Math.max(0,
                             Math.min(reward.maxDailyReward - rewardSum, reward.instantReward));
                     recordTransactionLocked(userId, pkgName, ledger,
-                            new Ledger.Transaction(now, now, eventId, tag, rewardVal));
+                            new Ledger.Transaction(now, now, eventId, tag, rewardVal), true);
                 }
                 break;
 
@@ -207,13 +223,6 @@ class Agent {
                 Slog.w(TAG, "Unsupported event type: " + eventType);
         }
         scheduleBalanceCheckLocked(userId, pkgName);
-
-        final boolean isSolvent = getBalanceLocked(userId, pkgName) > 0;
-        if (wasSolvent && !isSolvent) {
-            mIrs.postSolvencyChanged(userId, pkgName, false);
-        } else if (!wasSolvent && isSolvent) {
-            mIrs.postSolvencyChanged(userId, pkgName, true);
-        }
     }
 
     @GuardedBy("mLock")
@@ -269,23 +278,55 @@ class Agent {
     }
 
     @GuardedBy("mLock")
-    void updateOngoingEventsLocked() {
+    void onDeviceStateChangedLocked() {
         final long now = System.currentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
 
         mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
+            final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                    mActionAffordabilityNotes.get(userId, pkgName);
+            final boolean[] wasAffordable;
+            if (actionAffordabilityNotes != null) {
+                final int size = actionAffordabilityNotes.size();
+                wasAffordable = new boolean[size];
+                for (int i = 0; i < size; ++i) {
+                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
+                    final long originalBalance =
+                            getLedgerLocked(userId, pkgName).getCurrentBalance();
+                    wasAffordable[i] = originalBalance >= note.getCachedModifiedPrice();
+                }
+            } else {
+                wasAffordable = EmptyArray.BOOLEAN;
+            }
             ongoingEvents.forEach((ongoingEvent) -> {
+                // Disable balance check & affordability notifications here because we're in the
+                // middle of updating ongoing action costs/prices and sending out notifications
+                // or rescheduling the balance check alarm would be a waste since we'll have to
+                // redo them again after all of our internal state is updated.
                 stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
-                        ongoingEvent.tag, nowElapsed, now, false);
+                        ongoingEvent.tag, nowElapsed, now, false, false);
                 noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
                         nowElapsed, false);
             });
+            if (actionAffordabilityNotes != null) {
+                final int size = actionAffordabilityNotes.size();
+                for (int i = 0; i < size; ++i) {
+                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
+                    note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
+                    final long newBalance = getLedgerLocked(userId, pkgName).getCurrentBalance();
+                    final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
+                    if (wasAffordable[i] != isAffordable) {
+                        note.setNewAffordability(isAffordable);
+                        mIrs.postAffordabilityChanged(userId, pkgName, note);
+                    }
+                }
+            }
             scheduleBalanceCheckLocked(userId, pkgName);
         });
     }
 
     @GuardedBy("mLock")
-    void updateOngoingEventsLocked(final int userId, @NonNull ArraySet<String> pkgNames) {
+    void onAppStatesChangedLocked(final int userId, @NonNull ArraySet<String> pkgNames) {
         final long now = System.currentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
 
@@ -294,12 +335,45 @@ class Agent {
             SparseArrayMap<String, OngoingEvent> ongoingEvents =
                     mCurrentOngoingEvents.get(userId, pkgName);
             if (ongoingEvents != null) {
+                final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                        mActionAffordabilityNotes.get(userId, pkgName);
+                final boolean[] wasAffordable;
+                if (actionAffordabilityNotes != null) {
+                    final int size = actionAffordabilityNotes.size();
+                    wasAffordable = new boolean[size];
+                    for (int n = 0; n < size; ++n) {
+                        final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
+                        final long originalBalance =
+                                getLedgerLocked(userId, pkgName).getCurrentBalance();
+                        wasAffordable[n] = originalBalance >= note.getCachedModifiedPrice();
+                    }
+                } else {
+                    wasAffordable = EmptyArray.BOOLEAN;
+                }
                 ongoingEvents.forEach((ongoingEvent) -> {
+                    // Disable balance check & affordability notifications here because we're in the
+                    // middle of updating ongoing action costs/prices and sending out notifications
+                    // or rescheduling the balance check alarm would be a waste since we'll have to
+                    // redo them again after all of our internal state is updated.
                     stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
-                            ongoingEvent.tag, nowElapsed, now, false);
+                            ongoingEvent.tag, nowElapsed, now, false, false);
                     noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
                             nowElapsed, false);
                 });
+                if (actionAffordabilityNotes != null) {
+                    final int size = actionAffordabilityNotes.size();
+                    for (int n = 0; n < size; ++n) {
+                        final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
+                        note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
+                        final long newBalance =
+                                getLedgerLocked(userId, pkgName).getCurrentBalance();
+                        final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
+                        if (wasAffordable[n] != isAffordable) {
+                            note.setNewAffordability(isAffordable);
+                            mIrs.postAffordabilityChanged(userId, pkgName, note);
+                        }
+                    }
+                }
                 scheduleBalanceCheckLocked(userId, pkgName);
             }
         }
@@ -308,13 +382,19 @@ class Agent {
     @GuardedBy("mLock")
     void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
             @Nullable String tag, final long nowElapsed, final long now) {
-        stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now, true);
+        stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now, true, true);
     }
 
+    /**
+     * @param updateBalanceCheck          Whether or not to reschedule the affordability/balance
+     *                                    check alarm.
+     * @param notifyOnAffordabilityChange Whether or not to evaluate the app's ability to afford
+     *                                    registered bills and notify listeners about any changes.
+     */
     @GuardedBy("mLock")
     void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
             @Nullable String tag, final long nowElapsed, final long now,
-            final boolean updateBalanceCheck) {
+            final boolean updateBalanceCheck, final boolean notifyOnAffordabilityChange) {
         final Ledger ledger = getLedgerLocked(userId, pkgName);
 
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
@@ -336,7 +416,8 @@ class Agent {
             final long startTime = now - (nowElapsed - startElapsed);
             final long actualDelta = getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
             recordTransactionLocked(userId, pkgName, ledger,
-                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta));
+                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
+                    notifyOnAffordabilityChange);
             ongoingEvents.delete(eventId, tag);
         }
         if (updateBalanceCheck) {
@@ -360,7 +441,8 @@ class Agent {
 
     @GuardedBy("mLock")
     private void recordTransactionLocked(final int userId, @NonNull final String pkgName,
-            @NonNull Ledger ledger, @NonNull Ledger.Transaction transaction) {
+            @NonNull Ledger ledger, @NonNull Ledger.Transaction transaction,
+            final boolean notifyOnAffordabilityChange) {
         final long maxCirculationAllowed = mIrs.getMaxCirculationLocked();
         final long newArcsInCirculation = mCurrentNarcsInCirculation + transaction.delta;
         if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
@@ -396,11 +478,20 @@ class Agent {
             mLedgerCleanupAlarmListener.addAlarmLocked(userId, pkgName, cleanupAlarmElapsed);
         }
         // TODO: save changes to disk in a background thread
-        final long newBalance = ledger.getCurrentBalance();
-        if (originalBalance <= 0 && newBalance > 0) {
-            mIrs.postSolvencyChanged(userId, pkgName, true);
-        } else if (originalBalance > 0 && newBalance <= 0) {
-            mIrs.postSolvencyChanged(userId, pkgName, false);
+        if (notifyOnAffordabilityChange) {
+            final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                    mActionAffordabilityNotes.get(userId, pkgName);
+            if (actionAffordabilityNotes != null) {
+                final long newBalance = ledger.getCurrentBalance();
+                for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
+                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
+                    final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
+                    if (note.isCurrentlyAffordable() != isAffordable) {
+                        note.setNewAffordability(isAffordable);
+                        mIrs.postAffordabilityChanged(userId, pkgName, note);
+                    }
+                }
+            }
         }
     }
 
@@ -439,7 +530,8 @@ class Agent {
 
                     recordTransactionLocked(userId, pkgName, ledger,
                             new Ledger.Transaction(
-                                    now, now, REGULATION_WEALTH_RECLAMATION, null, -toReclaim));
+                                    now, now, REGULATION_WEALTH_RECLAMATION, null, -toReclaim),
+                            true);
                 }
             }
         }
@@ -461,7 +553,7 @@ class Agent {
                 final long shortfall = minBalance - getBalanceLocked(userId, pkgName);
                 recordTransactionLocked(userId, pkgName, ledger,
                         new Ledger.Transaction(now, now, REGULATION_BASIC_INCOME,
-                                null, (long) (perc * shortfall)));
+                                null, (long) (perc * shortfall)), true);
             }
         }
     }
@@ -497,7 +589,8 @@ class Agent {
 
             recordTransactionLocked(userId, pkgName, ledger,
                     new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
-                            Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))));
+                            Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))),
+                    true);
         }
     }
 
@@ -517,14 +610,14 @@ class Agent {
 
         recordTransactionLocked(userId, pkgName, ledger,
                 new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
-                        Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))));
+                        Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))), true);
     }
 
     @GuardedBy("mLock")
     void onPackageRemovedLocked(final int userId, @NonNull final String pkgName) {
         reclaimAssetsLocked(userId, pkgName);
         mLedgerCleanupAlarmListener.removeAlarmLocked(userId, pkgName);
-        mSolvencyAlarmListener.removeAlarmLocked(userId, pkgName);
+        mBalanceThresholdAlarmListener.removeAlarmLocked(userId, pkgName);
     }
 
     /**
@@ -546,7 +639,7 @@ class Agent {
     void onUserRemovedLocked(final int userId, @NonNull final List<String> pkgNames) {
         reclaimAssetsLocked(userId, pkgNames);
         mLedgerCleanupAlarmListener.removeAlarmsLocked(userId);
-        mSolvencyAlarmListener.removeAlarmsLocked(userId);
+        mBalanceThresholdAlarmListener.removeAlarmsLocked(userId);
     }
 
     @GuardedBy("mLock")
@@ -556,25 +649,88 @@ class Agent {
         }
     }
 
-    private static class TrendCalculator implements Consumer<OngoingEvent> {
-        private boolean mSolvent;
-        /**
-         * The maximum change in credits per second towards 0 (solvency/insolvency threshold).
-         * A value of 0 means the current ongoing events will never result in the app crossing the
-         * solvency threshold.
-         */
-        private long mMaxDeltaPerSecToThreshold;
+    @VisibleForTesting
+    static class TrendCalculator implements Consumer<OngoingEvent> {
+        static final long WILL_NOT_CROSS_THRESHOLD = -1;
 
-        void reset(boolean solvent) {
-            mSolvent = solvent;
-            mMaxDeltaPerSecToThreshold = 0;
+        private long mCurBalance;
+        /**
+         * The maximum change in credits per second towards the upper threshold
+         * {@link #mUpperThreshold}. A value of 0 means the current ongoing events will never
+         * result in the app crossing the upper threshold.
+         */
+        private long mMaxDeltaPerSecToUpperThreshold;
+        /**
+         * The maximum change in credits per second towards the lower threshold
+         * {@link #mLowerThreshold}. A value of 0 means the current ongoing events will never
+         * result in the app crossing the lower threshold.
+         */
+        private long mMaxDeltaPerSecToLowerThreshold;
+        private long mUpperThreshold;
+        private long mLowerThreshold;
+
+        void reset(long curBalance,
+                @Nullable ArraySet<ActionAffordabilityNote> actionAffordabilityNotes) {
+            mCurBalance = curBalance;
+            mMaxDeltaPerSecToUpperThreshold = mMaxDeltaPerSecToLowerThreshold = 0;
+            mUpperThreshold = Long.MIN_VALUE;
+            mLowerThreshold = Long.MAX_VALUE;
+            if (actionAffordabilityNotes != null) {
+                for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
+                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
+                    final long price = note.getCachedModifiedPrice();
+                    if (price <= mCurBalance) {
+                        mLowerThreshold = (mLowerThreshold == Long.MAX_VALUE)
+                                ? price : Math.max(mLowerThreshold, price);
+                    } else {
+                        mUpperThreshold = (mUpperThreshold == Long.MIN_VALUE)
+                                ? price : Math.min(mUpperThreshold, price);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Returns the amount of time (in millisecond) it will take for the app to cross the next
+         * lowest action affordability note (compared to its current balance) based on current
+         * ongoing events.
+         * Returns {@link #WILL_NOT_CROSS_THRESHOLD} if the app will never cross the lowest
+         * threshold.
+         */
+        long getTimeToCrossLowerThresholdMs() {
+            if (mMaxDeltaPerSecToLowerThreshold == 0) {
+                // Will never cross upper threshold based on current events.
+                return WILL_NOT_CROSS_THRESHOLD;
+            }
+            // deltaPerSec is a negative value, so do threshold-balance to cancel out the negative.
+            final long minSeconds =
+                    (mLowerThreshold - mCurBalance) / mMaxDeltaPerSecToLowerThreshold;
+            return minSeconds * 1000;
+        }
+
+        /**
+         * Returns the amount of time (in millisecond) it will take for the app to cross the next
+         * highest action affordability note (compared to its current balance) based on current
+         * ongoing events.
+         * Returns {@link #WILL_NOT_CROSS_THRESHOLD} if the app will never cross the upper
+         * threshold.
+         */
+        long getTimeToCrossUpperThresholdMs() {
+            if (mMaxDeltaPerSecToUpperThreshold == 0) {
+                // Will never cross upper threshold based on current events.
+                return WILL_NOT_CROSS_THRESHOLD;
+            }
+            final long minSeconds =
+                    (mUpperThreshold - mCurBalance) / mMaxDeltaPerSecToUpperThreshold;
+            return minSeconds * 1000;
         }
 
         @Override
         public void accept(OngoingEvent ongoingEvent) {
-            if ((mSolvent && ongoingEvent.deltaPerSec < 0)
-                    || (!mSolvent && ongoingEvent.deltaPerSec > 0)) {
-                mMaxDeltaPerSecToThreshold += ongoingEvent.deltaPerSec;
+            if (mCurBalance >= mLowerThreshold && ongoingEvent.deltaPerSec < 0) {
+                mMaxDeltaPerSecToLowerThreshold += ongoingEvent.deltaPerSec;
+            } else if (mCurBalance < mUpperThreshold && ongoingEvent.deltaPerSec > 0) {
+                mMaxDeltaPerSecToUpperThreshold += ongoingEvent.deltaPerSec;
             }
         }
     }
@@ -588,28 +744,32 @@ class Agent {
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents == null) {
             // No ongoing transactions. No reason to schedule
-            mSolvencyAlarmListener.removeAlarmLocked(userId, pkgName);
+            mBalanceThresholdAlarmListener.removeAlarmLocked(userId, pkgName);
             return;
         }
-        final long balance = getBalanceLocked(userId, pkgName);
-        mTrendCalculator.reset(balance > 0);
+        mTrendCalculator.reset(
+                getBalanceLocked(userId, pkgName), mActionAffordabilityNotes.get(userId, pkgName));
         ongoingEvents.forEach(mTrendCalculator);
-        if (mTrendCalculator.mMaxDeltaPerSecToThreshold == 0) {
-            // Will never cross solvency threshold based on current events.
-            mSolvencyAlarmListener.removeAlarmLocked(userId, pkgName);
-            return;
+        final long lowerTimeMs = mTrendCalculator.getTimeToCrossLowerThresholdMs();
+        final long upperTimeMs = mTrendCalculator.getTimeToCrossUpperThresholdMs();
+        final long timeToThresholdMs;
+        if (lowerTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD) {
+            if (upperTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD) {
+                // Will never cross a threshold based on current events.
+                mBalanceThresholdAlarmListener.removeAlarmLocked(userId, pkgName);
+                return;
+            }
+            timeToThresholdMs = upperTimeMs;
+        } else {
+            timeToThresholdMs = (upperTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD)
+                    ? lowerTimeMs : Math.min(lowerTimeMs, upperTimeMs);
         }
-        // The minimum amount of time before this app will cross the solvency threshold.
-        // Including "-" in the calculation ensures that minSeconds is always non-negative:
-        //   * If balance is negative (or 0), solvent=false, so the maxDeltaPerSecToThreshold is
-        //     positive
-        //   * If balance is positive, solvent=true, so the maxDeltaPerSecToThreshold is negative
-        final long minSeconds = -balance / mTrendCalculator.mMaxDeltaPerSecToThreshold;
-        mSolvencyAlarmListener.addAlarmLocked(userId, pkgName,
-                SystemClock.elapsedRealtime() + minSeconds * 1000);
+        mBalanceThresholdAlarmListener.addAlarmLocked(userId, pkgName,
+                SystemClock.elapsedRealtime() + timeToThresholdMs);
     }
 
-    private static class OngoingEvent {
+    @VisibleForTesting
+    static class OngoingEvent {
         public final long startTimeElapsed;
         public final int eventId;
         @Nullable
@@ -883,16 +1043,135 @@ class Agent {
         }
     }
 
-    /** Track when apps will cross the solvency threshold (in both directions). */
-    private class SolvencyAlarmListener extends AlarmQueueListener {
-        private SolvencyAlarmListener() {
-            super(ALARM_TAG_SOLVENCY_CHECK, true, 15_000L);
+    /** Track when apps will cross the closest affordability threshold (in both directions). */
+    private class BalanceThresholdAlarmListener extends AlarmQueueListener {
+        private BalanceThresholdAlarmListener() {
+            super(ALARM_TAG_AFFORDABILITY_CHECK, true, 15_000L);
         }
 
         @Override
         @GuardedBy("mLock")
         protected void processExpiredAlarmLocked(int userId, @NonNull String packageName) {
             mHandler.obtainMessage(MSG_CHECK_BALANCE, userId, 0, packageName).sendToTarget();
+        }
+    }
+
+    @GuardedBy("mLock")
+    public void registerAffordabilityChangeListenerLocked(int userId, @NonNull String pkgName,
+            @NonNull EconomyManagerInternal.AffordabilityChangeListener listener,
+            @NonNull EconomyManagerInternal.ActionBill bill) {
+        ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                mActionAffordabilityNotes.get(userId, pkgName);
+        if (actionAffordabilityNotes == null) {
+            actionAffordabilityNotes = new ArraySet<>();
+            mActionAffordabilityNotes.add(userId, pkgName, actionAffordabilityNotes);
+        }
+        final ActionAffordabilityNote note =
+                new ActionAffordabilityNote(bill, listener, mCompleteEconomicPolicy);
+        if (actionAffordabilityNotes.add(note)) {
+            note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
+            note.setNewAffordability(
+                    getBalanceLocked(userId, pkgName) >= note.getCachedModifiedPrice());
+            mIrs.postAffordabilityChanged(userId, pkgName, note);
+            // Update ongoing alarm
+            scheduleBalanceCheckLocked(userId, pkgName);
+        }
+    }
+
+    @GuardedBy("mLock")
+    public void unregisterAffordabilityChangeListenerLocked(int userId, @NonNull String pkgName,
+            @NonNull EconomyManagerInternal.AffordabilityChangeListener listener,
+            @NonNull EconomyManagerInternal.ActionBill bill) {
+        final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                mActionAffordabilityNotes.get(userId, pkgName);
+        if (actionAffordabilityNotes != null) {
+            final ActionAffordabilityNote note =
+                    new ActionAffordabilityNote(bill, listener, mCompleteEconomicPolicy);
+            if (actionAffordabilityNotes.remove(note)) {
+                // Update ongoing alarm
+                scheduleBalanceCheckLocked(userId, pkgName);
+            }
+        }
+    }
+
+    static final class ActionAffordabilityNote {
+        private final EconomyManagerInternal.ActionBill mActionBill;
+        private final EconomyManagerInternal.AffordabilityChangeListener mListener;
+        private long mModifiedPrice;
+        private boolean mIsAffordable;
+
+        @VisibleForTesting
+        ActionAffordabilityNote(@NonNull EconomyManagerInternal.ActionBill bill,
+                @NonNull EconomyManagerInternal.AffordabilityChangeListener listener,
+                @NonNull EconomicPolicy economicPolicy) {
+            mActionBill = bill;
+            final List<EconomyManagerInternal.AnticipatedAction> anticipatedActions =
+                    bill.getAnticipatedActions();
+            for (int i = 0; i < anticipatedActions.size(); ++i) {
+                final EconomyManagerInternal.AnticipatedAction aa = anticipatedActions.get(i);
+                final EconomicPolicy.Action action = economicPolicy.getAction(aa.actionId);
+                if (action == null) {
+                    throw new IllegalArgumentException("Invalid action id: " + aa.actionId);
+                }
+            }
+            mListener = listener;
+        }
+
+        @NonNull
+        EconomyManagerInternal.ActionBill getActionBill() {
+            return mActionBill;
+        }
+
+        @NonNull
+        EconomyManagerInternal.AffordabilityChangeListener getListener() {
+            return mListener;
+        }
+
+        private long getCachedModifiedPrice() {
+            return mModifiedPrice;
+        }
+
+        @VisibleForTesting
+        long recalculateModifiedPrice(@NonNull EconomicPolicy economicPolicy,
+                int userId, @NonNull String pkgName) {
+            long modifiedPrice = 0;
+            final List<EconomyManagerInternal.AnticipatedAction> anticipatedActions =
+                    mActionBill.getAnticipatedActions();
+            for (int i = 0; i < anticipatedActions.size(); ++i) {
+                final EconomyManagerInternal.AnticipatedAction aa = anticipatedActions.get(i);
+
+                final long actionCost =
+                        economicPolicy.getCostOfAction(aa.actionId, userId, pkgName);
+                modifiedPrice += actionCost * aa.numInstantaneousCalls
+                        + actionCost * (aa.ongoingDurationMs / 1000);
+            }
+            mModifiedPrice = modifiedPrice;
+            return modifiedPrice;
+        }
+
+        boolean isCurrentlyAffordable() {
+            return mIsAffordable;
+        }
+
+        private void setNewAffordability(boolean isAffordable) {
+            mIsAffordable = isAffordable;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ActionAffordabilityNote)) return false;
+            ActionAffordabilityNote other = (ActionAffordabilityNote) o;
+            return mActionBill.equals(other.mActionBill)
+                    && mListener.equals(other.mListener);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 0;
+            hash = 31 * hash + Objects.hash(mListener);
+            hash = 31 * hash + mActionBill.hashCode();
+            return hash;
         }
     }
 
@@ -908,16 +1187,24 @@ class Agent {
                     final int userId = msg.arg1;
                     final String pkgName = (String) msg.obj;
                     synchronized (mLock) {
-                        final Ledger ledger = getLedgerLocked(userId, pkgName);
-                        final long loggedBalance = ledger.getCurrentBalance();
-                        final long newBalance = getBalanceLocked(userId, pkgName);
-                        if (loggedBalance <= 0 && newBalance > 0) {
-                            mIrs.postSolvencyChanged(userId, pkgName, true);
-                        } else if (loggedBalance > 0 && newBalance <= 0) {
-                            mIrs.postSolvencyChanged(userId, pkgName, false);
-                        } else {
-                            scheduleBalanceCheckLocked(userId, pkgName);
+                        final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                                mActionAffordabilityNotes.get(userId, pkgName);
+                        if (actionAffordabilityNotes != null
+                                && actionAffordabilityNotes.size() > 0) {
+                            final long newBalance = getBalanceLocked(userId, pkgName);
+
+                            for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
+                                final ActionAffordabilityNote note =
+                                        actionAffordabilityNotes.valueAt(i);
+                                final boolean isAffordable =
+                                        newBalance >= note.getCachedModifiedPrice();
+                                if (note.isCurrentlyAffordable() != isAffordable) {
+                                    note.setNewAffordability(isAffordable);
+                                    mIrs.postAffordabilityChanged(userId, pkgName, note);
+                                }
+                            }
                         }
+                        scheduleBalanceCheckLocked(userId, pkgName);
                     }
                 }
                 break;
@@ -935,7 +1222,7 @@ class Agent {
                 case MSG_SET_ALARMS: {
                     synchronized (mLock) {
                         mLedgerCleanupAlarmListener.setNextAlarmLocked();
-                        mSolvencyAlarmListener.setNextAlarmLocked();
+                        mBalanceThresholdAlarmListener.setNextAlarmLocked();
                     }
                 }
                 break;
@@ -949,7 +1236,7 @@ class Agent {
         pw.println(narcToString(mCurrentNarcsInCirculation));
 
         pw.println();
-        mSolvencyAlarmListener.dumpLocked(pw);
+        mBalanceThresholdAlarmListener.dumpLocked(pw);
 
         pw.println();
         mLedgerCleanupAlarmListener.dumpLocked(pw);

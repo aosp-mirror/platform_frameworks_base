@@ -290,45 +290,6 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertThat(batterySaverStateOff.batterySaverEnabled).isFalse();
     }
 
-    public void testDeviceSpecific() {
-        mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_1;
-        mMockGlobalSettings.put(Global.BATTERY_SAVER_CONSTANTS, "");
-        mMockGlobalSettings.put(Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS, "");
-
-        mBatterySaverPolicy.onChange();
-        assertThat(mBatterySaverPolicy.getFileValues(true).toString()).isEqualTo("{}");
-        assertThat(mBatterySaverPolicy.getFileValues(false).toString()).isEqualTo("{}");
-
-
-        mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_2;
-
-        mBatterySaverPolicy.onChange();
-        assertThat(mBatterySaverPolicy.getFileValues(true).toString()).isEqualTo("{}");
-        assertThat(mBatterySaverPolicy.getFileValues(false).toString())
-                .isEqualTo("{/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq=123, "
-                        + "/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq=456}");
-
-        mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_3;
-
-        mBatterySaverPolicy.onChange();
-        assertThat(mBatterySaverPolicy.getFileValues(true).toString())
-                .isEqualTo("{/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq=333, "
-                        + "/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq=444}");
-        assertThat(mBatterySaverPolicy.getFileValues(false).toString())
-                .isEqualTo("{/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq=222}");
-
-
-        mMockGlobalSettings.put(Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
-                "cpufreq-i=3:1234567890/4:014/5:015");
-
-        mBatterySaverPolicy.onChange();
-        assertThat(mBatterySaverPolicy.getFileValues(true).toString())
-                .isEqualTo("{/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq=1234567890, "
-                        + "/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq=14, "
-                        + "/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq=15}");
-        assertThat(mBatterySaverPolicy.getFileValues(false).toString()).isEqualTo("{}");
-    }
-
     public void testSetPolicyLevel_Off() {
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_OFF);
 

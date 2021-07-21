@@ -3355,7 +3355,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // control of all writes to the file in question.
 
         // We must complete all stack dumps within 20 seconds.
-        long remainingTime = 20 * 1000;
+        long remainingTime = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
         // As applications are usually interested with the ANR stack traces, but we can't share with
         // them the stack traces other than their own stacks. So after the very first PID is
@@ -5698,6 +5698,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Our own process gets to do everything.
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
+        }
+        if (uid != ROOT_UID) { // bypass the root
+            if (mPackageManagerInt.filterAppAccess(uid, Binder.getCallingUid())) {
+                return PackageManager.PERMISSION_DENIED;
+            }
         }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;

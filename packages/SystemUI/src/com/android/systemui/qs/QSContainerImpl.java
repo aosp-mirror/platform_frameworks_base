@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -47,6 +48,7 @@ public class QSContainerImpl extends FrameLayout {
     private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private NonInterceptingScrollView mQSPanelContainer;
+    private ImageView mDragHandle;
 
     private int mSideMargins;
     private boolean mQsDisabled;
@@ -65,6 +67,7 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
+        mDragHandle = findViewById(R.id.qs_drag_handle);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
@@ -195,6 +198,8 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail.setBottom(getTop() + scrollBottom);
         int qsDetailBottomMargin = ((MarginLayoutParams) mQSDetail.getLayoutParams()).bottomMargin;
         mQSDetail.setBottom(getTop() + scrollBottom - qsDetailBottomMargin);
+        // Pin the drag handle to the bottom of the panel.
+        mDragHandle.setTranslationY(scrollBottom - mDragHandle.getHeight());
     }
 
     protected int calculateContainerHeight() {
@@ -216,6 +221,7 @@ public class QSContainerImpl extends FrameLayout {
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
         mQSPanelContainer.setScrollingEnabled(expansion > 0f);
+        mDragHandle.setAlpha(1.0f - expansion);
         updateExpansion();
     }
 

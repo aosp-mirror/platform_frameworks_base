@@ -471,19 +471,18 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#requestUpdateCursorAnchorInfo(int, IIntResultCallback)}.
+     * Invokes {@link IInputContext#requestCursorUpdates(int, IIntResultCallback)}.
      *
      * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
-     * @return {@link Completable.Int} that can be used to retrieve the invocation result.
+     * @return {@link Completable.Boolean} that can be used to retrieve the invocation result.
      *         {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.Int requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
-        final Completable.Int value = Completable.createInt();
+    public Completable.Boolean requestCursorUpdates(int cursorUpdateMode) {
+        final Completable.Boolean value = Completable.createBoolean();
         try {
-            mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode,
-                    ResultCallbacks.of(value));
+            mIInputContext.requestCursorUpdates(cursorUpdateMode, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             value.onError(ThrowableHolder.of(e));
         }
@@ -497,14 +496,14 @@ public final class IInputContextInvoker {
      * @param inputContentInfo {@code inputContentInfo} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
      * @param opts {@code opts} parameter to be passed.
-     * @return {@link Completable.Int} that can be used to retrieve the invocation result.
+     * @return {@link Completable.Boolean} that can be used to retrieve the invocation result.
      *         {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.Int commitContent(InputContentInfo inputContentInfo, int flags,
+    public Completable.Boolean commitContent(InputContentInfo inputContentInfo, int flags,
             Bundle opts) {
-        final Completable.Int value = Completable.createInt();
+        final Completable.Boolean value = Completable.createBoolean();
         try {
             mIInputContext.commitContent(inputContentInfo, flags, opts, ResultCallbacks.of(value));
         } catch (RemoteException e) {

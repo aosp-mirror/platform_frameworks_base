@@ -3055,6 +3055,13 @@ public class ParsingPackageUtils {
     /**
      * @hide
      */
+    public static void setCompatibilityModeEnabled(boolean compatibilityModeEnabled) {
+        sCompatibilityModeEnabled = compatibilityModeEnabled;
+    }
+
+    /**
+     * @hide
+     */
     public static void readConfigUseRoundIcon(Resources r) {
         if (r != null) {
             sUseRoundIcon = r.getBoolean(com.android.internal.R.bool.config_useRoundIcon);

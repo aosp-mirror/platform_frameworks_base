@@ -44,6 +44,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -449,8 +450,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     @Test
     public void testConsecutiveLaunchNewTask() {
         final IBinder launchCookie = mock(IBinder.class);
+        final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
         mTrampolineActivity.noDisplay = true;
         mTrampolineActivity.mLaunchCookie = launchCookie;
+        mTrampolineActivity.mLaunchRootTask = launchRootTask;
         onActivityLaunched(mTrampolineActivity);
         final ActivityRecord activityOnNewTask = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -464,6 +467,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 mTrampolineActivity.mLaunchCookie).isNull();
         assertWithMessage("The last launch task has the transferred cookie").that(
                 activityOnNewTask.mLaunchCookie).isEqualTo(launchCookie);
+        assertWithMessage("Trampoline's launch root task must be transferred").that(
+                mTrampolineActivity.mLaunchRootTask).isNull();
+        assertWithMessage("The last launch task has the transferred launch root task").that(
+                activityOnNewTask.mLaunchRootTask).isEqualTo(launchRootTask);
     }
 
     @Test

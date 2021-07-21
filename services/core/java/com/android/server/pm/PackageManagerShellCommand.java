@@ -2644,14 +2644,25 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    // pm remove-user [--set-ephemeral-if-in-use] USER_ID
+    // pm remove-user [--set-ephemeral-if-in-use][--wait] USER_ID
     public int runRemoveUser() throws RemoteException {
         int userId;
         String arg;
         boolean setEphemeralIfInUse = false;
+        boolean wait = false;
+
         while ((arg = getNextOption()) != null) {
-            if (arg.equals("--set-ephemeral-if-in-use")) {
-                setEphemeralIfInUse = true;
+            switch (arg) {
+                case "--set-ephemeral-if-in-use":
+                    setEphemeralIfInUse = true;
+                    break;
+                case "--wait": // fallthrough
+                case "-w":
+                    wait = true;
+                    break;
+                default:
+                    getErrPrintWriter().println("Error: unknown option: " + arg);
+                    return -1;
             }
         }
 
@@ -2666,18 +2677,64 @@ class PackageManagerShellCommand extends ShellCommand {
         if (setEphemeralIfInUse) {
             return removeUserOrSetEphemeral(um, userId);
         } else {
-            return removeUser(um, userId);
+            final boolean success = wait ? removeUserAndWait(um, userId) : removeUser(um, userId);
+            if (success) {
+                getOutPrintWriter().println("Success: removed user");
+                return 0;
+            } else {
+                // Error message should already have been printed.
+                return 1;
+            }
         }
     }
 
-    private int removeUser(IUserManager um, @UserIdInt int userId) throws RemoteException {
+    private boolean removeUser(IUserManager um, @UserIdInt int userId) throws RemoteException {
         Slog.i(TAG, "Removing user " + userId);
         if (um.removeUser(userId)) {
-            getOutPrintWriter().println("Success: removed user");
-            return 0;
+            return true;
         } else {
             getErrPrintWriter().println("Error: couldn't remove user id " + userId);
-            return 1;
+            return false;
+        }
+    }
+
+    private boolean removeUserAndWait(IUserManager um, @UserIdInt int userId)
+            throws RemoteException {
+        Slog.i(TAG, "Removing (and waiting for completion) user " + userId);
+
+        final CountDownLatch waitLatch = new CountDownLatch(1);
+        final UserManagerInternal.UserLifecycleListener listener =
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserRemoved(UserInfo user) {
+                        if (userId == user.id) {
+                            waitLatch.countDown();
+                        }
+                    }
+                };
+
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        umi.addUserLifecycleListener(listener);
+
+        try {
+            if (um.removeUser(userId)) {
+                final boolean awaitSuccess = waitLatch.await(10, TimeUnit.MINUTES);
+                if (!awaitSuccess) {
+                    getErrPrintWriter().printf("Error: Remove user %d timed out\n", userId);
+                    return false;
+                }
+                // Success!
+                return true;
+            } else {
+                getErrPrintWriter().println("Error: couldn't remove user id " + userId);
+                return false;
+            }
+        } catch (InterruptedException e) {
+            getErrPrintWriter().printf("Error: Remove user %d wait interrupted: %s\n", userId, e);
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            umi.removeUserLifecycleListener(listener);
         }
     }
 
@@ -3827,13 +3884,14 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --restricted is shorthand for '--user-type android.os.usertype.full.RESTRICTED'.");
         pw.println("      --guest is shorthand for '--user-type android.os.usertype.full.GUEST'.");
         pw.println("");
-        pw.println("  remove-user [--set-ephemeral-if-in-use] USER_ID");
+        pw.println("  remove-user [--set-ephemeral-if-in-use | --wait] USER_ID");
         pw.println("    Remove the user with the given USER_IDENTIFIER, deleting all data");
         pw.println("    associated with that user.");
         pw.println("      --set-ephemeral-if-in-use: If the user is currently running and");
         pw.println("        therefore cannot be removed immediately, mark the user as ephemeral");
         pw.println("        so that it will be automatically removed when possible (after user");
         pw.println("        switch or reboot)");
+        pw.println("      --wait: Wait until user is removed. Ignored if set-ephemeral-if-in-use");
         pw.println("");
         pw.println("  set-user-restriction [--user USER_ID] RESTRICTION VALUE");
         pw.println("");

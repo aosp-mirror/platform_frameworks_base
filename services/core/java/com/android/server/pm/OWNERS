@@ -42,7 +42,7 @@ per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com
 per-file KeySetManagerService.java = cbrubaker@google.com, nnk@google.com
 per-file PackageKeySetData.java = cbrubaker@google.com, nnk@google.com
 per-file PackageSignatures.java = cbrubaker@google.com, nnk@google.com
-per-file SELinuxMMAC.java = cbrubaker@google.com, jeffv@google.com, jgalenson@google.com, nnk@google.com
+per-file SELinuxMMAC* = alanstokes@google.com, cbrubaker@google.com, jeffv@google.com, jgalenson@google.com
 
 # shortcuts
 per-file LauncherAppsService.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com

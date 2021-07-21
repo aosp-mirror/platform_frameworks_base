@@ -23,6 +23,7 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 
+import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.ICharSequenceResultCallback;
 import com.android.internal.inputmethod.IExtractedTextResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
@@ -78,10 +79,10 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
 
     void getSelectedText(int flags, ICharSequenceResultCallback callback);
 
-    void requestUpdateCursorAnchorInfo(int cursorUpdateMode, IIntResultCallback callback);
+    void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback);
 
     void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
-            IIntResultCallback callback);
+            IBooleanResultCallback callback);
 
     void getSurroundingText(int beforeLength, int afterLength, int flags,
             ISurroundingTextResultCallback callback);

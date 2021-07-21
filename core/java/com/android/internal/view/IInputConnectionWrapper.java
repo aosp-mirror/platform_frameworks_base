@@ -43,6 +43,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.ICharSequenceResultCallback;
 import com.android.internal.inputmethod.IExtractedTextResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
@@ -79,7 +80,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_SPELL_CHECK = 110;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
-    private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
+    private static final int DO_REQUEST_CURSOR_UPDATES = 140;
     private static final int DO_CLOSE_CONNECTION = 150;
     private static final int DO_COMMIT_CONTENT = 160;
     private static final int DO_GET_SURROUNDING_TEXT = 41;
@@ -309,8 +310,8 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
     }
 
-    public void requestUpdateCursorAnchorInfo(int cursorUpdateMode, IIntResultCallback callback) {
-        dispatchMessage(mH.obtainMessage(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO, cursorUpdateMode,
+    public void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback) {
+        dispatchMessage(mH.obtainMessage(DO_REQUEST_CURSOR_UPDATES, cursorUpdateMode,
                 0 /* unused */, callback));
     }
 
@@ -319,7 +320,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
-            IIntResultCallback callback) {
+            IBooleanResultCallback callback) {
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = inputContentInfo;
         args.arg2 = opts;
@@ -794,10 +795,10 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
+            case DO_REQUEST_CURSOR_UPDATES: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#requestCursorUpdates");
                 try {
-                    final IIntResultCallback callback = (IIntResultCallback) msg.obj;
+                    final IBooleanResultCallback callback = (IBooleanResultCallback) msg.obj;
                     final InputConnection ic = getInputConnection();
                     final boolean result;
                     if (ic == null || !isActive()) {
@@ -807,7 +808,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         result = ic.requestCursorUpdates(msg.arg1);
                     }
                     try {
-                        callback.onResult(result ? 1 : 0);
+                        callback.onResult(result);
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to return the result to requestCursorUpdates()."
                                 + " result=" + result, e);
@@ -854,7 +855,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 SomeArgs args = (SomeArgs) msg.obj;
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitContent");
                 try {
-                    final IIntResultCallback callback = (IIntResultCallback) args.arg3;
+                    final IBooleanResultCallback callback = (IBooleanResultCallback) args.arg3;
                     final InputConnection ic = getInputConnection();
                     final boolean result;
                     if (ic == null || !isActive()) {
@@ -871,7 +872,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         }
                     }
                     try {
-                        callback.onResult(result ? 1 : 0);
+                        callback.onResult(result);
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to return the result to commitContent()."
                                 + " result=" + result, e);

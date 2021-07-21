@@ -30,6 +30,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManagerInternal;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -43,11 +44,9 @@ import android.util.SparseSetArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.tare.EconomyManagerInternal.BalanceChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Responsible for handling app's ARC count based on events, ensuring ARCs are credited when
@@ -75,9 +74,6 @@ public class InternalResourceService extends SystemService {
 
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final Agent mAgent;
-
-    private final CopyOnWriteArraySet<BalanceChangeListener> mBalanceChangeListeners =
-            new CopyOnWriteArraySet<>();
 
     @NonNull
     @GuardedBy("mLock")
@@ -157,9 +153,10 @@ public class InternalResourceService extends SystemService {
                 }
             };
 
-    private static final int MSG_NOTIFY_BALANCE_CHANGE_LISTENERS = 0;
+    private static final int MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER = 0;
     private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
+    private static final String KEY_PKG = "pkg";
 
     /**
      * Initializes the system service.
@@ -253,7 +250,7 @@ public class InternalResourceService extends SystemService {
 
     void onDeviceStateChanged() {
         synchronized (mLock) {
-            mAgent.updateOngoingEventsLocked();
+            mAgent.onDeviceStateChangedLocked();
         }
     }
 
@@ -302,7 +299,7 @@ public class InternalResourceService extends SystemService {
             if (pkgNames == null) {
                 Slog.e(TAG, "Don't have packages for uid " + uid);
             } else {
-                mAgent.updateOngoingEventsLocked(UserHandle.getUserId(uid), pkgNames);
+                mAgent.onAppStatesChangedLocked(UserHandle.getUserId(uid), pkgNames);
             }
         }
     }
@@ -331,10 +328,18 @@ public class InternalResourceService extends SystemService {
         }
     }
 
-    void postSolvencyChanged(final int userId, @NonNull final String pkgName, boolean nowSolvent) {
-        mHandler.obtainMessage(
-                MSG_NOTIFY_BALANCE_CHANGE_LISTENERS, userId, nowSolvent ? 1 : 0, pkgName)
-                .sendToTarget();
+    void postAffordabilityChanged(final int userId, @NonNull final String pkgName,
+            @NonNull Agent.ActionAffordabilityNote affordabilityNote) {
+        if (DEBUG) {
+            Slog.d(TAG, userId + ":" + pkgName + " affordability changed to "
+                    + affordabilityNote.isCurrentlyAffordable());
+        }
+        Message msg = mHandler.obtainMessage(
+                MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER, userId, 0, affordabilityNote);
+        Bundle data = new Bundle();
+        data.putString(KEY_PKG, pkgName);
+        msg.setData(data);
+        msg.sendToTarget();
     }
 
     @GuardedBy("mLock")
@@ -398,45 +403,64 @@ public class InternalResourceService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_NOTIFY_BALANCE_CHANGE_LISTENERS:
+                case MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER: {
+                    Bundle data = msg.getData();
                     final int userId = msg.arg1;
-                    final String pkgName = (String) msg.obj;
-                    final boolean nowSolvent = msg.arg2 == 1;
-                    for (BalanceChangeListener listener : mBalanceChangeListeners) {
-                        if (nowSolvent) {
-                            listener.onSolvent(userId, pkgName);
-                        } else {
-                            listener.onBankruptcy(userId, pkgName);
-                        }
-                    }
-                    break;
+                    final String pkgName = data.getString(KEY_PKG);
+                    final Agent.ActionAffordabilityNote affordabilityNote =
+                            (Agent.ActionAffordabilityNote) msg.obj;
+                    final EconomyManagerInternal.AffordabilityChangeListener listener =
+                            affordabilityNote.getListener();
+                    listener.onAffordabilityChanged(userId, pkgName,
+                            affordabilityNote.getActionBill(),
+                            affordabilityNote.isCurrentlyAffordable());
+                }
+                break;
 
-                case MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT:
+                case MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT: {
                     removeMessages(MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT);
                     synchronized (mLock) {
                         scheduleUnusedWealthReclamationLocked();
                     }
-                    break;
+                }
+                break;
             }
         }
     }
 
-    // TODO: implement
     private final class LocalService implements EconomyManagerInternal {
-
         @Override
-        public void registerBalanceChangeListener(@NonNull BalanceChangeListener listener) {
-            mBalanceChangeListeners.add(listener);
+        public void registerAffordabilityChangeListener(int userId, @NonNull String pkgName,
+                @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
+            synchronized (mLock) {
+                mAgent.registerAffordabilityChangeListenerLocked(userId, pkgName, listener, bill);
+            }
         }
 
         @Override
-        public void unregisterBalanceChangeListener(@NonNull BalanceChangeListener listener) {
-            mBalanceChangeListeners.remove(listener);
+        public void unregisterAffordabilityChangeListener(int userId, @NonNull String pkgName,
+                @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
+            synchronized (mLock) {
+                mAgent.unregisterAffordabilityChangeListenerLocked(userId, pkgName, listener, bill);
+            }
         }
 
         @Override
-        public boolean hasBalanceAtLeast(int userId, @NonNull String pkgName, int minBalance) {
-            return false;
+        public boolean canPayFor(int userId, @NonNull String pkgName, @NonNull ActionBill bill) {
+            // TODO: take temp-allowlist into consideration
+            long requiredBalance = 0;
+            final List<EconomyManagerInternal.AnticipatedAction> projectedActions =
+                    bill.getAnticipatedActions();
+            for (int i = 0; i < projectedActions.size(); ++i) {
+                AnticipatedAction action = projectedActions.get(i);
+                final long cost =
+                        mCompleteEconomicPolicy.getCostOfAction(action.actionId, userId, pkgName);
+                requiredBalance += cost * action.numInstantaneousCalls
+                        + cost * (action.ongoingDurationMs / 1000);
+            }
+            synchronized (mLock) {
+                return mAgent.getBalanceLocked(userId, pkgName) >= requiredBalance;
+            }
         }
 
         @Override

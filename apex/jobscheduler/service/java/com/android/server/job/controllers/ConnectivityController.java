@@ -845,12 +845,14 @@ public final class ConnectivityController extends RestrictingController implemen
 
         mSortedStats.sort(mUidStatsComparator);
 
-        boolean changed = false;
+        final ArraySet<JobStatus> changedJobs = new ArraySet<>();
         // Iterate in reverse order to remove existing callbacks before adding new ones.
         for (int i = mSortedStats.size() - 1; i >= 0; --i) {
             UidStats us = mSortedStats.get(i);
             if (i >= MAX_NETWORK_CALLBACKS) {
-                changed |= unregisterDefaultNetworkCallbackLocked(us.uid, nowElapsed);
+                if (unregisterDefaultNetworkCallbackLocked(us.uid, nowElapsed)) {
+                    changedJobs.addAll(mTrackedJobs.get(us.uid));
+                }
             } else {
                 UidDefaultNetworkCallback defaultNetworkCallback =
                         mCurrentDefaultNetworkCallbacks.get(us.uid);
@@ -867,8 +869,8 @@ public final class ConnectivityController extends RestrictingController implemen
                 }
             }
         }
-        if (changed) {
-            mStateChangedListener.onControllerStateChanged();
+        if (changedJobs.size() > 0) {
+            mStateChangedListener.onControllerStateChanged(changedJobs);
         }
     }
 
@@ -991,16 +993,23 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     @GuardedBy("mLock")
     private void updateTrackedJobsLocked(int filterUid, @Nullable Network filterNetwork) {
-        boolean changed = false;
+        final ArraySet<JobStatus> changedJobs;
         if (filterUid == -1) {
+            changedJobs = new ArraySet<>();
             for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
-                changed |= updateTrackedJobsLocked(mTrackedJobs.valueAt(i), filterNetwork);
+                if (updateTrackedJobsLocked(mTrackedJobs.valueAt(i), filterNetwork)) {
+                    changedJobs.addAll(mTrackedJobs.valueAt(i));
+                }
             }
         } else {
-            changed = updateTrackedJobsLocked(mTrackedJobs.get(filterUid), filterNetwork);
+            if (updateTrackedJobsLocked(mTrackedJobs.get(filterUid), filterNetwork)) {
+                changedJobs = mTrackedJobs.get(filterUid);
+            } else {
+                changedJobs = null;
+            }
         }
-        if (changed) {
-            mStateChangedListener.onControllerStateChanged();
+        if (changedJobs != null && changedJobs.size() > 0) {
+            mStateChangedListener.onControllerStateChanged(changedJobs);
         }
     }
 

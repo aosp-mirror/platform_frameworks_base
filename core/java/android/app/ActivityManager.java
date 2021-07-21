@@ -2835,9 +2835,10 @@ public class ActivityManager {
      * Returns a list of any processes that are currently in an error condition.  The result
      * will be null if all processes are running properly at this time.
      *
-     * <p>As of {@link android.os.Build.VERSION_CODES#T Android T}, for regular apps this method
-     * will only return {@link ProcessErrorStateInfo} records for the processes running as the
-     * caller's uid, unless the caller has the permission {@link android.Manifest.permission#DUMP}.
+     * <p>As of {@link android.os.Build.VERSION_CODES#TIRAMISU Android TIRAMISU}, for regular apps
+     * this method will only return {@link ProcessErrorStateInfo} records for the processes running
+     * as the caller's uid, unless the caller has the permission
+     * {@link android.Manifest.permission#DUMP}.
      * </p>
      *
      * @return Returns a list of {@link ProcessErrorStateInfo} records, or null if there are no

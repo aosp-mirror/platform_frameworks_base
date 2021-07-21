@@ -1320,7 +1320,8 @@ public class NotificationPanelViewController extends PanelViewController {
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
                 .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
-        if (hasVisibleNotifications && !mShouldUseSplitNotificationShade) {
+        if ((hasVisibleNotifications && !mShouldUseSplitNotificationShade)
+                || (mShouldUseSplitNotificationShade && mMediaDataManager.hasActiveMedia())) {
             mKeyguardStatusViewController.displayClock(SMALL);
         } else {
             mKeyguardStatusViewController.displayClock(LARGE);

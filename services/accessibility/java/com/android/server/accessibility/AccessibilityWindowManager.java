@@ -499,6 +499,9 @@ public class AccessibilityWindowManager {
             if (oldWindow.displayId != newWindow.displayId) {
                 return true;
             }
+            if (oldWindow.taskId != newWindow.taskId) {
+                return true;
+            }
             return false;
         }
 
@@ -699,6 +702,7 @@ public class AccessibilityWindowManager {
             reportedWindow.setAnchorId(window.accessibilityIdOfAnchor);
             reportedWindow.setPictureInPicture(window.inPictureInPicture);
             reportedWindow.setDisplayId(window.displayId);
+            reportedWindow.setTaskId(window.taskId);
 
             final int parentId = findWindowIdLocked(userId, window.parentToken);
             if (parentId >= 0) {
