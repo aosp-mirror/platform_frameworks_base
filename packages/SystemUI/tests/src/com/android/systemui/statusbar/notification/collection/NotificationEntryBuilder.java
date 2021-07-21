@@ -23,6 +23,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
@@ -32,6 +33,8 @@ import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import java.util.ArrayList;
+
+import kotlin.Unit;
 
 /**
  * Combined builder for constructing a NotificationEntry and its associated StatusBarNotification
@@ -43,28 +46,62 @@ import java.util.ArrayList;
  * Only for use in tests.
  */
 public class NotificationEntryBuilder {
-    private final SbnBuilder mSbnBuilder = new SbnBuilder();
-    private final RankingBuilder mRankingBuilder = new RankingBuilder();
+    private final SbnBuilder mSbnBuilder;
+    private final RankingBuilder mRankingBuilder;
     private final FakeSystemClock mClock = new FakeSystemClock();
     private StatusBarNotification mSbn = null;
 
     /* ListEntry properties */
     private GroupEntry mParent;
-    private int mSection = -1;
 
     /* If set, use this creation time instead of mClock.uptimeMillis */
     private long mCreationTime = -1;
 
+    public NotificationEntryBuilder() {
+        mSbnBuilder = new SbnBuilder();
+        mRankingBuilder = new RankingBuilder();
+    }
+
+    public NotificationEntryBuilder(NotificationEntry source) {
+        mSbnBuilder = new SbnBuilder(source.getSbn());
+        mRankingBuilder = new RankingBuilder(source.getRanking());
+
+        mParent = source.getParent();
+        mCreationTime = source.getCreationTime();
+    }
+
+    /** Build a new instance of NotificationEntry */
     public NotificationEntry build() {
-        StatusBarNotification sbn = mSbn != null ? mSbn : mSbnBuilder.build();
-        mRankingBuilder.setKey(sbn.getKey());
-        long creationTime = mCreationTime != -1 ? mCreationTime : mClock.uptimeMillis();
-        final NotificationEntry entry = new NotificationEntry(
-                sbn, mRankingBuilder.build(), mClock.uptimeMillis());
+        return buildOrApply(null);
+    }
+
+    /** Modifies [target] to match the contents of this builder */
+    public void apply(NotificationEntry target) {
+        buildOrApply(target);
+    }
+
+    /** Convenience method for Kotlin callbacks that are passed a builder and need to return Unit */
+    public Unit done() {
+        return Unit.INSTANCE;
+    }
+
+    private NotificationEntry buildOrApply(NotificationEntry target) {
+        final StatusBarNotification sbn = mSbn != null ? mSbn : mSbnBuilder.build();
+        final Ranking ranking = mRankingBuilder.setKey(sbn.getKey()).build();
+        final long creationTime = mCreationTime != -1 ? mCreationTime : mClock.uptimeMillis();
+
+        final NotificationEntry entry;
+        if (target == null) {
+            entry = new NotificationEntry(sbn, ranking, creationTime);
+        } else {
+            entry = target;
+            entry.setSbn(sbn);
+            entry.setRanking(ranking);
+            // Note: we can't modify the creation time as it's immutable
+        }
 
         /* ListEntry properties */
         entry.setParent(mParent);
-        entry.getAttachState().setSectionIndex(mSection);
         return entry;
     }
 
@@ -73,14 +110,6 @@ public class NotificationEntryBuilder {
      */
     public NotificationEntryBuilder setParent(@Nullable GroupEntry parent) {
         mParent = parent;
-        return this;
-    }
-
-    /**
-     * Sets the section.
-     */
-    public NotificationEntryBuilder setSection(int section) {
-        mSection = section;
         return this;
     }
 
@@ -291,6 +320,11 @@ public class NotificationEntryBuilder {
 
     public NotificationEntryBuilder setShortcutInfo(ShortcutInfo shortcutInfo) {
         mRankingBuilder.setShortcutInfo(shortcutInfo);
+        return this;
+    }
+
+    public NotificationEntryBuilder setRankingAdjustment(int rankingAdjustment) {
+        mRankingBuilder.setRankingAdjustment(rankingAdjustment);
         return this;
     }
 }

@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 
 import java.util.ArrayList;
 
@@ -56,7 +57,7 @@ public class ViewOverlay {
      * of the overlay
      * @return
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     ViewGroup getOverlayView() {
         return mOverlayViewGroup;
     }
@@ -96,7 +97,7 @@ public class ViewOverlay {
         mOverlayViewGroup.clear();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean isEmpty() {
         return mOverlayViewGroup.isEmpty();
     }
@@ -249,11 +250,11 @@ public class ViewOverlay {
              * This means that we need to insert reorder barriers manually though, so that children
              * of the OverlayViewGroup can cast shadows and Z reorder with each other.
              */
-            canvas.insertReorderBarrier();
+            canvas.enableZ();
 
             super.dispatchDraw(canvas);
 
-            canvas.insertInorderBarrier();
+            canvas.disableZ();
             final int numDrawables = (mDrawables == null) ? 0 : mDrawables.size();
             for (int i = 0; i < numDrawables; ++i) {
                 mDrawables.get(i).draw(canvas);

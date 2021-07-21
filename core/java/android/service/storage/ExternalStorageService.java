@@ -16,6 +16,7 @@
 
 package android.service.storage;
 
+import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -29,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 
 import com.android.internal.os.BackgroundThread;
@@ -37,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.UUID;
 
 /**
  * A service to handle filesystem I/O from other apps.
@@ -91,6 +94,13 @@ public abstract class ExternalStorageService extends Service {
      */
     public static final String EXTRA_ERROR =
             "android.service.storage.extra.error";
+
+    /**
+     * {@link Bundle} key for a package name {@link String} value.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_PACKAGE_NAME = "android.service.storage.extra.package_name";
 
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_SESSION_"},
@@ -147,6 +157,32 @@ public abstract class ExternalStorageService extends Service {
      */
     public abstract void onVolumeStateChanged(@NonNull StorageVolume vol) throws IOException;
 
+    /**
+     * Called when any cache held by the ExternalStorageService needs to be freed.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed
+     * @param bytes number of bytes which need to be freed
+     */
+    public void onFreeCache(@NonNull UUID volumeUuid, @BytesLong long bytes) throws IOException {
+        throw new UnsupportedOperationException("onFreeCacheRequested not implemented");
+    }
+
+    /**
+     * Called when {@code packageName} is about to ANR. The {@link ExternalStorageService} can
+     * show a progress dialog for the {@code reason}.
+     *
+     * @param packageName the package name of the ANR'ing app
+     * @param uid the uid of the ANR'ing app
+     * @param tid the thread id of the ANR'ing app
+     * @param reason the reason the app is ANR'ing
+     */
+    public void onAnrDelayStarted(@NonNull String packageName, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        throw new UnsupportedOperationException("onAnrDelayStarted not implemented");
+    }
+
     @Override
     @NonNull
     public final IBinder onBind(@NonNull Intent intent) {
@@ -183,6 +219,19 @@ public abstract class ExternalStorageService extends Service {
         }
 
         @Override
+        public void freeCache(String sessionId, String volumeUuid, long bytes,
+                RemoteCallback callback) {
+            mHandler.post(() -> {
+                try {
+                    onFreeCache(StorageManager.convert(volumeUuid), bytes);
+                    sendResult(sessionId, null /* throwable */, callback);
+                } catch (Throwable t) {
+                    sendResult(sessionId, t, callback);
+                }
+            });
+        }
+
+        @Override
         public void endSession(String sessionId, RemoteCallback callback) throws RemoteException {
             mHandler.post(() -> {
                 try {
@@ -190,6 +239,18 @@ public abstract class ExternalStorageService extends Service {
                     sendResult(sessionId, null /* throwable */, callback);
                 } catch (Throwable t) {
                     sendResult(sessionId, t, callback);
+                }
+            });
+        }
+
+        @Override
+        public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason)
+                throws RemoteException {
+            mHandler.post(() -> {
+                try {
+                    onAnrDelayStarted(packageName, uid, tid, reason);
+                } catch (Throwable t) {
+                    // Ignored
                 }
             });
         }

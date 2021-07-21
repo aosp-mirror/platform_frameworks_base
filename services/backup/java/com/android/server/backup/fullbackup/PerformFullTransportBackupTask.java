@@ -53,7 +53,7 @@ import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportNotAvailableException;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
 
@@ -107,7 +107,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             IBackupObserver backupObserver,
             IBackupManagerMonitor monitor,
             boolean userInitiated,
-            String caller) {
+            String caller,
+            BackupEligibilityRules backupEligibilityRules) {
         TransportManager transportManager = backupManagerService.getTransportManager();
         TransportClient transportClient = transportManager.getCurrentTransportClient(caller);
         OnTaskFinishedListener listener =
@@ -124,7 +125,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 backupObserver,
                 monitor,
                 listener,
-                userInitiated);
+                userInitiated,
+                backupEligibilityRules);
     }
 
     private static final String TAG = "PFTBT";
@@ -151,6 +153,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private volatile boolean mCancelAll;
     private final int mCurrentOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+    private final BackupEligibilityRules mBackupEligibilityRules;
 
     public PerformFullTransportBackupTask(UserBackupManagerService backupManagerService,
             TransportClient transportClient,
@@ -158,7 +161,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             String[] whichPackages, boolean updateSchedule,
             FullBackupJob runningJob, CountDownLatch latch, IBackupObserver backupObserver,
             @Nullable IBackupManagerMonitor monitor, @Nullable OnTaskFinishedListener listener,
-            boolean userInitiated) {
+            boolean userInitiated, BackupEligibilityRules backupEligibilityRules) {
         super(observer);
         this.mUserBackupManagerService = backupManagerService;
         mTransportClient = transportClient;
@@ -176,6 +179,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
         mUserId = backupManagerService.getUserId();
+        mBackupEligibilityRules = backupEligibilityRules;
 
         if (backupManagerService.isBackupOperationInProgress()) {
             if (DEBUG) {
@@ -193,7 +197,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 PackageInfo info = pm.getPackageInfoAsUser(pkg,
                         PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
                 mCurrentPackage = info;
-                if (!AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, mUserId)) {
+                if (!mBackupEligibilityRules.appIsEligibleForBackup(info.applicationInfo)) {
                     // Cull any packages that have indicated that backups are not permitted,
                     // that run as system-domain uids but do not define their own backup agents,
                     // as well as any explicit mention of the 'special' shared-storage agent
@@ -209,7 +213,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     BackupObserverUtils.sendBackupOnPackageResult(mBackupObserver, pkg,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
-                } else if (!AppBackupUtils.appGetsFullBackup(info)) {
+                } else if (!mBackupEligibilityRules.appGetsFullBackup(info)) {
                     // Cull any packages that are found in the queue but now aren't supposed
                     // to get full-data backup operations.
                     if (MORE_DEBUG) {
@@ -224,7 +228,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     BackupObserverUtils.sendBackupOnPackageResult(mBackupObserver, pkg,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
-                } else if (AppBackupUtils.appIsStopped(info.applicationInfo)) {
+                } else if (mBackupEligibilityRules.appIsStopped(info.applicationInfo)) {
                     // Cull any packages in the 'stopped' state: they've either just been
                     // installed or have explicitly been force-stopped by the user.  In both
                     // cases we do not want to launch them for backup.
@@ -856,7 +860,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                             this,
                             mQuota,
                             mCurrentOpToken,
-                            mTransportFlags);
+                            mTransportFlags,
+                            mBackupEligibilityRules);
             try {
                 try {
                     if (!mIsCancelled) {

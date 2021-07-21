@@ -28,9 +28,11 @@ import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
+import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
 import static com.android.internal.util.ArrayUtils.total;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.NetworkStatsHistoryBucketProto;
@@ -43,8 +45,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import libcore.util.EmptyArray;
 
 import java.io.CharArrayWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
@@ -90,18 +92,18 @@ public class NetworkStatsHistory implements Parcelable {
     public static class Entry {
         public static final long UNKNOWN = -1;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long bucketDuration;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long bucketStart;
         public long activeTime;
         @UnsupportedAppUsage
         public long rxBytes;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long rxPackets;
         @UnsupportedAppUsage
         public long txBytes;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long txPackets;
         public long operations;
     }
@@ -133,7 +135,7 @@ public class NetworkStatsHistory implements Parcelable {
         recordEntireHistory(existing);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public NetworkStatsHistory(Parcel in) {
         bucketDuration = in.readLong();
         bucketStart = readLongArray(in);
@@ -160,7 +162,7 @@ public class NetworkStatsHistory implements Parcelable {
         out.writeLong(totalBytes);
     }
 
-    public NetworkStatsHistory(DataInputStream in) throws IOException {
+    public NetworkStatsHistory(DataInput in) throws IOException {
         final int version = in.readInt();
         switch (version) {
             case VERSION_INIT: {
@@ -202,7 +204,7 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
-    public void writeToStream(DataOutputStream out) throws IOException {
+    public void writeToStream(DataOutput out) throws IOException {
         out.writeInt(VERSION_ADD_ACTIVE);
         out.writeLong(bucketDuration);
         writeVarLongArray(out, bucketStart, bucketCount);
@@ -219,7 +221,7 @@ public class NetworkStatsHistory implements Parcelable {
         return 0;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int size() {
         return bucketCount;
     }
@@ -257,7 +259,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Return index of bucket that contains or is immediately before the
      * requested time.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getIndexBefore(long time) {
         int index = Arrays.binarySearch(bucketStart, 0, bucketCount, time);
         if (index < 0) {
@@ -285,7 +287,7 @@ public class NetworkStatsHistory implements Parcelable {
     /**
      * Return specific stats entry.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Entry getValues(int i, Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.bucketStart = bucketStart[i];
@@ -364,11 +366,12 @@ public class NetworkStatsHistory implements Parcelable {
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
-            final long fracRxBytes = rxBytes * overlap / duration;
-            final long fracRxPackets = rxPackets * overlap / duration;
-            final long fracTxBytes = txBytes * overlap / duration;
-            final long fracTxPackets = txPackets * overlap / duration;
-            final long fracOperations = operations * overlap / duration;
+            final long fracRxBytes = multiplySafeByRational(rxBytes, overlap, duration);
+            final long fracRxPackets = multiplySafeByRational(rxPackets, overlap, duration);
+            final long fracTxBytes = multiplySafeByRational(txBytes, overlap, duration);
+            final long fracTxPackets = multiplySafeByRational(txPackets, overlap, duration);
+            final long fracOperations = multiplySafeByRational(operations, overlap, duration);
+
 
             addLong(activeTime, i, overlap);
             addLong(this.rxBytes, i, fracRxBytes); rxBytes -= fracRxBytes;
@@ -568,12 +571,24 @@ public class NetworkStatsHistory implements Parcelable {
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
-            if (activeTime != null) entry.activeTime += activeTime[i] * overlap / bucketSpan;
-            if (rxBytes != null) entry.rxBytes += rxBytes[i] * overlap / bucketSpan;
-            if (rxPackets != null) entry.rxPackets += rxPackets[i] * overlap / bucketSpan;
-            if (txBytes != null) entry.txBytes += txBytes[i] * overlap / bucketSpan;
-            if (txPackets != null) entry.txPackets += txPackets[i] * overlap / bucketSpan;
-            if (operations != null) entry.operations += operations[i] * overlap / bucketSpan;
+            if (activeTime != null) {
+                entry.activeTime += multiplySafeByRational(activeTime[i], overlap, bucketSpan);
+            }
+            if (rxBytes != null) {
+                entry.rxBytes += multiplySafeByRational(rxBytes[i], overlap, bucketSpan);
+            }
+            if (rxPackets != null) {
+                entry.rxPackets += multiplySafeByRational(rxPackets[i], overlap, bucketSpan);
+            }
+            if (txBytes != null) {
+                entry.txBytes += multiplySafeByRational(txBytes[i], overlap, bucketSpan);
+            }
+            if (txPackets != null) {
+                entry.txPackets += multiplySafeByRational(txPackets[i], overlap, bucketSpan);
+            }
+            if (operations != null) {
+                entry.operations += multiplySafeByRational(operations[i], overlap, bucketSpan);
+            }
         }
         return entry;
     }
@@ -753,7 +768,7 @@ public class NetworkStatsHistory implements Parcelable {
      */
     public static class DataStreamUtils {
         @Deprecated
-        public static long[] readFullLongArray(DataInputStream in) throws IOException {
+        public static long[] readFullLongArray(DataInput in) throws IOException {
             final int size = in.readInt();
             if (size < 0) throw new ProtocolException("negative array size");
             final long[] values = new long[size];
@@ -766,7 +781,7 @@ public class NetworkStatsHistory implements Parcelable {
         /**
          * Read variable-length {@link Long} using protobuf-style approach.
          */
-        public static long readVarLong(DataInputStream in) throws IOException {
+        public static long readVarLong(DataInput in) throws IOException {
             int shift = 0;
             long result = 0;
             while (shift < 64) {
@@ -782,7 +797,7 @@ public class NetworkStatsHistory implements Parcelable {
         /**
          * Write variable-length {@link Long} using protobuf-style approach.
          */
-        public static void writeVarLong(DataOutputStream out, long value) throws IOException {
+        public static void writeVarLong(DataOutput out, long value) throws IOException {
             while (true) {
                 if ((value & ~0x7FL) == 0) {
                     out.writeByte((int) value);
@@ -794,7 +809,7 @@ public class NetworkStatsHistory implements Parcelable {
             }
         }
 
-        public static long[] readVarLongArray(DataInputStream in) throws IOException {
+        public static long[] readVarLongArray(DataInput in) throws IOException {
             final int size = in.readInt();
             if (size == -1) return null;
             if (size < 0) throw new ProtocolException("negative array size");
@@ -805,7 +820,7 @@ public class NetworkStatsHistory implements Parcelable {
             return values;
         }
 
-        public static void writeVarLongArray(DataOutputStream out, long[] values, int size)
+        public static void writeVarLongArray(DataOutput out, long[] values, int size)
                 throws IOException {
             if (values == null) {
                 out.writeInt(-1);

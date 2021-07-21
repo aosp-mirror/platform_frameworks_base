@@ -664,20 +664,20 @@ public class DisplayRotationTests {
     // Non-rotation API Tests
     // ========================
     @Test
-    public void testRespectsAppRequestedOrientationByDefault() throws Exception {
+    public void testIsNotFixedToUserRotationByDefault() throws Exception {
         mBuilder.build();
 
-        assertTrue("Display rotation should respect app requested orientation by"
-                + " default.", mTarget.respectAppRequestedOrientation());
+        assertFalse("Display rotation should respect app requested orientation by"
+                + " default.", mTarget.isFixedToUserRotation());
     }
 
     @Test
-    public void testNotRespectAppRequestedOrientation_FixedToUserRotation() throws Exception {
+    public void testIsFixedToUserRotation() throws Exception {
         mBuilder.build();
         mTarget.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
 
-        assertFalse("Display rotation shouldn't respect app requested orientation if"
-                + " fixed to user rotation.", mTarget.respectAppRequestedOrientation());
+        assertTrue("Display rotation shouldn't respect app requested orientation if"
+                + " fixed to user rotation.", mTarget.isFixedToUserRotation());
     }
 
     /**

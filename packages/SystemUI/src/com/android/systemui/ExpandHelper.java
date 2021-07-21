@@ -32,10 +32,10 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 
 public class ExpandHelper implements Gefingerpoken {
     public interface Callback {
@@ -162,8 +162,8 @@ public class ExpandHelper implements Gefingerpoken {
      *
      * @param context application context
      * @param callback the container that holds the items to be manipulated
-     * @param small the smallest allowable size for the manuipulated items.
-     * @param large the largest allowable size for the manuipulated items.
+     * @param small the smallest allowable size for the manipulated items.
+     * @param large the largest allowable size for the manipulated items.
      */
     public ExpandHelper(Context context, Callback callback, int small, int large) {
         mSmallSize = small;

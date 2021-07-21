@@ -16,13 +16,20 @@
 
 package com.android.systemui.settings.dagger;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.UserManager;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserContentResolverProvider;
+import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.settings.UserTrackerImpl;
 
-import javax.inject.Singleton;
-
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -30,19 +37,29 @@ import dagger.Provides;
  * Dagger Module for classes found within the com.android.systemui.settings package.
  */
 @Module
-public interface SettingsModule {
+public abstract class SettingsModule {
 
-    /**
-     * Provides and initializes a CurrentUserContextTracker
-     */
-    @Singleton
+
+    @Binds
+    @SysUISingleton
+    abstract UserContextProvider bindUserContextProvider(UserTracker tracker);
+
+    @Binds
+    @SysUISingleton
+    abstract UserContentResolverProvider bindUserContentResolverProvider(
+            UserTracker tracker);
+
+    @SysUISingleton
     @Provides
-    static CurrentUserContextTracker provideCurrentUserContextTracker(
+    static UserTracker provideUserTracker(
             Context context,
-            BroadcastDispatcher broadcastDispatcher) {
-        CurrentUserContextTracker tracker =
-                new CurrentUserContextTracker(context, broadcastDispatcher);
-        tracker.initialize();
+            UserManager userManager,
+            DumpManager dumpManager,
+            @Background Handler handler
+    ) {
+        int startingUser = ActivityManager.getCurrentUser();
+        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, dumpManager, handler);
+        tracker.initialize(startingUser);
         return tracker;
     }
 }

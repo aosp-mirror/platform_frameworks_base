@@ -17,7 +17,7 @@
 #ifndef CORE_JNI_HELPERS
 #define CORE_JNI_HELPERS
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/scoped_local_ref.h>
 #include <nativehelper/scoped_utf_chars.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -47,7 +47,7 @@ static inline jclass FindClassOrDie(JNIEnv* env, const char* class_name) {
 static inline jfieldID GetFieldIDOrDie(JNIEnv* env, jclass clazz, const char* field_name,
                                        const char* field_signature) {
     jfieldID res = env->GetFieldID(clazz, field_name, field_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s with signature %s", field_name,
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find field %s with signature %s", field_name,
                         field_signature);
     return res;
 }
@@ -90,6 +90,12 @@ static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
     return res;
 }
 
+static inline jobject jniGetReferent(JNIEnv* env, jobject ref) {
+    jclass cls = FindClassOrDie(env, "java/lang/ref/Reference");
+    jmethodID get = GetMethodIDOrDie(env, cls, "get", "()Ljava/lang/Object;");
+    return env->CallObjectMethod(ref, get);
+}
+
 /**
  * Read the specified field from jobject, and convert to std::string.
  * If the field cannot be obtained, return defaultValue.
@@ -102,6 +108,31 @@ static inline std::string getStringField(JNIEnv* env, jobject obj, jfieldID fiel
         return std::string(chars.c_str());
     }
     return std::string(defaultValue);
+}
+
+static inline JNIEnv* GetJNIEnvironment(JavaVM* vm, jint version = JNI_VERSION_1_4) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), version) != JNI_OK) {
+        return nullptr;
+    }
+    return env;
+}
+
+static inline JNIEnv* GetOrAttachJNIEnvironment(JavaVM* jvm, jint version = JNI_VERSION_1_4) {
+    JNIEnv* env = GetJNIEnvironment(jvm, version);
+    if (!env) {
+        int result = jvm->AttachCurrentThread(&env, nullptr);
+        LOG_ALWAYS_FATAL_IF(result != JNI_OK, "JVM thread attach failed.");
+        struct VmDetacher {
+            VmDetacher(JavaVM* vm) : mVm(vm) {}
+            ~VmDetacher() { mVm->DetachCurrentThread(); }
+
+        private:
+            JavaVM* const mVm;
+        };
+        static thread_local VmDetacher detacher(jvm);
+    }
+    return env;
 }
 
 }  // namespace android

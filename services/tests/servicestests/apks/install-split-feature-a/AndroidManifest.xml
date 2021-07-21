@@ -15,14 +15,18 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.frameworks.servicestests.install_split"
-        featureSplit="feature_a">
+    package="com.android.frameworks.servicestests.install_split"
+    featureSplit="feature_a"
+    android:versionCode="9001"
+    android:versionName="1.0"
+    >
 
     <application>
-        <activity android:name=".feature_a.FeatureAActivity">
+        <activity android:name=".feature_a.FeatureAActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

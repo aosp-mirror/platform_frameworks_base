@@ -10,8 +10,6 @@ option java_package android.app
 # The activity's onResume has been called.
 30022 wm_on_resume_called (Token|1|5),(Component Name|3),(Reason|3)
 
-# Attempting to stop an activity
-30048 wm_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
 # The activity's onStop has been called.
 30049 wm_on_stop_called (Token|1|5),(Component Name|3),(Reason|3)
 
@@ -30,7 +28,4 @@ option java_package android.app
 30064 wm_on_top_resumed_gained_called (Token|1|5),(Component Name|3),(Reason|3)
 # The activity's onTopResumedActivityChanged(false) has been called.
 30065 wm_on_top_resumed_lost_called (Token|1|5),(Component Name|3),(Reason|3)
-
-# An activity been add into stopping list
-30066 wm_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
 

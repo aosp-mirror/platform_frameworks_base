@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/resolver_list"
         android:clipToPadding="false"
-        android:background="?attr/colorBackgroundFloating"
+        android:background="?attr/colorBackground"
         android:elevation="@dimen/resolver_elevation"
         android:nestedScrollingEnabled="true"
         android:scrollbarStyle="outsideOverlay"

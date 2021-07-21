@@ -37,7 +37,7 @@ public final class Sandman {
     private static final String TAG = "Sandman";
 
 
-    // The sandman is eternal.  No one instantiates him.
+    // The sandman is eternal.  No one instantiates them.
     private Sandman() {
     }
 

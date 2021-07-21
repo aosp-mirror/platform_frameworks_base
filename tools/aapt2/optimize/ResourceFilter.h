@@ -25,16 +25,16 @@
 
 namespace aapt {
 
-// Removes non-whitelisted entries from resource table.
+// Removes exclude-listed entries from resource table.
 class ResourceFilter : public IResourceTableConsumer {
  public:
-  explicit ResourceFilter(const std::unordered_set<ResourceName>& blacklist);
+  explicit ResourceFilter(const std::unordered_set<ResourceName>& exclude_list);
 
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceFilter);
-  std::unordered_set<ResourceName> blacklist_;
+  std::unordered_set<ResourceName> exclude_list_;
 };
 
 } // namespace aapt

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     package="com.android.wm.shell.flicker.testapp">
+
+    <uses-sdk android:minSdkVersion="29"
+         android:targetSdkVersion="29"/>
+    <application android:allowBackup="false"
+         android:supportsRtl="true">
+        <activity android:name=".FixedActivity"
+                  android:resizeableActivity="true"
+                  android:supportsPictureInPicture="true"
+                  android:launchMode="singleTop"
+                  android:label="FixedApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".PipActivity"
+                 android:resizeableActivity="true"
+                 android:supportsPictureInPicture="true"
+                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+                 android:taskAffinity="com.android.wm.shell.flicker.testapp.PipActivity"
+                 android:launchMode="singleTop"
+                 android:label="PipApp"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ImeActivity"
+                 android:taskAffinity="com.android.wm.shell.flicker.testapp.ImeActivity"
+                 android:label="ImeApp"
+                 android:launchMode="singleTop"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".SplitScreenActivity"
+                  android:resizeableActivity="true"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.SplitScreenActivity"
+                  android:label="SplitScreenPrimaryApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".SplitScreenSecondaryActivity"
+                  android:resizeableActivity="true"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.SplitScreenSecondaryActivity"
+                  android:label="SplitScreenSecondaryApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".NonResizeableActivity"
+                  android:resizeableActivity="false"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.NonResizeableActivity"
+                  android:label="NonResizeableApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".SimpleActivity"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.SimpleActivity"
+                  android:label="SimpleApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

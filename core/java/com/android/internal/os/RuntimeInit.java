@@ -24,7 +24,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
 import android.os.DeadObjectException;
-import android.os.Debug;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -36,7 +35,6 @@ import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
 
 import dalvik.system.RuntimeHooks;
-import dalvik.system.ThreadPrioritySetter;
 import dalvik.system.VMRuntime;
 
 import libcore.content.type.MimeMap;
@@ -208,7 +206,6 @@ public class RuntimeInit {
      */
     public static void preForkInit() {
         if (DEBUG) Slog.d(TAG, "Entered preForkInit.");
-        RuntimeHooks.setThreadPrioritySetter(new RuntimeThreadPrioritySetter());
         RuntimeInit.enableDdms();
         // TODO(b/142019040#comment13): Decide whether to load the default instance eagerly, i.e.
         // MimeMap.setDefault(DefaultMimeMapFactory.create());
@@ -219,35 +216,6 @@ public class RuntimeInit {
          * with several customizations (extensions, overrides).
          */
         MimeMap.setDefaultSupplier(DefaultMimeMapFactory::create);
-    }
-
-    private static class RuntimeThreadPrioritySetter implements ThreadPrioritySetter {
-        // Should remain consistent with kNiceValues[] in system/libartpalette/palette_android.cc
-        private static final int[] NICE_VALUES = {
-            Process.THREAD_PRIORITY_LOWEST,  // 1 (MIN_PRIORITY)
-            Process.THREAD_PRIORITY_BACKGROUND + 6,
-            Process.THREAD_PRIORITY_BACKGROUND + 3,
-            Process.THREAD_PRIORITY_BACKGROUND,
-            Process.THREAD_PRIORITY_DEFAULT,  // 5 (NORM_PRIORITY)
-            Process.THREAD_PRIORITY_DEFAULT - 2,
-            Process.THREAD_PRIORITY_DEFAULT - 4,
-            Process.THREAD_PRIORITY_URGENT_DISPLAY + 3,
-            Process.THREAD_PRIORITY_URGENT_DISPLAY + 2,
-            Process.THREAD_PRIORITY_URGENT_DISPLAY  // 10 (MAX_PRIORITY)
-        };
-
-        @Override
-        public void setPriority(int nativeTid, int priority) {
-            // Check NICE_VALUES[] length first.
-            if (NICE_VALUES.length != (1 + Thread.MAX_PRIORITY - Thread.MIN_PRIORITY)) {
-                throw new AssertionError("Unexpected NICE_VALUES.length=" + NICE_VALUES.length);
-            }
-            // Priority should be in the range of MIN_PRIORITY (1) to MAX_PRIORITY (10).
-            if (priority < Thread.MIN_PRIORITY || priority > Thread.MAX_PRIORITY) {
-                throw new IllegalArgumentException("Priority out of range: " + priority);
-            }
-            Process.setThreadPriority(nativeTid, NICE_VALUES[priority - Thread.MIN_PRIORITY]);
-        }
     }
 
     @UnsupportedAppUsage
@@ -288,24 +256,12 @@ public class RuntimeInit {
          */
         NetworkManagementSocketTagger.install();
 
-        /*
-         * If we're running in an emulator launched with "-trace", put the
-         * VM into emulator trace profiling mode so that the user can hit
-         * F9/F10 at any time to capture traces.  This has performance
-         * consequences, so it's not something you want to do always.
-         */
-        String trace = SystemProperties.get("ro.kernel.android.tracing");
-        if (trace.equals("1")) {
-            Slog.i(TAG, "NOTE: emulator trace profiling enabled");
-            Debug.enableEmulatorTraceOutput();
-        }
-
         initialized = true;
     }
 
     /**
      * Returns an HTTP user agent of the form
-     * "Dalvik/1.1.0 (Linux; U; Android Eclair Build/MASTER)".
+     * "Dalvik/1.1.0 (Linux; U; Android Eclair Build/MAIN)".
      */
     private static String getDefaultUserAgent() {
         StringBuilder result = new StringBuilder(64);
@@ -324,7 +280,7 @@ public class RuntimeInit {
                 result.append(model);
             }
         }
-        String id = Build.ID; // "MASTER" or "M4-rc20"
+        String id = Build.ID; // "MAIN" or "M4-rc20"
         if (id.length() > 0) {
             result.append(" Build/");
             result.append(id);

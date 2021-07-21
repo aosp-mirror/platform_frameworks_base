@@ -109,7 +109,7 @@ public final class CellularBatteryStats implements Parcelable {
                         CellSignalStrength.getNumSignalStrengthLevels()));
         mTxTimeMs = Arrays.copyOfRange(
                 txTimeMs, 0,
-                Math.min(txTimeMs.length, ModemActivityInfo.TX_POWER_LEVELS));
+                Math.min(txTimeMs.length, ModemActivityInfo.getNumTxPowerLevels()));
         mMonitoredRailChargeConsumedMaMs = monitoredRailChargeConsumedMaMs;
     }
 

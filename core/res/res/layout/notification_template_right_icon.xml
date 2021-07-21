@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2015 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,29 +13,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<!-- The view only has 8dp padding at the end instead of notification_content_margin_end,
-     since the reply icon has an inset of 8dp and we want it to visually start at the start of the
-     icon. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/right_icon_container"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="@dimen/notification_content_margin_top"
-             android:layout_marginEnd="8dp"
-             android:layout_gravity="top|end">
-    <ImageView android:id="@+id/right_icon"
-               android:layout_width="@dimen/notification_right_icon_size"
-               android:layout_height="@dimen/notification_right_icon_size"
-               android:layout_gravity="top|end"
-               android:layout_marginEnd="8dp"
-               android:scaleType="centerCrop"
-               android:importantForAccessibility="no" />
-    <ImageView android:id="@+id/reply_icon_action"
-                 android:layout_width="@dimen/notification_right_icon_size"
-                 android:layout_height="@dimen/notification_right_icon_size"
-                 android:layout_gravity="top|end"
-                 android:contentDescription="@string/notification_reply_button_accessibility"
-                 android:scaleType="centerCrop"
-                 android:src="@drawable/ic_reply_notification"/>
-</LinearLayout>
-
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/right_icon"
+    android:layout_width="@dimen/notification_right_icon_size"
+    android:layout_height="@dimen/notification_right_icon_size"
+    android:layout_gravity="top|end"
+    android:layout_marginEnd="@dimen/notification_header_expand_icon_size"
+    android:layout_marginTop="@dimen/notification_right_icon_big_margin_top"
+    android:background="@drawable/notification_large_icon_outline"
+    android:clipToOutline="true"
+    android:importantForAccessibility="no"
+    android:scaleType="centerCrop"
+    />

@@ -1,3 +1,12 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_media_jni_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_media_jni_license"],
+}
+
 cc_library_shared {
     name: "libaudioeffect_jni",
 
@@ -10,6 +19,7 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "framework-permission-aidl-cpp",
         "liblog",
         "libcutils",
         "libutils",
@@ -18,6 +28,11 @@ cc_library_shared {
         "libaudioclient",
         "libaudioutils",
         "libaudiofoundation",
+        "libbinder"
+    ],
+
+    export_shared_lib_headers: [
+        "framework-permission-aidl-cpp",
     ],
 
     version_script: "exports.lds",
@@ -28,4 +43,9 @@ cc_library_shared {
         "-Wunused",
         "-Wunreachable-code",
     ],
+
+    // Workaround Clang LTO crash.
+    lto: {
+        never: true,
+    },
 }

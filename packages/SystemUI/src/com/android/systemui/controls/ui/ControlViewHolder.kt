@@ -37,6 +37,7 @@ import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.StatelessTemplate
 import android.service.controls.templates.TemperatureControlTemplate
+import android.service.controls.templates.ThumbnailTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import android.util.MathUtils
@@ -45,9 +46,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
 import com.android.internal.graphics.ColorUtils
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
+import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import kotlin.reflect.KClass
@@ -62,7 +66,9 @@ class ControlViewHolder(
     val controlsController: ControlsController,
     val uiExecutor: DelayableExecutor,
     val bgExecutor: DelayableExecutor,
-    val controlActionCoordinator: ControlActionCoordinator
+    val controlActionCoordinator: ControlActionCoordinator,
+    val controlsMetricsLogger: ControlsMetricsLogger,
+    val uid: Int
 ) {
 
     companion object {
@@ -87,8 +93,11 @@ class ControlViewHolder(
         ): KClass<out Behavior> {
             return when {
                 status != Control.STATUS_OK -> StatusBehavior::class
-                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
                 template == ControlTemplate.NO_TEMPLATE -> TouchBehavior::class
+                template is ThumbnailTemplate -> ThumbnailBehavior::class
+
+                // Required for legacy support, or where cameras do not use the new template
+                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
                 template is ToggleTemplate -> ToggleBehavior::class
                 template is StatelessTemplate -> TouchBehavior::class
                 template is ToggleRangeTemplate -> ToggleRangeBehavior::class
@@ -105,7 +114,7 @@ class ControlViewHolder(
     private var statusAnimator: Animator? = null
     private val baseLayer: GradientDrawable
     val icon: ImageView = layout.requireViewById(R.id.icon)
-    private val status: TextView = layout.requireViewById(R.id.status)
+    val status: TextView = layout.requireViewById(R.id.status)
     private var nextStatusText: CharSequence = ""
     val title: TextView = layout.requireViewById(R.id.title)
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
@@ -132,13 +141,12 @@ class ControlViewHolder(
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
-        clipLayer.alpha = ALPHA_DISABLED
         baseLayer = ld.findDrawableByLayerId(R.id.background) as GradientDrawable
         // needed for marquee to start
         status.setSelected(true)
     }
 
-    fun bindData(cws: ControlWithState) {
+    fun bindData(cws: ControlWithState, isLocked: Boolean) {
         // If an interaction is in progress, the update may visually interfere with the action the
         // action the user wants to make. Don't apply the update, and instead assume a new update
         // will coming from when the user interaction is complete.
@@ -168,10 +176,16 @@ class ControlViewHolder(
             controlActionCoordinator.runPendingAction(cws.ci.controlId)
         }
 
+        val wasLoading = isLoading
         isLoading = false
         behavior = bindBehavior(behavior,
             findBehaviorClass(controlStatus, controlTemplate, deviceType))
         updateContentDescription()
+
+        // Only log one event per control, at the moment we have determined that the control
+        // switched from the loading to done state
+        val doneLoading = wasLoading && !isLoading
+        if (doneLoading) controlsMetricsLogger.refreshEnd(this, isLocked)
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
@@ -301,7 +315,8 @@ class ControlViewHolder(
         @ColorRes bgColor: Int
     ) {
         val bg = context.resources.getColor(R.color.control_default_background, context.theme)
-        var (newClipColor, newAlpha) = if (enabled) {
+
+        val (newClipColor, newAlpha) = if (enabled) {
             // allow color overrides for the enabled state only
             val color = cws.control?.getCustomColor()?.let {
                 val state = intArrayOf(android.R.attr.state_enabled)
@@ -314,42 +329,85 @@ class ControlViewHolder(
                 ALPHA_DISABLED
             )
         }
+        val newBaseColor = if (behavior is ToggleRangeBehavior) {
+            ColorUtils.blendARGB(bg, newClipColor, toggleBackgroundIntensity)
+        } else {
+            bg
+        }
 
-        (clipLayer.getDrawable() as GradientDrawable).apply {
-            val newBaseColor = if (behavior is ToggleRangeBehavior) {
-                ColorUtils.blendARGB(bg, newClipColor, toggleBackgroundIntensity)
-            } else {
-                bg
-            }
+        clipLayer.drawable?.apply {
+            clipLayer.alpha = ALPHA_DISABLED
             stateAnimator?.cancel()
             if (animated) {
-                val oldColor = color?.defaultColor ?: newClipColor
-                val oldBaseColor = baseLayer.color?.defaultColor ?: newBaseColor
-                val oldAlpha = layout.alpha
-                stateAnimator = ValueAnimator.ofInt(clipLayer.alpha, newAlpha).apply {
-                    addUpdateListener {
-                        alpha = it.animatedValue as Int
-                        setColor(ColorUtils.blendARGB(oldColor, newClipColor, it.animatedFraction))
-                        baseLayer.setColor(ColorUtils.blendARGB(oldBaseColor,
-                                newBaseColor, it.animatedFraction))
-                        layout.alpha = MathUtils.lerp(oldAlpha, 1f, it.animatedFraction)
-                    }
-                    addListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
-                            stateAnimator = null
-                        }
-                    })
-                    duration = STATE_ANIMATION_DURATION
-                    interpolator = Interpolators.CONTROL_STATE
-                    start()
-                }
+                startBackgroundAnimation(this, newAlpha, newClipColor, newBaseColor)
             } else {
-                alpha = newAlpha
-                setColor(newClipColor)
-                baseLayer.setColor(newBaseColor)
-                layout.alpha = 1f
+                applyBackgroundChange(
+                        this, newAlpha, newClipColor, newBaseColor, newLayoutAlpha = 1f
+                )
             }
         }
+    }
+
+    private fun startBackgroundAnimation(
+        clipDrawable: Drawable,
+        newAlpha: Int,
+        @ColorInt newClipColor: Int,
+        @ColorInt newBaseColor: Int
+    ) {
+        val oldClipColor = if (clipDrawable is GradientDrawable) {
+            clipDrawable.color?.defaultColor ?: newClipColor
+        } else {
+            newClipColor
+        }
+        val oldBaseColor = baseLayer.color?.defaultColor ?: newBaseColor
+        val oldAlpha = layout.alpha
+
+        stateAnimator = ValueAnimator.ofInt(clipLayer.alpha, newAlpha).apply {
+            addUpdateListener {
+                val updatedAlpha = it.animatedValue as Int
+                val updatedClipColor = ColorUtils.blendARGB(oldClipColor, newClipColor,
+                        it.animatedFraction)
+                val updatedBaseColor = ColorUtils.blendARGB(oldBaseColor, newBaseColor,
+                        it.animatedFraction)
+                val updatedLayoutAlpha = MathUtils.lerp(oldAlpha, 1f, it.animatedFraction)
+                applyBackgroundChange(
+                        clipDrawable,
+                        updatedAlpha,
+                        updatedClipColor,
+                        updatedBaseColor,
+                        updatedLayoutAlpha
+                )
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    stateAnimator = null
+                }
+            })
+            duration = STATE_ANIMATION_DURATION
+            interpolator = Interpolators.CONTROL_STATE
+            start()
+        }
+    }
+
+    /**
+     * Applies a change in background.
+     *
+     * Updates both alpha and background colors. Only updates colors for GradientDrawables and not
+     * static images as used for the ThumbnailTemplate.
+     */
+    private fun applyBackgroundChange(
+        clipDrawable: Drawable,
+        newAlpha: Int,
+        @ColorInt newClipColor: Int,
+        @ColorInt newBaseColor: Int,
+        newLayoutAlpha: Float
+    ) {
+        clipDrawable.alpha = newAlpha
+        if (clipDrawable is GradientDrawable) {
+            clipDrawable.setColor(newClipColor)
+        }
+        baseLayer.setColor(newBaseColor)
+        layout.alpha = newLayoutAlpha
     }
 
     private fun animateStatusChange(animated: Boolean, statusRowUpdater: () -> Unit) {
@@ -397,7 +455,8 @@ class ControlViewHolder(
         }
     }
 
-    private fun updateStatusRow(
+    @VisibleForTesting
+    internal fun updateStatusRow(
         enabled: Boolean,
         text: CharSequence,
         drawable: Drawable,
@@ -412,11 +471,8 @@ class ControlViewHolder(
         status.setTextColor(color)
 
         control?.getCustomIcon()?.let {
-            // do not tint custom icons, assume the intended icon color is correct
-            if (icon.imageTintList != null) {
-                icon.imageTintList = null
-            }
             icon.setImageIcon(it)
+            icon.imageTintList = it.tintList
         } ?: run {
             if (drawable is StateListDrawable) {
                 // Only reset the drawable if it is a different resource, as it will interfere

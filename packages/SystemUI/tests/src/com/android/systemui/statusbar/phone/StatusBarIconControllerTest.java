@@ -31,7 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -60,14 +60,14 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     @Test
     public void testSetCalledOnAdd_IconManager() {
         LinearLayout layout = new LinearLayout(mContext);
-        TestIconManager manager = new TestIconManager(layout, new CommandQueue(mContext));
+        TestIconManager manager = new TestIconManager(layout);
         testCallOnAdd_forManager(manager);
     }
 
     @Test
     public void testSetCalledOnAdd_DarkIconManager() {
         LinearLayout layout = new LinearLayout(mContext);
-        TestDarkIconManager manager = new TestDarkIconManager(layout, new CommandQueue(mContext));
+        TestDarkIconManager manager = new TestDarkIconManager(layout, mock(FeatureFlags.class));
         testCallOnAdd_forManager(manager);
     }
 
@@ -104,8 +104,8 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     private static class TestDarkIconManager extends DarkIconManager
             implements TestableIconManager {
 
-        TestDarkIconManager(LinearLayout group, CommandQueue commandQueue) {
-            super(group, commandQueue);
+        TestDarkIconManager(LinearLayout group, FeatureFlags featureFlags) {
+            super(group, featureFlags);
         }
 
         @Override
@@ -139,8 +139,8 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     }
 
     private static class TestIconManager extends IconManager implements TestableIconManager {
-        TestIconManager(ViewGroup group, CommandQueue commandQueue) {
-            super(group, commandQueue);
+        TestIconManager(ViewGroup group) {
+            super(group, mock(FeatureFlags.class));
         }
 
         @Override

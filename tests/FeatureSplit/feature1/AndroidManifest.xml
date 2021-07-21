@@ -15,17 +15,19 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.test.split.feature"
-    featureSplit="feature1">
+     package="com.android.test.split.feature"
+     featureSplit="feature1">
 
-    <uses-sdk android:minSdkVersion="21" />
-    <uses-split android:name="feature2" />
+    <uses-sdk android:minSdkVersion="21"/>
+    <uses-split android:name="feature2"/>
 
     <application>
-        <activity android:name=".one.One" android:label="Feature One">
+        <activity android:name=".one.One"
+             android:label="Feature One"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

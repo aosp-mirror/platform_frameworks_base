@@ -17,10 +17,11 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.util.RotationUtils.deltaRotation;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.AnimationSpecProto.ROTATE;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.RotationAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.RotationAnimationSpecProto.END_LUMA;
 import static com.android.server.wm.RotationAnimationSpecProto.START_LUMA;
@@ -35,9 +36,11 @@ import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -50,7 +53,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
 import com.android.internal.R;
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.RotationAnimationUtils;
@@ -101,7 +104,6 @@ class ScreenRotationAnimation {
     private final Transformation mRotateExitTransformation = new Transformation();
     private final Transformation mRotateEnterTransformation = new Transformation();
     // Complete transformations being applied.
-    private final Transformation mEnterTransformation = new Transformation();
     private final Matrix mSnapshotInitialMatrix = new Matrix();
     private final WindowManagerService mService;
     /** Only used for custom animations and not screen rotation. */
@@ -161,42 +163,64 @@ class ScreenRotationAnimation {
             originalWidth = displayInfo.logicalWidth;
             originalHeight = displayInfo.logicalHeight;
         }
-        if (realOriginalRotation == Surface.ROTATION_90
-                || realOriginalRotation == Surface.ROTATION_270) {
-            mWidth = originalHeight;
-            mHeight = originalWidth;
-        } else {
-            mWidth = originalWidth;
-            mHeight = originalHeight;
-        }
+        mWidth = originalWidth;
+        mHeight = originalHeight;
 
         mOriginalRotation = originalRotation;
         // If the delta is not zero, the rotation of display may not change, but we still want to
         // apply rotation animation because there should be a top app shown as rotated. So the
         // specified original rotation customizes the direction of animation to have better look
         // when restoring the rotated app to the same rotation as current display.
-        final int delta = DisplayContent.deltaRotation(originalRotation, realOriginalRotation);
+        final int delta = deltaRotation(originalRotation, realOriginalRotation);
         final boolean flipped = delta == Surface.ROTATION_90 || delta == Surface.ROTATION_270;
         mOriginalWidth = flipped ? originalHeight : originalWidth;
         mOriginalHeight = flipped ? originalWidth : originalHeight;
         mSurfaceRotationAnimationController = new SurfaceRotationAnimationController();
 
         // Check whether the current screen contains any secure content.
-        final boolean isSecure = displayContent.hasSecureWindowOnScreen();
+        boolean isSecure = displayContent.hasSecureWindowOnScreen();
+        final int displayId = displayContent.getDisplayId();
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
+
         try {
+            SurfaceControl.LayerCaptureArgs args =
+                    new SurfaceControl.LayerCaptureArgs.Builder(displayContent.getSurfaceControl())
+                            .setCaptureSecureLayers(true)
+                            .setAllowProtected(true)
+                            .setSourceCrop(new Rect(0, 0, mWidth, mHeight))
+                            .build();
+            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    SurfaceControl.captureLayers(args);
+            if (screenshotBuffer == null) {
+                Slog.w(TAG, "Unable to take screenshot of display " + displayId);
+                return;
+            }
+
+            // If the screenshot contains secure layers, we have to make sure the
+            // screenshot surface we display it in also has FLAG_SECURE so that
+            // the user can not screenshot secure layers via the screenshot surface.
+            if (screenshotBuffer.containsSecureLayers()) {
+                isSecure = true;
+            }
+
             mBackColorSurface = displayContent.makeChildSurface(null)
                     .setName("BackColorSurface")
                     .setColorLayer()
                     .setCallsite("ScreenRotationAnimation")
                     .build();
 
+            String name = "RotationLayer";
             mScreenshotLayer = displayContent.makeOverlay()
-                    .setName("RotationLayer")
-                    .setBufferSize(mWidth, mHeight)
+                    .setName(name)
+                    .setOpaque(true)
                     .setSecure(isSecure)
                     .setCallsite("ScreenRotationAnimation")
+                    .setBLASTLayer()
                     .build();
+            // This is the way to tell the input system to exclude this surface from occlusion
+            // detection since we don't have a window for it. We do this because this window is
+            // generated by the system as well as its content.
+            InputMonitor.setTrustedOverlayInputInfo(mScreenshotLayer, t, displayId, name);
 
             mEnterBlackFrameLayer = displayContent.makeOverlay()
                     .setName("EnterBlackFrameLayer")
@@ -204,54 +228,42 @@ class ScreenRotationAnimation {
                     .setCallsite("ScreenRotationAnimation")
                     .build();
 
-            // In case display bounds change, screenshot buffer and surface may mismatch so set a
-            // scaling mode.
-            SurfaceControl.Transaction t2 = mService.mTransactionFactory.get();
-            t2.setOverrideScalingMode(mScreenshotLayer, Surface.SCALING_MODE_SCALE_TO_WINDOW);
-            t2.apply(true /* sync */);
+            HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                    "ScreenRotationAnimation#getMedianBorderLuma");
+            mStartLuma = RotationAnimationUtils.getMedianBorderLuma(hardwareBuffer,
+                    screenshotBuffer.getColorSpace());
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
-            // Capture a screenshot into the surface we just created.
-            final int displayId = displayContent.getDisplayId();
-            final Surface surface = mService.mSurfaceFactory.get();
-            surface.copyFrom(mScreenshotLayer);
-            SurfaceControl.ScreenshotGraphicBuffer gb =
-                    mService.mDisplayManagerInternal.systemScreenshot(displayId);
-            if (gb != null) {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
-                        "ScreenRotationAnimation#getMedianBorderLuma");
-                mStartLuma = RotationAnimationUtils.getMedianBorderLuma(gb.getGraphicBuffer(),
-                        gb.getColorSpace());
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                try {
-                    surface.attachAndQueueBufferWithColorSpace(gb.getGraphicBuffer(),
-                            gb.getColorSpace());
-                } catch (RuntimeException e) {
-                    Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
-                }
-                // If the screenshot contains secure layers, we have to make sure the
-                // screenshot surface we display it in also has FLAG_SECURE so that
-                // the user can not screenshot secure layers via the screenshot surface.
-                if (gb.containsSecureLayers()) {
-                    t.setSecure(mScreenshotLayer, true);
-                }
-                t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
-                t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
-                t.setLayer(mBackColorSurface, -1);
-                t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
-                t.setAlpha(mBackColorSurface, 1);
-                t.show(mScreenshotLayer);
-                t.show(mBackColorSurface);
-            } else {
-                Slog.w(TAG, "Unable to take screenshot of display " + displayId);
-            }
-            surface.destroy();
+            GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
+                    screenshotBuffer.getHardwareBuffer());
+
+            t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
+            t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
+            t.setLayer(mBackColorSurface, -1);
+            t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
+            t.setAlpha(mBackColorSurface, 1);
+            t.setBuffer(mScreenshotLayer, buffer);
+            t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
+            t.show(mScreenshotLayer);
+            t.show(mBackColorSurface);
+
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
         ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                    "  FREEZE %s: CREATE", mScreenshotLayer);
-        setRotation(t, realOriginalRotation);
+                "  FREEZE %s: CREATE", mScreenshotLayer);
+        if (originalRotation == realOriginalRotation) {
+            setRotation(t, realOriginalRotation);
+        } else {
+            // If the given original rotation is different from real original display rotation,
+            // this is playing non-zero degree rotation animation without display rotation change,
+            // so the snapshot doesn't need to be transformed.
+            mCurRotation = realOriginalRotation;
+            mSnapshotInitialMatrix.reset();
+            setRotationTransform(t, mSnapshotInitialMatrix);
+        }
         t.apply();
     }
 
@@ -309,10 +321,8 @@ class ScreenRotationAnimation {
         pw.print(" "); mRotateExitTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mRotateEnterAnimation="); pw.print(mRotateEnterAnimation);
         pw.print(" "); mRotateEnterTransformation.printShortString(pw); pw.println();
-        pw.print(prefix); pw.print("mEnterTransformation=");
-        mEnterTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mSnapshotInitialMatrix=");
-        mSnapshotInitialMatrix.printShortString(pw);pw.println();
+        mSnapshotInitialMatrix.dump(pw); pw.println();
         pw.print(prefix); pw.print("mForceDefaultOrientation="); pw.print(mForceDefaultOrientation);
         if (mForceDefaultOrientation) {
             pw.print(" mOriginalDisplayRect="); pw.print(mOriginalDisplayRect.toShortString());
@@ -326,9 +336,8 @@ class ScreenRotationAnimation {
         // Compute the transformation matrix that must be applied
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
-        int delta = DisplayContent.deltaRotation(rotation, Surface.ROTATION_0);
+        int delta = deltaRotation(rotation, mOriginalRotation);
         RotationAnimationUtils.createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
-
         setRotationTransform(t, mSnapshotInitialMatrix);
     }
 
@@ -348,8 +357,7 @@ class ScreenRotationAnimation {
         mStarted = true;
 
         // Figure out how the screen has moved from the original rotation.
-        int delta = DisplayContent.deltaRotation(mCurRotation, mOriginalRotation);
-
+        int delta = deltaRotation(mCurRotation, mOriginalRotation);
 
         final boolean customAnim;
         if (exitAnim != 0 && enterAnim != 0) {
@@ -365,7 +373,7 @@ class ScreenRotationAnimation {
                     mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
                             R.anim.screen_rotate_0_exit);
                     mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                            R.anim.screen_rotate_0_enter);
+                            R.anim.rotation_animation_enter);
                     break;
                 case Surface.ROTATION_90:
                     mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
@@ -506,10 +514,6 @@ class ScreenRotationAnimation {
 
     public boolean isRotating() {
         return mCurRotation != mOriginalRotation;
-    }
-
-    public Transformation getEnterTransformation() {
-        return mEnterTransformation;
     }
 
     /**

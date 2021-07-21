@@ -16,9 +16,12 @@
 
 package com.android.server.rollback;
 
+import android.annotation.NonNull;
 import android.content.Context;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 /**
  * Service that manages APK level rollbacks. Publishes
@@ -38,11 +41,12 @@ public final class RollbackManagerService extends SystemService {
     public void onStart() {
         mService = new RollbackManagerServiceImpl(getContext());
         publishBinderService(Context.ROLLBACK_SERVICE, mService);
+        LocalServices.addService(RollbackManagerInternal.class, mService);
     }
 
     @Override
-    public void onUnlockUser(int user) {
-        mService.onUnlockUser(user);
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        mService.onUnlockUser(user.getUserIdentifier());
     }
 
     @Override

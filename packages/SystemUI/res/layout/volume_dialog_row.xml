@@ -20,11 +20,15 @@
     android:layout_width="@dimen/volume_dialog_panel_width"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:theme="@style/qs_theme">
+    android:gravity="center"
+    android:paddingTop="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding"
+    android:background="@drawable/volume_row_rounded_background"
+    android:theme="@style/volume_dialog_theme">
 
     <LinearLayout
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/volume_dialog_panel_width"
         android:gravity="center"
         android:layout_gravity="center"
         android:orientation="vertical" >
@@ -41,21 +45,28 @@
         <FrameLayout
             android:id="@+id/volume_row_slider_frame"
             android:layout_width="match_parent"
-            android:layout_marginTop="@dimen/volume_dialog_slider_margin_top"
-            android:layout_marginBottom="@dimen/volume_dialog_slider_margin_bottom"
-            android:layoutDirection="rtl"
-            android:layout_height="@dimen/volume_dialog_slider_height">
+            android:layout_height="@dimen/volume_row_slider_height">
             <SeekBar
                 android:id="@+id/volume_row_slider"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
                 android:clickable="true"
-                android:layout_width="@dimen/volume_dialog_slider_height"
+                android:layout_width="@dimen/volume_row_slider_height"
                 android:layout_height="match_parent"
-                android:layoutDirection="rtl"
                 android:layout_gravity="center"
-                android:rotation="90" />
+                android:thumb="@null"
+                android:splitTrack="false"
+                android:progressDrawable="@drawable/volume_row_seekbar"
+                android:background="@null"
+                android:layoutDirection="ltr"
+                android:rotation="270" />
+            <include layout="@layout/volume_dnd_icon"/>
         </FrameLayout>
 
         <com.android.keyguard.AlphaOptimizedImageButton
+            android:visibility="gone"
             android:id="@+id/volume_row_icon"
             style="@style/VolumeButtons"
             android:layout_width="@dimen/volume_dialog_tap_target_size"
@@ -65,7 +76,5 @@
             android:tint="@color/accent_tint_color_selector"
             android:soundEffectsEnabled="false" />
     </LinearLayout>
-
-    <include layout="@layout/volume_dnd_icon"/>
 
 </FrameLayout>

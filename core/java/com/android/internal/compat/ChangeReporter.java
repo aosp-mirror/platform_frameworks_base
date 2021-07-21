@@ -16,6 +16,8 @@
 
 package com.android.internal.compat;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.IntDef;
 import android.util.Log;
 import android.util.Slog;
@@ -175,7 +177,7 @@ public final class ChangeReporter {
     }
 
     private void debugLog(int uid, long changeId, int state) {
-        String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
+        String message = formatSimple("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
         if (mSource == SOURCE_SYSTEM_SERVER) {
             Slog.d(TAG, message);
@@ -221,7 +223,7 @@ public final class ChangeReporter {
                     FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "STATE_" }, value = {
+    @IntDef(prefix = { "STATE_" }, value = {
             STATE_UNKNOWN_STATE,
             STATE_ENABLED,
             STATE_DISABLED,
@@ -231,7 +233,7 @@ public final class ChangeReporter {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+    @IntDef(prefix = { "SOURCE_" }, value = {
             SOURCE_UNKNOWN_SOURCE,
             SOURCE_APP_PROCESS,
             SOURCE_SYSTEM_SERVER

@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.management
 
+import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
@@ -29,9 +30,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
-import com.android.systemui.globalactions.GlobalActionsComponent
+import com.android.systemui.controls.ui.ControlsActivity
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
@@ -41,8 +44,9 @@ import javax.inject.Inject
  */
 class ControlsEditingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
-    broadcastDispatcher: BroadcastDispatcher,
-    private val globalActionsComponent: GlobalActionsComponent
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val customIconCache: CustomIconCache,
+    private val uiController: ControlsUiController
 ) : LifecycleActivity() {
 
     companion object {
@@ -98,7 +102,6 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     override fun onBackPressed() {
-        globalActionsComponent.handleShowGlobalActionsMenu()
         animateExitAndFinish()
     }
 
@@ -137,14 +140,17 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
-        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         saveButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setText(R.string.save)
             setOnClickListener {
                 saveFavorites()
+                startActivity(
+                    Intent(applicationContext, ControlsActivity::class.java),
+                    ActivityOptions
+                        .makeSceneTransitionAnimation(this@ControlsEditingActivity).toBundle()
+                )
                 animateExitAndFinish()
-                globalActionsComponent.handleShowGlobalActionsMenu()
             }
         }
     }
@@ -170,7 +176,7 @@ class ControlsEditingActivity @Inject constructor(
 
     private fun setUpList() {
         val controls = controller.getFavoritesForStructure(component, structure)
-        model = FavoritesModel(component, controls, favoritesModelCallback)
+        model = FavoritesModel(customIconCache, component, controls, favoritesModelCallback)
         val elevation = resources.getFloat(R.dimen.control_card_elevation)
         val recyclerView = requireViewById<RecyclerView>(R.id.list)
         recyclerView.alpha = 0.0f

@@ -32,8 +32,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class CpuFrequenciesTest {
     private void check(ArrayMap<String, String> expected, String config) {
-        assertEquals(expected, (new CpuFrequencies().parseString(config))
-                .toSysFileMap());
+        CpuFrequencies actual = new CpuFrequencies().parseString(config);
+        assertEquals(expected, actual.toSysFileMap());
     }
 
     @Test
@@ -66,5 +66,22 @@ public class CpuFrequenciesTest {
         check(expected, "0:1900800/4:1958400/a:1"); // Shouldn't crash.
         check(expected, "0:1900800/4:1958400/1:"); // Shouldn't crash.
         check(expected, "0:1900800/4:1958400/1:b"); // Shouldn't crash.
+    }
+
+    @Test
+    public void testToString_returnsSanitizedStringUsedToParse() {
+        String inputString = "0:1900800/4:1958400/a:1";
+        String expectedString = "0:1900800/4:1958400";
+        CpuFrequencies cpuFrequencies = new CpuFrequencies();
+        cpuFrequencies.parseString(inputString);
+        assertEquals(expectedString, cpuFrequencies.toString());
+    }
+
+    @Test
+    public void testEquals_objectsParsedFromSameStringShouldBeEqual() {
+        String inputString = "0:1900800/4:1958400/a:1";
+        CpuFrequencies cpuFrequencies1 = new CpuFrequencies().parseString(inputString);
+        CpuFrequencies cpuFrequencies2 = new CpuFrequencies().parseString(inputString);
+        assertEquals(cpuFrequencies1, cpuFrequencies2);
     }
 }

@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"نصب‌کننده بسته"</string>
     <string name="install" msgid="711829760615509273">"نصب"</string>
+    <string name="update" msgid="3932142540719227615">"به‌روزرسانی"</string>
     <string name="done" msgid="6632441120016885253">"تمام"</string>
     <string name="cancel" msgid="1018267193425558088">"لغو"</string>
     <string name="installing" msgid="4921993079741206516">"درحال نصب…"</string>
     <string name="installing_app" msgid="1165095864863849422">"درحال نصب <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"برنامه نصب شد."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"می‌خواهید این برنامه را نصب کنید؟"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"آیا می‌خواهید به‌روزرسانی‌ این برنامه کنونی را نصب کنید؟ داده کنونی شما از بین نمی‌رود."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"آیا می‌خواهید به‌روزرسانی این برنامه داخلی را نصب کنید؟ داده‌های کنونی شما از بین نمی‌رود."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"می‌خواهید این برنامه را نصب کنید؟"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"می‌خواهید این برنامه را به‌روزرسانی کنید؟"</string>
     <string name="install_failed" msgid="5777824004474125469">"برنامه نصب نشد."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"از نصب شدن بسته جلوگیری شد."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"برنامه نصب نشد چون بسته با بسته موجود تداخل دارد."</string>
@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> نصب نمی‌شود. مقداری از فضا را آزاد و دوباره امتحان کنید."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"برنامه یافت نشد"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"برنامه در فهرست برنامه‌های نصب‌شده یافت نشد."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"مجاز نیست"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"مجاز نبودن"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"کاربر کنونی مجاز به انجام این حذف نصب نیست."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"خطا"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"برنامه را نمی‌توان حذف نصب کرد."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"‏کنش‌های نصب/حذف نصب در Wear پشتیبانی نمی‌شود."</string>
     <string name="message_staging" msgid="8032722385658438567">"مرحله‌بندی برنامه…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"نامشخص"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"برای امنیت شما، رایانه لوحی‌تان اجازه نمی‌دهد از این منبع برنامه‌های ناشناس نصب شود."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"برای امنیت شما، تلویزیونتان اجازه نمی‌دهد از این منبع برنامه‌های ناشناس نصب شود."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"برای امنیت شما، تلفنتان اجازه نمی‌دهد از این منبع برنامه‌های ناشناس نصب شود."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"برای امنیت شما، درحال‌حاضر رایانه لوحی‌تان اجازه ندارد برنامه‌های ناشناس را از این منبع نصب کنید. می‌توانید آن را در «تنظیمات» تغییر دهید."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"برای امنیت شما، درحال‌حاضر تلویزیونتان اجازه ندارد برنامه‌های ناشناس را از این منبع نصب کنید. می‌توانید آن را در «تنظیمات» تغییر دهید."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"برای امنیت شما، درحال‌حاضر تلفنتان اجازه ندارد برنامه‌های ناشناس را از این منبع نصب کنید. می‌توانید آن را در «تنظیمات» تغییر دهید."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"تلفن و داده‌های شخصی‌تان دربرابر حمله برنامه‌های ناشناس آسیب‌پذیرتر هستند. با نصب این برنامه، موافقت می‌کنید که مسئول هرگونه آسیب به تلفن یا از دست رفتن داده‌ای هستید که ممکن است درنتیجه استفاده از آن به وجود آید."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"رایانه لوحی و داده‌های شخصی‌تان دربرابر حمله برنامه‌های ناشناس آسیب‌پذیرتر هستند. با نصب این برنامه، موافقت می‌کنید که مسئول هرگونه آسیب به رایانه لوحی یا از دست رفتن داده‌ای هستید که ممکن است درنتیجه استفاده از آن به وجود آید."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"تلویزیون و داده‌های شخصی‌تان دربرابر حمله برنامه‌های ناشناس آسیب‌پذیرتر هستند. با نصب این برنامه، موافقت می‌کنید که مسئول هرگونه آسیب به تلویزیون یا از دست رفتن داده‌ای هستید که ممکن است درنتیجه استفاده از آن به وجود آید."</string>

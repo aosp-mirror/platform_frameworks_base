@@ -41,7 +41,7 @@ import java.io.PrintWriter;
  * Companion for {@link AbstractMasterSystemService}, it's the base class for the "real" service
  * implementation.
  *
- * @param <M> "master" service class.
+ * @param <M> "main" service class.
  * @param <S> "real" service class.
  *
  * @hide
@@ -208,7 +208,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     }
 
     /**
-     * Gets the master service.
+     * Gets the main service.
      */
     public final M getMaster() {
         return mMaster;
@@ -301,7 +301,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     }
 
     /**
-     * Removes the service from the master's cache.
+     * Removes the service from the main service's cache.
      */
     protected final void removeSelfFromCacheLocked() {
         mMaster.removeCachedServiceLocked(mUserId);

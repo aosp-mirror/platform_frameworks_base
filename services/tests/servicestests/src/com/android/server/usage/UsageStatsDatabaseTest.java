@@ -261,6 +261,7 @@ public class UsageStatsDatabaseTest {
         // mEndTimeStamp is based on the enclosing IntervalStats, don't bother checking
         assertEquals(us1.mLastTimeUsed, us2.mLastTimeUsed);
         assertEquals(us1.mLastTimeVisible, us2.mLastTimeVisible);
+        assertEquals(us1.mLastTimeComponentUsed, us2.mLastTimeComponentUsed);
         assertEquals(us1.mTotalTimeInForeground, us2.mTotalTimeInForeground);
         assertEquals(us1.mTotalTimeVisible, us2.mTotalTimeVisible);
         assertEquals(us1.mLastTimeForegroundServiceUsed, us2.mLastTimeForegroundServiceUsed);

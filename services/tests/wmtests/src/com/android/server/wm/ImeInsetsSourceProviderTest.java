@@ -18,7 +18,9 @@ package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.PixelFormat;
@@ -50,10 +52,36 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     public void testTransparentControlTargetWindowCanShowIme() {
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, "app");
         final WindowState popup = createWindow(appWin, TYPE_APPLICATION, "popup");
-        mDisplayContent.mInputMethodControlTarget = popup;
-        mDisplayContent.mInputMethodTarget = appWin;
+        mDisplayContent.setImeControlTarget(popup);
+        mDisplayContent.setImeLayeringTarget(appWin);
         popup.mAttrs.format = PixelFormat.TRANSPARENT;
         mImeProvider.scheduleShowImePostLayout(appWin);
-        assertTrue(mImeProvider.isImeTargetFromDisplayContentAndImeSame());
+        assertTrue(mImeProvider.isReadyToShowIme());
+    }
+
+    @Test
+    public void testInputMethodInputTargetCanShowIme() {
+        WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        mDisplayContent.setImeLayeringTarget(target);
+        mImeProvider.scheduleShowImePostLayout(target);
+        assertTrue(mImeProvider.isReadyToShowIme());
+    }
+
+    @Test
+    public void testIsImeShowing() {
+        WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        makeWindowVisibleAndDrawn(ime);
+        mImeProvider.setWindow(ime, null, null);
+
+        WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        mDisplayContent.setImeLayeringTarget(target);
+        mDisplayContent.setImeControlTarget(target);
+
+        mImeProvider.scheduleShowImePostLayout(target);
+        assertFalse(mImeProvider.isImeShowing());
+        mImeProvider.checkShowImePostLayout();
+        assertTrue(mImeProvider.isImeShowing());
+        mImeProvider.setImeShowing(false);
+        assertFalse(mImeProvider.isImeShowing());
     }
 }

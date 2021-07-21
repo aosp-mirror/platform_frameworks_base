@@ -43,7 +43,7 @@ public class InternalDownloadProgressListener extends IDownloadProgressListener.
             return;
         }
 
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override

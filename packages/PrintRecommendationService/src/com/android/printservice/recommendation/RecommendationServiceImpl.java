@@ -46,7 +46,7 @@ public class RecommendationServiceImpl extends RecommendationService
     private static final String LOG_TAG = "PrintServiceRecService";
 
     /** All registered plugins */
-    private ArrayList<RemotePrintServicePlugin> mPlugins;
+    private final ArrayList<RemotePrintServicePlugin> mPlugins = new ArrayList<>();
 
     /** Lock to keep multi-cast enabled */
     private WifiManager.MulticastLock mMultiCastLock;
@@ -61,8 +61,6 @@ public class RecommendationServiceImpl extends RecommendationService
 
             mMultiCastLock.acquire();
         }
-
-        mPlugins = new ArrayList<>();
 
         try {
             for (VendorConfig config : VendorConfig.getAllConfigs(this)) {
@@ -138,6 +136,7 @@ public class RecommendationServiceImpl extends RecommendationService
                 Log.e(LOG_TAG, "Could not stop plugin", e);
             }
         }
+        mPlugins.clear();
 
         if (mMultiCastLock != null) {
             mMultiCastLock.release();

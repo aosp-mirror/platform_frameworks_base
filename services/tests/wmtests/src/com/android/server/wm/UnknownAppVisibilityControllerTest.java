@@ -44,7 +44,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testFlow() {
-        final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
         mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(activity);
         mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(activity);
@@ -55,9 +55,21 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testSkipResume() {
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
+        activity.mLaunchTaskBehind = true;
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
+        mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(activity);
+
+        // Make sure our handler processed the message.
+        waitHandlerIdle(mWm.mH);
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
+    }
+
+    @Test
     public void testMultiple() {
-        final ActivityRecord activity1 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
-        final ActivityRecord activity2 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
+        final ActivityRecord activity2 = createNonAttachedActivityRecord(mDisplayContent);
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity1);
         mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(activity1);
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity2);
@@ -72,15 +84,25 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testClear() {
-        final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
         mDisplayContent.mUnknownAppVisibilityController.clear();
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
     @Test
+    public void testRemoveFinishingInvisibleActivityFromUnknown() {
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
+        activity.finishing = true;
+        activity.mVisibleRequested = true;
+        activity.setVisibility(false, false);
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
+    }
+
+    @Test
     public void testAppRemoved() {
-        final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
         mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(activity);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());

@@ -41,6 +41,9 @@ public:
     enum Style : uint8_t { kNormal = 0, kBold = 0x01, kItalic = 0x02, kBoldItalic = 0x03 };
     Style fAPIStyle;
 
+    // base weight in CSS-style units, 1..1000
+    int fBaseWeight;
+
     static const Typeface* resolveDefault(const Typeface* src);
 
     // The following three functions create new Typeface from an existing Typeface with a different
@@ -81,10 +84,6 @@ public:
 
     // Sets roboto font as the default typeface for testing purpose.
     static void setRobotoTypefaceForTest();
-
-private:
-    // base weight in CSS-style units, 1..1000
-    int fBaseWeight;
 };
 }
 

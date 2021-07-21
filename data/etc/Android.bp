@@ -15,6 +15,15 @@
 
 // Sysconfig files
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 prebuilt_etc {
     name: "framework-sysconfig.xml",
     sub_dir: "sysconfig",
@@ -102,10 +111,32 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.imsserviceentitlement",
+    product_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.imsserviceentitlement.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.launcher3",
     system_ext_specific: true,
     sub_dir: "permissions",
     src: "com.android.launcher3.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.networkstack",
+    sub_dir: "permissions",
+    src: "com.android.networkstack.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.networkstack.tethering",
+    sub_dir: "permissions",
+    src: "com.android.networkstack.tethering.xml",
     filename_from_src: true,
 }
 

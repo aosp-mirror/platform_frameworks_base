@@ -23,14 +23,13 @@ import android.os.UserHandle;
 import com.android.internal.app.ResolverActivity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents a "stack" of chooser targets for various activities within the same component.
  */
 public class MultiDisplayResolveInfo extends DisplayResolveInfo {
 
-    List<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
+    ArrayList<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
     // We'll use this DRI for basic presentation info - eg icon, name.
     final DisplayResolveInfo mBaseInfo;
     // Index of selected target
@@ -61,7 +60,7 @@ public class MultiDisplayResolveInfo extends DisplayResolveInfo {
     /**
      * List of all DisplayResolveInfos included in this target.
      */
-    public List<DisplayResolveInfo> getTargets() {
+    public ArrayList<DisplayResolveInfo> getTargets() {
         return mTargetInfos;
     }
 

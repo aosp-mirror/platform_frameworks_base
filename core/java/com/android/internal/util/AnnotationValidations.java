@@ -182,7 +182,7 @@ public class AnnotationValidations {
             Annotation ignored, int value, Object... params) {}
     public static void validate(Class<? extends Annotation> annotation,
             Annotation ignored, int value) {
-        if (("android.annotation".equals(annotation.getPackageName$())
+        if (("android.annotation".equals(annotation.getPackageName())
                 && annotation.getSimpleName().endsWith("Res"))
                 || ColorInt.class.equals(annotation)) {
             if (value < 0) {
@@ -192,7 +192,7 @@ public class AnnotationValidations {
     }
     public static void validate(Class<? extends Annotation> annotation,
             Annotation ignored, long value) {
-        if ("android.annotation".equals(annotation.getPackageName$())
+        if ("android.annotation".equals(annotation.getPackageName())
                 && annotation.getSimpleName().endsWith("Long")) {
             if (value < 0L) {
                 invalid(annotation, value);

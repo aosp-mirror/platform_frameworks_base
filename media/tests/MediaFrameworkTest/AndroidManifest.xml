@@ -15,85 +15,86 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.mediaframeworktest">
+     package="com.android.mediaframeworktest">
 
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application android:networkSecurityConfig="@xml/network_security_config">
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
         <activity android:label="@string/app_name"
-                android:name="MediaFrameworkTest"
-                android:screenOrientation="landscape">
+             android:name="MediaFrameworkTest"
+             android:screenOrientation="landscape"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:label="Camera2CtsActivity"
-                android:name="Camera2SurfaceViewActivity"
-                android:screenOrientation="landscape"
-                android:configChanges="keyboardHidden|orientation|screenSize">
+             android:name="Camera2SurfaceViewActivity"
+             android:screenOrientation="landscape"
+             android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
     </application>
 
     <instrumentation android:name=".CameraStressTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="Camera stress tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="Camera stress tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".Camera2InstrumentationTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="Camera2 InstrumentationTestRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="Camera2 InstrumentationTestRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="MediaFramework tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="MediaFramework tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkPerfTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="MediaFramework Performance tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="MediaFramework Performance tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkUnitTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="MediaFramework unit tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="MediaFramework unit tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaRecorderStressTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="MediaRecorder stress tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="MediaRecorder stress tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".AudioTestHarnessTemplateRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="Audio Test Harness tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="Audio Test Harness tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkPowerTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="Media Power tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="Media Power tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaPlayerStressTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="Media Power tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="Media Power tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkIntegrationTestRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="MediaFramework integration tests InstrumentationRunner">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="MediaFramework integration tests InstrumentationRunner">
     </instrumentation>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-            android:targetPackage="com.android.mediaframeworktest"
-            android:label="media framework tests">
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="media framework tests">
     </instrumentation>
 
 </manifest>

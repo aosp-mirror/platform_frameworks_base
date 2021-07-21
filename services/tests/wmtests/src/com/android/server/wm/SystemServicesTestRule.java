@@ -88,6 +88,7 @@ import org.mockito.quality.Strictness;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * JUnit test rule to correctly setting up system services like {@link WindowManagerService}
@@ -102,15 +103,18 @@ public class SystemServicesTestRule implements TestRule {
 
     private static final int[] TEST_USER_PROFILE_IDS = {};
 
+    private Description mDescription;
     private Context mContext;
     private StaticMockitoSession mMockitoSession;
     private ActivityManagerService mAmService;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
     private TestWindowManagerPolicy mWMPolicy;
+    private TestDisplayWindowSettingsProvider mTestDisplayWindowSettingsProvider;
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
+    private Supplier<Surface> mSurfaceFactory = () -> mock(Surface.class);
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
      */
@@ -121,6 +125,7 @@ public class SystemServicesTestRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                mDescription = description;
                 Throwable throwable = null;
                 try {
                     runWithDexmakerShareClassLoader(SystemServicesTestRule.this::setUp);
@@ -234,6 +239,7 @@ public class SystemServicesTestRule implements TestRule {
         inputChannels[0].dispose();
         mInputChannel = inputChannels[1];
         doReturn(mInputChannel).when(mImService).monitorInput(anyString(), anyInt());
+        doReturn(mInputChannel).when(mImService).createInputChannel(anyString());
 
         // StatusBarManagerInternal
         final StatusBarManagerInternal sbmi = mock(StatusBarManagerInternal.class);
@@ -279,11 +285,13 @@ public class SystemServicesTestRule implements TestRule {
         mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
         mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
                 mPowerManagerWrapper);
+        mTestDisplayWindowSettingsProvider = new TestDisplayWindowSettingsProvider();
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new,
-                () -> mock(Surface.class), (unused) -> new MockSurfaceControlBuilder());
+                mContext, mImService, false, false, mWMPolicy, mAtmService,
+                mTestDisplayWindowSettingsProvider, StubTransaction::new,
+                () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.
@@ -293,6 +301,8 @@ public class SystemServicesTestRule implements TestRule {
         // Called when moving activity to pinned stack.
         doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
                 anyInt(), anyBoolean(), anyBoolean());
+        spyOn(mWmService.mDisplayWindowSettings);
+        spyOn(mWmService.mDisplayWindowSettingsProvider);
 
         // Setup factory classes to prevent calls to native code.
         mTransaction = spy(StubTransaction.class);
@@ -316,8 +326,11 @@ public class SystemServicesTestRule implements TestRule {
         display.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(display);
         final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
+
+        // Set the default focused TDA.
+        display.onLastFocusedTaskDisplayAreaChanged(taskDisplayArea);
         spyOn(taskDisplayArea);
-        final ActivityStack homeStack = taskDisplayArea.getStack(
+        final Task homeStack = taskDisplayArea.getRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         spyOn(homeStack);
     }
@@ -332,7 +345,7 @@ public class SystemServicesTestRule implements TestRule {
         // HighRefreshRateBlacklist with DeviceConfig. We need to undo that here to avoid
         // leaking mWmService.
         mWmService.mConstants.dispose();
-        mWmService.mHighRefreshRateBlacklist.dispose();
+        mWmService.mHighRefreshRateDenylist.dispose();
 
         // This makes sure the posted messages without delay are processed, e.g.
         // DisplayPolicy#release, WindowManagerService#setAnimationScale.
@@ -373,6 +386,10 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
     }
 
+    Description getDescription() {
+        return mDescription;
+    }
+
     WindowManagerService getWindowManagerService() {
         return mWmService;
     }
@@ -383,6 +400,10 @@ public class SystemServicesTestRule implements TestRule {
 
     WindowState.PowerManagerWrapper getPowerManagerWrapper() {
         return mPowerManagerWrapper;
+    }
+
+    void setSurfaceFactory(Supplier<Surface> factory) {
+        mSurfaceFactory = factory;
     }
 
     void cleanupWindowManagerHandlers() {
@@ -449,9 +470,9 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     protected class TestActivityTaskManagerService extends ActivityTaskManagerService {
-        // ActivityStackSupervisor may be created more than once while setting up AMS and ATMS.
+        // ActivityTaskSupervisor may be created more than once while setting up AMS and ATMS.
         // We keep the reference in order to prevent creating it twice.
-        ActivityStackSupervisor mTestStackSupervisor;
+        ActivityTaskSupervisor mTestTaskSupervisor;
 
         TestActivityTaskManagerService(Context context, ActivityManagerService ams) {
             super(context);
@@ -462,6 +483,13 @@ public class SystemServicesTestRule implements TestRule {
             mSupportsSplitScreenMultiWindow = true;
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
+            mDevEnableNonResizableMultiWindow = false;
+            mMinPercentageMultiWindowSupportHeight = 0.3f;
+            mMinPercentageMultiWindowSupportWidth = 0.5f;
+            mLargeScreenSmallestScreenWidthDp = 600;
+            mSupportsNonResizableMultiWindow = 0;
+            mRespectsActivityMinWidthHeightMultiWindow = 0;
+            mForceResizableActivities = false;
 
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
             // allow background activity starts by default
@@ -505,21 +533,21 @@ public class SystemServicesTestRule implements TestRule {
         }
 
         @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
-            if (mTestStackSupervisor == null) {
-                mTestStackSupervisor = new TestActivityStackSupervisor(this, mH.getLooper());
+        protected ActivityTaskSupervisor createTaskSupervisor() {
+            if (mTestTaskSupervisor == null) {
+                mTestTaskSupervisor = new TestActivityTaskSupervisor(this, mH.getLooper());
             }
-            return mTestStackSupervisor;
+            return mTestTaskSupervisor;
         }
     }
 
     /**
-     * An {@link ActivityStackSupervisor} which stubs out certain methods that depend on
+     * An {@link ActivityTaskSupervisor} which stubs out certain methods that depend on
      * setup not available in the test environment. Also specifies an injector for
      */
-    protected class TestActivityStackSupervisor extends ActivityStackSupervisor {
+    protected class TestActivityTaskSupervisor extends ActivityTaskSupervisor {
 
-        TestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
+        TestActivityTaskSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
             spyOn(this);
 
@@ -528,11 +556,14 @@ public class SystemServicesTestRule implements TestRule {
             doNothing().when(this).scheduleIdleTimeout(any());
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
-            doReturn(mock(KeyguardController.class)).when(this).getKeyguardController();
 
             mLaunchingActivityWakeLock = mock(PowerManager.WakeLock.class);
 
             initialize();
+
+            final KeyguardController controller = getKeyguardController();
+            spyOn(controller);
+            doReturn(true).when(controller).checkKeyguardVisibility(any());
         }
     }
 

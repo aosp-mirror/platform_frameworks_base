@@ -71,6 +71,13 @@ public abstract class ShortcutServiceInternal {
     public abstract int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 
+    /**
+     * Get the theme res ID of the starting window, it can be 0 if not specified.
+     */
+    public abstract @Nullable String getShortcutStartingThemeResName(int launcherUserId,
+            @NonNull String callingPackage, @NonNull String packageName, @NonNull String shortcutId,
+            int userId);
+
     public abstract ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
             @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);

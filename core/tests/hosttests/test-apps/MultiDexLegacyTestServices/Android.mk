@@ -23,6 +23,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SDK_VERSION := 9
 
 LOCAL_PACKAGE_NAME := MultiDexLegacyTestServices
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../NOTICE
 
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-multidex
 
@@ -32,6 +35,8 @@ mainDexList:= \
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
 
 LOCAL_DEX_PREOPT := false
+
+LOCAL_EMMA_INSTRUMENT := false
 
 include $(BUILD_PACKAGE)
 

@@ -239,8 +239,8 @@ public class UninstallFinish extends BroadcastReceiver {
         builder.addAction((new Notification.Action.Builder(
                 Icon.createWithResource(context, R.drawable.ic_settings_multiuser),
                 context.getString(R.string.manage_users),
-                PendingIntent.getActivity(context, 0, intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT))).build());
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                        | PendingIntent.FLAG_IMMUTABLE))).build());
     }
 
     /**
@@ -259,7 +259,7 @@ public class UninstallFinish extends BroadcastReceiver {
         builder.addAction((new Notification.Action.Builder(
                 Icon.createWithResource(context, R.drawable.ic_lock),
                 context.getString(R.string.manage_device_administrators),
-                PendingIntent.getActivity(context, 0, intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT))).build());
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                        | PendingIntent.FLAG_IMMUTABLE))).build());
     }
 }

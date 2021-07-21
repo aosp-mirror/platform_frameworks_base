@@ -62,17 +62,17 @@ Acquire the dispatcher by using `@Inject` to obtain a `BroadcastDispatcher`. The
  * @param executor An executor to dispatch [BroadcastReceiver.onReceive]. Pass null to use an
  *                 executor in the main thread (default).
  * @param user A user handle to determine which broadcast should be dispatched to this receiver.
- *             By default, it is the user of the context (system user in SystemUI).
+ *             Pass `null` to use the user of the context (system user in SystemUI).
  * @throws IllegalArgumentException if the filter has other constraints that are not actions or
  *                                  categories or the filter has no actions.
  */
 @JvmOverloads
-fun registerReceiver(
-        BroadcastReceiver, 
-        IntentFilter, 
-        Executor? = context.mainExecutor,
-        UserHandle = context.user
-) {
+open fun registerReceiver(
+    receiver: BroadcastReceiver,
+    filter: IntentFilter,
+    executor: Executor? = null,
+    user: UserHandle? = null
+)
 ```
 
 All subscriptions are done with the same overloaded method. As specified in the doc, in order to pass a `UserHandle` with the default `Executor`, pass `null` for the `Executor`.

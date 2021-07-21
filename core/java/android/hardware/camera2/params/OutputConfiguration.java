@@ -17,23 +17,33 @@
 
 package android.hardware.camera2.params;
 
+import static com.android.internal.util.Preconditions.*;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.MultiResolutionImageReader;
+import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
+import android.media.ImageReader;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
-import static com.android.internal.util.Preconditions.*;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -81,6 +91,13 @@ import java.util.Objects;
  * {@link CameraCaptureSession#updateOutputConfiguration} can be called after the configuration
  * finalize method returns without exceptions.</li>
  *
+ * <li>If the camera device supports multi-resolution output streams, {@link
+ * CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP} will contain the
+ * formats and their corresponding stream info. The application can use an OutputConfiguration
+ * created with the multi-resolution stream info queried from {@link
+ * MultiResolutionStreamConfigurationMap#getOutputInfo} and
+ * {@link android.hardware.camera2.MultiResolutionImageReader} to capture variable size images.
+ *
  * </ul>
  *
  * <p> As of {@link android.os.Build.VERSION_CODES#P Android P}, all formats except
@@ -88,6 +105,7 @@ import java.util.Objects;
  * device support. On prior API levels, only {@link ImageFormat#PRIVATE} format may be used.</p>
  *
  * @see CameraDevice#createCaptureSessionByOutputConfigurations
+ * @see CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP
  *
  */
 public final class OutputConfiguration implements Parcelable {
@@ -131,6 +149,13 @@ public final class OutputConfiguration implements Parcelable {
      *doesn't belong to any surface group.</p>
      */
     public static final int SURFACE_GROUP_ID_NONE = -1;
+
+    /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(prefix = {"SENSOR_PIXEL_MODE_"}, value =
+         {CameraMetadata.SENSOR_PIXEL_MODE_DEFAULT,
+          CameraMetadata.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION})
+     public @interface SensorPixelMode {};
 
     /**
      * Create a new {@link OutputConfiguration} instance with a {@link Surface}.
@@ -206,6 +231,33 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Set the multi-resolution output flag.
+     *
+     * <p>Specify that this OutputConfiguration is part of a multi-resolution output stream group
+     * used by {@link android.hardware.camera2.MultiResolutionImageReader}.</p>
+     *
+     * <p>This function must only be called for an OutputConfiguration with a non-negative
+     * group ID. And all OutputConfigurations of a MultiResolutionImageReader will have the same
+     * group ID and have this flag set.</p>
+     *
+     * @throws IllegalStateException If surface sharing is enabled via {@link #enableSurfaceSharing}
+     *         call, or no non-negative group ID has been set.
+     * @hide
+     */
+    void setMultiResolutionOutput() {
+        if (mIsShared) {
+            throw new IllegalStateException("Multi-resolution output flag must not be set for " +
+                    "configuration with surface sharing");
+        }
+        if (mSurfaceGroupId == SURFACE_GROUP_ID_NONE) {
+            throw new IllegalStateException("Multi-resolution output flag should only be set for " +
+                    "surface with non-negative group ID");
+        }
+
+        mIsMultiResolution = true;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance.
      *
      * <p>This constructor takes an argument for desired camera rotation</p>
@@ -265,6 +317,49 @@ public final class OutputConfiguration implements Parcelable {
         mIsDeferredConfig = false;
         mIsShared = false;
         mPhysicalCameraId = null;
+        mIsMultiResolution = false;
+        mSensorPixelModesUsed = new ArrayList<Integer>();
+    }
+
+    /**
+     * Create a list of {@link OutputConfiguration} instances for the outputs used by a
+     * {@link android.hardware.camera2.MultiResolutionImageReader}.
+     *
+     * <p>This constructor takes an argument for a
+     * {@link android.hardware.camera2.MultiResolutionImageReader}.</p>
+     *
+     * @param multiResolutionImageReader
+     *          The multi-resolution image reader object.
+     */
+    public static @NonNull Collection<OutputConfiguration> createInstancesForMultiResolutionOutput(
+            @NonNull MultiResolutionImageReader multiResolutionImageReader)  {
+        checkNotNull(multiResolutionImageReader, "Multi-resolution image reader must not be null");
+
+        int groupId = MULTI_RESOLUTION_GROUP_ID_COUNTER;
+        MULTI_RESOLUTION_GROUP_ID_COUNTER++;
+        // Skip in case the group id counter overflows to -1, the invalid value.
+        if (MULTI_RESOLUTION_GROUP_ID_COUNTER == -1) {
+            MULTI_RESOLUTION_GROUP_ID_COUNTER++;
+        }
+
+        ImageReader[] imageReaders = multiResolutionImageReader.getReaders();
+        ArrayList<OutputConfiguration> configs = new ArrayList<OutputConfiguration>();
+        for (int i = 0; i < imageReaders.length; i++) {
+            MultiResolutionStreamInfo streamInfo =
+                    multiResolutionImageReader.getStreamInfoForImageReader(imageReaders[i]);
+
+            OutputConfiguration config = new OutputConfiguration(
+                    groupId, imageReaders[i].getSurface());
+            config.setPhysicalCameraId(streamInfo.getPhysicalCameraId());
+            config.setMultiResolutionOutput();
+            configs.add(config);
+
+            // No need to call addSensorPixelModeUsed for ultra high resolution sensor camera,
+            // because regular and max resolution output configurations are used for DEFAULT mode
+            // and MAX_RESOLUTION mode respectively by default.
+        }
+
+        return configs;
     }
 
     /**
@@ -319,6 +414,8 @@ public final class OutputConfiguration implements Parcelable {
         mIsDeferredConfig = true;
         mIsShared = false;
         mPhysicalCameraId = null;
+        mIsMultiResolution = false;
+        mSensorPixelModesUsed = new ArrayList<Integer>();
     }
 
     /**
@@ -355,8 +452,18 @@ public final class OutputConfiguration implements Parcelable {
      * <p>Up to {@link #getMaxSharedSurfaceCount} surfaces can be shared for an OutputConfiguration.
      * The supported surfaces for sharing must be of type SurfaceTexture, SurfaceView,
      * MediaRecorder, MediaCodec, or implementation defined ImageReader.</p>
+     *
+     * <p>This function must not be called from OuptutConfigurations created by {@link
+     * #createInstancesForMultiResolutionOutput}.</p>
+     *
+     * @throws IllegalStateException If this OutputConfiguration is created via {@link
+     * #createInstancesForMultiResolutionOutput} to back a MultiResolutionImageReader.
      */
     public void enableSurfaceSharing() {
+        if (mIsMultiResolution) {
+            throw new IllegalStateException("Cannot enable surface sharing on "
+                    + "multi-resolution output configurations");
+        }
         mIsShared = true;
     }
 
@@ -368,8 +475,7 @@ public final class OutputConfiguration implements Parcelable {
      * This call achieves it by mapping the OutputConfiguration to the physical camera id.</p>
      *
      * <p>The valid physical camera ids can be queried by {@link
-     * android.hardware.camera2.CameraCharacteristics#getPhysicalCameraIds}.
-     * </p>
+     * CameraCharacteristics#getPhysicalCameraIds}.</p>
      *
      * <p>Passing in a null physicalCameraId means that the OutputConfiguration is for a logical
      * stream.</p>
@@ -380,11 +486,94 @@ public final class OutputConfiguration implements Parcelable {
      * after {@link CameraDevice#createCaptureSessionByOutputConfigurations} or {@link
      * CameraDevice#createReprocessableCaptureSessionByConfigurations} has no effect.</p>
      *
-     * <p>The surface belonging to a physical camera OutputConfiguration must not be used as input
-     * or output of a reprocessing request. </p>
+     * <p>As of {@link android.os.Build.VERSION_CODES#S Android 12}, an image buffer from a
+     * physical camera stream can be used for reprocessing to logical camera streams and streams
+     * from the same physical camera if the camera device supports multi-resolution input and output
+     * streams. See {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP}
+     * for details. The behaviors of reprocessing from a non-physical camera stream to a physical
+     * camera stream, and from a physical camera stream to a physical camera stream of different
+     * physical camera, are device-specific and not guaranteed to be supported.</p>
+     *
+     * <p>On prior API levels, the surface belonging to a physical camera OutputConfiguration must
+     * not be used as input or output of a reprocessing request. </p>
      */
     public void setPhysicalCameraId(@Nullable String physicalCameraId) {
         mPhysicalCameraId = physicalCameraId;
+    }
+
+    /**
+     * Add a sensor pixel mode that this OutputConfiguration will be used in.
+     *
+     * <p> In the case that this output stream configuration (format, width, height) is
+     * available through {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}
+     * configurations and
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION},
+     * configurations, the camera sub-system will assume that this {@link OutputConfiguration} will
+     * be used only with {@link android.hardware.camera2.CaptureRequest}s which has
+     * {@link android.hardware.camera2.CaptureRequest#SENSOR_PIXEL_MODE} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT}.
+     * In such cases, if clients intend to use the
+     * {@link OutputConfiguration}(s) in a {@link android.hardware.camera2.CaptureRequest} with
+     * other sensor pixel modes, they must specify which
+     * {@link android.hardware.camera2.CaptureRequest#SENSOR_PIXEL_MODE}(s) they will use this
+     * {@link OutputConfiguration} with, by calling this method.
+     *
+     * In case this output stream configuration (format, width, height) is only in
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION},
+     * configurations, this output target must only be used with
+     * {@link android.hardware.camera2.CaptureRequest}s which has
+     * {@link android.hardware.camera2.CaptureRequest#SENSOR_PIXEL_MODE} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION} and that
+     * is what the camera sub-system will assume. If clients add
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT} in this
+     * case, session configuration will fail, if this {@link OutputConfiguration} is included.
+     *
+     * In case this output stream configuration (format, width, height) is only in
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP},
+     * configurations, this output target must only be used with
+     * {@link android.hardware.camera2.CaptureRequest}s which has
+     * {@link android.hardware.camera2.CaptureRequest#SENSOR_PIXEL_MODE} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT} and that is what
+     * the camera sub-system will assume. If clients add
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION} in this
+     * case, session configuration will fail, if this {@link OutputConfiguration} is included.
+     *
+     * @param sensorPixelModeUsed The sensor pixel mode this OutputConfiguration will be used with
+     * </p>
+     *
+     */
+    public void addSensorPixelModeUsed(@SensorPixelMode int sensorPixelModeUsed) {
+        // Verify that the values are in range.
+        if (sensorPixelModeUsed != CameraMetadata.SENSOR_PIXEL_MODE_DEFAULT &&
+                sensorPixelModeUsed != CameraMetadata.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION) {
+            throw new IllegalArgumentException("Not a valid sensor pixel mode " +
+                    sensorPixelModeUsed);
+        }
+
+        if (mSensorPixelModesUsed.contains(sensorPixelModeUsed)) {
+            // Already added, ignore;
+            return;
+        }
+        mSensorPixelModesUsed.add(sensorPixelModeUsed);
+    }
+
+    /**
+     * Remove a sensor pixel mode, previously added through addSensorPixelModeUsed, from this
+     * OutputConfiguration.
+     *
+     * <p> Sensor pixel modes added via calls to {@link #addSensorPixelModeUsed} can also be removed
+     * from the OutputConfiguration.</p>
+     *
+     * @param sensorPixelModeUsed The sensor pixel mode to be removed.
+     *
+     * @throws IllegalArgumentException If the sensor pixel mode wasn't previously added
+     *                                  through {@link #addSensorPixelModeUsed}.
+     */
+    public void removeSensorPixelModeUsed(@SensorPixelMode int sensorPixelModeUsed) {
+      if (!mSensorPixelModesUsed.remove(Integer.valueOf(sensorPixelModeUsed))) {
+            throw new IllegalArgumentException("sensorPixelMode " + sensorPixelModeUsed +
+                    "is not part of this output configuration");
+      }
     }
 
     /**
@@ -527,6 +716,8 @@ public final class OutputConfiguration implements Parcelable {
         this.mIsDeferredConfig = other.mIsDeferredConfig;
         this.mIsShared = other.mIsShared;
         this.mPhysicalCameraId = other.mPhysicalCameraId;
+        this.mIsMultiResolution = other.mIsMultiResolution;
+        this.mSensorPixelModesUsed = other.mSensorPixelModesUsed;
     }
 
     /**
@@ -543,7 +734,8 @@ public final class OutputConfiguration implements Parcelable {
         ArrayList<Surface> surfaces = new ArrayList<Surface>();
         source.readTypedList(surfaces, Surface.CREATOR);
         String physicalCameraId = source.readString();
-
+        boolean isMultiResolutionOutput = source.readInt() == 1;
+        int[] sensorPixelModesUsed = source.createIntArray();
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
 
         mSurfaceGroupId = surfaceSetId;
@@ -566,6 +758,8 @@ public final class OutputConfiguration implements Parcelable {
             mConfiguredGenerationId = 0;
         }
         mPhysicalCameraId = physicalCameraId;
+        mIsMultiResolution = isMultiResolutionOutput;
+        mSensorPixelModesUsed = convertIntArrayToIntegerList(sensorPixelModesUsed);
     }
 
     /**
@@ -631,13 +825,7 @@ public final class OutputConfiguration implements Parcelable {
             new Parcelable.Creator<OutputConfiguration>() {
         @Override
         public OutputConfiguration createFromParcel(Parcel source) {
-            try {
-                OutputConfiguration outputConfiguration = new OutputConfiguration(source);
-                return outputConfiguration;
-            } catch (Exception e) {
-                Log.e(TAG, "Exception creating OutputConfiguration from parcel", e);
-                return null;
-            }
+            return new OutputConfiguration(source);
         }
 
         @Override
@@ -649,6 +837,25 @@ public final class OutputConfiguration implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    private static int[] convertIntegerToIntList(List<Integer> integerList) {
+        int[] integerArray = new int[integerList.size()];
+        for (int i = 0; i < integerList.size(); i++) {
+            integerArray[i] = integerList.get(i);
+        }
+        return integerArray;
+    }
+
+    private static ArrayList<Integer> convertIntArrayToIntegerList(int[] intArray) {
+        ArrayList<Integer> integerList = new ArrayList<Integer>();
+        if (intArray == null) {
+            return integerList;
+        }
+        for (int i = 0; i < intArray.length; i++) {
+            integerList.add(intArray[i]);
+        }
+        return integerList;
     }
 
     @Override
@@ -665,6 +872,9 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mIsShared ? 1 : 0);
         dest.writeTypedList(mSurfaces);
         dest.writeString(mPhysicalCameraId);
+        dest.writeInt(mIsMultiResolution ? 1 : 0);
+        // writeList doesn't seem to work well with Integer list.
+        dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
     }
 
     /**
@@ -677,7 +887,7 @@ public final class OutputConfiguration implements Parcelable {
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         } else if (this == obj) {
@@ -694,9 +904,17 @@ public final class OutputConfiguration implements Parcelable {
                     mConfiguredFormat != other.mConfiguredFormat ||
                     mConfiguredDataspace != other.mConfiguredDataspace ||
                     mConfiguredGenerationId != other.mConfiguredGenerationId ||
-                    !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId))
+                    !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId) ||
+                    mIsMultiResolution != other.mIsMultiResolution)
                 return false;
-
+            if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
+                return false;
+            }
+            for (int j = 0; j < mSensorPixelModesUsed.size(); j++) {
+                if (mSensorPixelModesUsed.get(j) != other.mSensorPixelModesUsed.get(j)) {
+                    return false;
+                }
+            }
             int minLen = Math.min(mSurfaces.size(), other.mSurfaces.size());
             for (int i = 0;  i < minLen; i++) {
                 if (mSurfaces.get(i) != other.mSurfaces.get(i))
@@ -720,17 +938,24 @@ public final class OutputConfiguration implements Parcelable {
             return HashCodeHelpers.hashCode(
                     mRotation, mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace,
                     mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
-                    mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode());
+                    mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
+                    mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode());
         }
 
         return HashCodeHelpers.hashCode(
                 mRotation, mSurfaces.hashCode(), mConfiguredGenerationId,
                 mConfiguredSize.hashCode(), mConfiguredFormat,
                 mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
-                mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode());
+                mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
+                mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode());
     }
 
     private static final String TAG = "OutputConfiguration";
+
+    // A surfaceGroupId counter used for MultiResolutionImageReader. Its value is
+    // incremented everytime {@link createInstancesForMultiResolutionOutput} is called.
+    private static int MULTI_RESOLUTION_GROUP_ID_COUNTER = 0;
+
     private ArrayList<Surface> mSurfaces;
     private final int mRotation;
     private final int mSurfaceGroupId;
@@ -749,4 +974,9 @@ public final class OutputConfiguration implements Parcelable {
     private boolean mIsShared;
     // The physical camera id that this output configuration is for.
     private String mPhysicalCameraId;
+    // Flag indicating if this config is for a multi-resolution output with a
+    // MultiResolutionImageReader
+    private boolean mIsMultiResolution;
+    // The sensor pixel modes that this OutputConfiguration will use
+    private ArrayList<Integer> mSensorPixelModesUsed;
 }

@@ -24,8 +24,8 @@ import android.graphics.ColorMatrixColorFilter;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.util.function.Consumer;

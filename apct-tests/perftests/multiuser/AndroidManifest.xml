@@ -17,16 +17,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.perftests.multiuser">
 
-    <uses-sdk android:targetSdkVersion="28" />
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
-    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
     <application>
         <uses-library android:name="android.test.runner" />

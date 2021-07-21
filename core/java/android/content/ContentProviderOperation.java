@@ -533,21 +533,21 @@ public class ContentProviderOperation implements Parcelable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ContentProviderOperation(");
-        sb.append("type=" + typeToString(mType) + " ");
+        sb.append("type=").append(typeToString(mType)).append(' ');
         if (mUri != null) {
-            sb.append("uri=" + mUri + " ");
+            sb.append("uri=").append(mUri).append(' ');
         }
         if (mValues != null) {
-            sb.append("values=" + mValues + " ");
+            sb.append("values=").append(mValues).append(' ');
         }
         if (mSelection != null) {
-            sb.append("selection=" + mSelection + " ");
+            sb.append("selection=").append(mSelection).append(' ');
         }
         if (mSelectionArgs != null) {
-            sb.append("selectionArgs=" + mSelectionArgs + " ");
+            sb.append("selectionArgs=").append(mSelectionArgs).append(' ');
         }
         if (mExpectedCount != null) {
-            sb.append("expectedCount=" + mExpectedCount + " ");
+            sb.append("expectedCount=").append(mExpectedCount).append(' ');
         }
         if (mYieldAllowed) {
             sb.append("yieldAllowed ");

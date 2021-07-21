@@ -125,14 +125,14 @@ public class CertBlacklister extends Binder {
     }
 
     private void registerObservers(ContentResolver cr) {
-        // set up the public key blacklist observer
+        // set up the public key denylist observer
         cr.registerContentObserver(
             Settings.Secure.getUriFor(PUBKEY_BLACKLIST_KEY),
             true,
             buildPubkeyObserver(cr)
         );
 
-        // set up the serial number blacklist observer
+        // set up the serial number denylist observer
         cr.registerContentObserver(
             Settings.Secure.getUriFor(SERIAL_BLACKLIST_KEY),
             true,

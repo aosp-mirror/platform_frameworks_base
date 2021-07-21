@@ -20,6 +20,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import dalvik.annotation.optimization.FastNative;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -131,4 +133,82 @@ public class FontFileUtil {
             buffer.order(originalOrder);
         }
     }
+
+    /**
+     * Analyze head OpenType table and return fontRevision value as 32bit integer.
+     *
+     * The font revision is stored in 16.16 bit fixed point value. This function returns this fixed
+     * point value as 32 bit integer, i.e. the value multiplied with 65536.
+     *
+     * IllegalArgumentException will be thrown for invalid font data.
+     * If the font file is invalid, returns -1L.
+     *
+     * @param buffer a buffer of OpenType font
+     * @param index a font index
+     * @return font revision that shifted 16 bits left.
+     */
+    public static long getRevision(@NonNull ByteBuffer buffer, @IntRange(from = 0) int index) {
+        return nGetFontRevision(buffer, index);
+    }
+
+    /**
+     * Analyze name OpenType table and return PostScript name.
+     *
+     * IllegalArgumentException will be thrown for invalid font data.
+     * null will be returned if not found or the PostScript name is invalid.
+     *
+     * @param buffer a buffer of OpenType font
+     * @param index a font index
+     * @return a post script name or null if it is invalid or not found.
+     */
+    public static String getPostScriptName(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index) {
+        return nGetFontPostScriptName(buffer, index);
+    }
+
+    /**
+     * Analyze name OpenType table and return true if the font has PostScript Type 1 glyphs.
+     *
+     * IllegalArgumentException will be thrown for invalid font data.
+     * -1 will be returned if the byte buffer is not a OpenType font data.
+     * 0 will be returned if the font file doesn't have PostScript Type 1 glyphs, i.e. ttf file.
+     * 1 will be returned if the font file has PostScript Type 1 glyphs, i.e. otf file.
+     *
+     * @param buffer a buffer of OpenType font
+     * @param index a font index
+     * @return a post script name or null if it is invalid or not found.
+     */
+    public static int isPostScriptType1Font(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index) {
+        return nIsPostScriptType1Font(buffer, index);
+    }
+
+    /**
+     * Analyze the file content and returns 1 if the font file is an OpenType collection file, 0 if
+     * the font file is a OpenType font file, -1 otherwise.
+     */
+    public static int isCollectionFont(@NonNull ByteBuffer buffer) {
+        ByteBuffer copied = buffer.slice();
+        copied.order(ByteOrder.BIG_ENDIAN);
+        int magicNumber = copied.getInt(0);
+        if (magicNumber == TTC_TAG) {
+            return 1;
+        } else if (magicNumber == SFNT_VERSION_1 || magicNumber == SFNT_VERSION_OTTO) {
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    @FastNative
+    private static native long nGetFontRevision(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index);
+
+    @FastNative
+    private static native String nGetFontPostScriptName(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index);
+
+    @FastNative
+    private static native int nIsPostScriptType1Font(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index);
 }

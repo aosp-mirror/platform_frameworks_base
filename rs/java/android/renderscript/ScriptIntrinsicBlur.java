@@ -20,8 +20,11 @@ package android.renderscript;
  * Intrinsic Gausian blur filter. Applies a gaussian blur of the
  * specified radius to all elements of an allocation.
  *
- *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
     private final float[] mValues = new float[9];
     private Allocation mInput;

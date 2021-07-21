@@ -19,8 +19,11 @@ package android.os.incremental;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IDataLoaderStatusListener;
 import android.os.incremental.IncrementalNewFileParams;
+import android.os.incremental.IStorageLoadingProgressListener;
 import android.os.incremental.IStorageHealthListener;
+import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
+import android.os.PersistableBundle;
 
 /** @hide */
 interface IIncrementalService {
@@ -36,11 +39,23 @@ interface IIncrementalService {
      * Opens or creates a storage given a target path and data loader params. Returns the storage ID.
      */
     int openStorage(in @utf8InCpp String path);
-    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode,
-                      in IDataLoaderStatusListener statusListener,
-                      in StorageHealthCheckParams healthCheckParams,
-                      in IStorageHealthListener healthListener);
+    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode);
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
+
+    /**
+     * Loops DataLoader through bind/create/start with params.
+     */
+    boolean startLoading(int storageId,
+                         in DataLoaderParamsParcel params,
+                         in IDataLoaderStatusListener statusListener,
+                         in StorageHealthCheckParams healthCheckParams,
+                         in IStorageHealthListener healthListener,
+                         in PerUidReadTimeouts[] perUidReadTimeouts);
+
+    /**
+     * PM/system is done with this storage, ok to increase timeouts.
+     */
+    void onInstallationComplete(int storageId);
 
     /**
      * Bind-mounts a path under a storage to a full path. Can be permanent or temporary.
@@ -68,7 +83,7 @@ interface IIncrementalService {
     /**
      * Creates a file under a storage.
      */
-    int makeFile(int storageId, in @utf8InCpp String path, in IncrementalNewFileParams params);
+    int makeFile(int storageId, in @utf8InCpp String path, in IncrementalNewFileParams params, in @nullable byte[] content);
 
     /**
      * Creates a file under a storage. Content of the file is from a range inside another file.
@@ -90,20 +105,32 @@ interface IIncrementalService {
     int unlink(int storageId, in @utf8InCpp String path);
 
     /**
-     * Checks if a file's certain range is loaded. File is specified by its path.
+     * Checks if a file is fully loaded. File is specified by its path.
+     * 0 - fully loaded
+     * >0 - certain pages missing
+     * <0 - -errcode
      */
-    boolean isFileRangeLoaded(int storageId, in @utf8InCpp String path, long start, long end);
+    int isFileFullyLoaded(int storageId, in @utf8InCpp String path);
+
+    /**
+     * Checks if all files in the storage are fully loaded.
+     * 0 - fully loaded
+     * >0 - certain pages missing
+     * <0 - -errcode
+     */
+    int isFullyLoaded(int storageId);
+
+    /**
+     * Returns overall loading progress of all the files on a storage, progress value between [0,1].
+     * Returns a negative value on error.
+     */
+    float getLoadingProgress(int storageId);
 
     /**
      * Reads the metadata of a file. File is specified by either its path or 16 byte id.
      */
     byte[] getMetadataByPath(int storageId, in @utf8InCpp String path);
     byte[] getMetadataById(int storageId, in byte[] fileId);
-
-    /**
-     * Starts loading data for a storage.
-     */
-    boolean startLoading(int storageId);
 
     /**
      * Deletes a storage given its ID. Deletes its bind mounts and unmount it. Stop its data loader.
@@ -113,7 +140,7 @@ interface IIncrementalService {
     /**
      * Permanently disable readlogs reporting for a storage given its ID.
      */
-    void disableReadLogs(int storageId);
+    void disallowReadLogs(int storageId);
 
     /**
      * Setting up native library directories and extract native libs onto a storage if needed.
@@ -124,4 +151,67 @@ interface IIncrementalService {
      * Waits until all native library extraction is done for the storage
      */
     boolean waitForNativeBinariesExtraction(int storageId);
+
+    /**
+     * Register to start listening for loading progress change for a storage.
+     */
+    boolean registerLoadingProgressListener(int storageId, IStorageLoadingProgressListener listener);
+
+    /**
+     * Stop listening for the loading progress change for a storage.
+     */
+    boolean unregisterLoadingProgressListener(int storageId);
+
+    /**
+     * Metrics key for the duration in milliseconds between now and the oldest pending read. The value is a long.
+     */
+    const @utf8InCpp String METRICS_MILLIS_SINCE_OLDEST_PENDING_READ = "millisSinceOldestPendingRead";
+    /**
+     * Metrics key for whether read logs are enabled. The value is a boolean.
+     */
+    const @utf8InCpp String METRICS_READ_LOGS_ENABLED = "readLogsEnabled";
+    /**
+     * Metrics key for the storage health status. The value is an int.
+     */
+    const @utf8InCpp String METRICS_STORAGE_HEALTH_STATUS_CODE = "storageHealthStatusCode";
+    /**
+     * Metrics key for the data loader status. The value is an int.
+     */
+    const @utf8InCpp String METRICS_DATA_LOADER_STATUS_CODE = "dataLoaderStatusCode";
+    /**
+     * Metrics key for duration since last data loader binding attempt. The value is a long.
+     */
+    const @utf8InCpp String METRICS_MILLIS_SINCE_LAST_DATA_LOADER_BIND = "millisSinceLastDataLoaderBind";
+    /**
+     * Metrics key for delay in milliseconds to retry data loader binding. The value is a long.
+     */
+    const @utf8InCpp String METRICS_DATA_LOADER_BIND_DELAY_MILLIS = "dataLoaderBindDelayMillis";
+    /**
+     * Metrics key for total count of delayed reads caused by pending reads. The value is an int.
+     */
+    const @utf8InCpp String METRICS_TOTAL_DELAYED_READS = "totalDelayedReads";
+    /**
+     * Metrics key for total count of delayed reads caused by pending reads. The value is an int.
+     */
+    const @utf8InCpp String METRICS_TOTAL_DELAYED_READS_MILLIS = "totalDelayedReadsMillis";
+    /**
+     * Metrics key for total count of failed reads. The value is an int.
+     */
+    const @utf8InCpp String METRICS_TOTAL_FAILED_READS = "totalFailedReads";
+    /**
+     * Metrics key for the uid of the last read error. The value is an int.
+     */
+    const @utf8InCpp String METRICS_LAST_READ_ERROR_UID = "lastReadErrorUid";
+    /**
+     * Metrics key for duration in milliseconds since the last read error. The value is a long.
+     */
+    const @utf8InCpp String METRICS_MILLIS_SINCE_LAST_READ_ERROR = "millisSinceLastReadError";
+    /**
+     * Metrics key for the error number of the last read error. The value is an int.
+     */
+    const @utf8InCpp String METRICS_LAST_READ_ERROR_NUMBER = "lastReadErrorNo";
+    /**
+     * Return a bundle containing the requested metrics keys and their values.
+     */
+    PersistableBundle getMetrics(int storageId);
 }

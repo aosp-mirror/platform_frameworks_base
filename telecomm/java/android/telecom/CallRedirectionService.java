@@ -100,6 +100,9 @@ public abstract class CallRedirectionService extends Service {
      */
     public final void placeCallUnmodified() {
         try {
+            if (mCallRedirectionAdapter == null) {
+                throw new IllegalStateException("Can only be called from onPlaceCall.");
+            }
             mCallRedirectionAdapter.placeCallUnmodified();
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
@@ -128,6 +131,9 @@ public abstract class CallRedirectionService extends Service {
                                    @NonNull PhoneAccountHandle targetPhoneAccount,
                                    boolean confirmFirst) {
         try {
+            if (mCallRedirectionAdapter == null) {
+                throw new IllegalStateException("Can only be called from onPlaceCall.");
+            }
             mCallRedirectionAdapter.redirectCall(gatewayUri, targetPhoneAccount, confirmFirst);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
@@ -146,6 +152,9 @@ public abstract class CallRedirectionService extends Service {
      */
     public final void cancelCall() {
         try {
+            if (mCallRedirectionAdapter == null) {
+                throw new IllegalStateException("Can only be called from onPlaceCall.");
+            }
             mCallRedirectionAdapter.cancelCall();
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();

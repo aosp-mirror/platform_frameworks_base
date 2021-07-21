@@ -22,7 +22,6 @@
 #include <SkGradientShader.h>
 #include <SkPaint.h>
 #include <SkShader.h>
-#include <ui/ColorSpace.h>
 
 #include <algorithm>
 #include <cmath>
@@ -32,7 +31,7 @@
 
 namespace android::uirenderer {
 
-static SkColor makeLight(SkColor color) {
+SkColor makeLight(SkColor color) {
     Lab lab = sRGBToLab(color);
     float invertedL = std::min(110 - lab.L, 100.0f);
     if (invertedL > lab.L) {
@@ -43,7 +42,7 @@ static SkColor makeLight(SkColor color) {
     }
 }
 
-static SkColor makeDark(SkColor color) {
+SkColor makeDark(SkColor color) {
     Lab lab = sRGBToLab(color);
     float invertedL = std::min(110 - lab.L, 100.0f);
     if (invertedL < lab.L) {
@@ -54,11 +53,22 @@ static SkColor makeDark(SkColor color) {
     }
 }
 
-static SkColor transformColor(ColorTransform transform, SkColor color) {
+SkColor transformColor(ColorTransform transform, SkColor color) {
     switch (transform) {
         case ColorTransform::Light:
             return makeLight(color);
         case ColorTransform::Dark:
+            return makeDark(color);
+        default:
+            return color;
+    }
+}
+
+SkColor transformColorInverse(ColorTransform transform, SkColor color) {
+    switch (transform) {
+        case ColorTransform::Dark:
+            return makeLight(color);
+        case ColorTransform::Light:
             return makeDark(color);
         default:
             return color;

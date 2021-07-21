@@ -147,15 +147,16 @@ public class NotificationComparator
     }
 
     private boolean isImportantOngoing(NotificationRecord record) {
-        if (!isOngoing(record)) {
-            return false;
-        }
-
         if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
             return false;
         }
-
-        return isCall(record) || isMediaNotification(record);
+        if (isCallStyle(record)) {
+            return true;
+        }
+        if (!isOngoing(record)) {
+            return false;
+        }
+        return isCallCategory(record) || isMediaNotification(record);
     }
 
     protected boolean isImportantPeople(NotificationRecord record) {
@@ -181,9 +182,13 @@ public class NotificationComparator
         return record.getNotification().hasMediaSession();
     }
 
-    private boolean isCall(NotificationRecord record) {
+    private boolean isCallCategory(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_CALL)
                 && isDefaultPhoneApp(record.getSbn().getPackageName());
+    }
+
+    private boolean isCallStyle(NotificationRecord record) {
+        return record.getNotification().isStyle(Notification.CallStyle.class);
     }
 
     private boolean isDefaultPhoneApp(String pkg) {

@@ -38,6 +38,8 @@ import java.util.Map;
 public class CpuFrequencies {
     private static final String TAG = "CpuFrequencies";
 
+    private static final String CPU_DELIM = "/";
+    private static final String FREQUENCY_DELIM = ":";
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -53,12 +55,12 @@ public class CpuFrequencies {
         synchronized (mLock) {
             mCoreAndFrequencies.clear();
             try {
-                for (String pair : cpuNumberAndFrequencies.split("/")) {
+                for (String pair : cpuNumberAndFrequencies.split(CPU_DELIM)) {
                     pair = pair.trim();
                     if (pair.length() == 0) {
                         continue;
                     }
-                    final String[] coreAndFreq = pair.split(":", 2);
+                    final String[] coreAndFreq = pair.split(FREQUENCY_DELIM, 2);
 
                     if (coreAndFreq.length != 2) {
                         throw new IllegalArgumentException("Wrong format");
@@ -101,5 +103,40 @@ public class CpuFrequencies {
                 map.put(file, Long.toString(freq));
             }
         }
+    }
+
+    /**
+     * Returns String describing the frequency settings used.
+     * The returned String can be parsed again by {@link #parseString(String)}.
+     */
+    public String toString() {
+        synchronized (mLock) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mCoreAndFrequencies.size(); i++) {
+                if (i > 0) {
+                    sb.append(CPU_DELIM);
+                }
+                sb.append(mCoreAndFrequencies.keyAt(i));
+                sb.append(FREQUENCY_DELIM);
+                sb.append(mCoreAndFrequencies.valueAt(i));
+            }
+
+            return sb.toString();
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        synchronized (mLock) {
+            if (this == obj) return true;
+            if (!(obj instanceof CpuFrequencies)) return false;
+            CpuFrequencies other = (CpuFrequencies) obj;
+            return mCoreAndFrequencies.equals(other.mCoreAndFrequencies);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return mCoreAndFrequencies.hashCode();
     }
 }

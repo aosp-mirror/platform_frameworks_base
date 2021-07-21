@@ -170,7 +170,7 @@ class Convert {
         int len = config.ranges.size();
         List<RadioManager.BandDescriptor> bands = new ArrayList<>(len);
 
-        // Just a dummy value.
+        // Just a placeholder value.
         int region = RadioManager.REGION_ITU_1;
 
         for (AmFmBandRange range : config.ranges) {

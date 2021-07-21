@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.IFusedGeofenceHardware;
@@ -878,7 +879,7 @@ public final class GeofenceHardwareImpl {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj == null) return false;
             if (obj == this) return true;
 

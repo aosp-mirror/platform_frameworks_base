@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
@@ -29,6 +30,7 @@ import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -145,7 +147,7 @@ public final class EuiccProfileInfo implements Parcelable {
      * @deprecated - Do not use.
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public EuiccProfileInfo(String iccid, @Nullable UiccAccessRule[] accessRules,
             @Nullable String nickname) {
         if (!TextUtils.isDigitsOnly(iccid)) {
@@ -231,7 +233,9 @@ public final class EuiccProfileInfo implements Parcelable {
             mState = baseProfile.mState;
             mCarrierIdentifier = baseProfile.mCarrierIdentifier;
             mPolicyRules = baseProfile.mPolicyRules;
-            mAccessRules = Arrays.asList(baseProfile.mAccessRules);
+            mAccessRules = baseProfile.mAccessRules == null
+                            ? Collections.emptyList()
+                            : Arrays.asList(baseProfile.mAccessRules);
         }
 
         /** Builds the profile instance. */

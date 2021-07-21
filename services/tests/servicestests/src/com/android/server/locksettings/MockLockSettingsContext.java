@@ -20,11 +20,16 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 
@@ -93,5 +98,12 @@ public class MockLockSettingsContext extends ContextWrapper {
     @Override
     public int checkCallingOrSelfPermission(String permission) {
         return PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver,
+            UserHandle user, IntentFilter filter, String broadcastPermission,
+            Handler scheduler) {
+        return null;
     }
 }

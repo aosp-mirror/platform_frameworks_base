@@ -319,7 +319,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
     }
 
     private String switchCodeToString(int switchValues, int switchMask) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if ((switchMask & SW_HEADPHONE_INSERT_BIT) != 0 &&
                 (switchValues & SW_HEADPHONE_INSERT_BIT) != 0) {
             sb.append("SW_HEADPHONE_INSERT ");

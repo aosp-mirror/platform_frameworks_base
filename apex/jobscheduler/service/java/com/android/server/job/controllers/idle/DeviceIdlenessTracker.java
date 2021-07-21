@@ -16,6 +16,8 @@
 
 package com.android.server.job.controllers.idle;
 
+import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
+
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AlarmManager;
@@ -34,7 +36,9 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
+import java.util.Set;
 
+/** Class to track device idle state. */
 public final class DeviceIdlenessTracker extends BroadcastReceiver implements IdlenessTracker {
     private static final String TAG = "JobScheduler.DeviceIdlenessTracker";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
@@ -50,8 +54,10 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     private boolean mIdle;
     private boolean mScreenOn;
     private boolean mDockIdle;
-    private boolean mInCarMode;
+    private boolean mProjectionActive;
     private IdlenessListener mIdleListener;
+    private final UiModeManager.OnProjectionStateChangedListener mOnProjectionStateChangedListener =
+            this::onProjectionStateChanged;
 
     private AlarmManager.OnAlarmListener mIdleAlarmListener = () -> {
         handleIdleTrigger();
@@ -60,10 +66,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     public DeviceIdlenessTracker() {
         // At boot we presume that the user has just "interacted" with the
         // device in some meaningful way.
-        mIdle = false;
         mScreenOn = true;
-        mDockIdle = false;
-        mInCarMode = false;
     }
 
     @Override
@@ -98,11 +101,34 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         filter.addAction(Intent.ACTION_DOCK_IDLE);
         filter.addAction(Intent.ACTION_DOCK_ACTIVE);
 
-        // Car mode
-        filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED);
-        filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED);
-
         context.registerReceiver(this, filter);
+
+        // TODO(b/172579710): Move the callbacks off the main executor and on to
+        //  JobSchedulerBackgroundThread.getExecutor() once synchronization is fixed in this class.
+        context.getSystemService(UiModeManager.class).addOnProjectionStateChangedListener(
+                UiModeManager.PROJECTION_TYPE_ALL, context.getMainExecutor(),
+                mOnProjectionStateChangedListener);
+    }
+
+    private void onProjectionStateChanged(@UiModeManager.ProjectionType int activeProjectionTypes,
+            Set<String> projectingPackages) {
+        boolean projectionActive = activeProjectionTypes != PROJECTION_TYPE_NONE;
+        if (mProjectionActive == projectionActive) {
+            return;
+        }
+        if (DEBUG) {
+            Slog.v(TAG, "Projection state changed: " + projectionActive);
+        }
+        mProjectionActive = projectionActive;
+        if (mProjectionActive) {
+            cancelIdlenessCheck();
+            if (mIdle) {
+                mIdle = false;
+                mIdleListener.reportNewIdleState(mIdle);
+            }
+        } else {
+            maybeScheduleIdlenessCheck("Projection ended");
+        }
     }
 
     @Override
@@ -110,8 +136,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         pw.print("  mIdle: "); pw.println(mIdle);
         pw.print("  mScreenOn: "); pw.println(mScreenOn);
         pw.print("  mDockIdle: "); pw.println(mDockIdle);
-        pw.print("  mInCarMode: ");
-        pw.println(mInCarMode);
+        pw.print("  mProjectionActive: "); pw.println(mProjectionActive);
     }
 
     @Override
@@ -129,8 +154,9 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
                 StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IS_DOCK_IDLE,
                 mDockIdle);
         proto.write(
-                StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IN_CAR_MODE,
-                mInCarMode);
+                StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker
+                        .PROJECTION_ACTIVE,
+                mProjectionActive);
 
         proto.end(diToken);
         proto.end(token);
@@ -186,18 +212,6 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
                 }
                 maybeScheduleIdlenessCheck(action);
                 break;
-            case UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED:
-                mInCarMode = true;
-                cancelIdlenessCheck();
-                if (mIdle) {
-                    mIdle = false;
-                    mIdleListener.reportNewIdleState(mIdle);
-                }
-                break;
-            case UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED:
-                mInCarMode = false;
-                maybeScheduleIdlenessCheck(action);
-                break;
             case ActivityManagerService.ACTION_TRIGGER_IDLE:
                 handleIdleTrigger();
                 break;
@@ -205,7 +219,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     }
 
     private void maybeScheduleIdlenessCheck(String reason) {
-        if ((!mScreenOn || mDockIdle) && !mInCarMode) {
+        if ((!mScreenOn || mDockIdle) && !mProjectionActive) {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final long when = nowElapsed + mInactivityIdleThreshold;
             if (DEBUG) {
@@ -222,7 +236,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
 
     private void handleIdleTrigger() {
         // idle time starts now. Do not set mIdle if screen is on.
-        if (!mIdle && (!mScreenOn || mDockIdle) && !mInCarMode) {
+        if (!mIdle && (!mScreenOn || mDockIdle) && !mProjectionActive) {
             if (DEBUG) {
                 Slog.v(TAG, "Idle trigger fired @ " + sElapsedRealtimeClock.millis());
             }
@@ -231,7 +245,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         } else {
             if (DEBUG) {
                 Slog.v(TAG, "TRIGGER_IDLE received but not changing state; idle="
-                        + mIdle + " screen=" + mScreenOn + " car=" + mInCarMode);
+                        + mIdle + " screen=" + mScreenOn + " projection=" + mProjectionActive);
             }
         }
     }

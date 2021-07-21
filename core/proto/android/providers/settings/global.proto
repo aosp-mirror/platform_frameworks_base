@@ -47,7 +47,7 @@ message GlobalSettingsProto {
     }
     optional AirplaneMode airplane_mode = 5;
 
-    optional SettingProto alarm_manager_constants = 6;
+    reserved 6; // alarm_manager_constants
     optional SettingProto allow_user_switching_when_system_user_locked = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // This is a key=value list, separated by commas.
     optional SettingProto always_on_display_constants = 8;
@@ -78,7 +78,7 @@ message GlobalSettingsProto {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
         // These are key=value lists, separated by commas.
-        optional SettingProto idle_constants = 1;
+        reserved 1; // idle_constants
         optional SettingProto standby_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto auto_restriction_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto forced_app_standby_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -88,14 +88,6 @@ message GlobalSettingsProto {
 
     optional SettingProto assisted_gps_enabled = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto audio_safe_volume_state = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
-
-    message Auto {
-        option (android.msg_privacy).dest = DEST_EXPLICIT;
-
-        optional SettingProto time = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto time_zone = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional Auto auto = 16;
 
     reserved 17; // Used to be autofill_compat_mode_allowed_packages
 
@@ -253,6 +245,14 @@ message GlobalSettingsProto {
     }
     optional Database database = 36;
 
+    message DateTime {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto auto_time = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto auto_time_zone = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional DateTime date_time = 16;
+
     message Debug {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -282,7 +282,10 @@ message GlobalSettingsProto {
         optional SettingProto force_rtl = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto emulate_display_cutout = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto force_desktop_mode_on_external_displays = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto enable_sizecompat_freeform = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Deprecated, use enable_non_resizable_multi_window
+        optional SettingProto enable_sizecompat_freeform = 7 [ (android.privacy).dest = DEST_AUTOMATIC, deprecated = true ];
+        optional SettingProto enable_non_resizable_multi_window = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto disable_window_blurs = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Development development = 39;
 
@@ -292,7 +295,7 @@ message GlobalSettingsProto {
         optional SettingProto name = 1;
         optional SettingProto provisioned = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto provisioning_mobile_data_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto idle_constants = 4;
+        reserved 4; // idle_constants
         optional SettingProto policy_constants = 5;
         optional SettingProto demo_mode = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
@@ -433,35 +436,38 @@ message GlobalSettingsProto {
         // Ordered GPU debug layer list for GLES
         // i.e. <layer1>:<layer2>:...:<layerN>
         optional SettingProto debug_layers_gles = 7;
-        // Game Driver - global preference for all Apps
+        // Updatable Driver - global preference for all Apps
         // 0 = Default
-        // 1 = All Apps use Game Driver
-        // 2 = All Apps use system graphics driver
-        optional SettingProto game_driver_all_apps = 8;
-        // Game Driver - List of Apps selected to use Game Driver
+        // 1 = All Apps use updatable production driver
+        // 2 = All apps use updatable prerelease driver
+        // 3 = All Apps use system graphics driver
+        optional SettingProto updatable_driver_all_apps = 8;
+        // Updatable Driver - List of Apps selected to use updatable production driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto game_driver_opt_in_apps = 9;
-        // Game Driver - List of Apps selected not to use Game Driver
+        optional SettingProto updatable_driver_production_opt_in_apps = 9;
+        // Updatable Driver - List of Apps selected not to use updatable production driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto game_driver_opt_out_apps = 10;
-        // Game Driver - List of Apps that are forbidden to use Game Driver
-        optional SettingProto game_driver_blacklist = 11;
-        // Game Driver - List of Apps that are allowed to use Game Driver
-        optional SettingProto game_driver_whitelist = 12;
+        optional SettingProto updatable_driver_production_opt_out_apps = 10;
+        // Updatable Driver - List of Apps that are forbidden to use updatable production driver
+        optional SettingProto updatable_driver_production_denylist = 11;
+        // Updatable Driver - List of Apps that are allowed to use updatable production driver
+        optional SettingProto updatable_driver_production_allowlist = 12;
         // ANGLE - List of Apps that can check ANGLE rules
-        optional SettingProto angle_whitelist = 13;
-        // Game Driver - List of blacklists, each blacklist is a blacklist for
-        // a specific Game Driver version
-        optional SettingProto game_driver_blacklists = 14;
+        optional SettingProto angle_allowlist = 13;
+        // Updatable Driver - List of denylists, each denylist is a denylist for
+        // a specific updatable production driver version
+        optional SettingProto updatable_driver_production_denylists = 14;
         // ANGLE - Show a dialog box when ANGLE is selected for the currently running PKG
         optional SettingProto show_angle_in_use_dialog = 15;
-        // Game Driver - List of libraries in sphal accessible by Game Driver
-        optional SettingProto game_driver_sphal_libraries = 16;
+        // Updatable Driver - List of libraries in sphal accessible by updatable driver
+        optional SettingProto updatable_driver_sphal_libraries = 16;
         // ANGLE - External package containing ANGLE libraries
         optional SettingProto angle_debug_package = 17;
-        // Game Driver - List of Apps selected to use prerelease Game Driver
+        // Updatable Driver - List of Apps selected to use updatable prerelease driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto game_driver_prerelease_opt_in_apps = 18;
+        optional SettingProto updatable_driver_prerelease_opt_in_apps = 18;
+
+        optional SettingProto angle_egl_features = 19;
     }
     optional Gpu gpu = 59;
 
@@ -506,9 +512,9 @@ message GlobalSettingsProto {
     }
     optional IntentFirewall intent_firewall = 65;
 
-    optional SettingProto job_scheduler_constants = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto job_scheduler_quota_controller_constants = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto job_scheduler_time_controller_constants = 150 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 66; // job_scheduler_constants
+    reserved 149; // job_scheduler_quota_controller_constants
+    reserved 150; // job_scheduler_time_controller_constants
 
     optional SettingProto keep_profile_in_background = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -532,7 +538,7 @@ message GlobalSettingsProto {
         // If set to 1, {@link Secure#LOCATION_MODE} will be set to {@link
         // Secure#LOCATION_MODE_OFF} temporarily for all users.
         optional SettingProto global_kill_switch = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto gnss_satellite_blacklist = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto gnss_satellite_blocklist = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto gnss_hal_location_request_duration_millis = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Packages that are whitelisted for ignoring location settings (during emergencies)
         optional SettingProto ignore_settings_package_whitelist = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -910,13 +916,8 @@ message GlobalSettingsProto {
         optional SettingProto storage_full_threshold_bytes = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto storage_cache_percentage = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto storage_cache_max_bytes = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // System VDSO global setting. This links to the "sys.vdso" system property.
-        // The following values are supported:
-        // false  -> both 32 and 64 bit vdso disabled
-        // 32     -> 32 bit vdso enabled
-        // 64     -> 64 bit vdso enabled
-        // Any other value defaults to both 32 bit and 64 bit true.
-        optional SettingProto vdso = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Used to be sys_vdso
+        reserved 7;
         // UidCpuPower global setting. This links the sys.uidcpupower system property.
         // The following values are supported:
         // 0 -> /proc/uid_cpupower/* are disabled

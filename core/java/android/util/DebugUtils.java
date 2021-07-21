@@ -271,6 +271,26 @@ public class DebugUtils {
         return res.toString();
     }
 
+    /**
+     * Gets human-readable representation of constants (static final values).
+     *
+     * @hide
+     */
+    public static String constantToString(Class<?> clazz, String prefix, int value) {
+        for (Field field : clazz.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            try {
+                if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                        && field.getType().equals(int.class) && field.getName().startsWith(prefix)
+                        && field.getInt(null) == value) {
+                    return constNameWithoutPrefix(prefix, field);
+                }
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        return prefix + Integer.toString(value);
+    }
+
     private static String constNameWithoutPrefix(String prefix, Field field) {
         return field.getName().substring(prefix.length());
     }

@@ -51,7 +51,7 @@ public class UpdateLock {
      * locker releases theirs.  The broadcast is sticky but is sent only to
      * registered receivers.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String UPDATE_LOCK_CHANGED = "android.os.UpdateLock.UPDATE_LOCK_CHANGED";
 
     /**
@@ -60,7 +60,7 @@ public class UpdateLock {
      * update operation.  True means that updates are okay right now; false indicates
      * that perhaps later would be a better time.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String NOW_IS_CONVENIENT = "nowisconvenient";
 
     /**
@@ -69,7 +69,7 @@ public class UpdateLock {
      * in the System.currentTimeMillis() time base, which may be non-monotonic especially
      * around reboots.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String TIMESTAMP = "timestamp";
 
     /**
@@ -94,7 +94,7 @@ public class UpdateLock {
     /**
      * Is this lock currently held?
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isHeld() {
         synchronized (mToken) {
             return mHeld;
@@ -104,7 +104,7 @@ public class UpdateLock {
     /**
      * Acquire an update lock.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void acquire() {
         if (DEBUG) {
             Log.v(TAG, "acquire() : " + this, new RuntimeException("here"));
@@ -131,7 +131,7 @@ public class UpdateLock {
     /**
      * Release this update lock.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void release() {
         if (DEBUG) Log.v(TAG, "release() : " + this, new RuntimeException("here"));
         checkService();

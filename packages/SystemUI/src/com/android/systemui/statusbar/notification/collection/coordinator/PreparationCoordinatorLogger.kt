@@ -40,6 +40,23 @@ class PreparationCoordinatorLogger @Inject constructor(
             "NOTIF INFLATION ABORTED $str1 reason=$str2"
         })
     }
+
+    fun logGroupInflationTookTooLong(groupKey: String) {
+        buffer.log(TAG, LogLevel.WARNING, {
+            str1 = groupKey
+        }, {
+            "Group inflation took too long far $str1, releasing children early"
+        })
+    }
+
+    fun logDelayingGroupRelease(groupKey: String, childKey: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = groupKey
+            str2 = childKey
+        }, {
+            "Delaying release of group $str1 because child $str2 is still inflating"
+        })
+    }
 }
 
 private const val TAG = "PreparationCoordinator"

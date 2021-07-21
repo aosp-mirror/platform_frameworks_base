@@ -3706,33 +3706,40 @@ message MetricsEvent {
     // OS: O
     BACKUP_SETTINGS = 818;
 
+    // DEPRECATED: The metrics has been migrated to UiEvent per go/uievent.
     // ACTION: Picture-in-picture was explicitly entered for an activity
     // VALUE: true if it was entered while hiding as a result of moving to
     // another task, false otherwise
-    ACTION_PICTURE_IN_PICTURE_ENTERED = 819;
+    ACTION_PICTURE_IN_PICTURE_ENTERED = 819 [deprecated=true];
 
+    // DEPRECATED: The metrics has been migrated to UiEvent per go/uievent.
     // ACTION: The activity currently in picture-in-picture was expanded back to fullscreen
     // PACKAGE: The package name of the activity that was expanded back to fullscreen
-    ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN = 820;
+    ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN = 820 [deprecated=true];
 
+    // DEPRECATED: The metrics no longer used after migration to UiEvent per go/uievent.
     // ACTION: The activity currently in picture-in-picture was minimized
     // VALUE: True if the PiP was minimized, false otherwise
-    ACTION_PICTURE_IN_PICTURE_MINIMIZED = 821;
+    ACTION_PICTURE_IN_PICTURE_MINIMIZED = 821 [deprecated=true];
 
+    // DEPRECATED: The metrics has been migrated to UiEvent per go/uievent.
     // ACTION: Picture-in-picture was dismissed via the dismiss button
     // VALUE: 0 if dismissed by tap, 1 if dismissed by drag
-    ACTION_PICTURE_IN_PICTURE_DISMISSED = 822;
+    ACTION_PICTURE_IN_PICTURE_DISMISSED = 822 [deprecated=true];
 
-    // ACTION: The visibility of the picture-in-picture meny
+    // DEPRECATED: The metrics has been migrated to UiEvent per go/uievent.
+    // ACTION: The visibility of the picture-in-picture menu
     // VALUE: Whether or not the menu is visible
-    ACTION_PICTURE_IN_PICTURE_MENU = 823;
+    ACTION_PICTURE_IN_PICTURE_MENU = 823 [deprecated=true];
 
+    // DEPRECATED: The metrics has been migrated to UiEvent per go/uievent.
     // Enclosing category for group of PICTURE_IN_PICTURE_ASPECT_RATIO_FOO events,
     // logged when the aspect ratio changes
-    ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED = 824;
+    ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED = 824 [deprecated=true];
 
+    // DEPRECATED: The metrics no longer used after migration to UiEvent per go/uievent.
     // The current aspect ratio of the PiP, logged when it changes.
-    PICTURE_IN_PICTURE_ASPECT_RATIO = 825;
+    PICTURE_IN_PICTURE_ASPECT_RATIO = 825 [deprecated=true];
 
     // FIELD - length in dp of ACTION_LS_* gestures, or zero if not applicable
     // CATEGORY: GLOBAL_SYSTEM_UI

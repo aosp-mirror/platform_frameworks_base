@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Instalador do pacote"</string>
     <string name="install" msgid="711829760615509273">"Instalar"</string>
+    <string name="update" msgid="3932142540719227615">"Atualizar"</string>
     <string name="done" msgid="6632441120016885253">"Concluído"</string>
     <string name="cancel" msgid="1018267193425558088">"Cancelar"</string>
     <string name="installing" msgid="4921993079741206516">"A instalar…"</string>
     <string name="installing_app" msgid="1165095864863849422">"A instalar <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"App instalada."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Pretende instalar esta app?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Pretende instalar uma atualização para esta app existente? Os seus dados existentes não serão perdidos."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Pretende instalar uma atualização para esta app incorporada? Os seus dados existentes não serão perdidos."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Pretende instalar esta app?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Pretende atualizar esta app?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplicação não instalada."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Foi bloqueada a instalação do pacote."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A app não foi instalada porque o pacote entra em conflito com um pacote existente."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"As ações de instalar/desinstalar não são compatíveis com o Android Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"A preparar a app…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Desconhecida"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Para sua segurança, o tablet não está autorizado a instalar aplicações desconhecidas a partir desta fonte."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Para sua segurança, a TV não está autorizada a instalar aplicações desconhecidas a partir desta fonte."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Para sua segurança, o telemóvel não está autorizado a instalar aplicações desconhecidas a partir desta fonte."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Para sua segurança, o tablet não está atualmente autorizado a instalar apps desconhecidas a partir desta origem. Pode alterar esta opção nas Definições."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Para sua segurança, a TV não está atualmente autorizada a instalar apps desconhecidas a partir desta origem. Pode alterar esta opção nas Definições."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Para sua segurança, o telemóvel não está atualmente autorizado a instalar apps desconhecidas a partir desta origem. Pode alterar esta opção nas Definições."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"O seu telemóvel e os dados pessoais estão mais vulneráveis a ataques por parte de aplicações desconhecidas. Ao instalar esta app, concorda que é responsável por quaisquer danos causados ao telemóvel ou pelas perdas de dados que possam resultar da utilização da mesma."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"O seu tablet e os dados pessoais estão mais vulneráveis a ataques por parte de aplicações desconhecidas. Ao instalar esta app, concorda que é responsável por quaisquer danos causados ao tablet ou pelas perdas de dados que possam resultar da utilização da mesma."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"A sua TV e os dados pessoais estão mais vulneráveis a ataques por parte de aplicações desconhecidas. Ao instalar esta app, concorda que é responsável por quaisquer danos causados à TV ou pelas perdas de dados que possam resultar da utilização da mesma."</string>

@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import java.util.List;
 
+import android.app.assist.AssistStructure;
 import android.graphics.Rect;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
@@ -34,6 +35,11 @@ interface IAugmentedAutofillManagerClient {
       * Gets the coordinates of the input field view.
       */
     Rect getViewCoordinates(in AutofillId id);
+
+    /**
+      * Gets the autofill view structure of the input field view.
+      */
+    AssistStructure.ViewNodeParcelable getViewNodeParcelable(in AutofillId id);
 
     /**
      * Autofills the activity with the contents of the values.

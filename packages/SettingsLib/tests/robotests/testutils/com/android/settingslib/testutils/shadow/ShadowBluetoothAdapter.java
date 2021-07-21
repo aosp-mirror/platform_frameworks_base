@@ -24,6 +24,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.os.ParcelUuid;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -36,6 +37,7 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
     private List<Integer> mSupportedProfiles;
     private List<BluetoothDevice> mMostRecentlyConnectedDevices;
     private BluetoothProfile.ServiceListener mServiceListener;
+    private ParcelUuid[] mParcelUuids;
 
     @Implementation
     protected boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
@@ -86,5 +88,14 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
             return false;
         }
         return true;
+    }
+
+    @Implementation
+    protected ParcelUuid[] getUuids() {
+        return mParcelUuids;
+    }
+
+    public void setUuids(ParcelUuid[] uuids) {
+        mParcelUuids = uuids;
     }
 }

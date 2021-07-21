@@ -31,38 +31,38 @@ oneway interface IImsUtListener {
     /**
      * Notifies the result of the supplementary service configuration udpate.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationUpdated(in IImsUt ut, int id);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationUpdateFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
     /**
      * Notifies the result of the supplementary service configuration query.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationQueried(in IImsUt ut, int id, in Bundle ssInfo);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationQueryFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
     void lineIdentificationSupplementaryServiceResponse(int id, in ImsSsInfo config);
     /**
      * Notifies the status of the call barring supplementary service.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationCallBarringQueried(in IImsUt ut,
             int id, in ImsSsInfo[] cbInfo);
 
     /**
      * Notifies the status of the call forwarding supplementary service.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationCallForwardQueried(in IImsUt ut,
             int id, in ImsCallForwardInfo[] cfInfo);
 
     /**
      * Notifies the status of the call waiting supplementary service.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void utConfigurationCallWaitingQueried(in IImsUt ut,
             int id, in ImsSsInfo[] cwInfo);
 

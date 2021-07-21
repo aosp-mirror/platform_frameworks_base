@@ -54,12 +54,12 @@ import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ExceptionUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.DumpArgs;
@@ -332,10 +332,10 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 throw new IllegalStateException("Not allowed to change access type in state: "
                         + stateToString(mState));
             }
-            if (mBlobAccessMode.getNumWhitelistedPackages() >= getMaxPermittedPackages()) {
+            if (mBlobAccessMode.getAllowedPackagesCount() >= getMaxPermittedPackages()) {
                 throw new ParcelableException(new LimitExceededException(
                         "Too many packages permitted to access the blob: "
-                                + mBlobAccessMode.getNumWhitelistedPackages()));
+                                + mBlobAccessMode.getAllowedPackagesCount()));
             }
             mBlobAccessMode.allowPackageAccess(packageName, certificate);
         }

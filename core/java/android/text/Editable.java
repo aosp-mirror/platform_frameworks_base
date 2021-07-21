@@ -137,7 +137,7 @@ extends CharSequence, GetChars, Spannable, Appendable
         }
 
         /**
-         * Returns a new SpannedStringBuilder from the specified
+         * Returns a new SpannableStringBuilder from the specified
          * CharSequence.  You can override this to provide
          * a different kind of Spanned.
          */

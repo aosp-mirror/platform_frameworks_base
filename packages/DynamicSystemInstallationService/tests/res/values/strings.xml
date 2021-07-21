@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- testFromJsonString -->
-    <string name="blacklist_json_string" translatable="false">
+    <string name="blocklist_json_string" translatable="false">
       {
         \"entries\":[
           {

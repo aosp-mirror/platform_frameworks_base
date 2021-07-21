@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Installer paket"</string>
     <string name="install" msgid="711829760615509273">"Instal"</string>
+    <string name="update" msgid="3932142540719227615">"Update"</string>
     <string name="done" msgid="6632441120016885253">"Selesai"</string>
     <string name="cancel" msgid="1018267193425558088">"Batal"</string>
     <string name="installing" msgid="4921993079741206516">"Menginstal..."</string>
     <string name="installing_app" msgid="1165095864863849422">"Menginstal <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikasi terinstal."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Anda ingin menginstal aplikasi ini?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Apakah Anda ingin menginstal update ke aplikasi yang sudah ada? Data Anda yang ada saat ini tidak akan hilang."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Apakah Anda ingin menginstal update ke aplikasi bawaan? Data Anda yang ada saat ini tidak akan hilang."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Ingin menginstal aplikasi ini?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Ingin mengupdate aplikasi ini?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikasi tidak terinstal."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paket diblokir sehingga tidak dapat diinstal."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikasi tidak diinstal karena paket ini bentrok dengan paket yang sudah ada."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Tindakan Instal/Uninstal tidak didukung di Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Menyiapkan aplikasi..."</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Tidak dikenal"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Demi keamanan, TV Anda tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Demi keamanan, TV Anda tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Demi keamanan, ponsel Anda tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Demi keamanan, tablet Anda saat ini tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini. Anda dapat mengubahnya di Setelan."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Demi keamanan, TV Anda saat ini tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini. Anda dapat mengubahnya di Setelan."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Demi keamanan, ponsel Anda saat ini tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini. Anda dapat mengubahnya di Setelan."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Ponsel dan data pribadi Anda lebih rentan terhadap serangan oleh aplikasi yang tidak dikenal. Dengan menginstal aplikasi ini, Anda setuju bahwa Anda bertanggung jawab atas kerusakan ponsel atau kehilangan data yang mungkin diakibatkan oleh penggunaannya."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet dan data pribadi Anda lebih rentan terhadap serangan oleh aplikasi yang tidak dikenal. Dengan menginstal aplikasi ini, Anda setuju bahwa Anda bertanggung jawab atas kerusakan tablet atau kehilangan data yang mungkin diakibatkan oleh penggunaannya."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV dan data pribadi Anda lebih rentan terhadap serangan oleh aplikasi yang tidak dikenal. Dengan menginstal aplikasi ini, Anda setuju bahwa Anda bertanggung jawab atas kerusakan TV atau kehilangan data yang mungkin diakibatkan oleh penggunaannya."</string>

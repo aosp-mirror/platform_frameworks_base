@@ -114,7 +114,7 @@ public class NinePatchDrawable extends Drawable {
      * Create drawable from raw nine-patch data, setting initial target density
      * based on the display metrics of the resources.
      *
-     * @hide
+     * @hide for use by android.graphics.ImageDecoder, but must not be used outside the module.
      */
     public NinePatchDrawable(Resources res, Bitmap bitmap, byte[] chunk,
             Rect padding, Rect opticalInsets, String srcName) {
@@ -582,7 +582,6 @@ public class NinePatchDrawable extends Drawable {
         return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mNinePatchState.mTint != null && mNinePatchState.mTint.hasFocusStateSpecified();

@@ -44,8 +44,6 @@ import com.android.bandwidthtest.NetworkState;
 import com.android.bandwidthtest.NetworkState.StateTransitionDirection;
 import com.android.internal.util.AsyncChannel;
 
-import junit.framework.Assert;
-
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -76,7 +74,11 @@ public class ConnectionUtil {
     private WifiManager mWifiManager;
     private Context mContext;
     // Verify connectivity state
-    private static final int NUM_NETWORK_TYPES = ConnectivityManager.MAX_NETWORK_TYPE + 1;
+    // ConnectivityManager.TYPE_* is deprecated and no longer extended, so use the max public
+    // network type - TYPE_VPN should be enough.
+    // TODO: Replace registering CONNECTIVITY_ACTION with registering NetworkCallback and check
+    //  network by NetworkCapabilities.TRANSPORT_* and NetworkCapabilities.hasTransport() instead.
+    private static final int NUM_NETWORK_TYPES = ConnectivityManager.TYPE_VPN + 1;
     private NetworkState[] mConnectivityState = new NetworkState[NUM_NETWORK_TYPES];
 
     public ConnectionUtil(Context context) {

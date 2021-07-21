@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -42,15 +43,20 @@ import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.BackgroundDexOptService;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
 import com.android.server.wm.ActivityMetricsLaunchObserver.Temperature;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * System-server-local proxy into the {@code IIorap} native service.
@@ -65,6 +71,7 @@ public class IorapForwardingService extends SystemService {
     /** $> adb shell 'setprop iorapd.forwarding_service.wtf_crash true' */
     private static boolean WTF_CRASH = SystemProperties.getBoolean(
             "iorapd.forwarding_service.wtf_crash", false);
+    private static final Duration TIMEOUT = Duration.ofSeconds(600L);
 
     // "Unique" job ID from the service name. Also equal to 283673059.
     public static final int JOB_ID_IORAPD = encodeEnglishAlphabetStringIntoInt("iorapd");
@@ -79,6 +86,12 @@ public class IorapForwardingService extends SystemService {
 
     private volatile IorapdJobService mJobService;  // Write-once (null -> non-null forever).
     private volatile static IorapForwardingService sSelfService;  // Write once (null -> non-null).
+
+
+    /**
+     * Atomics set to true if the JobScheduler requests an abort.
+     */
+    private final AtomicBoolean mAbortIdleCompilation = new AtomicBoolean(false);
 
     /**
      * Initializes the system service.
@@ -123,7 +136,7 @@ public class IorapForwardingService extends SystemService {
         try {
             iorap = IIorap.Stub.asInterface(ServiceManager.getServiceOrThrow("iorapd"));
         } catch (ServiceManager.ServiceNotFoundException e) {
-            handleRemoteError(e);
+            Log.w(TAG, e.getMessage());
             return null;
         }
 
@@ -154,9 +167,27 @@ public class IorapForwardingService extends SystemService {
 
     @VisibleForTesting
     protected boolean isIorapEnabled() {
+        // These two mendel flags should match those in iorapd native process
+        // system/iorapd/src/common/property.h
+        boolean isTracingEnabled =
+            getMendelFlag("iorap_perfetto_enable", "iorapd.perfetto.enable", false);
+        boolean isReadAheadEnabled =
+            getMendelFlag("iorap_readahead_enable", "iorapd.readahead.enable", false);
         // Same as the property in iorapd.rc -- disabling this will mean the 'iorapd' binder process
         // never comes up, so all binder connections will fail indefinitely.
-        return IS_ENABLED;
+        return IS_ENABLED && (isTracingEnabled || isReadAheadEnabled);
+    }
+
+    private boolean getMendelFlag(String mendelFlag, String sysProperty, boolean defaultValue) {
+        // TODO(yawanng) use DeviceConfig to get mendel property.
+        // DeviceConfig doesn't work and the reason is not clear.
+        // Provider service is already up before IORapForwardService.
+        String mendelProperty = "persist.device_config."
+            + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
+            + "."
+            + mendelFlag;
+        return SystemProperties.getBoolean(mendelProperty,
+            SystemProperties.getBoolean(sysProperty, defaultValue));
     }
 
     //</editor-fold>
@@ -239,7 +270,9 @@ public class IorapForwardingService extends SystemService {
         //
         // TODO: it would be good to get nodified of 'adb shell stop iorapd' to avoid
         // printing this warning.
-        Log.w(TAG, "Failed to connect to iorapd, is it down? Delay for " + sleepTime);
+        if (DEBUG) {
+            Log.v(TAG, "Failed to connect to iorapd, is it down? Delay for " + sleepTime);
+        }
 
         // Use a handler instead of Thread#sleep to avoid backing up the binder thread
         // when this is called from the death recipient callback.
@@ -275,7 +308,9 @@ public class IorapForwardingService extends SystemService {
         // Connect to the native binder service.
         mIorapRemote = provideIorapRemote();
         if (mIorapRemote == null) {
-            Log.e(TAG, "connectToRemoteAndConfigure - null iorap remote. check for Log.wtf?");
+            if (DEBUG) {
+                Log.e(TAG, "connectToRemoteAndConfigure - null iorap remote. check for Log.wtf?");
+            }
             return false;
         }
         invokeRemote(mIorapRemote,
@@ -542,32 +577,86 @@ public class IorapForwardingService extends SystemService {
             // Tell iorapd to start a background job.
             Log.d(TAG, "Starting background job: " + params.toString());
 
-            // We wait until that job's sequence ID returns to us with 'Completed',
-            RequestId request;
-            synchronized (mLock) {
-                // TODO: would be cleaner if we got the request from the 'invokeRemote' function.
-                // Better yet, consider a Pair<RequestId, Future<TaskResult>> or similar.
-                request = RequestId.nextValueForSequence();
-                mRunningJobs.put(request, params);
-            }
+            mAbortIdleCompilation.set(false);
+            // PackageManagerService starts before IORap service.
+            PackageManagerService pm = (PackageManagerService)ServiceManager.getService("package");
+            List<String> pkgs = pm.getAllPackages();
+            runIdleCompilationAsync(params, pkgs);
+            return true;
+        }
 
-            if (!invokeRemote(mIorapRemote, (IIorap remote) ->
-                    remote.onJobScheduledEvent(request,
-                            JobScheduledEvent.createIdleMaintenance(
-                                    JobScheduledEvent.TYPE_START_JOB,
-                                    params))
-            )) {
-                synchronized (mLock) {
-                    mRunningJobs.remove(request); // Avoid memory leaks.
+        private void runIdleCompilationAsync(final JobParameters params, final List<String> pkgs) {
+            new Thread("IORap_IdleCompilation") {
+                @Override
+                public void run() {
+                    for (int i = 0; i < pkgs.size(); i++) {
+                        String pkg = pkgs.get(i);
+                        if (mAbortIdleCompilation.get()) {
+                            Log.i(TAG, "The idle compilation is aborted");
+                            return;
+                        }
+
+                        // We wait until that job's sequence ID returns to us with 'Completed',
+                        RequestId request;
+                        synchronized (mLock) {
+                            // TODO: would be cleaner if we got the request from the
+                            // 'invokeRemote' function. Better yet, consider
+                            // a Pair<RequestId, Future<TaskResult>> or similar.
+                            request = RequestId.nextValueForSequence();
+                            mRunningJobs.put(request, params);
+                        }
+
+                        Log.i(TAG, String.format("IORap compile package: %s, [%d/%d]",
+                              pkg, i + 1, pkgs.size()));
+                        boolean shouldUpdateVersions = (i == 0);
+                        if (!invokeRemote(mIorapRemote, (IIorap remote) ->
+                                remote.onJobScheduledEvent(request,
+                                        JobScheduledEvent.createIdleMaintenance(
+                                                JobScheduledEvent.TYPE_START_JOB,
+                                                params,
+                                                pkg,
+                                                shouldUpdateVersions)))) {
+                            synchronized (mLock) {
+                                mRunningJobs.remove(request); // Avoid memory leaks.
+                            }
+                        }
+
+                        // Wait until the job is complete and removed from the running jobs.
+                        retryWithTimeout(TIMEOUT, () -> {
+                            synchronized (mLock) {
+                                return !mRunningJobs.containsKey(request);
+                            }
+                        });
+                    }
+
+                    // Finish the job after all packages are compiled.
+                    if (mProxy != null) {
+                        mProxy.jobFinished(params, /*reschedule*/false);
+                    }
+                }
+          }.start();
+        }
+
+        /** Retry until timeout. */
+        private boolean retryWithTimeout(final Duration timeout, BooleanSupplier supplier) {
+            long totalSleepTimeMs = 0L;
+            long sleepIntervalMs = 10L;
+            while (true) {
+                if (supplier.getAsBoolean()) {
+                    return true;
+                }
+                try {
+                    TimeUnit.MILLISECONDS.sleep(sleepIntervalMs);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, e.getMessage());
+                    return false;
                 }
 
-                // Something went wrong on the remote side. Treat the job as being
-                // 'already finished' (i.e. immediately release wake lock).
-                return false;
+                totalSleepTimeMs += sleepIntervalMs;
+                if (totalSleepTimeMs > timeout.toMillis()) {
+                    return false;
+                }
             }
-
-            // True -> keep the wakelock acquired until #jobFinished is called.
-            return true;
         }
 
         // Called by system to prematurely stop the job.
@@ -575,32 +664,7 @@ public class IorapForwardingService extends SystemService {
         public boolean onStopJob(JobParameters params) {
             // As this is unexpected behavior, print a warning.
             Log.w(TAG, "onStopJob(params=" + params.toString() + ")");
-
-            // No longer track this job (avoids a memory leak).
-            boolean wasTracking = false;
-            synchronized (mLock) {
-                for (HashMap.Entry<RequestId, JobParameters> entry : mRunningJobs.entrySet()) {
-                   if (entry.getValue().getJobId() == params.getJobId()) {
-                       mRunningJobs.remove(entry.getKey());
-                       wasTracking = true;
-                   }
-                }
-            }
-
-            // Notify iorapd to stop (abort) the job.
-            if (wasTracking) {
-                invokeRemote(mIorapRemote, (IIorap remote) ->
-                        remote.onJobScheduledEvent(RequestId.nextValueForSequence(),
-                                JobScheduledEvent.createIdleMaintenance(
-                                        JobScheduledEvent.TYPE_STOP_JOB,
-                                        params))
-                );
-            } else {
-                // Even weirder. This could only be considered "correct" if iorapd reported success
-                // concurrently to the JobService requesting an onStopJob.
-                Log.e(TAG, "Untracked onStopJob request");  // see above Log.w for the params.
-            }
-
+            mAbortIdleCompilation.set(true);
 
             // Yes, retry the job at a later time no matter what.
             return true;
@@ -626,18 +690,6 @@ public class IorapForwardingService extends SystemService {
             }
 
             Log.d(TAG, "Finished background job: " + jobParameters.toString());
-
-            // Job is successful and periodic. Do not 'reschedule' according to the back-off
-            // criteria.
-            //
-            // This releases the wakelock that was acquired in #onStartJob.
-
-            IorapdJobServiceProxy proxy = mProxy;
-            if (proxy != null) {
-                proxy.jobFinished(jobParameters, /*reschedule*/false);
-            }
-            // Cannot call 'jobFinished' on 'this' because it was not constructed
-            // from the JobService, so it would get an NPE when calling mEngine.
         }
 
         public void onIorapdDisconnected() {

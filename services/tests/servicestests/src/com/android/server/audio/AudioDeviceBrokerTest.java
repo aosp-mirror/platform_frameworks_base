@@ -17,6 +17,7 @@ package com.android.server.audio;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -27,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.util.Log;
@@ -58,7 +60,7 @@ public class AudioDeviceBrokerTest {
     @Mock private AudioService mMockAudioService;
     @Spy private AudioDeviceInventory mSpyDevInventory;
     @Spy private AudioSystemAdapter mSpyAudioSystem;
-    private SystemServerAdapter mSystemServer;
+    @Spy private SystemServerAdapter mSpySystemServer;
 
     private BluetoothDevice mFakeBtDevice;
 
@@ -69,9 +71,9 @@ public class AudioDeviceBrokerTest {
         mMockAudioService = mock(AudioService.class);
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSpyDevInventory = spy(new AudioDeviceInventory(mSpyAudioSystem));
-        mSystemServer = new NoOpSystemServerAdapter();
+        mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory,
-                mSystemServer);
+                mSpySystemServer);
         mSpyDevInventory.setDeviceBroker(mAudioDeviceBroker);
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -96,8 +98,9 @@ public class AudioDeviceBrokerTest {
         Log.i(TAG, "starting testPostA2dpDeviceConnectionChange");
         Assert.assertNotNull("invalid null BT device", mFakeBtDevice);
 
-        mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1);
+        mAudioDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                new AudioDeviceBroker.BtDeviceConnectionInfo(mFakeBtDevice,
+                        BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1));
         Thread.sleep(2 * MAX_MESSAGE_HANDLING_DELAY_MS);
         verify(mSpyDevInventory, times(1)).setBluetoothA2dpDeviceConnectionState(
                 any(BluetoothDevice.class),
@@ -172,6 +175,30 @@ public class AudioDeviceBrokerTest {
                 true);
     }
 
+    /**
+     * Test that device wired state intents are broadcasted on connection state change
+     * @throws Exception
+     */
+    @Test
+    public void testSetWiredDeviceConnectionState() throws Exception {
+        Log.i(TAG, "starting postSetWiredDeviceConnectionState");
+
+        final String address = "testAddress";
+        final String name = "testName";
+        final String caller = "testCaller";
+
+        doNothing().when(mSpySystemServer).broadcastStickyIntentToCurrentProfileGroup(
+                any(Intent.class));
+
+        mSpyDevInventory.setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                AudioService.CONNECTION_STATE_CONNECTED, address, name, caller);
+        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+
+        // Verify that the sticky intent is broadcasted
+        verify(mSpySystemServer, times(1)).broadcastStickyIntentToCurrentProfileGroup(
+                any(Intent.class));
+    }
+
     private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection,
             boolean mockMediaPlayback, boolean guaranteeSingleConnection) throws Exception {
         when(mMockAudioService.getDeviceForStream(AudioManager.STREAM_MUSIC))
@@ -183,20 +210,23 @@ public class AudioDeviceBrokerTest {
         ((NoOpAudioSystemAdapter) mSpyAudioSystem).configureIsStreamActive(mockMediaPlayback);
 
         // first connection: ensure the device is connected as a starting condition for the test
-        mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1);
+        mAudioDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                new AudioDeviceBroker.BtDeviceConnectionInfo(mFakeBtDevice,
+                        BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1));
         Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
 
         // disconnection
-        mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
-                BluetoothProfile.STATE_DISCONNECTED, BluetoothProfile.A2DP, false, -1);
+        mAudioDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                new AudioDeviceBroker.BtDeviceConnectionInfo(mFakeBtDevice,
+                        BluetoothProfile.STATE_DISCONNECTED, BluetoothProfile.A2DP, false, -1));
         if (delayAfterDisconnection > 0) {
             Thread.sleep(delayAfterDisconnection);
         }
 
         // reconnection
-        mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 2);
+        mAudioDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                new AudioDeviceBroker.BtDeviceConnectionInfo(mFakeBtDevice,
+                        BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 2));
         Thread.sleep(AudioService.BECOMING_NOISY_DELAY_MS + MAX_MESSAGE_HANDLING_DELAY_MS);
 
         // Verify disconnection has been cancelled and we're seeing two connections attempts,

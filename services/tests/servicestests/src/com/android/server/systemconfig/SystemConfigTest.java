@@ -184,7 +184,7 @@ public class SystemConfigTest {
 
     /**
      * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_APP_CONFIGS}
-     * permission flag for the tag: whitelisted-staged-installer.
+     * permission flag for the tag: allowlisted-staged-installer.
      */
     @Test
     public void readPermissions_allowAppConfigs_parsesStagedInstallerWhitelist()
@@ -204,7 +204,7 @@ public class SystemConfigTest {
 
     /**
      * Tests that readPermissions works correctly without {@link SystemConfig#ALLOW_APP_CONFIGS}
-     * permission flag for the tag: whitelisted-staged-installer.
+     * permission flag for the tag: allowlisted-staged-installer.
      */
     @Test
     public void readPermissions_notAllowAppConfigs_wontParseStagedInstallerWhitelist()
@@ -219,6 +219,64 @@ public class SystemConfigTest {
         mSysConfig.readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers()).isEmpty();
+    }
+
+    /**
+     * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_VENDOR_APEX}
+     * permission flag for the tag: {@code allowed-vendor-apex}.
+     */
+    @Test
+    public void readPermissions_allowVendorApex_parsesVendorApexAllowList()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <allowed-vendor-apex package=\"com.android.apex1\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "vendor-apex-allowlist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAllowedVendorApexes()).containsExactly("com.android.apex1");
+    }
+
+    /**
+     * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_VENDOR_APEX}
+     * permission flag for the tag: {@code allowed-vendor-apex}.
+     */
+    @Test
+    public void readPermissions_allowVendorApex_parsesVendorApexAllowList_noPackage()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <allowed-vendor-apex/>\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "vendor-apex-allowlist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
+    }
+
+
+    /**
+     * Tests that readPermissions works correctly without {@link SystemConfig#ALLOW_VENDOR_APEX}
+     * permission flag for the tag: {@code allowed-oem-apex}.
+     */
+    @Test
+    public void readPermissions_notAllowVendorApex_doesNotParseVendorApexAllowList()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <allowed-vendor-apex package=\"com.android.apex1\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "vendor-apex-allowlist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_VENDOR_APEX flag */ ~0x400);
+
+        assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
     }
 
     /**

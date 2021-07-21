@@ -17,9 +17,12 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.Tuner;
+import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,7 +37,7 @@ public abstract class FrontendSettings {
     /** @hide */
     @IntDef(prefix = "TYPE_",
             value = {TYPE_UNDEFINED, TYPE_ANALOG, TYPE_ATSC, TYPE_ATSC3, TYPE_DVBC, TYPE_DVBS,
-                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT})
+                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT, TYPE_DTMB})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
@@ -78,7 +81,10 @@ public abstract class FrontendSettings {
      * Integrated Services Digital Broadcasting-Terrestrial (ISDB-T) frontend type.
      */
     public static final int TYPE_ISDBT = Constants.FrontendType.ISDBT;
-
+    /**
+     * Digital Terrestrial Multimedia Broadcast standard (DTMB) frontend type.
+     */
+    public static final int TYPE_DTMB = android.hardware.tv.tuner.V1_1.Constants.FrontendType.DTMB;
 
 
     /** @hide */
@@ -241,9 +247,36 @@ public abstract class FrontendSettings {
      */
     public static final long FEC_77_90 = Constants.FrontendInnerFec.FEC_77_90;
 
+    /** @hide */
+    @IntDef(prefix = "FRONTEND_SPECTRAL_INVERSION_",
+            value = {FRONTEND_SPECTRAL_INVERSION_UNDEFINED, FRONTEND_SPECTRAL_INVERSION_NORMAL,
+                    FRONTEND_SPECTRAL_INVERSION_INVERTED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendSpectralInversion {}
+
+    /**
+     * Spectral Inversion Type undefined.
+     */
+    public static final int FRONTEND_SPECTRAL_INVERSION_UNDEFINED =
+            Constants.FrontendDvbcSpectralInversion.UNDEFINED;
+    /**
+     * Normal Spectral Inversion.
+     */
+    public static final int FRONTEND_SPECTRAL_INVERSION_NORMAL =
+            Constants.FrontendDvbcSpectralInversion.NORMAL;
+    /**
+     * Inverted Spectral Inversion.
+     */
+    public static final int FRONTEND_SPECTRAL_INVERSION_INVERTED =
+            Constants.FrontendDvbcSpectralInversion.INVERTED;
+
 
 
     private final int mFrequency;
+    // End frequency is only supported in Tuner 1.1 or higher.
+    private int mEndFrequency = Tuner.INVALID_FRONTEND_SETTING_FREQUENCY;
+    // General spectral inversion is only supported in Tuner 1.1 or higher.
+    private int mSpectralInversion = FRONTEND_SPECTRAL_INVERSION_UNDEFINED;
 
     FrontendSettings(int frequency) {
         mFrequency = frequency;
@@ -262,5 +295,63 @@ public abstract class FrontendSettings {
      */
     public int getFrequency() {
         return mFrequency;
+    }
+
+    /**
+     * Get the end frequency.
+     *
+     * @return the end frequency in Hz.
+     */
+    @IntRange(from = 1)
+    public int getEndFrequency() {
+        return mEndFrequency;
+    }
+
+    /**
+     * Get the spectral inversion.
+     *
+     * @return the value of the spectral inversion.
+     */
+    @FrontendSpectralInversion
+    public int getFrontendSpectralInversion() {
+        return mSpectralInversion;
+    }
+
+    /**
+     * Set Spectral Inversion.
+     *
+     * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @param inversion the value to set as the spectral inversion. Default value is {@link
+     * #FRONTEND_SPECTRAL_INVERSION_UNDEFINED}.
+     */
+    public void setSpectralInversion(@FrontendSpectralInversion int inversion) {
+        if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "setSpectralInversion")) {
+            mSpectralInversion = inversion;
+        }
+    }
+
+    /**
+     * Set End Frequency. This API is only supported with Tuner HAL 1.1 or higher. Otherwise it
+     * would be no-op.
+     *
+     * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @param endFrequency the end frequency used during blind scan. The default value is
+     * {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_SETTING_FREQUENCY}.
+     * @throws IllegalArgumentException if the {@code endFrequency} is not greater than 0.
+     */
+    @IntRange(from = 1)
+    public void setEndFrequency(int endFrequency) {
+        if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "setEndFrequency")) {
+            if (endFrequency < 1) {
+                throw new IllegalArgumentException("endFrequency must be greater than 0");
+            }
+            mEndFrequency = endFrequency;
+        }
     }
 }

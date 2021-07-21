@@ -22,13 +22,18 @@ import android.annotation.Nullable;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
+import android.text.TextUtils;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -41,7 +46,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A font class can be used for creating FontFamily.
@@ -53,16 +61,23 @@ public final class Font {
     private static final int STYLE_ITALIC = 1;
     private static final int STYLE_NORMAL = 0;
 
+    private static final NativeAllocationRegistry BUFFER_REGISTRY =
+            NativeAllocationRegistry.createMalloced(
+                    ByteBuffer.class.getClassLoader(), nGetReleaseNativeFont());
+
+    private static final NativeAllocationRegistry FONT_REGISTRY =
+            NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
+                    nGetReleaseNativeFont());
+
     /**
      * A builder class for creating new Font.
      */
     public static final class Builder {
-        private static final NativeAllocationRegistry sFontRegistry =
-                NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
-                    nGetReleaseNativeFont());
+
 
         private @Nullable ByteBuffer mBuffer;
         private @Nullable File mFile;
+        private @Nullable Font mFont;
         private @NonNull String mLocaleList = "";
         private @IntRange(from = -1, to = 1000) int mWeight = NOT_SPECIFIED;
         private @IntRange(from = -1, to = 1) int mItalic = NOT_SPECIFIED;
@@ -97,6 +112,19 @@ public final class Font {
                 @NonNull String localeList) {
             this(buffer);
             mFile = path;
+            mLocaleList = localeList;
+        }
+
+        /**
+         * Construct a builder with a byte buffer and file path.
+         *
+         * This method is intended to be called only from SystemFonts.
+         * @param path font file path
+         * @param localeList comma concatenated BCP47 compliant language tag.
+         * @hide
+         */
+        public Builder(@NonNull File path, @NonNull String localeList) {
+            this(path);
             mLocaleList = localeList;
         }
 
@@ -201,6 +229,22 @@ public final class Font {
             } catch (IOException e) {
                 mException = e;
             }
+        }
+
+        /**
+         * Constructs a builder from existing Font instance.
+         *
+         * @param font the font instance.
+         */
+        public Builder(@NonNull Font font) {
+            mFont = font;
+            // Copies all parameters as a default value.
+            mBuffer = font.getBuffer();
+            mWeight = font.getStyle().getWeight();
+            mItalic = font.getStyle().getSlant();
+            mAxes = font.getAxes();
+            mFile = font.getFile();
+            mTtcIndex = font.getTtcIndex();
         }
 
         /**
@@ -430,11 +474,17 @@ public final class Font {
             }
             final ByteBuffer readonlyBuffer = mBuffer.asReadOnlyBuffer();
             final String filePath = mFile == null ? "" : mFile.getAbsolutePath();
-            final long ptr = nBuild(builderPtr, readonlyBuffer, filePath, mWeight, italic,
-                    mTtcIndex);
-            final Font font = new Font(ptr, readonlyBuffer, mFile,
-                    new FontStyle(mWeight, slant), mTtcIndex, mAxes, mLocaleList);
-            sFontRegistry.registerNativeAllocation(font, ptr);
+
+            long ptr;
+            final Font font;
+            if (mFont == null) {
+                ptr = nBuild(builderPtr, readonlyBuffer, filePath, mLocaleList, mWeight, italic,
+                        mTtcIndex);
+                font = new Font(ptr);
+            } else {
+                ptr = nClone(mFont.getNativePtr(), builderPtr, mWeight, italic, mTtcIndex);
+                font = new Font(ptr);
+            }
             return font;
         }
 
@@ -445,42 +495,71 @@ public final class Font {
         @CriticalNative
         private static native void nAddAxis(long builderPtr, int tag, float value);
         private static native long nBuild(
-                long builderPtr, @NonNull ByteBuffer buffer, @NonNull String filePath, int weight,
-                boolean italic, int ttcIndex);
+                long builderPtr, @NonNull ByteBuffer buffer, @NonNull String filePath,
+                @NonNull String localeList, int weight, boolean italic, int ttcIndex);
         @CriticalNative
         private static native long nGetReleaseNativeFont();
+
+        @FastNative
+        private static native long nClone(long fontPtr, long builderPtr, int weight,
+                boolean italic, int ttcIndex);
     }
 
     private final long mNativePtr;  // address of the shared ptr of minikin::Font
-    private final @NonNull ByteBuffer mBuffer;
-    private final @Nullable File mFile;
-    private final FontStyle mFontStyle;
-    private final @IntRange(from = 0) int mTtcIndex;
-    private final @Nullable FontVariationAxis[] mAxes;
-    private final @NonNull String mLocaleList;
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private @NonNull ByteBuffer mBuffer = null;
+    @GuardedBy("mLock")
+    private boolean mIsFileInitialized = false;
+    @GuardedBy("mLock")
+    private @Nullable File mFile = null;
+    @GuardedBy("mLock")
+    private FontStyle mFontStyle = null;
+    @GuardedBy("mLock")
+    private @Nullable FontVariationAxis[] mAxes = null;
+    @GuardedBy("mLock")
+    private @NonNull LocaleList mLocaleList = null;
 
     /**
      * Use Builder instead
+     *
+     * Caller must increment underlying minikin::Font ref count.
+     * This class takes the ownership of the passing native objects.
+     *
+     * @hide
      */
-    private Font(long nativePtr, @NonNull ByteBuffer buffer, @Nullable File file,
-            @NonNull FontStyle fontStyle, @IntRange(from = 0) int ttcIndex,
-            @Nullable FontVariationAxis[] axes, @NonNull String localeList) {
-        mBuffer = buffer;
-        mFile = file;
-        mFontStyle = fontStyle;
+    public Font(long nativePtr) {
         mNativePtr = nativePtr;
-        mTtcIndex = ttcIndex;
-        mAxes = axes;
-        mLocaleList = localeList;
+
+        FONT_REGISTRY.registerNativeAllocation(this, mNativePtr);
     }
 
     /**
      * Returns a font file buffer.
      *
+     * Duplicate before reading values by {@link ByteBuffer#duplicate()} for avoiding unexpected
+     * reading position sharing.
+     *
      * @return a font buffer
      */
     public @NonNull ByteBuffer getBuffer() {
-        return mBuffer;
+        synchronized (mLock) {
+            if (mBuffer == null) {
+                // Create new instance of native FontWrapper, i.e. incrementing ref count of
+                // minikin Font instance for keeping buffer fo ByteBuffer reference which may live
+                // longer than this object.
+                long ref = nCloneFont(mNativePtr);
+                ByteBuffer fromNative = nNewByteBuffer(mNativePtr);
+
+                // Bind ByteBuffer's lifecycle with underlying font object.
+                BUFFER_REGISTRY.registerNativeAllocation(fromNative, ref);
+
+                // JNI NewDirectBuffer creates writable ByteBuffer even if it is mmaped readonly.
+                mBuffer = fromNative.asReadOnlyBuffer();
+            }
+            return mBuffer;
+        }
     }
 
     /**
@@ -491,7 +570,16 @@ public final class Font {
      * @return a file path of the font
      */
     public @Nullable File getFile() {
-        return mFile;
+        synchronized (mLock) {
+            if (!mIsFileInitialized) {
+                String path = nGetFontPath(mNativePtr);
+                if (!TextUtils.isEmpty(path)) {
+                    mFile = new File(path);
+                }
+                mIsFileInitialized = true;
+            }
+            return mFile;
+        }
     }
 
     /**
@@ -502,7 +590,16 @@ public final class Font {
      * @return a font style
      */
     public @NonNull FontStyle getStyle() {
-        return mFontStyle;
+        synchronized (mLock) {
+            if (mFontStyle == null) {
+                int packedStyle = nGetPackedStyle(mNativePtr);
+                mFontStyle = new FontStyle(
+                        FontFileUtil.unpackWeight(packedStyle),
+                        FontFileUtil.unpackItalic(packedStyle)
+                                ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT);
+            }
+            return mFontStyle;
+        }
     }
 
     /**
@@ -514,7 +611,7 @@ public final class Font {
      * @return a TTC index value
      */
     public @IntRange(from = 0) int getTtcIndex() {
-        return mTtcIndex;
+        return nGetIndex(mNativePtr);
     }
 
     /**
@@ -525,7 +622,23 @@ public final class Font {
      * @return font variation settings
      */
     public @Nullable FontVariationAxis[] getAxes() {
-        return mAxes == null ? null : mAxes.clone();
+        synchronized (mLock) {
+            if (mAxes == null) {
+                int axisCount = nGetAxisCount(mNativePtr);
+                mAxes = new FontVariationAxis[axisCount];
+                char[] charBuffer = new char[4];
+                for (int i = 0; i < axisCount; ++i) {
+                    long packedAxis = nGetAxisInfo(mNativePtr, i);
+                    float value = Float.intBitsToFloat((int) (packedAxis & 0x0000_0000_FFFF_FFFFL));
+                    charBuffer[0] = (char) ((packedAxis & 0xFF00_0000_0000_0000L) >>> 56);
+                    charBuffer[1] = (char) ((packedAxis & 0x00FF_0000_0000_0000L) >>> 48);
+                    charBuffer[2] = (char) ((packedAxis & 0x0000_FF00_0000_0000L) >>> 40);
+                    charBuffer[3] = (char) ((packedAxis & 0x0000_00FF_0000_0000L) >>> 32);
+                    mAxes[i] = new FontVariationAxis(new String(charBuffer), value);
+                }
+            }
+        }
+        return mAxes;
     }
 
     /**
@@ -535,7 +648,51 @@ public final class Font {
      * @return a locale list
      */
     public @NonNull LocaleList getLocaleList() {
-        return LocaleList.forLanguageTags(mLocaleList);
+        synchronized (mLock) {
+            if (mLocaleList == null) {
+                String langTags = nGetLocaleList(mNativePtr);
+                if (TextUtils.isEmpty(langTags)) {
+                    mLocaleList = LocaleList.getEmptyLocaleList();
+                } else {
+                    mLocaleList = LocaleList.forLanguageTags(langTags);
+                }
+            }
+            return mLocaleList;
+        }
+    }
+
+    /**
+     * Retrieve the glyph horizontal advance and bounding box.
+     *
+     * Note that {@link android.graphics.Typeface} in {@link android.graphics.Paint} is ignored.
+     *
+     * @param glyphId a glyph ID
+     * @param paint a paint object used for resolving glyph style
+     * @param outBoundingBox a nullable destination object. If null is passed, this function just
+     *                      return the horizontal advance. If non-null is passed, this function
+     *                      fills bounding box information to this object.
+     * @return the amount of horizontal advance in pixels
+     */
+    public float getGlyphBounds(@IntRange(from = 0) int glyphId, @NonNull Paint paint,
+            @Nullable RectF outBoundingBox) {
+        return nGetGlyphBounds(mNativePtr, glyphId, paint.getNativeInstance(), outBoundingBox);
+    }
+
+    /**
+     * Retrieve the font metrics information.
+     *
+     * Note that {@link android.graphics.Typeface} in {@link android.graphics.Paint} is ignored.
+     *
+     * @param paint a paint object used for retrieving font metrics.
+     * @param outMetrics a nullable destination object. If null is passed, this function only
+     *                  retrieve recommended interline spacing. If non-null is passed, this function
+     *                  fills to font metrics to it.
+     *
+     * @see Paint#getFontMetrics()
+     * @see Paint#getFontMetricsInt()
+     */
+    public void getMetrics(@NonNull Paint paint, @Nullable Paint.FontMetrics outMetrics) {
+        nGetFontMetrics(mNativePtr, paint.getNativeInstance(), outMetrics);
     }
 
     /** @hide */
@@ -543,34 +700,222 @@ public final class Font {
         return mNativePtr;
     }
 
+    /**
+     * Returns the unique ID of the source font data.
+     *
+     * You can use this identifier as a key of the cache or checking if two fonts can be
+     * interpolated with font variation settings.
+     * <pre>
+     * <code>
+     *   // Following three Fonts, fontA, fontB, fontC have the same identifier.
+     *   Font fontA = new Font.Builder("/path/to/font").build();
+     *   Font fontB = new Font.Builder(fontA).setTtcIndex(1).build();
+     *   Font fontC = new Font.Builder(fontB).setFontVariationSettings("'wght' 700).build();
+     *
+     *   // Following fontD has the different identifier from above three.
+     *   Font fontD = new Font.Builder("/path/to/another/font").build();
+     *
+     *   // Following fontE has different identifier from above four even the font path is the same.
+     *   // To get the same identifier, please create new Font instance from existing fonts.
+     *   Font fontE = new Font.Builder("/path/to/font").build();
+     * </code>
+     * </pre>
+     *
+     * Here is an example of caching font object that has
+     * <pre>
+     * <code>
+     *   private LongSparseArray<SparseArray<Font>> mCache = new LongSparseArray<>();
+     *
+     *   private Font getFontWeightVariation(Font font, int weight) {
+     *       // Different collection index is treated as different font.
+     *       long key = ((long) font.getSourceIdentifier()) << 32 | (long) font.getTtcIndex();
+     *
+     *       SparseArray<Font> weightCache = mCache.get(key);
+     *       if (weightCache == null) {
+     *          weightCache = new SparseArray<>();
+     *          mCache.put(key, weightCache);
+     *       }
+     *
+     *       Font cachedFont = weightCache.get(weight);
+     *       if (cachedFont != null) {
+     *         return cachedFont;
+     *       }
+     *
+     *       Font newFont = new Font.Builder(cachedFont)
+     *           .setFontVariationSettings("'wght' " + weight);
+     *           .build();
+     *
+     *       weightCache.put(weight, newFont);
+     *       return newFont;
+     *   }
+     * </code>
+     * </pre>
+     * @return an unique identifier for the font source data.
+     */
+    public int getSourceIdentifier() {
+        return nGetSourceId(mNativePtr);
+    }
+
+    /**
+     * Returns true if the given font is created from the same source data from this font.
+     *
+     * This method essentially compares {@link ByteBuffer} inside Font, but has some optimization
+     * for faster comparing. This method compares the internal object before going to one-by-one
+     * byte compare with {@link ByteBuffer}. This typically works efficiently if you compares the
+     * font that is created from {@link Builder#Builder(Font)}.
+     *
+     * This API is typically useful for checking if two fonts can be interpolated by font variation
+     * axes. For example, when you call {@link android.text.TextShaper} for the same
+     * string but different style, you may get two font objects which is created from the same
+     * source but have different parameters. You may want to animate between them by interpolating
+     * font variation settings if these fonts are created from the same source.
+     *
+     * @param other a font object to be compared.
+     * @return true if given font is created from the same source from this font. Otherwise false.
+     */
+    private boolean isSameSource(@NonNull Font other) {
+        Objects.requireNonNull(other);
+
+        ByteBuffer myBuffer = getBuffer();
+        ByteBuffer otherBuffer = other.getBuffer();
+
+        // Shortcut for the same instance.
+        if (myBuffer == otherBuffer) {
+            return true;
+        }
+
+        // Shortcut for different font buffer check by comparing size.
+        if (myBuffer.capacity() != otherBuffer.capacity()) {
+            return false;
+        }
+
+        // ByteBuffer#equals compares all bytes which is not performant for e.g HashMap. Since
+        // underlying native font object holds buffer address, check if this buffer points exactly
+        // the same address as a shortcut of equality. For being compatible with of API30 or before,
+        // check buffer position even if the buffer points the same address.
+        if (getSourceIdentifier() == other.getSourceIdentifier()
+                && myBuffer.position() == otherBuffer.position()) {
+            return true;
+        }
+
+        // Unfortunately, need to compare bytes one-by-one since the buffer may be different font
+        // file but has the same file size, or two font has same content but they are allocated
+        // differently. For being compatible with API30 ore before, compare with ByteBuffer#equals.
+        return myBuffer.equals(otherBuffer);
+    }
+
+    /** @hide */
+    public boolean paramEquals(@NonNull Font f) {
+        return f.getStyle().equals(getStyle())
+                && f.getTtcIndex() == getTtcIndex()
+                && Arrays.equals(f.getAxes(), getAxes())
+                && Objects.equals(f.getLocaleList(), getLocaleList())
+                && Objects.equals(getFile(), f.getFile());
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }
-        if (o == null || !(o instanceof Font)) {
+        if (!(o instanceof Font)) {
             return false;
         }
+
         Font f = (Font) o;
-        return mFontStyle.equals(f.mFontStyle) && f.mTtcIndex == mTtcIndex
-                && Arrays.equals(f.mAxes, mAxes) && f.mBuffer.equals(mBuffer)
-                && Objects.equals(f.mLocaleList, mLocaleList);
+
+        // The underlying minikin::Font object is the source of the truth of font information. Thus,
+        // Pointer equality is the object equality.
+        if (nGetMinikinFontPtr(mNativePtr) == nGetMinikinFontPtr(f.mNativePtr)) {
+            return true;
+        }
+
+        if (!paramEquals(f)) {
+            return false;
+        }
+
+        return isSameSource(f);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFontStyle, mTtcIndex, Arrays.hashCode(mAxes), mBuffer, mLocaleList);
+        return Objects.hash(
+                getStyle(),
+                getTtcIndex(),
+                Arrays.hashCode(getAxes()),
+                // Use Buffer size instead of ByteBuffer#hashCode since ByteBuffer#hashCode traverse
+                // data which is not performant e.g. for HashMap. The hash collision are less likely
+                // happens because it is unlikely happens the different font files has exactly the
+                // same size.
+                getLocaleList());
     }
 
     @Override
     public String toString() {
         return "Font {"
-            + "path=" + mFile
-            + ", style=" + mFontStyle
-            + ", ttcIndex=" + mTtcIndex
-            + ", axes=" + FontVariationAxis.toFontVariationSettings(mAxes)
-            + ", localeList=" + mLocaleList
-            + ", buffer=" + mBuffer
+            + "path=" + getFile()
+            + ", style=" + getStyle()
+            + ", ttcIndex=" + getTtcIndex()
+            + ", axes=" + FontVariationAxis.toFontVariationSettings(getAxes())
+            + ", localeList=" + getLocaleList()
+            + ", buffer=" + getBuffer()
             + "}";
     }
+
+    /** @hide */
+    public static Set<Font> getAvailableFonts() {
+        // The font uniqueness is already calculated in the native code. So use IdentityHashMap
+        // for avoiding hash/equals calculation.
+        IdentityHashMap<Font, Font> map = new IdentityHashMap<>();
+        for (long nativePtr : nGetAvailableFontSet()) {
+            Font font = new Font(nativePtr);
+            map.put(font, font);
+        }
+        return Collections.unmodifiableSet(map.keySet());
+    }
+
+    @CriticalNative
+    private static native long nGetMinikinFontPtr(long font);
+
+    @CriticalNative
+    private static native long nCloneFont(long font);
+
+    @FastNative
+    private static native ByteBuffer nNewByteBuffer(long font);
+
+    @CriticalNative
+    private static native long nGetBufferAddress(long font);
+
+    @CriticalNative
+    private static native int nGetSourceId(long font);
+
+    @CriticalNative
+    private static native long nGetReleaseNativeFont();
+
+    @FastNative
+    private static native float nGetGlyphBounds(long font, int glyphId, long paint, RectF rect);
+
+    @FastNative
+    private static native float nGetFontMetrics(long font, long paint, Paint.FontMetrics metrics);
+
+    @FastNative
+    private static native String nGetFontPath(long fontPtr);
+
+    @FastNative
+    private static native String nGetLocaleList(long familyPtr);
+
+    @CriticalNative
+    private static native int nGetPackedStyle(long fontPtr);
+
+    @CriticalNative
+    private static native int nGetIndex(long fontPtr);
+
+    @CriticalNative
+    private static native int nGetAxisCount(long fontPtr);
+
+    @CriticalNative
+    private static native long nGetAxisInfo(long fontPtr, int i);
+
+    @FastNative
+    private static native long[] nGetAvailableFontSet();
 }

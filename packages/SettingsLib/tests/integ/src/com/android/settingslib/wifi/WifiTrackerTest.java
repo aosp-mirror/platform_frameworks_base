@@ -1090,7 +1090,7 @@ public class WifiTrackerTest {
 
         // Verify second update AP is the same object as the first update AP
         assertThat(passpointAccessPointsFirstUpdate.get(0))
-                .isSameAs(passpointAccessPointsSecondUpdate.get(0));
+                .isSameInstanceAs(passpointAccessPointsSecondUpdate.get(0));
         // Verify second update AP has the average of the first and second update RSSIs
         assertThat(passpointAccessPointsSecondUpdate.get(0).getRssi())
                 .isEqualTo((prevRssi + newRssi) / 2);
@@ -1210,7 +1210,8 @@ public class WifiTrackerTest {
                 providersAndScans, cachedAccessPoints);
 
         // Verify second update AP is the same object as the first update AP
-        assertThat(osuAccessPointsFirstUpdate.get(0)).isSameAs(osuAccessPointsSecondUpdate.get(0));
+        assertThat(osuAccessPointsFirstUpdate.get(0))
+                .isSameInstanceAs(osuAccessPointsSecondUpdate.get(0));
         // Verify second update AP has the average of the first and second update RSSIs
         assertThat(osuAccessPointsSecondUpdate.get(0).getRssi())
                 .isEqualTo((prevRssi + newRssi) / 2);

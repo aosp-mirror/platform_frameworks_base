@@ -16,22 +16,23 @@
 
 package android.os;
 
-import static android.system.OsConstants.AF_UNIX;
 import static android.system.OsConstants.SOCK_STREAM;
 
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 import libcore.io.IoBridge;
 import libcore.io.IoUtils;
 import libcore.io.Memory;
 import libcore.io.Streams;
-import libcore.util.ArrayUtils;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
@@ -58,17 +59,19 @@ public class FileBridge extends Thread {
     /** CMD_CLOSE */
     private static final int CMD_CLOSE = 3;
 
-    private FileDescriptor mTarget;
+    private ParcelFileDescriptor mTarget;
 
-    private final FileDescriptor mServer = new FileDescriptor();
-    private final FileDescriptor mClient = new FileDescriptor();
+    private ParcelFileDescriptor mServer;
+    private ParcelFileDescriptor mClient;
 
     private volatile boolean mClosed;
 
     public FileBridge() {
         try {
-            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, mServer, mClient);
-        } catch (ErrnoException e) {
+            ParcelFileDescriptor[] fds = ParcelFileDescriptor.createSocketPair(SOCK_STREAM);
+            mServer = fds[0];
+            mClient = fds[1];
+        } catch (IOException e) {
             throw new RuntimeException("Failed to create bridge");
         }
     }
@@ -80,48 +83,50 @@ public class FileBridge extends Thread {
     public void forceClose() {
         IoUtils.closeQuietly(mTarget);
         IoUtils.closeQuietly(mServer);
-        IoUtils.closeQuietly(mClient);
         mClosed = true;
     }
 
-    public void setTargetFile(FileDescriptor target) {
+    public void setTargetFile(ParcelFileDescriptor target) {
         mTarget = target;
     }
 
-    public FileDescriptor getClientSocket() {
+    public ParcelFileDescriptor getClientSocket() {
         return mClient;
     }
 
     @Override
     public void run() {
-        final byte[] temp = new byte[8192];
+        final ByteBuffer tempBuffer = ByteBuffer.allocateDirect(8192);
+        final byte[] temp = tempBuffer.hasArray() ? tempBuffer.array() : new byte[8192];
         try {
-            while (IoBridge.read(mServer, temp, 0, MSG_LENGTH) == MSG_LENGTH) {
+            while (IoBridge.read(mServer.getFileDescriptor(), temp,
+                                 0, MSG_LENGTH) == MSG_LENGTH) {
                 final int cmd = Memory.peekInt(temp, 0, ByteOrder.BIG_ENDIAN);
                 if (cmd == CMD_WRITE) {
                     // Shuttle data into local file
                     int len = Memory.peekInt(temp, 4, ByteOrder.BIG_ENDIAN);
                     while (len > 0) {
-                        int n = IoBridge.read(mServer, temp, 0, Math.min(temp.length, len));
+                        int n = IoBridge.read(mServer.getFileDescriptor(), temp, 0,
+                                              Math.min(temp.length, len));
                         if (n == -1) {
                             throw new IOException(
                                     "Unexpected EOF; still expected " + len + " bytes");
                         }
-                        IoBridge.write(mTarget, temp, 0, n);
+                        IoBridge.write(mTarget.getFileDescriptor(), temp, 0, n);
                         len -= n;
                     }
 
                 } else if (cmd == CMD_FSYNC) {
                     // Sync and echo back to confirm
-                    Os.fsync(mTarget);
-                    IoBridge.write(mServer, temp, 0, MSG_LENGTH);
+                    Os.fsync(mTarget.getFileDescriptor());
+                    IoBridge.write(mServer.getFileDescriptor(), temp, 0, MSG_LENGTH);
 
                 } else if (cmd == CMD_CLOSE) {
                     // Close and echo back to confirm
-                    Os.fsync(mTarget);
-                    Os.close(mTarget);
+                    Os.fsync(mTarget.getFileDescriptor());
+                    mTarget.close();
                     mClosed = true;
-                    IoBridge.write(mServer, temp, 0, MSG_LENGTH);
+                    IoBridge.write(mServer.getFileDescriptor(), temp, 0, MSG_LENGTH);
                     break;
                 }
             }
@@ -136,16 +141,14 @@ public class FileBridge extends Thread {
     public static class FileBridgeOutputStream extends OutputStream {
         private final ParcelFileDescriptor mClientPfd;
         private final FileDescriptor mClient;
-        private final byte[] mTemp = new byte[MSG_LENGTH];
+        private final ByteBuffer mTempBuffer = ByteBuffer.allocateDirect(MSG_LENGTH);
+        private final byte[] mTemp = mTempBuffer.hasArray()
+                                     ? mTempBuffer.array()
+                                     : new byte[MSG_LENGTH];
 
         public FileBridgeOutputStream(ParcelFileDescriptor clientPfd) {
             mClientPfd = clientPfd;
             mClient = clientPfd.getFileDescriptor();
-        }
-
-        public FileBridgeOutputStream(FileDescriptor client) {
-            mClientPfd = null;
-            mClient = client;
         }
 
         @Override
@@ -153,7 +156,6 @@ public class FileBridge extends Thread {
             try {
                 writeCommandAndBlock(CMD_CLOSE, "close()");
             } finally {
-                IoBridge.closeAndSignalBlockedThreads(mClient);
                 IoUtils.closeQuietly(mClientPfd);
             }
         }

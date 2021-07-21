@@ -24,15 +24,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.TextUtils;
-import android.util.DebugUtils;
 import android.util.Log;
-
-import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -43,10 +41,10 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
 
 /**
  * Takes care of managing a {@link ServiceConnection} and auto-disconnecting from the service upon
@@ -220,14 +218,17 @@ public interface ServiceConnector<I extends IInterface> {
         private final @NonNull Queue<Job<I, ?>> mQueue = this;
         private final @NonNull List<CompletionAwareJob<I, ?>> mUnfinishedJobs = new ArrayList<>();
 
+        private final @NonNull Handler mMainHandler = new Handler(Looper.getMainLooper());
         private final @NonNull ServiceConnection mServiceConnection = this;
         private final @NonNull Runnable mTimeoutDisconnect = this;
 
+        // This context contains the user information.
         protected final @NonNull Context mContext;
         private final @NonNull Intent mIntent;
         private final int mBindingFlags;
-        private final int mUserId;
         private final @Nullable Function<IBinder, I> mBinderAsInterface;
+        private final @NonNull Handler mHandler;
+        protected final @NonNull Executor mExecutor;
 
         private volatile I mService = null;
         private boolean mBinding = false;
@@ -250,21 +251,22 @@ public interface ServiceConnector<I extends IInterface> {
          *                          {@link IInterface}.
          *                          Typically this is {@code IMyInterface.Stub::asInterface}
          */
-        public Impl(@NonNull Context context, @NonNull Intent intent,
-                @Context.BindServiceFlags int bindingFlags, @UserIdInt int userId,
-                @Nullable Function<IBinder, I> binderAsInterface) {
-            mContext = context;
+        public Impl(@NonNull Context context, @NonNull Intent intent, int bindingFlags,
+                @UserIdInt int userId, @Nullable Function<IBinder, I> binderAsInterface) {
+            mContext = context.createContextAsUser(UserHandle.of(userId), 0);
             mIntent = intent;
             mBindingFlags = bindingFlags;
-            mUserId = userId;
             mBinderAsInterface = binderAsInterface;
+
+            mHandler = getJobHandler();
+            mExecutor = new HandlerExecutor(mHandler);
         }
 
         /**
          * {@link Handler} on which {@link Job}s will be called
          */
         protected Handler getJobHandler() {
-            return Handler.getMain();
+            return mMainHandler;
         }
 
         /**
@@ -296,14 +298,12 @@ public interface ServiceConnector<I extends IInterface> {
          * <p>
          * If overridden, implementation must use at least the provided {@link ServiceConnection}
          */
-        protected boolean bindService(
-                @NonNull ServiceConnection serviceConnection, @NonNull Handler handler) {
+        protected boolean bindService(@NonNull ServiceConnection serviceConnection) {
             if (DEBUG) {
                 logTrace();
             }
-            return mContext.bindServiceAsUser(mIntent, serviceConnection,
-                    Context.BIND_AUTO_CREATE | mBindingFlags,
-                    handler, UserHandle.of(mUserId));
+            return mContext.bindService(mIntent, Context.BIND_AUTO_CREATE | mBindingFlags,
+                    mExecutor, serviceConnection);
         }
 
         /**
@@ -385,14 +385,13 @@ public interface ServiceConnector<I extends IInterface> {
             if (!enqueue((Job<I, ?>) task)) {
                 task.completeExceptionally(new IllegalStateException(
                         "Failed to post a job to handler. Likely "
-                                + getJobHandler().getLooper() + " is exiting"));
+                                + mHandler.getLooper() + " is exiting"));
             }
         }
 
         private boolean enqueue(@NonNull Job<I, ?> job) {
             cancelTimeout();
-            return getJobHandler().sendMessage(PooledLambda.obtainMessage(
-                    ServiceConnector.Impl::enqueueJobThread, this, job));
+            return mHandler.post(() -> enqueueJobThread(job));
         }
 
         void enqueueJobThread(@NonNull Job<I, ?> job) {
@@ -409,7 +408,7 @@ public interface ServiceConnector<I extends IInterface> {
             } else if (isBound()) {
                 processQueue();
             } else if (!mBinding) {
-                if (bindService(mServiceConnection, getJobHandler())) {
+                if (bindService(mServiceConnection)) {
                     mBinding = true;
                 } else {
                     completeExceptionally(job,
@@ -422,7 +421,7 @@ public interface ServiceConnector<I extends IInterface> {
             if (DEBUG) {
                 logTrace();
             }
-            Handler.getMain().removeCallbacks(mTimeoutDisconnect);
+            mMainHandler.removeCallbacks(mTimeoutDisconnect);
         }
 
         void completeExceptionally(@NonNull Job<?, ?> job, @NonNull Throwable ex) {
@@ -486,7 +485,7 @@ public interface ServiceConnector<I extends IInterface> {
             }
             long timeout = getAutoDisconnectTimeoutMs();
             if (timeout > 0) {
-                Handler.getMain().postDelayed(mTimeoutDisconnect, timeout);
+                mMainHandler.postDelayed(mTimeoutDisconnect, timeout);
             } else if (DEBUG) {
                 Log.i(LOG_TAG, "Not scheduling unbind for permanently bound " + this);
             }
@@ -502,7 +501,7 @@ public interface ServiceConnector<I extends IInterface> {
                 logTrace();
             }
             mUnbinding = true;
-            getJobHandler().sendMessage(PooledLambda.obtainMessage(Impl::unbindJobThread, this));
+            mHandler.post(this::unbindJobThread);
         }
 
         void unbindJobThread() {
@@ -611,7 +610,7 @@ public interface ServiceConnector<I extends IInterface> {
         public String toString() {
             StringBuilder sb = new StringBuilder("ServiceConnector@")
                     .append(System.identityHashCode(this) % 1000).append("(")
-                    .append(mIntent).append(", user: ").append(mUserId)
+                    .append(mIntent).append(", user: ").append(mContext.getUser().getIdentifier())
                     .append(")[").append(stateToString());
             if (!mQueue.isEmpty()) {
                 sb.append(", ").append(mQueue.size()).append(" pending job(s)");
@@ -629,8 +628,8 @@ public interface ServiceConnector<I extends IInterface> {
             String tab = "  ";
             pw.append(prefix).append("ServiceConnector:").println();
             pw.append(prefix).append(tab).append(String.valueOf(mIntent)).println();
-            pw.append(prefix).append(tab)
-                    .append("userId: ").append(String.valueOf(mUserId)).println();
+            pw.append(prefix).append(tab).append("userId: ")
+                    .append(String.valueOf(mContext.getUser().getIdentifier())).println();
             pw.append(prefix).append(tab)
                     .append("State: ").append(stateToString()).println();
             pw.append(prefix).append(tab)
@@ -659,10 +658,7 @@ public interface ServiceConnector<I extends IInterface> {
         }
 
         private void logTrace() {
-            Log.i(LOG_TAG,
-                    TextUtils.join(" -> ",
-                            DebugUtils.callersWithin(ServiceConnector.class, /* offset= */ 1))
-                    + "(" + this + ")");
+            Log.i(LOG_TAG, "See stacktrace", new Throwable());
         }
 
         /**
@@ -729,5 +725,44 @@ public interface ServiceConnector<I extends IInterface> {
                 }
             }
         }
+    }
+
+    /**
+     * A {@link ServiceConnector} that doesn't connect to anything.
+     *
+     * @param <T> the type of the {@link IInterface ipc interface} for the remote service
+     */
+    class NoOp<T extends IInterface> extends AndroidFuture<Object> implements ServiceConnector<T> {
+        {
+            completeExceptionally(new IllegalStateException("ServiceConnector is a no-op"));
+        }
+
+        @Override
+        public boolean run(@NonNull VoidJob<T> job) {
+            return false;
+        }
+
+        @Override
+        public AndroidFuture<Void> post(@NonNull VoidJob<T> job) {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public <R> AndroidFuture<R> postForResult(@NonNull Job<T, R> job) {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public <R> AndroidFuture<R> postAsync(@NonNull Job<T, CompletableFuture<R>> job) {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public AndroidFuture<T> connect() {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public void unbind() {}
     }
 }

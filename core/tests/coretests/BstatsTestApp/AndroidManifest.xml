@@ -19,7 +19,7 @@
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="25"/>
+    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="26"/>
 
     <application>
         <activity android:name=".TestActivity"

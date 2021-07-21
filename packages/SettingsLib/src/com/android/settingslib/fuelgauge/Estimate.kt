@@ -38,14 +38,13 @@ class Estimate(
          * @return An [Estimate] object with the latest battery estimates.
          */
         @JvmStatic
+        @Suppress("DEPRECATION")
         fun getCachedEstimateIfAvailable(context: Context): Estimate? {
             // if time > 2 min return null or the estimate otherwise
             val resolver = context.contentResolver
-            val lastUpdateTime = Instant.ofEpochMilli(
-                    Settings.Global.getLong(
-                            resolver, Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME, -1))
+            val lastUpdateTime = getLastCacheUpdateTime(context)
             return if (Duration.between(lastUpdateTime,
-                            Instant.now()).compareTo(Duration.ofMinutes(1)) > 0) {
+                            Instant.now()) > Duration.ofMinutes(1)) {
                 null
             } else Estimate(
                     Settings.Global.getLong(resolver,
@@ -65,6 +64,7 @@ class Estimate(
          * @param estimate the [Estimate] object to store
          */
         @JvmStatic
+        @Suppress("DEPRECATION")
         fun storeCachedEstimate(context: Context, estimate: Estimate) {
             // store the estimate and update the timestamp
             val resolver = context.contentResolver
@@ -82,6 +82,7 @@ class Estimate(
          * Returns when the estimate was last updated as an Instant
          */
         @JvmStatic
+        @Suppress("DEPRECATION")
         fun getLastCacheUpdateTime(context: Context): Instant {
             return Instant.ofEpochMilli(
                     Settings.Global.getLong(

@@ -50,10 +50,12 @@ public:
     CopyResult copySurfaceInto(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap);
 
     CopyResult copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);
+    CopyResult copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap);
 
     CopyResult copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
 private:
+    CopyResult copySurfaceIntoLegacy(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap);
     CopyResult copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTransform,
                              const Rect& srcRect, SkBitmap* bitmap);
 

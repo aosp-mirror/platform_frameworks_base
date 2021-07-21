@@ -256,57 +256,41 @@ class ValueBodyPrinter : public ConstValueVisitor {
 
 void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options,
                        Printer* printer) {
-  for (const auto& package : table.packages) {
-    ValueHeadlinePrinter headline_printer(package->name, printer);
-    ValueBodyPrinter body_printer(package->name, printer);
+  const auto table_view = table.GetPartitionedView();
+  for (const auto& package : table_view.packages) {
+    ValueHeadlinePrinter headline_printer(package.name, printer);
+    ValueBodyPrinter body_printer(package.name, printer);
 
     printer->Print("Package name=");
-    printer->Print(package->name);
-    if (package->id) {
-      printer->Print(StringPrintf(" id=%02x", package->id.value()));
+    printer->Print(package.name);
+    if (package.id) {
+      printer->Print(StringPrintf(" id=%02x", package.id.value()));
     }
     printer->Println();
 
     printer->Indent();
-    for (const auto& type : package->types) {
+    for (const auto& type : package.types) {
       printer->Print("type ");
-      printer->Print(to_string(type->type));
-      if (type->id) {
-        printer->Print(StringPrintf(" id=%02x", type->id.value()));
+      printer->Print(to_string(type.type));
+      if (type.id) {
+        printer->Print(StringPrintf(" id=%02x", type.id.value()));
       }
-      printer->Println(StringPrintf(" entryCount=%zd", type->entries.size()));
-
-      std::vector<const ResourceEntry*> sorted_entries;
-      for (const auto& entry : type->entries) {
-        auto iter = std::lower_bound(
-            sorted_entries.begin(), sorted_entries.end(), entry.get(),
-            [](const ResourceEntry* a, const ResourceEntry* b) -> bool {
-              if (a->id && b->id) {
-                return a->id.value() < b->id.value();
-              } else if (a->id) {
-                return true;
-              } else {
-                return false;
-              }
-            });
-        sorted_entries.insert(iter, entry.get());
-      }
+      printer->Println(StringPrintf(" entryCount=%zd", type.entries.size()));
 
       printer->Indent();
-      for (const ResourceEntry* entry : sorted_entries) {
-        const ResourceId id(package->id.value_or_default(0), type->id.value_or_default(0),
-                            entry->id.value_or_default(0));
-
+      for (const ResourceTableEntryView& entry : type.entries) {
         printer->Print("resource ");
-        printer->Print(id.to_string());
+        printer->Print(ResourceId(package.id.value_or_default(0), type.id.value_or_default(0),
+                                  entry.id.value_or_default(0))
+                           .to_string());
         printer->Print(" ");
 
         // Write the name without the package (this is obvious and too verbose).
-        printer->Print(to_string(type->type));
+        printer->Print(to_string(type.type));
         printer->Print("/");
-        printer->Print(entry->name);
+        printer->Print(entry.name);
 
-        switch (entry->visibility.level) {
+        switch (entry.visibility.level) {
           case Visibility::Level::kPublic:
             printer->Print(" PUBLIC");
             break;
@@ -318,15 +302,24 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
             break;
         }
 
-        if (entry->overlayable_item) {
+        if (entry.visibility.staged_api) {
+          printer->Print(" STAGED");
+        }
+
+        if (entry.overlayable_item) {
           printer->Print(" OVERLAYABLE");
+        }
+
+        if (entry.staged_id) {
+          printer->Print(" STAGED_ID=");
+          printer->Print(entry.staged_id.value().id.to_string());
         }
 
         printer->Println();
 
         if (options.show_values) {
           printer->Indent();
-          for (const auto& value : entry->values) {
+          for (const auto& value : entry.values) {
             printer->Print("(");
             printer->Print(value->config.to_string());
             printer->Print(") ");
@@ -436,9 +429,9 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   for (size_t i=0; i<N; i++) {
     size_t len;
     if (pool->isUTF8()) {
-      uniqueStrings.add(pool->string8At(i, &len));
+      uniqueStrings.add(UnpackOptionalString(pool->string8At(i), &len));
     } else {
-      uniqueStrings.add(pool->stringAt(i, &len));
+      uniqueStrings.add(UnpackOptionalString(pool->stringAt(i), &len));
     }
   }
 
@@ -450,8 +443,8 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
 
   const size_t NS = pool->size();
   for (size_t s=0; s<NS; s++) {
-    String8 str = pool->string8ObjectAt(s);
-    printer->Print(StringPrintf("String #%zd : %s\n", s, str.string()));
+    auto str = pool->string8ObjectAt(s);
+    printer->Print(StringPrintf("String #%zd : %s\n", s, str.has_value() ? str->string() : ""));
   }
 }
 

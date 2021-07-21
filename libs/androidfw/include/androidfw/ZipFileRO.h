@@ -30,16 +30,19 @@
 #ifndef __LIBS_ZIPFILERO_H
 #define __LIBS_ZIPFILERO_H
 
-#include <utils/Compat.h>
-#include <utils/Errors.h>
-#include <utils/FileMap.h>
-#include <utils/threads.h>
-
+#include <optional>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+
+#include <util/map_ptr.h>
+
+#include <utils/Compat.h>
+#include <utils/Errors.h>
+#include <utils/FileMap.h>
+#include <utils/threads.h>
 
 struct ZipArchive;
 typedef ZipArchive* ZipArchiveHandle;
@@ -136,12 +139,24 @@ public:
         uint32_t* pCrc32) const;
 
     /*
-     * Create a new FileMap object that maps a subset of the archive.  For
+     * Create a new FileMap object that maps a subset of the archive. For
      * an uncompressed entry this effectively provides a pointer to the
      * actual data, for a compressed entry this provides the input buffer
      * for inflate().
+     *
+     * Use this function if the archive can never reside on IncFs.
      */
     FileMap* createEntryFileMap(ZipEntryRO entry) const;
+
+    /*
+     * Create a new incfs::IncFsFileMap object that maps a subset of the archive. For
+     * an uncompressed entry this effectively provides a pointer to the
+     * actual data, for a compressed entry this provides the input buffer
+     * for inflate().
+     *
+     * Use this function if the archive can potentially reside on IncFs.
+     */
+    std::optional<incfs::IncFsFileMap> createEntryIncFsFileMap(ZipEntryRO entry) const;
 
     /*
      * Uncompress the data into a buffer.  Depending on the compression

@@ -19,10 +19,12 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.IntentResolver;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
 
 public class PersistentPreferredIntentResolver
-        extends IntentResolver<PersistentPreferredActivity, PersistentPreferredActivity> {
+        extends WatchedIntentResolver<PersistentPreferredActivity, PersistentPreferredActivity>
+        implements Snappable {
     @Override
     protected PersistentPreferredActivity[] newArray(int size) {
         return new PersistentPreferredActivity[size];
@@ -30,11 +32,48 @@ public class PersistentPreferredIntentResolver
 
     @Override
     protected IntentFilter getIntentFilter(@NonNull PersistentPreferredActivity input) {
-        return input;
+        return input.getIntentFilter();
     }
 
     @Override
     protected boolean isPackageForFilter(String packageName, PersistentPreferredActivity filter) {
         return packageName.equals(filter.mComponent.getPackageName());
+    }
+
+    public PersistentPreferredIntentResolver() {
+        super();
+        mSnapshot = makeCache();
+    }
+
+    // Take the snapshot of F
+    protected PersistentPreferredActivity snapshot(PersistentPreferredActivity f) {
+        return (f == null) ? null : f.snapshot();
+    }
+
+    // Copy constructor used only to create a snapshot.
+    private PersistentPreferredIntentResolver(PersistentPreferredIntentResolver f) {
+        copyFrom(f);
+        mSnapshot = new SnapshotCache.Sealed();
+    }
+
+    // The cache for snapshots, so they are not rebuilt if the base object has not
+    // changed.
+    final SnapshotCache<PersistentPreferredIntentResolver> mSnapshot;
+
+    private SnapshotCache makeCache() {
+        return new SnapshotCache<PersistentPreferredIntentResolver>(this, this) {
+            @Override
+            public PersistentPreferredIntentResolver createSnapshot() {
+                return new PersistentPreferredIntentResolver(mSource);
+            }};
+    }
+
+    /**
+     * Return a snapshot of the current object.  The snapshot is a read-only copy suitable
+     * for read-only methods.
+     * @return A snapshot of the current object.
+     */
+    public PersistentPreferredIntentResolver snapshot() {
+        return mSnapshot.snapshot();
     }
 }

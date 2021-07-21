@@ -38,7 +38,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.text.format.DateUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.Log;
@@ -188,7 +190,7 @@ public final class CalendarContract {
      * notified when there is a change in the managed profile calendar provider.
      *
      * <p>Throw UnsupportedOperationException if another profile doesn't exist or is disabled, or
-     * if the calling package is not whitelisted to access cross-profile calendar, or if the
+     * if the calling package is not allowlisted to access cross-profile calendar, or if the
      * feature has been disabled by the user in Settings.
      *
      * @see Events#ENTERPRISE_CONTENT_URI
@@ -1825,7 +1827,7 @@ public final class CalendarContract {
          *
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static String[] PROVIDER_WRITABLE_COLUMNS = new String[] {
                 ACCOUNT_NAME,
                 ACCOUNT_TYPE,
@@ -1860,7 +1862,7 @@ public final class CalendarContract {
          *
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         @TestApi
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             _SYNC_ID,
@@ -2512,7 +2514,7 @@ public final class CalendarContract {
          *         if no such alarm exists.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final long findNextAlarmTime(ContentResolver cr, long millis) {
             String selection = ALARM_TIME + ">=" + millis;
             // TODO: construct an explicit SQL query so that we can add
@@ -2546,7 +2548,7 @@ public final class CalendarContract {
          * @param manager the AlarmManager
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final void rescheduleMissedAlarms(ContentResolver cr,
                 Context context, AlarmManager manager) {
             // Get all the alerts that have been scheduled but have not fired
@@ -2603,7 +2605,7 @@ public final class CalendarContract {
          *            epoch
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static void scheduleAlarm(Context context, AlarmManager manager, long alarmTime) {
             if (DEBUG) {
                 String schedTime = TimeMigrationUtils.formatMillisWithFixedFormat(alarmTime);
@@ -2618,7 +2620,14 @@ public final class CalendarContract {
             intent.setData(ContentUris.withAppendedId(CalendarContract.CONTENT_URI, alarmTime));
             intent.putExtra(ALARM_TIME, alarmTime);
             intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+            // Disable strict mode VM policy violations temporarily for intents that contain a
+            // content URI but don't have FLAG_GRANT_READ_URI_PERMISSION.
+            StrictMode.VmPolicy oldVmPolicy = StrictMode.allowVmViolations();
+            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
+                    PendingIntent.FLAG_IMMUTABLE);
+            StrictMode.setVmPolicy(oldVmPolicy);
+
             manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, pi);
         }
 

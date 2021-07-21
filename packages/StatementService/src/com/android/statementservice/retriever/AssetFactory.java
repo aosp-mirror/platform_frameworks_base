@@ -16,12 +16,14 @@
 
 package com.android.statementservice.retriever;
 
+import com.android.statementservice.utils.StatementUtils;
+
 import org.json.JSONObject;
 
 /**
  * Factory to create asset from JSON string.
  */
-/* package private */ final class AssetFactory {
+public final class AssetFactory {
 
     private static final String FIELD_NOT_STRING_FORMAT_STRING = "Expected %s to be string.";
 
@@ -34,15 +36,15 @@ import org.json.JSONObject;
      */
     public static AbstractAsset create(JSONObject asset)
             throws AssociationServiceException {
-        String namespace = asset.optString(Utils.NAMESPACE_FIELD, null);
+        String namespace = asset.optString(StatementUtils.NAMESPACE_FIELD, null);
         if (namespace == null) {
             throw new AssociationServiceException(String.format(
-                    FIELD_NOT_STRING_FORMAT_STRING, Utils.NAMESPACE_FIELD));
+                    FIELD_NOT_STRING_FORMAT_STRING, StatementUtils.NAMESPACE_FIELD));
         }
 
-        if (namespace.equals(Utils.NAMESPACE_WEB)) {
+        if (namespace.equals(StatementUtils.NAMESPACE_WEB)) {
             return WebAsset.create(asset);
-        } else if (namespace.equals(Utils.NAMESPACE_ANDROID_APP)) {
+        } else if (namespace.equals(StatementUtils.NAMESPACE_ANDROID_APP)) {
             return AndroidAppAsset.create(asset);
         } else {
             throw new AssociationServiceException("Namespace " + namespace + " is not supported.");

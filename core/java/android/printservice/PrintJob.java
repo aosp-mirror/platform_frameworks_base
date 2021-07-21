@@ -27,6 +27,7 @@ import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.android.internal.util.Preconditions;
 
 /**
@@ -436,7 +437,7 @@ public final class PrintJob {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

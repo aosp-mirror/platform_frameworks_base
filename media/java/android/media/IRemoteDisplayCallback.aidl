@@ -22,6 +22,6 @@ import android.media.RemoteDisplayState;
  * {@hide}
  */
 oneway interface IRemoteDisplayCallback {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onStateChanged(in RemoteDisplayState state);
 }

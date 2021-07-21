@@ -204,7 +204,7 @@ public class DynamicCodeLoggingService extends JobService {
             //
             // A typical message might look like this:
             // type=1400 audit(0.0:521): avc: granted { execute } for comm="executable"
-            //  path="/data/data/com.dummy.app/executable" dev="sda13" ino=1655302
+            //  path="/data/data/com.placeholder.app/executable" dev="sda13" ino=1655302
             //  scontext=u:r:untrusted_app_27:s0:c66,c257,c512,c768
             //  tcontext=u:object_r:app_data_file:s0:c66,c257,c512,c768 tclass=file
             //
@@ -234,7 +234,7 @@ public class DynamicCodeLoggingService extends JobService {
 
                 List<EventLog.Event> events = new ArrayList<>();
                 EventLog.readEvents(tags, events);
-
+                Matcher matcher = EXECUTE_NATIVE_AUDIT_PATTERN.matcher("");
                 for (int i = 0; i < events.size(); ++i) {
                     if (mAuditWatchingStopRequested) {
                         Log.w(TAG, "Stopping AuditWatchingJob run at scheduler request");
@@ -259,7 +259,9 @@ public class DynamicCodeLoggingService extends JobService {
 
                     // And then use a regular expression to verify it's one of the messages we're
                     // interested in and to extract the path of the file being loaded.
-                    Matcher matcher = EXECUTE_NATIVE_AUDIT_PATTERN.matcher(message);
+                    // Reuse the Matcher to avoid unnecessary string garbage caused by libcore's
+                    // regex matching.
+                    matcher.reset(message);
                     if (!matcher.matches()) {
                         continue;
                     }

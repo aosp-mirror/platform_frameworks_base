@@ -113,6 +113,7 @@ public class DctConstants {
     public static final int EVENT_NR_TIMER_WATCHDOG = BASE + 53;
     public static final int EVENT_CARRIER_CONFIG_CHANGED = BASE + 54;
     public static final int EVENT_SIM_STATE_UPDATED = BASE + 55;
+    public static final int EVENT_APN_UNTHROTTLED = BASE + 56;
 
     /***** Constants *****/
 
@@ -124,7 +125,9 @@ public class DctConstants {
     public static final String PROVISIONING_URL_KEY = "provisioningUrl";
     public static final String BANDWIDTH_SOURCE_MODEM_KEY = "modem";
     public static final String BANDWIDTH_SOURCE_CARRIER_CONFIG_KEY = "carrier_config";
+    public static final String BANDWIDTH_SOURCE_BANDWIDTH_ESTIMATOR_KEY = "bandwidth_estimator";
     public static final String RAT_NAME_LTE = "LTE";
     public static final String RAT_NAME_NR_NSA = "NR_NSA";
     public static final String RAT_NAME_NR_NSA_MMWAVE = "NR_NSA_MMWAVE";
+    public static final String RAT_NAME_NR_SA_MMWAVE = "NR_MMWAVE";
 }

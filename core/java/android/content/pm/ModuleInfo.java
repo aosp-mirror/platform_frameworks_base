@@ -130,7 +130,7 @@ public final class ModuleInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof ModuleInfo)) {
             return false;
         }

@@ -22,13 +22,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.HandlerThread;
 import android.perftests.utils.ManualBenchmarkState;
-import android.perftests.utils.PerfManualStatusReporter;
 import android.perftests.utils.TraceMarkParser;
 import android.perftests.utils.TraceMarkParser.TraceMarkLine;
 import android.perftests.utils.TraceMarkParser.TraceMarkSlice;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.perftests.am.util.AtraceUtils;
 import com.android.frameworks.perftests.am.util.TargetPackageUtils;
@@ -36,10 +36,8 @@ import com.android.frameworks.perftests.am.util.Utils;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +51,9 @@ import java.util.List;
  * into the stats; when there are enough samples in the stats, the test will
  * stop and output the mean/stddev time spent on the updateOomAdjLocked.
  */
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @LargeTest
-public final class OomAdjPerfTest {
+public final class OomAdjPerfTest extends BasePerfTest {
     private static final String TAG = "OomAdjPerfTest";
     private static final boolean VERBOSE = true;
 
@@ -74,8 +72,6 @@ public final class OomAdjPerfTest {
     private static final String ATRACE_CATEGORY = "am";
     private static final String ATRACE_OOMADJ_PREFIX = "updateOomAdj_";
 
-    @Rule
-    public PerfManualStatusReporter mPerfManualStatusReporter = new PerfManualStatusReporter();
     private TraceMarkParser mTraceMarkParser = new TraceMarkParser(this::shouldFilterTraceLine);
     private final ArrayList<Long> mDurations = new ArrayList<Long>();
     private Context mContext;

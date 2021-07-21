@@ -182,6 +182,24 @@ public class UsbHandlerTest {
 
     @SmallTest
     @Test
+    public void setFunctionsNcmAndRndis() {
+        final long rndisPlusNcm = UsbManager.FUNCTION_RNDIS | UsbManager.FUNCTION_NCM;
+
+        mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_SET_CURRENT_FUNCTIONS,
+                UsbManager.FUNCTION_NCM));
+        assertEquals(UsbManager.FUNCTION_NCM, mUsbHandler.getEnabledFunctions() & rndisPlusNcm);
+
+        mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_SET_CURRENT_FUNCTIONS,
+                rndisPlusNcm));
+        assertEquals(rndisPlusNcm, mUsbHandler.getEnabledFunctions() & rndisPlusNcm);
+
+        mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_SET_CURRENT_FUNCTIONS,
+                UsbManager.FUNCTION_NCM));
+        assertEquals(UsbManager.FUNCTION_NCM, mUsbHandler.getEnabledFunctions() & rndisPlusNcm);
+    }
+
+    @SmallTest
+    @Test
     public void enableAdb() {
         sendBootCompleteMessages(mUsbHandler);
         Message msg = mUsbHandler.obtainMessage(MSG_ENABLE_ADB);

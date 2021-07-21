@@ -41,7 +41,12 @@ public class NotificationChannelLoggerImpl implements NotificationChannelLogger 
                 /* String package_name */ pkg,
                 /* int32 channel_id_hash */ NotificationChannelLogger.getIdHash(channel),
                 /* int old_importance*/ oldImportance,
-                /* int importance*/ newImportance);
+                /* int importance*/ newImportance,
+                /* bool is_conversation */ channel.isConversation(),
+                /* int32 conversation_id_hash */
+                NotificationChannelLogger.getConversationIdHash(channel),
+                /* bool is_conversation_demoted */ channel.isDemoted(),
+                /* bool is_conversation_priority */ channel.isImportantConversation());
     }
 
     @Override
@@ -53,7 +58,11 @@ public class NotificationChannelLoggerImpl implements NotificationChannelLogger 
                 /* String package_name */ pkg,
                 /* int32 channel_id_hash */ NotificationChannelLogger.getIdHash(channelGroup),
                 /* int old_importance*/ NotificationChannelLogger.getImportance(wasBlocked),
-                /* int importance*/ NotificationChannelLogger.getImportance(channelGroup));
+                /* int importance*/ NotificationChannelLogger.getImportance(channelGroup),
+                /* bool is_conversation */ false,
+                /* int32 conversation_id_hash */ 0,
+                /* bool is_conversation_demoted */ false,
+                /* bool is_conversation_priority */ false);
     }
 
     @Override

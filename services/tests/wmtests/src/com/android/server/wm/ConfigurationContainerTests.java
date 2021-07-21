@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -324,6 +325,71 @@ public class ConfigurationContainerTests {
         assertEquals(100, listener.mOverrideConfiguration.smallestScreenWidthDp);
     }
 
+    @Test
+    public void testSetMaxBoundsByHierarchy() {
+        final TestConfigurationContainer root =
+                new TestConfigurationContainer(true /* providesMaxBounds */);
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        final TestConfigurationContainer child = new TestConfigurationContainer();
+        root.addChild(child);
+
+        root.setBounds(bounds);
+
+        assertEquals(bounds, root.getBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getBounds());
+        assertEquals(bounds, child.getBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getBounds());
+
+        assertEquals(bounds, root.getMaxBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getMaxBounds());
+        assertEquals(bounds, child.getMaxBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getMaxBounds());
+    }
+
+    @Test
+    public void testSetBoundsNotOverrideMaxBounds() {
+        final TestConfigurationContainer root = new TestConfigurationContainer();
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        final TestConfigurationContainer child = new TestConfigurationContainer();
+        root.addChild(child);
+
+        root.setBounds(bounds);
+
+        assertEquals(bounds, root.getBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getBounds());
+        assertEquals(bounds, child.getBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getBounds());
+
+        assertTrue(root.getMaxBounds().isEmpty());
+        assertTrue(root.getConfiguration().windowConfiguration.getMaxBounds().isEmpty());
+        assertTrue(child.getMaxBounds().isEmpty());
+        assertTrue(child.getConfiguration().windowConfiguration.getMaxBounds().isEmpty());
+    }
+
+    @Test
+    public void testOnRequestedOverrideConfigurationChangedOverrideMaxBounds() {
+        final TestConfigurationContainer root =
+                new TestConfigurationContainer(true /* providesMaxBounds */);
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        final TestConfigurationContainer child = new TestConfigurationContainer();
+        root.addChild(child);
+        final Configuration configuration = new Configuration();
+        configuration.windowConfiguration.setBounds(bounds);
+
+        root.onRequestedOverrideConfigurationChanged(configuration);
+
+        assertEquals(bounds, root.getBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getBounds());
+        assertEquals(bounds, child.getBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getBounds());
+
+        assertEquals(bounds, root.getMaxBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getMaxBounds());
+        assertEquals(bounds, child.getMaxBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getMaxBounds());
+    }
+
+
     /**
      * Contains minimal implementation of {@link ConfigurationContainer}'s abstract behavior needed
      * for testing.
@@ -332,6 +398,14 @@ public class ConfigurationContainerTests {
             extends ConfigurationContainer<TestConfigurationContainer> {
         private List<TestConfigurationContainer> mChildren = new ArrayList<>();
         private TestConfigurationContainer mParent;
+
+        private boolean mProvidesMaxBounds = false;
+
+        TestConfigurationContainer() {}
+
+        TestConfigurationContainer(boolean providesMaxBounds) {
+            mProvidesMaxBounds = providesMaxBounds;
+        }
 
         TestConfigurationContainer addChild(TestConfigurationContainer childContainer) {
             final ConfigurationContainer oldParent = childContainer.getParent();
@@ -368,6 +442,11 @@ public class ConfigurationContainerTests {
         @Override
         protected ConfigurationContainer getParent() {
             return mParent;
+        }
+
+        @Override
+        public boolean providesMaxBounds() {
+            return mProvidesMaxBounds;
         }
     }
 

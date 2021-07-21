@@ -1,0 +1,51 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.app.time;
+
+import "frameworks/base/core/proto/android/app/time_zone_detector.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "LocationTimeZoneManagerProto";
+
+// Represents the state of the LocationTimeZoneManagerService for use in tests.
+message LocationTimeZoneManagerServiceStateProto {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional GeolocationTimeZoneSuggestionProto last_suggestion = 1;
+  repeated TimeZoneProviderStateProto primary_provider_states = 2;
+  repeated TimeZoneProviderStateProto secondary_provider_states = 3;
+}
+
+// The state tracked for a LocationTimeZoneProvider.
+message TimeZoneProviderStateProto {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional TimeZoneProviderStateEnum state = 1;
+}
+
+// The state enum for LocationTimeZoneProviders.
+enum TimeZoneProviderStateEnum {
+  TIME_ZONE_PROVIDER_STATE_UNKNOWN = 0;
+  TIME_ZONE_PROVIDER_STATE_INITIALIZING = 1;
+  TIME_ZONE_PROVIDER_STATE_CERTAIN = 2;
+  TIME_ZONE_PROVIDER_STATE_UNCERTAIN = 3;
+  TIME_ZONE_PROVIDER_STATE_DISABLED = 4;
+  TIME_ZONE_PROVIDER_STATE_PERM_FAILED = 5;
+  TIME_ZONE_PROVIDER_STATE_DESTROYED = 6;
+}

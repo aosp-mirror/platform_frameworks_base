@@ -292,7 +292,7 @@ public final class SyncResult implements Parcelable {
      * @return debugging string.
      */
     public String toDebugString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         if (fullSyncRequested) {
             sb.append("f1");

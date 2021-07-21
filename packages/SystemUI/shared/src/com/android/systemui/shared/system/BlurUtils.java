@@ -16,15 +16,12 @@
 
 package com.android.systemui.shared.system;
 
+import static android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED;
+
 import android.app.ActivityManager;
 import android.os.SystemProperties;
 
 public abstract class BlurUtils {
-
-    private static boolean mBlurSupportedSysProp = SystemProperties
-            .getBoolean("ro.surface_flinger.supports_background_blur", false);
-    private static boolean mBlurDisabledSysProp = SystemProperties
-            .getBoolean("persist.sys.sf.disable_blurs", false);
 
     /**
      * If this device can render blurs.
@@ -32,6 +29,7 @@ public abstract class BlurUtils {
      * @return {@code true} when supported.
      */
     public static boolean supportsBlursOnWindows() {
-        return mBlurSupportedSysProp && !mBlurDisabledSysProp && ActivityManager.isHighEndGfx();
+        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx()
+                && !SystemProperties.getBoolean("persist.sysui.disableBlur", false);
     }
 }

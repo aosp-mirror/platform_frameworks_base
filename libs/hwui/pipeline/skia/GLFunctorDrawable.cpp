@@ -15,30 +15,20 @@
  */
 
 #include "GLFunctorDrawable.h"
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <private/hwui/DrawGlInfo.h>
 #include "FunctorDrawable.h"
-#include "GlFunctorLifecycleListener.h"
 #include "GrBackendSurface.h"
-#include "GrRenderTarget.h"
-#include "GrRenderTargetContext.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
 #include "SkRect.h"
-#include "include/private/SkM44.h"
+#include "SkM44.h"
+#include "utils/GLUtils.h"
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
-
-GLFunctorDrawable::~GLFunctorDrawable() {
-    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
-        if (lp->listener) {
-            lp->listener->onGlFunctorReleased(lp->functor);
-        }
-    }
-}
 
 static void setScissor(int viewportHeight, const SkIRect& clip) {
     SkASSERT(!clip.isEmpty());
@@ -49,23 +39,18 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
 }
 
 static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
-    GrRenderTargetContext* renderTargetContext =
-            canvas->internal_private_accessTopLayerRenderTargetContext();
-    LOG_ALWAYS_FATAL_IF(!renderTargetContext, "Failed to retrieve GrRenderTargetContext");
-
-    GrRenderTarget* renderTarget = renderTargetContext->accessRenderTarget();
-    LOG_ALWAYS_FATAL_IF(!renderTarget, "accessRenderTarget failed");
-
+    GrBackendRenderTarget renderTarget = canvas->topLayerBackendRenderTarget();
     GrGLFramebufferInfo fboInfo;
-    LOG_ALWAYS_FATAL_IF(!renderTarget->getBackendRenderTarget().getGLFramebufferInfo(&fboInfo),
+    LOG_ALWAYS_FATAL_IF(!renderTarget.getGLFramebufferInfo(&fboInfo),
         "getGLFrameBufferInfo failed");
 
     *outFboID = fboInfo.fFBOID;
-    *outFboSize = SkISize::Make(renderTargetContext->width(), renderTargetContext->height());
+    *outFboSize = renderTarget.dimensions();
 }
 
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
-    if (canvas->getGrContext() == nullptr) {
+    GrDirectContext* directContext = GrAsDirectContext(canvas->recordingContext());
+    if (directContext == nullptr) {
         // We're dumping a picture, render a light-blue rectangle instead
         // TODO: Draw the WebView text on top? Seemingly complicated as SkPaint doesn't
         // seem to have a default typeface that works. We only ever use drawGlyphs, which
@@ -83,9 +68,9 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     SkISize fboSize;
     GetFboDetails(canvas, &fboID, &fboSize);
 
-    SkIRect surfaceBounds = canvas->internal_private_getTopLayerBounds();
+    SkIRect surfaceBounds = canvas->topLayerBounds();
     SkIRect clipBounds = canvas->getDeviceClipBounds();
-    SkM44 mat4(canvas->experimental_getLocalToDevice());
+    SkM44 mat4(canvas->getLocalToDevice());
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
 
@@ -96,7 +81,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         SkImageInfo surfaceInfo =
                 canvas->imageInfo().makeWH(clipBounds.width(), clipBounds.height());
         tmpSurface =
-                SkSurface::MakeRenderTarget(canvas->getGrContext(), SkBudgeted::kYes, surfaceInfo);
+                SkSurface::MakeRenderTarget(directContext, SkBudgeted::kYes, surfaceInfo);
         tmpSurface->getCanvas()->clear(SK_ColorTRANSPARENT);
 
         GrGLFramebufferInfo fboInfo;
@@ -150,7 +135,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
         // notify Skia that we just updated the FBO and stencil
         const uint32_t grState = kStencil_GrGLBackendState | kRenderTarget_GrGLBackendState;
-        canvas->getGrContext()->resetContext(grState);
+        directContext->resetContext(grState);
 
         SkCanvas* tmpCanvas = canvas;
         if (tmpSurface) {
@@ -186,11 +171,9 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         setScissor(info.height, clipRegion.getBounds());
     }
 
-    if (mAnyFunctor.index() == 0) {
-        std::get<0>(mAnyFunctor).handle->drawGl(info);
-    } else {
-        (*(std::get<1>(mAnyFunctor).functor))(DrawGlInfo::kModeDraw, &info);
-    }
+    // WebView may swallow GL errors, so catch them here
+    GL_CHECKPOINT(LOW);
+    mWebViewHandle->drawGl(info);
 
     if (clearStencilAfterFunctor) {
         // clear stencil buffer as it may be used by Skia
@@ -201,7 +184,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         glClear(GL_STENCIL_BUFFER_BIT);
     }
 
-    canvas->getGrContext()->resetContext();
+    directContext->resetContext();
 
     // if there were unclipped save layers involved we draw our offscreen surface to the canvas
     if (tmpSurface) {
@@ -214,7 +197,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         canvas->concat(invertedMatrix);
 
         const SkIRect deviceBounds = canvas->getDeviceClipBounds();
-        tmpSurface->draw(canvas, deviceBounds.fLeft, deviceBounds.fTop, nullptr);
+        tmpSurface->draw(canvas, deviceBounds.fLeft, deviceBounds.fTop);
     }
 }
 

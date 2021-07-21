@@ -1,8 +1,8 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -16,11 +16,11 @@ import android.os.Parcelable;
  */
 public class AppTransitionAnimationSpec implements Parcelable {
     public final int taskId;
-    public final GraphicBuffer buffer;
+    public final HardwareBuffer buffer;
     public final Rect rect;
 
     @UnsupportedAppUsage
-    public AppTransitionAnimationSpec(int taskId, GraphicBuffer buffer, Rect rect) {
+    public AppTransitionAnimationSpec(int taskId, HardwareBuffer buffer, Rect rect) {
         this.taskId = taskId;
         this.rect = rect;
         this.buffer = buffer;
@@ -28,8 +28,8 @@ public class AppTransitionAnimationSpec implements Parcelable {
 
     public AppTransitionAnimationSpec(Parcel in) {
         taskId = in.readInt();
-        rect = in.readParcelable(null);
-        buffer = in.readParcelable(null);
+        rect = in.readTypedObject(Rect.CREATOR);
+        buffer = in.readTypedObject(HardwareBuffer.CREATOR);
     }
 
     @Override
@@ -40,8 +40,8 @@ public class AppTransitionAnimationSpec implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(taskId);
-        dest.writeParcelable(rect, 0 /* flags */);
-        dest.writeParcelable(buffer, 0);
+        dest.writeTypedObject(rect, 0 /* flags */);
+        dest.writeTypedObject(buffer, 0 /* flags */);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AppTransitionAnimationSpec> CREATOR

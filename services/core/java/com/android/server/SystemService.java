@@ -70,10 +70,18 @@ public abstract class SystemService {
     /** @hide */
     protected static final boolean DEBUG_USER = false;
 
-    /*
+    /**
      * The earliest boot phase the system send to system services on boot.
      */
     public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100;
+
+    /**
+     * Boot phase that blocks on SensorService availability. The service gets started
+     * asynchronously since it may take awhile to actually finish initializing.
+     *
+     * @hide
+     */
+    public static final int PHASE_WAIT_FOR_SENSOR_SERVICE = 200;
 
     /**
      * After receiving this boot phase, services can obtain lock settings data.
@@ -132,45 +140,89 @@ public abstract class SystemService {
      */
     @SystemApi(client = Client.SYSTEM_SERVER)
     public static final class TargetUser {
-        @NonNull
-        private final UserInfo mUserInfo;
+
+        // NOTE: attributes below must be immutable while ther user is running (i.e., from the
+        // moment it's started until after it's shutdown).
+        private final @UserIdInt int mUserId;
+        private final boolean mFull;
+        private final boolean mManagedProfile;
+        private final boolean mPreCreated;
 
         /** @hide */
         public TargetUser(@NonNull UserInfo userInfo) {
-            mUserInfo = userInfo;
+            mUserId = userInfo.id;
+            mFull = userInfo.isFull();
+            mManagedProfile = userInfo.isManagedProfile();
+            mPreCreated = userInfo.preCreated;
         }
 
         /**
-         * @return The information about the user. <b>NOTE: </b> this is a "live" object
-         * referenced by {@link UserManagerService} and hence should not be modified.
+         * Checks if the target user is {@link UserInfo#isFull() full}.
          *
          * @hide
          */
-        @NonNull
-        public UserInfo getUserInfo() {
-            return mUserInfo;
+        public boolean isFull() {
+            return mFull;
         }
 
         /**
-         * @return the target {@link UserHandle}.
+         * Checks if the target user is a managed profile.
+         *
+         * @hide
+         */
+        public boolean isManagedProfile() {
+            return mManagedProfile;
+        }
+
+        /**
+         * Checks if the target user is a pre-created user.
+         *
+         * @hide
+         */
+        public boolean isPreCreated() {
+            return mPreCreated;
+        }
+
+        /**
+         * Gets the target user's {@link UserHandle}.
          */
         @NonNull
         public UserHandle getUserHandle() {
-            return mUserInfo.getUserHandle();
+            return UserHandle.of(mUserId);
         }
 
         /**
-         * @return the integer user id
+         * Gets the target user's id.
          *
          * @hide
          */
-        public int getUserIdentifier() {
-            return mUserInfo.id;
+        public @UserIdInt int getUserIdentifier() {
+            return mUserId;
         }
 
         @Override
         public String toString() {
-            return Integer.toString(getUserIdentifier());
+            return Integer.toString(mUserId);
+        }
+
+        /**
+         * @hide
+         */
+        public void dump(@NonNull PrintWriter pw) {
+            pw.print(getUserIdentifier());
+
+            if (!isFull() && !isManagedProfile()) return;
+
+            pw.print('(');
+            boolean addComma = false;
+            if (isFull()) {
+                pw.print("full");
+            }
+            if (isManagedProfile()) {
+                if (addComma) pw.print(',');
+                pw.print("mp");
+            }
+            pw.print(')');
         }
     }
 
@@ -263,26 +315,6 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onUserStarting(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStartUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStarting(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStartUser(@NonNull UserInfo userInfo) {
-        onStartUser(userInfo.id);
-    }
-
-    /**
      * Called when a new user is starting, for system services to initialize any per-user
      * state they maintain for running users.
      *
@@ -292,27 +324,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStarting(@NonNull TargetUser user) {
-        onStartUser(user.getUserInfo());
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserUnlocking(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onUnlockUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserUnlocking(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
-        onUnlockUser(userInfo.id);
     }
 
     /**
@@ -333,7 +344,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserUnlocking(@NonNull TargetUser user) {
-        onUnlockUser(user.getUserInfo());
     }
 
     /**
@@ -345,26 +355,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserUnlocked(@NonNull TargetUser user) {
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserSwitching(TargetUser, TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onSwitchUser(@UserIdInt int toUserId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserSwitching(TargetUser, TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onSwitchUser(@Nullable UserInfo from, @NonNull UserInfo to) {
-        onSwitchUser(to.id);
     }
 
     /**
@@ -382,28 +372,6 @@ public abstract class SystemService {
      * @param to the user switching to
      */
     public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
-        onSwitchUser((from == null ? null : from.getUserInfo()), to.getUserInfo());
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopping(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStopUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopping(TargetUser)} instead
-     * (which by default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onStopUser(@NonNull UserInfo user) {
-        onStopUser(user.id);
-
     }
 
     /**
@@ -420,27 +388,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStopping(@NonNull TargetUser user) {
-        onStopUser(user.getUserInfo());
-    }
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopped(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onCleanupUser(@UserIdInt int userId) {}
-
-    /**
-     * @deprecated subclasses should extend {@link #onUserStopped(TargetUser)} instead (which by
-     * default calls this method).
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onCleanupUser(@NonNull UserInfo user) {
-        onCleanupUser(user.id);
     }
 
     /**
@@ -454,7 +401,6 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStopped(@NonNull TargetUser user) {
-        onCleanupUser(user.getUserInfo());
     }
 
     /**

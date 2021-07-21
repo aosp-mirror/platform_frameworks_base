@@ -24,7 +24,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -70,7 +72,6 @@ public interface RegistrationManager {
      */
     int REGISTRATION_STATE_REGISTERED = 2;
 
-
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
     // and WWAN are more accurate constants.
@@ -78,12 +79,50 @@ public interface RegistrationManager {
             new HashMap<Integer, Integer>() {{
                 // Map NONE to -1 to make sure that we handle the REGISTRATION_TECH_NONE
                 // case, since it is defined.
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE,
+                        AccessNetworkConstants.TRANSPORT_TYPE_INVALID);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_NR,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
                         AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+                /* As the cross sim will be using ePDG tunnel over internet, it behaves
+                   like IWLAN in most cases. Hence setting the access type as IWLAN
+                 */
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
             }};
+
+    /** @hide */
+    @NonNull
+    static String registrationStateToString(
+            final @NetworkRegistrationInfo.RegistrationState int value) {
+        switch (value) {
+            case REGISTRATION_STATE_NOT_REGISTERED:
+                return "REGISTRATION_STATE_NOT_REGISTERED";
+            case REGISTRATION_STATE_REGISTERING:
+                return "REGISTRATION_STATE_REGISTERING";
+            case REGISTRATION_STATE_REGISTERED:
+                return "REGISTRATION_STATE_REGISTERED";
+            default:
+                return Integer.toString(value);
+        }
+    }
+
+    /**
+     * @param regtech The registration technology.
+     * @return The Access Network type from registration technology.
+     * @hide
+     */
+    static int getAccessType(int regtech) {
+        if (!RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.containsKey(regtech)) {
+            Log.w("RegistrationManager", "getAccessType - invalid regType returned: "
+                    + regtech);
+            return AccessNetworkConstants.TRANSPORT_TYPE_INVALID;
+        }
+        return RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.get(regtech);
+    }
 
     /**
      * Callback class for receiving IMS network Registration callback events.
@@ -96,32 +135,31 @@ public interface RegistrationManager {
 
             private final RegistrationCallback mLocalCallback;
             private Executor mExecutor;
+            private Bundle mBundle = new Bundle();
 
             RegistrationBinder(RegistrationCallback localCallback) {
                 mLocalCallback = localCallback;
             }
 
             @Override
-            public void onRegistered(int imsRadioTech) {
+            public void onRegistered(ImsRegistrationAttributes attr) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() ->
-                            mLocalCallback.onRegistered(getAccessType(imsRadioTech)));
+                    mExecutor.execute(() -> mLocalCallback.onRegistered(attr));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
             }
 
             @Override
-            public void onRegistering(int imsRadioTech) {
+            public void onRegistering(ImsRegistrationAttributes attr) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() ->
-                            mLocalCallback.onRegistering(getAccessType(imsRadioTech)));
+                    mExecutor.execute(() -> mLocalCallback.onRegistering(attr));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -131,7 +169,7 @@ public interface RegistrationManager {
             public void onDeregistered(ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onUnregistered(info));
                 } finally {
@@ -143,7 +181,7 @@ public interface RegistrationManager {
             public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
                             getAccessType(imsRadioTech), info));
@@ -155,7 +193,7 @@ public interface RegistrationManager {
             public void onSubscriberAssociatedUriChanged(Uri[] uris) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onSubscriberAssociatedUriChanged(uris));
                 } finally {
@@ -166,15 +204,6 @@ public interface RegistrationManager {
             private void setExecutor(Executor executor) {
                 mExecutor = executor;
             }
-
-            private static int getAccessType(int regType) {
-                if (!RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.containsKey(regType)) {
-                    Log.w("RegistrationManager", "RegistrationBinder - invalid regType returned: "
-                            + regType);
-                    return -1;
-                }
-                return RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.get(regType);
-            }
         }
 
         private final RegistrationBinder mBinder = new RegistrationBinder(this);
@@ -183,16 +212,40 @@ public interface RegistrationManager {
          * Notifies the framework when the IMS Provider is registered to the IMS network.
          *
          * @param imsTransportType the radio access technology.
+         * @deprecated Use {@link #onRegistered(ImsRegistrationAttributes)} instead.
          */
+        @Deprecated
         public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is registered to the IMS network
+         * with corresponding attributes.
+         *
+         * @param attributes The attributes associated with this IMS registration.
+         */
+        public void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
+            // Default impl to keep backwards compatibility with old implementations
+            onRegistered(attributes.getTransportType());
         }
 
         /**
          * Notifies the framework when the IMS Provider is trying to register the IMS network.
          *
          * @param imsTransportType the radio access technology.
+         * @deprecated Use {@link #onRegistering(ImsRegistrationAttributes)} instead.
          */
         public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType) {
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is trying to register the IMS network.
+         *
+         * @param attributes The attributes associated with this IMS registration.
+         */
+        public void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
+            // Default impl to keep backwards compatibility with old implementations
+            onRegistering(attributes.getTransportType());
         }
 
         /**

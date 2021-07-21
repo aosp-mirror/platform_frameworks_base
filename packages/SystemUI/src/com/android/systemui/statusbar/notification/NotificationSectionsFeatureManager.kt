@@ -61,10 +61,8 @@ class NotificationSectionsFeatureManager @Inject constructor(
             isFilteringEnabled() && !isMediaControlsEnabled() ->
                 intArrayOf(BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE, BUCKET_PEOPLE,
                         BUCKET_ALERTING, BUCKET_SILENT)
-            NotificationUtils.useNewInterruptionModel(context) ->
-                intArrayOf(BUCKET_ALERTING, BUCKET_SILENT)
             else ->
-                intArrayOf(BUCKET_ALERTING)
+                intArrayOf(BUCKET_ALERTING, BUCKET_SILENT)
         }
     }
 

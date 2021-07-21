@@ -20,6 +20,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import com.android.net.IProxyService;
+
 import com.google.android.collect.Lists;
 
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class PacProxySelector extends ProxySelector {
                 ServiceManager.getService(PROXY_SERVICE));
         if (mProxyService == null) {
             // Added because of b10267814 where mako is restarting.
-            Log.e(TAG, "PacManager: no proxy service");
+            Log.e(TAG, "PacProxyService: no proxy service");
         }
         mDefaultList = Lists.newArrayList(java.net.Proxy.NO_PROXY);
     }

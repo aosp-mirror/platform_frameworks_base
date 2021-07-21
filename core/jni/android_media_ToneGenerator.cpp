@@ -23,6 +23,7 @@
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "core_jni_helpers.h"
 
 #include <utils/Log.h>
@@ -85,9 +86,12 @@ static void android_media_ToneGenerator_release(JNIEnv *env, jobject thiz) {
     delete lpToneGen;
 }
 
-static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
-        jint streamType, jint volume) {
-    ToneGenerator *lpToneGen = new ToneGenerator((audio_stream_type_t) streamType, AudioSystem::linearToLog(volume), true);
+static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz, jint streamType,
+                                                     jint volume, jstring opPackageName) {
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
+    ToneGenerator *lpToneGen =
+            new ToneGenerator((audio_stream_type_t)streamType, AudioSystem::linearToLog(volume),
+                              true /*threadCanCallJava*/, opPackageNameStr.c_str());
 
     env->SetLongField(thiz, fields.context, 0);
 
@@ -123,15 +127,14 @@ static void android_media_ToneGenerator_native_finalize(JNIEnv *env,
 
 // ----------------------------------------------------------------------------
 
-static const JNINativeMethod gMethods[] = {
-    { "startTone", "(II)Z", (void *)android_media_ToneGenerator_startTone },
-    { "stopTone", "()V", (void *)android_media_ToneGenerator_stopTone },
-    { "getAudioSessionId", "()I", (void *)android_media_ToneGenerator_getAudioSessionId},
-    { "release", "()V", (void *)android_media_ToneGenerator_release },
-    { "native_setup", "(II)V", (void *)android_media_ToneGenerator_native_setup },
-    { "native_finalize", "()V", (void *)android_media_ToneGenerator_native_finalize }
-};
-
+static const JNINativeMethod gMethods[] =
+        {{"startTone", "(II)Z", (void *)android_media_ToneGenerator_startTone},
+         {"stopTone", "()V", (void *)android_media_ToneGenerator_stopTone},
+         {"getAudioSessionId", "()I", (void *)android_media_ToneGenerator_getAudioSessionId},
+         {"release", "()V", (void *)android_media_ToneGenerator_release},
+         {"native_setup", "(IILjava/lang/String;)V",
+          (void *)android_media_ToneGenerator_native_setup},
+         {"native_finalize", "()V", (void *)android_media_ToneGenerator_native_finalize}};
 
 int register_android_media_ToneGenerator(JNIEnv *env) {
     jclass clazz = FindClassOrDie(env, "android/media/ToneGenerator");

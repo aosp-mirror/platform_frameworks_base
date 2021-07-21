@@ -43,9 +43,11 @@ public class TextToastRecord extends ToastRecord {
 
     public TextToastRecord(NotificationManagerService notificationManager,
             @Nullable StatusBarManagerInternal statusBarManager, int uid, int pid,
-            String packageName, IBinder token, CharSequence text, int duration, Binder windowToken,
-            int displayId, @Nullable ITransientNotificationCallback callback) {
-        super(notificationManager, uid, pid, packageName, token, duration, windowToken, displayId);
+            String packageName, boolean isSystemToast, IBinder token, CharSequence text,
+            int duration, Binder windowToken, int displayId,
+            @Nullable ITransientNotificationCallback callback) {
+        super(notificationManager, uid, pid, packageName, isSystemToast, token, duration,
+                windowToken, displayId);
         mStatusBar = statusBarManager;
         mCallback = callback;
         this.text = checkNotNull(text);
@@ -73,10 +75,16 @@ public class TextToastRecord extends ToastRecord {
     }
 
     @Override
+    public boolean isAppRendered() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "TextToastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + pid + ":" +  pkg + "/" + UserHandle.formatUid(uid)
+                + " isSystemToast=" + isSystemToast
                 + " token=" + token
                 + " text=" + text
                 + " duration=" + getDuration()

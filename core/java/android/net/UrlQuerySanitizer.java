@@ -28,17 +28,17 @@ import java.util.regex.Pattern;
 /**
  *
  * Sanitizes the Query portion of a URL. Simple example:
- * <code>
+ * <pre class="prettyprint">
  * UrlQuerySanitizer sanitizer = new UrlQuerySanitizer();
  * sanitizer.setAllowUnregisteredParamaters(true);
  * sanitizer.parseUrl("http://example.com/?name=Joe+User");
  * String name = sanitizer.getValue("name"));
  * // name now contains "Joe_User"
- * </code>
+ * </pre>
  *
  * Register ValueSanitizers to customize the way individual
  * parameters are sanitized:
- * <code>
+ * <pre class="prettyprint">
  * UrlQuerySanitizer sanitizer = new UrlQuerySanitizer();
  * sanitizer.registerParamater("name", UrlQuerySanitizer.createSpaceLegal());
  * sanitizer.parseUrl("http://example.com/?name=Joe+User");
@@ -48,10 +48,11 @@ import java.util.regex.Pattern;
  * // converts the ' ' to an '_'. (The ' ' is converted because the default
  * unregistered parameter sanitizer does not allow any special characters,
  * and ' ' is a special character.)
- * </code>
- *
+ * </pre>
+ * <p>
  * There are several ways to create ValueSanitizers. In order of increasing
  * sophistication:
+* </p>
  * <ol>
  * <li>Call one of the UrlQuerySanitizer.createXXX() methods.
  * <li>Construct your own instance of

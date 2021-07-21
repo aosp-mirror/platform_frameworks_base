@@ -1,0 +1,6 @@
+per-file Window*.java = file:/services/core/java/com/android/server/wm/OWNERS
+
+# Notification, DND, Status bar
+per-file *Notification* = file:/packages/SystemUI/OWNERS
+per-file *Zen* = file:/packages/SystemUI/OWNERS
+per-file *StatusBar* = file:/packages/SystemUI/OWNERS

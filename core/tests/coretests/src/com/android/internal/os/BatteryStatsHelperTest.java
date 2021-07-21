@@ -21,12 +21,10 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -194,7 +192,6 @@ public class BatteryStatsHelperTest extends TestCase {
         sippers.add(mBluetoothBatterySipper);
         sippers.add(mIdleBatterySipper);
         doReturn(true).when(mBatteryStatsHelper).isTypeSystem(mSystemBatterySipper);
-        doNothing().when(mBatteryStatsHelper).smearScreenBatterySipper(any(), any());
 
         final double totalUsage = mBatteryStatsHelper.removeHiddenBatterySippers(sippers);
 
@@ -208,19 +205,20 @@ public class BatteryStatsHelperTest extends TestCase {
 
     @Test
     public void testSmearScreenBatterySipper() {
+        final ScreenPowerCalculator spc = spy(ScreenPowerCalculator.class);
         final BatterySipper sipperNull = createTestSmearBatterySipper(TIME_FOREGROUND_ACTIVITY_ZERO,
-                BATTERY_APP_USAGE, 0 /* uid */, true /* isUidNull */);
+                BATTERY_APP_USAGE, 0 /* uid */, true /* isUidNull */, spc);
         final BatterySipper sipperBg = createTestSmearBatterySipper(TIME_FOREGROUND_ACTIVITY_ZERO,
-                BATTERY_APP_USAGE, 1 /* uid */, false /* isUidNull */);
+                BATTERY_APP_USAGE, 1 /* uid */, false /* isUidNull */, spc);
         final BatterySipper sipperFg = createTestSmearBatterySipper(TIME_FOREGROUND_ACTIVITY,
-                BATTERY_APP_USAGE, 2 /* uid */, false /* isUidNull */);
+                BATTERY_APP_USAGE, 2 /* uid */, false /* isUidNull */, spc);
 
         final List<BatterySipper> sippers = new ArrayList<>();
         sippers.add(sipperNull);
         sippers.add(sipperBg);
         sippers.add(sipperFg);
 
-        mBatteryStatsHelper.smearScreenBatterySipper(sippers, mScreenBatterySipper);
+        spc.smearScreenBatterySipper(sippers, mScreenBatterySipper, 0);
 
         assertThat(sipperNull.screenPowerMah).isWithin(PRECISION).of(0);
         assertThat(sipperBg.screenPowerMah).isWithin(PRECISION).of(0);
@@ -249,13 +247,13 @@ public class BatteryStatsHelperTest extends TestCase {
 
     @Test
     public void testGetProcessForegroundTimeMs_largerActivityTime_returnMinTime() {
-        doReturn(TIME_STATE_FOREGROUND_US + 500).when(mBatteryStatsHelper)
+        final ScreenPowerCalculator spc = spy(ScreenPowerCalculator.class);
+        doReturn(TIME_STATE_FOREGROUND_US + 500).when(spc)
                 .getForegroundActivityTotalTimeUs(eq(mUid), anyLong());
         doReturn(TIME_STATE_FOREGROUND_US).when(mUid).getProcessStateTime(eq(PROCESS_STATE_TOP),
                 anyLong(), anyInt());
 
-        final long time = mBatteryStatsHelper.getProcessForegroundTimeMs(mUid,
-                BatteryStats.STATS_SINCE_CHARGED);
+        final long time = spc.getProcessForegroundTimeMs(mUid, 1000);
 
         assertThat(time).isEqualTo(TIME_STATE_FOREGROUND_MS);
     }
@@ -291,15 +289,14 @@ public class BatteryStatsHelperTest extends TestCase {
     }
 
     private BatterySipper createTestSmearBatterySipper(long activityTime, double totalPowerMah,
-            int uidCode, boolean isUidNull) {
+            int uidCode, boolean isUidNull, ScreenPowerCalculator spc) {
         final BatterySipper sipper = mock(BatterySipper.class);
         sipper.drainType = BatterySipper.DrainType.APP;
         sipper.totalPowerMah = totalPowerMah;
         doReturn(uidCode).when(sipper).getUid();
         if (!isUidNull) {
             final BatteryStats.Uid uid = mock(BatteryStats.Uid.class, RETURNS_DEEP_STUBS);
-            doReturn(activityTime).when(mBatteryStatsHelper).getProcessForegroundTimeMs(eq(uid),
-                    anyInt());
+            doReturn(activityTime).when(spc).getProcessForegroundTimeMs(eq(uid), anyLong());
             doReturn(uidCode).when(uid).getUid();
             sipper.uidObj = uid;
         }

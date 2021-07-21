@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യൽ താൽക്കാലികമായി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"നിങ്ങളുടെ ചാർജർ കണക്റ്റുചെയ്യുക."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
@@ -135,6 +136,6 @@
       <item quantity="one">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ഡിഫോൾട്ട്"</string>
-    <string name="clock_title_bubble" msgid="2204559396790593213">"ബബ്ൾ"</string>
+    <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>
 </resources>

@@ -1,4 +1,0 @@
-ifname total_skb_rx_bytes total_skb_rx_packets total_skb_tx_bytes total_skb_tx_packets
-rmnet2 4968 35 3081 39
-rmnet1 11153922 8051 190226 2468
-rmnet0 6824 16 5692 10

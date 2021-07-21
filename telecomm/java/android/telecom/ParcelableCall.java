@@ -399,7 +399,7 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** The current state of the call. */
-    public int getState() {
+    public @Call.CallState int getState() {
         return mState;
     }
 

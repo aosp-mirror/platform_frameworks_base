@@ -15,6 +15,8 @@
  */
 
 #include <DeviceInfo.h>
+#include <android/hardware_buffer.h>
+#include <apex/display.h>
 #include <log/log.h>
 #include <utils/Errors.h>
 
@@ -30,14 +32,47 @@ DeviceInfo* DeviceInfo::get() {
 
 DeviceInfo::DeviceInfo() {
 #if HWUI_NULL_GPU
-        mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
+    mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
 #else
-        mMaxTextureSize = -1;
+    mMaxTextureSize = -1;
 #endif
-        updateDisplayInfo();
 }
-DeviceInfo::~DeviceInfo() {
-    ADisplay_release(mDisplays);
+
+void DeviceInfo::updateDisplayInfo() {
+    if (Properties::isolatedProcess) {
+        return;
+    }
+
+    ADisplay** displays;
+    int size = ADisplay_acquirePhysicalDisplays(&displays);
+
+    if (size <= 0) {
+        LOG_ALWAYS_FATAL("Failed to acquire physical displays for WCG support!");
+    }
+
+    for (int i = 0; i < size; ++i) {
+        // Pick the first internal display for querying the display type
+        // In practice this is controlled by a sysprop so it doesn't really
+        // matter which display we use.
+        if (ADisplay_getDisplayType(displays[i]) == DISPLAY_TYPE_INTERNAL) {
+            // We get the dataspace from DisplayManager already. Allocate space
+            // for the result here but we don't actually care about using it.
+            ADataSpace dataspace;
+            AHardwareBuffer_Format pixelFormat;
+            ADisplay_getPreferredWideColorFormat(displays[i], &dataspace, &pixelFormat);
+
+            if (pixelFormat == AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) {
+                mWideColorType = SkColorType::kN32_SkColorType;
+            } else if (pixelFormat == AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT) {
+                mWideColorType = SkColorType::kRGBA_F16_SkColorType;
+            } else {
+                LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format: %d", pixelFormat);
+            }
+            ADisplay_release(displays);
+            return;
+        }
+    }
+    LOG_ALWAYS_FATAL("Failed to find a valid physical display for WCG support!");
 }
 
 int DeviceInfo::maxTextureSize() const {
@@ -49,75 +84,29 @@ void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
     DeviceInfo::get()->mMaxTextureSize = maxTextureSize;
 }
 
+void DeviceInfo::setWideColorDataspace(ADataSpace dataspace) {
+    switch (dataspace) {
+        case ADATASPACE_DISPLAY_P3:
+            get()->mWideColorSpace =
+                    SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDisplayP3);
+            break;
+        case ADATASPACE_SCRGB:
+            get()->mWideColorSpace = SkColorSpace::MakeSRGB();
+            break;
+        case ADATASPACE_SRGB:
+            // when sRGB is returned, it means wide color gamut is not supported.
+            get()->mWideColorSpace = SkColorSpace::MakeSRGB();
+            break;
+        default:
+            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+    }
+}
+
 void DeviceInfo::onRefreshRateChanged(int64_t vsyncPeriod) {
     mVsyncPeriod = vsyncPeriod;
 }
 
-void DeviceInfo::updateDisplayInfo() {
-    if (Properties::isolatedProcess) {
-        return;
-    }
-
-    if (mCurrentConfig == nullptr) {
-        mDisplaysSize = ADisplay_acquirePhysicalDisplays(&mDisplays);
-        LOG_ALWAYS_FATAL_IF(mDisplays == nullptr || mDisplaysSize <= 0,
-                            "Failed to get physical displays: no connected display: %d!", mDisplaysSize);
-        for (size_t i = 0; i < mDisplaysSize; i++) {
-            ADisplayType type = ADisplay_getDisplayType(mDisplays[i]);
-            if (type == ADisplayType::DISPLAY_TYPE_INTERNAL) {
-                mPhysicalDisplayIndex = i;
-                break;
-            }
-        }
-        LOG_ALWAYS_FATAL_IF(mPhysicalDisplayIndex < 0, "Failed to find a connected physical display!");
-
-
-        // Since we now just got the primary display for the first time, then
-        // store the primary display metadata here.
-        ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
-        mMaxRefreshRate = ADisplay_getMaxSupportedFps(primaryDisplay);
-        ADataSpace dataspace;
-        AHardwareBuffer_Format format;
-        ADisplay_getPreferredWideColorFormat(primaryDisplay, &dataspace, &format);
-        switch (dataspace) {
-            case ADATASPACE_DISPLAY_P3:
-                mWideColorSpace =
-                        SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
-                break;
-            case ADATASPACE_SCRGB:
-                mWideColorSpace = SkColorSpace::MakeSRGB();
-                break;
-            case ADATASPACE_SRGB:
-                // when sRGB is returned, it means wide color gamut is not supported.
-                mWideColorSpace = SkColorSpace::MakeSRGB();
-                break;
-            default:
-                LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
-        }
-        switch (format) {
-            case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
-                mWideColorType = SkColorType::kN32_SkColorType;
-                break;
-            case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
-                mWideColorType = SkColorType::kRGBA_F16_SkColorType;
-                break;
-            default:
-                LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format.");
-        }
-    }
-    // This method may have been called when the display config changed, so
-    // sync with the current configuration.
-    ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
-    status_t status = ADisplay_getCurrentConfig(primaryDisplay, &mCurrentConfig);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get display config, error %d", status);
-
-    mWidth = ADisplayConfig_getWidth(mCurrentConfig);
-    mHeight = ADisplayConfig_getHeight(mCurrentConfig);
-    mDensity = ADisplayConfig_getDensity(mCurrentConfig);
-    mVsyncPeriod = static_cast<int64_t>(1000000000 / ADisplayConfig_getFps(mCurrentConfig));
-    mCompositorOffset = ADisplayConfig_getCompositorOffsetNanos(mCurrentConfig);
-    mAppOffset = ADisplayConfig_getAppVsyncOffsetNanos(mCurrentConfig);
-}
+std::atomic<float> DeviceInfo::sDensity = 2.0;
 
 } /* namespace uirenderer */
 } /* namespace android */

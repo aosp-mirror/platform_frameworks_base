@@ -16,9 +16,12 @@
 
 package com.android.internal.util;
 
+import android.util.IndentingPrintWriter;
+
 import com.google.android.collect.Lists;
 import com.google.caliper.AfterExperiment;
 import com.google.caliper.BeforeExperiment;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -92,7 +95,7 @@ public class IndentingPrintWriterBenchmark {
     public void timePairIndenting(int reps) {
         final int value = 1024;
         for (int i = 0; i < reps; i++) {
-            mIndenting.printPair("key", value);
+            mIndenting.print("key", value);
         }
     }
 
@@ -135,7 +138,7 @@ public class IndentingPrintWriterBenchmark {
             pw.println();
         }
 
-        public void dumpIndenting(IndentingPrintWriter pw) {
+        public void dumpIndenting(android.util.IndentingPrintWriter pw) {
             dumpSelf(pw);
 
             if (children != null) {

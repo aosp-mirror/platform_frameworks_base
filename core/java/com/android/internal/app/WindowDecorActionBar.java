@@ -32,6 +32,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
@@ -80,11 +81,11 @@ public class WindowDecorActionBar extends ActionBar implements
     private ActionBarOverlayLayout mOverlayLayout;
     private ActionBarContainer mContainerView;
     private DecorToolbar mDecorToolbar;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
     private View mContentView;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private ScrollingTabContainerView mTabScrollView;
 
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
@@ -1149,7 +1150,7 @@ public class WindowDecorActionBar extends ActionBar implements
      * @hide
      */
     public class TabImpl extends ActionBar.Tab {
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private ActionBar.TabListener mCallback;
         private Object mTag;
         private Drawable mIcon;

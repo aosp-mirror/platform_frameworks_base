@@ -4,7 +4,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -99,6 +101,20 @@ public class JobStoreTest {
     private void waitForPendingIo() throws Exception {
         assertTrue("Timed out waiting for persistence I/O to complete",
                 mTaskStoreUnderTest.waitForWriteToCompleteForTesting(5_000L));
+    }
+
+    @Test
+    public void testStringToIntArrayAndIntArrayToString() {
+        final int[] netCapabilitiesIntArray = { 1, 3, 5, 7, 9 };
+        final String netCapabilitiesStr = "1,3,5,7,9";
+        final String netCapabilitiesStrWithErrorInt = "1,3,a,7,9";
+        final String emptyString = "";
+        final String str1 = JobStore.intArrayToString(netCapabilitiesIntArray);
+        assertArrayEquals(netCapabilitiesIntArray, JobStore.stringToIntArray(str1));
+        assertEquals(0, JobStore.stringToIntArray(emptyString).length);
+        assertThrows(NumberFormatException.class,
+                () -> JobStore.stringToIntArray(netCapabilitiesStrWithErrorInt));
+        assertEquals(netCapabilitiesStr, JobStore.intArrayToString(netCapabilitiesIntArray));
     }
 
     @Test
@@ -276,7 +292,7 @@ public class JobStoreTest {
                 0 /* sourceUserId */, 0, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
-                persistedExecutionTimesUTC, 0 /* innerFlagg */);
+                persistedExecutionTimesUTC, 0 /* innerFlag */, 0 /* dynamicConstraints */);
 
         mTaskStoreUnderTest.add(js);
         waitForPendingIo();
@@ -374,7 +390,7 @@ public class JobStoreTest {
                 .setPersisted(true)
                 .setRequiredNetwork(new NetworkRequest.Builder()
                         .addCapability(NET_CAPABILITY_IMS)
-                        .addUnwantedCapability(NET_CAPABILITY_OEM_PAID)
+                        .addForbiddenCapability(NET_CAPABILITY_OEM_PAID)
                         .build())
                 .build());
     }
@@ -505,7 +521,7 @@ public class JobStoreTest {
                 first.getTransientExtras().toString(), second.getTransientExtras().toString());
 
         // Since people can forget to add tests here for new fields, do one last
-        // sanity check based on bits-on-wire equality.
+        // validity check based on bits-on-wire equality.
         final byte[] firstBytes = marshall(first);
         final byte[] secondBytes = marshall(second);
         if (!Arrays.equals(firstBytes, secondBytes)) {

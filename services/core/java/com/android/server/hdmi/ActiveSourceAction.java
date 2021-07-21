@@ -39,15 +39,19 @@ public class ActiveSourceAction extends HdmiCecFeatureAction {
     @Override
     boolean start() {
         mState = STATE_STARTED;
-        sendCommand(HdmiCecMessageBuilder.buildActiveSource(getSourceAddress(),
-                source().mService.getPhysicalAddress()));
+        int logicalAddress = getSourceAddress();
+        int physicalAddress = getSourcePath();
+
+        sendCommand(HdmiCecMessageBuilder.buildActiveSource(logicalAddress, physicalAddress));
 
         if (source().getType() == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             // Reports menu-status active to receive <User Control Pressed>.
             sendCommand(
-                    HdmiCecMessageBuilder.buildReportMenuStatus(getSourceAddress(), mDestination,
+                    HdmiCecMessageBuilder.buildReportMenuStatus(logicalAddress, mDestination,
                             Constants.MENU_STATE_ACTIVATED));
         }
+
+        source().setActiveSource(logicalAddress, physicalAddress, "ActiveSourceAction");
         mState = STATE_FINISHED;
         finish();
         return true;

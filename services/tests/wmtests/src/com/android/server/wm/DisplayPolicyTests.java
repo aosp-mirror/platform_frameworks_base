@@ -18,40 +18,33 @@ package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
-import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
+import static com.android.server.wm.utils.WmDisplayCutout.NO_CUTOUT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +54,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.PrivacyIndicatorBounds;
 import android.view.WindowInsets.Side;
 import android.view.WindowManager;
 
@@ -82,8 +76,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         attrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         attrs.format = PixelFormat.OPAQUE;
-        attrs.systemUiVisibility = attrs.subtreeSystemUiVisibility = win.mSystemUiVisibility =
-                hasLightNavBar ? SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0;
+        attrs.insetsFlags.appearance = hasLightNavBar ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0;
         return win;
     }
 
@@ -107,8 +100,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         attrs.flags = FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_IN_SCREEN
                 | (drawNavBar ? FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS : 0);
         attrs.format = PixelFormat.TRANSPARENT;
-        attrs.systemUiVisibility = attrs.subtreeSystemUiVisibility = win.mSystemUiVisibility =
-                hasLightNavBar ? SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0;
+        attrs.insetsFlags.appearance = hasLightNavBar ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0;
         win.mHasSurface = visible;
         return win;
     }
@@ -165,8 +157,10 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 opaque, dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
     @Test
     public void testUpdateLightNavigationBarLw() {
+        DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         final WindowState opaqueDarkNavBar = createOpaqueFullscreen(false);
         final WindowState opaqueLightNavBar = createOpaqueFullscreen(true);
 
@@ -175,53 +169,66 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final WindowState imeDrawDarkNavBar = createInputMethodWindow(true, true, false);
         final WindowState imeDrawLightNavBar = createInputMethodWindow(true, true, true);
 
-        assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                DisplayPolicy.updateLightNavigationBarLw(
-                        SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, null, null,
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.performLayout(true /* initial */, false /* updateImeWindows */);
+
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        navSource.setFrame(mNavBarWindow.getFrame());
+        opaqueDarkNavBar.mAboveInsetsState.addSource(navSource);
+        opaqueLightNavBar.mAboveInsetsState.addSource(navSource);
+        dimming.mAboveInsetsState.addSource(navSource);
+        imeDrawDarkNavBar.mAboveInsetsState.addSource(navSource);
+        imeDrawLightNavBar.mAboveInsetsState.addSource(navSource);
+
+        // If there is no window, APPEARANCE_LIGHT_NAVIGATION_BARS is not allowed.
+        assertEquals(0,
+                displayPolicy.updateLightNavigationBarLw(
+                        APPEARANCE_LIGHT_NAVIGATION_BARS, null, null,
                         null, null));
 
-        // Opaque top fullscreen window overrides SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR flag.
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
+        // Opaque top fullscreen window overrides APPEARANCE_LIGHT_NAVIGATION_BARS flag.
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
                 0, opaqueDarkNavBar, opaqueDarkNavBar, null, opaqueDarkNavBar));
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
-                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, opaqueDarkNavBar, opaqueDarkNavBar, null,
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueDarkNavBar, opaqueDarkNavBar, null,
                 opaqueDarkNavBar));
-        assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                DisplayPolicy.updateLightNavigationBarLw(0, opaqueLightNavBar,
+        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                displayPolicy.updateLightNavigationBarLw(0, opaqueLightNavBar,
                         opaqueLightNavBar, null, opaqueLightNavBar));
-        assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                DisplayPolicy.updateLightNavigationBarLw(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                displayPolicy.updateLightNavigationBarLw(APPEARANCE_LIGHT_NAVIGATION_BARS,
                         opaqueLightNavBar, opaqueLightNavBar, null, opaqueLightNavBar));
 
-        // Dimming window clears SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
+        // Dimming window clears APPEARANCE_LIGHT_NAVIGATION_BARS.
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
                 0, opaqueDarkNavBar, dimming, null, dimming));
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
                 0, opaqueLightNavBar, dimming, null, dimming));
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
-                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, opaqueDarkNavBar, dimming, null, dimming));
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
-                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, opaqueLightNavBar, dimming, null, dimming));
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
-                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, opaqueLightNavBar, dimming, imeDrawLightNavBar,
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueDarkNavBar, dimming, null, dimming));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar, dimming, null, dimming));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar, dimming, imeDrawLightNavBar,
                 dimming));
 
-        // IME window clears SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
-                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, null, null, imeDrawDarkNavBar,
+        // IME window clears APPEARANCE_LIGHT_NAVIGATION_BARS
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, null, null, imeDrawDarkNavBar,
                 imeDrawDarkNavBar));
 
-        // Even if the top fullscreen has SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, IME window wins.
-        assertEquals(0, DisplayPolicy.updateLightNavigationBarLw(
-                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, opaqueLightNavBar, opaqueLightNavBar,
+        // Even if the top fullscreen has APPEARANCE_LIGHT_NAVIGATION_BARS, IME window wins.
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar, opaqueLightNavBar,
                 imeDrawDarkNavBar, imeDrawDarkNavBar));
 
-        // IME window should be able to use SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.
-        assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                DisplayPolicy.updateLightNavigationBarLw(0, opaqueDarkNavBar,
+        // IME window should be able to use APPEARANCE_LIGHT_NAVIGATION_BARS.
+        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                displayPolicy.updateLightNavigationBarLw(0, opaqueDarkNavBar,
                         opaqueDarkNavBar, imeDrawLightNavBar, imeDrawLightNavBar));
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
@@ -234,36 +241,13 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertEquals(mAppWindow, policy.getTopFullscreenOpaqueWindow());
     }
 
-    @Test
-    public void testShouldShowToastWhenScreenLocked() {
-        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
-        final WindowState activity = createApplicationWindow();
-        final WindowState toast = createToastWindow();
-
-        policy.adjustWindowParamsLw(toast, toast.mAttrs, 0 /* callingPid */, 0 /* callingUid */);
-
-        assertTrue(policy.canToastShowWhenLocked(0 /* callingUid */));
-        assertNotEquals(0, toast.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED);
-    }
-
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testMainAppWindowDisallowFitSystemWindowTypes() {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         final WindowState activity = createBaseApplicationWindow();
         activity.mAttrs.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 
-        policy.adjustWindowParamsLw(activity, activity.mAttrs, 0 /* callingPid */,
-                0 /* callingUid */);
-    }
-
-    private WindowState createToastWindow() {
-        final WindowState win = createWindow(null, TYPE_TOAST, "Toast");
-        final WindowManager.LayoutParams attrs = win.mAttrs;
-        attrs.width = WRAP_CONTENT;
-        attrs.height = WRAP_CONTENT;
-        attrs.flags = FLAG_KEEP_SCREEN_ON | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE;
-        attrs.format = PixelFormat.TRANSLUCENT;
-        return win;
+        policy.adjustWindowParamsLw(activity, activity.mAttrs);
     }
 
     private WindowState createApplicationWindow() {
@@ -296,7 +280,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         final WindowState navigationBar = createNavigationBarWindow();
 
-        navigationBar.getFrameLw().set(new Rect(100, 200, 200, 300));
+        navigationBar.getFrame().set(new Rect(100, 200, 200, 300));
 
         assertFalse("Freeform is overlapping with navigation bar",
                 DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
@@ -320,44 +304,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         return win;
     }
 
-    @Test
-    public void testUpdateHideNavInputEventReceiver() {
-        final InsetsPolicy insetsPolicy = mDisplayContent.getInsetsPolicy();
-        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        displayPolicy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
-        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
-        displayPolicy.addWindowLw(mNotificationShadeWindow, mNotificationShadeWindow.mAttrs);
-        spyOn(displayPolicy);
-        doReturn(true).when(displayPolicy).hasNavigationBar();
-
-        // App doesn't request to hide navigation bar.
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNull(displayPolicy.mInputConsumer);
-
-        // App requests to hide navigation bar.
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
-        mAppWindow.updateRequestedInsetsState(requestedState);
-        insetsPolicy.onInsetsModified(mAppWindow, requestedState);
-        assertNotNull(displayPolicy.mInputConsumer);
-
-        // App still requests to hide navigation bar, but without BEHAVIOR_SHOW_BARS_BY_TOUCH.
-        mAppWindow.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNull(displayPolicy.mInputConsumer);
-
-        // App still requests to hide navigation bar, but with BEHAVIOR_SHOW_BARS_BY_TOUCH.
-        mAppWindow.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNotNull(displayPolicy.mInputConsumer);
-
-        // App still requests to hide navigation bar with BEHAVIOR_SHOW_BARS_BY_TOUCH,
-        // but notification shade forcibly shows navigation bar
-        mNotificationShadeWindow.mAttrs.privateFlags |= PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNull(displayPolicy.mInputConsumer);
-    }
-
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -365,21 +312,22 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayInfo.logicalWidth = 1000;
         displayInfo.logicalHeight = 2000;
         displayInfo.rotation = ROTATION_0;
-        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
-                displayInfo, null /* displayCutout */);
 
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        mImeWindow.mAboveInsetsState.set(state);
+        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
+                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
-        mImeWindow.getGivenContentInsetsLw().set(0, displayInfo.logicalHeight, 0, 0);
+        mImeWindow.mGivenContentInsets.set(0, displayInfo.logicalHeight, 0, 0);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
-        displayPolicy.beginLayoutLw(mDisplayContent.mDisplayFrames, 0 /* UI mode */);
+        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
         displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
 
-        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         final InsetsSource imeSource = state.peekSource(ITYPE_IME);
         final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
 

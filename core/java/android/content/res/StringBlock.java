@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -86,8 +88,19 @@ public final class StringBlock implements Closeable {
                 + ": " + nativeGetSize(mNative));
     }
 
+    /**
+     * @deprecated use {@link #getSequence(int)} which can return null when a string cannot be found
+     *             due to incremental installation.
+     */
+    @Deprecated
     @UnsupportedAppUsage
     public CharSequence get(int idx) {
+        CharSequence seq = getSequence(idx);
+        return seq == null ? "" : seq;
+    }
+
+    @Nullable
+    public CharSequence getSequence(int idx) {
         synchronized (this) {
             if (mStrings != null) {
                 CharSequence res = mStrings[idx];
@@ -108,6 +121,9 @@ public final class StringBlock implements Closeable {
                 }
             }
             String str = nativeGetString(mNative, idx);
+            if (str == null) {
+                return null;
+            }
             CharSequence res = str;
             int[] style = nativeGetStyle(mNative, idx);
             if (localLOGV) Log.v(TAG, "Got string: " + str);
@@ -133,6 +149,9 @@ public final class StringBlock implements Closeable {
                     }
 
                     String styleTag = nativeGetString(mNative, styleId);
+                    if (styleTag == null) {
+                        return null;
+                    }
 
                     if (styleTag.equals("b")) {
                         mStyleIDs.boldId = styleId;
@@ -161,8 +180,10 @@ public final class StringBlock implements Closeable {
 
                 res = applyStyles(str, style, mStyleIDs);
             }
-            if (mStrings != null) mStrings[idx] = res;
-            else mSparseStrings.put(idx, res);
+            if (res != null) {
+                if (mStrings != null) mStrings[idx] = res;
+                else mSparseStrings.put(idx, res);
+            }
             return res;
         }
     }
@@ -203,6 +224,7 @@ public final class StringBlock implements Closeable {
         private int marqueeId = -1;
     }
 
+    @Nullable
     private CharSequence applyStyles(String str, int[] style, StyleIDs ids) {
         if (style.length == 0)
             return str;
@@ -260,6 +282,9 @@ public final class StringBlock implements Closeable {
                                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             } else {
                 String tag = nativeGetString(mNative, type);
+                if (tag == null) {
+                    return null;
+                }
 
                 if (tag.startsWith("font;")) {
                     String sub;

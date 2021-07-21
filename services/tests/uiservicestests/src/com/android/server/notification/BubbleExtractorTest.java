@@ -154,7 +154,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     }
 
     void setUpBubblesEnabled(boolean feature, int app, int channel) {
-        when(mConfig.bubblesEnabled()).thenReturn(feature);
+        when(mConfig.bubblesEnabled(mUser)).thenReturn(feature);
         when(mConfig.getBubblePreference(anyString(), anyInt())).thenReturn(app);
         mChannel.setAllowBubbles(channel);
     }

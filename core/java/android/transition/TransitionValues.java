@@ -17,6 +17,7 @@
 package android.transition;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,7 +74,7 @@ public class TransitionValues {
     final ArrayList<Transition> targetedTransitions = new ArrayList<Transition>();
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (other instanceof TransitionValues) {
             if (view == ((TransitionValues) other).view) {
                 if (values.equals(((TransitionValues) other).values)) {

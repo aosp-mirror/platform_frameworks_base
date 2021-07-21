@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification
 
 import android.provider.DeviceConfig
 import android.provider.Settings
-import android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL
 import android.testing.AndroidTestingRunner
 
 import androidx.test.filters.SmallTest
@@ -43,19 +42,18 @@ class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
 
     @Before
     public fun setup() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-        NOTIFICATION_NEW_INTERRUPTION_MODEL, 1)
         manager = NotificationSectionsFeatureManager(proxyFake, mContext)
         manager!!.clearCache()
-        originalQsMediaPlayer = Settings.System.getInt(context.getContentResolver(),
-                "qs_media_player", 1)
-        Settings.Global.putInt(context.getContentResolver(), "qs_media_player", 0)
+        originalQsMediaPlayer = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1)
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 0)
     }
 
     @After
     public fun teardown() {
-        Settings.Global.putInt(context.getContentResolver(), "qs_media_player",
-                originalQsMediaPlayer)
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, originalQsMediaPlayer)
     }
 
     @Test

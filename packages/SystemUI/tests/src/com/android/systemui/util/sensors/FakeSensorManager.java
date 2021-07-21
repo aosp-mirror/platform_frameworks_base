@@ -60,7 +60,7 @@ public class FakeSensorManager extends SensorManager {
 
     public FakeSensorManager(Context context) throws Exception {
         Sensor proxSensor = context.getSystemService(SensorManager.class)
-                .getDefaultSensor(Sensor.TYPE_PROXIMITY);
+                .getDefaultSensor(Sensor.TYPE_PROXIMITY, true);
         if (proxSensor == null) {
             // No prox? Let's create a fake one!
             proxSensor =

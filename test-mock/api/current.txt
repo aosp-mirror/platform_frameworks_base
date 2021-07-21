@@ -117,6 +117,7 @@ package android.test.mock {
     method public void sendOrderedBroadcast(android.content.Intent, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
     method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
     method public void sendStickyBroadcast(android.content.Intent);
+    method public void sendStickyBroadcast(android.content.Intent, android.os.Bundle);
     method public void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
     method public void sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);

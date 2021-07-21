@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
   Note: Add android:sharedUserId="android.uid.system" to the root element to simulate the system UID
   caller case.
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.tests.usagestats"
-    >
+     package="com.android.tests.usagestats">
 
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-    <uses-permission android:name="android.permission.OBSERVE_APP_USAGE" />
-    <uses-permission android:name="android.permission.SUSPEND_APPS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
+    <uses-permission android:name="android.permission.OBSERVE_APP_USAGE"/>
+    <uses-permission android:name="android.permission.SUSPEND_APPS"/>
 
     <application android:label="Usage Access Test">
         <activity android:name=".UsageStatsActivity"
-                  android:label="Device Usage History">
+             android:label="Device Usage History"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name=".UsageLogActivity" />
+        <activity android:name=".UsageLogActivity"/>
 
     </application>
 </manifest>

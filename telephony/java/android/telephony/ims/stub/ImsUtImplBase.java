@@ -23,12 +23,14 @@ import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.ims.ImsUtListener;
+import android.util.Log;
 
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Base implementation of IMS UT interface, which implements stubs. Override these methods to
@@ -40,6 +42,7 @@ import java.lang.annotation.RetentionPolicy;
 // will break other implementations of ImsUt maintained by other ImsServices.
 @SystemApi
 public class ImsUtImplBase {
+    private static final String TAG = "ImsUtImplBase";
     /**
      * Bar all incoming calls. (See 3GPP TS 24.611)
      * @hide
@@ -116,7 +119,10 @@ public class ImsUtImplBase {
      */
     public static final int INVALID_RESULT = -1;
 
-    private IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
+    private final IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
+        private final Object mLock = new Object();
+        private ImsUtListener mUtListener;
+
         @Override
         public void close() throws RemoteException {
             ImsUtImplBase.this.close();
@@ -202,7 +208,30 @@ public class ImsUtImplBase {
 
         @Override
         public void setListener(IImsUtListener listener) throws RemoteException {
-            ImsUtImplBase.this.setListener(new ImsUtListener(listener));
+            synchronized (mLock) {
+                if (mUtListener != null
+                        && !mUtListener.getListenerInterface().asBinder().isBinderAlive()) {
+                    Log.w(TAG, "setListener: discarding dead Binder");
+                    mUtListener = null;
+                }
+                if (mUtListener != null && listener != null && Objects.equals(
+                        mUtListener.getListenerInterface().asBinder(), listener.asBinder())) {
+                    return;
+                }
+
+                if (listener == null) {
+                    mUtListener = null;
+                } else if (listener != null && mUtListener == null) {
+                    mUtListener = new ImsUtListener(listener);
+                } else {
+                    // Warn that the listener is being replaced while active
+                    Log.w(TAG, "setListener is being called when there is already an active "
+                            + "listener");
+                    mUtListener = new ImsUtListener(listener);
+                }
+            }
+
+            ImsUtImplBase.this.setListener(mUtListener);
         }
 
         @Override

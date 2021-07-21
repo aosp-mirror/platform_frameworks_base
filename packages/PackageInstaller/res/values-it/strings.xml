@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Installazione pacchetti"</string>
     <string name="install" msgid="711829760615509273">"Installa"</string>
+    <string name="update" msgid="3932142540719227615">"Aggiorna"</string>
     <string name="done" msgid="6632441120016885253">"Fine"</string>
     <string name="cancel" msgid="1018267193425558088">"Annulla"</string>
     <string name="installing" msgid="4921993079741206516">"Installazione…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Installazione di <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"App installata."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Installare questa applicazione?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Vuoi installare un aggiornamento a questa applicazione esistente? I tuoi dati non andranno persi."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Vuoi installare un aggiornamento per questa applicazione integrata? I tuoi dati non andranno persi."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Vuoi installare questa app?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Vuoi aggiornare questa app?"</string>
     <string name="install_failed" msgid="5777824004474125469">"App non installata."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"È stata bloccata l\'installazione del pacchetto."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App non installata poiché il pacchetto è in conflitto con un pacchetto esistente."</string>
@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera dello spazio e riprova."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"App non trovata"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Impossibile trovare l\'applicazione nell\'elenco di applicazioni installate."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Non consentita"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Autorizzazione non concessa"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"L\'utente corrente non è autorizzato a eseguire questa disinstallazione."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Errore"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Impossibile disinstallare l\'app."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Le azioni di installazione/disinstallazione non sono supportate su Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"App in preparazione…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Sconosciuto"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Per sicurezza, il tuo tablet non è autorizzato a installare app sconosciute da questa origine."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Per sicurezza, la tua TV non è autorizzata a installare app sconosciute da questa origine."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Per sicurezza, il tuo telefono non è autorizzato a installare app sconosciute da questa origine."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Per motivi di sicurezza, il tuo tablet non è attualmente autorizzato a installare app sconosciute da questa origine. Puoi modificare questa opzione nelle Impostazioni."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Per motivi di sicurezza, la tua TV non è attualmente autorizzata a installare app sconosciute da questa origine. Puoi modificare questa opzione nelle Impostazioni."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Per motivi di sicurezza, il tuo telefono non è attualmente autorizzato a installare app sconosciute da questa origine. Puoi modificare questa opzione nelle Impostazioni."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"I dati del telefono e i dati personali sono più vulnerabili agli attacchi di app sconosciute. Se installi questa app, accetti di essere responsabile degli eventuali danni al telefono o dell\'eventuale perdita di dati derivanti dall\'uso dell\'app."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"I dati del tablet e i dati personali sono più vulnerabili agli attacchi di app sconosciute. Se installi questa app, accetti di essere responsabile degli eventuali danni al tablet o dell\'eventuale perdita di dati derivanti dall\'uso dell\'app."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"I dati della TV e i dati personali sono più vulnerabili agli attacchi di app sconosciute. Se installi questa app, accetti di essere responsabile degli eventuali danni alla TV o dell\'eventuale perdita di dati derivanti dall\'uso dell\'app."</string>

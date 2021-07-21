@@ -13,14 +13,37 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="test.overlay">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="test.overlay">
     <application android:hasCode="false"/>
 
-    <overlay
-        android:targetPackage="test.target"
-        android:targetName="TestResources"
-        android:resourcesMap="@xml/overlays"/>
+    <overlay android:name="Default"
+             android:targetPackage="test.target"
+             android:targetName="TestResources"
+             android:resourcesMap="@xml/overlays"/>
+
+    <overlay android:name="NoTargetName"
+             android:targetPackage="test.target"
+             android:resourcesMap="@xml/overlays"/>
+
+    <overlay android:name="Inline"
+             android:targetName="TestResources"
+             android:targetPackage="test.target"
+             android:resourcesMap="@xml/overlays_inline"/>
+
+    <overlay android:name="DifferentPackages"
+             android:targetName="TestResources"
+             android:targetPackage="test.target"
+             android:resourcesMap="@xml/overlays_different_package"/>
+
+    <overlay android:name="SwapNames"
+             android:targetName="TestResources"
+             android:targetPackage="test.target"
+             android:resourcesMap="@xml/overlays_swap"/>
+
+    <overlay android:name="AllPolicies"
+             android:targetName="TestResources"
+             android:targetPackage="test.target"
+             android:resourcesMap="@xml/overlays_policies"/>
+
 </manifest>

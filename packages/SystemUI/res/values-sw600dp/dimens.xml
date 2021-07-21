@@ -36,10 +36,6 @@
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
 
-    <!-- The margin between the clock and the notifications on Keyguard. See
-         keyguard_clock_height_fraction_* for the difference between min and max.-->
-    <dimen name="keyguard_clock_notifications_margin">44dp</dimen>
-
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">60dp</dimen>
 
@@ -68,8 +64,6 @@
      phone hints. -->
     <dimen name="edge_tap_area_width">80dp</dimen>
 
-    <dimen name="keyguard_indication_margin_bottom">90dp</dimen>
-
     <!-- Margin on the right side of the system icon group on Keyguard. -->
     <dimen name="system_icons_keyguard_padding_end">2dp</dimen>
 
@@ -94,4 +88,11 @@
 
     <!-- Text size for user name in user switcher -->
     <dimen name="kg_user_switcher_text_size">18sp</dimen>
+
+    <!-- TODO(himanshujaju) - add comments -->
+    <dimen name="global_actions_wallet_top_margin">5dp</dimen>
+    <dimen name="controls_header_bottom_margin">12dp</dimen>
+    <dimen name="controls_top_margin">24dp</dimen>
+
+    <dimen name="global_actions_grid_item_layout_height">80dp</dimen>
 </resources>

@@ -79,7 +79,7 @@ interface ITelecomService {
     /**
      * @see TelecomManager#getPhoneAccount
      */
-    PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
+    PhoneAccount getPhoneAccount(in PhoneAccountHandle account, String callingPackage);
 
     /**
      * @see TelecomManager#getAllPhoneAccountsCount
@@ -179,6 +179,11 @@ interface ITelecomService {
     boolean isInCall(String callingPackage, String callingFeatureId);
 
     /**
+     * @see TelecomServiceImpl#hasManageOngoingCallsPermission
+     */
+    boolean hasManageOngoingCallsPermission(String callingPackage);
+
+    /**
      * @see TelecomServiceImpl#isInManagedCall
      */
     boolean isInManagedCall(String callingPackage, String callingFeatureId);
@@ -190,9 +195,16 @@ interface ITelecomService {
 
     /**
      * @see TelecomServiceImpl#getCallState
+     * Note: only kept around to not break app compat, however this will throw a SecurityException
+     * on API 31+.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int getCallState();
+
+    /**
+     * @see TelecomServiceImpl#getCallState
+     */
+    int getCallStateUsingPackage(String callingPackage, String callingFeatureId);
 
     /**
      * @see TelecomServiceImpl#endCall
@@ -326,6 +338,10 @@ interface ITelecomService {
      */
     void handleCallIntent(in Intent intent, in String callingPackageProxy);
 
+    void cleanupStuckCalls();
+
+    void resetCarMode();
+
     void setTestDefaultCallRedirectionApp(String packageName);
 
     void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);
@@ -344,4 +360,8 @@ interface ITelecomService {
      */
     void setTestDefaultDialer(in String packageName);
 
+    /**
+     * @see TelecomServiceImpl#setTestCallDiagnosticService
+     */
+    void setTestCallDiagnosticService(in String packageName);
 }

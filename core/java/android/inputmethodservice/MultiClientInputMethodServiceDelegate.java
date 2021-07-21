@@ -167,16 +167,6 @@ public final class MultiClientInputMethodServiceDelegate {
 
         /**
          * Called when the associated IME client called {@link
-         * android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)}.
-         *
-         * @param showFlags The flag passed by the client.
-         * @param hideFlags The flag passed by the client.
-         * @see android.inputmethodservice.InputMethodService#onToggleSoftInput(int, int)
-         */
-        void onToggleSoftInput(int showFlags, int hideFlags);
-
-        /**
-         * Called when the associated IME client called {@link
          * android.view.inputmethod.InputMethodManager#updateCursorAnchorInfo(View,
          * CursorAnchorInfo)}.
          *

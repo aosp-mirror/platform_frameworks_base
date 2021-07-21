@@ -26,37 +26,23 @@ aapt2 link \
 aapt2 link \
     --no-resource-removal \
     -I "$FRAMEWORK_RES_APK" \
-    --manifest AndroidManifestNoName.xml \
-    -o overlay-no-name.apk \
-    compiled.flata
-
-aapt2 link \
-    --no-resource-removal \
-    -I "$FRAMEWORK_RES_APK" \
-    --manifest AndroidManifestNoNameStatic.xml \
-    -o overlay-no-name-static.apk \
-    compiled.flata
-
-aapt2 link \
-    --no-resource-removal \
-    -I "$FRAMEWORK_RES_APK" \
-    --manifest AndroidManifestStatic1.xml \
-    -o overlay-static-1.apk \
-    compiled.flata
-
-aapt2 link \
-    --no-resource-removal \
-    -I "$FRAMEWORK_RES_APK" \
-    --manifest AndroidManifestStatic2.xml \
-    -o overlay-static-2.apk \
-    compiled.flata
-
-aapt2 link \
-    --no-resource-removal \
-    --shared-lib \
-    -I "$FRAMEWORK_RES_APK" \
     --manifest AndroidManifest.xml \
     -o overlay-shared.apk \
+    --shared-lib \
+    compiled.flata
+
+aapt2 link \
+    --no-resource-removal \
+    -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifestLegacy.xml \
+    -o overlay-legacy.apk \
+    compiled.flata
+
+aapt2 link \
+    --no-resource-removal \
+    -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifestInvalid.xml \
+    -o overlay-invalid.apk \
     compiled.flata
 
 rm compiled.flata

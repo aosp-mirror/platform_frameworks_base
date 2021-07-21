@@ -58,7 +58,6 @@
             android:src="@drawable/status_bar_notification_section_header_clear_btn"
             android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
             android:scaleType="center"
-            android:tint="?attr/wallpaperTextColor"
             android:tintMode="src_in"
             android:visibility="gone"
             android:forceHasOverlappingRendering="false"

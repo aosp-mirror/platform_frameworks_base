@@ -80,9 +80,9 @@ class TableMerger {
   DISALLOW_COPY_AND_ASSIGN(TableMerger);
 
   IAaptContext* context_;
-  ResourceTable* master_table_;
+  ResourceTable* main_table_;
   TableMergerOptions options_;
-  ResourceTablePackage* master_package_;
+  ResourceTablePackage* main_package_;
   std::set<std::string> merged_packages_;
 
   bool MergeImpl(const Source& src, ResourceTable* src_table, bool overlay, bool allow_new);

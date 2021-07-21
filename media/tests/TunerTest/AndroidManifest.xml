@@ -17,13 +17,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.mediatunertest">
 
+    <uses-permission android:name="android.permission.ACCESS_TV_DESCRAMBLER" />
     <uses-permission android:name="android.permission.ACCESS_TV_TUNER" />
+    <uses-permission android:name="android.permission.CREATE_USERS"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
+    <uses-permission android:name="android.permission.MANAGE_USERS"/>
+    <uses-permission android:name="android.permission.TUNER_RESOURCE_ACCESS" />
 
     <application android:label="@string/app_name">
         <uses-library android:name="android.test.runner" />
     </application>
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.mediatunertest"
                      android:label="Media Tuner Tests"/>
 </manifest>

@@ -33,6 +33,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcelable;
@@ -52,8 +53,8 @@ import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
@@ -82,6 +83,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public static final int STATE_ICON = 0;
     public static final int STATE_DOT = 1;
     public static final int STATE_HIDDEN = 2;
+
+    /**
+     * Maximum allowed byte count for an icon bitmap
+     * @see android.graphics.RecordingCanvas.MAX_BITMAP_SIZE
+     */
+    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
+    /**
+     * Maximum allowed width or height for an icon drawable, if we can't get byte count
+     */
+    private static final int MAX_IMAGE_SIZE = 5000;
 
     private static final String TAG = "StatusBarIconView";
     private static final Property<StatusBarIconView, Float> ICON_APPEAR_AMOUNT
@@ -378,6 +389,22 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             Log.w(TAG, "No icon for slot " + mSlot + "; " + mIcon.icon);
             return false;
         }
+
+        if (drawable instanceof BitmapDrawable && ((BitmapDrawable) drawable).getBitmap() != null) {
+            // If it's a bitmap we can check the size directly
+            int byteCount = ((BitmapDrawable) drawable).getBitmap().getByteCount();
+            if (byteCount > MAX_BITMAP_SIZE) {
+                Log.w(TAG, "Drawable is too large (" + byteCount + " bytes) " + mIcon);
+                return false;
+            }
+        } else if (drawable.getIntrinsicWidth() > MAX_IMAGE_SIZE
+                || drawable.getIntrinsicHeight() > MAX_IMAGE_SIZE) {
+            // Otherwise, check dimensions
+            Log.w(TAG, "Drawable is too large (" + drawable.getIntrinsicWidth() + "x"
+                    + drawable.getIntrinsicHeight() + ") " + mIcon);
+            return false;
+        }
+
         if (withClear) {
             setImageDrawable(null);
         }
@@ -389,18 +416,24 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         return mIcon.icon;
     }
 
-    private Drawable getIcon(StatusBarIcon icon) {
-        return getIcon(getContext(), icon);
+    Drawable getIcon(StatusBarIcon icon) {
+        Context notifContext = getContext();
+        if (mNotification != null) {
+            notifContext = mNotification.getPackageContext(getContext());
+        }
+        return getIcon(getContext(), notifContext != null ? notifContext : getContext(), icon);
     }
 
     /**
      * Returns the right icon to use for this item
      *
-     * @param context Context to use to get resources
+     * @param sysuiContext Context to use to get scale factor
+     * @param context Context to use to get resources of notification icon
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
-    public static Drawable getIcon(Context context, StatusBarIcon statusBarIcon) {
+    public static Drawable getIcon(Context sysuiContext,
+            Context context, StatusBarIcon statusBarIcon) {
         int userId = statusBarIcon.user.getIdentifier();
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
@@ -409,7 +442,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         Drawable icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
 
         TypedValue typedValue = new TypedValue();
-        context.getResources().getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        sysuiContext.getResources().getValue(R.dimen.status_bar_icon_scale_factor,
+                typedValue, true);
         float scaleFactor = typedValue.getFloat();
 
         // No need to scale the icon, so return it as is.

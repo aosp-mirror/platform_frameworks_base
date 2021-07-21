@@ -306,6 +306,10 @@ please see styles_device_defaults.xml.
         <item name="textUnderlineColor">@color/holo_blue_light</item>
     </style>
 
+    <style name="TextAppearance.GrammarErrorSuggestion" parent="TextAppearance.Suggestion">
+        <item name="textUnderlineColor">@color/holo_blue_light</item>
+    </style>
+
     <!-- Widget Styles -->
 
     <style name="Widget">
@@ -960,8 +964,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Toast">
-        <item name="fontFamily">sans-serif</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="textSize">14sp</item>
+        <item name="textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Tooltip">
@@ -1474,17 +1479,6 @@ please see styles_device_defaults.xml.
     <style name="AutofillSaveAnimation">
         <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
         <item name="android:windowExitAnimation">@anim/slide_out_down</item>
-    </style>
-
-    <!-- The style for the container of media actions in a notification. -->
-    <!-- @hide -->
-    <style name="NotificationMediaActionContainer">
-        <item name="layout_width">wrap_content</item>
-        <item name="layout_height">wrap_content</item>
-        <item name="layout_marginTop">-21dp</item>
-        <item name="paddingStart">8dp</item>
-        <item name="paddingBottom">@dimen/media_notification_actions_padding_bottom</item>
-        <item name="gravity">top</item>
     </style>
 
     <!-- The style for normal action button on notification -->

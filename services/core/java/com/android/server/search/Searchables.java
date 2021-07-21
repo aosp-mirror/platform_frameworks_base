@@ -20,6 +20,7 @@ import android.app.AppGlobals;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -233,7 +234,7 @@ public class Searchables {
         List<ResolveInfo> searchList;
         final Intent intent = new Intent(Intent.ACTION_SEARCH);
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             searchList = queryIntentActivities(intent,
                     PackageManager.GET_META_DATA | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
@@ -397,8 +398,9 @@ public class Searchables {
     }
 
     private String getGlobalSearchProviderSetting() {
-        return Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY);
+        final ContentResolver cr = mContext.getContentResolver();
+        return Settings.Secure.getStringForUser(cr,
+                Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY, cr.getUserId());
     }
 
     /**
@@ -417,7 +419,7 @@ public class Searchables {
 
         if (activities != null && !activities.isEmpty()) {
             ActivityInfo ai = activities.get(0).activityInfo;
-            // TODO: do some sanity checks here?
+            // TODO: do some validity checks here?
             return new ComponentName(ai.packageName, ai.name);
         }
         Log.w(LOG_TAG, "No web search activity found");

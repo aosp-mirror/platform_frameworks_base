@@ -15,9 +15,13 @@
  */
 package android.hardware.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class describing the nanoapp state information resulting from a query to a Context Hub.
@@ -29,11 +33,21 @@ public final class NanoAppState implements Parcelable {
     private long mNanoAppId;
     private int mNanoAppVersion;
     private boolean mIsEnabled;
+    private List<String> mNanoAppPermissions;
 
     public NanoAppState(long nanoAppId, int appVersion, boolean enabled) {
         mNanoAppId = nanoAppId;
         mNanoAppVersion = appVersion;
         mIsEnabled = enabled;
+        mNanoAppPermissions = new ArrayList<String>();
+    }
+
+    public NanoAppState(long nanoAppId, int appVersion, boolean enabled,
+                        @NonNull List<String> nanoAppPermissions) {
+        mNanoAppId = nanoAppId;
+        mNanoAppVersion = appVersion;
+        mIsEnabled = enabled;
+        mNanoAppPermissions = nanoAppPermissions;
     }
 
     /**
@@ -57,10 +71,19 @@ public final class NanoAppState implements Parcelable {
         return mIsEnabled;
     }
 
+    /**
+     * @return List of Android permissions that are required to communicate with this app.
+     */
+    public @NonNull List<String> getNanoAppPermissions() {
+        return mNanoAppPermissions;
+    }
+
     private NanoAppState(Parcel in) {
         mNanoAppId = in.readLong();
         mNanoAppVersion = in.readInt();
         mIsEnabled = (in.readInt() == 1);
+        mNanoAppPermissions = new ArrayList<String>();
+        in.readStringList(mNanoAppPermissions);
     }
 
     @Override
@@ -73,6 +96,7 @@ public final class NanoAppState implements Parcelable {
         out.writeLong(mNanoAppId);
         out.writeInt(mNanoAppVersion);
         out.writeInt(mIsEnabled ? 1 : 0);
+        out.writeStringList(mNanoAppPermissions);
     }
 
     public static final @android.annotation.NonNull Creator<NanoAppState> CREATOR =

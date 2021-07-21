@@ -22,12 +22,11 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.SurfaceControlViewHost;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
@@ -46,8 +45,6 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
 
         mView.setZOrderOnTop(true);
         mView.getHolder().addCallback(this);
-
-        addEmbeddedView();
     }
 
     void addEmbeddedView() {
@@ -63,6 +60,8 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
                     v.setBackgroundColor(Color.RED);
                 }
         });
+        v.getViewTreeObserver().addOnWindowFocusChangeListener(focused ->
+                v.setBackgroundColor(focused ? Color.MAGENTA : Color.DKGRAY));
         WindowManager.LayoutParams lp =
             new WindowManager.LayoutParams(500, 500, WindowManager.LayoutParams.TYPE_APPLICATION,
                     0, PixelFormat.OPAQUE);
@@ -71,6 +70,7 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        addEmbeddedView();
     }
 
     @Override

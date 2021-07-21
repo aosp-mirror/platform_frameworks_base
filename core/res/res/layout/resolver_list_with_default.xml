@@ -148,7 +148,7 @@
         android:layout_alwaysShow="true"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?attr/colorBackgroundFloating"
+        android:background="?attr/colorBackground"
         android:foreground="?attr/dividerVertical" />
 
     <FrameLayout
@@ -157,7 +157,7 @@
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorBackgroundFloating"/>
+        android:background="?attr/colorBackground"/>
 
     <TabHost
         android:layout_alwaysShow="true"
@@ -166,7 +166,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="?attr/colorBackgroundFloating">
+        android:background="?attr/colorBackground">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -182,7 +182,7 @@
                 android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="?attr/colorBackgroundFloating"
+                android:background="?attr/colorBackground"
                 android:foreground="?attr/dividerVertical"/>
             <FrameLayout
                 android:id="@android:id/tabcontent"
@@ -200,6 +200,6 @@
         android:layout_alwaysShow="true"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?attr/colorBackgroundFloating"
+        android:background="?attr/colorBackground"
         android:foreground="?attr/dividerVertical" />
 </com.android.internal.widget.ResolverDrawerLayout>

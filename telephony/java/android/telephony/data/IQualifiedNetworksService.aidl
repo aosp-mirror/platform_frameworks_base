@@ -17,6 +17,7 @@
 package android.telephony.data;
 
 import android.telephony.data.IQualifiedNetworksServiceCallback;
+import android.telephony.data.ThrottleStatus;
 
 /**
  * {@hide}
@@ -25,4 +26,5 @@ interface IQualifiedNetworksService
 {
     oneway void createNetworkAvailabilityProvider(int slotId, IQualifiedNetworksServiceCallback callback);
     oneway void removeNetworkAvailabilityProvider(int slotId);
+    oneway void reportThrottleStatusChanged(int slotId, in List<ThrottleStatus> statuses);
 }

@@ -91,7 +91,9 @@ class AppZygoteInit {
                     } else {
                         Constructor<?> ctor = cl.getConstructor();
                         ZygotePreload preloadObject = (ZygotePreload) ctor.newInstance();
+                        Zygote.markOpenedFilesBeforePreload();
                         preloadObject.doPreload(appInfo);
+                        Zygote.allowFilesOpenedByPreload();
                     }
                 } catch (ReflectiveOperationException e) {
                     Log.e(TAG, "AppZygote application preload failed for "

@@ -18,6 +18,7 @@ package android.util;
 
 import static com.android.internal.util.Preconditions.*;
 
+import android.annotation.Nullable;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 /**
@@ -146,7 +147,7 @@ public final class Range<T extends Comparable<? super T>> {
      * @return {@code true} if the ranges are equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         } else if (this == obj) {

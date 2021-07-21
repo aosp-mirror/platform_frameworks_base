@@ -45,6 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.am.PersistentConnection;
 import com.android.server.appbinding.finders.AppServiceFinder;
 import com.android.server.appbinding.finders.CarrierMessagingClientServiceFinder;
@@ -125,18 +126,18 @@ public class AppBindingService extends Binder {
         }
 
         @Override
-        public void onStartUser(int userHandle) {
-            mService.onStartUser(userHandle);
+        public void onUserStarting(@NonNull TargetUser user) {
+            mService.onStartUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onUnlockUser(int userId) {
-            mService.onUnlockUser(userId);
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            mService.onUnlockUser(user.getUserIdentifier());
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mService.onStopUser(userHandle);
+        public void onUserStopping(@NonNull TargetUser user) {
+            mService.onStopUser(user.getUserIdentifier());
         }
     }
 

@@ -527,7 +527,7 @@ public class ToolbarActionBar extends ActionBar {
         public View onCreatePanelView(int featureId) {
             if (featureId == Window.FEATURE_OPTIONS_PANEL) {
                 // This gets called by PhoneWindow.preparePanel. Since this already manages
-                // its own panel, we return a dummy view here to prevent PhoneWindow from
+                // its own panel, we return a placeholder view here to prevent PhoneWindow from
                 // preparing a default one.
                 return new View(mDecorToolbar.getContext());
             }

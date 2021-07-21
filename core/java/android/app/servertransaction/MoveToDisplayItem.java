@@ -19,6 +19,8 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -31,23 +33,25 @@ import java.util.Objects;
  * Activity move to a different display message.
  * @hide
  */
-public class MoveToDisplayItem extends ClientTransactionItem {
+public class MoveToDisplayItem extends ActivityTransactionItem {
 
     private int mTargetDisplayId;
     private Configuration mConfiguration;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
+        final ActivityClientRecord r = getActivityClientRecord(client, token,
+                true /* includeLaunching */);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
-        client.updatePendingActivityConfiguration(token, mConfiguration);
+        client.updatePendingActivityConfiguration(r, mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
-        client.handleActivityConfigurationChanged(token, mConfiguration, mTargetDisplayId);
+        client.handleActivityConfigurationChanged(r, mConfiguration, mTargetDisplayId);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -96,7 +100,8 @@ public class MoveToDisplayItem extends ClientTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final @android.annotation.NonNull Creator<MoveToDisplayItem> CREATOR = new Creator<MoveToDisplayItem>() {
+    public static final @NonNull Creator<MoveToDisplayItem> CREATOR =
+            new Creator<MoveToDisplayItem>() {
         public MoveToDisplayItem createFromParcel(Parcel in) {
             return new MoveToDisplayItem(in);
         }
@@ -107,7 +112,7 @@ public class MoveToDisplayItem extends ClientTransactionItem {
     };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

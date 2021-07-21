@@ -136,7 +136,7 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
      */
     protected static int measureIndividualMenuWidth(ListAdapter adapter, ViewGroup parent,
             Context context, int maxAllowedWidth) {
-        // Menus don't tend to be long, so this is more sane than it looks.
+        // Menus don't tend to be long, so this is more valid than it looks.
         int maxWidth = 0;
         View itemView = null;
         int itemType = 0;

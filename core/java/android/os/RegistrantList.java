@@ -42,9 +42,9 @@ public class RegistrantList
     {
         // if the handler is already in the registrant list, remove it
         remove(h);
-        add(new Registrant(h, what, obj));        
+        add(new Registrant(h, what, obj));
     }
-    
+
     @UnsupportedAppUsage
     public synchronized void
     add(Registrant r)
@@ -59,7 +59,7 @@ public class RegistrantList
     {
         for (int i = registrants.size() - 1; i >= 0 ; i--) {
             Registrant  r = (Registrant) registrants.get(i);
-            
+
             if (r.refH == null) {
                 registrants.remove(i);
             }
@@ -92,7 +92,7 @@ public class RegistrantList
             r.internalNotifyRegistrant(result, exception);
        }
     }
-    
+
     @UnsupportedAppUsage
     public /*synchronized*/ void
     notifyRegistrants()
@@ -113,14 +113,14 @@ public class RegistrantList
         internalNotifyRegistrants (result, null);
     }
 
-    
+
     @UnsupportedAppUsage
     public /*synchronized*/ void
     notifyRegistrants(AsyncResult ar)
     {
         internalNotifyRegistrants(ar.result, ar.exception);
     }
-    
+
     @UnsupportedAppUsage
     public synchronized void
     remove(Handler h)

@@ -22,12 +22,14 @@ import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.BundleUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -77,7 +79,7 @@ public class RestrictionsSet {
         if (!changed) {
             return false;
         }
-        if (!UserRestrictionsUtils.isEmpty(restrictions)) {
+        if (!BundleUtils.isEmpty(restrictions)) {
             mUserRestrictions.put(userId, restrictions);
         } else {
             mUserRestrictions.delete(userId);
@@ -183,12 +185,12 @@ public class RestrictionsSet {
     /**
      * Serialize a given {@link RestrictionsSet} to XML.
      */
-    public void writeRestrictions(@NonNull XmlSerializer serializer, @NonNull String outerTag)
+    public void writeRestrictions(@NonNull TypedXmlSerializer serializer, @NonNull String outerTag)
             throws IOException {
         serializer.startTag(null, outerTag);
         for (int i = 0; i < mUserRestrictions.size(); i++) {
             serializer.startTag(null, TAG_RESTRICTIONS_USER);
-            serializer.attribute(null, USER_ID, String.valueOf(mUserRestrictions.keyAt(i)));
+            serializer.attributeInt(null, USER_ID, mUserRestrictions.keyAt(i));
             UserRestrictionsUtils.writeRestrictions(serializer, mUserRestrictions.valueAt(i),
                     TAG_RESTRICTIONS);
             serializer.endTag(null, TAG_RESTRICTIONS_USER);
@@ -199,7 +201,7 @@ public class RestrictionsSet {
     /**
      * Read restrictions from XML.
      */
-    public static RestrictionsSet readRestrictions(@NonNull XmlPullParser parser,
+    public static RestrictionsSet readRestrictions(@NonNull TypedXmlPullParser parser,
             @NonNull String outerTag) throws IOException, XmlPullParserException {
         RestrictionsSet restrictionsSet = new RestrictionsSet();
         int userId = 0;
@@ -210,7 +212,7 @@ public class RestrictionsSet {
             if (type == XmlPullParser.END_TAG && outerTag.equals(tag)) {
                 return restrictionsSet;
             } else if (type == XmlPullParser.START_TAG && TAG_RESTRICTIONS_USER.equals(tag)) {
-                userId = Integer.parseInt(parser.getAttributeValue(null, USER_ID));
+                userId = parser.getAttributeInt(null, USER_ID);
             } else if (type == XmlPullParser.START_TAG && TAG_RESTRICTIONS.equals(tag)) {
                 Bundle restrictions = UserRestrictionsUtils.readRestrictions(parser);
                 restrictionsSet.updateRestrictions(userId, restrictions);

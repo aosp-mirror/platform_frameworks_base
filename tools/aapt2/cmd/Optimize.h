@@ -36,8 +36,8 @@ struct OptimizeOptions {
   // Details of the app extracted from the AndroidManifest.xml
   AppInfo app_info;
 
-  // Blacklist of unused resources that should be removed from the apk.
-  std::unordered_set<ResourceName> resources_blacklist;
+  // Exclude list of unused resources that should be removed from the apk.
+  std::unordered_set<ResourceName> resources_exclude_list;
 
   // Split APK options.
   TableSplitterOptions table_splitter_options;

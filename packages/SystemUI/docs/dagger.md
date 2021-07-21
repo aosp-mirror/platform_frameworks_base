@@ -41,8 +41,6 @@ public interface SystemUIRootComponent {
 The root component is composed of root modules, which in turn provide the global singleton 
 dependencies across all of SystemUI.
 
-- `ContextHolder` is just a wrapper that provides a context.
-
 - `SystemUIFactory` `@Provides` dependencies that need to be overridden by SystemUI
 variants (like other form factors e.g. Car). 
 
@@ -52,41 +50,8 @@ variants (like other form factors e.g. Car).
 
 ### Adding injection to a new SystemUI object
 
-Anything that depends on any `@Singleton` provider from SystemUIRootComponent
-should be declared as a `@Subcomponent` of the root component. This requires
-declaring your own interface for generating your own modules or just the
-object you need injected. The subcomponent also needs to be added to
-SystemUIRootComponent in SystemUIFactory so it can be acquired.
-
-```java
-public interface SystemUIRootComponent {
-+    @Singleton
-+    Dependency.DependencyInjector createDependency();
-}
-
-public class Dependency extends SystemUI {
-  //...
-+  @Subcomponent
-+  public interface DependencyInjector {
-+      Dependency createSystemUI();
-+  }
-}
-```
-
-For objects which extend SystemUI and require injection, you can define an
-injector that creates the injected object for you. This other class should
-be referenced in [@string/config_systemUIServiceComponents](packages/SystemUI/res/values/config.xml).
-
-```java
-public static class DependencyCreator implements Injector {
-    @Override
-    public SystemUI apply(Context context) {
-        return SystemUIFactory.getInstance().getRootComponent()
-                .createDependency()
-                .createSystemUI();
-    }
-}
-```
+SystemUI object are made injectable by adding an entry in `SystemUIBinder`. SystemUIApplication uses
+information in that file to locate and construct an instance of the requested SystemUI class.
 
 ### Adding a new injectable object
 
@@ -147,7 +112,7 @@ whenever your fragment needs to be created.
 
 ```java
 public interface FragmentCreator {
-+   NavigationBarFragment createNavigationBar();
+    NavigationBarFragment createNavigationBar();
 }
 ```
 
@@ -160,57 +125,45 @@ FragmentHostManager.get(view).create(NavigationBarFragment.class);
 
 ### Using injection with Views
 
-Generally, you shouldn't need to inject for a view, as the view should
-be relatively self contained and logic that requires injection should be
-moved to a higher level construct such as a Fragment or a top-level SystemUI
-component, see above for how to do injection for both of which.
+DO NOT ADD NEW VIEW INJECTION. VIEW INJECTION IS BEING ACTIVELY DEPRECATED.
 
-Still here? Yeah, ok, sysui has a lot of pre-existing views that contain a
-lot of code that could benefit from injection and will need to be migrated
-off from Dependency#get uses. Similar to how fragments are injected, the view
-needs to be added to the interface
-com.android.systemui.util.InjectionInflationController$ViewInstanceCreator.
+Needing to inject objects into your View's constructor generally implies you
+are doing more work in your presentation layer than is advisable.
+Instead, create an injected controller for you view, inject into the
+controller, and then attach the view to the controller after inflation.
 
-```java
-public interface ViewInstanceCreator {
-+   QuickStatusBarHeader createQsHeader();
-}
-```
-
-Presumably you need to inflate that view from XML (otherwise why do you
-need anything special? see earlier sections about generic injection). To obtain
-an inflater that supports injected objects, call InjectionInflationController#injectable,
-which will wrap the inflater it is passed in one that can create injected
-objects when needed.
-
-```java
-@Override
-public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-        Bundle savedInstanceState) {
-    return mInjectionInflater.injectable(inflater).inflate(R.layout.my_layout, container, false);
-}
-```
-
-There is one other important thing to note about injecting with views. SysUI
-already has a Context in its global dagger component, so if you simply inject
-a Context, you will not get the one that the view should have with proper
-theming. Because of this, always ensure to tag views that have @Inject with
-the @Named view context.
-
-```java
-public CustomView(@Named(VIEW_CONTEXT) Context themedViewContext, AttributeSet attrs,
-        OtherCustomDependency something) {
-    //...
-}
-```
+View injection generally causes headaches while testing, as inflating a view
+(which may in turn inflate other views) implicitly causes a Dagger graph to 
+be stood up, which may or may not contain the appropriately 
+faked/mocked/stubbed objects. It is a hard to control process.
 
 ## Updating Dagger2
+
+We depend on the Dagger source found in external/dagger2. We should automatically pick up on updates
+when that repository is updated.
+
+*Deprecated:*
 
 Binaries can be downloaded from https://repo1.maven.org/maven2/com/google/dagger/ and then loaded
 into
 [/prebuilts/tools/common/m2/repository/com/google/dagger/](http://cs/android/prebuilts/tools/common/m2/repository/com/google/dagger/)
 
+The following commands should work, substituting in the version that you are looking for:
 
+````
+cd prebuilts/tools/common/m2/repository/com/google/dagger/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger/2.28.1/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger-compiler/2.28.1/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger-spi/2.28.1/
+
+wget -r -np -nH --cut-dirs=4 -erobots=off -R "index.html*" -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" https://repo1.maven.org/maven2/com/google/dagger/dagger-producers/2.28.1/
+````
+
+Then update `prebuilts/tools/common/m2/Android.bp` to point at your new jars.
+ 
 ## TODO List
 
  - Eliminate usages of Dependency#get

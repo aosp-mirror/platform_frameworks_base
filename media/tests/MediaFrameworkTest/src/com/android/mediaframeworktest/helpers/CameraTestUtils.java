@@ -16,16 +16,6 @@
 
 package com.android.mediaframeworktest.helpers;
 
-import com.android.ex.camera2.blocking.BlockingCameraManager;
-import com.android.ex.camera2.blocking.BlockingCameraManager.BlockingOpenException;
-import com.android.ex.camera2.blocking.BlockingSessionCallback;
-import com.android.ex.camera2.blocking.BlockingStateCallback;
-import com.android.ex.camera2.exceptions.TimeoutRuntimeException;
-
-import junit.framework.Assert;
-
-import org.mockito.Mockito;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -64,6 +54,16 @@ import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.ex.camera2.blocking.BlockingCameraManager;
+import com.android.ex.camera2.blocking.BlockingCameraManager.BlockingOpenException;
+import com.android.ex.camera2.blocking.BlockingSessionCallback;
+import com.android.ex.camera2.blocking.BlockingStateCallback;
+import com.android.ex.camera2.exceptions.TimeoutRuntimeException;
+
+import junit.framework.Assert;
+
+import org.mockito.Mockito;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -77,8 +77,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -225,7 +225,7 @@ public class CameraTestUtils extends Assert {
     }
 
     /**
-     * Dummy listener that release the image immediately once it is available.
+     * Mock listener that release the image immediately once it is available.
      *
      * <p>
      * It can be used for the case where we don't care the image data at all.

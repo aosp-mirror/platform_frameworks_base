@@ -88,7 +88,7 @@ public abstract class SwitchesProvider extends ContentProvider {
 
             controller.setAuthority(mAuthority);
             mControllerMap.put(key, controller);
-            if (!(controller instanceof MasterSwitchController)) {
+            if (!(controller instanceof PrimarySwitchController)) {
                 mSwitchDataList.add(controller.getBundle());
             }
         });
@@ -116,7 +116,7 @@ public abstract class SwitchesProvider extends ContentProvider {
 
         switch (method) {
             case METHOD_GET_SWITCH_DATA:
-                if (!(controller instanceof MasterSwitchController)) {
+                if (!(controller instanceof PrimarySwitchController)) {
                     return controller.getBundle();
                 }
                 break;

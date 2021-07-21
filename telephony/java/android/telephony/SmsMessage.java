@@ -29,6 +29,7 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Binder;
+import android.os.Build;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
@@ -133,7 +134,7 @@ public class SmsMessage {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mSubId = 0;
 
     /** set Subscription information
@@ -251,28 +252,6 @@ public class SmsMessage {
                 Rlog.e(LOG_TAG, "createFromPdu(): wrappedMessage is null");
                 return null;
             }
-        }
-    }
-
-    /**
-     * TS 27.005 3.4.1 lines[0] and lines[1] are the two lines read from the
-     * +CMT unsolicited response (PDU mode, of course)
-     *  +CMT: [&lt;alpha>],<length><CR><LF><pdu>
-     *
-     * Only public for debugging and for RIL
-     *
-     * {@hide}
-     */
-    public static SmsMessage newFromCMT(byte[] pdu) {
-        // received SMS in 3GPP format
-        SmsMessageBase wrappedMessage =
-                com.android.internal.telephony.gsm.SmsMessage.newFromCMT(pdu);
-
-        if (wrappedMessage != null) {
-            return new SmsMessage(wrappedMessage);
-        } else {
-            Rlog.e(LOG_TAG, "newFromCMT(): wrappedMessage is null");
-            return null;
         }
     }
 
@@ -496,7 +475,10 @@ public class SmsMessage {
         String newMsgBody = null;
         Resources r = Resources.getSystem();
         if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsgBody = Sms7BitEncodingTranslator.translate(text, isCdma);
+            // 7-bit ASCII table based translation is required only for CDMA single-part SMS since
+            // ENCODING_7BIT_ASCII is used for CDMA single-part SMS and ENCODING_GSM_7BIT_ALPHABET
+            // is used for CDMA multi-part SMS.
+            newMsgBody = Sms7BitEncodingTranslator.translate(text, isCdma && ted.msgCount == 1);
         }
         if (TextUtils.isEmpty(newMsgBody)) {
             newMsgBody = text;
@@ -1059,7 +1041,7 @@ public class SmsMessage {
      *
      * @return true if Cdma format should be used for MO SMS, false otherwise.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static boolean useCdmaFormatForMoSms(int subId) {
         SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
         if (!smsManager.isImsSmsSupported()) {

@@ -24,13 +24,16 @@ public interface AlarmManagerInternal {
     public interface InFlightListener {
         /** There is now an alarm pending delivery to the given app */
         void broadcastAlarmPending(int recipientUid);
+
         /** A broadcast alarm targeted to the given app has completed delivery */
         void broadcastAlarmComplete(int recipientUid);
     }
 
     /** Returns true if AlarmManager is delaying alarms due to device idle. */
     boolean isIdling();
+
     public void removeAlarmsForUid(int uid);
+
     public void registerInFlightListener(InFlightListener callback);
 
     /**
@@ -38,4 +41,10 @@ public interface AlarmManagerInternal {
      * {@link android.app.PendingIntent#equals(java.lang.Object) PendingIntent.equals}
      */
     void remove(PendingIntent rec);
+
+    /**
+     * Returns if the given package in the given user holds
+     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+     */
+    boolean hasScheduleExactAlarm(String packageName, int uid);
 }

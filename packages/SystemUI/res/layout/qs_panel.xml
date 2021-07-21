@@ -17,36 +17,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:clipToPadding="false"
     android:clipChildren="false" >
-
-    <!-- Main QS background -->
-    <View
-        android:id="@+id/quick_settings_background"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:elevation="4dp"
-        android:background="@drawable/qs_background_primary" />
-
-    <!-- Black part behind the status bar -->
-    <View
-        android:id="@+id/quick_settings_status_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/quick_qs_offset_height"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:background="#ff000000" />
-
-    <!-- Gradient view behind QS -->
-    <View
-        android:id="@+id/quick_settings_gradient_view"
-        android:layout_width="match_parent"
-        android:layout_height="126dp"
-        android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:background="@drawable/qs_bg_gradient" />
 
     <com.android.systemui.qs.NonInterceptingScrollView
         android:id="@+id/expanded_qs_scroll_view"
@@ -54,6 +27,9 @@
         android:layout_height="wrap_content"
         android:elevation="4dp"
         android:importantForAccessibility="no"
+        android:scrollbars="none"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:layout_weight="1">
         <com.android.systemui.qs.QSPanel
             android:id="@+id/quick_settings_panel"
@@ -61,10 +37,10 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:focusable="true"
-            android:accessibilityTraversalBefore="@android:id/edit">
+            android:accessibilityTraversalBefore="@android:id/edit"
+            android:clipToPadding="false"
+            android:clipChildren="false">
             <include layout="@layout/qs_footer_impl" />
-            <include layout="@layout/qs_media_divider"
-                android:id="@+id/divider"/>
         </com.android.systemui.qs.QSPanel>
     </com.android.systemui.qs.NonInterceptingScrollView>
 
@@ -74,19 +50,5 @@
 
     <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
         android:visibility="gone" />
-
-    <FrameLayout
-        android:id="@+id/qs_drag_handle_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:elevation="4dp"
-        android:paddingBottom="5dp">
-        <View
-            android:layout_width="46dp"
-            android:layout_height="3dp"
-            android:background="@drawable/qs_footer_drag_handle" />
-    </FrameLayout>
-
 
 </com.android.systemui.qs.QSContainerImpl>

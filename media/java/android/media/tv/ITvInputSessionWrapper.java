@@ -68,6 +68,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 19;
     private static final int DO_START_RECORDING = 20;
     private static final int DO_STOP_RECORDING = 21;
+    private static final int DO_PAUSE_RECORDING = 22;
+    private static final int DO_RESUME_RECORDING = 23;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -224,6 +226,14 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputRecordingSessionImpl.stopRecording();
                 break;
             }
+            case DO_PAUSE_RECORDING: {
+                mTvInputRecordingSessionImpl.pauseRecording((Bundle) msg.obj);
+                break;
+            }
+            case DO_RESUME_RECORDING: {
+                mTvInputRecordingSessionImpl.resumeRecording((Bundle) msg.obj);
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -361,6 +371,16 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void stopRecording() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_STOP_RECORDING));
+    }
+
+    @Override
+    public void pauseRecording(@Nullable Bundle params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_PAUSE_RECORDING, params));
+    }
+
+    @Override
+    public void resumeRecording(@Nullable Bundle params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_RESUME_RECORDING, params));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

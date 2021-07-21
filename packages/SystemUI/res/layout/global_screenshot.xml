@@ -14,11 +14,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout
+<com.android.systemui.screenshot.ScreenshotView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/global_screenshot_frame"
+    android:theme="@style/Screenshot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:importantForAccessibility="no">
+    <ImageView
+        android:id="@+id/screenshot_scrolling_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:clickable="true"
+        android:importantForAccessibility="no"/>
     <ImageView
         android:id="@+id/global_screenshot_actions_background"
         android:layout_height="@dimen/screenshot_bg_protection_height"
@@ -26,14 +35,6 @@
         android:layout_gravity="bottom"
         android:alpha="0.0"
         android:src="@drawable/screenshot_actions_background_protection"/>
-    <ImageView
-        android:id="@+id/global_screenshot_animated_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:visibility="gone"
-        android:elevation="@dimen/screenshot_preview_elevation"
-        android:background="@drawable/screenshot_rounded_corners" />
     <ImageView
         android:id="@+id/global_screenshot_flash"
         android:layout_width="match_parent"
@@ -47,19 +48,6 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
-    <include layout="@layout/global_screenshot_static"/>
-    <FrameLayout
-        android:id="@+id/global_screenshot_dismiss_button"
-        android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"
-        android:layout_height="@dimen/screenshot_dismiss_button_tappable_size"
-        android:elevation="7dp"
-        android:visibility="gone"
-        android:contentDescription="@string/screenshot_dismiss_ui_description">
-        <ImageView
-            android:id="@+id/global_screenshot_dismiss_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/screenshot_dismiss_button_margin"
-            android:src="@drawable/screenshot_cancel"/>
-    </FrameLayout>
-</FrameLayout>
+    <include layout="@layout/global_screenshot_static"
+             android:id="@+id/global_screenshot_static"/>
+</com.android.systemui.screenshot.ScreenshotView>

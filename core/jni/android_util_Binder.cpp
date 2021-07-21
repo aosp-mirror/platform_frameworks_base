@@ -39,6 +39,7 @@
 #include <binder/Stability.h>
 #include <binderthreadstate/CallerUtils.h>
 #include <cutils/atomic.h>
+#include <cutils/threads.h>
 #include <log/log.h>
 #include <utils/KeyedVector.h>
 #include <utils/List.h>
@@ -302,8 +303,9 @@ static void report_java_lang_error(JNIEnv* env, jthrowable error, const char* ms
     report_java_lang_error_fatal_error(env, error, msg);
 }
 
-static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
-{
+namespace android {
+
+void binder_report_exception(JNIEnv* env, jthrowable excep, const char* msg) {
     env->ExceptionClear();
 
     ScopedLocalRef<jstring> tagstr(env, env->NewStringUTF(LOG_TAG));
@@ -330,6 +332,8 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
         report_java_lang_error(env, excep, msg);
     }
 }
+
+} // namespace android
 
 class JavaBBinderHolder;
 
@@ -405,9 +409,9 @@ protected:
 
         if (env->ExceptionCheck()) {
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-            report_exception(env, excep.get(),
-                "*** Uncaught remote exception!  "
-                "(Exceptions are not yet supported across processes.)");
+            binder_report_exception(env, excep.get(),
+                                    "*** Uncaught remote exception!  "
+                                    "(Exceptions are not yet supported across processes.)");
             res = JNI_FALSE;
         }
 
@@ -421,8 +425,8 @@ protected:
 
         if (env->ExceptionCheck()) {
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-            report_exception(env, excep.get(),
-                "*** Uncaught exception in onBinderStrictModePolicyChange");
+            binder_report_exception(env, excep.get(),
+                                    "*** Uncaught exception in onBinderStrictModePolicyChange");
         }
 
         // Need to always call through the native implementation of
@@ -482,7 +486,13 @@ public:
     }
 
     void markVintf() {
+        AutoMutex _l(mLock);
         mVintf = true;
+    }
+
+    void forceDowngradeToSystemStability() {
+        AutoMutex _l(mLock);
+        mVintf = false;
     }
 
     sp<IBinder> getExtension() {
@@ -567,8 +577,8 @@ public:
                                       jBinderProxy.get());
             if (env->ExceptionCheck()) {
                 jthrowable excep = env->ExceptionOccurred();
-                report_exception(env, excep,
-                        "*** Uncaught exception returned from death notification!");
+                binder_report_exception(env, excep,
+                                        "*** Uncaught exception returned from death notification!");
             }
 
             // Serialize with our containing DeathRecipientList so that we can't
@@ -959,17 +969,8 @@ static jlong android_os_Binder_clearCallingIdentity()
     return IPCThreadState::self()->clearCallingIdentity();
 }
 
-static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz, jlong token)
+static void android_os_Binder_restoreCallingIdentity(jlong token)
 {
-    // XXX temporary sanity check to debug crashes.
-    int uid = (int)(token>>32);
-    if (uid > 0 && uid < 999) {
-        // In Android currently there are no uids in this range.
-        char buf[128];
-        sprintf(buf, "Restoring bad calling ident: 0x%" PRIx64, token);
-        jniThrowException(env, "java/lang/IllegalStateException", buf);
-        return;
-    }
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
@@ -1007,6 +1008,12 @@ static void android_os_Binder_markVintfStability(JNIEnv* env, jobject clazz) {
     JavaBBinderHolder* jbh =
         (JavaBBinderHolder*) env->GetLongField(clazz, gBinderOffsets.mObject);
     jbh->markVintf();
+}
+
+static void android_os_Binder_forceDowngradeToSystemStability(JNIEnv* env, jobject clazz) {
+    JavaBBinderHolder* jbh =
+        (JavaBBinderHolder*) env->GetLongField(clazz, gBinderOffsets.mObject);
+    jbh->forceDowngradeToSystemStability();
 }
 
 static void android_os_Binder_flushPendingCommands(JNIEnv* env, jobject clazz)
@@ -1059,6 +1066,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "isHandlingTransaction", "()Z", (void*)android_os_Binder_isHandlingTransaction },
     // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
+    // @CriticalNative
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
     // @CriticalNative
     { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },
@@ -1072,6 +1080,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "clearCallingWorkSource", "()J", (void*)android_os_Binder_clearCallingWorkSource },
     { "restoreCallingWorkSource", "(J)V", (void*)android_os_Binder_restoreCallingWorkSource },
     { "markVintfStability", "()V", (void*)android_os_Binder_markVintfStability},
+    { "forceDowngradeToSystemStability", "()V", (void*)android_os_Binder_forceDowngradeToSystemStability},
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "getNativeBBinderHolder", "()J", (void*)android_os_Binder_getNativeBBinderHolder },
     { "getNativeFinalizer", "()J", (void*)android_os_Binder_getNativeFinalizer },
@@ -1163,8 +1172,8 @@ static void android_os_BinderInternal_proxyLimitcallback(int uid)
 
     if (env->ExceptionCheck()) {
         ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-        report_exception(env, excep.get(),
-            "*** Uncaught exception in binderProxyLimitCallbackFromNative");
+        binder_report_exception(env, excep.get(),
+                                "*** Uncaught exception in binderProxyLimitCallbackFromNative");
     }
 }
 
@@ -1496,7 +1505,9 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
             res = JNI_TRUE;
         } else {
             jniThrowException(env, "java/util/NoSuchElementException",
-                              "Death link does not exist");
+                              base::StringPrintf("Death link does not exist (%s)",
+                                                 statusToString(err).c_str())
+                                      .c_str());
         }
     }
 

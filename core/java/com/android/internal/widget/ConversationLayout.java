@@ -18,8 +18,6 @@ package com.android.internal.widget;
 
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
-import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_IN;
-import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_OUT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -34,10 +32,6 @@ import android.app.Person;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -52,6 +46,7 @@ import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.RemotableViewMethod;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -66,15 +61,12 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.graphics.ColorUtils;
-import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * A custom-built layout for the Notification.MessagingStyle allows dynamic addition and removal
@@ -84,16 +76,6 @@ import java.util.regex.Pattern;
 public class ConversationLayout extends FrameLayout
         implements ImageMessageConsumer, IMessagingLayout {
 
-    private static final float COLOR_SHIFT_AMOUNT = 60;
-    /**
-     *  Pattern for filter some ignorable characters.
-     *  p{Z} for any kind of whitespace or invisible separator.
-     *  p{C} for any kind of punctuation character.
-     */
-    private static final Pattern IGNORABLE_CHAR_PATTERN
-            = Pattern.compile("[\\p{C}\\p{Z}]");
-    private static final Pattern SPECIAL_CHAR_PATTERN
-            = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
     private static final Consumer<MessagingMessage> REMOVE_MESSAGE
             = MessagingMessage::removeMessage;
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
@@ -105,6 +87,7 @@ public class ConversationLayout extends FrameLayout
     public static final int IMPORTANCE_ANIM_GROW_DURATION = 250;
     public static final int IMPORTANCE_ANIM_SHRINK_DURATION = 200;
     public static final int IMPORTANCE_ANIM_SHRINK_DELAY = 25;
+    private final PeopleHelper mPeopleHelper = new PeopleHelper();
     private List<MessagingMessage> mMessages = new ArrayList<>();
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
@@ -113,9 +96,6 @@ public class ConversationLayout extends FrameLayout
     private int mLayoutColor;
     private int mSenderTextColor;
     private int mMessageTextColor;
-    private int mAvatarSize;
-    private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint mTextPaint = new Paint();
     private Icon mAvatarReplacement;
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
@@ -133,23 +113,23 @@ public class ConversationLayout extends FrameLayout
     private CachingIconView mConversationIconBadgeBg;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
-    private View mExpandButtonInnerContainer;
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
-    private int mExpandButtonExpandedTopMargin;
-    private int mBadgedSideMargins;
+    private int mBadgeProtrusion;
     private int mConversationAvatarSize;
     private int mConversationAvatarSizeExpanded;
     private CachingIconView mIcon;
     private CachingIconView mImportanceRingView;
-    private int mExpandedGroupSideMargin;
-    private int mExpandedGroupSideMarginFacePile;
+    private int mExpandedGroupBadgeProtrusion;
+    private int mExpandedGroupBadgeProtrusionFacePile;
     private View mConversationFacePile;
     private int mNotificationBackgroundColor;
     private CharSequence mFallbackChatName;
     private CharSequence mFallbackGroupChatName;
     private CharSequence mConversationTitle;
+    private int mMessageSpacingStandard;
+    private int mMessageSpacingGroup;
     private int mNotificationHeaderExpandedPadding;
     private View mConversationHeader;
     private View mContentContainer;
@@ -157,22 +137,19 @@ public class ConversationLayout extends FrameLayout
     private int mContentMarginEnd;
     private Rect mMessagingClipRect;
     private ObservableTextView mAppName;
-    private ViewGroup mActions;
-    private int mConversationContentStart;
-    private int mInternalButtonPadding;
+    private NotificationActionListLayout mActions;
     private boolean mAppNameGone;
     private int mFacePileAvatarSize;
     private int mFacePileAvatarSizeExpandedGroup;
     private int mFacePileProtectionWidth;
     private int mFacePileProtectionWidthExpanded;
     private boolean mImportantConversation;
-    private TextView mUnreadBadge;
-    private ViewGroup mAppOps;
-    private Rect mAppOpsTouchRect = new Rect();
+    private View mFeedbackIcon;
     private float mMinTouchSize;
     private Icon mConversationIcon;
     private Icon mShortcutIcon;
     private View mAppNameDivider;
+    private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -195,6 +172,7 @@ public class ConversationLayout extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mPeopleHelper.init(getContext());
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
         mActions = findViewById(R.id.actions);
         mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
@@ -204,13 +182,10 @@ public class ConversationLayout extends FrameLayout
         int size = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         mMessagingClipRect = new Rect(0, 0, size, size);
         setMessagingClippingDisabled(false);
-        mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextPaint.setAntiAlias(true);
         mConversationIconView = findViewById(R.id.conversation_icon);
         mConversationIconContainer = findViewById(R.id.conversation_icon_container);
         mIcon = findViewById(R.id.icon);
-        mAppOps = findViewById(com.android.internal.R.id.app_ops);
+        mFeedbackIcon = findViewById(com.android.internal.R.id.feedback);
         mMinTouchSize = 48 * getResources().getDisplayMetrics().density;
         mImportanceRingView = findViewById(R.id.conversation_icon_badge_ring);
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
@@ -249,31 +224,32 @@ public class ConversationLayout extends FrameLayout
         });
         // When the small icon is gone, hide the rest of the badge
         mIcon.setOnForceHiddenChangedListener((forceHidden) -> {
-            animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
-            animateViewForceHidden(mImportanceRingView, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mImportanceRingView, forceHidden);
         });
 
         // When the conversation icon is gone, hide the whole badge
         mConversationIconView.setOnForceHiddenChangedListener((forceHidden) -> {
-            animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
-            animateViewForceHidden(mImportanceRingView, forceHidden);
-            animateViewForceHidden(mIcon, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mImportanceRingView, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mIcon, forceHidden);
         });
         mConversationText = findViewById(R.id.conversation_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
         mConversationHeader = findViewById(R.id.conversation_header);
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
-        mExpandButtonInnerContainer = findViewById(R.id.expand_button_inner_container);
         mExpandButton = findViewById(R.id.expand_button);
-        mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
-                R.dimen.conversation_expand_button_top_margin_expanded);
+        mMessageSpacingStandard = getResources().getDimensionPixelSize(
+                R.dimen.notification_messaging_spacing);
+        mMessageSpacingGroup = getResources().getDimensionPixelSize(
+                R.dimen.notification_messaging_spacing_conversation_group);
         mNotificationHeaderExpandedPadding = getResources().getDimensionPixelSize(
                 R.dimen.conversation_header_expanded_padding_end);
         mContentMarginEnd = getResources().getDimensionPixelSize(
                 R.dimen.notification_content_margin_end);
-        mBadgedSideMargins = getResources().getDimensionPixelSize(
-                R.dimen.conversation_badge_side_margin);
+        mBadgeProtrusion = getResources().getDimensionPixelSize(
+                R.dimen.conversation_badge_protrusion);
         mConversationAvatarSize = getResources().getDimensionPixelSize(
                 R.dimen.conversation_avatar_size);
         mConversationAvatarSizeExpanded = getResources().getDimensionPixelSize(
@@ -284,10 +260,10 @@ public class ConversationLayout extends FrameLayout
                 R.dimen.conversation_icon_container_top_padding);
         mExpandedGroupMessagePadding = getResources().getDimensionPixelSize(
                 R.dimen.expanded_group_conversation_message_padding);
-        mExpandedGroupSideMargin = getResources().getDimensionPixelSize(
-                R.dimen.conversation_badge_side_margin_group_expanded);
-        mExpandedGroupSideMarginFacePile = getResources().getDimensionPixelSize(
-                R.dimen.conversation_badge_side_margin_group_expanded_face_pile);
+        mExpandedGroupBadgeProtrusion = getResources().getDimensionPixelSize(
+                R.dimen.conversation_badge_protrusion_group_expanded);
+        mExpandedGroupBadgeProtrusionFacePile = getResources().getDimensionPixelSize(
+                R.dimen.conversation_badge_protrusion_group_expanded_face_pile);
         mConversationFacePile = findViewById(R.id.conversation_face_pile);
         mFacePileAvatarSize = getResources().getDimensionPixelSize(
                 R.dimen.conversation_face_pile_avatar_size);
@@ -307,34 +283,6 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
-        mUnreadBadge = findViewById(R.id.conversation_unread_count);
-        mConversationContentStart = getResources().getDimensionPixelSize(
-                R.dimen.conversation_content_start);
-        mInternalButtonPadding
-                = getResources().getDimensionPixelSize(R.dimen.button_padding_horizontal_material)
-                + getResources().getDimensionPixelSize(R.dimen.button_inset_horizontal_material);
-    }
-
-    private void animateViewForceHidden(CachingIconView view, boolean forceHidden) {
-        boolean nowForceHidden = view.willBeForceHidden() || view.isForceHidden();
-        if (forceHidden == nowForceHidden) {
-            // We are either already forceHidden or will be
-            return;
-        }
-        view.animate().cancel();
-        view.setWillBeForceHidden(forceHidden);
-        view.animate()
-                .scaleX(forceHidden ? 0.5f : 1.0f)
-                .scaleY(forceHidden ? 0.5f : 1.0f)
-                .alpha(forceHidden ? 0.0f : 1.0f)
-                .setInterpolator(forceHidden ? ALPHA_OUT : ALPHA_IN)
-                .setDuration(160);
-        if (view.getVisibility() != VISIBLE) {
-            view.setForceHidden(forceHidden);
-        } else {
-            view.animate().withEndAction(() -> view.setForceHidden(forceHidden));
-        }
-        view.animate().start();
     }
 
     @RemotableViewMethod
@@ -467,17 +415,7 @@ public class ConversationLayout extends FrameLayout
 
     /** @hide */
     public void setUnreadCount(int unreadCount) {
-        boolean visible = mIsCollapsed && unreadCount > 1;
-        mUnreadBadge.setVisibility(visible ? VISIBLE : GONE);
-        if (visible) {
-            CharSequence text = unreadCount >= 100
-                    ? getResources().getString(R.string.unread_convo_overflow, 99)
-                    : String.format(Locale.getDefault(), "%d", unreadCount);
-            mUnreadBadge.setText(text);
-            mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
-            boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
-            mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
-        }
+        mExpandButton.setNumber(unreadCount);
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -559,7 +497,8 @@ public class ConversationLayout extends FrameLayout
                     if (mConversationIcon == null) {
                         Icon avatarIcon = messagingGroup.getAvatarIcon();
                         if (avatarIcon == null) {
-                            avatarIcon = createAvatarSymbol(conversationText, "", mLayoutColor);
+                            avatarIcon = mPeopleHelper.createAvatarSymbol(conversationText, "",
+                                    mLayoutColor);
                         }
                         mConversationIcon = avatarIcon;
                     }
@@ -588,13 +527,7 @@ public class ConversationLayout extends FrameLayout
         mConversationText.setText(conversationText);
         // Update if the groups can hide the sender if they are first (applies to 1:1 conversations)
         // This needs to happen after all of the above o update all of the groups
-        for (int i = mGroups.size() - 1; i >= 0; i--) {
-            MessagingGroup messagingGroup = mGroups.get(i);
-            CharSequence messageSender = messagingGroup.getSenderName();
-            boolean canHide = mIsOneToOne
-                    && TextUtils.equals(conversationText, messageSender);
-            messagingGroup.setCanHideSenderIfFirst(canHide);
-        }
+        mPeopleHelper.maybeHideFirstSenderName(mGroups, mIsOneToOne, conversationText);
         updateAppName();
         updateIconPositionAndSize();
         updateImageMessages();
@@ -604,22 +537,8 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateActionListPadding() {
-        if (mActions == null) {
-            return;
-        }
-        View firstAction = mActions.getChildAt(0);
-        if (firstAction != null) {
-            // Let's visually position the first action where the content starts
-            int paddingStart = mConversationContentStart;
-
-            MarginLayoutParams layoutParams = (MarginLayoutParams) firstAction.getLayoutParams();
-            paddingStart -= layoutParams.getMarginStart();
-            paddingStart -= mInternalButtonPadding;
-
-            mActions.setPaddingRelative(paddingStart,
-                    mActions.getPaddingTop(),
-                    mActions.getPaddingEnd(),
-                    mActions.getPaddingBottom());
+        if (mActions != null) {
+            mActions.setCollapsibleIndentDimen(R.dimen.call_notification_collapsible_indent);
         }
     }
 
@@ -672,11 +591,11 @@ public class ConversationLayout extends FrameLayout
             }
         }
         if (lastIcon == null) {
-            lastIcon = createAvatarSymbol(" ", "", mLayoutColor);
+            lastIcon = mPeopleHelper.createAvatarSymbol(" ", "", mLayoutColor);
         }
         bottomView.setImageIcon(lastIcon);
         if (secondLastIcon == null) {
-            secondLastIcon = createAvatarSymbol("", "", mLayoutColor);
+            secondLastIcon = mPeopleHelper.createAvatarSymbol("", "", mLayoutColor);
         }
         topView.setImageIcon(secondLastIcon);
     }
@@ -703,7 +622,7 @@ public class ConversationLayout extends FrameLayout
             facepileAvatarSize = mFacePileAvatarSizeExpandedGroup;
             facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidthExpanded;
         }
-        LayoutParams layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
+        LayoutParams layoutParams = (LayoutParams) mConversationFacePile.getLayoutParams();
         layoutParams.width = conversationAvatarSize;
         layoutParams.height = conversationAvatarSize;
         mConversationFacePile.setLayoutParams(layoutParams);
@@ -736,32 +655,42 @@ public class ConversationLayout extends FrameLayout
      * update the icon position and sizing
      */
     private void updateIconPositionAndSize() {
-        int sidemargin;
+        int badgeProtrusion;
         int conversationAvatarSize;
         if (mIsOneToOne || mIsCollapsed) {
-            sidemargin = mBadgedSideMargins;
+            badgeProtrusion = mBadgeProtrusion;
             conversationAvatarSize = mConversationAvatarSize;
         } else {
-            sidemargin = mConversationFacePile.getVisibility() == VISIBLE
-                    ? mExpandedGroupSideMarginFacePile
-                    : mExpandedGroupSideMargin;
+            badgeProtrusion = mConversationFacePile.getVisibility() == VISIBLE
+                    ? mExpandedGroupBadgeProtrusionFacePile
+                    : mExpandedGroupBadgeProtrusion;
             conversationAvatarSize = mConversationAvatarSizeExpanded;
         }
-        LayoutParams layoutParams =
-                (LayoutParams) mConversationIconBadge.getLayoutParams();
-        layoutParams.topMargin = sidemargin;
-        layoutParams.setMarginStart(sidemargin);
-        mConversationIconBadge.setLayoutParams(layoutParams);
 
         if (mConversationIconView.getVisibility() == VISIBLE) {
-            layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
+            LayoutParams layoutParams = (LayoutParams) mConversationIconView.getLayoutParams();
             layoutParams.width = conversationAvatarSize;
             layoutParams.height = conversationAvatarSize;
+            layoutParams.leftMargin = badgeProtrusion;
+            layoutParams.rightMargin = badgeProtrusion;
+            layoutParams.bottomMargin = badgeProtrusion;
             mConversationIconView.setLayoutParams(layoutParams);
+        }
+
+        if (mConversationFacePile.getVisibility() == VISIBLE) {
+            LayoutParams layoutParams = (LayoutParams) mConversationFacePile.getLayoutParams();
+            layoutParams.leftMargin = badgeProtrusion;
+            layoutParams.rightMargin = badgeProtrusion;
+            layoutParams.bottomMargin = badgeProtrusion;
+            mConversationFacePile.setLayoutParams(layoutParams);
         }
     }
 
     private void updatePaddingsBasedOnContentAvailability() {
+        // groups have avatars that need more spacing
+        mMessagingLinearLayout.setSpacing(
+                mIsOneToOne ? mMessageSpacingStandard : mMessageSpacingGroup);
+
         int messagingPadding = mIsOneToOne || mIsCollapsed
                 ? 0
                 // Add some extra padding to the messages, since otherwise it will overlap with the
@@ -836,34 +765,8 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateTitleAndNamesDisplay() {
-        ArrayMap<CharSequence, String> uniqueNames = new ArrayMap<>();
-        ArrayMap<Character, CharSequence> uniqueCharacters = new ArrayMap<>();
-        for (int i = 0; i < mGroups.size(); i++) {
-            MessagingGroup group = mGroups.get(i);
-            CharSequence senderName = group.getSenderName();
-            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
-                continue;
-            }
-            if (!uniqueNames.containsKey(senderName)) {
-                // Only use visible characters to get uniqueNames
-                String pureSenderName = IGNORABLE_CHAR_PATTERN
-                        .matcher(senderName).replaceAll("" /* replacement */);
-                char c = pureSenderName.charAt(0);
-                if (uniqueCharacters.containsKey(c)) {
-                    // this character was already used, lets make it more unique. We first need to
-                    // resolve the existing character if it exists
-                    CharSequence existingName = uniqueCharacters.get(c);
-                    if (existingName != null) {
-                        uniqueNames.put(existingName, findNameSplit((String) existingName));
-                        uniqueCharacters.put(c, null);
-                    }
-                    uniqueNames.put(senderName, findNameSplit((String) senderName));
-                } else {
-                    uniqueNames.put(senderName, Character.toString(c));
-                    uniqueCharacters.put(c, pureSenderName);
-                }
-            }
-        }
+        // Map of unique names to their prefix
+        Map<CharSequence, String> uniqueNames = mPeopleHelper.mapUniqueNamesToPrefix(mGroups);
 
         // Now that we have the correct symbols, let's look what we have cached
         ArrayMap<CharSequence, Icon> cachedAvatars = new ArrayMap<>();
@@ -896,57 +799,14 @@ public class ConversationLayout extends FrameLayout
             } else {
                 Icon cachedIcon = cachedAvatars.get(senderName);
                 if (cachedIcon == null) {
-                    cachedIcon = createAvatarSymbol(senderName, uniqueNames.get(senderName),
-                            mLayoutColor);
+                    cachedIcon = mPeopleHelper.createAvatarSymbol(senderName,
+                            uniqueNames.get(senderName), mLayoutColor);
                     cachedAvatars.put(senderName, cachedIcon);
                 }
                 group.setCreatedAvatar(cachedIcon, senderName, uniqueNames.get(senderName),
                         mLayoutColor);
             }
         }
-    }
-
-    private Icon createAvatarSymbol(CharSequence senderName, String symbol, int layoutColor) {
-        if (symbol.isEmpty() || TextUtils.isDigitsOnly(symbol) ||
-                SPECIAL_CHAR_PATTERN.matcher(symbol).find()) {
-            Icon avatarIcon = Icon.createWithResource(getContext(),
-                    R.drawable.messaging_user);
-            avatarIcon.setTint(findColor(senderName, layoutColor));
-            return avatarIcon;
-        } else {
-            Bitmap bitmap = Bitmap.createBitmap(mAvatarSize, mAvatarSize, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            float radius = mAvatarSize / 2.0f;
-            int color = findColor(senderName, layoutColor);
-            mPaint.setColor(color);
-            canvas.drawCircle(radius, radius, radius, mPaint);
-            boolean needDarkText = ColorUtils.calculateLuminance(color) > 0.5f;
-            mTextPaint.setColor(needDarkText ? Color.BLACK : Color.WHITE);
-            mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.5f : mAvatarSize * 0.3f);
-            int yPos = (int) (radius - ((mTextPaint.descent() + mTextPaint.ascent()) / 2));
-            canvas.drawText(symbol, radius, yPos, mTextPaint);
-            return Icon.createWithBitmap(bitmap);
-        }
-    }
-
-    private int findColor(CharSequence senderName, int layoutColor) {
-        double luminance = ContrastColorUtil.calculateLuminance(layoutColor);
-        float shift = Math.abs(senderName.hashCode()) % 5 / 4.0f - 0.5f;
-
-        // we need to offset the range if the luminance is too close to the borders
-        shift += Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - luminance, 0);
-        shift -= Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - (1.0f - luminance), 0);
-        return ContrastColorUtil.getShiftedColor(layoutColor,
-                (int) (shift * COLOR_SHIFT_AMOUNT));
-    }
-
-    private String findNameSplit(String existingName) {
-        String[] split = existingName.split(" ");
-        if (split.length > 1) {
-            return Character.toString(split[0].charAt(0))
-                    + Character.toString(split[1].charAt(0));
-        }
-        return existingName.substring(0, 1);
     }
 
     @RemotableViewMethod
@@ -1166,46 +1026,30 @@ public class ConversationLayout extends FrameLayout
                 }
             });
         }
-        if (mAppOps.getWidth() > 0) {
+        mTouchDelegate.clear();
+        if (mFeedbackIcon.getVisibility() == VISIBLE) {
+            float width = Math.max(mMinTouchSize, mFeedbackIcon.getWidth());
+            float height = Math.max(mMinTouchSize, mFeedbackIcon.getHeight());
+            final Rect feedbackTouchRect = new Rect();
+            feedbackTouchRect.left = (int) ((mFeedbackIcon.getLeft() + mFeedbackIcon.getRight())
+                    / 2.0f - width / 2.0f);
+            feedbackTouchRect.top = (int) ((mFeedbackIcon.getTop() + mFeedbackIcon.getBottom())
+                    / 2.0f - height / 2.0f);
+            feedbackTouchRect.bottom = (int) (feedbackTouchRect.top + height);
+            feedbackTouchRect.right = (int) (feedbackTouchRect.left + width);
 
-            // Let's increase the touch size of the app ops view if it's here
-            mAppOpsTouchRect.set(
-                    mAppOps.getLeft(),
-                    mAppOps.getTop(),
-                    mAppOps.getRight(),
-                    mAppOps.getBottom());
-            for (int i = 0; i < mAppOps.getChildCount(); i++) {
-                View child = mAppOps.getChildAt(i);
-                if (child.getVisibility() == GONE) {
-                    continue;
-                }
-                // Make sure each child has at least a minTouchSize touch target around it
-                float childTouchLeft = child.getLeft() + child.getWidth() / 2.0f
-                        - mMinTouchSize / 2.0f;
-                float childTouchRight = childTouchLeft + mMinTouchSize;
-                mAppOpsTouchRect.left = (int) Math.min(mAppOpsTouchRect.left,
-                        mAppOps.getLeft() + childTouchLeft);
-                mAppOpsTouchRect.right = (int) Math.max(mAppOpsTouchRect.right,
-                        mAppOps.getLeft() + childTouchRight);
-            }
+            getRelativeTouchRect(feedbackTouchRect, mFeedbackIcon);
+            mTouchDelegate.add(new TouchDelegate(feedbackTouchRect, mFeedbackIcon));
+        }
 
-            // Increase the height
-            int heightIncrease = 0;
-            if (mAppOpsTouchRect.height() < mMinTouchSize) {
-                heightIncrease = (int) Math.ceil((mMinTouchSize - mAppOpsTouchRect.height())
-                        / 2.0f);
-            }
-            mAppOpsTouchRect.inset(0, -heightIncrease);
+        setTouchDelegate(mTouchDelegate);
+    }
 
-            // Let's adjust the hitrect since app ops isn't a direct child
-            ViewGroup viewGroup = (ViewGroup) mAppOps.getParent();
-            while (viewGroup != this) {
-                mAppOpsTouchRect.offset(viewGroup.getLeft(), viewGroup.getTop());
-                viewGroup = (ViewGroup) viewGroup.getParent();
-            }
-            //
-            // Extend the size of the app opps to be at least 48dp
-            setTouchDelegate(new TouchDelegate(mAppOpsTouchRect, mAppOps));
+    private void getRelativeTouchRect(Rect touchRect, View view) {
+        ViewGroup viewGroup = (ViewGroup) view.getParent();
+        while (viewGroup != this) {
+            touchRect.offset(viewGroup.getLeft(), viewGroup.getTop());
+            viewGroup = (ViewGroup) viewGroup.getParent();
         }
     }
 
@@ -1222,25 +1066,22 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateExpandButton() {
-        int drawableId;
-        int contentDescriptionId;
-        int gravity;
-        int topMargin = 0;
+        int buttonGravity;
         ViewGroup newContainer;
         if (mIsCollapsed) {
-            drawableId = R.drawable.ic_expand_notification;
-            contentDescriptionId = R.string.expand_button_content_description_collapsed;
-            gravity = Gravity.CENTER;
+            buttonGravity = Gravity.CENTER;
+            // NOTE(b/182474419): In order for the touch target of the expand button to be the full
+            // height of the notification, we would want the mExpandButtonContainer's height to be
+            // set to WRAP_CONTENT (or 88dp) when in the collapsed state.  Unfortunately, that
+            // causes an unstable remeasuring infinite loop when the unread count is visible,
+            // causing the layout to occasionally hide the messages.  As an aside, that naive
+            // solution also causes an undesirably large gap between content and smart replies.
             newContainer = mExpandButtonAndContentContainer;
         } else {
-            drawableId = R.drawable.ic_collapse_notification;
-            contentDescriptionId = R.string.expand_button_content_description_expanded;
-            gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-            topMargin = mExpandButtonExpandedTopMargin;
+            buttonGravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
             newContainer = this;
         }
-        mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(mExpandButton.getOriginalNotificationColor());
+        mExpandButton.setExpanded(!mIsCollapsed);
 
         // We need to make sure that the expand button is in the linearlayout pushing over the
         // content when collapsed, but allows the content to flow under it when expanded.
@@ -1252,11 +1093,8 @@ public class ConversationLayout extends FrameLayout
         // update if the expand button is centered
         LinearLayout.LayoutParams layoutParams =
                 (LinearLayout.LayoutParams) mExpandButton.getLayoutParams();
-        layoutParams.gravity = gravity;
-        layoutParams.topMargin = topMargin;
+        layoutParams.gravity = buttonGravity;
         mExpandButton.setLayoutParams(layoutParams);
-
-        mExpandButtonInnerContainer.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     private void updateContentEndPaddings() {
@@ -1303,12 +1141,13 @@ public class ConversationLayout extends FrameLayout
         mExpandable = expandable;
         if (expandable) {
             mExpandButtonContainer.setVisibility(VISIBLE);
-            mExpandButtonInnerContainer.setOnClickListener(onClickListener);
+            mExpandButton.setOnClickListener(onClickListener);
             mConversationIconContainer.setOnClickListener(onClickListener);
         } else {
             mExpandButtonContainer.setVisibility(GONE);
             mConversationIconContainer.setOnClickListener(null);
         }
+        mExpandButton.setVisibility(VISIBLE);
         updateContentEndPaddings();
     }
 
@@ -1354,5 +1193,34 @@ public class ConversationLayout extends FrameLayout
     @Nullable
     public Icon getConversationIcon() {
         return mConversationIcon;
+    }
+
+    private static class TouchDelegateComposite extends TouchDelegate {
+        private final ArrayList<TouchDelegate> mDelegates = new ArrayList<>();
+
+        private TouchDelegateComposite(View view) {
+            super(new Rect(), view);
+        }
+
+        public void add(TouchDelegate delegate) {
+            mDelegates.add(delegate);
+        }
+
+        public void clear() {
+            mDelegates.clear();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            float x = event.getX();
+            float y = event.getY();
+            for (TouchDelegate delegate: mDelegates) {
+                event.setLocation(x, y);
+                if (delegate.onTouchEvent(event)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

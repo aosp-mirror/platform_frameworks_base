@@ -79,7 +79,7 @@ class MultiFingerMultiTap extends GestureMatcher {
     }
 
     @Override
-    protected void clear() {
+    public void clear() {
         mCompletedTapCount = 0;
         mIsTargetFingerCountReached = false;
         for (int i = 0; i < mBases.length; i++) {
@@ -162,6 +162,7 @@ class MultiFingerMultiTap extends GestureMatcher {
         // Accept down only before target number of fingers are down
         // or the finger count is not more than target.
         if ((currentFingerCount > mTargetFingerCount) || mIsTargetFingerCountReached) {
+            mIsTargetFingerCountReached = false;
             cancelGesture(event, rawEvent, policyFlags);
             return;
         }

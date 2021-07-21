@@ -23,6 +23,9 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.telephony.SubscriptionManager;
@@ -34,21 +37,29 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SignalTileView;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import javax.inject.Inject;
@@ -62,14 +73,22 @@ public class CellularTile extends QSTileImpl<SignalState> {
     private final CellularDetailAdapter mDetailAdapter;
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
-    private final ActivityStarter mActivityStarter;
 
     @Inject
-    public CellularTile(QSHost host, NetworkController networkController,
-            ActivityStarter activityStarter) {
-        super(host);
+    public CellularTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            FalsingManager falsingManager,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            NetworkController networkController
+    ) {
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mController = networkController;
-        mActivityStarter = activityStarter;
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
         mController.observe(getLifecycle(), mSignalCallback);
@@ -99,7 +118,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
@@ -117,7 +136,8 @@ public class CellularTile extends QSTileImpl<SignalState> {
             return;
         }
         String carrierName = mController.getMobileDataNetworkName();
-        if (TextUtils.isEmpty(carrierName)) {
+        boolean isInService = mController.isMobileDataNetworkInService();
+        if (TextUtils.isEmpty(carrierName) || !isInService) {
             carrierName = mContext.getString(R.string.mobile_data_disable_message_default_carrier);
         }
         AlertDialog dialog = new Builder(mContext)
@@ -139,7 +159,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleSecondaryClick(@Nullable View view) {
         if (mDataController.isMobileDataSupported()) {
             showDetail(true);
         } else {
@@ -230,7 +250,8 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     public boolean isAvailable() {
-        return mController.hasMobileDataFeature();
+        return mController.hasMobileDataFeature()
+            && mHost.getUserContext().getUserId() == UserHandle.USER_SYSTEM;
     }
 
     private static final class CallbackInfo {
@@ -248,21 +269,17 @@ public class CellularTile extends QSTileImpl<SignalState> {
         private final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
-                int qsType, boolean activityIn, boolean activityOut,
-                CharSequence typeContentDescription,
-                CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming) {
-            if (qsIcon == null) {
+        public void setMobileDataIndicators(MobileDataIndicators indicators) {
+            if (indicators.qsIcon == null) {
                 // Not data sim, don't display.
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
-            mInfo.dataContentDescription =
-                    (description != null) ? typeContentDescriptionHtml : null;
-            mInfo.activityIn = activityIn;
-            mInfo.activityOut = activityOut;
-            mInfo.roaming = roaming;
+            mInfo.dataContentDescription = indicators.description != null
+                    ? indicators.typeContentDescriptionHtml : null;
+            mInfo.activityIn = indicators.activityIn;
+            mInfo.activityOut = indicators.activityOut;
+            mInfo.roaming = indicators.roaming;
             mInfo.multipleSubs = mController.getNumberSubscriptions() > 1;
             refreshState(mInfo);
         }

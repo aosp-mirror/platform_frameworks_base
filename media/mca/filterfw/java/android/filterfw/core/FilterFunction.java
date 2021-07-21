@@ -43,7 +43,7 @@ public class FilterFunction {
     public Frame execute(KeyValueMap inputMap) {
         int filterOutCount = mFilter.getNumberOfOutputs();
 
-        // Sanity checks
+        // Validation checks
         if (filterOutCount > 1) {
             throw new RuntimeException("Calling execute on filter " + mFilter + " with multiple "
                 + "outputs! Use executeMulti() instead!");

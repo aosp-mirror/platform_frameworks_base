@@ -119,6 +119,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         switch(type) {
             case "restrict-background":
                 return getRestrictBackground();
+            case "restricted-mode":
+                return getRestrictedModeState();
         }
         pw.println("Error: unknown get type '" + type + "'");
         return -1;
@@ -253,6 +255,13 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         final int[] uids = mInterface.getAppIdleWhitelist();
         return listUidList("App Idle whitelisted UIDs", uids);
+    }
+
+    private int getRestrictedModeState() {
+        final PrintWriter pw = getOutPrintWriter();
+        pw.print("Restricted mode status: ");
+        pw.println(mInterface.isRestrictedModeEnabled() ? "enabled" : "disabled");
+        return 0;
     }
 
     private int getRestrictBackground() throws RemoteException {

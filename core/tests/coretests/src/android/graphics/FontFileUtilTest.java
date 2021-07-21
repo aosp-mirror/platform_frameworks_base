@@ -17,11 +17,15 @@
 package android.graphics;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.fonts.SystemFonts;
 import android.util.Log;
 import android.util.Pair;
 
@@ -142,6 +146,20 @@ public class FontFileUtilTest {
                     FontVariationAxis.fromFontVariationSettings(axes));
             assertEquals(path + "#" + axes, weight, FontFileUtil.unpackWeight(packed));
             assertEquals(path + "#" + axes, italic, FontFileUtil.unpackItalic(packed));
+        }
+    }
+
+    @Test
+    public void testExtension() throws IOException {
+        for (Font f : SystemFonts.getAvailableFonts()) {
+            String name = f.getFile().getName();
+            if (!name.endsWith(".ttf") && !name.endsWith(".otf")) {
+                continue;  // Only test ttf/otf file
+            }
+            int isOtfFile = FontFileUtil.isPostScriptType1Font(f.getBuffer(), 0);
+            assertNotEquals(-1, isOtfFile);
+            String extension = isOtfFile == 1 ? ".otf" : ".ttf";
+            assertTrue(name.endsWith(extension));
         }
     }
 }

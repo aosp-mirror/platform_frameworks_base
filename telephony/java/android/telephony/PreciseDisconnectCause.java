@@ -121,7 +121,7 @@ public final class PreciseDisconnectCause {
     public static final int BEARER_CAPABILITY_NOT_AUTHORIZED                 = 57;
     /** The requested bearer capability is not available at this time. */
     public static final int BEARER_NOT_AVAIL                                 = 58;
-    /** The service option is not availble at this time. */
+    /** The service option is not available at this time. */
     public static final int SERVICE_OPTION_NOT_AVAILABLE                     = 63;
     /** The equipment sending this cause does not support the bearer capability requested. */
     public static final int BEARER_SERVICE_NOT_IMPLEMENTED                   = 65;

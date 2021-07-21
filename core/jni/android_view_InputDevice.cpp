@@ -60,13 +60,18 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
     // Not sure why, but JNI is complaining when I pass this through directly.
     jboolean hasMic = deviceInfo.hasMic() ? JNI_TRUE : JNI_FALSE;
 
-    ScopedLocalRef<jobject> inputDeviceObj(env, env->NewObject(gInputDeviceClassInfo.clazz,
-                gInputDeviceClassInfo.ctor, deviceInfo.getId(), deviceInfo.getGeneration(),
-                deviceInfo.getControllerNumber(), nameObj.get(),
-                static_cast<int32_t>(ident.vendor), static_cast<int32_t>(ident.product),
-                descriptorObj.get(), deviceInfo.isExternal(), deviceInfo.getSources(),
-                deviceInfo.getKeyboardType(), kcmObj.get(), deviceInfo.hasVibrator(),
-                hasMic, deviceInfo.hasButtonUnderPad()));
+    ScopedLocalRef<jobject>
+            inputDeviceObj(env,
+                           env->NewObject(gInputDeviceClassInfo.clazz, gInputDeviceClassInfo.ctor,
+                                          deviceInfo.getId(), deviceInfo.getGeneration(),
+                                          deviceInfo.getControllerNumber(), nameObj.get(),
+                                          static_cast<int32_t>(ident.vendor),
+                                          static_cast<int32_t>(ident.product), descriptorObj.get(),
+                                          deviceInfo.isExternal(), deviceInfo.getSources(),
+                                          deviceInfo.getKeyboardType(), kcmObj.get(),
+                                          deviceInfo.hasVibrator(), hasMic,
+                                          deviceInfo.hasButtonUnderPad(), deviceInfo.hasSensor(),
+                                          deviceInfo.hasBattery()));
 
     const std::vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (const InputDeviceInfo::MotionRange& range: ranges) {
@@ -86,8 +91,10 @@ int register_android_view_InputDevice(JNIEnv* env)
     gInputDeviceClassInfo.clazz = FindClassOrDie(env, "android/view/InputDevice");
     gInputDeviceClassInfo.clazz = MakeGlobalRefOrDie(env, gInputDeviceClassInfo.clazz);
 
-    gInputDeviceClassInfo.ctor = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
-            "(IIILjava/lang/String;IILjava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZZ)V");
+    gInputDeviceClassInfo.ctor =
+            GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
+                             "(IIILjava/lang/String;IILjava/lang/"
+                             "String;ZIILandroid/view/KeyCharacterMap;ZZZZZ)V");
 
     gInputDeviceClassInfo.addMotionRange = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz,
             "addMotionRange", "(IIFFFFF)V");

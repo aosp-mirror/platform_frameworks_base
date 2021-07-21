@@ -57,7 +57,8 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mConfig = DozeConfigurationUtil.createMockConfig();
         mDockManagerFake = spy(new DockManagerFake());
-        mDockHandler = new DozeDockHandler(mConfig, mMachine, mDockManagerFake);
+        mDockHandler = new DozeDockHandler(mConfig, mDockManagerFake);
+        mDockHandler.setDozeMachine(mMachine);
 
         when(mMachine.getState()).thenReturn(State.DOZE_AOD);
         doReturn(true).when(mConfig).alwaysOnEnabled(anyInt());

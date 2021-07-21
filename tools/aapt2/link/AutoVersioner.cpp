@@ -72,6 +72,7 @@ ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry,
 
 bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
   TRACE_NAME("AutoVersioner::Consume");
+  CloningValueTransformer cloner(&table->string_pool);
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       if (type->type != ResourceType::kStyle) {
@@ -128,7 +129,7 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
                 ConfigDescription new_config(config_value->config);
                 new_config.sdkVersion = static_cast<uint16_t>(min_sdk_stripped.value());
 
-                std::unique_ptr<Style> new_style(style->Clone(&table->string_pool));
+                std::unique_ptr<Style> new_style(style->Transform(cloner));
                 new_style->SetComment(style->GetComment());
                 new_style->SetSource(style->GetSource());
 

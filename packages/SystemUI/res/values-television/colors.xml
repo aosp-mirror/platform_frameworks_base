@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2021, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources>
+    <color name="volume_dialog_background_color">#E61F232B</color>
+    <color name="volume_dialog_background_color_above_blur">#C71F232B</color>
+
+    <color name="bottom_sheet_icon_color">#D2E3FC</color>
+
+    <color name="bottom_sheet_title_color">#E8F0FE</color>
+    <color name="bottom_sheet_body_color">#D2E3FC</color>
+
+    <color name="bottom_sheet_background_color">#1F232C</color>
+    <color name="bottom_sheet_background_color_with_blur">#AA1A2734</color>
+
+    <color name="bottom_sheet_button_background_color_focused">#E8F0FE</color>
+    <color name="bottom_sheet_button_background_color_unfocused">#0FE8EAED</color>
+
+    <color name="bottom_sheet_button_text_color_focused">#DB202124</color>
+    <color name="bottom_sheet_button_text_color_unfocused">#B5E8EAED</color>
+
+    <color name="privacy_circle">#5BB974</color> <!-- g400 -->
+    <color name="privacy_icon_tint">#30302A</color>
+    <color name="privacy_chip_dot_bg_tint">#66000000</color>
+</resources>

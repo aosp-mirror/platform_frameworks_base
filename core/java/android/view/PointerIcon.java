@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.XmlRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -152,17 +153,17 @@ public final class PointerIcon implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mType;
     private int mSystemIconResourceId;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Bitmap mBitmap;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private float mHotSpotX;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private float mHotSpotY;
     // The bitmaps for the additional frame of animated pointer icon. Note that the first frame
     // will be stored in mBitmap.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Bitmap mBitmapFrames[];
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mDurationPerFrame;
 
     /**
@@ -405,7 +406,7 @@ public final class PointerIcon implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (this == other) {
             return true;
         }

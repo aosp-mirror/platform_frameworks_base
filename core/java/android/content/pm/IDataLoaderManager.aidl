@@ -23,7 +23,7 @@ import android.content.pm.IDataLoaderStatusListener;
 
 /** @hide */
 interface IDataLoaderManager {
-    boolean bindToDataLoader(int id, in DataLoaderParamsParcel params,
+    boolean bindToDataLoader(int id, in DataLoaderParamsParcel params, long bindDelayMs,
             IDataLoaderStatusListener listener);
     IDataLoader getDataLoader(int dataLoaderId);
     void unbindFromDataLoader(int dataLoaderId);

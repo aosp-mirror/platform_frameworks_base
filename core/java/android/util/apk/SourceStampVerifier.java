@@ -23,6 +23,7 @@ import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContent
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
+import static android.util.apk.ApkSigningBlockUtils.verifyProofOfRotationStruct;
 
 import android.util.Pair;
 import android.util.Slog;
@@ -44,12 +45,14 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +79,7 @@ public abstract class SourceStampVerifier {
     private static final int APK_SIGNATURE_SCHEME_V2_BLOCK_ID = 0x7109871a;
     private static final int APK_SIGNATURE_SCHEME_V3_BLOCK_ID = 0xf05368c0;
     private static final int SOURCE_STAMP_BLOCK_ID = 0x6dff800d;
+    private static final int PROOF_OF_ROTATION_ATTR_ID = 0x9d6303f7;
 
     private static final int VERSION_JAR_SIGNATURE_SCHEME = 1;
     private static final int VERSION_APK_SIGNATURE_SCHEME_V2 = 2;
@@ -85,11 +89,13 @@ public abstract class SourceStampVerifier {
     private static final String SOURCE_STAMP_CERTIFICATE_HASH_ZIP_ENTRY_NAME = "stamp-cert-sha256";
 
     /** Hidden constructor to prevent instantiation. */
-    private SourceStampVerifier() {}
+    private SourceStampVerifier() {
+    }
 
-    /** Verifies SourceStamp present in a list of APKs. */
+    /** Verifies SourceStamp present in a list of (split) APKs for the same app. */
     public static SourceStampVerificationResult verify(List<String> apkFiles) {
         Certificate stampCertificate = null;
+        List<? extends Certificate> stampCertificateLineage = Collections.emptyList();
         for (String apkFile : apkFiles) {
             SourceStampVerificationResult sourceStampVerificationResult = verify(apkFile);
             if (!sourceStampVerificationResult.isPresent()
@@ -97,12 +103,15 @@ public abstract class SourceStampVerifier {
                 return sourceStampVerificationResult;
             }
             if (stampCertificate != null
-                    && !stampCertificate.equals(sourceStampVerificationResult.getCertificate())) {
+                    && (!stampCertificate.equals(sourceStampVerificationResult.getCertificate())
+                    || !stampCertificateLineage.equals(
+                            sourceStampVerificationResult.getCertificateLineage()))) {
                 return SourceStampVerificationResult.notVerified();
             }
             stampCertificate = sourceStampVerificationResult.getCertificate();
+            stampCertificateLineage = sourceStampVerificationResult.getCertificateLineage();
         }
-        return SourceStampVerificationResult.verified(stampCertificate);
+        return SourceStampVerificationResult.verified(stampCertificate, stampCertificateLineage);
     }
 
     /** Verifies SourceStamp present in the provided APK. */
@@ -177,21 +186,44 @@ public abstract class SourceStampVerifier {
                                 "No signatures found for signature scheme %d",
                                 signatureSchemeDigest.getKey()));
             }
+            ByteBuffer signatures = ApkSigningBlockUtils.getLengthPrefixedSlice(
+                    signedSignatureSchemeData.get(signatureSchemeDigest.getKey()));
             verifySourceStampSignature(
-                    signedSignatureSchemeData.get(signatureSchemeDigest.getKey()),
+                    signatureSchemeDigest.getValue(),
                     sourceStampCertificate,
-                    signatureSchemeDigest.getValue());
+                    signatures);
         }
 
-        return SourceStampVerificationResult.verified(sourceStampCertificate);
+        List<? extends Certificate> sourceStampCertificateLineage = Collections.emptyList();
+        if (sourceStampBlockData.hasRemaining()) {
+            // The stamp block contains some additional attributes.
+            ByteBuffer stampAttributeData = getLengthPrefixedSlice(sourceStampBlockData);
+            ByteBuffer stampAttributeDataSignatures = getLengthPrefixedSlice(sourceStampBlockData);
+
+            byte[] stampAttributeBytes = new byte[stampAttributeData.remaining()];
+            stampAttributeData.get(stampAttributeBytes);
+            stampAttributeData.flip();
+
+            verifySourceStampSignature(stampAttributeBytes, sourceStampCertificate,
+                    stampAttributeDataSignatures);
+            ApkSigningBlockUtils.VerifiedProofOfRotation verifiedProofOfRotation =
+                    verifySourceStampAttributes(stampAttributeData, sourceStampCertificate);
+            if (verifiedProofOfRotation != null) {
+                sourceStampCertificateLineage = verifiedProofOfRotation.certs;
+            }
+        }
+
+        return SourceStampVerificationResult.verified(sourceStampCertificate,
+                sourceStampCertificateLineage);
     }
 
     /**
      * Verify the SourceStamp certificate found in the signing block is the same as the SourceStamp
      * certificate found in the APK. It returns the verified certificate.
      *
-     * @param sourceStampBlockData the source stamp block in the APK signing block which contains
-     *     the certificate used to sign the stamp digests.
+     * @param sourceStampBlockData         the source stamp block in the APK signing block which
+     *                                     contains
+     *                                     the certificate used to sign the stamp digests.
      * @param sourceStampCertificateDigest the source stamp certificate digest found in the APK.
      */
     private static X509Certificate verifySourceStampCertificate(
@@ -230,16 +262,16 @@ public abstract class SourceStampVerifier {
      * Verify the SourceStamp signature found in the signing block is signed by the SourceStamp
      * certificate found in the APK.
      *
-     * @param signedBlockData the source stamp block in the APK signing block which contains the
-     *     stamp signed digests.
+     * @param data                   the digest to be verified being signed by the source stamp
+     *                               certificate.
      * @param sourceStampCertificate the source stamp certificate used to sign the stamp digests.
-     * @param digest the digest to be verified being signed by the source stamp certificate.
+     * @param signatures             the source stamp block in the APK signing block which contains
+     *                               the stamp signed digests.
      */
-    private static void verifySourceStampSignature(
-            ByteBuffer signedBlockData, X509Certificate sourceStampCertificate, byte[] digest)
+    private static void verifySourceStampSignature(byte[] data,
+            X509Certificate sourceStampCertificate, ByteBuffer signatures)
             throws IOException {
         // Parse the signatures block and identify supported signatures
-        ByteBuffer signatures = ApkSigningBlockUtils.getLengthPrefixedSlice(signedBlockData);
         int signatureCount = 0;
         int bestSigAlgorithm = -1;
         byte[] bestSigAlgorithmSignatureBytes = null;
@@ -285,7 +317,7 @@ public abstract class SourceStampVerifier {
             if (jcaSignatureAlgorithmParams != null) {
                 sig.setParameter(jcaSignatureAlgorithmParams);
             }
-            sig.update(digest);
+            sig.update(data);
             sigVerified = sig.verify(bestSigAlgorithmSignatureBytes);
         } catch (InvalidKeyException
                 | InvalidAlgorithmParameterException
@@ -412,6 +444,46 @@ public abstract class SourceStampVerifier {
             result.put(second);
         }
         return result.array();
+    }
+
+    private static ApkSigningBlockUtils.VerifiedProofOfRotation verifySourceStampAttributes(
+            ByteBuffer stampAttributeData,
+            X509Certificate sourceStampCertificate)
+            throws IOException {
+        CertificateFactory certFactory;
+        try {
+            certFactory = CertificateFactory.getInstance("X.509");
+        } catch (CertificateException e) {
+            throw new RuntimeException("Failed to obtain X.509 CertificateFactory", e);
+        }
+        ByteBuffer stampAttributes = getLengthPrefixedSlice(stampAttributeData);
+        ApkSigningBlockUtils.VerifiedProofOfRotation verifiedProofOfRotation = null;
+        while (stampAttributes.hasRemaining()) {
+            ByteBuffer attribute = getLengthPrefixedSlice(stampAttributes);
+            int id = attribute.getInt();
+            if (id == PROOF_OF_ROTATION_ATTR_ID) {
+                if (verifiedProofOfRotation != null) {
+                    throw new SecurityException("Encountered multiple Proof-of-rotation records"
+                            + " when verifying source stamp signature");
+                }
+                verifiedProofOfRotation = verifyProofOfRotationStruct(attribute, certFactory);
+                // Make sure that the last certificate in the Proof-of-rotation record matches
+                // the one used to sign this APK.
+                try {
+                    if (verifiedProofOfRotation.certs.size() > 0
+                            && !Arrays.equals(verifiedProofOfRotation.certs.get(
+                            verifiedProofOfRotation.certs.size() - 1).getEncoded(),
+                            sourceStampCertificate.getEncoded())) {
+                        throw new SecurityException("Terminal certificate in Proof-of-rotation"
+                                + " record does not match source stamp certificate");
+                    }
+                } catch (CertificateEncodingException e) {
+                    throw new SecurityException("Failed to encode certificate when comparing"
+                            + " Proof-of-rotation record and source stamp certificate", e);
+                }
+            }
+        }
+        return verifiedProofOfRotation;
     }
 
     private static byte[] computeSha256Digest(byte[] input) {

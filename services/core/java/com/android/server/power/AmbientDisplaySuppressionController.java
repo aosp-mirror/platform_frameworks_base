@@ -29,7 +29,9 @@ import android.util.Slog;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -70,6 +72,24 @@ public class AmbientDisplaySuppressionController {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to suppress ambient display", e);
         }
+    }
+
+    /**
+     * Returns the tokens used to suppress ambient display through
+     * {@link #suppress(String, int, boolean)}.
+     *
+     * @param callingUid The uid of the calling application.
+     */
+    List<String> getSuppressionTokens(int callingUid) {
+        List<String> result = new ArrayList<>();
+        synchronized (mSuppressionTokens) {
+            for (Pair<String, Integer> token : mSuppressionTokens) {
+                if (token.second == callingUid) {
+                    result.add(token.first);
+                }
+            }
+        }
+        return result;
     }
 
     /**

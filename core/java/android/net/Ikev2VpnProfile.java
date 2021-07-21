@@ -16,21 +16,25 @@
 
 package android.net;
 
-import static android.net.PlatformVpnProfile.TYPE_IKEV2_IPSEC_PSK;
-import static android.net.PlatformVpnProfile.TYPE_IKEV2_IPSEC_RSA;
-import static android.net.PlatformVpnProfile.TYPE_IKEV2_IPSEC_USER_PASS;
+import static android.net.IpSecAlgorithm.AUTH_AES_CMAC;
+import static android.net.IpSecAlgorithm.AUTH_AES_XCBC;
+import static android.net.IpSecAlgorithm.AUTH_CRYPT_AES_GCM;
+import static android.net.IpSecAlgorithm.AUTH_CRYPT_CHACHA20_POLY1305;
+import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA256;
+import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA384;
+import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA512;
+import static android.net.IpSecAlgorithm.CRYPT_AES_CBC;
+import static android.net.IpSecAlgorithm.CRYPT_AES_CTR;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
+import static com.android.net.module.util.NetworkStackConstants.IPV6_MIN_MTU;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.content.pm.PackageManager;
-import android.os.Process;
 import android.security.Credentials;
-import android.security.KeyStore;
-import android.security.keystore.AndroidKeyStoreProvider;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnProfile;
@@ -38,7 +42,9 @@ import com.android.internal.net.VpnProfile;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
@@ -69,17 +75,33 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     /** Prefix for when a Private Key is stored directly in the profile @hide */
     public static final String PREFIX_INLINE = "INLINE:";
 
+    private static final String ANDROID_KEYSTORE_PROVIDER = "AndroidKeyStore";
     private static final String MISSING_PARAM_MSG_TMPL = "Required parameter was not provided: %s";
     private static final String EMPTY_CERT = "";
 
     /** @hide */
-    public static final List<String> DEFAULT_ALGORITHMS =
-            Collections.unmodifiableList(Arrays.asList(
-                    IpSecAlgorithm.CRYPT_AES_CBC,
-                    IpSecAlgorithm.AUTH_HMAC_SHA256,
-                    IpSecAlgorithm.AUTH_HMAC_SHA384,
-                    IpSecAlgorithm.AUTH_HMAC_SHA512,
-                    IpSecAlgorithm.AUTH_CRYPT_AES_GCM));
+    public static final List<String> DEFAULT_ALGORITHMS;
+
+    private static void addAlgorithmIfSupported(List<String> algorithms, String ipSecAlgoName) {
+        if (IpSecAlgorithm.getSupportedAlgorithms().contains(ipSecAlgoName)) {
+            algorithms.add(ipSecAlgoName);
+        }
+    }
+
+    static {
+        final List<String> algorithms = new ArrayList<>();
+        addAlgorithmIfSupported(algorithms, CRYPT_AES_CBC);
+        addAlgorithmIfSupported(algorithms, CRYPT_AES_CTR);
+        addAlgorithmIfSupported(algorithms, AUTH_HMAC_SHA256);
+        addAlgorithmIfSupported(algorithms, AUTH_HMAC_SHA384);
+        addAlgorithmIfSupported(algorithms, AUTH_HMAC_SHA512);
+        addAlgorithmIfSupported(algorithms, AUTH_AES_XCBC);
+        addAlgorithmIfSupported(algorithms, AUTH_AES_CMAC);
+        addAlgorithmIfSupported(algorithms, AUTH_CRYPT_AES_GCM);
+        addAlgorithmIfSupported(algorithms, AUTH_CRYPT_CHACHA20_POLY1305);
+
+        DEFAULT_ALGORITHMS = Collections.unmodifiableList(algorithms);
+    }
 
     @NonNull private final String mServerAddr;
     @NonNull private final String mUserIdentity;
@@ -158,9 +180,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         // IPv6 MTU is greater; since profiles may be started by the system on IPv4 and IPv6
         // networks, the VPN must provide a link fulfilling the stricter of the two conditions
         // (at least that of the IPv6 MTU).
-        if (mMaxMtu < LinkProperties.MIN_MTU_V6) {
-            throw new IllegalArgumentException(
-                    "Max MTU must be at least" + LinkProperties.MIN_MTU_V6);
+        if (mMaxMtu < IPV6_MIN_MTU) {
+            throw new IllegalArgumentException("Max MTU must be at least" + IPV6_MIN_MTU);
         }
 
         switch (mType) {
@@ -199,8 +220,6 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
      * @param allowedAlgorithms The list to be validated
      */
     private static void validateAllowedAlgorithms(@NonNull List<String> algorithmNames) {
-        VpnProfile.validateAllowedAlgorithms(algorithmNames);
-
         // First, make sure no insecure algorithms were proposed.
         if (algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_MD5)
                 || algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_SHA1)) {
@@ -364,7 +383,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof Ikev2VpnProfile)) {
             return false;
         }
@@ -434,32 +453,31 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         return profile;
     }
 
-    /**
-     * Constructs a Ikev2VpnProfile from an internal-use VpnProfile instance.
-     *
-     * <p>Redundant authentication information (not related to profile type) will be discarded.
-     *
-     * @hide
-     */
-    @NonNull
-    public static Ikev2VpnProfile fromVpnProfile(@NonNull VpnProfile profile)
-            throws IOException, GeneralSecurityException {
-        return fromVpnProfile(profile, null);
+    private static PrivateKey getPrivateKeyFromAndroidKeystore(String alias) {
+        try {
+            final KeyStore keystore = KeyStore.getInstance(ANDROID_KEYSTORE_PROVIDER);
+            keystore.load(null);
+            final Key key = keystore.getKey(alias, null);
+            if (!(key instanceof PrivateKey)) {
+                throw new IllegalStateException(
+                        "Unexpected key type returned from android keystore.");
+            }
+            return (PrivateKey) key;
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load key from android keystore.", e);
+        }
     }
 
     /**
      * Builds the Ikev2VpnProfile from the given profile.
      *
      * @param profile the source VpnProfile to build from
-     * @param keyStore the Android Keystore instance to use to retrieve the private key, or null if
-     *     the private key is PEM-encoded into the profile.
      * @return The IKEv2/IPsec VPN profile
      * @hide
      */
     @NonNull
-    public static Ikev2VpnProfile fromVpnProfile(
-            @NonNull VpnProfile profile, @Nullable KeyStore keyStore)
-            throws IOException, GeneralSecurityException {
+    public static Ikev2VpnProfile fromVpnProfile(@NonNull VpnProfile profile)
+            throws GeneralSecurityException {
         final Builder builder = new Builder(profile.server, profile.ipsecIdentifier);
         builder.setProxy(profile.proxy);
         builder.setAllowedAlgorithms(profile.getAllowedAlgorithms());
@@ -483,12 +501,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
             case TYPE_IKEV2_IPSEC_RSA:
                 final PrivateKey key;
                 if (profile.ipsecSecret.startsWith(PREFIX_KEYSTORE_ALIAS)) {
-                    Objects.requireNonNull(keyStore, "Missing Keystore for aliased PrivateKey");
-
                     final String alias =
                             profile.ipsecSecret.substring(PREFIX_KEYSTORE_ALIAS.length());
-                    key = AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
-                            keyStore, alias, Process.myUid());
+                    key = getPrivateKeyFromAndroidKeystore(alias);
                 } else if (profile.ipsecSecret.startsWith(PREFIX_INLINE)) {
                     key = getPrivateKey(profile.ipsecSecret.substring(PREFIX_INLINE.length()));
                 } else {
@@ -811,9 +826,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
             // IPv6 MTU is greater; since profiles may be started by the system on IPv4 and IPv6
             // networks, the VPN must provide a link fulfilling the stricter of the two conditions
             // (at least that of the IPv6 MTU).
-            if (mtu < LinkProperties.MIN_MTU_V6) {
-                throw new IllegalArgumentException(
-                        "Max MTU must be at least " + LinkProperties.MIN_MTU_V6);
+            if (mtu < IPV6_MIN_MTU) {
+                throw new IllegalArgumentException("Max MTU must be at least " + IPV6_MIN_MTU);
             }
             mMaxMtu = mtu;
             return this;

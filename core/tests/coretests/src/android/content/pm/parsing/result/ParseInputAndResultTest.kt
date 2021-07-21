@@ -113,7 +113,7 @@ class ParseInputAndResultTest {
         assertError(result)
         assertThat(result.errorCode).isEqualTo(errorCode)
         assertThat(result.errorMessage).isEqualTo(errorMessage)
-        assertThat(result.exception).isSameAs(exception)
+        assertThat(result.exception).isSameInstanceAs(exception)
     }
 
     @Test
@@ -125,13 +125,13 @@ class ParseInputAndResultTest {
         assertError(result)
         assertThat(result.errorCode).isEqualTo(errorCode)
         assertThat(result.errorMessage).isEqualTo(errorMessage)
-        assertThat(result.exception).isSameAs(exception)
+        assertThat(result.exception).isSameInstanceAs(exception)
 
         val carriedResult = input.error<Int>(result)
         assertError(carriedResult)
         assertThat(carriedResult.errorCode).isEqualTo(errorCode)
         assertThat(carriedResult.errorMessage).isEqualTo(errorMessage)
-        assertThat(carriedResult.exception).isSameAs(exception)
+        assertThat(carriedResult.exception).isSameInstanceAs(exception)
     }
 
     @Test
@@ -259,7 +259,7 @@ class ParseInputAndResultTest {
     private fun assertSuccess(expected: Any? = null, result: ParseResult<*>) {
         assertThat(result.isError).isFalse()
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.result).isSameAs(expected)
+        assertThat(result.result).isSameInstanceAs(expected)
         assertThat(result.errorCode).isEqualTo(PackageManager.INSTALL_SUCCEEDED)
         assertThat(result.errorMessage).isNull()
         assertThat(result.exception).isNull()

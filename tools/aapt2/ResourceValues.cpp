@@ -47,6 +47,14 @@ std::ostream& operator<<(std::ostream& out, const Value& value) {
   return out;
 }
 
+std::unique_ptr<Value> Value::Transform(ValueTransformer& transformer) const {
+  return std::unique_ptr<Value>(this->TransformValueImpl(transformer));
+}
+
+std::unique_ptr<Item> Item::Transform(ValueTransformer& transformer) const {
+  return std::unique_ptr<Item>(this->TransformItemImpl(transformer));
+}
+
 template <typename Derived>
 void BaseValue<Derived>::Accept(ValueVisitor* visitor) {
   visitor->Visit(static_cast<Derived*>(this));
@@ -77,13 +85,6 @@ bool RawString::Equals(const Value* value) const {
   return *this->value == *other->value;
 }
 
-RawString* RawString::Clone(StringPool* new_pool) const {
-  RawString* rs = new RawString(new_pool->MakeRef(value));
-  rs->comment_ = comment_;
-  rs->source_ = source_;
-  return rs;
-}
-
 bool RawString::Flatten(android::Res_value* out_value) const {
   out_value->dataType = android::Res_value::TYPE_STRING;
   out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
@@ -110,12 +111,15 @@ bool Reference::Equals(const Value* value) const {
   if (!other) {
     return false;
   }
-  return reference_type == other->reference_type &&
-         private_reference == other->private_reference && id == other->id &&
-         name == other->name;
+  return reference_type == other->reference_type && private_reference == other->private_reference &&
+         id == other->id && name == other->name && type_flags == other->type_flags;
 }
 
 bool Reference::Flatten(android::Res_value* out_value) const {
+  if (name && name.value().type == ResourceType::kMacro) {
+    return false;
+  }
+
   const ResourceId resid = id.value_or_default(ResourceId(0));
   const bool dynamic = resid.is_valid() && is_dynamic;
 
@@ -134,10 +138,6 @@ bool Reference::Flatten(android::Res_value* out_value) const {
   }
   out_value->data = util::HostToDevice32(resid.id);
   return true;
-}
-
-Reference* Reference::Clone(StringPool* /*new_pool*/) const {
-  return new Reference(*this);
 }
 
 void Reference::Print(std::ostream* out) const {
@@ -220,10 +220,6 @@ bool Id::Flatten(android::Res_value* out) const {
   return true;
 }
 
-Id* Id::Clone(StringPool* /*new_pool*/) const {
-  return new Id(*this);
-}
-
 void Id::Print(std::ostream* out) const {
   *out << "(id)";
 }
@@ -264,14 +260,6 @@ bool String::Flatten(android::Res_value* out_value) const {
   out_value->dataType = android::Res_value::TYPE_STRING;
   out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
-}
-
-String* String::Clone(StringPool* new_pool) const {
-  String* str = new String(new_pool->MakeRef(value));
-  str->comment_ = comment_;
-  str->source_ = source_;
-  str->untranslatable_sections = untranslatable_sections;
-  return str;
 }
 
 void String::Print(std::ostream* out) const {
@@ -321,14 +309,6 @@ bool StyledString::Flatten(android::Res_value* out_value) const {
   return true;
 }
 
-StyledString* StyledString::Clone(StringPool* new_pool) const {
-  StyledString* str = new StyledString(new_pool->MakeRef(value));
-  str->comment_ = comment_;
-  str->source_ = source_;
-  str->untranslatable_sections = untranslatable_sections;
-  return str;
-}
-
 void StyledString::Print(std::ostream* out) const {
   *out << "(styled string) \"" << value->value << "\"";
   for (const StringPool::Span& span : value->spans) {
@@ -355,15 +335,6 @@ bool FileReference::Flatten(android::Res_value* out_value) const {
   out_value->dataType = android::Res_value::TYPE_STRING;
   out_value->data = util::HostToDevice32(static_cast<uint32_t>(path.index()));
   return true;
-}
-
-FileReference* FileReference::Clone(StringPool* new_pool) const {
-  FileReference* fr = new FileReference(new_pool->MakeRef(path));
-  fr->file = file;
-  fr->type = type;
-  fr->comment_ = comment_;
-  fr->source_ = source_;
-  return fr;
 }
 
 void FileReference::Print(std::ostream* out) const {
@@ -404,10 +375,6 @@ bool BinaryPrimitive::Flatten(::android::Res_value* out_value) const {
   out_value->dataType = value.dataType;
   out_value->data = util::HostToDevice32(value.data);
   return true;
-}
-
-BinaryPrimitive* BinaryPrimitive::Clone(StringPool* /*new_pool*/) const {
-  return new BinaryPrimitive(*this);
 }
 
 void BinaryPrimitive::Print(std::ostream* out) const {
@@ -587,11 +554,7 @@ bool Attribute::IsCompatibleWith(const Attribute& attr) const {
   return this_type_mask == that_type_mask;
 }
 
-Attribute* Attribute::Clone(StringPool* /*new_pool*/) const {
-  return new Attribute(*this);
-}
-
-std::string Attribute::MaskString() const {
+std::string Attribute::MaskString(uint32_t type_mask) {
   if (type_mask == android::ResTable_map::TYPE_ANY) {
     return "any";
   }
@@ -688,6 +651,10 @@ std::string Attribute::MaskString() const {
     out << "flags";
   }
   return out.str();
+}
+
+std::string Attribute::MaskString() const {
+  return MaskString(type_mask);
 }
 
 void Attribute::Print(std::ostream* out) const {
@@ -893,18 +860,6 @@ bool Style::Equals(const Value* value) const {
                     });
 }
 
-Style* Style::Clone(StringPool* new_pool) const {
-  Style* style = new Style();
-  style->parent = parent;
-  style->parent_inferred = parent_inferred;
-  style->comment_ = comment_;
-  style->source_ = source_;
-  for (auto& entry : entries) {
-    style->entries.push_back(Entry{entry.key, std::unique_ptr<Item>(entry.value->Clone(new_pool))});
-  }
-  return style;
-}
-
 void Style::Print(std::ostream* out) const {
   *out << "(style) ";
   if (parent && parent.value().name) {
@@ -920,7 +875,8 @@ void Style::Print(std::ostream* out) const {
 Style::Entry CloneEntry(const Style::Entry& entry, StringPool* pool) {
   Style::Entry cloned_entry{entry.key};
   if (entry.value != nullptr) {
-    cloned_entry.value.reset(entry.value->Clone(pool));
+    CloningValueTransformer cloner(pool);
+    cloned_entry.value = entry.value->Transform(cloner);
   }
   return cloned_entry;
 }
@@ -993,16 +949,6 @@ bool Array::Equals(const Value* value) const {
                     });
 }
 
-Array* Array::Clone(StringPool* new_pool) const {
-  Array* array = new Array();
-  array->comment_ = comment_;
-  array->source_ = source_;
-  for (auto& item : elements) {
-    array->elements.emplace_back(std::unique_ptr<Item>(item->Clone(new_pool)));
-  }
-  return array;
-}
-
 void Array::Print(std::ostream* out) const {
   *out << "(array) [" << util::Joiner(elements, ", ") << "]";
 }
@@ -1028,19 +974,6 @@ bool Plural::Equals(const Value* value) const {
     }
   }
   return true;
-}
-
-Plural* Plural::Clone(StringPool* new_pool) const {
-  Plural* p = new Plural();
-  p->comment_ = comment_;
-  p->source_ = source_;
-  const size_t count = values.size();
-  for (size_t i = 0; i < count; i++) {
-    if (values[i]) {
-      p->values[i] = std::unique_ptr<Item>(values[i]->Clone(new_pool));
-    }
-  }
-  return p;
 }
 
 void Plural::Print(std::ostream* out) const {
@@ -1086,13 +1019,24 @@ bool Styleable::Equals(const Value* value) const {
                     });
 }
 
-Styleable* Styleable::Clone(StringPool* /*new_pool*/) const {
-  return new Styleable(*this);
-}
-
 void Styleable::Print(std::ostream* out) const {
   *out << "(styleable) "
        << " [" << util::Joiner(entries, ", ") << "]";
+}
+
+bool Macro::Equals(const Value* value) const {
+  const Macro* other = ValueCast<Macro>(value);
+  if (!other) {
+    return false;
+  }
+  return other->raw_value == raw_value && other->style_string.spans == style_string.spans &&
+         other->style_string.str == style_string.str &&
+         other->untranslatable_sections == untranslatable_sections &&
+         other->alias_namespaces == alias_namespaces;
+}
+
+void Macro::Print(std::ostream* out) const {
+  *out << "(macro) ";
 }
 
 bool operator<(const Reference& a, const Reference& b) {
@@ -1124,6 +1068,112 @@ void Styleable::MergeWith(Styleable* other) {
   entries.clear();
   entries.reserve(references.size());
   entries.insert(entries.end(), references.begin(), references.end());
+}
+
+template <typename T>
+std::unique_ptr<T> CopyValueFields(std::unique_ptr<T> new_value, const T* value) {
+  new_value->SetSource(value->GetSource());
+  new_value->SetComment(value->GetComment());
+  return new_value;
+}
+
+CloningValueTransformer::CloningValueTransformer(StringPool* new_pool)
+    : ValueTransformer(new_pool) {
+}
+
+std::unique_ptr<Reference> CloningValueTransformer::TransformDerived(const Reference* value) {
+  return std::make_unique<Reference>(*value);
+}
+
+std::unique_ptr<Id> CloningValueTransformer::TransformDerived(const Id* value) {
+  return std::make_unique<Id>(*value);
+}
+
+std::unique_ptr<RawString> CloningValueTransformer::TransformDerived(const RawString* value) {
+  auto new_value = std::make_unique<RawString>(pool_->MakeRef(value->value));
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<String> CloningValueTransformer::TransformDerived(const String* value) {
+  auto new_value = std::make_unique<String>(pool_->MakeRef(value->value));
+  new_value->untranslatable_sections = value->untranslatable_sections;
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<StyledString> CloningValueTransformer::TransformDerived(const StyledString* value) {
+  auto new_value = std::make_unique<StyledString>(pool_->MakeRef(value->value));
+  new_value->untranslatable_sections = value->untranslatable_sections;
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<FileReference> CloningValueTransformer::TransformDerived(
+    const FileReference* value) {
+  auto new_value = std::make_unique<FileReference>(pool_->MakeRef(value->path));
+  new_value->file = value->file;
+  new_value->type = value->type;
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<BinaryPrimitive> CloningValueTransformer::TransformDerived(
+    const BinaryPrimitive* value) {
+  return std::make_unique<BinaryPrimitive>(*value);
+}
+
+std::unique_ptr<Attribute> CloningValueTransformer::TransformDerived(const Attribute* value) {
+  auto new_value = std::make_unique<Attribute>();
+  new_value->type_mask = value->type_mask;
+  new_value->min_int = value->min_int;
+  new_value->max_int = value->max_int;
+  for (const Attribute::Symbol& s : value->symbols) {
+    new_value->symbols.emplace_back(Attribute::Symbol{
+        .symbol = *s.symbol.Transform(*this),
+        .value = s.value,
+        .type = s.type,
+    });
+  }
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<Style> CloningValueTransformer::TransformDerived(const Style* value) {
+  auto new_value = std::make_unique<Style>();
+  new_value->parent = value->parent;
+  new_value->parent_inferred = value->parent_inferred;
+  for (auto& entry : value->entries) {
+    new_value->entries.push_back(Style::Entry{entry.key, entry.value->Transform(*this)});
+  }
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<Array> CloningValueTransformer::TransformDerived(const Array* value) {
+  auto new_value = std::make_unique<Array>();
+  for (auto& item : value->elements) {
+    new_value->elements.emplace_back(item->Transform(*this));
+  }
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<Plural> CloningValueTransformer::TransformDerived(const Plural* value) {
+  auto new_value = std::make_unique<Plural>();
+  const size_t count = value->values.size();
+  for (size_t i = 0; i < count; i++) {
+    if (value->values[i]) {
+      new_value->values[i] = value->values[i]->Transform(*this);
+    }
+  }
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<Styleable> CloningValueTransformer::TransformDerived(const Styleable* value) {
+  auto new_value = std::make_unique<Styleable>();
+  for (const Reference& s : value->entries) {
+    new_value->entries.emplace_back(*s.Transform(*this));
+  }
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<Macro> CloningValueTransformer::TransformDerived(const Macro* value) {
+  auto new_value = std::make_unique<Macro>(*value);
+  return CopyValueFields(std::move(new_value), value);
 }
 
 }  // namespace aapt

@@ -31,7 +31,8 @@ public:
 
     void onDeviceOpen();
     void onDeviceGetReport(uint32_t requestId, uint8_t reportId);
-    void onDeviceOutput(const std::vector<uint8_t>& data);
+    void onDeviceSetReport(uint8_t rType, const std::vector<uint8_t>& data);
+    void onDeviceOutput(uint8_t rType, const std::vector<uint8_t>& data);
     void onDeviceError();
 
 private:

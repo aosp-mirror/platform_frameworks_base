@@ -33,4 +33,6 @@ enum UidObserverFlag {
     UID_OBSERVER_FLAG_ACTIVE = 4;
     // report uid cached state has changed, original value is 1 << 4
     UID_OBSERVER_FLAG_CACHED = 5;
+    // report uid capability has changed, original value is 1 << 5
+    UID_OBSERVER_FLAG_CAPABILITY = 6;
 }

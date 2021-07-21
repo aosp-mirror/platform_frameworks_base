@@ -360,6 +360,30 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.unpair(mAdapter, device);
     }
 
+    /* Make sure there is at least 1 unread message in the last week on remote device */
+    public void testMceSetMessageStatus() {
+        int iterations = BluetoothTestRunner.sMceSetMessageStatusIterations;
+        if (iterations == 0) {
+            return;
+        }
+
+        BluetoothDevice device = mAdapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.enable(mAdapter);
+        mTestUtils.connectProfile(mAdapter, device, BluetoothProfile.MAP_CLIENT, null);
+        mTestUtils.mceGetUnreadMessage(mAdapter, device);
+
+        for (int i = 0; i < iterations; i++) {
+            mTestUtils.mceSetMessageStatus(mAdapter, device, BluetoothMapClient.READ);
+            mTestUtils.mceSetMessageStatus(mAdapter, device, BluetoothMapClient.UNREAD);
+        }
+
+        /**
+         * It is hard to find device to support set undeleted status, so just
+         * set deleted in 1 iteration
+         **/
+        mTestUtils.mceSetMessageStatus(mAdapter, device, BluetoothMapClient.DELETED);
+    }
+
     private void sleep(long time) {
         try {
             Thread.sleep(time);

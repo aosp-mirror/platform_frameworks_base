@@ -213,11 +213,11 @@ public class StorageMeasurement {
 
                 // Only count code once against current user
                 if (user.id == UserHandle.myUserId()) {
-                    addValue(details.usersSize, user.id, stats.getCodeBytes());
+                    addValue(details.usersSize, user.id, stats.getAppBytes());
                 }
 
                 addValue(details.usersSize, user.id, stats.getDataBytes());
-                addValue(details.appsSize, user.id, stats.getCodeBytes() + stats.getDataBytes());
+                addValue(details.appsSize, user.id, stats.getAppBytes() + stats.getDataBytes());
 
                 details.cacheSize += stats.getCacheBytes();
             }

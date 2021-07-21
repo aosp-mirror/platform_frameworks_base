@@ -20,8 +20,9 @@
     android:id="@android:id/title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
     android:gravity="center"
-    android:paddingTop="20dp"
-    android:paddingBottom="13dp"
-    android:textAppearance="@style/TextAppearance.QSEdit.Headers"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp"
+    android:textAppearance="@style/TextAppearance.QSEdit"
     android:text="@string/drag_to_add_tiles" />

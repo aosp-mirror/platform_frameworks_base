@@ -17,10 +17,11 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -31,17 +32,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles the attachment of {@link Coordinator}s to the {@link NotifPipeline} so that the
  * Coordinators can register their respective callbacks.
  */
-@Singleton
+@SysUISingleton
 public class NotifCoordinators implements Dumpable {
     private static final String TAG = "NotifCoordinators";
     private final List<Coordinator> mCoordinators = new ArrayList<>();
-    private final List<NotifSection> mOrderedSections = new ArrayList<>();
+    private final List<NotifSectioner> mOrderedSections = new ArrayList<>();
+
     /**
      * Creates all the coordinators.
      */
@@ -58,8 +59,11 @@ public class NotifCoordinators implements Dumpable {
             HeadsUpCoordinator headsUpCoordinator,
             ConversationCoordinator conversationCoordinator,
             PreparationCoordinator preparationCoordinator,
-            MediaCoordinator mediaCoordinator) {
+            MediaCoordinator mediaCoordinator,
+            SmartspaceDedupingCoordinator smartspaceDedupingCoordinator,
+            VisualStabilityCoordinator visualStabilityCoordinator) {
         dumpManager.registerDumpable(TAG, this);
+
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
         mCoordinators.add(hideNotifsForOtherUsersCoordinator);
         mCoordinators.add(keyguardCoordinator);
@@ -67,20 +71,28 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(appOpsCoordinator);
         mCoordinators.add(deviceProvisionedCoordinator);
         mCoordinators.add(bubbleCoordinator);
+        mCoordinators.add(conversationCoordinator);
+        mCoordinators.add(mediaCoordinator);
+        mCoordinators.add(visualStabilityCoordinator);
+
+        if (featureFlags.isSmartspaceDedupingEnabled()) {
+            mCoordinators.add(smartspaceDedupingCoordinator);
+        }
+
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mCoordinators.add(conversationCoordinator);
             mCoordinators.add(headsUpCoordinator);
             mCoordinators.add(preparationCoordinator);
         }
-        // TODO: add new Coordinators here! (b/112656837)
-        mCoordinators.add(mediaCoordinator);
 
-        // TODO: add the sections in a particular ORDER (HeadsUp < People < Alerting)
-        for (Coordinator c : mCoordinators) {
-            if (c.getSection() != null) {
-                mOrderedSections.add(c.getSection());
-            }
+        // Manually add Ordered Sections
+        // HeadsUp > FGS > People > Alerting > Silent > Unknown/Default
+        if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mOrderedSections.add(headsUpCoordinator.getSectioner()); // HeadsUp
         }
+        mOrderedSections.add(appOpsCoordinator.getSectioner()); // ForegroundService
+        mOrderedSections.add(conversationCoordinator.getSectioner()); // People
+        mOrderedSections.add(rankingCoordinator.getAlertingSectioner()); // Alerting
+        mOrderedSections.add(rankingCoordinator.getSilentSectioner()); // Silent
     }
 
     /**
@@ -103,7 +115,7 @@ public class NotifCoordinators implements Dumpable {
             pw.println("\t" + c.getClass());
         }
 
-        for (NotifSection s : mOrderedSections) {
+        for (NotifSectioner s : mOrderedSections) {
             pw.println("\t" + s.getName());
         }
     }

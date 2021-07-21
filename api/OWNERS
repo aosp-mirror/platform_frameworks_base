@@ -1,0 +1,6 @@
+hansson@google.com
+
+# Modularization team
+file:platform/packages/modules/common:/OWNERS
+
+per-file Android.bp = file:platform/build/soong:/OWNERS

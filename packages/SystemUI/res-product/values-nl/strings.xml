@@ -21,8 +21,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Lijn de telefoon opnieuw uit om sneller op te laden"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Lijn de telefoon opnieuw uit om draadloos op te laden"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Het Android TV-apparaat wordt binnenkort uitgeschakeld. Druk op een knop om het ingeschakeld te houden."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Het apparaat wordt binnenkort uitgeschakeld. Druk om het ingeschakeld te houden."</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Het Android TV-apparaat wordt binnenkort uitgezet. Druk op een knop om het aan te laten."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Het apparaat wordt binnenkort uitgezet. Druk om het aan te laten."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Geen simkaart in tablet."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Geen simkaart in telefoon."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Pincodes komen niet overeen"</string>

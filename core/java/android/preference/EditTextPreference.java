@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -28,6 +29,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.WindowInsets;
 import android.widget.EditText;
 
 /**
@@ -123,7 +125,7 @@ public class EditTextPreference extends DialogPreference {
 
         EditText editText = mEditText;
         editText.setText(getText());
-        
+
         ViewParent oldParent = editText.getParent();
         if (oldParent != view) {
             if (oldParent != null) {
@@ -131,6 +133,13 @@ public class EditTextPreference extends DialogPreference {
             }
             onAddEditTextToDialogView(view, editText);
         }
+    }
+
+    @Override
+    protected void showDialog(Bundle state) {
+        super.showDialog(state);
+        mEditText.requestFocus();
+        mEditText.getWindowInsetsController().show(WindowInsets.Type.ime());
     }
 
     /**
@@ -181,13 +190,6 @@ public class EditTextPreference extends DialogPreference {
      */
     public EditText getEditText() {
         return mEditText;
-    }
-
-    /** @hide */
-    @Override
-    protected boolean needInputMethod() {
-        // We want the input method to show, if possible, when dialog is displayed
-        return true;
     }
 
     @Override

@@ -17,81 +17,39 @@
 #ifndef _UI_POINTER_CONTROLLER_H
 #define _UI_POINTER_CONTROLLER_H
 
-#include "SpriteController.h"
-
-#include <map>
-#include <vector>
-
-#include <ui/DisplayInfo.h>
+#include <PointerControllerInterface.h>
+#include <gui/DisplayEventReceiver.h>
 #include <input/DisplayViewport.h>
 #include <input/Input.h>
-#include <PointerControllerInterface.h>
 #include <utils/BitSet.h>
-#include <utils/RefBase.h>
 #include <utils/Looper.h>
-#include <gui/DisplayEventReceiver.h>
+#include <utils/RefBase.h>
+
+#include <map>
+#include <memory>
+#include <vector>
+
+#include "MouseCursorController.h"
+#include "PointerControllerContext.h"
+#include "SpriteController.h"
+#include "TouchSpotController.h"
 
 namespace android {
-
-/*
- * Pointer resources.
- */
-struct PointerResources {
-    SpriteIcon spotHover;
-    SpriteIcon spotTouch;
-    SpriteIcon spotAnchor;
-};
-
-struct PointerAnimation {
-    std::vector<SpriteIcon> animationFrames;
-    nsecs_t durationPerFrame;
-};
-
-/*
- * Pointer controller policy interface.
- *
- * The pointer controller policy is used by the pointer controller to interact with
- * the Window Manager and other system components.
- *
- * The actual implementation is partially supported by callbacks into the DVM
- * via JNI.  This interface is also mocked in the unit tests.
- */
-class PointerControllerPolicyInterface : public virtual RefBase {
-protected:
-    PointerControllerPolicyInterface() { }
-    virtual ~PointerControllerPolicyInterface() { }
-
-public:
-    virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId) = 0;
-    virtual void loadPointerResources(PointerResources* outResources, int32_t displayId) = 0;
-    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-            std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) = 0;
-    virtual int32_t getDefaultPointerIconId() = 0;
-    virtual int32_t getCustomPointerIconId() = 0;
-};
-
 
 /*
  * Tracks pointer movements and draws the pointer sprite to a surface.
  *
  * Handles pointer acceleration and animation.
  */
-class PointerController : public PointerControllerInterface, public MessageHandler,
-                          public LooperCallback {
-protected:
-    virtual ~PointerController();
-
+class PointerController : public PointerControllerInterface {
 public:
-    enum InactivityTimeout {
-        INACTIVITY_TIMEOUT_NORMAL = 0,
-        INACTIVITY_TIMEOUT_SHORT = 1,
-    };
+    static std::shared_ptr<PointerController> create(
+            const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+            const sp<SpriteController>& spriteController);
 
-    PointerController(const sp<PointerControllerPolicyInterface>& policy,
-            const sp<Looper>& looper, const sp<SpriteController>& spriteController);
+    virtual ~PointerController() = default;
 
-    virtual bool getBounds(float* outMinX, float* outMinY,
-            float* outMaxX, float* outMaxY) const;
+    virtual bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
     virtual void move(float deltaX, float deltaY);
     virtual void setButtonState(int32_t buttonState);
     virtual int32_t getButtonState() const;
@@ -103,111 +61,36 @@ public:
     virtual void setDisplayViewport(const DisplayViewport& viewport);
 
     virtual void setPresentation(Presentation presentation);
-    virtual void setSpots(const PointerCoords* spotCoords,
-            const uint32_t* spotIdToIndex, BitSet32 spotIdBits, int32_t displayId);
+    virtual void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
+                          BitSet32 spotIdBits, int32_t displayId);
     virtual void clearSpots();
 
     void updatePointerIcon(int32_t iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
+    void doInactivityTimeout();
     void reloadPointerResources();
+    void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
 
 private:
-    static const size_t MAX_RECYCLED_SPRITES = 12;
-    static const size_t MAX_SPOTS = 12;
+    friend PointerControllerContext::LooperCallback;
+    friend PointerControllerContext::MessageHandler;
 
-    enum {
-        MSG_INACTIVITY_TIMEOUT,
-    };
+    mutable std::mutex mLock;
 
-    struct Spot {
-        static const uint32_t INVALID_ID = 0xffffffff;
+    PointerControllerContext mContext;
 
-        uint32_t id;
-        sp<Sprite> sprite;
-        float alpha;
-        float scale;
-        float x, y;
-
-        inline Spot(uint32_t id, const sp<Sprite>& sprite)
-                : id(id), sprite(sprite), alpha(1.0f), scale(1.0f),
-                  x(0.0f), y(0.0f), lastIcon(NULL) { }
-
-        void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId);
-
-    private:
-        const SpriteIcon* lastIcon;
-    };
-
-    mutable Mutex mLock;
-
-    sp<PointerControllerPolicyInterface> mPolicy;
-    sp<Looper> mLooper;
-    sp<SpriteController> mSpriteController;
-    sp<WeakMessageHandler> mHandler;
-    sp<LooperCallback> mCallback;
-
-    DisplayEventReceiver mDisplayEventReceiver;
-
-    PointerResources mResources;
+    MouseCursorController mCursorController;
 
     struct Locked {
-        bool animationPending;
-        nsecs_t animationTime;
-
-        size_t animationFrameIndex;
-        nsecs_t lastFrameUpdatedTime;
-
-        DisplayViewport viewport;
-
-        InactivityTimeout inactivityTimeout;
-
         Presentation presentation;
-        bool presentationChanged;
 
-        int32_t pointerFadeDirection;
-        float pointerX;
-        float pointerY;
-        float pointerAlpha;
-        sp<Sprite> pointerSprite;
-        SpriteIcon pointerIcon;
-        bool pointerIconChanged;
-
-        std::map<int32_t, SpriteIcon> additionalMouseResources;
-        std::map<int32_t, PointerAnimation> animationResources;
-
-        int32_t requestedPointerType;
-
-        int32_t buttonState;
-
-        std::map<int32_t /* displayId */, std::vector<Spot*>> spotsByDisplay;
-        std::vector<sp<Sprite> > recycledSprites;
+        std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;
     } mLocked GUARDED_BY(mLock);
 
-    bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
-    void setPositionLocked(float x, float y);
-
-    void handleMessage(const Message& message);
-    int handleEvent(int fd, int events, void* data);
-    void doAnimate(nsecs_t timestamp);
-    bool doFadingAnimationLocked(nsecs_t timestamp);
-    bool doBitmapAnimationLocked(nsecs_t timestamp);
-    void doInactivityTimeout();
-
-    void startAnimationLocked();
-
-    void resetInactivityTimeoutLocked();
-    void removeInactivityTimeoutLocked();
-    void updatePointerLocked();
-
-    Spot* getSpot(uint32_t id, const std::vector<Spot*>& spots);
-    Spot* createAndAddSpotLocked(uint32_t id, std::vector<Spot*>& spots);
-    Spot* removeFirstFadingSpotLocked(std::vector<Spot*>& spots);
-    void releaseSpotLocked(Spot* spot);
-    void fadeOutAndReleaseSpotLocked(Spot* spot);
-    void fadeOutAndReleaseAllSpotsLocked();
-
-    void loadResourcesLocked();
+    PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+                      const sp<SpriteController>& spriteController);
+    void clearSpotsLocked();
 };
 
 } // namespace android

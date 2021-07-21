@@ -78,4 +78,26 @@ public abstract class InputManagerInternal {
      */
     public abstract boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken);
+
+    /** Registers the {@link LidSwitchCallback} to begin receiving notifications. */
+    public abstract void registerLidSwitchCallback(@NonNull LidSwitchCallback callbacks);
+
+    /**
+     * Unregisters a {@link LidSwitchCallback callback} previously registered with
+     * {@link #registerLidSwitchCallback(LidSwitchCallback)}.
+     */
+    public abstract void unregisterLidSwitchCallback(@NonNull LidSwitchCallback callbacks);
+
+    /** Callback interface for notifications relating to the lid switch. */
+    public interface LidSwitchCallback {
+        /**
+         * This callback is invoked when the lid switch changes state. Will be triggered once on
+         * registration of the callback with a {@code whenNanos} of 0 and then on every subsequent
+         * change in lid switch state.
+         *
+         * @param whenNanos the time when the change occurred
+         * @param lidOpen true if the lid is open
+         */
+        void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
+    }
 }

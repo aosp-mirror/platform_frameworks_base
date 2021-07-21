@@ -19,6 +19,7 @@ package android.content.pm.parsing.component;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
@@ -35,8 +36,6 @@ import com.android.internal.annotations.VisibleForTesting;
 
 /** @hide */
 class ParsedComponentUtils {
-
-    private static final String TAG = ParsingPackageUtils.TAG;
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -99,13 +98,29 @@ class ParsedComponentUtils {
 
     static ParseResult<Bundle> addMetaData(ParsedComponent component, ParsingPackage pkg,
             Resources resources, XmlResourceParser parser, ParseInput input) {
-        ParseResult<Bundle> result = ParsingPackageUtils.parseMetaData(pkg, resources,
-                parser, component.metaData, input);
+        ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, component,
+                resources, parser, "<meta-data>", input);
         if (result.isError()) {
             return input.error(result);
         }
-        Bundle bundle = result.getResult();
-        component.metaData = bundle;
-        return input.success(bundle);
+        final Property property = result.getResult();
+        if (property != null) {
+            component.metaData = property.toBundle(component.metaData);
+        }
+        return input.success(component.metaData);
+    }
+
+    static ParseResult<Property> addProperty(ParsedComponent component, ParsingPackage pkg,
+            Resources resources, XmlResourceParser parser, ParseInput input) {
+        ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, component,
+                resources, parser, "<property>", input);
+        if (result.isError()) {
+            return input.error(result);
+        }
+        final Property property = result.getResult();
+        if (property != null) {
+            component.addProperty(property);
+        }
+        return input.success(property);
     }
 }

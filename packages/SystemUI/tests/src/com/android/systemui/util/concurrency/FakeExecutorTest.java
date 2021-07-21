@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.concurrency;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -317,6 +319,18 @@ public class FakeExecutorTest extends SysuiTestCase {
         removeFunctions.forEach(Runnable::run);
         assertEquals(0, fakeExecutor.numPending());
         assertEquals(1, runnable.mRunCount);
+    }
+
+    @Test
+    public void testIsExecuting() {
+        FakeSystemClock clock = new FakeSystemClock();
+        FakeExecutor fakeExecutor = new FakeExecutor(clock);
+
+        Runnable runnable = () -> assertThat(fakeExecutor.isExecuting()).isTrue();
+
+        assertThat(fakeExecutor.isExecuting()).isFalse();
+        fakeExecutor.execute(runnable);
+        assertThat(fakeExecutor.isExecuting()).isFalse();
     }
 
     private static class RunnableImpl implements Runnable {

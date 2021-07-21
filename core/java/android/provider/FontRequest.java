@@ -20,13 +20,14 @@ import android.util.Base64;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Information about a font request that may be sent to a Font Provider.
+ * @deprecated Use the {@link androidx.core.provider.FontRequest}
  */
+@Deprecated
 public final class FontRequest {
     private final String mProviderAuthority;
     private final String mProviderPackage;

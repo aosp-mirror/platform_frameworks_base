@@ -50,14 +50,14 @@ public class CertBlacklisterTest extends AndroidTestCase {
     public void testClearBlacklistPubkey() throws Exception {
         // clear the gservices setting for a clean slate
         overrideSettings(PUBKEY_KEY, "");
-        // read the contents of the pubkey blacklist
+        // read the contents of the pubkey denylist
         String blacklist = IoUtils.readFileAsString(PUBKEY_PATH);
         // Verify that it's empty
         assertEquals("", blacklist);
     }
 
     public void testSetBlacklistPubkey() throws Exception {
-        // build a new thing to blacklist
+        // build a new thing to denylist
         String badPubkey = "7ccabd7db47e94a5759901b6a7dfd45d1c091ccc";
         // add the gservices override
         overrideSettings(PUBKEY_KEY, badPubkey);
@@ -110,14 +110,14 @@ public class CertBlacklisterTest extends AndroidTestCase {
     public void testClearBlacklistSerial() throws Exception {
         // clear the gservices setting for a clean slate
         overrideSettings(SERIAL_KEY, "");
-        // read the contents of the pubkey blacklist
+        // read the contents of the pubkey denylist
         String blacklist = IoUtils.readFileAsString(SERIAL_PATH);
         // Verify that it's empty
         assertEquals("", blacklist);
     }
 
     public void testSetBlacklistSerial() throws Exception {
-        // build a new thing to blacklist
+        // build a new thing to denylist
         String badSerial = "22e514121e61c643b1e9b06bd4b9f7d0";
         // add the gservices override
         overrideSettings(SERIAL_KEY, badSerial);

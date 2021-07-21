@@ -16,14 +16,8 @@
 
 package com.android.internal.os.logging;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.util.Pair;
 import android.view.WindowManager.LayoutParams;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
 
 /**
@@ -31,81 +25,6 @@ import com.android.internal.util.FrameworkStatsLog;
  * readable.
  */
 public class MetricsLoggerWrapper {
-
-    private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
-    private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
-
-    public static void logPictureInPictureDismissByTap(Context context,
-            Pair<ComponentName, Integer> topActivityInfo) {
-        MetricsLogger.action(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                METRIC_VALUE_DISMISSED_BY_TAP);
-        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
-                getUid(context, topActivityInfo.first, topActivityInfo.second),
-                topActivityInfo.first.flattenToString(),
-                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__DISMISSED);
-    }
-
-    public static void logPictureInPictureDismissByDrag(Context context,
-            Pair<ComponentName, Integer> topActivityInfo) {
-        MetricsLogger.action(context,
-                MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                METRIC_VALUE_DISMISSED_BY_DRAG);
-        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
-                getUid(context, topActivityInfo.first, topActivityInfo.second),
-                topActivityInfo.first.flattenToString(),
-                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__DISMISSED);
-    }
-
-    public static void logPictureInPictureMinimize(Context context, boolean isMinimized,
-            Pair<ComponentName, Integer> topActivityInfo) {
-        MetricsLogger.action(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
-                isMinimized);
-        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
-                getUid(context, topActivityInfo.first, topActivityInfo.second),
-                topActivityInfo.first.flattenToString(),
-                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__MINIMIZED);
-    }
-
-    /**
-     * Get uid from component name and user Id
-     * @return uid. -1 if not found.
-     */
-    private static int getUid(Context context, ComponentName componentName, int userId) {
-        int uid = -1;
-        if (componentName == null) {
-            return uid;
-        }
-        try {
-            uid = context.getPackageManager().getApplicationInfoAsUser(
-                    componentName.getPackageName(), 0, userId).uid;
-        } catch (NameNotFoundException e) {
-        }
-        return uid;
-    }
-
-    public static void logPictureInPictureMenuVisible(Context context, boolean menuStateFull) {
-        MetricsLogger.visibility(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
-                menuStateFull);
-    }
-
-    public static void logPictureInPictureEnter(Context context,
-            int uid, String shortComponentName, boolean supportsEnterPipOnTaskSwitch) {
-        MetricsLogger.action(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_ENTERED,
-                supportsEnterPipOnTaskSwitch);
-        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED, uid,
-                shortComponentName,
-                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__ENTERED);
-    }
-
-    public static void logPictureInPictureFullScreen(Context context, int uid,
-            String shortComponentName) {
-        MetricsLogger.action(context,
-                MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
-        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
-                uid,
-                shortComponentName,
-                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__EXPANDED_TO_FULL_SCREEN);
-    }
 
     public static void logAppOverlayEnter(int uid, String packageName, boolean changed, int type, boolean usingAlertWindow) {
         if (changed) {

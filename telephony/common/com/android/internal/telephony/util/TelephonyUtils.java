@@ -15,6 +15,8 @@
  */
 package com.android.internal.telephony.util;
 
+import static android.telephony.Annotation.DataState;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,11 +28,13 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.telephony.TelephonyManager;
 
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -40,6 +44,8 @@ import java.util.function.Supplier;
 public final class TelephonyUtils {
     public static boolean IS_USER = "user".equals(android.os.Build.TYPE);
     public static boolean IS_DEBUGGABLE = SystemProperties.getInt("ro.debuggable", 0) == 1;
+
+    public static final Executor DIRECT_EXECUTOR = Runnable::run;
 
     /**
      * Verify that caller holds {@link android.Manifest.permission#DUMP}.
@@ -93,7 +99,7 @@ public final class TelephonyUtils {
      */
     public static void runWithCleanCallingIdentity(
             @NonNull Runnable action) {
-        long callingIdentity = Binder.clearCallingIdentity();
+        final long callingIdentity = Binder.clearCallingIdentity();
         try {
             action.run();
         } finally {
@@ -112,7 +118,7 @@ public final class TelephonyUtils {
      */
     public static <T> T runWithCleanCallingIdentity(
             @NonNull Supplier<T> action) {
-        long callingIdentity = Binder.clearCallingIdentity();
+        final long callingIdentity = Binder.clearCallingIdentity();
         try {
             return action.get();
         } finally {
@@ -153,5 +159,23 @@ public final class TelephonyUtils {
             latch.await(timeoutMs, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
         }
+    }
+
+    /**
+     * Convert data state to string
+     *
+     * @return The data state in string format.
+     */
+    public static String dataStateToString(@DataState int state) {
+        switch (state) {
+            case TelephonyManager.DATA_DISCONNECTED: return "DISCONNECTED";
+            case TelephonyManager.DATA_CONNECTING: return "CONNECTING";
+            case TelephonyManager.DATA_CONNECTED: return "CONNECTED";
+            case TelephonyManager.DATA_SUSPENDED: return "SUSPENDED";
+            case TelephonyManager.DATA_DISCONNECTING: return "DISCONNECTING";
+            case TelephonyManager.DATA_UNKNOWN: return "UNKNOWN";
+        }
+        // This is the error case. The well-defined value for UNKNOWN is -1.
+        return "UNKNOWN(" + state + ")";
     }
 }

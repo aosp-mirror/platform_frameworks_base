@@ -18,12 +18,15 @@ package android.os;
 
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Representation of a user on the device.
@@ -97,7 +100,7 @@ public final class UserHandle implements Parcelable {
     public static final @UserIdInt int USER_SYSTEM = 0;
 
     /** @hide A user serial constant to indicate the "system" user of the device */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int USER_SERIAL_SYSTEM = 0;
 
     /** @hide A user handle to indicate the "system" user of the device */
@@ -133,22 +136,22 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int ERR_GID = -1;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int AID_ROOT = android.os.Process.ROOT_UID;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int AID_APP_START = android.os.Process.FIRST_APPLICATION_UID;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int AID_APP_END = android.os.Process.LAST_APPLICATION_UID;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int AID_SHARED_GID_START = android.os.Process.FIRST_SHARED_APPLICATION_GID;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int AID_CACHE_GID_START = android.os.Process.FIRST_APPLICATION_CACHE_GID;
 
     /** The userId represented by this UserHandle. */
@@ -220,6 +223,14 @@ public final class UserHandle implements Parcelable {
     }
 
     /**
+     * Whether a UID belongs to a shared app gid.
+     * @hide
+     */
+    public static boolean isSharedAppGid(int uid) {
+        return getAppIdFromSharedAppGid(uid) != -1;
+    }
+
+    /**
      * Returns the user for a given uid.
      * @param uid A uid for an application running in a particular user.
      * @return A {@link UserHandle} for that user.
@@ -251,6 +262,26 @@ public final class UserHandle implements Parcelable {
     /** @hide */
     public static @AppIdInt int getCallingAppId() {
         return getAppId(Binder.getCallingUid());
+    }
+
+    /** @hide */
+    @NonNull
+    public static int[] fromUserHandles(@NonNull List<UserHandle> users) {
+        int[] userIds = new int[users.size()];
+        for (int i = 0; i < userIds.length; ++i) {
+            userIds[i] = users.get(i).getIdentifier();
+        }
+        return userIds;
+    }
+
+    /** @hide */
+    @NonNull
+    public static List<UserHandle> toUserHandles(@NonNull int[] userIds) {
+        List<UserHandle> users = new ArrayList<>(userIds.length);
+        for (int i = 0; i < userIds.length; ++i) {
+            users.add(UserHandle.of(userIds[i]));
+        }
+        return users;
     }
 
     /** @hide */
@@ -292,6 +323,18 @@ public final class UserHandle implements Parcelable {
         } else {
             return appId;
         }
+    }
+
+    /**
+     * Returns the uid representing the given appId for this UserHandle.
+     *
+     * @param appId the AppId to compose the uid
+     * @return the uid representing the given appId for this UserHandle
+     * @hide
+     */
+    @SystemApi
+    public int getUid(@AppIdInt int appId) {
+        return getUid(getIdentifier(), appId);
     }
 
     /**
@@ -503,13 +546,13 @@ public final class UserHandle implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         try {
             if (obj != null) {
                 UserHandle other = (UserHandle)obj;
                 return mHandle == other.mHandle;
             }
-        } catch (ClassCastException e) {
+        } catch (ClassCastException ignore) {
         }
         return false;
     }

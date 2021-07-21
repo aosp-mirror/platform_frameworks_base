@@ -25,7 +25,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
-import android.util.Slog;
+
 import com.android.server.SystemService;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class MediaResourceMonitorService extends SystemService {
         public void notifyResourceGranted(int pid, int type)
                 throws RemoteException {
             if (DEBUG) {
-                Slog.d(TAG, "notifyResourceGranted(pid=" + pid + ", type=" + type + ")");
+                Log.d(TAG, "notifyResourceGranted(pid=" + pid + ", type=" + type + ")");
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -62,17 +62,18 @@ public class MediaResourceMonitorService extends SystemService {
                 if (pkgNames == null) {
                     return;
                 }
-                UserManager manager = (UserManager) getContext().getSystemService(
-                        Context.USER_SERVICE);
-                int[] userIds = manager.getEnabledProfileIds(ActivityManager.getCurrentUser());
-                if (userIds == null || userIds.length == 0) {
+                UserManager manager = getContext().createContextAsUser(
+                        UserHandle.of(ActivityManager.getCurrentUser()), /*flags=*/0)
+                        .getSystemService(UserManager.class);
+                List<UserHandle> enabledProfiles = manager.getEnabledProfiles();
+                if (enabledProfiles.isEmpty()) {
                     return;
                 }
                 Intent intent = new Intent(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
                 intent.putExtra(Intent.EXTRA_PACKAGES, pkgNames);
                 intent.putExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE, type);
-                for (int userId : userIds) {
-                    getContext().sendBroadcastAsUser(intent, UserHandle.of(userId),
+                for (UserHandle userHandle : enabledProfiles) {
+                    getContext().sendBroadcastAsUser(intent, userHandle,
                             android.Manifest.permission.RECEIVE_MEDIA_RESOURCE_USAGE);
                 }
             } finally {
@@ -81,15 +82,11 @@ public class MediaResourceMonitorService extends SystemService {
         }
 
         private String[] getPackageNamesFromPid(int pid) {
-            try {
-                for (ActivityManager.RunningAppProcessInfo proc :
-                        ActivityManager.getService().getRunningAppProcesses()) {
-                    if (proc.pid == pid) {
-                        return proc.pkgList;
-                    }
+            ActivityManager manager = getContext().getSystemService(ActivityManager.class);
+            for (ActivityManager.RunningAppProcessInfo proc : manager.getRunningAppProcesses()) {
+                if (proc.pid == pid) {
+                    return proc.pkgList;
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "ActivityManager.getRunningAppProcesses() failed");
             }
             return null;
         }

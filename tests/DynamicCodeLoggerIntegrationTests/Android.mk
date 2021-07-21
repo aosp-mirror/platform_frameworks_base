@@ -22,6 +22,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE := DynamicCodeLoggerTestLibrary
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 LOCAL_SRC_FILES := $(call all-java-files-under, src/com/android/dcl)
 
 include $(BUILD_JAVA_LIBRARY)
@@ -35,9 +38,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE := DynamicCodeLoggerNativeTestLibrary
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 LOCAL_SRC_FILES := src/cpp/com_android_dcl_Jni.cpp
-LOCAL_C_INCLUDES += \
-    $(JNI_H_INCLUDE)
+LOCAL_HEADER_LIBRARIES := jni_headers
 LOCAL_SDK_VERSION := 28
 LOCAL_NDK_STL_VARIANT := c++_static
 
@@ -49,6 +54,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE := DynamicCodeLoggerNativeExecutable
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 LOCAL_SRC_FILES := src/cpp/test_executable.cpp
 
 include $(BUILD_EXECUTABLE)
@@ -81,4 +89,7 @@ LOCAL_JAVA_RESOURCE_FILES := \
     $(dynamiccodeloggertest_jar) \
     $(dynamiccodeloggertest_executable) \
 
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 include $(BUILD_PACKAGE)

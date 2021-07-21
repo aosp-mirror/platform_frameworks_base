@@ -20,8 +20,10 @@ import android.content.AutofillOptions;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.contentcapture.ContentCaptureManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -47,9 +49,17 @@ public class DecorContext extends ContextThemeWrapper {
     public DecorContext(Context baseContext, PhoneWindow phoneWindow) {
         super(null /* base */, null);
         setPhoneWindow(phoneWindow);
-        final Context displayContext = baseContext.createDisplayContext(
-                // TODO(b/149790106): Non-activity context can be passed.
-                phoneWindow.getContext().getDisplayNoVerify());
+        // TODO(b/149790106): Non-activity context can be passed.
+        final Display display = phoneWindow.getContext().getDisplayNoVerify();
+        final Context displayContext;
+        if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            // TODO(b/166174272): Creating a display context for the default display will result
+            // in additional resource creation.
+            displayContext = baseContext.createConfigurationContext(Configuration.EMPTY);
+            displayContext.updateDisplay(Display.DEFAULT_DISPLAY);
+        } else {
+            displayContext = baseContext.createDisplayContext(display);
+        }
         attachBaseContext(displayContext);
     }
 

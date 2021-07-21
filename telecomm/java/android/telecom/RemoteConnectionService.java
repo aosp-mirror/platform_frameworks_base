@@ -31,9 +31,9 @@ import com.android.internal.telecom.RemoteServiceCallback;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -587,6 +587,38 @@ final class RemoteConnectionService {
             return connection;
         } catch (RemoteException e) {
             return RemoteConnection.failure(
+                    new DisconnectCause(DisconnectCause.ERROR, e.toString()));
+        }
+    }
+
+    RemoteConference createRemoteConference(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request,
+            boolean isIncoming) {
+        final String id = UUID.randomUUID().toString();
+        try {
+            if (mConferenceById.isEmpty()) {
+                mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub(),
+                        null /*Session.Info*/);
+            }
+            RemoteConference conference = new RemoteConference(id, mOutgoingConnectionServiceRpc);
+            mOutgoingConnectionServiceRpc.createConference(connectionManagerPhoneAccount,
+                    id,
+                    request,
+                    isIncoming,
+                    false /* isUnknownCall */,
+                    null /*Session.info*/);
+            conference.registerCallback(new RemoteConference.Callback() {
+                @Override
+                public void onDestroyed(RemoteConference conference) {
+                    mConferenceById.remove(id);
+                    maybeDisconnectAdapter();
+                }
+            });
+            conference.putExtras(request.getExtras());
+            return conference;
+        } catch (RemoteException e) {
+            return RemoteConference.failure(
                     new DisconnectCause(DisconnectCause.ERROR, e.toString()));
         }
     }

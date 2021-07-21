@@ -18,7 +18,7 @@ package com.android.systemui.volume;
 
 import android.content.res.Configuration;
 
-import com.android.systemui.DemoMode;
+import com.android.systemui.demomode.DemoMode;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

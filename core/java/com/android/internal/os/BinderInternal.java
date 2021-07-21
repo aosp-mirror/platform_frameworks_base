@@ -31,6 +31,7 @@ import dalvik.system.VMRuntime;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Private and debugging Binder APIs.
@@ -84,8 +85,9 @@ public class BinderInternal {
         long timeStarted;
         // Should be set to one when an exception is thrown.
         boolean exceptionThrown;
+        // Detailed information should be recorded for this call when it ends.
+        public boolean recordedCall;
     }
-
 
     /**
      * Responsible for resolving a work source.
@@ -131,6 +133,22 @@ public class BinderInternal {
          * thrown by the binder transaction.
          */
         public void callThrewException(CallSession s, Exception exception);
+    }
+
+    /**
+     * Allows to track observe incoming binder call stats.
+     */
+    public interface CallStatsObserver {
+        /**
+         * Notes incoming binder call stats associated with this work source UID.
+         */
+        void noteCallStats(int workSourceUid, long incrementalCallCount,
+                Collection<BinderCallsStats.CallStat> callStats);
+
+        /**
+         * Notes the native IDs of threads taking incoming binder calls.
+         */
+        void noteBinderThreadNativeIds(int[] binderThreadNativeTids);
     }
 
     /**

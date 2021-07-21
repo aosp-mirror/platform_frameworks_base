@@ -22,10 +22,12 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentCallbacksController;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
@@ -52,13 +54,13 @@ import java.util.ArrayList;
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "Application";
     @UnsupportedAppUsage
-    private ArrayList<ComponentCallbacks> mComponentCallbacks =
-            new ArrayList<ComponentCallbacks>();
-    @UnsupportedAppUsage
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
     @UnsupportedAppUsage
     private ArrayList<OnProvideAssistDataListener> mAssistCallbacks = null;
+
+    private final ComponentCallbacksController mCallbacksController =
+            new ComponentCallbacksController();
 
     /** @hide */
     @UnsupportedAppUsage
@@ -259,47 +261,25 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
 
     @CallSuper
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        Object[] callbacks = collectComponentCallbacks();
-        if (callbacks != null) {
-            for (int i=0; i<callbacks.length; i++) {
-                ((ComponentCallbacks)callbacks[i]).onConfigurationChanged(newConfig);
-            }
-        }
+        mCallbacksController.dispatchConfigurationChanged(newConfig);
     }
 
     @CallSuper
     public void onLowMemory() {
-        Object[] callbacks = collectComponentCallbacks();
-        if (callbacks != null) {
-            for (int i=0; i<callbacks.length; i++) {
-                ((ComponentCallbacks)callbacks[i]).onLowMemory();
-            }
-        }
+        mCallbacksController.dispatchLowMemory();
     }
 
     @CallSuper
     public void onTrimMemory(int level) {
-        Object[] callbacks = collectComponentCallbacks();
-        if (callbacks != null) {
-            for (int i=0; i<callbacks.length; i++) {
-                Object c = callbacks[i];
-                if (c instanceof ComponentCallbacks2) {
-                    ((ComponentCallbacks2)c).onTrimMemory(level);
-                }
-            }
-        }
+        mCallbacksController.dispatchTrimMemory(level);
     }
 
     public void registerComponentCallbacks(ComponentCallbacks callback) {
-        synchronized (mComponentCallbacks) {
-            mComponentCallbacks.add(callback);
-        }
+        mCallbacksController.registerCallbacks(callback);
     }
 
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
-        synchronized (mComponentCallbacks) {
-            mComponentCallbacks.remove(callback);
-        }
+        mCallbacksController.unregisterCallbacks(callback);
     }
 
     public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
@@ -352,7 +332,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPreCreated(@NonNull Activity activity,
             @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -376,7 +356,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostCreated(@NonNull Activity activity,
             @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -388,7 +368,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPreStarted(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -408,7 +388,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostStarted(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -418,7 +398,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPreResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -438,7 +418,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -448,7 +428,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPrePaused(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -468,7 +448,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostPaused(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -478,7 +458,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPreStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -498,7 +478,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -508,7 +488,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPreSaveInstanceState(@NonNull Activity activity,
             @NonNull Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -532,7 +512,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostSaveInstanceState(@NonNull Activity activity,
             @NonNull Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -544,7 +524,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPreDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -564,7 +544,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ void dispatchActivityPostDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -572,16 +552,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostDestroyed(activity);
             }
         }
-    }
-
-    private Object[] collectComponentCallbacks() {
-        Object[] callbacks = null;
-        synchronized (mComponentCallbacks) {
-            if (mComponentCallbacks.size() > 0) {
-                callbacks = mComponentCallbacks.toArray();
-            }
-        }
-        return callbacks;
     }
 
     @UnsupportedAppUsage

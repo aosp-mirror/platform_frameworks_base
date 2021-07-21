@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<xs:schema version="2.0"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="device-state-config">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="device-state" type="deviceState" maxOccurs="256" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="deviceState">
+        <xs:sequence>
+            <xs:element name="identifier">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0" />
+                        <xs:maxInclusive value="255" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="name" type="xs:string" minOccurs="0">
+                <xs:annotation name="nullable" />
+            </xs:element>
+            <xs:element name="conditions" type="conditions" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="conditions">
+        <xs:sequence>
+            <xs:element name="lid-switch" type="lidSwitchCondition" minOccurs="0">
+                <xs:annotation name="nullable" />
+            </xs:element>
+            <xs:element name="sensor" type="sensorCondition" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="nullable" />
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="lidSwitchCondition">
+        <xs:sequence>
+            <xs:element name="open" type="xs:boolean" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="sensorCondition">
+        <xs:sequence>
+            <xs:element name="type" type="xs:string" />
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="value" type="numericRange" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="numericRange">
+        <xs:sequence>
+            <xs:choice minOccurs="0">
+                <xs:element name="min" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
+                <xs:element name="min-inclusive" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
+            </xs:choice>
+            <xs:choice minOccurs="0">
+                <xs:element name="max" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
+                <xs:element name="max-inclusive" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

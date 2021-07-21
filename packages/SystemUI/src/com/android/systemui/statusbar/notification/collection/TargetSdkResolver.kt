@@ -20,13 +20,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.phone.StatusBar
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class TargetSdkResolver @Inject constructor(
     private val context: Context
 ) {

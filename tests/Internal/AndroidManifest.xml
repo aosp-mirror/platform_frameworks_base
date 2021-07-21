@@ -16,29 +16,30 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.internal.tests">
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.BIND_WALLPAPER" />
+     package="com.android.internal.tests">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.BIND_WALLPAPER"/>
     <application>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
 
         <service android:name="stub.DummyWallpaperService"
-                 android:enabled="true"
-                 android:directBootAware="true"
-                 android:label="Dummy wallpaper"
-                 android:permission="android.permission.BIND_WALLPAPER">
+             android:enabled="true"
+             android:directBootAware="true"
+             android:label="Dummy wallpaper"
+             android:permission="android.permission.BIND_WALLPAPER"
+             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
+                <action android:name="android.service.wallpaper.WallpaperService"/>
             </intent-filter>
 
             <!-- Link to XML that defines the wallpaper info. -->
             <meta-data android:name="android.service.wallpaper"
-                       android:resource="@xml/livewallpaper" />
+                 android:resource="@xml/livewallpaper"/>
         </service>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="com.android.internal.tests"
-                     android:label="Internal Tests" />
+         android:targetPackage="com.android.internal.tests"
+         android:label="Internal Tests"/>
 </manifest>

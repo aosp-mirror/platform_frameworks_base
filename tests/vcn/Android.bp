@@ -1,0 +1,37 @@
+//########################################################################
+// Build FrameworksVcnTests package
+//########################################################################
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "FrameworksVcnTests",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.kt",
+    ],
+    platform_apis: true,
+    test_suites: ["device-tests"],
+    certificate: "platform",
+    static_libs: [
+        "androidx.test.rules",
+        "frameworks-base-testutils",
+        "framework-protos",
+        "mockito-target-minus-junit4",
+        "net-tests-utils",
+        "platform-test-annotations",
+        "services.core",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+}

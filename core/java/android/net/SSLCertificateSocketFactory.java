@@ -66,7 +66,7 @@ import javax.net.ssl.X509TrustManager;
  * must verify the identity of the server you are connected to.
  *
  * <p class="caution"><b>Most {@link SSLSocketFactory} implementations do not
- * verify the server's identity, allowing man-in-the-middle attacks.</b>
+ * verify the server's identity, allowing person-in-the-middle attacks.</b>
  * This implementation does check the server's certificate hostname, but only
  * for createSocket variants that specify a hostname.  When using methods that
  * use {@link InetAddress} or which return an unconnected socket, you MUST
@@ -115,20 +115,20 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory mInsecureFactory = null;
     @UnsupportedAppUsage
     private SSLSocketFactory mSecureFactory = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private TrustManager[] mTrustManagers = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private KeyManager[] mKeyManagers = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private byte[] mNpnProtocols = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private byte[] mAlpnProtocols = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private PrivateKey mChannelIdPrivateKey = null;
 
     @UnsupportedAppUsage
     private final int mHandshakeTimeoutMillis;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SSLClientSessionCache mSessionCache;
     @UnsupportedAppUsage
     private final boolean mSecure;
@@ -176,7 +176,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * disabled, using an optional handshake timeout and SSL session cache.
      *
      * <p class="caution"><b>Warning:</b> Sockets created using this factory
-     * are vulnerable to man-in-the-middle attacks!</p>
+     * are vulnerable to person-in-the-middle attacks!</p>
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
@@ -249,7 +249,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
@@ -343,7 +343,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *     must be non-empty and of length less than 256.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setAlpnProtocols(byte[][] protocols) {
         this.mAlpnProtocols = toLengthPrefixedList(protocols);
     }
@@ -464,13 +464,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setSoWriteTimeout(Socket socket, int writeTimeoutMilliseconds)
             throws SocketException {
         castToOpenSSLSocket(socket).setSoWriteTimeout(writeTimeoutMilliseconds);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static OpenSSLSocketImpl castToOpenSSLSocket(Socket socket) {
         if (!(socket instanceof OpenSSLSocketImpl)) {
             throw new IllegalArgumentException("Socket not created by this factory: "
@@ -508,7 +508,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * <p class="caution"><b>Warning:</b> Hostname verification is not performed
      * with this method.  You MUST verify the server's identity after connecting
-     * the socket to avoid man-in-the-middle attacks.</p>
+     * the socket to avoid person-in-the-middle attacks.</p>
      */
     @Override
     public Socket createSocket() throws IOException {
@@ -527,7 +527,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * <p class="caution"><b>Warning:</b> Hostname verification is not performed
      * with this method.  You MUST verify the server's identity after connecting
-     * the socket to avoid man-in-the-middle attacks.</p>
+     * the socket to avoid person-in-the-middle attacks.</p>
      */
     @Override
     public Socket createSocket(InetAddress addr, int port, InetAddress localAddr, int localPort)
@@ -548,7 +548,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * <p class="caution"><b>Warning:</b> Hostname verification is not performed
      * with this method.  You MUST verify the server's identity after connecting
-     * the socket to avoid man-in-the-middle attacks.</p>
+     * the socket to avoid person-in-the-middle attacks.</p>
      */
     @Override
     public Socket createSocket(InetAddress addr, int port) throws IOException {

@@ -20,6 +20,7 @@ import static android.app.usage.UsageEvents.Event.ACTIVITY_DESTROYED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
+import static android.app.usage.UsageEvents.Event.APP_COMPONENT_USED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
@@ -137,6 +138,7 @@ public class UsageStatsTest {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
         left.mTotalTimeInForeground = 10;
+        left.mLastTimeComponentUsed = 200000;
 
         left.mActivities.put(1, Event.ACTIVITY_RESUMED);
         left.mActivities.put(2, Event.ACTIVITY_RESUMED);
@@ -542,6 +544,19 @@ public class UsageStatsTest {
     }
 
     @Test
+    public void testEvent_APP_COMPONENT_USED() {
+        left.mPackageName = "com.test";
+        left.mBeginTimeStamp = 100000;
+        final String className = "com.test.component1";
+
+        left.update(className, 200000, APP_COMPONENT_USED, 0);
+        assertEquals(left.mLastTimeComponentUsed, 200000);
+
+        left.update(className, 300000, APP_COMPONENT_USED, 0);
+        assertEquals(left.mLastTimeComponentUsed, 300000);
+    }
+
+    @Test
     public void testEvent_DEVICE_SHUTDOWN() {
         testClosingEvent(DEVICE_SHUTDOWN);
     }
@@ -586,6 +601,7 @@ public class UsageStatsTest {
         assertEquals(us1.mBeginTimeStamp, us2.mBeginTimeStamp);
         assertEquals(us1.mLastTimeUsed, us2.mLastTimeUsed);
         assertEquals(us1.mLastTimeVisible, us2.mLastTimeVisible);
+        assertEquals(us1.mLastTimeComponentUsed, us2.mLastTimeComponentUsed);
         assertEquals(us1.mLastTimeForegroundServiceUsed, us2.mLastTimeForegroundServiceUsed);
         assertEquals(us1.mTotalTimeInForeground, us2.mTotalTimeInForeground);
         assertEquals(us1.mTotalTimeForegroundServiceUsed, us2.mTotalTimeForegroundServiceUsed);

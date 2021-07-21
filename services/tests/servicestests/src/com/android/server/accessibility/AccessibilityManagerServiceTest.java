@@ -35,9 +35,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -46,6 +48,8 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
+import com.android.server.accessibility.magnification.MagnificationController;
+import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -63,7 +67,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     private static final String INTENT_ACTION = "TESTACTION";
     private static final String DESCRIPTION = "description";
     private static final PendingIntent TEST_PENDING_INTENT = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION), 0);
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION), PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction TEST_ACTION = new RemoteAction(
             Icon.createWithContentUri("content://test"),
             LABEL,
@@ -80,6 +84,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private AccessibilityServiceInfo mMockServiceInfo;
     @Mock private ResolveInfo mMockResolveInfo;
     @Mock private AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
+    @Mock private WindowManagerInternal.AccessibilityControllerInternal mMockA11yController;
     @Mock private PackageManager mMockPackageManager;
     @Mock private WindowManagerInternal mMockWindowManagerService;
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -89,6 +94,10 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
     @Mock private IBinder mMockBinder;
     @Mock private IAccessibilityServiceClient mMockServiceClient;
+    @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
+    @Mock private MagnificationController mMockMagnificationController;
+    @Mock private Resources mMockResources;
+
     private AccessibilityUserState mUserState;
 
     private MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
@@ -105,13 +114,26 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         LocalServices.addService(
                 ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
 
+        when(mMockMagnificationController.getWindowMagnificationMgr()).thenReturn(
+                mMockWindowMagnificationMgr);
+        when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
+                mMockA11yController);
+        when(mMockA11yController.isAccessibilityTracingEnabled()).thenReturn(false);
         mA11yms = new AccessibilityManagerService(
             InstrumentationRegistry.getContext(),
             mMockPackageManager,
             mMockSecurityPolicy,
             mMockSystemActionPerformer,
             mMockA11yWindowManager,
-            mMockA11yDisplayListener);
+            mMockA11yDisplayListener,
+            mMockMagnificationController);
+
+        mMockResources = mock(Resources.class);
+        when(mMockContext.getResources()).thenReturn(mMockResources);
+
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                mA11yms.getCurrentUserIdLocked(), mMockContext, mA11yms);
+        mA11yms.mUserStates.put(mA11yms.getCurrentUserIdLocked(), userState);
     }
 
     private void setupAccessibilityServiceConnection() {
@@ -135,6 +157,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
                 new Object(),
                 mMockSecurityPolicy,
                 mMockSystemSupport,
+                mA11yms.getTraceManager(),
                 mMockWindowManagerService,
                 mMockSystemActionPerformer,
                 mMockA11yWindowManager,
@@ -146,9 +169,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testRegisterSystemActionWithoutPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
-                .enforceCallerIsRecentsOrHasPermission(
-                        Manifest.permission.MANAGE_ACCESSIBILITY,
-                        AccessibilityManagerService.FUNCTION_REGISTER_SYSTEM_ACTION);
+                .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
         try {
             mA11yms.registerSystemAction(TEST_ACTION, ACTION_ID);
@@ -167,9 +188,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testUnregisterSystemActionWithoutPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
-                .enforceCallerIsRecentsOrHasPermission(
-                        Manifest.permission.MANAGE_ACCESSIBILITY,
-                        AccessibilityManagerService.FUNCTION_UNREGISTER_SYSTEM_ACTION);
+                .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
         try {
             mA11yms.unregisterSystemAction(ACTION_ID);
@@ -191,5 +210,20 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         mA11yms.notifySystemActionsChangedLocked(mUserState);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(mMockServiceClient).onSystemActionsChanged();
+    }
+
+    @SmallTest
+    public void testOnMagnificationTransitionFailed_capabilitiesIsAll_fallBackToPreviousMode() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        userState.setMagnificationModeLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        mA11yms.onMagnificationTransitionEndedLocked(false);
+
+        assertEquals(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                userState.getMagnificationModeLocked());
     }
 }

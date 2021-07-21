@@ -155,6 +155,19 @@ public class DynamicSystemManager {
         }
     }
     /**
+     * Complete the current partition installation.
+     *
+     * @return true if the partition installation completes without error.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean closePartition() {
+        try {
+            return mService.closePartition();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+    /**
      * Finish a previously started installation. Installations without a cooresponding
      * finishInstallation() will be cleaned up during device boot.
      */
@@ -252,6 +265,18 @@ public class DynamicSystemManager {
     public boolean setEnable(boolean enable, boolean oneShot) {
         try {
             return mService.setEnable(enable, oneShot);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /**
+     * Returns the suggested scratch partition size for overlayFS.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public long suggestScratchSize() {
+        try {
+            return mService.suggestScratchSize();
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }

@@ -26,7 +26,7 @@ import android.os.ResultReceiver;
 import java.util.Objects;
 
 /**
- * Handles incoming commands from {@link MediaSession2} to both {@link MediaController2}.
+ * Handles incoming commands from {@link MediaSession2} to {@link MediaController2}.
  * @hide
  */
 // @SystemApi

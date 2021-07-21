@@ -34,47 +34,47 @@ oneway interface IImsCallSessionListener {
     /**
      * Notifies the result of the basic session operation (setup / terminate).
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionProgressing(in IImsCallSession session, in ImsStreamMediaProfile profile);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionStarted(in IImsCallSession session, in ImsCallProfile profile);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionStartFailed(in IImsCallSession session, in ImsReasonInfo reasonInfo);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionTerminated(in IImsCallSession session, in ImsReasonInfo reasonInfo);
 
     /**
      * Notifies the result of the call hold/resume operation.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionHeld(in IImsCallSession session, in ImsCallProfile profile);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionHoldFailed(in IImsCallSession session, in ImsReasonInfo reasonInfo);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionHoldReceived(in IImsCallSession session, in ImsCallProfile profile);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionResumed(in IImsCallSession session, in ImsCallProfile profile);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionResumeFailed(in IImsCallSession session, in ImsReasonInfo reasonInfo);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionResumeReceived(in IImsCallSession session, in ImsCallProfile profile);
 
     /**
      * Notifies the result of call merge operation.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionMergeStarted(in IImsCallSession session,
             in IImsCallSession newSession, in ImsCallProfile profile);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionMergeComplete(in IImsCallSession session);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionMergeFailed(in IImsCallSession session,
             in ImsReasonInfo reasonInfo);
 
     /**
      * Notifies the result of call upgrade / downgrade or any other call updates.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionUpdated(in IImsCallSession session,
             in ImsCallProfile profile);
     void callSessionUpdateFailed(in IImsCallSession session,
@@ -95,9 +95,9 @@ oneway interface IImsCallSessionListener {
     /**
      * Notifies the result of the participant invitation / removal to/from the conference session.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionInviteParticipantsRequestDelivered(in IImsCallSession session);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionInviteParticipantsRequestFailed(in IImsCallSession session,
             in ImsReasonInfo reasonInfo);
     void callSessionRemoveParticipantsRequestDelivered(in IImsCallSession session);
@@ -107,7 +107,7 @@ oneway interface IImsCallSessionListener {
     /**
      * Notifies the changes of the conference info. in the conference session.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionConferenceStateUpdated(in IImsCallSession session,
             in ImsConferenceState state);
 
@@ -120,10 +120,10 @@ oneway interface IImsCallSessionListener {
     /**
      * Notifies of handover information for this call
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionHandover(in IImsCallSession session,
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionHandoverFailed(in IImsCallSession session,
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
     void callSessionMayHandover(in IImsCallSession session,
@@ -137,7 +137,7 @@ oneway interface IImsCallSessionListener {
      * - {@link com.android.internal.telephony.Phone#TTY_MODE_HCO}
      * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionTtyModeReceived(in IImsCallSession session, in int mode);
 
     /**
@@ -146,13 +146,13 @@ oneway interface IImsCallSessionListener {
      * @param session The call session.
      * @param isMultiParty {@code true} if the session became multiparty, {@code false} otherwise.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionMultipartyStateChanged(in IImsCallSession session, in boolean isMultiParty);
 
     /**
      * Notifies the supplementary service information for the current session.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void callSessionSuppServiceReceived(in IImsCallSession session,
          in ImsSuppServiceNotification suppSrvNotification);
 

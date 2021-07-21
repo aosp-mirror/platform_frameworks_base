@@ -37,6 +37,13 @@ public abstract class Classifier {
     public static final int GENERIC = 7;
     public static final int BOUNCER_UNLOCK = 8;
     public static final int PULSE_EXPAND = 9;
+    public static final int BRIGHTNESS_SLIDER = 10;
+    public static final int SHADE_DRAG = 11;
+    public static final int QS_COLLAPSE = 12;
+    public static final int UDFPS_AUTHENTICATION = 13;
+    public static final int LOCK_ICON = 14;
+    public static final int QS_SWIPE = 15;
+    public static final int BACK_GESTURE = 16;
 
     @IntDef({
             QUICK_SETTINGS,
@@ -48,15 +55,18 @@ public abstract class Classifier {
             RIGHT_AFFORDANCE,
             GENERIC,
             BOUNCER_UNLOCK,
-            PULSE_EXPAND
+            PULSE_EXPAND,
+            BRIGHTNESS_SLIDER,
+            SHADE_DRAG,
+            QS_COLLAPSE,
+            BRIGHTNESS_SLIDER,
+            UDFPS_AUTHENTICATION,
+            LOCK_ICON,
+            QS_SWIPE,
+            BACK_GESTURE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InteractionType {}
-
-    /**
-     * Contains all the information about touch events from which the classifier can query
-     */
-    protected ClassifierData mClassifierData;
 
     /**
      * Informs the classifier that a new touch event has occurred

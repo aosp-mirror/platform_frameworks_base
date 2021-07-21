@@ -25,9 +25,9 @@
     <!-- Max((28 + 20), 0) = 48 -->
     <dimen name="status_bar_height_landscape">48dp</dimen>
     <!-- Height of area above QQS where battery/time go (equal to status bar height if > 48dp) -->
-    <dimen name="quick_qs_offset_height">28dp</dimen>
+    <dimen name="quick_qs_offset_height">48dp</dimen>
     <!-- Total height of QQS (quick_qs_offset_height + 128) -->
-    <dimen name="quick_qs_total_height">156dp</dimen>
+    <dimen name="quick_qs_total_height">176dp</dimen>
 
     <dimen name="waterfall_display_left_edge_size">20dp</dimen>
     <dimen name="waterfall_display_top_edge_size">0dp</dimen>

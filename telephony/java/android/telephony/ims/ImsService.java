@@ -16,6 +16,9 @@
 
 package android.telephony.ims;
 
+import android.annotation.LongDef;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -28,17 +31,24 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsServiceController;
 import android.telephony.ims.aidl.IImsServiceControllerListener;
+import android.telephony.ims.aidl.ISipTransport;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsFeatureConfiguration;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.telephony.ims.stub.SipTransportImplBase;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Main ImsService implementation, which binds via the Telephony ImsResolver. Services that extend
@@ -96,6 +106,61 @@ public class ImsService extends Service {
     private static final String LOG_TAG = "ImsService";
 
     /**
+     * This ImsService supports the capability to place emergency calls over MMTEL.
+     * <p>
+     * Note: This should never be set by {@link #getImsServiceCapabilities()}, as whether it is
+     * there or not depends on whether or not {@link ImsFeature#FEATURE_EMERGENCY_MMTEL} is defined
+     * for this ImsService. If it is set, it will be removed during sanitization before the final
+     * capabilities bitfield is sent back to the framework.
+     * @hide This is encoded into the {@link ImsFeature#FEATURE_EMERGENCY_MMTEL}, but we will be
+     * adding other capabilities in a central location, so track this capability here as well.
+     */
+    public static final long CAPABILITY_EMERGENCY_OVER_MMTEL = 1 << 0;
+
+    /**
+     * This ImsService supports the capability to create SIP delegates for other IMS applications
+     * to use to proxy SIP messaging traffic through it.
+     * <p>
+     * In order for the framework to report SipDelegate creation as being available for this
+     * ImsService implementation, this ImsService must report this capability flag in
+     * {@link #getImsServiceCapabilities()}, {@link #getSipTransport(int)} must not return null, and
+     * this ImsService MUST report the ability to create both {@link ImsFeature#FEATURE_MMTEL} and
+     * {@link ImsFeature#FEATURE_RCS} features.
+     */
+    public static final long CAPABILITY_SIP_DELEGATE_CREATION = 1 << 1;
+
+    /**
+     * Used for internal correctness checks of capabilities set by the ImsService implementation and
+     * tracks the index of the largest defined flag in the capabilities long.
+     * @hide
+     */
+    public static final long CAPABILITY_MAX_INDEX =
+            Long.numberOfTrailingZeros(CAPABILITY_SIP_DELEGATE_CREATION);
+
+    /**
+     * @hide
+     */
+    @LongDef(flag = true,
+            prefix = "CAPABILITY_",
+            value = {
+                    // CAPABILITY_EMERGENCY_OVER_MMTEL is not included here because it is managed by
+                    // whether or not ImsFeature.FEATURE_EMERGENCY_MMTEL feature is set and should
+                    // not be set by users of ImsService.
+                    CAPABILITY_SIP_DELEGATE_CREATION
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ImsServiceCapability {}
+
+    /**
+     * Used for logging purposes, see {@link #getCapabilitiesString(long)}
+     * @hide
+     */
+    private static final Map<Long, String> CAPABILITIES_LOG_MAP = new HashMap<Long, String>() {{
+            put(CAPABILITY_EMERGENCY_OVER_MMTEL, "EMERGENCY_OVER_MMTEL");
+            put(CAPABILITY_SIP_DELEGATE_CREATION, "SIP_DELEGATE_CREATION");
+        }};
+
+    /**
      * The intent that must be defined as an intent-filter in the AndroidManifest of the ImsService.
      * @hide
      */
@@ -135,23 +200,46 @@ public class ImsService extends Service {
         }
 
         @Override
-        public IImsMmTelFeature createMmTelFeature(int slotId, IImsFeatureStatusCallback c) {
-            return createMmTelFeatureInternal(slotId, c);
+        public IImsMmTelFeature createMmTelFeature(int slotId) {
+            return createMmTelFeatureInternal(slotId);
         }
 
         @Override
-        public IImsRcsFeature createRcsFeature(int slotId, IImsFeatureStatusCallback c) {
-            return createRcsFeatureInternal(slotId, c);
+        public IImsRcsFeature createRcsFeature(int slotId) {
+            return createRcsFeatureInternal(slotId);
         }
 
         @Override
-        public void removeImsFeature(int slotId, int featureType, IImsFeatureStatusCallback c) {
-            ImsService.this.removeImsFeature(slotId, featureType, c);
+        public void addFeatureStatusCallback(int slotId, int featureType,
+                IImsFeatureStatusCallback c) {
+            ImsService.this.addImsFeatureStatusCallback(slotId, featureType, c);
+        }
+
+        @Override
+        public void removeFeatureStatusCallback(int slotId, int featureType,
+                IImsFeatureStatusCallback c) {
+            ImsService.this.removeImsFeatureStatusCallback(slotId, featureType, c);
+        }
+
+        @Override
+        public void removeImsFeature(int slotId, int featureType) {
+            ImsService.this.removeImsFeature(slotId, featureType);
         }
 
         @Override
         public ImsFeatureConfiguration querySupportedImsFeatures() {
             return ImsService.this.querySupportedImsFeatures();
+        }
+
+        @Override
+        public long getImsServiceCapabilities() {
+            long caps = ImsService.this.getImsServiceCapabilities();
+            long sanitizedCaps = sanitizeCapabilities(caps);
+            if (caps != sanitizedCaps) {
+                Log.w(LOG_TAG, "removing invalid bits from field: 0x"
+                        + Long.toHexString(caps ^ sanitizedCaps));
+            }
+            return sanitizedCaps;
         }
 
         @Override
@@ -169,6 +257,12 @@ public class ImsService extends Service {
         public IImsRegistration getRegistration(int slotId) {
             ImsRegistrationImplBase r = ImsService.this.getRegistration(slotId);
             return r != null ? r.getBinder() : null;
+        }
+
+        @Override
+        public ISipTransport getSipTransport(int slotId) {
+            SipTransportImplBase s = ImsService.this.getSipTransport(slotId);
+            return s != null ? s.getBinder() : null;
         }
 
         @Override
@@ -202,11 +296,10 @@ public class ImsService extends Service {
         return mFeaturesBySlot.get(slotId);
     }
 
-    private IImsMmTelFeature createMmTelFeatureInternal(int slotId,
-            IImsFeatureStatusCallback c) {
+    private IImsMmTelFeature createMmTelFeatureInternal(int slotId) {
         MmTelFeature f = createMmTelFeature(slotId);
         if (f != null) {
-            setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL, c);
+            setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL);
             return f.getBinder();
         } else {
             Log.e(LOG_TAG, "createMmTelFeatureInternal: null feature returned.");
@@ -214,11 +307,10 @@ public class ImsService extends Service {
         }
     }
 
-    private IImsRcsFeature createRcsFeatureInternal(int slotId,
-            IImsFeatureStatusCallback c) {
+    private IImsRcsFeature createRcsFeatureInternal(int slotId) {
         RcsFeature f = createRcsFeature(slotId);
         if (f != null) {
-            setupFeature(f, slotId, ImsFeature.FEATURE_RCS, c);
+            setupFeature(f, slotId, ImsFeature.FEATURE_RCS);
             return f.getBinder();
         } else {
             Log.e(LOG_TAG, "createRcsFeatureInternal: null feature returned.");
@@ -226,11 +318,43 @@ public class ImsService extends Service {
         }
     }
 
-    private void setupFeature(ImsFeature f, int slotId, int featureType,
-            IImsFeatureStatusCallback c) {
+    private void setupFeature(ImsFeature f, int slotId, int featureType) {
         f.initialize(this, slotId);
-        f.addImsFeatureStatusCallback(c);
         addImsFeature(slotId, featureType, f);
+    }
+
+    private void addImsFeatureStatusCallback(int slotId, int featureType,
+            IImsFeatureStatusCallback c) {
+        synchronized (mFeaturesBySlot) {
+            // get ImsFeature associated with the slot/feature
+            SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
+            if (features == null) {
+                Log.w(LOG_TAG, "Can not add ImsFeatureStatusCallback - no features on slot "
+                        + slotId);
+                return;
+            }
+            ImsFeature f = features.get(featureType);
+            if (f != null) {
+                f.addImsFeatureStatusCallback(c);
+            }
+        }
+    }
+
+    private void removeImsFeatureStatusCallback(int slotId, int featureType,
+            IImsFeatureStatusCallback c) {
+        synchronized (mFeaturesBySlot) {
+            // get ImsFeature associated with the slot/feature
+            SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
+            if (features == null) {
+                Log.w(LOG_TAG, "Can not remove ImsFeatureStatusCallback - no features on slot "
+                        + slotId);
+                return;
+            }
+            ImsFeature f = features.get(featureType);
+            if (f != null) {
+                f.removeImsFeatureStatusCallback(c);
+            }
+        }
     }
 
     private void addImsFeature(int slotId, int featureType, ImsFeature f) {
@@ -246,8 +370,7 @@ public class ImsService extends Service {
         }
     }
 
-    private void removeImsFeature(int slotId, int featureType,
-            IImsFeatureStatusCallback c) {
+    private void removeImsFeature(int slotId, int featureType) {
         synchronized (mFeaturesBySlot) {
             // get ImsFeature associated with the slot/feature
             SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
@@ -262,7 +385,6 @@ public class ImsService extends Service {
                         + featureType + " exists on slot " + slotId);
                 return;
             }
-            f.removeImsFeatureStatusCallback(c);
             f.onFeatureRemoved();
             features.remove(featureType);
         }
@@ -294,6 +416,20 @@ public class ImsService extends Service {
             throw new IllegalStateException("Framework is not ready");
         }
         mListener.onUpdateSupportedImsFeatures(c);
+    }
+
+    /**
+     * The optional capabilities that this ImsService supports.
+     * <p>
+     * This should be a static configuration and should not change at runtime.
+     * @return The optional static capabilities of this ImsService implementation.
+     */
+    // ImsService follows a different convention, since it is a stub class. The on* methods are
+    // final and call back into the framework with a state update.
+    @SuppressLint("OnNameExpected")
+    public @ImsServiceCapability long getImsServiceCapabilities() {
+        // Stub implementation to be implemented by ImsService.
+        return 0L;
     }
 
     /**
@@ -366,5 +502,64 @@ public class ImsService extends Service {
      */
     public ImsRegistrationImplBase getRegistration(int slotId) {
         return new ImsRegistrationImplBase();
+    }
+
+    /**
+     * Return the {@link SipTransportImplBase} implementation associated with the provided slot.
+     * <p>
+     * This is an optional interface used for devices that must support IMS single registration and
+     * proxy SIP traffic to remote IMS applications. If this is not supported for this IMS service,
+     * this method should return {@code null}. If this feature is supported, then this method must
+     * never be {@code null} and the optional ImsService capability flag
+     * {@link #CAPABILITY_SIP_DELEGATE_CREATION} must be set in
+     * {@link #getImsServiceCapabilities()}. Otherwise the framework will assume this feature is not
+     * supported for this ImsService.
+     * @param slotId The slot that is associated with the SipTransport implementation.
+     * @return the SipTransport implementation for the specified slot.
+     */
+    // ImsService follows a different convention, since it is a stub class. The on* methods are
+    // final and call back into the framework with a state update.
+    @SuppressLint("OnNameExpected")
+    public @Nullable SipTransportImplBase getSipTransport(int slotId) {
+        // Stub implementation for ImsServices that do not support SipTransport.
+        return null;
+    }
+
+    private static long sanitizeCapabilities(@ImsServiceCapability long caps) {
+        long filter = 0xFFFFFFFFFFFFFFFFL;
+        // pad the "allowed" set with zeros
+        filter <<= CAPABILITY_MAX_INDEX + 1;
+        // remove values above the allowed set.
+        caps &= ~filter;
+        // CAPABILITY_EMERGENCY_OVER_MMTEL should also not be set here, will be set by telephony
+        // internally.
+        caps &= ~CAPABILITY_EMERGENCY_OVER_MMTEL;
+        return caps;
+    }
+
+    /**
+     * @return A string representation of the ImsService capabilities for logging.
+     * @hide
+     */
+    public static String getCapabilitiesString(@ImsServiceCapability long caps) {
+        StringBuffer result = new StringBuffer();
+        result.append("capabilities={ ");
+        // filter incrementally fills 0s from  left to right. This is used to keep filtering out
+        // more bits in the long until the remaining leftmost bits are all zero.
+        long filter = 0xFFFFFFFFFFFFFFFFL;
+        // position of iterator to potentially print capability.
+        long i = 0;
+        while ((caps & filter) != 0 && i <= 63) {
+            long bitToCheck = (1L << i);
+            if ((caps & bitToCheck) != 0) {
+                result.append(CAPABILITIES_LOG_MAP.getOrDefault(bitToCheck, bitToCheck + "?"));
+                result.append(" ");
+            }
+            // shift left by one and fill in another 1 on the leftmost bit.
+            filter <<= 1;
+            i++;
+        }
+        result.append("}");
+        return result.toString();
     }
 }

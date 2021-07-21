@@ -187,7 +187,7 @@ TEST_F(ConfigurationParserTest, ForPath_NoFile) {
 
 TEST_F(ConfigurationParserTest, ExtractConfiguration) {
   Maybe<PostProcessingConfiguration> maybe_config =
-      ExtractConfiguration(kValidConfig, "dummy.xml", &diag_);
+      ExtractConfiguration(kValidConfig, "fake.xml", &diag_);
 
   PostProcessingConfiguration config = maybe_config.value();
 

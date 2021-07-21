@@ -26,12 +26,12 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,7 +104,7 @@ class AudioPlayerStateMonitor {
     // TODO(b/35278867): Find and use unique identifier for apps because apps may share the UID.
     @GuardedBy("mLock")
     @SuppressWarnings("WeakerAccess") /* synthetic access */
-    final IntArray mSortedAudioPlaybackClientUids = new IntArray();
+    final List<Integer> mSortedAudioPlaybackClientUids = new ArrayList<>();
 
     static AudioPlayerStateMonitor getInstance(Context context) {
         synchronized (AudioPlayerStateMonitor.class) {
@@ -145,8 +145,8 @@ class AudioPlayerStateMonitor {
      * audio/video) The UID whose audio is currently playing comes first, then the UID whose audio
      * playback becomes active at the last comes next.
      */
-    public IntArray getSortedAudioPlaybackClientUids() {
-        IntArray sortedAudioPlaybackClientUids = new IntArray();
+    public List<Integer> getSortedAudioPlaybackClientUids() {
+        List<Integer> sortedAudioPlaybackClientUids = new ArrayList();
         synchronized (mLock) {
             sortedAudioPlaybackClientUids.addAll(mSortedAudioPlaybackClientUids);
         }
@@ -258,16 +258,16 @@ class AudioPlayerStateMonitor {
                 if (mActiveAudioUids.size() > 0
                         && !mActiveAudioUids.contains(mSortedAudioPlaybackClientUids.get(0))) {
                     int firstActiveUid = -1;
-                    int firatActiveUidIndex = -1;
+                    int firstActiveUidIndex = -1;
                     for (int i = 1; i < mSortedAudioPlaybackClientUids.size(); ++i) {
                         int uid = mSortedAudioPlaybackClientUids.get(i);
                         if (mActiveAudioUids.contains(uid)) {
-                            firatActiveUidIndex = i;
+                            firstActiveUidIndex = i;
                             firstActiveUid = uid;
                             break;
                         }
                     }
-                    for (int i = firatActiveUidIndex; i > 0; --i) {
+                    for (int i = firstActiveUidIndex; i > 0; --i) {
                         mSortedAudioPlaybackClientUids.set(i,
                                 mSortedAudioPlaybackClientUids.get(i - 1));
                     }

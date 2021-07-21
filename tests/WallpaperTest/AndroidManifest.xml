@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.wallpapertest" >
+     package="com.example.wallpapertest">
 
-    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS"/>
 
-    <application
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" >
+    <application android:label="@string/app_name"
+         android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity"
+             android:label="@string/app_name"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <service
-            android:label="@string/test_wallpaper"
-            android:name=".TestWallpaper"
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:enabled="true">
+        <service android:label="@string/test_wallpaper"
+             android:name=".TestWallpaper"
+             android:permission="android.permission.BIND_WALLPAPER"
+             android:enabled="true"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
+                <action android:name="android.service.wallpaper.WallpaperService"/>
             </intent-filter>
             <meta-data android:name="android.service.wallpaper"
-                       android:resource="@xml/test_wallpaper" />
+                 android:resource="@xml/test_wallpaper"/>
         </service>
     </application>
 </manifest>

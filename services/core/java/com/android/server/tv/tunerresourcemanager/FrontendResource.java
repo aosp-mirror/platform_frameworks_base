@@ -40,9 +40,9 @@ public final class FrontendResource extends TunerResourceBasic {
     private final int mExclusiveGroupId;
 
     /**
-     * An array to save all the FE ids under the same exclisive group.
+     * An array to save all the FE handles under the same exclisive group.
      */
-    private Set<Integer> mExclusiveGroupMemberFeIds = new HashSet<>();
+    private Set<Integer> mExclusiveGroupMemberHandles = new HashSet<>();
 
     private FrontendResource(Builder builder) {
         super(builder);
@@ -58,26 +58,26 @@ public final class FrontendResource extends TunerResourceBasic {
         return mExclusiveGroupId;
     }
 
-    public Set<Integer> getExclusiveGroupMemberFeIds() {
-        return mExclusiveGroupMemberFeIds;
+    public Set<Integer> getExclusiveGroupMemberFeHandles() {
+        return mExclusiveGroupMemberHandles;
     }
 
     /**
-     * Add one id into the exclusive group member id collection.
+     * Add one handle into the exclusive group member handle collection.
      *
-     * @param id the id to be added.
+     * @param handle the handle to be added.
      */
-    public void addExclusiveGroupMemberFeId(int id) {
-        mExclusiveGroupMemberFeIds.add(id);
+    public void addExclusiveGroupMemberFeHandle(int handle) {
+        mExclusiveGroupMemberHandles.add(handle);
     }
 
     /**
-     * Add one id collection to the exclusive group member id collection.
+     * Add one handle collection to the exclusive group member handle collection.
      *
-     * @param ids the id collection to be added.
+     * @param handles the handle collection to be added.
      */
-    public void addExclusiveGroupMemberFeIds(Collection<Integer> ids) {
-        mExclusiveGroupMemberFeIds.addAll(ids);
+    public void addExclusiveGroupMemberFeHandles(Collection<Integer> handles) {
+        mExclusiveGroupMemberHandles.addAll(handles);
     }
 
     /**
@@ -85,15 +85,15 @@ public final class FrontendResource extends TunerResourceBasic {
      *
      * @param id the id to be removed.
      */
-    public void removeExclusiveGroupMemberFeId(int id) {
-        mExclusiveGroupMemberFeIds.remove(id);
+    public void removeExclusiveGroupMemberFeId(int handle) {
+        mExclusiveGroupMemberHandles.remove(handle);
     }
 
     @Override
     public String toString() {
-        return "FrontendResource[id=" + this.mId + ", type=" + this.mType
-                + ", exclusiveGId=" + this.mExclusiveGroupId + ", exclusiveGMemeberIds="
-                + this.mExclusiveGroupMemberFeIds
+        return "FrontendResource[handle=" + this.mHandle + ", type=" + this.mType
+                + ", exclusiveGId=" + this.mExclusiveGroupId + ", exclusiveGMemeberHandles="
+                + this.mExclusiveGroupMemberHandles
                 + ", isInUse=" + this.mIsInUse + ", ownerClientId=" + this.mOwnerClientId + "]";
     }
 
@@ -104,8 +104,8 @@ public final class FrontendResource extends TunerResourceBasic {
         @Type private int mType;
         private int mExclusiveGroupId;
 
-        Builder(int id) {
-            super(id);
+        Builder(int handle) {
+            super(handle);
         }
 
         /**

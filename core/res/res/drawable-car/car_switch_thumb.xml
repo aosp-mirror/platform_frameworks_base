@@ -14,12 +14,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="@color/car_switch"/>
-    <size
-        android:width="@dimen/car_seekbar_thumb_size"
-        android:height="@dimen/car_seekbar_thumb_size"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="center_vertical|fill_horizontal"
+        android:top="@dimen/car_switch_thumb_margin_size"
+        android:bottom="@dimen/car_switch_thumb_margin_size">
+        <shape android:shape="oval">
+            <solid android:color="@color/car_switch"/>
+            <size
+                android:width="@dimen/car_switch_thumb_size"
+                android:height="@dimen/car_switch_thumb_size"/>
+        </shape>
+    </item>
+</layer-list>

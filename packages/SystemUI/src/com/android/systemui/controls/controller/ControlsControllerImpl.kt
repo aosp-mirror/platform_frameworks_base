@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.controller
 
-import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.BroadcastReceiver
@@ -29,7 +28,6 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Environment
 import android.os.UserHandle
-import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.util.ArrayMap
@@ -42,9 +40,12 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.globalactions.GlobalActionsDialog
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_SEEDING_COMPLETED
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -52,9 +53,8 @@ import java.util.Optional
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class ControlsControllerImpl @Inject constructor (
     private val context: Context,
     @Background private val executor: DelayableExecutor,
@@ -63,20 +63,16 @@ class ControlsControllerImpl @Inject constructor (
     private val listingController: ControlsListingController,
     private val broadcastDispatcher: BroadcastDispatcher,
     optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    userTracker: UserTracker
 ) : Dumpable, ControlsController {
 
     companion object {
         private const val TAG = "ControlsControllerImpl"
-        internal const val CONTROLS_AVAILABLE = Settings.Secure.CONTROLS_ENABLED
-        internal val URI = Settings.Secure.getUriFor(CONTROLS_AVAILABLE)
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
         private const val DEFAULT_ENABLED = 1
         private const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
         const val SUGGESTED_CONTROLS_PER_STRUCTURE = 6
-
-        private fun isAvailable(userId: Int, cr: ContentResolver) = Settings.Secure.getIntForUser(
-            cr, CONTROLS_AVAILABLE, DEFAULT_ENABLED, userId) != 0
     }
 
     private var userChanging: Boolean = true
@@ -85,14 +81,12 @@ class ControlsControllerImpl @Inject constructor (
     private var seedingInProgress = false
     private val seedingCallbacks = mutableListOf<Consumer<Boolean>>()
 
-    private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
+    private var currentUser = userTracker.userHandle
     override val currentUserId
         get() = currentUser.identifier
 
     private val contentResolver: ContentResolver
         get() = context.contentResolver
-    override var available = isAvailable(currentUserId, contentResolver)
-        private set
 
     private val persistenceWrapper: ControlsFavoritePersistenceWrapper
     @VisibleForTesting
@@ -124,8 +118,7 @@ class ControlsControllerImpl @Inject constructor (
                 BackupManager(userStructure.userContext)
         )
         auxiliaryPersistenceWrapper.changeFile(userStructure.auxiliaryFile)
-        available = isAvailable(newUser.identifier, contentResolver)
-        resetFavorites(available)
+        resetFavorites()
         bindingController.changeUser(newUser)
         listingController.changeUser(newUser)
         userChanging = false
@@ -155,7 +148,7 @@ class ControlsControllerImpl @Inject constructor (
                     Log.d(TAG, "Restore finished, storing auxiliary favorites")
                     auxiliaryPersistenceWrapper.initialize()
                     persistenceWrapper.storeFavorites(auxiliaryPersistenceWrapper.favorites)
-                    resetFavorites(available)
+                    resetFavorites()
                 }
             }
         }
@@ -174,8 +167,7 @@ class ControlsControllerImpl @Inject constructor (
             if (userChanging || userId != currentUserId) {
                 return
             }
-            available = isAvailable(currentUserId, contentResolver)
-            resetFavorites(available)
+            resetFavorites()
         }
     }
 
@@ -197,11 +189,11 @@ class ControlsControllerImpl @Inject constructor (
                 // When a component is uninstalled, allow seeding to happen again if the user
                 // reinstalls the app
                 val prefs = userStructure.userContext.getSharedPreferences(
-                    GlobalActionsDialog.PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
+                    PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
                 val completedSeedingPackageSet = prefs.getStringSet(
-                    GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
+                    PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
                 val servicePackageSet = serviceInfoSet.map { it.packageName }
-                prefs.edit().putStringSet(GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED,
+                prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
                     completedSeedingPackageSet.intersect(servicePackageSet)).apply()
 
                 var changed = false
@@ -240,7 +232,7 @@ class ControlsControllerImpl @Inject constructor (
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
-        resetFavorites(available)
+        resetFavorites()
         userChanging = false
         broadcastDispatcher.registerReceiver(
                 userSwitchReceiver,
@@ -254,32 +246,23 @@ class ControlsControllerImpl @Inject constructor (
             PERMISSION_SELF,
             null
         )
-        contentResolver.registerContentObserver(URI, false, settingObserver, UserHandle.USER_ALL)
         listingController.addCallback(listingCallback)
     }
 
     fun destroy() {
         broadcastDispatcher.unregisterReceiver(userSwitchReceiver)
         context.unregisterReceiver(restoreFinishedReceiver)
-        contentResolver.unregisterContentObserver(settingObserver)
         listingController.removeCallback(listingCallback)
     }
 
-    private fun resetFavorites(shouldLoad: Boolean) {
+    private fun resetFavorites() {
         Favorites.clear()
-
-        if (shouldLoad) {
-            Favorites.load(persistenceWrapper.readFavorites())
-        }
+        Favorites.load(persistenceWrapper.readFavorites())
     }
 
     private fun confirmAvailability(): Boolean {
         if (userChanging) {
             Log.w(TAG, "Controls not available while user is changing")
-            return false
-        }
-        if (!available) {
-            Log.d(TAG, "Controls not available")
             return false
         }
         return true
@@ -477,7 +460,7 @@ class ControlsControllerImpl @Inject constructor (
         val pendingIntent = PendingIntent.getActivity(context,
                 componentName.hashCode(),
                 intent,
-                0)
+                PendingIntent.FLAG_IMMUTABLE)
         val control = Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
                 .setTitle(controlInfo.controlTitle)
                 .setSubtitle(controlInfo.controlSubtitle)
@@ -573,9 +556,12 @@ class ControlsControllerImpl @Inject constructor (
         )
     }
 
+    override fun getPreferredStructure(): StructureInfo {
+        return uiController.getPreferredStructure(getFavorites())
+    }
+
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
-        pw.println("  Available: $available")
         pw.println("  Changing users: $userChanging")
         pw.println("  Current user: ${currentUser.identifier}")
         pw.println("  Favorites:")

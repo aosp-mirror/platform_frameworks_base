@@ -43,6 +43,14 @@ static constexpr bool kPlayOnCallingThread = true;
 // Amount of time for a StreamManager thread to wait before closing.
 static constexpr int64_t kWaitTimeBeforeCloseNs = 9 * NANOS_PER_SECOND;
 
+// Debug flag:
+// kForceLockStreamManagerStop is set to true to force lock the StreamManager
+// worker thread during stop. This limits concurrency of Stream processing.
+// Normally we lock the StreamManager worker thread during stop ONLY
+// for SoundPools configured with a single Stream.
+//
+static constexpr bool kForceLockStreamManagerStop = false;
+
 ////////////
 
 StreamMap::StreamMap(int32_t streams) {
@@ -98,9 +106,12 @@ int32_t StreamMap::getNextIdForStream(Stream* stream) const {
 #pragma clang diagnostic ignored "-Wthread-safety-analysis"
 
 StreamManager::StreamManager(
-        int32_t streams, size_t threads, const audio_attributes_t* attributes)
+        int32_t streams, size_t threads, const audio_attributes_t* attributes,
+        std::string opPackageName)
     : StreamMap(streams)
     , mAttributes(*attributes)
+    , mOpPackageName(std::move(opPackageName))
+    , mLockStreamManagerStop(streams == 1 || kForceLockStreamManagerStop)
 {
     ALOGV("%s(%d, %zu, ...)", __func__, streams, threads);
     forEach([this](Stream *stream) {
@@ -111,7 +122,8 @@ StreamManager::StreamManager(
     });
 
     mThreadPool = std::make_unique<ThreadPool>(
-            std::min(threads, (size_t)std::thread::hardware_concurrency()),
+            std::min((size_t)streams,  // do not make more threads than streams to play
+                    std::min(threads, (size_t)std::thread::hardware_concurrency())),
             "SoundPool_");
 }
 
@@ -328,7 +340,7 @@ ssize_t StreamManager::removeFromQueues_l(
 
     // streams on mProcessingStreams are undergoing processing by the StreamManager thread
     // and do not participate in normal stream migration.
-    return found;
+    return (ssize_t)found;
 }
 
 void StreamManager::addToRestartQueue_l(Stream *stream) {
@@ -346,14 +358,14 @@ void StreamManager::addToActiveQueue_l(Stream *stream) {
 void StreamManager::run(int32_t id)
 {
     ALOGV("%s(%d) entering", __func__, id);
-    int64_t waitTimeNs = kWaitTimeBeforeCloseNs;
+    int64_t waitTimeNs = 0;  // on thread start, mRestartStreams can be non-empty.
     std::unique_lock lock(mStreamManagerLock);
     while (!mQuit) {
-        if (mRestartStreams.empty()) { // on thread start, mRestartStreams can be non-empty.
+        if (waitTimeNs > 0) {
             mStreamManagerCondition.wait_for(
                     lock, std::chrono::duration<int64_t, std::nano>(waitTimeNs));
         }
-        ALOGV("%s(%d) awake", __func__, id);
+        ALOGV("%s(%d) awake lock waitTimeNs:%lld", __func__, id, (long long)waitTimeNs);
 
         sanityCheckQueue_l();
 
@@ -373,12 +385,12 @@ void StreamManager::run(int32_t id)
             }
             mRestartStreams.erase(it);
             mProcessingStreams.emplace(stream);
-            lock.unlock();
+            if (!mLockStreamManagerStop) lock.unlock();
             stream->stop();
             ALOGV("%s(%d) stopping streamID:%d", __func__, id, stream->getStreamID());
             if (Stream* nextStream = stream->playPairStream()) {
                 ALOGV("%s(%d) starting streamID:%d", __func__, id, nextStream->getStreamID());
-                lock.lock();
+                if (!mLockStreamManagerStop) lock.lock();
                 if (nextStream->getStopTimeNs() > 0) {
                     // the next stream was stopped before we can move it to the active queue.
                     ALOGV("%s(%d) stopping started streamID:%d",
@@ -388,7 +400,7 @@ void StreamManager::run(int32_t id)
                     addToActiveQueue_l(nextStream);
                 }
             } else {
-                lock.lock();
+                if (!mLockStreamManagerStop) lock.lock();
                 mAvailableStreams.insert(stream);
             }
             mProcessingStreams.erase(stream);

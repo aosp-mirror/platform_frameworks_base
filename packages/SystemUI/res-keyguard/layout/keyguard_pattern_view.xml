@@ -40,7 +40,7 @@
         android:clipToPadding="false">
 
         <LinearLayout
-            android:id="@+id/container"
+            android:id="@+id/pattern_container"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"
@@ -67,6 +67,7 @@
               android:layout_height="wrap_content"
               android:orientation="vertical"
               android:layout_gravity="bottom|center_horizontal"
+              android:layout_marginTop="@dimen/keyguard_eca_top_margin"
               android:gravity="center_horizontal" />
         </LinearLayout>
     </FrameLayout>

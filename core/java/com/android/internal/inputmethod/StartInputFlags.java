@@ -47,4 +47,10 @@ public @interface StartInputFlags {
      * documented hence we probably need to revisit this though.
      */
     int INITIAL_CONNECTION = 4;
+
+    /**
+     * The start input happens when the window gained focus to call
+     * {@code android.view.inputmethod.InputMethodManager#startInputAsyncOnWindowFocusGain}.
+     */
+    int WINDOW_GAINED_FOCUS = 8;
 }

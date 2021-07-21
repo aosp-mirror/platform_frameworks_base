@@ -35,6 +35,8 @@ extern void set_dalvik_blockguard_policy(JNIEnv* env, jint strict_policy);
 extern void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
         bool canThrowRemoteException = false, int parcelSize = 0);
 
+// does not take ownership of the exception, aborts if this is an error
+void binder_report_exception(JNIEnv* env, jthrowable excep, const char* msg);
 }
 
 #endif

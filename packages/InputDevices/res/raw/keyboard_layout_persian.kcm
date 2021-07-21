@@ -292,14 +292,14 @@ key TAB {
 key COMMA {
     label, number:                      '\u0648'
     base:                               '\u0648'
-    shift:                              '<'
+    shift:                              '>'
     ctrl, alt, meta:                    none
 }
 
 key PERIOD {
     label, number:                      '.'
     base:                               '.'
-    shift:                              '>'
+    shift:                              '<'
     ctrl, alt, meta:                    none
 }
 
@@ -440,14 +440,14 @@ key NUMPAD_9 {
 }
 
 key NUMPAD_LEFT_PAREN {
-    label, number:                      '('
-    base:                               '('
+    label, number:                      ')'
+    base:                               ')'
     ctrl, alt, meta:                    none
 }
 
 key NUMPAD_RIGHT_PAREN {
-    label, number:                      ')'
-    base:                               ')'
+    label, number:                      '('
+    base:                               '('
     ctrl, alt, meta:                    none
 }
 

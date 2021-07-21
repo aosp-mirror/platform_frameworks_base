@@ -51,6 +51,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 /**
  * Tests for {@link UserTypeDetails} and {@link UserTypeFactory}.
  *
@@ -70,11 +72,18 @@ public class UserManagerServiceUserTypeTest {
     @Test
     public void testUserTypeBuilder_createUserType() {
         final Bundle restrictions = makeRestrictionsBundle("r1", "r2");
+        final Bundle systemSettings = makeSettingsBundle("s1", "s2");
+        final Bundle secureSettings = makeSettingsBundle("secure_s1", "secure_s2");
+        final List<DefaultCrossProfileIntentFilter> filters = List.of(
+                new DefaultCrossProfileIntentFilter.Builder(
+                DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                /* flags= */0,
+                /* letsPersonalDataIntoProfile= */false).build());
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(true)
                 .setMaxAllowed(21)
-                .setBaseType(FLAG_FULL)
+                .setBaseType(FLAG_PROFILE)
                 .setDefaultUserInfoPropertyFlags(FLAG_EPHEMERAL)
                 .setBadgeLabels(23, 24, 25)
                 .setBadgeColors(26, 27)
@@ -84,20 +93,45 @@ public class UserManagerServiceUserTypeTest {
                 .setLabel(31)
                 .setMaxAllowedPerParent(32)
                 .setDefaultRestrictions(restrictions)
+                .setDefaultSystemSettings(systemSettings)
+                .setDefaultSecureSettings(secureSettings)
+                .setDefaultCrossProfileIntentFilters(filters)
                 .createUserTypeDetails();
 
         assertEquals("a.name", type.getName());
         assertTrue(type.isEnabled());
         assertEquals(21, type.getMaxAllowed());
-        assertEquals(FLAG_FULL | FLAG_EPHEMERAL, type.getDefaultUserInfoFlags());
+        assertEquals(FLAG_PROFILE | FLAG_EPHEMERAL, type.getDefaultUserInfoFlags());
         assertEquals(28, type.getIconBadge());
         assertEquals(29, type.getBadgePlain());
         assertEquals(30, type.getBadgeNoBackground());
         assertEquals(31, type.getLabel());
         assertEquals(32, type.getMaxAllowedPerParent());
+
         assertTrue(UserRestrictionsUtils.areEqual(restrictions, type.getDefaultRestrictions()));
         assertNotSame(restrictions, type.getDefaultRestrictions());
 
+        assertNotSame(systemSettings, type.getDefaultSystemSettings());
+        assertEquals(systemSettings.size(), type.getDefaultSystemSettings().size());
+        for (String key : systemSettings.keySet()) {
+            assertEquals(
+                    systemSettings.getString(key),
+                    type.getDefaultSystemSettings().getString(key));
+        }
+
+        assertNotSame(secureSettings, type.getDefaultSecureSettings());
+        assertEquals(secureSettings.size(), type.getDefaultSecureSettings().size());
+        for (String key : secureSettings.keySet()) {
+            assertEquals(
+                    secureSettings.getString(key),
+                    type.getDefaultSecureSettings().getString(key));
+        }
+
+        assertNotSame(filters, type.getDefaultCrossProfileIntentFilters());
+        assertEquals(filters.size(), type.getDefaultCrossProfileIntentFilters().size());
+        for (int i = 0; i < filters.size(); i++) {
+            assertEquals(filters.get(i), type.getDefaultCrossProfileIntentFilters().get(i));
+        }
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -133,6 +167,9 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, type.getBadgeColor(0));
         assertEquals(Resources.ID_NULL, type.getLabel());
         assertTrue(type.getDefaultRestrictions().isEmpty());
+        assertTrue(type.getDefaultSystemSettings().isEmpty());
+        assertTrue(type.getDefaultSecureSettings().isEmpty());
+        assertTrue(type.getDefaultCrossProfileIntentFilters().isEmpty());
 
         assertFalse(type.hasBadge());
     }
@@ -358,16 +395,68 @@ public class UserManagerServiceUserTypeTest {
                 () -> UserTypeFactory.customizeBuilders(builders, parser));
     }
 
+    @Test
+    public void testUserTypeFactoryVersion_versionMissing() {
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_eraseArray);
+        assertEquals(0, UserTypeFactory.getUserTypeVersion(parser));
+    }
+
+    @Test
+    public void testUserTypeFactoryVersion_versionPresent() {
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
+        assertEquals(1234, UserTypeFactory.getUserTypeVersion(parser));
+    }
+
+    @Test
+    public void testUserTypeFactoryUpgrades_validUpgrades() {
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put("name", getMinimalBuilder());
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
+        List<UserTypeFactory.UserTypeUpgrade> upgrades = UserTypeFactory.parseUserUpgrades(builders,
+                parser);
+
+        assertFalse(upgrades.isEmpty());
+        UserTypeFactory.UserTypeUpgrade upgrade = upgrades.get(0);
+        assertEquals("android.test.1", upgrade.getFromType());
+        assertEquals("android.test.2", upgrade.getToType());
+        assertEquals(1233, upgrade.getUpToVersion());
+    }
+
+    @Test
+    public void testUserTypeFactoryUpgrades_illegalBaseTypeUpgrade() {
+        final String userTypeFull = "android.test.1";
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(userTypeFull, new UserTypeDetails.Builder()
+                .setName(userTypeFull)
+                .setBaseType(FLAG_FULL));
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_full);
+
+        // parser is illegal because the "to" upgrade type is not a profile, but a full user
+        assertThrows(IllegalArgumentException.class,
+                () -> UserTypeFactory.parseUserUpgrades(builders, parser));
+    }
+
     /** Returns a minimal {@link UserTypeDetails.Builder} that can legitimately be created. */
     private UserTypeDetails.Builder getMinimalBuilder() {
         return new UserTypeDetails.Builder().setName("name").setBaseType(FLAG_FULL);
     }
 
     /** Creates a Bundle of the given String restrictions, each set to true. */
-    private Bundle makeRestrictionsBundle(String ... restrictions) {
+    public static Bundle makeRestrictionsBundle(String ... restrictions) {
         final Bundle bundle = new Bundle();
         for (String restriction : restrictions) {
             bundle.putBoolean(restriction, true);
+        }
+        return bundle;
+    }
+
+    /** Creates a Bundle of the given settings keys and puts true for the value. */
+    private static Bundle makeSettingsBundle(String ... settings) {
+        final Bundle bundle = new Bundle();
+        for (String setting : settings) {
+            bundle.putBoolean(setting, true);
         }
         return bundle;
     }

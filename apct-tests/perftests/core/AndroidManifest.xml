@@ -10,20 +10,33 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.perftests.utils.PerfTestActivity">
+        <activity android:name="android.perftests.utils.PerfTestActivity"
+            android:exported="true">
           <intent-filter>
             <action android:name="com.android.perftests.core.PERFTEST" />
           </intent-filter>
         </activity>
-        <service android:name="android.os.SomeService" android:exported="false" android:process=":some_service" />
+
+        <service
+            android:name="android.os.SomeService"
+            android:exported="false"
+            android:process=":some_service" />
+
+        <provider
+            android:name="android.os.SomeProvider"
+            android:authorities="android.os.SomeProvider"
+            android:exported="false"
+            android:process=":some_provider" />
 
         <service
             android:name="android.view.autofill.MyAutofillService"
             android:label="PERF AutofillService"
-            android:permission="android.permission.BIND_AUTOFILL_SERVICE" >
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.autofill.AutofillService" />
             </intent-filter>
@@ -31,7 +44,7 @@
 
     </application>
 
-    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.benchmark.junit4.AndroidBenchmarkRunner"
         android:targetPackage="com.android.perftests.core"/>
 
 </manifest>

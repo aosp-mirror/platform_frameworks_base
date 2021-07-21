@@ -23,6 +23,9 @@ import android.os.Process;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
+import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
+
 import java.io.PrintWriter;
 
 /**
@@ -31,11 +34,13 @@ import java.io.PrintWriter;
 final class AccessibilityShellCommand extends ShellCommand {
     final @NonNull AccessibilityManagerService mService;
     final @NonNull SystemActionPerformer mSystemActionPerformer;
+    final @NonNull WindowManagerInternal mWindowManagerService;
 
     AccessibilityShellCommand(@NonNull AccessibilityManagerService service,
             @NonNull SystemActionPerformer systemActionPerformer) {
         mService = service;
         mSystemActionPerformer = systemActionPerformer;
+        mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
     }
 
     @Override
@@ -53,6 +58,9 @@ final class AccessibilityShellCommand extends ShellCommand {
             case "call-system-action": {
                 return runCallSystemAction();
             }
+            case "start-trace":
+            case "stop-trace":
+                return mService.getTraceManager().onShellCommand(cmd);
         }
         return -1;
     }
@@ -123,5 +131,6 @@ final class AccessibilityShellCommand extends ShellCommand {
         pw.println("    Get whether binding to services provided by instant apps is allowed.");
         pw.println("  call-system-action <ACTION_ID>");
         pw.println("    Calls the system action with the given action id.");
+        mService.getTraceManager().onHelp(pw);
     }
 }

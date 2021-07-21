@@ -28,7 +28,7 @@
 #include "android_runtime/Log.h"
 #include "android_util_Binder.h"
 #include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 
 #include <android/hardware/cas/1.0/BpHwCas.h>
 #include <android/hardware/cas/1.0/BnHwCas.h>
@@ -68,7 +68,7 @@ JMediaExtractor::JMediaExtractor(JNIEnv *env, jobject thiz)
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
 
-    mImpl = new NuMediaExtractor;
+    mImpl = new NuMediaExtractor(NuMediaExtractor::EntryPoint::SDK);
 }
 
 JMediaExtractor::~JMediaExtractor() {
@@ -294,6 +294,10 @@ bool JMediaExtractor::getCachedDuration(int64_t *durationUs, bool *eos) const {
 status_t JMediaExtractor::getAudioPresentations(size_t trackIdx,
         AudioPresentationCollection *presentations) const {
     return mImpl->getAudioPresentations(trackIdx, presentations);
+}
+
+status_t JMediaExtractor::setLogSessionId(const String8 &LogSessionId) {
+    return mImpl->setLogSessionId(LogSessionId);
 }
 }  // namespace android
 
@@ -920,6 +924,23 @@ android_media_MediaExtractor_native_getMetrics(JNIEnv * env, jobject thiz)
     return mybundle;
 }
 
+static void
+android_media_MediaExtractor_native_setLogSessionId(
+        JNIEnv * env, jobject thiz, jstring logSessionIdJString)
+{
+    ALOGV("android_media_MediaExtractor_native_setLogSessionId");
+
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+    if (extractor == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", nullptr);
+    }
+
+    const char* logSessionId = env->GetStringUTFChars(logSessionIdJString, nullptr);
+    if (extractor->setLogSessionId(String8(logSessionId)) != OK) {
+        ALOGE("setLogSessionId failed");
+    }
+    env->ReleaseStringUTFChars(logSessionIdJString, logSessionId);
+}
 
 static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
@@ -989,6 +1010,9 @@ static const JNINativeMethod gMethods[] = {
 
     {"native_getMetrics",          "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaExtractor_native_getMetrics},
+
+    { "native_setLogSessionId", "(Ljava/lang/String;)V",
+      (void *)android_media_MediaExtractor_native_setLogSessionId},
 
     { "native_getAudioPresentations", "(I)Ljava/util/List;",
       (void *)android_media_MediaExtractor_getAudioPresentations },

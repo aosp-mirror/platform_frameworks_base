@@ -20,6 +20,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
 import android.app.EmptyActivity;
@@ -41,6 +44,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /**
  * Tests {@link DecorContext}.
@@ -63,13 +67,18 @@ public final class DecorContextTest {
 
     @Test
     public void testDecorContextWithDefaultDisplay() {
+        final Context baseContext = Mockito.spy(mContext.getApplicationContext());
         Display defaultDisplay = new Display(DisplayManagerGlobal.getInstance(), DEFAULT_DISPLAY,
                 new DisplayInfo(), DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
         final Context defaultDisplayContext = mContext.createDisplayContext(defaultDisplay);
         final PhoneWindow window = new PhoneWindow(defaultDisplayContext);
-        DecorContext context = new DecorContext(mContext.getApplicationContext(), window);
+        DecorContext context = new DecorContext(baseContext, window);
 
         assertDecorContextDisplay(DEFAULT_DISPLAY, context);
+
+        // TODO(b/166174272): Creating a display context for the default display will result
+        // in additional resource creation.
+        verify(baseContext, never()).createDisplayContext(any());
     }
 
     @Test

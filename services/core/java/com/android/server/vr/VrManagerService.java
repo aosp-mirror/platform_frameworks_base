@@ -19,6 +19,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -41,6 +42,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PackageTagsList;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -817,14 +819,14 @@ public class VrManagerService extends SystemService
     }
 
     @Override
-    public void onStartUser(int userHandle) {
+    public void onUserStarting(@NonNull TargetUser user) {
         synchronized (mLock) {
             mComponentObserver.onUsersChanged();
         }
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         FgThread.getHandler().post(() -> {
             synchronized (mLock) {
                 mComponentObserver.onUsersChanged();
@@ -834,7 +836,7 @@ public class VrManagerService extends SystemService
     }
 
     @Override
-    public void onStopUser(int userHandle) {
+    public void onUserStopping(@NonNull TargetUser user) {
         synchronized (mLock) {
             mComponentObserver.onUsersChanged();
         }
@@ -842,7 +844,7 @@ public class VrManagerService extends SystemService
     }
 
     @Override
-    public void onCleanupUser(int userHandle) {
+    public void onUserStopped(@NonNull TargetUser user) {
         synchronized (mLock) {
             mComponentObserver.onUsersChanged();
         }
@@ -858,8 +860,10 @@ public class VrManagerService extends SystemService
         }
 
         // Apply the restrictions for the current user based on vr state
-        String[] exemptions = (exemptedPackage == null) ? new String[0] :
-                new String[] { exemptedPackage };
+        PackageTagsList exemptions = null;
+        if (exemptedPackage != null) {
+            exemptions = new PackageTagsList.Builder(1).add(exemptedPackage).build();
+        }
 
         appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
                 mVrModeEnabled, mOverlayToken, exemptions, newUserId);

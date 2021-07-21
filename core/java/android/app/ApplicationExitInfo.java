@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
  *
  * <p>
  * Application process could die for many reasons, for example {@link #REASON_LOW_MEMORY}
- * when it was killed by the ystem because it was running low on memory. Reason
+ * when it was killed by the system because it was running low on memory. Reason
  * of the death can be retrieved via {@link #getReason}. Besides the reason, there are a few other
  * auxiliary APIs like {@link #getStatus} and {@link #getImportance} to help the caller with
  * additional diagnostic information.
@@ -325,6 +325,35 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_ISOLATED_NOT_NEEDED = 17;
 
+    /**
+     * The process was killed because it's in forced-app-standby state, and it's cached and
+     * its uid state is idle; this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY = 18;
+
+    /**
+     * The process was killed because it fails to freeze/unfreeze binder
+     * or query binder frozen info while being frozen.
+     * this would be set only when the reason is {@link #REASON_FREEZER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_FREEZER_BINDER_IOCTL = 19;
+
+    /**
+     * The process was killed because it receives sync binder transactions
+     * while being frozen.
+     * this would be set only when the reason is {@link #REASON_FREEZER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_FREEZER_BINDER_TRANSACTION = 20;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
@@ -428,6 +457,20 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     private IAppTraceRetriever mAppTraceRetriever;
 
+    /**
+     * ParcelFileDescriptor pointing to a native tombstone.
+     *
+     * @see #getTraceInputStream
+     */
+    private IParcelFileDescriptorRetriever mNativeTombstoneRetriever;
+
+    /**
+     * Whether or not we've logged this into the statsd.
+     *
+     * for system internal use only, will not retain across processes.
+     */
+    private boolean mLoggedInStatsd;
+
     /** @hide */
     @IntDef(prefix = { "REASON_" }, value = {
         REASON_UNKNOWN,
@@ -468,6 +511,8 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_IMPERCEPTIBLE,
         SUBREASON_REMOVE_LRU,
         SUBREASON_ISOLATED_NOT_NEEDED,
+        SUBREASON_FREEZER_BINDER_IOCTL,
+        SUBREASON_FREEZER_BINDER_TRANSACTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -603,22 +648,38 @@ public final class ApplicationExitInfo implements Parcelable {
      * prior to the death of the process; typically it'll be available when
      * the reason is {@link #REASON_ANR}, though if the process gets an ANR
      * but recovers, and dies for another reason later, this trace will be included
-     * in the record of {@link ApplicationExitInfo} still.
+     * in the record of {@link ApplicationExitInfo} still. Beginning with API 31,
+     * tombstone traces will be returned for
+     * {@link #REASON_CRASH_NATIVE}, with an InputStream containing a protobuf with
+     * <a href="https://android.googlesource.com/platform/system/core/+/refs/heads/master/debuggerd/proto/tombstone.proto">this schema</a>.
+     * Note that because these traces are kept in a separate global circular buffer, crashes may be
+     * overwritten by newer crashes (including from other applications), so this may still return
+     * null.
      *
      * @return The input stream to the traces that was taken by the system
      *         prior to the death of the process.
      */
     public @Nullable InputStream getTraceInputStream() throws IOException {
-        if (mAppTraceRetriever == null) {
+        if (mAppTraceRetriever == null && mNativeTombstoneRetriever == null) {
             return null;
         }
+
         try {
-            final ParcelFileDescriptor fd = mAppTraceRetriever.getTraceFileDescriptor(
-                    mPackageName, mPackageUid, mPid);
-            if (fd == null) {
-                return null;
+            if (mNativeTombstoneRetriever != null) {
+                final ParcelFileDescriptor pfd = mNativeTombstoneRetriever.getPfd();
+                if (pfd == null) {
+                    return null;
+                }
+
+                return new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+            } else {
+                final ParcelFileDescriptor fd = mAppTraceRetriever.getTraceFileDescriptor(
+                        mPackageName, mPackageUid, mPid);
+                if (fd == null) {
+                    return null;
+                }
+                return new GZIPInputStream(new ParcelFileDescriptor.AutoCloseInputStream(fd));
             }
-            return new GZIPInputStream(new ParcelFileDescriptor.AutoCloseInputStream(fd));
         } catch (RemoteException e) {
             return null;
         }
@@ -849,6 +910,33 @@ public final class ApplicationExitInfo implements Parcelable {
         mAppTraceRetriever = retriever;
     }
 
+    /**
+     * @see mNativeTombstoneRetriever
+     *
+     * @hide
+     */
+    public void setNativeTombstoneRetriever(final IParcelFileDescriptorRetriever retriever) {
+        mNativeTombstoneRetriever = retriever;
+    }
+
+    /**
+     * @see #mLoggedInStatsd
+     *
+     * @hide
+     */
+    public boolean isLoggedInStatsd() {
+        return mLoggedInStatsd;
+    }
+
+    /**
+     * @see #mLoggedInStatsd
+     *
+     * @hide
+     */
+    public void setLoggedInStatsd(boolean loggedInStatsd) {
+        mLoggedInStatsd = loggedInStatsd;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -875,6 +963,12 @@ public final class ApplicationExitInfo implements Parcelable {
         if (mAppTraceRetriever != null) {
             dest.writeInt(1);
             dest.writeStrongBinder(mAppTraceRetriever.asBinder());
+        } else {
+            dest.writeInt(0);
+        }
+        if (mNativeTombstoneRetriever != null) {
+            dest.writeInt(1);
+            dest.writeStrongBinder(mNativeTombstoneRetriever.asBinder());
         } else {
             dest.writeInt(0);
         }
@@ -906,6 +1000,7 @@ public final class ApplicationExitInfo implements Parcelable {
         mState = other.mState;
         mTraceFile = other.mTraceFile;
         mAppTraceRetriever = other.mAppTraceRetriever;
+        mNativeTombstoneRetriever = other.mNativeTombstoneRetriever;
     }
 
     private ApplicationExitInfo(@NonNull Parcel in) {
@@ -927,6 +1022,10 @@ public final class ApplicationExitInfo implements Parcelable {
         mState = in.createByteArray();
         if (in.readInt() == 1) {
             mAppTraceRetriever = IAppTraceRetriever.Stub.asInterface(in.readStrongBinder());
+        }
+        if (in.readInt() == 1) {
+            mNativeTombstoneRetriever = IParcelFileDescriptorRetriever.Stub.asInterface(
+                    in.readStrongBinder());
         }
     }
 
@@ -955,6 +1054,8 @@ public final class ApplicationExitInfo implements Parcelable {
         pw.println(prefix + "  user=" + UserHandle.getUserId(mPackageUid));
         pw.println(prefix + "  process=" + mProcessName);
         pw.println(prefix + "  reason=" + mReason + " (" + reasonCodeToString(mReason) + ")");
+        pw.println(prefix + "  subreason=" + mSubReason + " (" + subreasonToString(mSubReason)
+                + ")");
         pw.println(prefix + "  status=" + mStatus);
         pw.println(prefix + "  importance=" + mImportance);
         pw.print(prefix + "  pss="); DebugUtils.printSizeValue(pw, mPss << 10); pw.println();
@@ -978,6 +1079,8 @@ public final class ApplicationExitInfo implements Parcelable {
         sb.append(" process=").append(mProcessName);
         sb.append(" reason=").append(mReason).append(" (")
                 .append(reasonCodeToString(mReason)).append(")");
+        sb.append(" subreason=").append(mSubReason).append(" (")
+                .append(subreasonToString(mSubReason)).append(")");
         sb.append(" status=").append(mStatus);
         sb.append(" importance=").append(mImportance);
         sb.append(" pss="); DebugUtils.sizeValueToString(mPss << 10, sb);
@@ -986,6 +1089,7 @@ public final class ApplicationExitInfo implements Parcelable {
         sb.append(" state=").append(ArrayUtils.isEmpty(mState)
                 ? "empty" : Integer.toString(mState.length) + " bytes");
         sb.append(" trace=").append(mTraceFile);
+
         return sb.toString();
     }
 
@@ -1059,6 +1163,10 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "REMOVE LRU";
             case SUBREASON_ISOLATED_NOT_NEEDED:
                 return "ISOLATED NOT NEEDED";
+            case SUBREASON_FREEZER_BINDER_IOCTL:
+                return "FREEZER BINDER IOCTL";
+            case SUBREASON_FREEZER_BINDER_TRANSACTION:
+                return "FREEZER BINDER TRANSACTION";
             default:
                 return "UNKNOWN";
         }
@@ -1164,7 +1272,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (other == null || !(other instanceof ApplicationExitInfo)) {
             return false;
         }

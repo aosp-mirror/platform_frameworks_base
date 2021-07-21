@@ -1550,6 +1550,11 @@ public class PduParser {
         if (cur < TEXT_MIN) {
             int length = parseValueLength(pduDataStream);
             int startPos = pduDataStream.available();
+            if (length > startPos) {
+                Log.e(LOG_TAG, "parseContentType: Invalid length " + length
+                        + " when available bytes are " + startPos);
+                return (PduContentTypes.contentTypes[0]).getBytes(); //"*/*"
+            }
             pduDataStream.mark(1);
             temp = pduDataStream.read();
             assert(-1 != temp);

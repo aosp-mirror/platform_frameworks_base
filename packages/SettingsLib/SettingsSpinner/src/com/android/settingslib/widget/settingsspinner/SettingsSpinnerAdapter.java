@@ -17,6 +17,9 @@
 package com.android.settingslib.widget.settingsspinner;
 
 import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import com.android.settingslib.widget.R;
@@ -26,6 +29,10 @@ import com.android.settingslib.widget.R;
  */
 public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
 
+    private static final int DEFAULT_RESOURCE = R.layout.settings_spinner_view;
+    private static final int DFAULT_DROPDOWN_RESOURCE = R.layout.settings_spinner_dropdown_view;
+    private final LayoutInflater mDefaultInflater;
+
     /**
      * Constructs a new SettingsSpinnerAdapter with the given context.
      * And it customizes title bar with a settings style.
@@ -34,7 +41,24 @@ public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
      *                access the current theme, resources, etc.
      */
     public SettingsSpinnerAdapter(Context context) {
-        super(context, R.layout.settings_spinner_view);
-        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        super(context, DEFAULT_RESOURCE);
+
+        setDropDownViewResource(DFAULT_DROPDOWN_RESOURCE);
+        mDefaultInflater = LayoutInflater.from(context);
+    }
+
+    /**
+     * In overridded {@link #getView(int, View, ViewGroup)}, use this method to get default view.
+     */
+    public View getDefaultView(int position, View convertView, ViewGroup parent) {
+        return mDefaultInflater.inflate(DEFAULT_RESOURCE, parent, false /* attachToRoot */);
+    }
+
+    /**
+     * In overridded {@link #getDropDownView(int, View, ViewGroup)}, use this method to get default
+     * drop down view.
+     */
+    public View getDefaultDropDownView(int position, View convertView, ViewGroup parent) {
+        return mDefaultInflater.inflate(DFAULT_DROPDOWN_RESOURCE, parent, false /* attachToRoot */);
     }
 }

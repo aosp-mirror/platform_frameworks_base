@@ -200,7 +200,7 @@ public class ThermalManagerService extends SystemService {
         final int count = mTemperatureMap.size();
         for (int i = 0; i < count; i++) {
             Temperature t = mTemperatureMap.valueAt(i);
-            if (t.getStatus() >= newStatus) {
+            if (t.getType() == Temperature.TYPE_SKIN && t.getStatus() >= newStatus) {
                 newStatus = t.getStatus();
             }
         }
@@ -514,6 +514,9 @@ public class ThermalManagerService extends SystemService {
                         pw.println("Current cooling devices from HAL:");
                         dumpItemsLocked(pw, "\t",
                                 mHalWrapper.getCurrentCoolingDevices(false, 0));
+                        pw.println("Temperature static thresholds from HAL:");
+                        dumpItemsLocked(pw, "\t",
+                                mHalWrapper.getTemperatureThresholds(false, 0));
                     }
                 }
             } finally {

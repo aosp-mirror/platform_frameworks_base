@@ -14,8 +14,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.view.View;
-
 import com.android.systemui.statusbar.StatusBarState;
 
 /**
@@ -76,15 +74,6 @@ public interface ShadeController {
      * Run all of the runnables added by {@link #addPostCollapseAction}.
      */
     void runPostCollapseRunnables();
-
-    /**
-     * If secure with redaction: Show bouncer, go to unlocked shade.
-     *
-     * <p>If secure without redaction or no security: Go to {@link StatusBarState#SHADE_LOCKED}.</p>
-     *
-     * @param startingChild The view to expand after going to the shade.
-     */
-    void goToLockedShade(View startingChild);
 
     /**
      * Close the shade if it was open

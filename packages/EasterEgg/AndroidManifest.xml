@@ -84,6 +84,7 @@
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:icon="@drawable/stat_icon"
             android:enabled="false"
+            android:exported="true"
             android:label="@string/default_tile_name">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />

@@ -92,6 +92,9 @@ public class RuleIndexingController {
                 break;
             }
         }
+        if (keyToIndexMap.size() < 2) {
+            throw new IllegalStateException("Indexing file is corrupt.");
+        }
         return keyToIndexMap;
     }
 
@@ -106,6 +109,9 @@ public class RuleIndexingController {
 
     private static List<String> searchKeysRangeContainingKey(
             List<String> sortedKeyList, String key, int startIndex, int endIndex) {
+        if (endIndex <= startIndex) {
+            throw new IllegalStateException("Indexing file is corrupt.");
+        }
         if (endIndex - startIndex == 1) {
             return Arrays.asList(sortedKeyList.get(startIndex), sortedKeyList.get(endIndex));
         }

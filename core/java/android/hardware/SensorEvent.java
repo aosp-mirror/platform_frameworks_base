@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
@@ -550,7 +551,7 @@ public class SensorEvent {
      *   <h4>{@link android.hardware.Sensor#TYPE_HEART_BEAT
      * Sensor.TYPE_HEART_BEAT}:</h4>
      *
-     * A sensor of this type returns an event everytime a hear beat peak is
+     * A sensor of this type returns an event everytime a heart beat peak is
      * detected.
      *
      * Peak here ideally corresponds to the positive peak in the QRS complex of
@@ -666,5 +667,17 @@ public class SensorEvent {
     @UnsupportedAppUsage
     SensorEvent(int valueSize) {
         values = new float[valueSize];
+    }
+
+    /**
+     * Construct a sensor event object by sensor object, accuracy, timestamp and values.
+     * This is only used for constructing an input device sensor event object.
+     * @hide
+     */
+    public SensorEvent(@NonNull Sensor sensor, int accuracy, long timestamp, float[] values) {
+        this.sensor = sensor;
+        this.accuracy = accuracy;
+        this.timestamp = timestamp;
+        this.values = values;
     }
 }

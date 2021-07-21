@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2014 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,69 +20,90 @@
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#00000000"
     android:tag="bigMediaNarrow"
     >
-    <!-- The size will actually be determined at runtime -->
-    <ImageView android:id="@+id/right_icon"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_gravity="top|end"
-        android:scaleType="centerCrop"
-    />
-    <include layout="@layout/notification_template_header"
+
+    <include
+        layout="@layout/notification_template_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/media_notification_header_height"
-        android:layout_gravity="start"/>
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/notification_media_content"
         >
+
         <LinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/notification_content_margin_top"
             android:layout_marginStart="@dimen/notification_content_margin_start"
-            android:layout_marginBottom="@dimen/notification_content_margin"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:minHeight="@dimen/notification_min_content_height"
             android:orientation="vertical"
             >
-            <include layout="@layout/notification_template_part_line1" />
-            <include layout="@layout/notification_template_text" />
+            <include layout="@layout/notification_template_part_line1"/>
+            <include layout="@layout/notification_template_text"/>
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/media_actions"
-            android:orientation="horizontal"
-            android:layoutDirection="ltr"
-            style="@style/NotificationMediaActionContainer" >
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action0"
-            />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action1"
-            />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action2"
-            />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action3"
-            />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action4"
-            />
-        </LinearLayout>
-        <ViewStub android:id="@+id/notification_media_seekbar_container"
-            android:layout_width="match_parent"
+
+        <!-- this FrameLayout's minHeight serves as a padding for the content above -->
+        <FrameLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-        />
+            android:layout_marginStart="38dp"
+            android:minHeight="@dimen/notification_content_margin"
+            >
+            <!-- The layout_marginStart is selected to ensure that action icons which are visually
+                 12x12 in a 24x24 drawable will align correctly with the text.  This means that
+                 stock media action icons will align, but icons may be visually up to 20x20 and
+                 remain in-spec, in which case they will protrude into the column slightly. -->
+
+            <!-- Nesting in FrameLayout is required to ensure that the marginStart actually applies
+                 at the start instead of always the left, given that the media_actions LinearLayout
+                 has layoutDirection="ltr". -->
+            <LinearLayout
+                android:id="@+id/media_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/media_notification_actions_padding_bottom"
+                android:gravity="top"
+                android:orientation="horizontal"
+                android:layoutDirection="ltr"
+                >
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action0"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action1"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action2"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action3"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action4"
+                    />
+            </LinearLayout>
+
+        </FrameLayout>
+
     </LinearLayout>
+
+    <include layout="@layout/notification_template_right_icon" />
+
 </com.android.internal.widget.MediaNotificationView>

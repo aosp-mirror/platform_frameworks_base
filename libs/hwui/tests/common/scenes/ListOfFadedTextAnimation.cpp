@@ -32,7 +32,7 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
                         int itemHeight) override {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         int length = dp(100);
-        canvas.saveLayer(0, 0, length, itemHeight, nullptr, SaveFlags::HasAlphaLayer);
+        canvas.saveLayer(0, 0, length, itemHeight, nullptr);
         Paint textPaint;
         textPaint.getSkFont().setSize(dp(20));
         textPaint.setAntiAlias(true);

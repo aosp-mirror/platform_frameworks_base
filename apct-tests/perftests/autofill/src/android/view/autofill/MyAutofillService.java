@@ -11,10 +11,11 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 package android.view.autofill;
 
+import android.app.assist.AssistStructure.ViewNode;
 import android.os.CancellationSignal;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
@@ -28,12 +29,9 @@ import android.util.Pair;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.perftests.autofill.R;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 public class MyAutofillService extends AutofillService {
 
     private static final String TAG = "MyAutofillService";
-    private static final int TIMEOUT_MS = 5000;
+    private static final int TIMEOUT_MS = 5_000;
 
     private static final String PACKAGE_NAME = "com.android.perftests.autofill";
     static final String COMPONENT_NAME = PACKAGE_NAME + "/android.view.autofill.MyAutofillService";
@@ -54,6 +52,14 @@ public class MyAutofillService extends AutofillService {
             new LinkedBlockingQueue<>();
 
     private static boolean sEnabled;
+
+    /**
+     * Returns the TestWatcher that was used for the testing.
+     */
+    @NonNull
+    public static AutofillTestWatcher getTestWatcher() {
+        return new AutofillTestWatcher();
+    }
 
     /**
      * Resets the static state associated with the service.
@@ -93,6 +99,11 @@ public class MyAutofillService extends AutofillService {
     }
 
     @Override
+    public void onConnected() {
+        AutofillTestWatcher.ServiceWatcher.onConnected();
+    }
+
+    @Override
     public void onFillRequest(FillRequest request, CancellationSignal cancellationSignal,
             FillCallback callback) {
         try {
@@ -120,20 +131,27 @@ public class MyAutofillService extends AutofillService {
         boolean hasData = false;
         if (response.mUsername != null) {
             hasData = true;
-            dataset.setValue(response.mUsername.first,
-                    AutofillValue.forText(response.mUsername.second));
+            AutofillId autofillId = getAutofillIdByResourceId(request, response.mUsername.first);
+            AutofillValue value = AutofillValue.forText(response.mUsername.second);
+            dataset.setValue(autofillId, value, newDatasetPresentation("dataset"));
         }
         if (response.mPassword != null) {
             hasData = true;
-            dataset.setValue(response.mPassword.first,
-                    AutofillValue.forText(response.mPassword.second));
+            AutofillId autofillId = getAutofillIdByResourceId(request, response.mPassword.first);
+            AutofillValue value = AutofillValue.forText(response.mPassword.second);
+            dataset.setValue(autofillId, value, newDatasetPresentation("dataset"));
         }
         if (hasData) {
             FillResponse.Builder fillResponse = new FillResponse.Builder();
             if (response.mIgnoredIds != null) {
-                fillResponse.setIgnoredIds(response.mIgnoredIds);
+                int length = response.mIgnoredIds.length;
+                AutofillId[] requiredIds = new AutofillId[length];
+                for (int i = 0; i < length; i++) {
+                    String resourceId = response.mIgnoredIds[i];
+                    requiredIds[i] = getAutofillIdByResourceId(request, resourceId);
+                }
+                fillResponse.setIgnoredIds(requiredIds);
             }
-
             callback.onSuccess(fillResponse.addDataset(dataset.build()).build());
         } else {
             callback.onSuccess(null);
@@ -141,6 +159,16 @@ public class MyAutofillService extends AutofillService {
         if (!sFillRequests.offer(request, TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
             Log.w(TAG, "could not offer request in " + TIMEOUT_MS + "ms");
         }
+    }
+
+    private AutofillId getAutofillIdByResourceId(FillRequest request, String resourceId)
+            throws Exception {
+        ViewNode node = AutofillTestHelper.findNodeByResourceId(request.getFillContexts(),
+                resourceId);
+        if (node == null) {
+            throw new AssertionError("No node with resource id " + resourceId);
+        }
+        return node.getAutofillId();
     }
 
     @Override
@@ -151,9 +179,9 @@ public class MyAutofillService extends AutofillService {
     }
 
     static final class CannedResponse {
-        private final Pair<AutofillId, String> mUsername;
-        private final Pair<AutofillId, String> mPassword;
-        private final AutofillId[] mIgnoredIds;
+        private final Pair<String, String> mUsername;
+        private final Pair<String, String> mPassword;
+        private final String[] mIgnoredIds;
 
         private CannedResponse(@NonNull Builder builder) {
             mUsername = builder.mUsername;
@@ -162,24 +190,24 @@ public class MyAutofillService extends AutofillService {
         }
 
         static class Builder {
-            private Pair<AutofillId, String> mUsername;
-            private Pair<AutofillId, String> mPassword;
-            private AutofillId[] mIgnoredIds;
+            private Pair<String, String> mUsername;
+            private Pair<String, String> mPassword;
+            private String[] mIgnoredIds;
 
             @NonNull
-            Builder setUsername(@NonNull AutofillId id, @NonNull String value) {
+            Builder setUsername(@NonNull String id, @NonNull String value) {
                 mUsername = new Pair<>(id, value);
                 return this;
             }
 
             @NonNull
-            Builder setPassword(@NonNull AutofillId id, @NonNull String value) {
+            Builder setPassword(@NonNull String id, @NonNull String value) {
                 mPassword = new Pair<>(id, value);
                 return this;
             }
 
             @NonNull
-            Builder setIgnored(AutofillId... ids) {
+            Builder setIgnored(String... ids) {
                 mIgnoredIds = ids;
                 return this;
             }

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -54,7 +55,7 @@ class AudioPortEventHandler {
      * Accessed by native methods: JNI Callback context.
      */
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mJniCallback;
 
     void init() {
@@ -178,7 +179,7 @@ class AudioPortEventHandler {
     }
 
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static void postEventFromNative(Object module_ref,
                                             int what, int arg1, int arg2, Object obj) {
         AudioPortEventHandler eventHandler =

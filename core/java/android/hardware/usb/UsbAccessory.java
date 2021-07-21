@@ -24,7 +24,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
-import java.util.Objects;
 
 import java.util.Objects;
 
@@ -187,7 +186,7 @@ public class UsbAccessory implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof UsbAccessory) {
             UsbAccessory accessory = (UsbAccessory)obj;
             return (compare(mManufacturer, accessory.getManufacturer()) &&

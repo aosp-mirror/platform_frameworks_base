@@ -27,17 +27,18 @@ import android.content.res.Resources;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.SurfaceControl;
-import android.view.SurfaceControl.DisplayPrimaries;
 import android.view.SurfaceControl.CieXyz;
+import android.view.SurfaceControl.DisplayPrimaries;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.R;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.R;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -190,6 +191,7 @@ public class DisplayWhiteBalanceTintControllerTest {
      * Matrix should match the precalculated one for given cct and display primaries.
      */
     @Test
+    @Ignore
     public void displayWhiteBalance_validateTransformMatrix() {
         DisplayPrimaries displayPrimaries = new DisplayPrimaries();
         displayPrimaries.red = new CieXyz();

@@ -59,6 +59,7 @@ import android.os.HidlMemoryUtil;
 import android.os.HwParcel;
 import android.os.IHwBinder;
 import android.os.IHwInterface;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.system.ErrnoException;
@@ -126,7 +127,7 @@ public class SoundTriggerMiddlewareImplTest {
         model.uuid = "12345678-2345-3456-4567-abcdef987654";
         model.vendorUuid = "87654321-5432-6543-7654-456789fedcba";
         byte[] data = new byte[]{91, 92, 93, 94, 95};
-        model.data = byteArrayToFileDescriptor(data);
+        model.data = new ParcelFileDescriptor(byteArrayToFileDescriptor(data));
         model.dataSize = data.length;
         return model;
     }

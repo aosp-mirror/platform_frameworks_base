@@ -1,7 +1,7 @@
 #include "CreateJavaOutputStreamAdaptor.h"
+#include "FrontBufferedStream.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedLocalRef.h>
-#include "SkFrontBufferedStream.h"
 #include "Movie.h"
 #include "SkStream.h"
 #include "SkUtils.h"
@@ -100,10 +100,8 @@ static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
     // Need to buffer enough input to be able to rewind as much as might be read by a decoder
     // trying to determine the stream's format. The only decoder for movies is GIF, which
     // will only read 6.
-    // FIXME: Get this number from SkImageDecoder
-    // bufferedStream takes ownership of strm
-    std::unique_ptr<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Make(
-        std::unique_ptr<SkStream>(strm), 6));
+    std::unique_ptr<SkStreamRewindable> bufferedStream(
+            android::skia::FrontBufferedStream::Make(std::unique_ptr<SkStream>(strm), 6));
     SkASSERT(bufferedStream.get() != NULL);
 
     Movie* moov = Movie::DecodeStream(bufferedStream.get());

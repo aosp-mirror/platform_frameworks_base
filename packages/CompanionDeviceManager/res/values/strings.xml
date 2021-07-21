@@ -20,9 +20,24 @@
     <string name="app_label">Companion Device Manager</string>
 
     <!-- Title of the device selection dialog. -->
-    <string name="chooser_title">Link with &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt;</string>
+    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- Title of the device pairing confirmation dialog. -->
-    <string name="confirmation_title">Link &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; with &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <!-- The generic placeholder for a device type when nothing specific is known about it [CHAR LIMIT=30] -->
+    <string name="profile_name_generic">device</string>
+
+    <!-- The name of the "watch" device type [CHAR LIMIT=30] -->
+    <string name="profile_name_watch">watch</string>
+
+    <!-- Title of the device association confirmation dialog. -->
+    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+
+    <!-- Text of the device profile permissions explanation in the association dialog. -->
+    <string name="profile_summary">This app is needed to manage your <xliff:g id="profile_name" example="watch">%1$s</xliff:g>. <xliff:g id="privileges_discplaimer" example="Android Wear will get access to your Notifications, Calendar and Contacts.">%2$s</xliff:g></string>
+
+    <!-- Positive button for the device-app association consent dialog [CHAR LIMIT=30] -->
+    <string name="consent_yes">Allow</string>
+
+    <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
+    <string name="consent_no">Don\u2019t allow</string>
 
 </resources>

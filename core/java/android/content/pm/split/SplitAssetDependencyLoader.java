@@ -19,9 +19,11 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.ParseFlags;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.os.Build;
@@ -45,14 +47,14 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
     private final ApkAssets[][] mCachedSplitApks;
     private final AssetManager[] mCachedAssetManagers;
 
-    public SplitAssetDependencyLoader(PackageParser.PackageLite pkg,
+    public SplitAssetDependencyLoader(PackageLite pkg,
             SparseArray<int[]> dependencies, @ParseFlags int flags) {
         super(dependencies);
 
         // The base is inserted into index 0, so we need to shift all the splits by 1.
-        mSplitPaths = new String[pkg.splitCodePaths.length + 1];
-        mSplitPaths[0] = pkg.baseCodePath;
-        System.arraycopy(pkg.splitCodePaths, 0, mSplitPaths, 1, pkg.splitCodePaths.length);
+        mSplitPaths = new String[pkg.getSplitApkPaths().length + 1];
+        mSplitPaths[0] = pkg.getBaseApkPath();
+        System.arraycopy(pkg.getSplitApkPaths(), 0, mSplitPaths, 1, pkg.getSplitApkPaths().length);
 
         mFlags = flags;
         mCachedSplitApks = new ApkAssets[mSplitPaths.length][];
@@ -66,7 +68,8 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
 
     private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
             throws PackageParserException {
-        if ((flags & PackageParser.PARSE_MUST_BE_APK) != 0 && !PackageParser.isApkPath(path)) {
+        if ((flags & ParsingPackageUtils.PARSE_MUST_BE_APK) != 0
+                && !ApkLiteParseUtils.isApkPath(path)) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                     "Invalid package file: " + path);
         }
@@ -122,6 +125,11 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
         // the base, we need to adjust the index.
         loadDependenciesForSplit(idx + 1);
         return mCachedAssetManagers[idx + 1];
+    }
+
+    @Override
+    public ApkAssets getBaseApkAssets() {
+        return mCachedSplitApks[0][0];
     }
 
     @Override

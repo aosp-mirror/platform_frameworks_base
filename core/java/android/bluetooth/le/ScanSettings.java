@@ -52,6 +52,16 @@ public final class ScanSettings implements Parcelable {
     public static final int SCAN_MODE_LOW_LATENCY = 2;
 
     /**
+     * Perform Bluetooth LE scan in ambient discovery mode. This mode has lower duty cycle and more
+     * aggressive scan interval than balanced mode that provides a good trade-off between scan
+     * latency and power consumption.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SCAN_MODE_AMBIENT_DISCOVERY = 3;
+
+    /**
      * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
      * If no filter is active, all advertisement packets are reported.
      */
@@ -276,10 +286,17 @@ public final class ScanSettings implements Parcelable {
          * @throws IllegalArgumentException If the {@code scanMode} is invalid.
          */
         public Builder setScanMode(int scanMode) {
-            if (scanMode < SCAN_MODE_OPPORTUNISTIC || scanMode > SCAN_MODE_LOW_LATENCY) {
-                throw new IllegalArgumentException("invalid scan mode " + scanMode);
+            switch (scanMode) {
+                case SCAN_MODE_OPPORTUNISTIC:
+                case SCAN_MODE_LOW_POWER:
+                case SCAN_MODE_BALANCED:
+                case SCAN_MODE_LOW_LATENCY:
+                case SCAN_MODE_AMBIENT_DISCOVERY:
+                    mScanMode = scanMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException("invalid scan mode " + scanMode);
             }
-            mScanMode = scanMode;
             return this;
         }
 
@@ -328,12 +345,14 @@ public final class ScanSettings implements Parcelable {
         }
 
         /**
-         * Set report delay timestamp for Bluetooth LE scan.
+         * Set report delay timestamp for Bluetooth LE scan. If set to 0, you will be notified of
+         * scan results immediately. If &gt; 0, scan results are queued up and delivered after the
+         * requested delay or 5000 milliseconds (whichever is higher). Note scan results may be
+         * delivered sooner if the internal buffers fill up.
          *
-         * @param reportDelayMillis Delay of report in milliseconds. Set to 0 to be notified of
-         * results immediately. Values &gt; 0 causes the scan results to be queued up and delivered
-         * after the requested delay or when the internal buffers fill up.
-         * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
+         * @param reportDelayMillis         how frequently scan results should be delivered in
+         *                                  milliseconds
+         * @throws IllegalArgumentException if {@code reportDelayMillis} &lt; 0
          */
         public Builder setReportDelay(long reportDelayMillis) {
             if (reportDelayMillis < 0) {

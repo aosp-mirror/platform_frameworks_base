@@ -16,10 +16,16 @@
 
 package com.android.server.display;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
+import android.util.ArraySet;
+import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -27,8 +33,8 @@ import android.view.SurfaceControl;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -58,14 +64,47 @@ import java.util.Objects;
  * </p>
  */
 final class LogicalDisplay {
-    private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
+    private static final String TAG = "LogicalDisplay";
+
+    /**
+     * Phase indicating the logical display's existence is hidden from the rest of the framework.
+     * This can happen if the current layout has specifically requested to keep this display
+     * disabled.
+     */
+    static final int DISPLAY_PHASE_DISABLED = -1;
+
+    /**
+     * Phase indicating that the logical display is going through a layout transition.
+     * When in this phase, other systems can choose to special case power-state handling of a
+     * display that might be in a transition.
+     */
+    static final int DISPLAY_PHASE_LAYOUT_TRANSITION = 0;
+
+    /**
+     * The display is exposed to the rest of the system and its power state is determined by a
+     * power-request from PowerManager.
+     */
+    static final int DISPLAY_PHASE_ENABLED = 1;
+
+    @IntDef(prefix = {"DISPLAY_PHASE" }, value = {
+        DISPLAY_PHASE_DISABLED,
+        DISPLAY_PHASE_LAYOUT_TRANSITION,
+        DISPLAY_PHASE_ENABLED
+    })
+    @interface DisplayPhase {}
 
     // The layer stack we use when the display has been blanked to prevent any
     // of its content from appearing.
     private static final int BLANK_LAYER_STACK = -1;
 
+    private static final DisplayInfo EMPTY_DISPLAY_INFO = new DisplayInfo();
+
+    private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
     private final int mDisplayId;
     private final int mLayerStack;
+
+    private int mDisplayGroupId = Display.INVALID_DISPLAY_GROUP;
+
     /**
      * Override information set by the window manager. Will be reported instead of {@link #mInfo}
      * if not null.
@@ -91,6 +130,8 @@ final class LogicalDisplay {
     private int mRequestedColorMode;
     private boolean mRequestedMinimalPostProcessing;
 
+    private int[] mUserDisabledHdrTypes = {};
+
     private DisplayModeDirector.DesiredDisplayModeSpecs mDesiredDisplayModeSpecs =
             new DisplayModeDirector.DesiredDisplayModeSpecs();
 
@@ -115,10 +156,35 @@ final class LogicalDisplay {
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
 
+    /**
+     * Indicates the current phase of the display. Generally, phases supersede any
+     * requests from PowerManager in DPC's calculation for the display state. Only when the
+     * phase is ENABLED does PowerManager's request for the display take effect.
+     */
+    @DisplayPhase
+    private int mPhase = DISPLAY_PHASE_ENABLED;
+
+    /**
+     * The UID mappings for refresh rate override
+     */
+    private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides;
+
+    /**
+     * Holds a set of UIDs that their frame rate override changed and needs to be notified
+     */
+    private ArraySet<Integer> mPendingFrameRateOverrideUids;
+
+    /**
+     * Temporary frame rate override list, used when needed.
+     */
+    private final SparseArray<Float> mTempFrameRateOverride;
+
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
+        mPendingFrameRateOverrideUids = new ArraySet<>();
+        mTempFrameRateOverride = new SparseArray<>();
     }
 
     /**
@@ -164,10 +230,32 @@ final class LogicalDisplay {
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
                 info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
                 info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
+                info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
             }
             mInfo.set(info);
         }
         return mInfo.get();
+    }
+
+    /**
+     * Returns the frame rate overrides list
+     */
+    public DisplayEventReceiver.FrameRateOverride[] getFrameRateOverrides() {
+        return mFrameRateOverrides;
+    }
+
+    /**
+     * Returns the list of uids that needs to be updated about their frame rate override
+     */
+    public ArraySet<Integer> getPendingFrameRateOverrideUids() {
+        return mPendingFrameRateOverrideUids;
+    }
+
+    /**
+     * Clears the list of uids that needs to be updated about their frame rate override
+     */
+    public void clearPendingFrameRateOverrideUids() {
+        mPendingFrameRateOverrideUids = new ArraySet<>();
     }
 
     /**
@@ -216,21 +304,34 @@ final class LogicalDisplay {
     }
 
     /**
+     * Updates the {@link DisplayGroup} to which the logical display belongs.
+     *
+     * @param groupId Identifier for the {@link DisplayGroup}.
+     */
+    public void updateDisplayGroupIdLocked(int groupId) {
+        if (groupId != mDisplayGroupId) {
+            mDisplayGroupId = groupId;
+            mBaseDisplayInfo.displayGroupId = groupId;
+            mInfo.set(null);
+        }
+    }
+
+    /**
      * Updates the state of the logical display based on the available display devices.
      * The logical display might become invalid if it is attached to a display device
      * that no longer exists.
      *
-     * @param devices The list of all connected display devices.
+     * @param deviceRepo Repository of active {@link DisplayDevice}s.
      */
-    public void updateLocked(List<DisplayDevice> devices) {
+    public void updateLocked(DisplayDeviceRepository deviceRepo) {
         // Nothing to update if already invalid.
         if (mPrimaryDisplayDevice == null) {
             return;
         }
 
         // Check whether logical display has become invalid.
-        if (!devices.contains(mPrimaryDisplayDevice)) {
-            mPrimaryDisplayDevice = null;
+        if (!deviceRepo.containsLocked(mPrimaryDisplayDevice)) {
+            setPrimaryDisplayDeviceLocked(null);
             return;
         }
 
@@ -272,6 +373,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TRUSTED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_TRUSTED;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_OWN_DISPLAY_GROUP;
+            }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
@@ -295,6 +399,7 @@ final class LogicalDisplay {
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.userDisabledHdrTypes = mUserDisabledHdrTypes;
             mBaseDisplayInfo.minimalPostProcessingSupported =
                     deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
@@ -313,9 +418,41 @@ final class LogicalDisplay {
                     (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
             mBaseDisplayInfo.displayCutout = maskCutout ? null : deviceInfo.displayCutout;
             mBaseDisplayInfo.displayId = mDisplayId;
-
+            mBaseDisplayInfo.displayGroupId = mDisplayGroupId;
+            updateFrameRateOverrides(deviceInfo);
+            mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
+            mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
+            mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
+            mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
+        }
+    }
+
+    private void updateFrameRateOverrides(DisplayDeviceInfo deviceInfo) {
+        mTempFrameRateOverride.clear();
+        if (mFrameRateOverrides != null) {
+            for (DisplayEventReceiver.FrameRateOverride frameRateOverride
+                    : mFrameRateOverrides) {
+                mTempFrameRateOverride.put(frameRateOverride.uid,
+                        frameRateOverride.frameRateHz);
+            }
+        }
+        mFrameRateOverrides = deviceInfo.frameRateOverrides;
+        if (mFrameRateOverrides != null) {
+            for (DisplayEventReceiver.FrameRateOverride frameRateOverride
+                    : mFrameRateOverrides) {
+                float refreshRate = mTempFrameRateOverride.get(frameRateOverride.uid, 0f);
+                if (refreshRate == 0 || frameRateOverride.frameRateHz != refreshRate) {
+                    mTempFrameRateOverride.put(frameRateOverride.uid,
+                            frameRateOverride.frameRateHz);
+                } else {
+                    mTempFrameRateOverride.delete(frameRateOverride.uid);
+                }
+            }
+        }
+        for (int i = 0; i < mTempFrameRateOverride.size(); i++) {
+            mPendingFrameRateOverrideUids.add(mTempFrameRateOverride.keyAt(i));
         }
     }
 
@@ -576,8 +713,70 @@ final class LogicalDisplay {
         mDisplayScalingDisabled = disableScaling;
     }
 
+    public void setUserDisabledHdrTypes(@NonNull int[] userDisabledHdrTypes) {
+        if (mUserDisabledHdrTypes != userDisabledHdrTypes) {
+            mUserDisabledHdrTypes = userDisabledHdrTypes;
+            mBaseDisplayInfo.userDisabledHdrTypes = userDisabledHdrTypes;
+            mInfo.set(null);
+        }
+    }
+
+    /**
+     * Swap the underlying {@link DisplayDevice} with the specified LogicalDisplay.
+     *
+     * @param targetDisplay The display with which to swap display-devices.
+     * @return {@code true} if the displays were swapped, {@code false} otherwise.
+     */
+    public void swapDisplaysLocked(@NonNull LogicalDisplay targetDisplay) {
+        final DisplayDevice oldTargetDevice =
+                targetDisplay.setPrimaryDisplayDeviceLocked(mPrimaryDisplayDevice);
+        setPrimaryDisplayDeviceLocked(oldTargetDevice);
+    }
+
+    /**
+     * Sets the primary display device to the specified device.
+     *
+     * @param device The new device to set.
+     * @return The previously set display device.
+     */
+    public DisplayDevice setPrimaryDisplayDeviceLocked(@Nullable DisplayDevice device) {
+        final DisplayDevice old = mPrimaryDisplayDevice;
+        mPrimaryDisplayDevice = device;
+
+        // Reset all our display info data
+        mPrimaryDisplayDeviceInfo = null;
+        mBaseDisplayInfo.copyFrom(EMPTY_DISPLAY_INFO);
+        mInfo.set(null);
+
+        return old;
+    }
+
+    public void setPhase(@DisplayPhase int phase) {
+        mPhase = phase;
+    }
+
+    /**
+     * Returns the currently set phase for this LogicalDisplay. Phases are used when transitioning
+     * from one device state to another. {@see LogicalDisplayMapper}.
+     */
+    @DisplayPhase
+    public int getPhase() {
+        return mPhase;
+    }
+
+    /**
+     * @return {@code true} if the LogicalDisplay is enabled or {@code false}
+     * if disabled indicating that the display should be hidden from the rest of the apps and
+     * framework.
+     */
+    public boolean isEnabled() {
+        // DISPLAY_PHASE_LAYOUT_TRANSITION is still considered an 'enabled' phase.
+        return mPhase == DISPLAY_PHASE_ENABLED || mPhase == DISPLAY_PHASE_LAYOUT_TRANSITION;
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
+        pw.println("mPhase=" + mPhase);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
@@ -589,5 +788,14 @@ final class LogicalDisplay {
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
         pw.println("mOverrideDisplayInfo=" + mOverrideDisplayInfo);
         pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
+        pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
+        pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        dumpLocked(new PrintWriter(sw));
+        return sw.toString();
     }
 }

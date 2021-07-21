@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -157,4 +158,28 @@ public abstract class VerifiedInputEvent implements Parcelable {
             throw new IllegalArgumentException("Unexpected input event type in parcel.");
         }
     };
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        @SuppressWarnings("unchecked")
+        VerifiedInputEvent that = (VerifiedInputEvent) o;
+        return mType == that.mType
+                && getDeviceId() == that.getDeviceId()
+                && getEventTimeNanos() == that.getEventTimeNanos()
+                && getSource() == that.getSource()
+                && getDisplayId() == that.getDisplayId();
+    }
+
+    @Override
+    public int hashCode() {
+        int _hash = 1;
+        _hash = 31 * _hash + mType;
+        _hash = 31 * _hash + getDeviceId();
+        _hash = 31 * _hash + Long.hashCode(getEventTimeNanos());
+        _hash = 31 * _hash + getSource();
+        _hash = 31 * _hash + getDisplayId();
+        return _hash;
+    }
 }

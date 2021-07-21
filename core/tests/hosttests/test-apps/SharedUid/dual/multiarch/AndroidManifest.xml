@@ -13,16 +13,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <!-- This is an example of writing an application that bundles a
      native code library. -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.framework.shareduid.multiarch" android:sharedUserId="com.framework.shareduid">
-    <application android:label="Main Activity (multiarch)" android:multiArch="true">
-        <activity android:name="com.framework.shareduid.dual.MainActivity">
+     package="com.framework.shareduid.multiarch"
+     android:sharedUserId="com.framework.shareduid">
+    <application android:label="Main Activity (multiarch)"
+         android:multiArch="true">
+        <activity android:name="com.framework.shareduid.dual.MainActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

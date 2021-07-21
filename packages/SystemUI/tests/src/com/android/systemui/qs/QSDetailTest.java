@@ -20,7 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +32,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -38,6 +41,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
 import org.junit.After;
@@ -52,30 +56,34 @@ public class QSDetailTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;
     private QSDetail mQsDetail;
-    private QSPanel mQsPanel;
+    private QSPanelController mQsPanelController;
     private QuickStatusBarHeader mQuickHeader;
     private ActivityStarter mActivityStarter;
     private DetailAdapter mMockDetailAdapter;
     private TestableLooper mTestableLooper;
     private UiEventLoggerFake mUiEventLogger;
+    private FrameLayout mParent;
 
     @Before
     public void setup() throws Exception {
         mTestableLooper = TestableLooper.get(this);
         mUiEventLogger = QSEvents.INSTANCE.setLoggerForTesting();
 
-        mTestableLooper.runWithLooper(() -> {
-            mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
-            mQsDetail = (QSDetail) LayoutInflater.from(mContext).inflate(R.layout.qs_detail, null);
-            mQsPanel = mock(QSPanel.class);
-            mQuickHeader = mock(QuickStatusBarHeader.class);
-            mQsDetail.setQsPanel(mQsPanel, mQuickHeader, mock(View.class));
+        mParent = new FrameLayout(mContext);
+        mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
+        mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
+        LayoutInflater.from(mContext).inflate(R.layout.qs_detail, mParent);
+        mQsDetail = (QSDetail) mParent.getChildAt(0);
 
-            mMockDetailAdapter = mock(DetailAdapter.class);
-            when(mMockDetailAdapter.createDetailView(any(), any(), any()))
-                    .thenReturn(mock(View.class));
-        });
+        mQsPanelController = mock(QSPanelController.class);
+        mQuickHeader = mock(QuickStatusBarHeader.class);
+        mQsDetail.setQsPanel(mQsPanelController, mQuickHeader, mock(QSFooter.class),
+                mock(FalsingManager.class));
+        mQsDetail.mClipper = mock(QSDetailClipper.class);
+
+        mMockDetailAdapter = mock(DetailAdapter.class);
+        when(mMockDetailAdapter.createDetailView(any(), any(), any()))
+                .thenReturn(new View(mContext));
 
         // Only detail in use is the user detail
         when(mMockDetailAdapter.openDetailEvent())
@@ -84,16 +92,18 @@ public class QSDetailTest extends SysuiTestCase {
                 .thenReturn(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE);
         when(mMockDetailAdapter.moreSettingsEvent())
                 .thenReturn(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS);
+        ViewUtils.attachView(mParent);
     }
 
     @After
     public void tearDown() {
         QSEvents.INSTANCE.resetLogger();
+        mTestableLooper.processAllMessages();
+        ViewUtils.detachView(mParent);
     }
 
     @Test
     public void testShowDetail_Metrics() {
-        ViewUtils.attachView(mQsDetail);
         mTestableLooper.processAllMessages();
 
         mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
@@ -107,14 +117,68 @@ public class QSDetailTest extends SysuiTestCase {
 
         assertEquals(1, mUiEventLogger.numLogs());
         assertEquals(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE.getId(), mUiEventLogger.eventId(0));
+    }
 
-        ViewUtils.detachView(mQsDetail);
+    @Test
+    public void testShowDetail_ShouldAnimate() {
         mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.shouldAnimate()).thenReturn(true);
+        mQsDetail.setFullyExpanded(true);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(true) /* animate */, anyInt(), anyInt(),
+                eq(true) /* in */, any());
+        clearInvocations(mQsDetail.mClipper);
+
+        mQsDetail.handleShowingDetail(null, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(true) /* animate */, anyInt(), anyInt(),
+                eq(false) /* in */, any());
+    }
+
+    @Test
+    public void testShowDetail_ShouldNotAnimate() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.shouldAnimate()).thenReturn(false);
+        mQsDetail.setFullyExpanded(true);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(false) /* animate */, anyInt(), anyInt(),
+                eq(true) /* in */, any());
+        clearInvocations(mQsDetail.mClipper);
+
+        // Detail adapters should always animate on close. shouldAnimate() should only affect the
+        // open transition
+        mQsDetail.handleShowingDetail(null, 0, 0, false);
+        verify(mQsDetail.mClipper).updateCircularClip(eq(true) /* animate */, anyInt(), anyInt(),
+                eq(false) /* in */, any());
+    }
+
+    @Test
+    public void testDoneButton_CloseDetailPanel() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.onDoneButtonClicked()).thenReturn(false);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        mQsDetail.requireViewById(android.R.id.button1).performClick();
+        verify(mQsPanelController).closeDetail();
+    }
+
+    @Test
+    public void testDoneButton_KeepDetailPanelOpen() {
+        mTestableLooper.processAllMessages();
+
+        when(mMockDetailAdapter.onDoneButtonClicked()).thenReturn(true);
+
+        mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
+        mQsDetail.requireViewById(android.R.id.button1).performClick();
+        verify(mQsPanelController, never()).closeDetail();
     }
 
     @Test
     public void testMoreSettingsButton() {
-        ViewUtils.attachView(mQsDetail);
         mTestableLooper.processAllMessages();
 
         mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
@@ -127,9 +191,6 @@ public class QSDetailTest extends SysuiTestCase {
         assertEquals(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS.getId(), mUiEventLogger.eventId(0));
 
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(), anyInt());
-
-        ViewUtils.detachView(mQsDetail);
-        mTestableLooper.processAllMessages();
     }
 
     @Test

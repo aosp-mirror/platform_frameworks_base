@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerGlobal;
@@ -65,6 +66,7 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
 
     int screenHeight;
     int screenWidth;
+    private DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
@@ -75,23 +77,31 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         mContext = checkNull("context", context);
         mHandler = handler;
         mCallbacks = checkNull("callbacks", callbacks);
+        onConfigurationChanged();
+    }
 
+    void onDisplayInfoChanged(DisplayInfo info) {
+        screenWidth = info.logicalWidth;
+        screenHeight = info.logicalHeight;
         onConfigurationChanged();
     }
 
     void onConfigurationChanged() {
-        mSwipeStartThreshold = mContext.getResources()
-                .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-
+        final Resources r = mContext.getResources();
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(Display.DEFAULT_DISPLAY);
+        display.getDisplayInfo(mTmpDisplayInfo);
+        mSwipeStartThreshold = mTmpDisplayInfo.logicalWidth > mTmpDisplayInfo.logicalHeight
+                ? r.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height_landscape)
+                : r.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height_portrait);
+
         final DisplayCutout displayCutout = display.getCutout();
         if (displayCutout != null) {
             final Rect bounds = displayCutout.getBoundingRectTop();
             if (!bounds.isEmpty()) {
                 // Expand swipe start threshold such that we can catch touches that just start below
                 // the notch area
-                mDisplayCutoutTouchableRegionSize = mContext.getResources().getDimensionPixelSize(
+                mDisplayCutoutTouchableRegionSize = r.getDimensionPixelSize(
                         com.android.internal.R.dimen.display_cutout_touchable_region_size);
                 mSwipeStartThreshold += mDisplayCutoutTouchableRegionSize;
             }

@@ -24,9 +24,17 @@ import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 public abstract class StartingData {
 
     protected final WindowManagerService mService;
+    protected final int mTypeParams;
 
-    protected StartingData(WindowManagerService service) {
+    /**
+     * Tell whether the launching activity should use
+     * {@link android.view.WindowManager.LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION}.
+     */
+    boolean mIsTransitionForward;
+
+    protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
+        mTypeParams = typeParams;
     }
 
     /**
@@ -38,4 +46,14 @@ public abstract class StartingData {
      *         {@link StartingSurface#remove}
      */
     abstract StartingSurface createStartingSurface(ActivityRecord activity);
+
+    /**
+     * @return Whether to apply reveal animation when exiting the starting window.
+     */
+    abstract boolean needRevealAnimation();
+
+    /** @see android.window.TaskSnapshot#hasImeSurface() */
+    boolean hasImeSurface() {
+        return false;
+    }
 }

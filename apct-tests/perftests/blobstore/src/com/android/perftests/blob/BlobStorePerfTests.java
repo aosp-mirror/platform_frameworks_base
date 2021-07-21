@@ -27,7 +27,7 @@ import android.support.test.uiautomator.UiDevice;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.utils.blob.DummyBlobData;
+import com.android.utils.blob.FakeBlobData;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,7 +96,7 @@ public class BlobStorePerfTests {
         mAtraceUtils.startTrace(ATRACE_CATEGORY_SYSTEM_SERVER);
         try {
             final List<Long> durations = new ArrayList<>();
-            final DummyBlobData blobData = prepareDataBlob(fileSizeInMb);
+            final FakeBlobData blobData = prepareDataBlob(fileSizeInMb);
             final TraceMarkParser parser = new TraceMarkParser(
                     line -> line.name.startsWith(ATRACE_COMPUTE_DIGEST_PREFIX));
             while (mState.keepRunning(durations)) {
@@ -120,15 +120,15 @@ public class BlobStorePerfTests {
         });
     }
 
-    private DummyBlobData prepareDataBlob(int fileSizeInMb) throws Exception {
-        final DummyBlobData blobData = new DummyBlobData.Builder(mContext)
+    private FakeBlobData prepareDataBlob(int fileSizeInMb) throws Exception {
+        final FakeBlobData blobData = new FakeBlobData.Builder(mContext)
                 .setFileSize(fileSizeInMb * 1024 * 1024 /* bytes */)
                 .build();
         blobData.prepare();
         return blobData;
     }
 
-    private void commitBlob(DummyBlobData blobData) throws Exception {
+    private void commitBlob(FakeBlobData blobData) throws Exception {
         final long sessionId = mBlobStoreManager.createSession(blobData.getBlobHandle());
         try (BlobStoreManager.Session session = mBlobStoreManager.openSession(sessionId)) {
             blobData.writeToSession(session);

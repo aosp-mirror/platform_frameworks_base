@@ -17,15 +17,19 @@
 package com.android.server.wm;
 
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
@@ -37,6 +41,9 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+
+import java.util.List;
 
 /**
  * Test for {@link WindowManagerService.SettingsObserver}.
@@ -51,8 +58,8 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
 
     @Test
     public void testForceDesktopModeOnExternalDisplays() {
-        try (SettingsSession forceDesktopModeSession = new
-                SettingsSession(DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS)) {
+        try (BoolSettingsSession forceDesktopModeSession = new
+                BoolSettingsSession(DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS)) {
             final boolean forceDesktopMode = !forceDesktopModeSession.getSetting();
             final Uri forceDesktopModeUri = forceDesktopModeSession.setSetting(forceDesktopMode);
             mWm.mSettingsObserver.onChange(false, forceDesktopModeUri);
@@ -63,8 +70,8 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
 
     @Test
     public void testFreeformWindow() {
-        try (SettingsSession freeformWindowSession = new
-                SettingsSession(DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT)) {
+        try (BoolSettingsSession freeformWindowSession = new
+                BoolSettingsSession(DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT)) {
             final boolean curFreeformWindow = freeformWindowSession.getSetting();
             final boolean newFreeformWindow = !curFreeformWindow;
             final Uri freeformWindowUri = freeformWindowSession.setSetting(newFreeformWindow);
@@ -77,8 +84,8 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
 
     @Test
     public void testFreeformWindow_valueChanged_updatesDisplaySettings() {
-        try (SettingsSession freeformWindowSession = new
-                SettingsSession(DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT)) {
+        try (BoolSettingsSession freeformWindowSession = new
+                BoolSettingsSession(DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT)) {
             final boolean curFreeformWindow = freeformWindowSession.getSetting();
             final boolean newFreeformWindow = !curFreeformWindow;
             final Uri freeformWindowUri = freeformWindowSession.setSetting(newFreeformWindow);
@@ -99,8 +106,8 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
 
     @Test
     public void testForceResizableMode() {
-        try (SettingsSession forceResizableSession = new
-                SettingsSession(DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES)) {
+        try (BoolSettingsSession forceResizableSession = new
+                BoolSettingsSession(DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES)) {
             final boolean forceResizableMode = !forceResizableSession.getSetting();
             final Uri forceResizableUri = forceResizableSession.setSetting(forceResizableMode);
 
@@ -111,27 +118,59 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testEnableSizeCompatFreeform() {
-        try (SettingsSession enableSizeCompatFreeformSession = new
-                SettingsSession(DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM)) {
-            final boolean enableSizeCompatFreeform =
-                    !enableSizeCompatFreeformSession.getSetting();
-            final Uri enableSizeCompatFreeformUri =
-                    enableSizeCompatFreeformSession.setSetting(enableSizeCompatFreeform);
-            mWm.mSettingsObserver.onChange(false, enableSizeCompatFreeformUri);
+    public void testSupportsNonResizableMultiWindow() {
+        try (BoolSettingsSession supportsNonResizableMultiWindowSession = new
+                BoolSettingsSession(DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)) {
+            final boolean supportsNonResizableMultiWindow =
+                    !supportsNonResizableMultiWindowSession.getSetting();
+            final Uri supportsNonResizableMultiWindowUri = supportsNonResizableMultiWindowSession
+                    .setSetting(supportsNonResizableMultiWindow);
+            mWm.mSettingsObserver.onChange(false, supportsNonResizableMultiWindowUri);
 
-            assertEquals(mWm.mAtmService.mSizeCompatFreeform, enableSizeCompatFreeform);
+            assertEquals(mWm.mAtmService.mDevEnableNonResizableMultiWindow,
+                    supportsNonResizableMultiWindow);
         }
     }
 
-    private class SettingsSession implements AutoCloseable {
+    @Test
+    public void testChangeBaseDisplaySettingsPath() {
+        try (StringSettingsSession baseDisplaySettingsPathSession = new
+                StringSettingsSession(DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH)) {
+            final String path = baseDisplaySettingsPathSession.getSetting() + "-test";
+            final Uri baseDisplaySettingsPathUri = baseDisplaySettingsPathSession.setSetting(path);
+
+            clearInvocations(mWm.mRoot);
+            clearInvocations(mWm.mDisplayWindowSettings);
+            clearInvocations(mWm.mDisplayWindowSettingsProvider);
+
+            mWm.mSettingsObserver.onChange(false /* selfChange */, baseDisplaySettingsPathUri);
+
+            ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
+            verify(mWm.mDisplayWindowSettingsProvider).setBaseSettingsFilePath(
+                    pathCaptor.capture());
+            assertEquals(path, pathCaptor.getValue());
+
+            ArgumentCaptor<DisplayContent> captor =
+                    ArgumentCaptor.forClass(DisplayContent.class);
+            verify(mWm.mDisplayWindowSettings, times(mWm.mRoot.mChildren.size()))
+                    .applySettingsToDisplayLocked(captor.capture());
+            List<DisplayContent> configuredDisplays = captor.getAllValues();
+            for (DisplayContent dc : mWm.mRoot.mChildren) {
+                assertTrue(configuredDisplays.contains(dc));
+            }
+
+            verify(mWm.mRoot, atLeastOnce()).performSurfacePlacement();
+        }
+    }
+
+    private class BoolSettingsSession implements AutoCloseable {
 
         private static final int SETTING_VALUE_OFF = 0;
         private static final int SETTING_VALUE_ON = 1;
         private final String mSettingName;
         private final int mInitialValue;
 
-        SettingsSession(String name) {
+        BoolSettingsSession(String name) {
             mSettingName = name;
             mInitialValue = getSetting() ? SETTING_VALUE_ON : SETTING_VALUE_OFF;
         }
@@ -153,6 +192,34 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
         @Override
         public void close() {
             setSetting(mInitialValue == SETTING_VALUE_ON);
+        }
+    }
+
+    private class StringSettingsSession implements AutoCloseable {
+        private final String mSettingName;
+        private final String mInitialValue;
+
+        StringSettingsSession(String name) {
+            mSettingName = name;
+            mInitialValue = getSetting();
+        }
+
+        String getSetting() {
+            return Settings.Global.getString(getContentResolver(), mSettingName);
+        }
+
+        Uri setSetting(String value) {
+            Settings.Global.putString(getContentResolver(), mSettingName, value);
+            return Settings.Global.getUriFor(mSettingName);
+        }
+
+        private ContentResolver getContentResolver() {
+            return getInstrumentation().getTargetContext().getContentResolver();
+        }
+
+        @Override
+        public void close() {
+            setSetting(mInitialValue);
         }
     }
 }

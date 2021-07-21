@@ -18,7 +18,6 @@ package android.view;
 
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -28,6 +27,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,13 +42,10 @@ import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.animation.LinearInterpolator;
-import android.view.test.InsetsModeSession;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -76,21 +73,10 @@ public class InsetsAnimationControlImplTest {
     private SurfaceControl mTopLeash;
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
-    private static InsetsModeSession sInsetsModeSession;
 
     @Mock Transaction mMockTransaction;
     @Mock InsetsController mMockController;
     @Mock WindowInsetsAnimationControlListener mMockListener;
-
-    @BeforeClass
-    public static void setupOnce() {
-        sInsetsModeSession = new InsetsModeSession(NEW_INSETS_MODE_FULL);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        sInsetsModeSession.close();
-    }
 
     @Before
     public void setup() {
@@ -104,16 +90,18 @@ public class InsetsAnimationControlImplTest {
         mInsetsState = new InsetsState();
         mInsetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 500, 100));
         mInsetsState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
+        doNothing().when(mMockController).onRequestedVisibilityChanged(any());
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0)),
+                new InsetsSourceControl(
+                        ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0), Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
                 mInsetsState, () -> mMockTransaction, mMockController);
         navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash,
-                new Point(400, 0)), new int[1], new int[1]);
+                new Point(400, 0), Insets.of(0, 0, 100, 0)), new int[1], new int[1]);
         navConsumer.hide();
 
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
@@ -122,7 +110,7 @@ public class InsetsAnimationControlImplTest {
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),
-                0 /* animationType */);
+                0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */);
         mController.mReadyDispatched = true;
     }
 
@@ -145,7 +133,7 @@ public class InsetsAnimationControlImplTest {
     public void testChangeInsets() {
         mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 1f /* alpha */,
                 0f /* fraction */);
-        mController.applyChangeInsets(new InsetsState());
+        mController.applyChangeInsets(null /* outState */);
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
         assertEquals(1f, mController.getCurrentAlpha(), 1f - mController.getCurrentAlpha());
 
@@ -165,7 +153,7 @@ public class InsetsAnimationControlImplTest {
     public void testChangeAlphaNoInsets() {
         Insets initialInsets = mController.getCurrentInsets();
         mController.setInsetsAndAlpha(null, 0.5f, 0f /* fraction*/);
-        mController.applyChangeInsets(new InsetsState());
+        mController.applyChangeInsets(null /* outState */);
         assertEquals(0.5f, mController.getCurrentAlpha(), 0.5f - mController.getCurrentAlpha());
         assertEquals(initialInsets, mController.getCurrentInsets());
     }
@@ -173,7 +161,7 @@ public class InsetsAnimationControlImplTest {
     @Test
     public void testChangeInsetsAndAlpha() {
         mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 0.5f, 1f);
-        mController.applyChangeInsets(new InsetsState());
+        mController.applyChangeInsets(null /* outState */);
         assertEquals(0.5f, mController.getCurrentAlpha(), 0.5f - mController.getCurrentAlpha());
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
     }

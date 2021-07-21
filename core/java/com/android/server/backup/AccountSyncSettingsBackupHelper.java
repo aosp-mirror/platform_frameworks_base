@@ -262,14 +262,14 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
             boolean currentMasterSyncEnabled = ContentResolver.getMasterSyncAutomaticallyAsUser(
                     mUserId);
             if (currentMasterSyncEnabled) {
-                // Disable master sync to prevent any syncs from running.
+                // Disable global sync to prevent any syncs from running.
                 ContentResolver.setMasterSyncAutomaticallyAsUser(false, mUserId);
             }
 
             try {
                 restoreFromJsonArray(accountJSONArray, mUserId);
             } finally {
-                // Set the master sync preference to the value from the backup set.
+                // Set the global sync preference to the value from the backup set.
                 ContentResolver.setMasterSyncAutomaticallyAsUser(masterSyncEnabled, mUserId);
             }
             Log.i(TAG, "Restore successful.");

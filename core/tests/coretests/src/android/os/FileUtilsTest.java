@@ -16,6 +16,7 @@
 
 package android.os;
 
+import static android.os.FileUtils.convertToModernFd;
 import static android.os.FileUtils.roundStorageSize;
 import static android.os.FileUtils.translateModeAccessToPosix;
 import static android.os.FileUtils.translateModePfdToPosix;
@@ -45,6 +46,8 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -67,6 +70,7 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Arrays;
@@ -221,6 +225,27 @@ public class FileUtilsTest {
             actual = readFile(dest);
             assertArrayEquals(expected, actual);
         }
+    }
+
+    @Test
+    public void testCopyFileWithAppend() throws Exception {
+        final File src = new File(mTarget, "src");
+        final File dest = new File(mTarget, "dest");
+
+        byte[] expected = new byte[10];
+        byte[] actual = new byte[10];
+        new Random().nextBytes(expected);
+        writeFile(src, expected);
+
+        try (FileInputStream in = new FileInputStream(src);
+                FileOutputStream out = new FileOutputStream(dest, true /* append */)) {
+            // sendfile(2) fails if output fd is opened with O_APPEND, but FileUtils#copy should
+            // fallback to userspace copy
+            FileUtils.copy(in, out);
+        }
+
+        actual = readFile(dest);
+        assertArrayEquals(expected, actual);
     }
 
     @Test
@@ -560,6 +585,49 @@ public class FileUtilsTest {
         assertEquals(O_WRONLY, translateModeAccessToPosix(W_OK));
         assertEquals(O_RDWR, translateModeAccessToPosix(R_OK | W_OK));
         assertEquals(O_RDWR, translateModeAccessToPosix(R_OK | W_OK | X_OK));
+    }
+
+    @Test
+    public void testConvertToModernFd() throws Exception {
+        final String nonce = String.valueOf(System.nanoTime());
+
+        final File cameraDir = new File("/storage/emulated/0/DCIM/Camera");
+        final File nonCameraDir = new File("/storage/emulated/0/Pictures");
+        cameraDir.mkdirs();
+        nonCameraDir.mkdirs();
+
+        final File validVideoCameraDir = new File(cameraDir, "validVideo-" + nonce + ".mp4");
+        final File validImageCameraDir = new File(cameraDir, "validImage-" + nonce + ".jpg");
+
+        final File validVideoNonCameraDir = new File(nonCameraDir, "validVideo-" + nonce + ".mp4");
+        final File validImageNonCameraDir = new File(nonCameraDir, "validImage-" + nonce + ".jpg");
+
+        try {
+            FileDescriptor pfdValidVideoCameraDir =
+                    ParcelFileDescriptor.open(validVideoCameraDir,
+                            MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
+            FileDescriptor pfdValidImageCameraDir =
+                    ParcelFileDescriptor.open(validImageCameraDir,
+                            MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
+
+            FileDescriptor pfdValidVideoNonCameraDir =
+                    ParcelFileDescriptor.open(validVideoNonCameraDir,
+                            MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
+            FileDescriptor pfdValidImageNonCameraDir =
+                    ParcelFileDescriptor.open(validImageNonCameraDir,
+                            MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
+
+            assertNotNull(convertToModernFd(pfdValidVideoCameraDir));
+
+            assertNull(convertToModernFd(pfdValidImageCameraDir));
+            assertNull(convertToModernFd(pfdValidVideoNonCameraDir));
+            assertNull(convertToModernFd(pfdValidImageNonCameraDir));
+        } finally {
+            validVideoCameraDir.delete();
+            validImageCameraDir.delete();
+            validVideoNonCameraDir.delete();
+            validImageNonCameraDir.delete();
+        }
     }
 
     private static void assertTranslate(String string, int posix, int pfd) {

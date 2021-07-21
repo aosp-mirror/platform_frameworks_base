@@ -45,7 +45,7 @@ class SplashScreenSurface implements StartingSurface {
     }
 
     @Override
-    public void remove() {
+    public void remove(boolean animate) {
         if (DEBUG_SPLASH_SCREEN) Slog.v(TAG, "Removing splash screen window for " + mAppToken + ": "
                         + this + " Callers=" + Debug.getCallers(4));
 

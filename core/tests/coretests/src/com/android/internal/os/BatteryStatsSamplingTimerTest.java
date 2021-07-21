@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
+import android.os.SystemClock;
 
 import androidx.test.filters.SmallTest;
 
@@ -36,9 +37,9 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
         timer.onTimeStarted(100, 100, 100);
 
         // First update is absorbed.
-        timer.update(10, 1);
+        timer.update(10, 1, SystemClock.elapsedRealtime() * 1000);
 
-        timer.update(20, 2);
+        timer.update(20, 2, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(1, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(10, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
@@ -55,6 +56,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
     }
 
     @SmallTest
+    @SkipPresubmit("b/180015146")
     public void testEndSampleAndContinueWhenTimeOrCountDecreases() throws Exception {
         final MockClocks clocks = new MockClocks();
         final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);
@@ -62,7 +64,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
                 timeBase);
 
         // First once is absorbed.
-        timer.update(10, 1);
+        timer.update(10, 1, SystemClock.elapsedRealtime() * 1000);
 
         timer.add(10, 1);
 
@@ -71,7 +73,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
         // This is less than we currently have, so we will end the sample. Time isn't running, so
         // nothing should happen.
-        timer.update(0, 0);
+        timer.update(0, 0, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(0, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
@@ -86,7 +88,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
         // This is less than we currently have, so we should end our sample and continue with the
         // entire amount updated here.
-        timer.update(50, 5);
+        timer.update(50, 5, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(150, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(15, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
@@ -106,7 +108,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
         // This should be absorbed because it is our first update and we don't know what
         // was being counted before.
-        timer.update(10, 1);
+        timer.update(10, 1, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(0, timer.getTotalTimeLocked(10, BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
@@ -115,7 +117,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
         timer.onTimeStarted(100, 100, 100);
 
         // This should be absorbed.
-        timer.update(10, 1);
+        timer.update(10, 1, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(0, timer.getTotalTimeLocked(100, BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
@@ -206,13 +208,13 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
         // Now, just like with a fresh timer, the first update should be absorbed to account for
         // data being collected when we weren't recording.
-        unparceledOnBatteryTimer.update(10, 10);
+        unparceledOnBatteryTimer.update(10, 10, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(10, unparceledOnBatteryTimer.getTotalTimeLocked(0,
                 BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(1, unparceledOnBatteryTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
-        unparceledOffBatteryTimer.update(10, 10);
+        unparceledOffBatteryTimer.update(10, 10, SystemClock.elapsedRealtime() * 1000);
 
         assertEquals(10, unparceledOffBatteryTimer.getTotalTimeLocked(0,
                 BatteryStats.STATS_SINCE_CHARGED));

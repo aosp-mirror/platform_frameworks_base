@@ -16,188 +16,123 @@
 
 package com.android.server.autofill.ui;
 
+import static android.view.inputmethod.InlineSuggestionInfo.TYPE_SUGGESTION;
+
 import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Intent;
 import android.content.IntentSender;
-import android.os.IBinder;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.InlinePresentation;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
-import android.view.inputmethod.InlineSuggestionsResponse;
 import android.widget.inline.InlinePresentationSpec;
 
 import com.android.internal.view.inline.IInlineContentProvider;
-import com.android.server.autofill.RemoteInlineSuggestionRenderService;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 final class InlineSuggestionFactory {
     private static final String TAG = "InlineSuggestionFactory";
 
-    public static boolean responseNeedAuthentication(@NonNull FillResponse response) {
-        return response.getAuthentication() != null && response.getInlinePresentation() != null;
-    }
-
     public static InlineSuggestion createInlineAuthentication(
-            @NonNull InlineSuggestionsRequest request, @NonNull FillResponse response,
-            @NonNull AutoFillUI.AutoFillUiCallback client, @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService, int userId,
-            int sessionId) {
-        final BiConsumer<Dataset, Integer> onClickFactory = (dataset, datasetIndex) -> {
-            client.authenticate(response.getRequestId(),
-                    datasetIndex, response.getAuthentication(), response.getClientState(),
-                    /* authenticateInline= */ true);
-        };
-        final Consumer<IntentSender> intentSenderConsumer = (intentSender) ->
-                client.startIntentSender(intentSender, new Intent());
+            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo, @NonNull FillResponse response,
+            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
         InlinePresentation inlineAuthentication = response.getInlinePresentation();
-        return createInlineAuthSuggestion(
-                mergedInlinePresentation(request, 0, inlineAuthentication),
-                remoteRenderService, userId, sessionId,
-                onClickFactory, onErrorCallback, intentSenderConsumer,
-                request.getHostInputToken(), request.getHostDisplayId());
+        final int requestId = response.getRequestId();
+
+        return createInlineSuggestion(inlineFillUiInfo, InlineSuggestionInfo.SOURCE_AUTOFILL,
+                InlineSuggestionInfo.TYPE_ACTION, () -> uiCallback.authenticate(requestId,
+                        AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
+                mergedInlinePresentation(inlineFillUiInfo.mInlineRequest, 0, inlineAuthentication),
+                createInlineSuggestionTooltip(inlineFillUiInfo.mInlineRequest,
+                        inlineFillUiInfo, InlineSuggestionInfo.SOURCE_AUTOFILL,
+                        response.getInlineTooltipPresentation()),
+                uiCallback);
     }
 
     /**
-     * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by the
-     * autofill service, potentially filtering the datasets.
+     * Creates an array of {@link InlineSuggestion}s with the {@code datasets} provided by either
+     * regular/augmented autofill services.
      */
     @Nullable
-    public static SparseArray<Pair<Dataset, InlineSuggestion>> createAutofillInlineSuggestions(
-            @NonNull InlineSuggestionsRequest request, int requestId,
+    public static SparseArray<Pair<Dataset, InlineSuggestion>> createInlineSuggestions(
+            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
+            @NonNull @InlineSuggestionInfo.Source String suggestionSource,
             @NonNull List<Dataset> datasets,
-            @NonNull AutofillId autofillId,
-            @NonNull AutoFillUI.AutoFillUiCallback client, @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId, int sessionId) {
-        if (sDebug) Slog.d(TAG, "createInlineSuggestionsResponse called");
-        final Consumer<IntentSender> intentSenderConsumer = (intentSender) ->
-                client.startIntentSender(intentSender, new Intent());
-        final BiConsumer<Dataset, Integer> onClickFactory = (dataset, datasetIndex) -> {
-            client.fill(requestId, datasetIndex, dataset);
-        };
+            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
+        if (sDebug) Slog.d(TAG, "createInlineSuggestions(source=" + suggestionSource + ") called");
 
-        return createInlineSuggestionsInternal(/* isAugmented= */ false, request,
-                datasets, autofillId,
-                onErrorCallback, onClickFactory, intentSenderConsumer, remoteRenderService, userId,
-                sessionId);
-    }
-
-    /**
-     * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by augmented
-     * autofill service.
-     */
-    @Nullable
-    public static SparseArray<Pair<Dataset, InlineSuggestion>>
-            createAugmentedAutofillInlineSuggestions(
-            @NonNull InlineSuggestionsRequest request, @NonNull List<Dataset> datasets,
-            @NonNull AutofillId autofillId,
-            @NonNull InlineFillUi.InlineSuggestionUiCallback inlineSuggestionUiCallback,
-            @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId, int sessionId) {
-        if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
-        return createInlineSuggestionsInternal(/* isAugmented= */ true, request,
-                datasets, autofillId, onErrorCallback,
-                (dataset, datasetIndex) ->
-                        inlineSuggestionUiCallback.autofill(dataset, datasetIndex),
-                (intentSender) ->
-                        inlineSuggestionUiCallback.startIntentSender(intentSender, new Intent()),
-                remoteRenderService, userId, sessionId);
-    }
-
-    @Nullable
-    private static SparseArray<Pair<Dataset, InlineSuggestion>> createInlineSuggestionsInternal(
-            boolean isAugmented, @NonNull InlineSuggestionsRequest request,
-            @NonNull List<Dataset> datasets, @NonNull AutofillId autofillId,
-            @NonNull Runnable onErrorCallback, @NonNull BiConsumer<Dataset, Integer> onClickFactory,
-            @NonNull Consumer<IntentSender> intentSenderConsumer,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId, int sessionId) {
+        final InlineSuggestionsRequest request = inlineFillUiInfo.mInlineRequest;
         SparseArray<Pair<Dataset, InlineSuggestion>> response = new SparseArray<>(datasets.size());
+
+        boolean hasTooltip = false;
         for (int datasetIndex = 0; datasetIndex < datasets.size(); datasetIndex++) {
             final Dataset dataset = datasets.get(datasetIndex);
-            final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
+            final int fieldIndex = dataset.getFieldIds().indexOf(inlineFillUiInfo.mFocusedId);
             if (fieldIndex < 0) {
-                Slog.w(TAG, "AutofillId=" + autofillId + " not found in dataset");
+                Slog.w(TAG, "AutofillId=" + inlineFillUiInfo.mFocusedId + " not found in dataset");
                 continue;
             }
-            final InlinePresentation inlinePresentation = dataset.getFieldInlinePresentation(
-                    fieldIndex);
+
+            final InlinePresentation inlinePresentation =
+                    dataset.getFieldInlinePresentation(fieldIndex);
             if (inlinePresentation == null) {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
                 continue;
             }
-            InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
-                    datasetIndex,
+
+            final String suggestionType =
+                    dataset.getAuthentication() == null ? TYPE_SUGGESTION
+                            : InlineSuggestionInfo.TYPE_ACTION;
+            final int index = datasetIndex;
+
+            InlineSuggestion inlineSuggestionTooltip = null;
+            if (!hasTooltip) {
+                // Only available for first one inline suggestion tooltip.
+                inlineSuggestionTooltip = createInlineSuggestionTooltip(request,
+                        inlineFillUiInfo, suggestionSource,
+                        dataset.getFieldInlineTooltipPresentation(fieldIndex));
+                if (inlineSuggestionTooltip != null) {
+                    hasTooltip = true;
+                }
+            }
+            InlineSuggestion inlineSuggestion = createInlineSuggestion(
+                    inlineFillUiInfo, suggestionSource, suggestionType,
+                    () -> uiCallback.autofill(dataset, index),
                     mergedInlinePresentation(request, datasetIndex, inlinePresentation),
-                    onClickFactory, remoteRenderService, userId, sessionId,
-                    onErrorCallback, intentSenderConsumer,
-                    request.getHostInputToken(), request.getHostDisplayId());
+                    inlineSuggestionTooltip,
+                    uiCallback);
             response.append(datasetIndex, Pair.create(dataset, inlineSuggestion));
         }
+
         return response;
     }
 
-    private static InlineSuggestion createInlineSuggestion(boolean isAugmented,
-            @NonNull Dataset dataset, int datasetIndex,
+    private static InlineSuggestion createInlineSuggestion(
+            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
+            @NonNull @InlineSuggestionInfo.Source String suggestionSource,
+            @NonNull @InlineSuggestionInfo.Type String suggestionType,
+            @NonNull Runnable onClickAction,
             @NonNull InlinePresentation inlinePresentation,
-            @NonNull BiConsumer<Dataset, Integer> onClickFactory,
-            @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId, int sessionId,
-            @NonNull Runnable onErrorCallback, @NonNull Consumer<IntentSender> intentSenderConsumer,
-            @Nullable IBinder hostInputToken,
-            int displayId) {
-        final String suggestionSource = isAugmented ? InlineSuggestionInfo.SOURCE_PLATFORM
-                : InlineSuggestionInfo.SOURCE_AUTOFILL;
-        final String suggestionType =
-                dataset.getAuthentication() == null ? InlineSuggestionInfo.TYPE_SUGGESTION
-                        : InlineSuggestionInfo.TYPE_ACTION;
+            @Nullable InlineSuggestion tooltip,
+            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
+
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(), suggestionSource,
                 inlinePresentation.getAutofillHints(), suggestionType,
-                inlinePresentation.isPinned());
-
-        final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
-                createInlineContentProvider(inlinePresentation,
-                        () -> onClickFactory.accept(dataset, datasetIndex), onErrorCallback,
-                        intentSenderConsumer, remoteRenderService, userId, sessionId,
-                        hostInputToken, displayId));
-
-        return inlineSuggestion;
-    }
-
-    private static InlineSuggestion createInlineAuthSuggestion(
-            @NonNull InlinePresentation inlinePresentation,
-            @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId, int sessionId,
-            @NonNull BiConsumer<Dataset, Integer> onClickFactory, @NonNull Runnable onErrorCallback,
-            @NonNull Consumer<IntentSender> intentSenderConsumer,
-            @Nullable IBinder hostInputToken, int displayId) {
-        final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
-                inlinePresentation.getInlinePresentationSpec(),
-                InlineSuggestionInfo.SOURCE_AUTOFILL, inlinePresentation.getAutofillHints(),
-                InlineSuggestionInfo.TYPE_ACTION, inlinePresentation.isPinned());
+                inlinePresentation.isPinned(), tooltip);
 
         return new InlineSuggestion(inlineSuggestionInfo,
-                createInlineContentProvider(inlinePresentation,
-                        () -> onClickFactory.accept(null,
-                                AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
-                        onErrorCallback, intentSenderConsumer, remoteRenderService, userId,
-                        sessionId, hostInputToken, displayId));
+                createInlineContentProvider(inlineFillUiInfo, inlinePresentation,
+                        onClickAction, uiCallback));
     }
 
     /**
@@ -216,25 +151,74 @@ final class InlineSuggestionFactory {
                 inlinePresentation.getInlinePresentationSpec().getMinSize(),
                 inlinePresentation.getInlinePresentationSpec().getMaxSize()).setStyle(
                 specFromHost.getStyle()).build();
+
         return new InlinePresentation(inlinePresentation.getSlice(), mergedInlinePresentation,
                 inlinePresentation.isPinned());
     }
 
+    // TODO(182306770): creates new class instead of the InlineSuggestion.
+    private static InlineSuggestion createInlineSuggestionTooltip(
+            @NonNull InlineSuggestionsRequest request,
+            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
+            String suggestionSource,
+            @NonNull InlinePresentation tooltipPresentation) {
+        if (tooltipPresentation == null) {
+            return null;
+        }
+
+        final InlinePresentationSpec spec = request.getInlineTooltipPresentationSpec();
+        InlinePresentationSpec mergedSpec;
+        if (spec == null) {
+            mergedSpec = tooltipPresentation.getInlinePresentationSpec();
+        } else {
+            mergedSpec = new InlinePresentationSpec.Builder(
+                    tooltipPresentation.getInlinePresentationSpec().getMinSize(),
+                    tooltipPresentation.getInlinePresentationSpec().getMaxSize()).setStyle(
+                    spec.getStyle()).build();
+        }
+
+        InlineFillUi.InlineSuggestionUiCallback uiCallback =
+                new InlineFillUi.InlineSuggestionUiCallback() {
+                    @Override
+                    public void autofill(Dataset dataset, int datasetIndex) {
+                        /* nothing */
+                    }
+
+                    @Override
+                    public void authenticate(int requestId, int datasetIndex) {
+                        /* nothing */
+                    }
+
+                    @Override
+                    public void startIntentSender(IntentSender intentSender) {
+                        /* nothing */
+                    }
+
+                    @Override
+                    public void onError() {
+                        Slog.w(TAG, "An error happened on the tooltip");
+                    }
+                };
+
+        InlinePresentation tooltipInline = new InlinePresentation(tooltipPresentation.getSlice(),
+                mergedSpec, false);
+        IInlineContentProvider tooltipContentProvider = createInlineContentProvider(
+                inlineFillUiInfo, tooltipInline, () -> { /* no operation */ }, uiCallback);
+        final InlineSuggestionInfo tooltipInlineSuggestionInfo = new InlineSuggestionInfo(
+                mergedSpec, suggestionSource, /* autofillHints */ null, TYPE_SUGGESTION,
+                        /* pinned */ false, /* tooltip */ null);
+        return new InlineSuggestion(tooltipInlineSuggestionInfo, tooltipContentProvider);
+    }
+
     private static IInlineContentProvider createInlineContentProvider(
+            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
             @NonNull InlinePresentation inlinePresentation, @Nullable Runnable onClickAction,
-            @NonNull Runnable onErrorCallback,
-            @NonNull Consumer<IntentSender> intentSenderConsumer,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId, int sessionId,
-            @Nullable IBinder hostInputToken,
-            int displayId) {
-        RemoteInlineSuggestionViewConnector
-                remoteInlineSuggestionViewConnector = new RemoteInlineSuggestionViewConnector(
-                remoteRenderService, userId, sessionId, inlinePresentation, hostInputToken,
-                displayId, onClickAction, onErrorCallback, intentSenderConsumer);
-        InlineContentProviderImpl inlineContentProvider = new InlineContentProviderImpl(
-                remoteInlineSuggestionViewConnector, null);
-        return inlineContentProvider;
+            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
+        RemoteInlineSuggestionViewConnector remoteInlineSuggestionViewConnector =
+                new RemoteInlineSuggestionViewConnector(inlineFillUiInfo, inlinePresentation,
+                        onClickAction, uiCallback);
+
+        return new InlineContentProviderImpl(remoteInlineSuggestionViewConnector, null);
     }
 
     private InlineSuggestionFactory() {

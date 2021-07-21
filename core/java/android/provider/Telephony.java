@@ -362,6 +362,18 @@ public final class Telephony {
 
         /**
          * Used to determine the currently configured default SMS package.
+         * <p>
+         * As of Android 11 apps will need specific permission to query other packages. To use
+         * this method an app must include in their AndroidManifest:
+         * <queries>
+         *   <intent>
+         *     <action android:name="android.provider.Telephony.SMS_DELIVER"/>
+         *   </intent>
+         * </queries>
+         * Which will allow them to query packages which declare intent filters that include
+         * the {@link android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION} intent.
+         * </p>
+         *
          * @param context context of the requesting application
          * @return package name for the default SMS package or null
          */
@@ -627,7 +639,7 @@ public final class Telephony {
              * @return the URI for the new message
              * @hide
              */
-            @UnsupportedAppUsage
+            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
             public static Uri addMessage(int subId, ContentResolver resolver,
                     String address, String body, String subject, Long date, boolean read) {
                 return addMessageToUri(subId, resolver, CONTENT_URI, address, body,
@@ -687,7 +699,7 @@ public final class Telephony {
              * @return the URI for the new message
              * @hide
              */
-            @UnsupportedAppUsage
+            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
             public static Uri addMessage(int subId, ContentResolver resolver,
                     String address, String body, String subject, Long date) {
                 return addMessageToUri(subId, resolver, CONTENT_URI, address, body,
@@ -734,7 +746,7 @@ public final class Telephony {
              * @return the URI for the new message
              * @hide
              */
-            @UnsupportedAppUsage
+            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
             public static Uri addMessage(int subId, ContentResolver resolver,
                     String address, String body, String subject, Long date) {
                 return addMessageToUri(subId, resolver, CONTENT_URI, address, body,
@@ -781,7 +793,7 @@ public final class Telephony {
              * @return the URI for the new message
              * @hide
              */
-            @UnsupportedAppUsage
+            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
             public static Uri addMessage(ContentResolver resolver,
                     String address, String body, String subject, Long date,
                     boolean deliveryReport, long threadId) {
@@ -1357,8 +1369,7 @@ public final class Telephony {
                 Object[] messages;
                 try {
                     messages = (Object[]) intent.getSerializableExtra("pdus");
-                }
-                catch (ClassCastException e) {
+                } catch (ClassCastException e) {
                     Rlog.e(TAG, "getMessagesFromIntent: " + e);
                     return null;
                 }
@@ -1370,9 +1381,12 @@ public final class Telephony {
 
                 String format = intent.getStringExtra("format");
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        SubscriptionManager.getDefaultSmsSubscriptionId());
-
-                Rlog.v(TAG, " getMessagesFromIntent sub_id : " + subId);
+                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                    Rlog.v(TAG, "getMessagesFromIntent with valid subId : " + subId);
+                } else {
+                    Rlog.v(TAG, "getMessagesFromIntent");
+                }
 
                 int pduCount = messages.length;
                 SmsMessage[] msgs = new SmsMessage[pduCount];
@@ -3946,8 +3960,7 @@ public final class Telephony {
 
         /**
          * The APN set id. When the user manually selects an APN or the framework sets an APN as
-         * preferred, all APNs with the same set id as the selected APN should be prioritized over
-         * APNs in other sets.
+         * preferred, the device can only use APNs with the same set id as the selected APN.
          * <p>Type: INTEGER</p>
          * @hide
          */
@@ -3955,14 +3968,22 @@ public final class Telephony {
         public static final String APN_SET_ID = "apn_set_id";
 
         /**
-         * Possible value for the {@link #APN_SET_ID} field. By default APNs will not belong to a
-         * set. If the user manually selects an APN without apn set id, there is no need to
-         * prioritize any specific APN set ids.
+         * Possible value for the {@link #APN_SET_ID} field. By default APNs are added to set 0.
          * <p>Type: INTEGER</p>
          * @hide
          */
         @SystemApi
         public static final int NO_APN_SET_ID = 0;
+
+        /**
+         * Possible value for the {@link #APN_SET_ID} field.
+         * APNs with MATCH_ALL_APN_SET_ID will be used regardless of any set ids of
+         * the selected APN.
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        @SystemApi
+        public static final int MATCH_ALL_APN_SET_ID = -1;
 
         /**
          * A unique carrier id associated with this APN
@@ -4324,11 +4345,13 @@ public final class Telephony {
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
-         * ETWS (Earthquake and Tsunami Warning System) primary message or not (ETWS alerts only).
+         * ETWS (Earthquake and Tsunami Warning System, Japan only) primary message or not. The
+         * primary message is sent as soon as the emergency occurs. It does not provide any
+         * information except the emergency type (e.g. earthquake, tsunami). The ETWS secondary
+         * message is sent afterwards and provides the details of the emergency.
+         *
          * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
          * <P>Type: BOOLEAN</P>
-         *
-         * @hide        // TODO: Unhide this for S.
          */
         public static final String ETWS_IS_PRIMARY = "etws_is_primary";
 
@@ -4548,6 +4571,15 @@ public final class Telephony {
         public static final String VOICE_REG_STATE = "voice_reg_state";
 
         /**
+         * An integer value indicating the current data service state.
+         * <p>
+         * Valid values: {@link ServiceState#STATE_IN_SERVICE},
+         * {@link ServiceState#STATE_OUT_OF_SERVICE}, {@link ServiceState#STATE_EMERGENCY_ONLY},
+         * {@link ServiceState#STATE_POWER_OFF}.
+         */
+        public static final String DATA_REG_STATE = "data_reg_state";
+
+        /**
          * The current registered operator numeric id.
          * <p>
          * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
@@ -4563,6 +4595,24 @@ public final class Telephony {
          * This is the same as {@link ServiceState#getIsManualSelection()}.
          */
         public static final String IS_MANUAL_NETWORK_SELECTION = "is_manual_network_selection";
+
+        /**
+         * The current data network type.
+         * <p>
+         * This is the same as {@link TelephonyManager#getDataNetworkType()}.
+         */
+        public static final String DATA_NETWORK_TYPE = "data_network_type";
+
+        /**
+         * An integer value indicating the current duplex mode if the radio technology is LTE,
+         * LTE-CA or NR.
+         * <p>
+         * Valid values: {@link ServiceState#DUPLEX_MODE_UNKNOWN},
+         * {@link ServiceState#DUPLEX_MODE_FDD}, {@link ServiceState#DUPLEX_MODE_TDD}.
+         * <p>
+         * This is the same as {@link ServiceState#getDuplexMode()}.
+         */
+        public static final String DUPLEX_MODE = "duplex_mode";
     }
 
     /**
@@ -5158,6 +5208,14 @@ public final class Telephony {
         public static final String COLUMN_IMS_RCS_UCE_ENABLED = "ims_rcs_uce_enabled";
 
         /**
+         * TelephonyProvider column name for determining if the user has enabled cross SIM calling
+         * for this subscription.
+         *
+         * @hide
+         */
+        public static final String COLUMN_CROSS_SIM_CALLING_ENABLED = "cross_sim_calling_enabled";
+
+        /**
          * TelephonyProvider column name for whether a subscription is opportunistic, that is,
          * whether the network it connects to is limited in functionality or coverage.
          * For example, CBRS.
@@ -5261,5 +5319,51 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
+
+        /**
+         * TelephonyProvider column name for allowed network types with all of reasons. Indicate
+         * which network types are allowed for
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER},
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER},
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER},
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}.
+         * <P>Type: TEXT </P>
+         *
+         * @hide
+         */
+        public static final String COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS =
+                "allowed_network_types_for_reasons";
+
+        /**
+         * TelephonyProvider column name for RCS configuration.
+         * <p>TYPE: BLOB
+         *
+         * @hide
+         */
+        public static final String COLUMN_RCS_CONFIG = "rcs_config";
+
+        /**
+         * TelephonyProvider column name for VoIMS provisioning. Default is 0.
+         * <P>Type: INTEGER </P>
+         *
+         * @hide
+         */
+        public static final String COLUMN_VOIMS_OPT_IN_STATUS = "voims_opt_in_status";
+
+        /**
+         * TelephonyProvider column name for device to device sharing status.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING = "d2d_sharing_status";
+
+        /**
+         * TelephonyProvider column name for information selected contacts that allow device to
+         * device sharing.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING_SELECTED_CONTACTS =
+                "d2d_sharing_contacts";
     }
 }

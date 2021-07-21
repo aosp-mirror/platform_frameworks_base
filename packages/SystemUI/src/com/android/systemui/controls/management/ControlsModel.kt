@@ -114,11 +114,28 @@ data class ControlStatusWrapper(
     val controlStatus: ControlStatus
 ) : ElementWrapper(), ControlInterface by controlStatus
 
+@Suppress("UNUSED_PARAMETER") // Use function instead of lambda for compile time alloc
+private fun nullIconGetter(_a: ComponentName, _b: String): Icon? = null
+
 data class ControlInfoWrapper(
     override val component: ComponentName,
     val controlInfo: ControlInfo,
     override var favorite: Boolean
 ) : ElementWrapper(), ControlInterface {
+
+    var customIconGetter: (ComponentName, String) -> Icon? = ::nullIconGetter
+        private set
+
+    // Separate constructor so the getter is not used in auto-generated methods
+    constructor(
+        component: ComponentName,
+        controlInfo: ControlInfo,
+        favorite: Boolean,
+        customIconGetter: (ComponentName, String) -> Icon?
+    ): this(component, controlInfo, favorite) {
+        this.customIconGetter = customIconGetter
+    }
+
     override val controlId: String
         get() = controlInfo.controlId
     override val title: CharSequence
@@ -128,8 +145,7 @@ data class ControlInfoWrapper(
     override val deviceType: Int
         get() = controlInfo.deviceType
     override val customIcon: Icon?
-        // Will need to address to support for edit activity
-        get() = null
+        get() = customIconGetter(component, controlId)
 }
 
 data class DividerWrapper(

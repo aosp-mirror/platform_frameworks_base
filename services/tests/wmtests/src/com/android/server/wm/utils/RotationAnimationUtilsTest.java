@@ -23,9 +23,9 @@ import static org.junit.Assert.assertEquals;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.hardware.HardwareBuffer;
 import android.view.Surface;
 import android.platform.test.annotations.Presubmit;
 
@@ -51,24 +51,24 @@ public class RotationAnimationUtilsTest {
     @Test
     public void blackLuma() {
         Bitmap swBitmap = createBitmap(0);
-        GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
+        HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
         assertEquals(0, borderLuma, 0);
     }
 
     @Test
     public void whiteLuma() {
         Bitmap swBitmap = createBitmap(1);
-        GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
+        HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
     @Test
     public void unevenBitmapDimens() {
         Bitmap swBitmap = createBitmap(1, BITMAP_WIDTH + 1, BITMAP_HEIGHT + 1);
-        GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
+        HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
@@ -76,8 +76,8 @@ public class RotationAnimationUtilsTest {
     public void whiteImageBlackBorderLuma() {
         Bitmap swBitmap = createBitmap(1);
         setBorderLuma(swBitmap, 0);
-        GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
+        HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
         assertEquals(0, borderLuma, 0);
     }
 
@@ -85,8 +85,8 @@ public class RotationAnimationUtilsTest {
     public void blackImageWhiteBorderLuma() {
         Bitmap swBitmap = createBitmap(0);
         setBorderLuma(swBitmap, 1);
-        GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
+        HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
@@ -146,9 +146,9 @@ public class RotationAnimationUtilsTest {
         return bitmap;
     }
 
-    private GraphicBuffer swBitmapToGraphicsBuffer(Bitmap swBitmap) {
+    private HardwareBuffer swBitmapToHardwareBuffer(Bitmap swBitmap) {
         Bitmap hwBitmap = swBitmap.copy(Bitmap.Config.HARDWARE, false);
-        return hwBitmap.createGraphicBufferHandle();
+        return hwBitmap.getHardwareBuffer();
     }
 
     private void setBorderLuma(Bitmap swBitmap, float luma) {

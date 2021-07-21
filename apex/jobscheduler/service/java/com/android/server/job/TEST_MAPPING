@@ -40,6 +40,13 @@
             "options": [
                 {"include-filter": "com.android.server.job"}
             ]
+        },
+        {
+            "name": "CtsHostsideNetworkTests",
+            "options": [
+                {"include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests#testMeteredNetworkAccess_expeditedJob"},
+                {"include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests#testNonMeteredNetworkAccess_expeditedJob"}
+            ]
         }
     ]
 }

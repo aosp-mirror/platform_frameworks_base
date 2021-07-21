@@ -18,35 +18,62 @@ package android.hardware.lights;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 /**
  * Encapsulates a request to modify the state of multiple lights.
  *
- * @hide
  */
-@SystemApi
 public final class LightsRequest {
 
     /** Visible to {@link LightsManager.Session}. */
-    final int[] mLightIds;
-
-    /** Visible to {@link LightsManager.Session}. */
-    final LightState[] mLightStates;
+    final Map<Light, LightState> mRequests = new HashMap<>();
+    final List<Integer> mLightIds = new ArrayList<>();
+    final List<LightState> mLightStates = new ArrayList<>();
 
     /**
      * Can only be constructed via {@link LightsRequest.Builder#build()}.
      */
-    private LightsRequest(SparseArray<LightState> changes) {
-        final int n = changes.size();
-        mLightIds = new int[n];
-        mLightStates = new LightState[n];
-        for (int i = 0; i < n; i++) {
-            mLightIds[i] = changes.keyAt(i);
-            mLightStates[i] = changes.valueAt(i);
+    private LightsRequest(Map<Light, LightState> requests) {
+        mRequests.putAll(requests);
+        List<Light> lights = new ArrayList<Light>(mRequests.keySet());
+        for (int i = 0; i < lights.size(); i++) {
+            final Light light = lights.get(i);
+            mLightIds.add(i, light.getId());
+            mLightStates.add(i, mRequests.get(light));
         }
+    }
+
+    /**
+     * Get a list of Light as ids.
+     *
+     * @return List of light ids in the request.
+     */
+    public @NonNull List<Integer> getLights() {
+        return mLightIds;
+    }
+
+    /**
+     * Get a list of LightState. The states will be returned in same order as the light ids
+     * returned by {@link #getLights()}.
+     *
+     * @return List of light states
+     */
+    public @NonNull List<LightState> getLightStates() {
+        return mLightStates;
+    }
+
+    /**
+     * Get a map of lights and states. The map will contain all the lights as keys and
+     * the corresponding LightState requested as values.
+     */
+    public @NonNull Map<Light, LightState> getLightsAndStates() {
+        return mRequests;
     }
 
     /**
@@ -54,19 +81,32 @@ public final class LightsRequest {
      */
     public static final class Builder {
 
-        private final SparseArray<LightState> mChanges = new SparseArray<>();
-
+        final Map<Light, LightState> mChanges = new HashMap<>();
         /**
          * Overrides the color and intensity of a given light.
          *
          * @param light the light to modify
          * @param state the desired color and intensity of the light
          */
-        public @NonNull Builder setLight(@NonNull Light light, @NonNull LightState state) {
+        public @NonNull Builder addLight(@NonNull Light light, @NonNull LightState state) {
             Preconditions.checkNotNull(light);
             Preconditions.checkNotNull(state);
-            mChanges.put(light.getId(), state);
+            mChanges.put(light, state);
             return this;
+        }
+
+        /**
+         * Overrides the color and intensity of a given light.
+         *
+         * @param light the light to modify
+         * @param state the desired color and intensity of the light         *
+         * @deprecated Use {@link #addLight(Light, LightState)} instead.
+         * @hide
+         */
+        @SystemApi
+        @Deprecated
+        public @NonNull Builder setLight(@NonNull Light light, @NonNull LightState state) {
+            return addLight(light, state);
         }
 
         /**
@@ -76,7 +116,7 @@ public final class LightsRequest {
          */
         public @NonNull Builder clearLight(@NonNull Light light) {
             Preconditions.checkNotNull(light);
-            mChanges.put(light.getId(), null);
+            mChanges.put(light, null);
             return this;
         }
 

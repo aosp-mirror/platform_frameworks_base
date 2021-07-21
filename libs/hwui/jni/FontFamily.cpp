@@ -17,15 +17,16 @@
 #undef LOG_TAG
 #define LOG_TAG "Minikin"
 
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include "FontUtils.h"
+#include "GraphicsJNI.h"
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkRefCnt.h"
 #include "SkTypeface.h"
-#include "GraphicsJNI.h"
-#include <nativehelper/ScopedPrimitiveArray.h>
-#include <nativehelper/ScopedUtfChars.h>
 #include "Utils.h"
-#include "FontUtils.h"
+#include "fonts/Font.h"
 
 #include <hwui/MinikinSkia.h>
 #include <hwui/Typeface.h>
@@ -35,6 +36,12 @@
 
 #include <memory>
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// The following JNI methods are kept only for compatibility reasons due to hidden API accesses.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace android {
 
 struct NativeFamilyBuilder {
@@ -42,7 +49,7 @@ struct NativeFamilyBuilder {
         : langId(langId), variant(static_cast<minikin::FamilyVariant>(variant)) {}
     uint32_t langId;
     minikin::FamilyVariant variant;
-    std::vector<minikin::Font> fonts;
+    std::vector<std::shared_ptr<minikin::Font>> fonts;
     std::vector<minikin::FontVariation> axes;
 };
 
@@ -104,29 +111,29 @@ static jlong FontFamily_getFamilyReleaseFunc(CRITICAL_JNI_PARAMS) {
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
         jint weight, jint italic) {
-    FatVector<SkFontArguments::Axis, 2> skiaAxes;
+    FatVector<SkFontArguments::VariationPosition::Coordinate, 2> skVariation;
     for (const auto& axis : builder->axes) {
-        skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
+        skVariation.push_back({axis.axisTag, axis.value});
     }
 
     const size_t fontSize = data->size();
     const void* fontPtr = data->data();
     std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
-    SkFontArguments params;
-    params.setCollectionIndex(ttcIndex);
-    params.setAxes(skiaAxes.data(), skiaAxes.size());
+    SkFontArguments args;
+    args.setCollectionIndex(ttcIndex);
+    args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
 
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), params));
+    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");
         builder->axes.clear();
         return false;
     }
     std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, "", ttcIndex,
-                    builder->axes);
+            std::make_shared<MinikinFontSkia>(std::move(face), fonts::getNewSourceId(), fontPtr,
+                                              fontSize, "", ttcIndex, builder->axes);
     minikin::Font::Builder fontBuilder(minikinFont);
 
     if (weight != RESOLVE_BY_FONT_TABLE) {

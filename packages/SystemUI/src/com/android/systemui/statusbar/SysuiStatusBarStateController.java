@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.view.View;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -58,7 +59,33 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
      * @param state see {@link StatusBarState} for valid options
      * @return {@code true} if the state changed, else {@code false}
      */
-    boolean setState(int state);
+    default boolean setState(int state) {
+        return setState(state, false /* force */);
+    }
+
+    /**
+     * Update the status bar state
+     * @param state see {@link StatusBarState} for valid options
+     * @param force whether to set the state even if it's the same as the current state. This will
+     *              dispatch the state to all StatusBarStateListeners, ensuring that all listening
+     *              components are reset to this state.
+     * @return {@code true} if the state was changed or set forcefully
+     */
+    boolean setState(int state, boolean force);
+
+    /**
+     * Provides a hint that the status bar has started to transition to another
+     * {@link StatusBarState}. This suggests that a matching call to setState() with the same value
+     * will happen in the near future, although that may not happen if the animation is canceled,
+     * etc.
+     */
+    void setUpcomingState(int state);
+
+    /**
+     * If the status bar is in the process of transitioning to a new state, returns that state.
+     * Otherwise, returns the current state.
+     */
+    int getCurrentOrUpcomingState();
 
     /**
      * Update the dozing state from {@link StatusBar}'s perspective
@@ -74,6 +101,23 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
      * @param animated If change should be animated or not. This will cancel current animations.
      */
     void setDozeAmount(float dozeAmount, boolean animated);
+
+    /**
+     * Changes the current doze amount, also starts the
+     * {@link com.android.internal.jank.InteractionJankMonitor InteractionJankMonitor} as possible.
+     *
+     * @param view An attached view, which will be used by InteractionJankMonitor.
+     * @param dozeAmount New doze/dark amount.
+     * @param animated If change should be animated or not. This will cancel current animations.
+     */
+    void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated);
+
+    /**
+     * Update the expanded state from {@link StatusBar}'s perspective
+     * @param expanded are we expanded?
+     * @return {@code true} if the state changed, else {@code false}
+     */
+    boolean setPanelExpanded(boolean expanded);
 
     /**
      * Sets whether to leave status bar open when hiding keyguard
@@ -113,7 +157,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     /**
      * Set the fullscreen state
      */
-    void setFullscreenState(boolean isFullscreen, boolean isImmersive);
+    void setFullscreenState(boolean isFullscreen);
 
     /**
      * Set pulsing

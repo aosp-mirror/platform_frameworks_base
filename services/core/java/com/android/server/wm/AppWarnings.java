@@ -27,18 +27,16 @@ import android.os.Message;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
-
-import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -477,8 +475,7 @@ class AppWarnings {
         try {
             fos = mConfigFile.startWrite();
 
-            final XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "packages");
@@ -491,7 +488,7 @@ class AppWarnings {
                 }
                 out.startTag(null, "package");
                 out.attribute(null, "name", pkg);
-                out.attribute(null, "flags", Integer.toString(mode));
+                out.attributeInt(null, "flags", mode);
                 out.endTag(null, "package");
             }
 
@@ -519,8 +516,7 @@ class AppWarnings {
         try {
             fis = mConfigFile.openRead();
 
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
 
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
@@ -541,15 +537,7 @@ class AppWarnings {
                             if ("package".equals(tagName)) {
                                 final String name = parser.getAttributeValue(null, "name");
                                 if (name != null) {
-                                    final String flags = parser.getAttributeValue(
-                                            null, "flags");
-                                    int flagsInt = 0;
-                                    if (flags != null) {
-                                        try {
-                                            flagsInt = Integer.parseInt(flags);
-                                        } catch (NumberFormatException e) {
-                                        }
-                                    }
+                                    int flagsInt = parser.getAttributeInt(null, "flags", 0);
                                     mPackageFlags.put(name, flagsInt);
                                 }
                             }

@@ -16,18 +16,20 @@
 
 package com.android.server.biometrics;
 
+import android.hardware.biometrics.BiometricManager;
+
 /**
  * Parsed sensor config. See core/res/res/values/config.xml config_biometric_sensors
  */
-class SensorConfig {
-    final int mId;
-    final int mModality;
-    final int mStrength;
+public class SensorConfig {
+    public final int id;
+    final int modality;
+    @BiometricManager.Authenticators.Types public final int strength;
 
     public SensorConfig(String config) {
         String[] elems = config.split(":");
-        mId = Integer.parseInt(elems[0]);
-        mModality = Integer.parseInt(elems[1]);
-        mStrength = Integer.parseInt(elems[2]);
+        id = Integer.parseInt(elems[0]);
+        modality = Integer.parseInt(elems[1]);
+        strength = Integer.parseInt(elems[2]);
     }
 }

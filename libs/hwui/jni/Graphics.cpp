@@ -9,6 +9,7 @@
 #include "GraphicsJNI.h"
 
 #include "SkCanvas.h"
+#include "SkFontMetrics.h"
 #include "SkMath.h"
 #include "SkRegion.h"
 #include <cutils/ashmem.h>
@@ -227,6 +228,20 @@ static jfieldID gColorSpace_Named_LinearExtendedSRGBFieldID;
 
 static jclass gTransferParameters_class;
 static jmethodID gTransferParameters_constructorMethodID;
+
+static jclass   gFontMetrics_class;
+static jfieldID gFontMetrics_top;
+static jfieldID gFontMetrics_ascent;
+static jfieldID gFontMetrics_descent;
+static jfieldID gFontMetrics_bottom;
+static jfieldID gFontMetrics_leading;
+
+static jclass   gFontMetricsInt_class;
+static jfieldID gFontMetricsInt_top;
+static jfieldID gFontMetricsInt_ascent;
+static jfieldID gFontMetricsInt_descent;
+static jfieldID gFontMetricsInt_bottom;
+static jfieldID gFontMetricsInt_leading;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -468,9 +483,35 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
     return r;
 }
 
+void GraphicsJNI::set_metrics(JNIEnv* env, jobject metrics, const SkFontMetrics& skmetrics) {
+    if (metrics == nullptr) return;
+    SkASSERT(env->IsInstanceOf(metrics, gFontMetrics_class));
+    env->SetFloatField(metrics, gFontMetrics_top, SkScalarToFloat(skmetrics.fTop));
+    env->SetFloatField(metrics, gFontMetrics_ascent, SkScalarToFloat(skmetrics.fAscent));
+    env->SetFloatField(metrics, gFontMetrics_descent, SkScalarToFloat(skmetrics.fDescent));
+    env->SetFloatField(metrics, gFontMetrics_bottom, SkScalarToFloat(skmetrics.fBottom));
+    env->SetFloatField(metrics, gFontMetrics_leading, SkScalarToFloat(skmetrics.fLeading));
+}
+
+int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetrics& skmetrics) {
+    int ascent = SkScalarRoundToInt(skmetrics.fAscent);
+    int descent = SkScalarRoundToInt(skmetrics.fDescent);
+    int leading = SkScalarRoundToInt(skmetrics.fLeading);
+
+    if (metrics) {
+        SkASSERT(env->IsInstanceOf(metrics, gFontMetricsInt_class));
+        env->SetIntField(metrics, gFontMetricsInt_top, SkScalarFloorToInt(skmetrics.fTop));
+        env->SetIntField(metrics, gFontMetricsInt_ascent, ascent);
+        env->SetIntField(metrics, gFontMetricsInt_descent, descent);
+        env->SetIntField(metrics, gFontMetricsInt_bottom, SkScalarCeilToInt(skmetrics.fBottom));
+        env->SetIntField(metrics, gFontMetricsInt_leading, leading);
+    }
+    return descent - ascent + leading;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
+jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, skia::BitmapRegionDecoder* bitmap)
 {
     ALOG_ASSERT(bitmap != NULL);
 
@@ -763,6 +804,24 @@ int register_android_graphics_Graphics(JNIEnv* env)
             "android/graphics/ColorSpace$Rgb$TransferParameters"));
     gTransferParameters_constructorMethodID = GetMethodIDOrDie(env, gTransferParameters_class,
             "<init>", "(DDDDDDD)V");
+
+    gFontMetrics_class = FindClassOrDie(env, "android/graphics/Paint$FontMetrics");
+    gFontMetrics_class = MakeGlobalRefOrDie(env, gFontMetrics_class);
+
+    gFontMetrics_top = GetFieldIDOrDie(env, gFontMetrics_class, "top", "F");
+    gFontMetrics_ascent = GetFieldIDOrDie(env, gFontMetrics_class, "ascent", "F");
+    gFontMetrics_descent = GetFieldIDOrDie(env, gFontMetrics_class, "descent", "F");
+    gFontMetrics_bottom = GetFieldIDOrDie(env, gFontMetrics_class, "bottom", "F");
+    gFontMetrics_leading = GetFieldIDOrDie(env, gFontMetrics_class, "leading", "F");
+
+    gFontMetricsInt_class = FindClassOrDie(env, "android/graphics/Paint$FontMetricsInt");
+    gFontMetricsInt_class = MakeGlobalRefOrDie(env, gFontMetricsInt_class);
+
+    gFontMetricsInt_top = GetFieldIDOrDie(env, gFontMetricsInt_class, "top", "I");
+    gFontMetricsInt_ascent = GetFieldIDOrDie(env, gFontMetricsInt_class, "ascent", "I");
+    gFontMetricsInt_descent = GetFieldIDOrDie(env, gFontMetricsInt_class, "descent", "I");
+    gFontMetricsInt_bottom = GetFieldIDOrDie(env, gFontMetricsInt_class, "bottom", "I");
+    gFontMetricsInt_leading = GetFieldIDOrDie(env, gFontMetricsInt_class, "leading", "I");
 
     return 0;
 }

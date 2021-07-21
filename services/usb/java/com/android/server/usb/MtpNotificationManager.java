@@ -64,12 +64,13 @@ class MtpNotificationManager {
 
     private final Context mContext;
     private final OnOpenInAppListener mListener;
+    private final Receiver mReceiver;
 
     MtpNotificationManager(Context context, OnOpenInAppListener listener) {
         mContext = context;
         mListener = listener;
-        final Receiver receiver = new Receiver();
-        context.registerReceiver(receiver, new IntentFilter(ACTION_OPEN_IN_APPS));
+        mReceiver = new Receiver();
+        context.registerReceiver(mReceiver, new IntentFilter(ACTION_OPEN_IN_APPS));
     }
 
     void showNotification(UsbDevice device) {
@@ -90,11 +91,12 @@ class MtpNotificationManager {
         intent.putExtra(UsbManager.EXTRA_DEVICE, device);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
 
+        // Simple notification clicks are immutable
         final PendingIntent openIntent = PendingIntent.getBroadcastAsUser(
                 mContext,
                 device.getDeviceId(),
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                 UserHandle.SYSTEM);
         builder.setContentIntent(openIntent);
 
@@ -153,5 +155,9 @@ class MtpNotificationManager {
 
     static interface OnOpenInAppListener {
         void onOpenInApp(UsbDevice device);
+    }
+
+    public void unregister() {
+        mContext.unregisterReceiver(mReceiver);
     }
 }

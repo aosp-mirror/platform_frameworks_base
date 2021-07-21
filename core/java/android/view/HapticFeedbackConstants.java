@@ -129,6 +129,12 @@ public class HapticFeedbackConstants {
     public static final int SAFE_MODE_ENABLED = 10001;
 
     /**
+     * Invocation of the voice assistant via hardware button.
+     * @hide
+     */
+    public static final int ASSISTANT_BUTTON = 10002;
+
+    /**
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the setting in the
      * view for whether to perform haptic feedback, do it always.

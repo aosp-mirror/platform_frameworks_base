@@ -108,7 +108,7 @@ public class BatterySaverUtils {
      * - If it's the first time and needFirstTimeWarning, show the first time dialog.
      * - If it's 4th time through 8th time, show the schedule suggestion notification.
      *
-     * @param enable true to disable battery saver.
+     * @param enable true to enable battery saver.
      *
      * @return true if the request succeeded.
      */

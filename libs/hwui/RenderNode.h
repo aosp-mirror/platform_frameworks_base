@@ -35,10 +35,12 @@
 #include "DisplayList.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
+#include "pipeline/skia/HolePunch.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaLayer.h"
 
 #include <vector>
+#include <pipeline/skia/StretchMask.h>
 
 class SkBitmap;
 class SkPaint;
@@ -94,22 +96,23 @@ public:
         DISPLAY_LIST = 1 << 14,
     };
 
-    ANDROID_API RenderNode();
-    ANDROID_API virtual ~RenderNode();
+    RenderNode();
+    virtual ~RenderNode();
 
     // See flags defined in DisplayList.java
     enum ReplayFlag { kReplayFlag_ClipChildren = 0x1 };
 
-    ANDROID_API void setStagingDisplayList(DisplayList* newData);
+    void setStagingDisplayList(DisplayList&& newData);
+    void discardStagingDisplayList();
 
-    ANDROID_API void output();
-    ANDROID_API int getUsageSize();
-    ANDROID_API int getAllocatedSize();
+    void output();
+    int getUsageSize();
+    int getAllocatedSize();
 
-    bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
+    bool isRenderable() const { return mDisplayList.hasContent(); }
 
     bool hasProjectionReceiver() const {
-        return mDisplayList && mDisplayList->containsProjectionReceiver();
+        return mDisplayList.containsProjectionReceiver();
     }
 
     const char* getName() const { return mName.string(); }
@@ -124,6 +127,8 @@ public:
             }
         }
     }
+
+    StretchMask& getStretchMask() { return mStretchMask; }
 
     VirtualLightRefBase* getUserContext() const { return mUserContext.get(); }
 
@@ -149,12 +154,12 @@ public:
 
     int getHeight() const { return properties().getHeight(); }
 
-    ANDROID_API virtual void prepareTree(TreeInfo& info);
+    virtual void prepareTree(TreeInfo& info);
     void destroyHardwareResources(TreeInfo* info = nullptr);
     void destroyLayers();
 
     // UI thread only!
-    ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
+    void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
     void removeAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
     // This can only happen during pushStaging()
@@ -168,18 +173,20 @@ public:
 
     bool nothingToDraw() const {
         const Outline& outline = properties().getOutline();
-        return mDisplayList == nullptr || properties().getAlpha() <= 0 ||
+        return !mDisplayList.isValid() || properties().getAlpha() <= 0 ||
                (outline.getShouldClip() && outline.isEmpty()) || properties().getScaleX() == 0 ||
                properties().getScaleY() == 0;
     }
 
-    const DisplayList* getDisplayList() const { return mDisplayList; }
+    const DisplayList& getDisplayList() const { return mDisplayList; }
+    // TODO: can this be cleaned up?
+    DisplayList& getDisplayList() { return mDisplayList; }
 
     // Note: The position callbacks are relying on the listener using
     // the frameNumber to appropriately batch/synchronize these transactions.
     // There is no other filtering/batching to ensure that only the "final"
     // state called once per frame.
-    class ANDROID_API PositionListener : public VirtualLightRefBase {
+    class PositionListener : public VirtualLightRefBase {
     public:
         virtual ~PositionListener() {}
         // Called when the RenderNode's position changes
@@ -190,14 +197,14 @@ public:
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) = 0;
     };
 
-    ANDROID_API void setPositionListener(PositionListener* listener) {
+    void setPositionListener(PositionListener* listener) {
         mStagingPositionListener = listener;
         mPositionListenerDirty = true;
     }
 
     // This is only modified in MODE_FULL, so it can be safely accessed
     // on the UI thread.
-    ANDROID_API bool hasParents() { return mParentCount; }
+    bool hasParents() { return mParentCount; }
 
     void onRemovedFromTree(TreeInfo* info);
 
@@ -252,8 +259,8 @@ private:
 
     bool mNeedsDisplayListSync;
     // WARNING: Do not delete this directly, you must go through deleteDisplayList()!
-    DisplayList* mDisplayList;
-    DisplayList* mStagingDisplayList;
+    DisplayList mDisplayList;
+    DisplayList mStagingDisplayList;
 
     int64_t mDamageGenerationId;
 
@@ -281,6 +288,9 @@ private:
 
     UsageHint mUsageHint = UsageHint::Unknown;
 
+    bool mHasHolePunches;
+    StretchMask mStretchMask;
+
     // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:
     /**
@@ -290,6 +300,8 @@ public:
     std::unique_ptr<skiapipeline::SkiaDisplayList> detachAvailableList() {
         return std::move(mAvailableDisplayList);
     }
+
+    bool hasHolePunches() { return mHasHolePunches; }
 
     /**
      * Attach unused displayList to this node for potential future reuse.
@@ -318,6 +330,13 @@ public:
         } else {
             mSkiaLayer.reset();
         }
+
+        mProperties.mutateLayerProperties().mutableStretchEffect().clear();
+        mStretchMask.clear();
+        // Clear out the previous snapshot and the image filter the previous
+        // snapshot was created with whenever the layer changes.
+        mSnapshotResult.snapshot = nullptr;
+        mTargetImageFilter = nullptr;
     }
 
     /**
@@ -332,6 +351,16 @@ public:
     SkSurface* getLayerSurface() const {
         return mSkiaLayer.get() ? mSkiaLayer->layerSurface.get() : nullptr;
     }
+
+    struct SnapshotResult {
+        sk_sp<SkImage> snapshot;
+        SkIRect outSubset;
+        SkIPoint outOffset;
+    };
+
+    std::optional<SnapshotResult> updateSnapshotIfRequired(GrRecordingContext* context,
+                                            const SkImageFilter* imageFilter,
+                                            const SkIRect& clipBounds);
 
     skiapipeline::SkiaLayer* getSkiaLayer() const { return mSkiaLayer.get(); }
 
@@ -362,6 +391,22 @@ private:
      * when it has been set to draw as a LayerType::RenderLayer.
      */
     std::unique_ptr<skiapipeline::SkiaLayer> mSkiaLayer;
+
+    /**
+     * SkImageFilter used to create the mSnapshotResult
+     */
+    sk_sp<SkImageFilter> mTargetImageFilter;
+
+    /**
+     * Clip bounds used to create the mSnapshotResult
+     */
+    SkIRect mImageFilterClipBounds;
+
+    /**
+     * Result of the most recent snapshot with additional metadata used to
+     * determine how to draw the contents
+     */
+    SnapshotResult mSnapshotResult;
 
     struct ClippedOutlineCache {
         // keys

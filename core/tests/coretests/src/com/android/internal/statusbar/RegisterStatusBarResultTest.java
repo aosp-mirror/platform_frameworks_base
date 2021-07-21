@@ -16,6 +16,8 @@
 
 package com.android.internal.statusbar;
 
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Binder;
@@ -56,8 +58,8 @@ public class RegisterStatusBarResultTest {
                 0x20 /* disabledFlags2 */,
                 new Binder() /* imeToken */,
                 true /* navbarColorManagedByIme */,
+                BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
                 true /* appFullscreen */,
-                true /* appImmersive */,
                 new int[0] /* transientBarTypes */);
 
         final RegisterStatusBarResult copy = clone(original);
@@ -74,10 +76,10 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeBackDisposition).isEqualTo(original.mImeBackDisposition);
         assertThat(copy.mShowImeSwitcher).isEqualTo(original.mShowImeSwitcher);
         assertThat(copy.mDisabledFlags2).isEqualTo(original.mDisabledFlags2);
-        assertThat(copy.mImeToken).isSameAs(original.mImeToken);
+        assertThat(copy.mImeToken).isSameInstanceAs(original.mImeToken);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
+        assertThat(copy.mBehavior).isEqualTo(original.mBehavior);
         assertThat(copy.mAppFullscreen).isEqualTo(original.mAppFullscreen);
-        assertThat(copy.mAppImmersive).isEqualTo(original.mAppImmersive);
         assertThat(copy.mTransientBarTypes).isEqualTo(original.mTransientBarTypes);
     }
 

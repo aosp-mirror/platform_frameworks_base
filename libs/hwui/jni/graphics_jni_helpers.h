@@ -18,7 +18,7 @@
 #define GRAPHICS_JNI_HELPERS
 
 #include <log/log.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/scoped_local_ref.h>
 #include <nativehelper/scoped_utf_chars.h>
 #include <string>

@@ -200,6 +200,9 @@ public final class NsdManager {
     public static final int RESOLVE_SERVICE_SUCCEEDED               = BASE + 20;
 
     /** @hide */
+    public static final int DAEMON_CLEANUP                          = BASE + 21;
+
+    /** @hide */
     public static final int ENABLE                                  = BASE + 24;
     /** @hide */
     public static final int DISABLE                                 = BASE + 25;

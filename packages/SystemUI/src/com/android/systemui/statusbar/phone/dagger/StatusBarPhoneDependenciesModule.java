@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.StatusBar;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -34,7 +33,7 @@ import dagger.Provides;
 public interface StatusBarPhoneDependenciesModule {
 
     /** */
-    @Singleton
+    @SysUISingleton
     @Provides
     static NotificationGroupAlertTransferHelper provideNotificationGroupAlertTransferHelper(
             RowContentBindStage bindStage) {

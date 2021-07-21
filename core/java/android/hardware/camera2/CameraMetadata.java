@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
@@ -109,6 +110,15 @@ public abstract class CameraMetadata<TKey> {
         } else {
             return mNativeInstance.getMetadataPtr();
         }
+    }
+
+    /**
+     * Retrieves the CameraMetadataNative instance.
+     *
+     * @hide
+     */
+    public CameraMetadataNative getNativeMetadata() {
+        return mNativeInstance;
     }
 
     /**
@@ -577,7 +587,7 @@ public abstract class CameraMetadata<TKey> {
      *   that is, {@link android.graphics.ImageFormat#PRIVATE } is included in the lists of
      *   formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
      * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
-     *   returns non empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
+     *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
      * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(ImageFormat.PRIVATE)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(ImageFormat.PRIVATE)}</li>
      * <li>Using {@link android.graphics.ImageFormat#PRIVATE } does not cause a frame rate drop
      *   relative to the sensor's maximum capture rate (at that resolution).</li>
@@ -981,13 +991,27 @@ public abstract class CameraMetadata<TKey> {
      * camera's crop region is set to maximum size, the FOV of the physical streams for the
      * ultrawide lens will be the same as the logical stream, by making the crop region
      * smaller than its active array size to compensate for the smaller focal length.</p>
-     * <p>Even if the underlying physical cameras have different RAW characteristics (such as
-     * size or CFA pattern), a logical camera can still advertise RAW capability. In this
-     * case, when the application configures a RAW stream, the camera device will make sure
-     * the active physical camera will remain active to ensure consistent RAW output
-     * behavior, and not switch to other physical cameras.</p>
+     * <p>There are two ways for the application to capture RAW images from a logical camera
+     * with RAW capability:</p>
+     * <ul>
+     * <li>Because the underlying physical cameras may have different RAW capabilities (such
+     * as resolution or CFA pattern), to maintain backward compatibility, when a RAW stream
+     * is configured, the camera device makes sure the default active physical camera remains
+     * active and does not switch to other physical cameras. (One exception is that, if the
+     * logical camera consists of identical image sensors and advertises multiple focalLength
+     * due to different lenses, the camera device may generate RAW images from different
+     * physical cameras based on the focalLength being set by the application.) This
+     * backward-compatible approach usually results in loss of optical zoom, to telephoto
+     * lens or to ultrawide lens.</li>
+     * <li>Alternatively, to take advantage of the full zoomRatio range of the logical camera,
+     * the application should use {@link android.hardware.camera2.MultiResolutionImageReader }
+     * to capture RAW images from the currently active physical camera. Because different
+     * physical camera may have different RAW characteristics, the application needs to use
+     * the characteristics and result metadata of the active physical camera for the
+     * relevant RAW metadata.</li>
+     * </ul>
      * <p>The capture request and result metadata tags required for backward compatible camera
-     * functionalities will be solely based on the logical camera capabiltity. On the other
+     * functionalities will be solely based on the logical camera capability. On the other
      * hand, the use of manual capture controls (sensor or post-processing) with a
      * logical camera may result in unexpected behavior when the HAL decides to switch
      * between physical cameras with different characteristics under the hood. For example,
@@ -1104,6 +1128,63 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING = 15;
+
+    /**
+     * <p>This camera device is capable of producing ultra high resolution images in
+     * addition to the image sizes described in the
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.
+     * It can operate in 'default' mode and 'max resolution' mode. It generally does this
+     * by binning pixels in 'default' mode and not binning them in 'max resolution' mode.
+     * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}</code> describes the streams supported in 'default'
+     * mode.
+     * The stream configurations supported in 'max resolution' mode are described by
+     * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</code>.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR = 16;
+
+    /**
+     * <p>The device supports reprocessing from the <code>RAW_SENSOR</code> format with a bayer pattern
+     * given by {@link CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR android.sensor.info.binningFactor} (m x n group of pixels with the same
+     * color filter) to a remosaiced regular bayer pattern.</p>
+     * <p>This capability will only be present for devices with
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability. When
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * devices do not advertise this capability,
+     * {@link android.graphics.ImageFormat#RAW_SENSOR } images will already have a
+     * regular bayer pattern.</p>
+     * <p>If a <code>RAW_SENSOR</code> stream is requested along with another non-RAW stream in a
+     * {@link android.hardware.camera2.CaptureRequest } (if multiple streams are supported
+     * when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }),
+     * the <code>RAW_SENSOR</code> stream will have a regular bayer pattern.</p>
+     * <p>This capability requires the camera device to support the following :
+     * * The {@link android.hardware.camera2.params.StreamConfigurationMap } mentioned below
+     *   refers to the one, described by
+     *   <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</code>.
+     * * One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.
+     * * {@link android.graphics.ImageFormat#RAW_SENSOR } is supported as an output/input
+     *   format, that is, {@link android.graphics.ImageFormat#RAW_SENSOR } is included in the
+     *   lists of formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.
+     * * {@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
+     *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.
+     * * Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(ImageFormat.RAW_SENSOR)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(ImageFormat.RAW_SENSOR)}
+     * * Using {@link android.graphics.ImageFormat#RAW_SENSOR } does not cause a frame rate
+     *   drop relative to the sensor's maximum capture rate (at that resolution).
+     * * No CaptureRequest controls will be applicable when a request has an input target
+     *   with {@link android.graphics.ImageFormat#RAW_SENSOR } format.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING = 17;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -2796,7 +2877,6 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>No rotate and crop is applied. Processed outputs are in the sensor orientation.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
-     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_NONE = 0;
 
@@ -2804,7 +2884,6 @@ public abstract class CameraMetadata<TKey> {
      * <p>Processed images are rotated by 90 degrees clockwise, and then cropped
      * to the original aspect ratio.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
-     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_90 = 1;
 
@@ -2812,7 +2891,6 @@ public abstract class CameraMetadata<TKey> {
      * <p>Processed images are rotated by 180 degrees.  Since the aspect ratio does not
      * change, no cropping is performed.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
-     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_180 = 2;
 
@@ -2820,7 +2898,6 @@ public abstract class CameraMetadata<TKey> {
      * <p>Processed images are rotated by 270 degrees clockwise, and then cropped
      * to the original aspect ratio.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
-     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_270 = 3;
 
@@ -2840,7 +2917,6 @@ public abstract class CameraMetadata<TKey> {
      * coordinate system to make the operation transparent for applications.</p>
      * <p>No coordinate mapping will be done when the application selects a non-AUTO mode.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
-     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_AUTO = 4;
 
@@ -2861,10 +2937,10 @@ public abstract class CameraMetadata<TKey> {
      * respective color channel provided in
      * {@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData}.</p>
      * <p>For example:</p>
-     * <pre><code>android.testPatternData = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
+     * <pre><code>{@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData} = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
      * </code></pre>
      * <p>All green pixels are 100% green. All red/blue pixels are black.</p>
-     * <pre><code>android.testPatternData = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
+     * <pre><code>{@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData} = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
      * </code></pre>
      * <p>All red pixels are 100% red. Only the odd green pixels
      * are 100% green. All blue pixels are 100% black.</p>
@@ -2941,6 +3017,20 @@ public abstract class CameraMetadata<TKey> {
     public static final int SENSOR_TEST_PATTERN_MODE_PN9 = 4;
 
     /**
+     * <p>All pixel data is replaced by 0% intensity (black) values.</p>
+     * <p>This test pattern is identical to SOLID_COLOR with a value of <code>[0, 0, 0, 0]</code> for
+     * {@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData}.  It is recommended that devices implement full
+     * SOLID_COLOR support instead, but BLACK can be used to provide minimal support for a
+     * test pattern suitable for privacy use cases.</p>
+     *
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_DATA
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     * @hide
+     */
+    @TestApi
+    public static final int SENSOR_TEST_PATTERN_MODE_BLACK = 5;
+
+    /**
      * <p>The first custom test pattern. All custom patterns that are
      * available only on this camera device are at least this numeric
      * value.</p>
@@ -2949,6 +3039,27 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
     public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256;
+
+    //
+    // Enumeration values for CaptureRequest#SENSOR_PIXEL_MODE
+    //
+
+    /**
+     * <p>This is the default sensor pixel mode. This is the only sensor pixel mode
+     * supported unless a camera device advertises
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.</p>
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    public static final int SENSOR_PIXEL_MODE_DEFAULT = 0;
+
+    /**
+     * <p>This sensor pixel mode is offered by devices with capability
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.
+     * In this mode, sensors typically do not bin pixels, as a result can offer larger
+     * image sizes.</p>
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    public static final int SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION = 1;
 
     //
     // Enumeration values for CaptureRequest#SHADING_MODE

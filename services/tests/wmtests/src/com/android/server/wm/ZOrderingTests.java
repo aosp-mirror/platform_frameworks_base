@@ -35,11 +35,19 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseBooleanArray;
+import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -62,6 +70,7 @@ import java.util.function.Function;
  */
 @SmallTest
 @Presubmit
+@WindowTestsBase.UseTestDisplay(addAllCommonWindows = true)
 @RunWith(WindowTestRunner.class)
 public class ZOrderingTests extends WindowTestsBase {
 
@@ -152,7 +161,7 @@ public class ZOrderingTests extends WindowTestsBase {
     private LayerRecordingTransaction mTransaction;
 
     @Override
-    void beforeCreateDisplay() {
+    void beforeCreateTestDisplay() {
         // We can't use @Before here because it may happen after WindowTestsBase @Before
         // which is after construction of the DisplayContent, meaning the HierarchyRecorder
         // would miss construction of the top-level layers.
@@ -217,7 +226,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForImeWithNoTarget() {
-        mDisplayContent.mInputMethodTarget = null;
+        mDisplayContent.setImeLayeringTarget(null);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // The Ime has an higher base layer than app windows and lower base layer than system
@@ -235,7 +244,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testAssignWindowLayers_ForImeWithAppTarget() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
-        mDisplayContent.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
 
         mDisplayContent.assignChildLayers(mTransaction);
 
@@ -261,7 +270,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 TYPE_APPLICATION_MEDIA_OVERLAY, imeAppTarget.mToken,
                 "imeAppTargetChildBelowWindow");
 
-        mDisplayContent.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for child windows that are z-ordered above it
@@ -283,7 +292,7 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
-        mDisplayContent.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for non-fullscreen app window above it and
@@ -306,7 +315,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 mDisplayContent, "imeSystemOverlayTarget",
                 true /* ownerCanAddInternalSystemWindow */);
 
-        mDisplayContent.mInputMethodTarget = imeSystemOverlayTarget;
+        mDisplayContent.setImeLayeringTarget(imeSystemOverlayTarget);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // The IME target base layer is higher than all window except for the nav bar window, so the
@@ -329,7 +338,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
-        mDisplayContent.mInputMethodTarget = mStatusBarWindow;
+        mDisplayContent.setImeLayeringTarget(mStatusBarWindow);
         mDisplayContent.assignChildLayers(mTransaction);
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
@@ -344,16 +353,16 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testStackLayers() {
         final WindowState anyWindow1 = createWindow("anyWindow");
-        final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
+        final WindowState pinnedStackWindow = createWindow(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
-        final WindowState dockedStackWindow = createWindowOnStack(null,
+        final WindowState dockedStackWindow = createWindow(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "dockedStackWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null,
+        final WindowState assistantStackWindow = createWindow(null,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
-        final WindowState homeActivityWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
+        final WindowState homeActivityWindow = createWindow(null, WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_HOME, TYPE_BASE_APPLICATION,
                 mDisplayContent, "homeActivityWindow");
         final WindowState anyWindow2 = createWindow("anyWindow2");
@@ -431,16 +440,16 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testDockedDividerPosition() {
-        final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
+        final WindowState pinnedStackWindow = createWindow(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
-        final WindowState splitScreenWindow = createWindowOnStack(null,
+        final WindowState splitScreenWindow = createWindow(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "splitScreenWindow");
-        final WindowState splitScreenSecondaryWindow = createWindowOnStack(null,
+        final WindowState splitScreenSecondaryWindow = createWindow(null,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
                 TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null,
+        final WindowState assistantStackWindow = createWindow(null,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
 
@@ -449,5 +458,39 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mDockedDividerWindow, splitScreenWindow);
         assertWindowHigher(mDockedDividerWindow, splitScreenSecondaryWindow);
         assertWindowHigher(pinnedStackWindow, mDockedDividerWindow);
+    }
+
+    @Test
+    public void testAttachNavBarWhenEnteringRecents_expectNavBarHigherThanIme() {
+        // create RecentsAnimationController
+        IRecentsAnimationRunner mockRunner = mock(IRecentsAnimationRunner.class);
+        when(mockRunner.asBinder()).thenReturn(new Binder());
+        final int displayId = mDisplayContent.getDisplayId();
+        RecentsAnimationController controller = new RecentsAnimationController(
+                mWm, mockRunner, null, displayId);
+        spyOn(controller);
+        controller.mShouldAttachNavBarToAppDuringTransition = true;
+        doReturn(mNavBarWindow).when(controller).getNavigationBarWindow();
+        mWm.setRecentsAnimationController(controller);
+
+        // set ime visible
+        spyOn(mDisplayContent.mInputMethodWindow);
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+
+        // create home activity
+        Task rootHomeTask = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
+        final ActivityRecord homeActivity = new ActivityBuilder(mWm.mAtmService)
+                .setParentTask(rootHomeTask)
+                .setCreateTask(true)
+                .build();
+        homeActivity.setVisibility(true);
+
+        // start recent animation
+        controller.initialize(homeActivity.getActivityType(), new SparseBooleanArray(),
+                homeActivity);
+
+        mDisplayContent.assignChildLayers(mTransaction);
+        assertZOrderGreaterThan(mTransaction, mNavBarWindow.mToken.getSurfaceControl(),
+                mDisplayContent.getImeContainer().getSurfaceControl());
     }
 }

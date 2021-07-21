@@ -1,0 +1,48 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_test {
+    name: "ActivityManagerNativeTestCases",
+
+    multilib: {
+        lib32: {
+            suffix: "32",
+        },
+        lib64: {
+            suffix: "64",
+        },
+    },
+
+    srcs: ["src/ActivityManagerNativeTest.cpp"],
+
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libandroid",
+        "libbinder",
+    ],
+
+    static_libs: [
+        "libbase",
+        "libgtest",
+    ],
+    stl: "c++_shared",
+
+    test_suites: [
+        "general-tests",
+    ],
+
+    cflags: [
+        "-Werror",
+        "-Wall",
+    ],
+    required: [
+        "UidImportanceHelperApp",
+    ],
+}

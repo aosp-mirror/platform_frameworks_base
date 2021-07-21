@@ -32,6 +32,9 @@ LOCAL_SRC_FILES := \
     $(call all-renderscript-files-under, src)
 
 LOCAL_PACKAGE_NAME := SmartCamera
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../NOTICE
 LOCAL_JNI_SHARED_LIBRARIES := libsmartcamera_jni
 
 include $(BUILD_PACKAGE)

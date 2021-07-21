@@ -121,7 +121,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       return;
     }
 
-    Log.d(TAG, String.format("Transition from %s to %s", state, State.INTENT_STARTED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.INTENT_STARTED));
     state = State.INTENT_STARTED;
   }
 
@@ -139,7 +139,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       return;
     }
 
-    Log.d(TAG, String.format("Transition from %s to %s", state, State.INTENT_FAILED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.INTENT_FAILED));
     state = State.INTENT_FAILED;
   }
 
@@ -157,7 +157,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       return;
     }
 
-    Log.d(TAG, String.format("Transition from %s to %s", state, State.ACTIVITY_LAUNCHED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.ACTIVITY_LAUNCHED));
     state = State.ACTIVITY_LAUNCHED;
   }
 
@@ -175,7 +175,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       return;
     }
 
-    Log.d(TAG, String.format("Transition from %s to %s", state, State.ACTIVITY_CANCELLED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.ACTIVITY_CANCELLED));
     state = State.ACTIVITY_CANCELLED;
   }
 
@@ -195,7 +195,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       return;
     }
 
-    Log.d(TAG, String.format("Transition from %s to %s", state, State.ACTIVITY_FINISHED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.ACTIVITY_FINISHED));
     state = State.ACTIVITY_FINISHED;
   }
 
@@ -216,7 +216,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       return;
     }
 
-    Log.d(TAG, String.format("Transition from %s to %s", state, State.REPORT_FULLY_DRAWN));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.REPORT_FULLY_DRAWN));
     state = State.REPORT_FULLY_DRAWN;
   }
 
@@ -239,7 +239,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       state = State.UNKNOWN;
     }
     ++accIntentStartedEvents;
-    Log.d(TAG,
+    Log.i(TAG,
         String.format("inc AccIntentStartedEvents to %d", accIntentStartedEvents));
   }
 
@@ -251,7 +251,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
       state = State.INIT;
     }
     --accIntentStartedEvents;
-    Log.d(TAG,
+    Log.i(TAG,
         String.format("dec AccIntentStartedEvents to %d", accIntentStartedEvents));
   }
 
@@ -264,3 +264,4 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
     }
   }
 }
+

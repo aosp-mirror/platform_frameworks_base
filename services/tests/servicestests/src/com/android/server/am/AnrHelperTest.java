@@ -18,21 +18,30 @@ package com.android.server.am;
 
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.appop.AppOpsService;
 import com.android.server.wm.WindowProcessController;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,13 +51,48 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class AnrHelperTest {
-    private final AnrHelper mAnrHelper = new AnrHelper();
+    private AnrHelper mAnrHelper;
 
     private ProcessRecord mAnrApp;
 
+    @Rule
+    public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+
     @Before
     public void setUp() {
-        runWithDexmakerShareClassLoader(() -> mAnrApp = mock(ProcessRecord.class));
+        final Context context = getInstrumentation().getTargetContext();
+        runWithDexmakerShareClassLoader(() -> {
+            mAnrApp = mock(ProcessRecord.class);
+            final ProcessErrorStateRecord errorState = mock(ProcessErrorStateRecord.class);
+            setFieldValue(ProcessErrorStateRecord.class, errorState, "mProcLock",
+                    new ActivityManagerProcLock());
+            setFieldValue(ProcessRecord.class, mAnrApp, "mErrorState", errorState);
+            final ActivityManagerService service = new ActivityManagerService(
+                    new ActivityManagerService.Injector(context) {
+                    @Override
+                    public AppOpsService getAppOpsService(File file, Handler handler) {
+                        return null;
+                    }
+
+                    @Override
+                    public Handler getUiHandler(ActivityManagerService service) {
+                        return mServiceThreadRule.getThread().getThreadHandler();
+                    }
+                }, mServiceThreadRule.getThread());
+            mAnrHelper = new AnrHelper(service);
+        });
+    }
+
+    private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Field mfield = Field.class.getDeclaredField("accessFlags");
+            mfield.setAccessible(true);
+            mfield.setInt(field, mfield.getInt(field) & ~(Modifier.FINAL | Modifier.PRIVATE));
+            field.set(obj, val);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+        }
     }
 
     @Test
@@ -62,7 +106,7 @@ public class AnrHelperTest {
         mAnrHelper.appNotResponding(mAnrApp, activityShortComponentName, appInfo,
                 parentShortComponentName, parentProcess, aboveSystem, annotation);
 
-        verify(mAnrApp, timeout(TimeUnit.SECONDS.toMillis(5))).appNotResponding(
+        verify(mAnrApp.mErrorState, timeout(TimeUnit.SECONDS.toMillis(5))).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
                 eq(parentProcess), eq(aboveSystem), eq(annotation), eq(false) /* onlyDumpSelf */);
     }

@@ -29,13 +29,18 @@ message ConfigSettingsProto {
   repeated NamespaceProto extra_namespaces = 2;
   repeated SettingProto activity_manager_native_boot_settings = 3;
   repeated SettingProto activity_manager_settings = 4;
+  repeated SettingProto alarm_manager_settings = 26;
   repeated SettingProto app_compat_settings = 5;
+  repeated SettingProto app_standby_settings = 27;
   repeated SettingProto autofill_settings = 6;
+  repeated SettingProto blobstore_settings = 23;
   repeated SettingProto connectivity_settings = 7;
   repeated SettingProto content_capture_settings = 8;
-  repeated SettingProto dex_boot_settings = 9;
+  repeated SettingProto device_idle_settings = 24;
+  reserved 9; // dex_boot_settings
   repeated SettingProto game_driver_settings = 10;
   repeated SettingProto input_native_boot_settings = 11;
+  repeated SettingProto job_scheduler_settings = 25;
   repeated SettingProto netd_native_settings = 12;
   repeated SettingProto privacy_settings = 13;
   repeated SettingProto rollback_boot_settings = 14;
@@ -47,7 +52,8 @@ message ConfigSettingsProto {
   repeated SettingProto systemui_settings = 20;
   repeated SettingProto telephony_settings = 21;
   repeated SettingProto textclassifier_settings = 22;
-  repeated SettingProto blobstore_settings = 23;
+
+  // Next tag: 28
 
   message NamespaceProto {
     optional string namespace = 1;

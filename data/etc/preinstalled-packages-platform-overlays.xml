@@ -23,7 +23,13 @@
     <install-in-user-type package="com.android.internal.display.cutout.emulation.double">
         <install-in user-type="FULL" />
     </install-in-user-type>
+    <install-in-user-type package="com.android.internal.display.cutout.emulation.hole">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
     <install-in-user-type package="com.android.internal.display.cutout.emulation.tall">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.internal.display.cutout.emulation.waterfall">
         <install-in user-type="FULL" />
     </install-in-user-type>
     <install-in-user-type package="com.android.internal.systemui.navbar.gestural">
@@ -43,5 +49,208 @@
     </install-in-user-type>
     <install-in-user-type package="com.android.internal.systemui.navbar.twobutton">
         <install-in user-type="FULL" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.internal.systemui.onehanded.gestural">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.amethyst">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.aquamarine">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.black">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.carbon">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.cinnamon">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.green">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.ocean">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.orchid">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.palette">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.purple">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.sand">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.space">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.color.tangerine">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.font.notoserifsource">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.circular.android">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.circular.launcher">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.circular.settings">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.circular.systemui">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.circular.themepicker">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.filled.android">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.filled.launcher">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.filled.settings">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.filled.systemui">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.filled.themepicker">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.kai.android">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.kai.launcher">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.kai.settings">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.kai.systemui">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.kai.themepicker">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.rounded.android">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.rounded.launcher">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.rounded.settings">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.rounded.systemui">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.rounded.themepicker">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.sam.android">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.sam.launcher">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.sam.settings">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.sam.systemui">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.sam.themepicker">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.victor.android">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.victor.launcher">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.victor.settings">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.victor.systemui">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon_pack.victor.themepicker">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon.pebble">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon.roundedrect">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon.squircle">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon.taperedrect">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon.teardrop">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.theme.icon.vessel">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
     </install-in-user-type>
 </config>

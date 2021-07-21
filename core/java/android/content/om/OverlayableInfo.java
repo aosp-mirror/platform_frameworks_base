@@ -82,7 +82,7 @@ public final class OverlayableInfo {
 
     @Override
     @DataClass.Generated.Member
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         // You can override field equality logic by defining either of the methods like:
         // boolean fieldNameEquals(OverlayableInfo other) { ... }
         // boolean fieldNameEquals(FieldType otherValue) { ... }

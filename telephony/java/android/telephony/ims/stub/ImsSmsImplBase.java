@@ -401,8 +401,7 @@ public class ImsSmsImplBase {
                             message.mWrappedSmsMessage.mMessageRef,
                             STATUS_REPORT_STATUS_ERROR);
                 } else {
-                    Log.w(LOG_TAG,
-                            "onSmsStatusReportReceivedWithoutMessageRef: Invalid pdu entered.");
+                    Log.w(LOG_TAG, "onSmsStatusReportReceived: Invalid pdu entered.");
                     acknowledgeSmsReport(token, 0, STATUS_REPORT_STATUS_ERROR);
                 }
             }

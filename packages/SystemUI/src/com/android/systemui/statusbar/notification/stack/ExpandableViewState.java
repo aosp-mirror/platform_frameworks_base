@@ -22,8 +22,8 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.view.View;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 

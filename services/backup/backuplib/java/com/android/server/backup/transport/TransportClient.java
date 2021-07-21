@@ -664,7 +664,7 @@ public class TransportClient {
                 return;
             }
             // TODO (b/147705255): Remove when binder calls to IBackupTransport are not blocking
-            // In short-term, blocking calls are OK as the transports come from the whitelist at
+            // In short-term, blocking calls are OK as the transports come from the allowlist at
             // {@link SystemConfig#getBackupTransportWhitelist()}
             Binder.allowBlocking(binder);
             transportClient.onServiceConnected(binder);

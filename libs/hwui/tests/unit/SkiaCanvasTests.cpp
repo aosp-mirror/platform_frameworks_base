@@ -17,7 +17,6 @@
 #include "tests/common/TestUtils.h"
 
 #include <hwui/Paint.h>
-#include <SkBlurDrawLooper.h>
 #include <SkCanvasStateUtils.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
@@ -37,7 +36,7 @@ TEST(SkiaCanvas, drawShadowLayer) {
     // it is transparent to ensure that we still draw the rect since it has a looper
     paint.setColor(SK_ColorTRANSPARENT);
     // this is how view's shadow layers are implemented
-    paint.setLooper(SkBlurDrawLooper::Make(0xF0000000, 6.0f, 0, 10));
+    paint.setLooper(BlurDrawLooper::Make({0, 0, 0, 240.0f / 255}, nullptr, 6.0f, {0, 10}));
     canvas.drawRect(3, 3, 7, 7, paint);
 
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
@@ -73,7 +72,7 @@ TEST(SkiaCanvas, colorSpaceXform) {
 
     // Test picture recording.
     SkPictureRecorder recorder;
-    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
+    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1);
     SkiaCanvas picCanvas(skPicCanvas);
     picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
@@ -104,7 +103,7 @@ TEST(SkiaCanvas, captureCanvasState) {
 
     // Create a picture canvas.
     SkPictureRecorder recorder;
-    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
+    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1);
     SkiaCanvas picCanvas(skPicCanvas);
     state = picCanvas.captureCanvasState();
 

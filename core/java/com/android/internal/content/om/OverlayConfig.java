@@ -111,7 +111,7 @@ public class OverlayConfig {
             // Rebase the system partitions and settings file on the specified root directory.
             partitions = new ArrayList<>(PackagePartitions.getOrderedPartitions(
                     p -> new OverlayPartition(
-                            new File(rootDirectory, p.getFolder().getPath()),
+                            new File(rootDirectory, p.getNonConicalFolder().getPath()),
                             p)));
         }
 
@@ -296,7 +296,7 @@ public class OverlayConfig {
             if (p.getOverlayTarget() != null && isSystem) {
                 overlays.add(new ParsedOverlayInfo(p.getPackageName(), p.getOverlayTarget(),
                         p.getTargetSdkVersion(), p.isOverlayIsStatic(), p.getOverlayPriority(),
-                        new File(p.getBaseCodePath())));
+                        new File(p.getBaseApkPath())));
             }
         });
         return overlays;

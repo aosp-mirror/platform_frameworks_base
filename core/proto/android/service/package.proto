@@ -124,6 +124,21 @@ message PackageProto {
         optional string originating_package_name = 2;
     }
 
+    message StatesProto {
+        reserved 1;
+        optional bool is_loading = 2;
+    }
+
+    // TODO (b/170263003) refactor to permissiongr
+    // Runtime permission state that are granted for users.
+    message UserPermissionsProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        // User id.
+        optional int32 id = 1;
+        // Pre-granted Android permissions.
+        repeated string granted_permissions = 2;
+    }
+
     // Name of package. e.g. "com.android.providers.telephony".
     optional string name = 1;
     // UID for this package as assigned by Android OS.
@@ -145,4 +160,8 @@ message PackageProto {
     repeated UserInfoProto users = 9;
     // Where the request to install this package came from,
     optional InstallSourceProto install_source = 10;
+    // Whether the package is still loading
+    optional StatesProto states = 11;
+    // Granted runtime permissions for users.
+    repeated UserPermissionsProto user_permissions = 12;
 }

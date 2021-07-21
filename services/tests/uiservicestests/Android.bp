@@ -2,6 +2,15 @@
 // Build FrameworksUiServicesTests package
 //########################################################################
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test {
     name: "FrameworksUiServicesTests",
 
@@ -25,6 +34,9 @@ android_test {
         "hamcrest-library",
         "testables",
         "truth-prebuilt",
+        // TODO: remove once Android migrates to JUnit 4.12,
+        // which provides assertThrows
+        "testng",
     ],
 
     libs: [
@@ -57,6 +69,6 @@ android_test {
         "libui",
         "libunwindstack",
         "libutils",
-        "netd_aidl_interface-cpp",
+        "netd_aidl_interface-V5-cpp",
     ],
 }

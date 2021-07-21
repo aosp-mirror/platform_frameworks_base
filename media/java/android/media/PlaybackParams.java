@@ -87,23 +87,23 @@ public final class PlaybackParams implements Parcelable {
     public static final int AUDIO_STRETCH_MODE_VOICE = 1;
 
     // flags to indicate which params are actually set
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int SET_SPEED               = 1 << 0;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int SET_PITCH               = 1 << 1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int SET_AUDIO_FALLBACK_MODE = 1 << 2;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int SET_AUDIO_STRETCH_MODE  = 1 << 3;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSet = 0;
 
     // params
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mAudioFallbackMode = AUDIO_FALLBACK_MODE_DEFAULT;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mAudioStretchMode = AUDIO_STRETCH_MODE_DEFAULT;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private float mPitch = 1.0f;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private float mSpeed = 1.0f;

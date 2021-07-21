@@ -13,6 +13,9 @@
       "name": "CtsAppEnumerationTestCases"
     },
     {
+      "name": "AppEnumerationInternalTests"
+    },
+    {
       "name": "CtsMatchFlagTestCases"
     },
     {
@@ -30,16 +33,32 @@
       ]
     },
     {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm."
+        }
+      ]
+    },
+    {
       "name": "CtsContentTestCases",
       "options": [
         {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
+          "exclude-annotation": "org.junit.Ignore"
         },
         {
-          "include-filter": "android.content.pm.cts.PackageManagerTest"
+          "include-filter": "android.content.pm.cts"
+        }
+      ]
+    },
+    {
+      "name": "GtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "com.google.android.content.gts"
         }
       ]
     },
@@ -75,6 +94,15 @@
       "options": [
         {
           "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ]
+    },
+    {
+      "name": "PackageManagerServiceHostTests",
+      "file_patterns": ["AppsFilter\\.java"],
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.test.OverlayActorVisibilityTest"
         }
       ]
     }

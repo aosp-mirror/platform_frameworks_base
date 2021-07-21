@@ -44,7 +44,7 @@ class MultiFingerMultiTapAndHold extends MultiFingerMultiTap {
 
     @Override
     protected void onUp(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (mCompletedTapCount + 1 == mTargetFingerCount) {
+        if (mCompletedTapCount + 1 == mTargetTapCount) {
             // Calling super.onUp  would complete the multi-tap version of this.
             cancelGesture(event, rawEvent, policyFlags);
         } else {

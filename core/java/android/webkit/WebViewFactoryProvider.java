@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Network;
 import android.net.Uri;
 
 import java.util.List;
@@ -175,11 +176,24 @@ public interface WebViewFactoryProvider {
     WebViewDatabase getWebViewDatabase(Context context);
 
     /**
-     * Gets the singleton PacProcessor instance.
+     * Gets the default PacProcessor instance.
      * @return the PacProcessor instance
      */
     @NonNull
     default PacProcessor getPacProcessor() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    /**
+     * Create a new PacProcessor instance.
+     *
+     * @param network a {@link Network} which needs to be associated
+     * with the returned {@link PacProcessor}.
+     * If {@code null} the method returns default {@link PacProcessor}.
+     * @return the {@link PacProcessor} instance associated with {@link Network}.
+     */
+    @NonNull
+    default PacProcessor createPacProcessor() {
         throw new UnsupportedOperationException("Not implemented");
     }
 

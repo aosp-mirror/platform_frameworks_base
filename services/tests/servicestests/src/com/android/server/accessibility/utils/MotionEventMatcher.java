@@ -30,7 +30,7 @@ public class MotionEventMatcher extends TypeSafeMatcher<MotionEvent> {
     private static final String LOG_TAG = "MotionEventMatcher";
     long mDownTime;
     long mEventTime;
-    long mActionMasked;
+    int mActionMasked;
     int mX;
     int mY;
 
@@ -73,9 +73,9 @@ public class MotionEventMatcher extends TypeSafeMatcher<MotionEvent> {
         Log.e(
                 LOG_TAG,
                 "event.getActionMasked() = "
-                        + event.getActionMasked()
+                        + MotionEvent.actionToString(event.getActionMasked())
                         + ", expected "
-                        + mActionMasked);
+                        + MotionEvent.actionToString(mActionMasked));
         Log.e(LOG_TAG, "event.getX() = " + event.getX() + ", expected " + mX);
         Log.e(LOG_TAG, "event.getY() = " + event.getY() + ", expected " + mY);
         return false;

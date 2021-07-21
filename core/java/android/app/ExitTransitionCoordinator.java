@@ -18,6 +18,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.NonNull;
 import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.content.Intent;
 import android.graphics.Color;
@@ -45,15 +46,17 @@ import java.util.ArrayList;
  * This ActivityTransitionCoordinator is created in ActivityOptions#makeSceneTransitionAnimation
  * to govern the exit of the Scene and the shared elements when calling an Activity as well as
  * the reentry of the Scene when coming back from the called Activity.
+ *
+ * @hide
  */
-class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
+public class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "ExitTransitionCoordinator";
     static long sMaxWaitMillis = 1000;
 
     private Bundle mSharedElementBundle;
     private boolean mExitNotified;
     private boolean mSharedElementNotified;
-    private Activity mActivity;
+    private ExitTransitionCallbacks mExitCallbacks;
     private boolean mIsBackgroundReady;
     private boolean mIsCanceled;
     private Handler mHandler;
@@ -62,20 +65,15 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private Bundle mExitSharedElementBundle;
     private boolean mIsExitStarted;
     private boolean mSharedElementsHidden;
-    private HideSharedElementsCallback mHideSharedElementsCallback;
 
-    public ExitTransitionCoordinator(Activity activity, Window window,
-            SharedElementCallback listener, ArrayList<String> names,
+    public ExitTransitionCoordinator(ExitTransitionCallbacks exitCallbacks,
+            Window window, SharedElementCallback listener, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<View> mapped, boolean isReturning) {
         super(window, names, listener, isReturning);
         viewsReady(mapSharedElements(accepted, mapped));
         stripOffscreenViews();
         mIsBackgroundReady = !isReturning;
-        mActivity = activity;
-    }
-
-    void setHideSharedElementsCallback(HideSharedElementsCallback callback) {
-        mHideSharedElementsCallback = callback;
+        mExitCallbacks = exitCallbacks;
     }
 
     @Override
@@ -190,8 +188,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void hideSharedElements() {
         moveSharedElementsFromOverlay();
-        if (mHideSharedElementsCallback != null) {
-            mHideSharedElementsCallback.hideSharedElements();
+        if (mExitCallbacks != null) {
+            mExitCallbacks.hideSharedElements();
         }
         if (!mIsHidden) {
             hideViews(mSharedElements);
@@ -210,20 +208,16 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 decorView.suppressLayout(true);
             }
             moveSharedElementsToOverlay();
-            startTransition(new Runnable() {
-                @Override
-                public void run() {
-                    if (mActivity != null) {
-                        beginTransitions();
-                    } else {
-                        startExitTransition();
-                    }
-                }
-            });
+            startTransition(this::beginTransitions);
         }
     }
 
-    public void startExit(int resultCode, Intent data) {
+    /**
+     * Starts the exit animation and sends back the activity result
+     */
+    public void startExit(Activity activity) {
+        int resultCode = activity.mResultCode;
+        Intent data = activity.mResultData;
         if (!mIsExitStarted) {
             mIsExitStarted = true;
             pauseInput();
@@ -247,9 +241,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     .getApplicationInfo().targetSdkVersion >= VERSION_CODES.M;
             ArrayList<String> sharedElementNames = targetsM ? mSharedElementNames :
                     mAllSharedElementNames;
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, this,
                     sharedElementNames, resultCode, data);
-            mActivity.convertToTranslucent(new Activity.TranslucentConversionListener() {
+            activity.convertToTranslucent(new Activity.TranslucentConversionListener() {
                 @Override
                 public void onTranslucentConversionComplete(boolean drawComplete) {
                     if (!mIsCanceled) {
@@ -257,21 +251,19 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     }
                 }
             }, options);
-            startTransition(new Runnable() {
-                @Override
-                public void run() {
-                    startExitTransition();
-                }
-            });
+            startTransition(this::startExitTransition);
         }
     }
 
-    public void stop() {
-        if (mIsReturning && mActivity != null) {
+    /**
+     * Called from {@link Activity#onStop()}
+     */
+    public void stop(Activity activity) {
+        if (mIsReturning && mExitCallbacks != null) {
             // Override the previous ActivityOptions. We don't want the
             // activity to have options since we're essentially canceling the
             // transition and finishing right now.
-            mActivity.convertToTranslucent(null, null);
+            activity.convertToTranslucent(null, null);
             finish();
         }
     }
@@ -434,7 +426,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mSharedElementNotified = true;
                 delayCancel();
 
-                if (!mActivity.isTopOfTask()) {
+                if (mExitCallbacks.isReturnTransitionAllowed()) {
                     mResultReceiver.send(MSG_ALLOW_RETURN_TRANSITION, null);
                 }
 
@@ -474,22 +466,17 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void finishIfNecessary() {
-        if (mIsReturning && mExitNotified && mActivity != null && (mSharedElements.isEmpty() ||
-                mSharedElementsHidden)) {
+        if (mIsReturning && mExitNotified && mExitCallbacks != null && (mSharedElements.isEmpty()
+                || mSharedElementsHidden)) {
             finish();
-        }
-        if (!mIsReturning && mExitNotified) {
-            mActivity = null; // don't need it anymore
         }
     }
 
     private void finish() {
         stopCancel();
-        if (mActivity != null) {
-            mActivity.mActivityTransitionState.clear();
-            mActivity.finish();
-            mActivity.overridePendingTransition(0, 0);
-            mActivity = null;
+        if (mExitCallbacks != null) {
+            mExitCallbacks.onFinish();
+            mExitCallbacks = null;
         }
         // Clear the state so that we can't hold any references accidentally and leak memory.
         clearState();
@@ -529,7 +516,49 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    interface HideSharedElementsCallback {
-        void hideSharedElements();
+    /**
+     * @hide
+     */
+    public interface ExitTransitionCallbacks {
+
+        /**
+         * Returns true if reverse exit animation is supported
+         */
+        boolean isReturnTransitionAllowed();
+
+        /**
+         * Called then the transition finishes
+         */
+        void onFinish();
+
+        /**
+         * Optional callback when the transition is hiding elements in the source surface
+         */
+        default void hideSharedElements() { };
+    }
+
+    /**
+     * @hide
+     */
+    public static class ActivityExitTransitionCallbacks implements ExitTransitionCallbacks {
+
+        @NonNull
+        final Activity mActivity;
+
+        ActivityExitTransitionCallbacks(@NonNull Activity activity) {
+            mActivity = activity;
+        }
+
+        @Override
+        public boolean isReturnTransitionAllowed() {
+            return true;
+        }
+
+        @Override
+        public void onFinish() {
+            mActivity.mActivityTransitionState.clear();
+            mActivity.finish();
+            mActivity.overridePendingTransition(0, 0);
+        }
     }
 }

@@ -16,7 +16,8 @@
 
 package android.hardware;
 
-import java.util.GregorianCalendar;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Estimates magnetic field at a given point on
@@ -26,7 +27,7 @@ import java.util.GregorianCalendar;
  * <p>This uses the World Magnetic Model produced by the United States National
  * Geospatial-Intelligence Agency.  More details about the model can be found at
  * <a href="http://www.ngdc.noaa.gov/geomag/WMM/DoDWMM.shtml">http://www.ngdc.noaa.gov/geomag/WMM/DoDWMM.shtml</a>.
- * This class currently uses WMM-2015 which is valid until 2020, but should
+ * This class currently uses WMM-2020 which is valid until 2025, but should
  * produce acceptable results for several years after that. Future versions of
  * Android may use a newer version of the model.
  */
@@ -48,69 +49,72 @@ public class GeomagneticField {
     static private final float EARTH_REFERENCE_RADIUS_KM = 6371.2f;
 
     // These coefficients and the formulae used below are from:
-    // NOAA Technical Report: The US/UK World Magnetic Model for 2015-2020
-    static private final float[][] G_COEFF = new float[][] {
-        { 0.0f },
-        { -29438.5f, -1501.1f },
-        { -2445.3f, 3012.5f, 1676.6f },
-        { 1351.1f, -2352.3f, 1225.6f, 581.9f },
-        { 907.2f, 813.7f, 120.3f, -335.0f, 70.3f },
-        { -232.6f, 360.1f, 192.4f, -141.0f, -157.4f, 4.3f },
-        { 69.5f, 67.4f, 72.8f, -129.8f, -29.0f, 13.2f, -70.9f },
-        { 81.6f, -76.1f, -6.8f, 51.9f, 15.0f, 9.3f, -2.8f, 6.7f },
-        { 24.0f, 8.6f, -16.9f, -3.2f, -20.6f, 13.3f, 11.7f, -16.0f, -2.0f },
-        { 5.4f, 8.8f, 3.1f, -3.1f, 0.6f, -13.3f, -0.1f, 8.7f, -9.1f, -10.5f },
-        { -1.9f, -6.5f, 0.2f, 0.6f, -0.6f, 1.7f, -0.7f, 2.1f, 2.3f, -1.8f, -3.6f },
-        { 3.1f, -1.5f, -2.3f, 2.1f, -0.9f, 0.6f, -0.7f, 0.2f, 1.7f, -0.2f, 0.4f, 3.5f },
-        { -2.0f, -0.3f, 0.4f, 1.3f, -0.9f, 0.9f, 0.1f, 0.5f, -0.4f, -0.4f, 0.2f, -0.9f, 0.0f } };
+    // NOAA Technical Report: The US/UK World Magnetic Model for 2020-2025
+    static private final float[][] G_COEFF = new float[][]{
+            {0.0f},
+            {-29404.5f, -1450.7f},
+            {-2500.0f, 2982.0f, 1676.8f},
+            {1363.9f, -2381.0f, 1236.2f, 525.7f},
+            {903.1f, 809.4f, 86.2f, -309.4f, 47.9f},
+            {-234.4f, 363.1f, 187.8f, -140.7f, -151.2f, 13.7f},
+            {65.9f, 65.6f, 73.0f, -121.5f, -36.2f, 13.5f, -64.7f},
+            {80.6f, -76.8f, -8.3f, 56.5f, 15.8f, 6.4f, -7.2f, 9.8f},
+            {23.6f, 9.8f, -17.5f, -0.4f, -21.1f, 15.3f, 13.7f, -16.5f, -0.3f},
+            {5.0f, 8.2f, 2.9f, -1.4f, -1.1f, -13.3f, 1.1f, 8.9f, -9.3f, -11.9f},
+            {-1.9f, -6.2f, -0.1f, 1.7f, -0.9f, 0.6f, -0.9f, 1.9f, 1.4f, -2.4f, -3.9f},
+            {3.0f, -1.4f, -2.5f, 2.4f, -0.9f, 0.3f, -0.7f, -0.1f, 1.4f, -0.6f, 0.2f, 3.1f},
+            {-2.0f, -0.1f, 0.5f, 1.3f, -1.2f, 0.7f, 0.3f, 0.5f, -0.2f, -0.5f, 0.1f, -1.1f, -0.3f}};
 
-    static private final float[][] H_COEFF = new float[][] {
-        { 0.0f },
-        { 0.0f, 4796.2f },
-        { 0.0f, -2845.6f, -642.0f },
-        { 0.0f, -115.3f, 245.0f, -538.3f },
-        { 0.0f, 283.4f, -188.6f, 180.9f, -329.5f },
-        { 0.0f, 47.4f, 196.9f, -119.4f, 16.1f, 100.1f },
-        { 0.0f, -20.7f, 33.2f, 58.8f, -66.5f, 7.3f, 62.5f },
-        { 0.0f, -54.1f, -19.4f, 5.6f, 24.4f, 3.3f, -27.5f, -2.3f },
-        { 0.0f, 10.2f, -18.1f, 13.2f, -14.6f, 16.2f, 5.7f, -9.1f, 2.2f },
-        { 0.0f, -21.6f, 10.8f, 11.7f, -6.8f, -6.9f, 7.8f, 1.0f, -3.9f, 8.5f },
-        { 0.0f, 3.3f, -0.3f, 4.6f, 4.4f, -7.9f, -0.6f, -4.1f, -2.8f, -1.1f, -8.7f },
-        { 0.0f, -0.1f, 2.1f, -0.7f, -1.1f, 0.7f, -0.2f, -2.1f, -1.5f, -2.5f, -2.0f, -2.3f },
-        { 0.0f, -1.0f, 0.5f, 1.8f, -2.2f, 0.3f, 0.7f, -0.1f, 0.3f, 0.2f, -0.9f, -0.2f, 0.7f } };
+    static private final float[][] H_COEFF = new float[][]{
+            {0.0f},
+            {0.0f, 4652.9f},
+            {0.0f, -2991.6f, -734.8f},
+            {0.0f, -82.2f, 241.8f, -542.9f},
+            {0.0f, 282.0f, -158.4f, 199.8f, -350.1f},
+            {0.0f, 47.7f, 208.4f, -121.3f, 32.2f, 99.1f},
+            {0.0f, -19.1f, 25.0f, 52.7f, -64.4f, 9.0f, 68.1f},
+            {0.0f, -51.4f, -16.8f, 2.3f, 23.5f, -2.2f, -27.2f, -1.9f},
+            {0.0f, 8.4f, -15.3f, 12.8f, -11.8f, 14.9f, 3.6f, -6.9f, 2.8f},
+            {0.0f, -23.3f, 11.1f, 9.8f, -5.1f, -6.2f, 7.8f, 0.4f, -1.5f, 9.7f},
+            {0.0f, 3.4f, -0.2f, 3.5f, 4.8f, -8.6f, -0.1f, -4.2f, -3.4f, -0.1f, -8.8f},
+            {0.0f, 0.0f, 2.6f, -0.5f, -0.4f, 0.6f, -0.2f, -1.7f, -1.6f, -3.0f, -2.0f, -2.6f},
+            {0.0f, -1.2f, 0.5f, 1.3f, -1.8f, 0.1f, 0.7f, -0.1f, 0.6f, 0.2f, -0.9f, 0.0f, 0.5f}};
 
-    static private final float[][] DELTA_G = new float[][] {
-        { 0.0f },
-        { 10.7f, 17.9f },
-        { -8.6f, -3.3f, 2.4f },
-        { 3.1f, -6.2f, -0.4f, -10.4f },
-        { -0.4f, 0.8f, -9.2f, 4.0f, -4.2f },
-        { -0.2f, 0.1f, -1.4f, 0.0f, 1.3f, 3.8f },
-        { -0.5f, -0.2f, -0.6f, 2.4f, -1.1f, 0.3f, 1.5f },
-        { 0.2f, -0.2f, -0.4f, 1.3f, 0.2f, -0.4f, -0.9f, 0.3f },
-        { 0.0f, 0.1f, -0.5f, 0.5f, -0.2f, 0.4f, 0.2f, -0.4f, 0.3f },
-        { 0.0f, -0.1f, -0.1f, 0.4f, -0.5f, -0.2f, 0.1f, 0.0f, -0.2f, -0.1f },
-        { 0.0f, 0.0f, -0.1f, 0.3f, -0.1f, -0.1f, -0.1f, 0.0f, -0.2f, -0.1f, -0.2f },
-        { 0.0f, 0.0f, -0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -0.1f, -0.1f },
-        { 0.1f, 0.0f, 0.0f, 0.1f, -0.1f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } };
+    static private final float[][] DELTA_G = new float[][]{
+            {0.0f},
+            {6.7f, 7.7f},
+            {-11.5f, -7.1f, -2.2f},
+            {2.8f, -6.2f, 3.4f, -12.2f},
+            {-1.1f, -1.6f, -6.0f, 5.4f, -5.5f},
+            {-0.3f, 0.6f, -0.7f, 0.1f, 1.2f, 1.0f},
+            {-0.6f, -0.4f, 0.5f, 1.4f, -1.4f, 0.0f, 0.8f},
+            {-0.1f, -0.3f, -0.1f, 0.7f, 0.2f, -0.5f, -0.8f, 1.0f},
+            {-0.1f, 0.1f, -0.1f, 0.5f, -0.1f, 0.4f, 0.5f, 0.0f, 0.4f},
+            {-0.1f, -0.2f, 0.0f, 0.4f, -0.3f, 0.0f, 0.3f, 0.0f, 0.0f, -0.4f},
+            {0.0f, 0.0f, 0.0f, 0.2f, -0.1f, -0.2f, 0.0f, -0.1f, -0.2f, -0.1f, 0.0f},
+            {0.0f, -0.1f, 0.0f, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f, -0.1f, -0.1f, -0.1f, -0.1f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -0.1f}};
 
-    static private final float[][] DELTA_H = new float[][] {
-        { 0.0f },
-        { 0.0f, -26.8f },
-        { 0.0f, -27.1f, -13.3f },
-        { 0.0f, 8.4f, -0.4f, 2.3f },
-        { 0.0f, -0.6f, 5.3f, 3.0f, -5.3f },
-        { 0.0f, 0.4f, 1.6f, -1.1f, 3.3f, 0.1f },
-        { 0.0f, 0.0f, -2.2f, -0.7f, 0.1f, 1.0f, 1.3f },
-        { 0.0f, 0.7f, 0.5f, -0.2f, -0.1f, -0.7f, 0.1f, 0.1f },
-        { 0.0f, -0.3f, 0.3f, 0.3f, 0.6f, -0.1f, -0.2f, 0.3f, 0.0f },
-        { 0.0f, -0.2f, -0.1f, -0.2f, 0.1f, 0.1f, 0.0f, -0.2f, 0.4f, 0.3f },
-        { 0.0f, 0.1f, -0.1f, 0.0f, 0.0f, -0.2f, 0.1f, -0.1f, -0.2f, 0.1f, -0.1f },
-        { 0.0f, 0.0f, 0.1f, 0.0f, 0.1f, 0.0f, 0.0f, 0.1f, 0.0f, -0.1f, 0.0f, -0.1f },
-        { 0.0f, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f } };
+    static private final float[][] DELTA_H = new float[][]{
+            {0.0f},
+            {0.0f, -25.1f},
+            {0.0f, -30.2f, -23.9f},
+            {0.0f, 5.7f, -1.0f, 1.1f},
+            {0.0f, 0.2f, 6.9f, 3.7f, -5.6f},
+            {0.0f, 0.1f, 2.5f, -0.9f, 3.0f, 0.5f},
+            {0.0f, 0.1f, -1.8f, -1.4f, 0.9f, 0.1f, 1.0f},
+            {0.0f, 0.5f, 0.6f, -0.7f, -0.2f, -1.2f, 0.2f, 0.3f},
+            {0.0f, -0.3f, 0.7f, -0.2f, 0.5f, -0.3f, -0.5f, 0.4f, 0.1f},
+            {0.0f, -0.3f, 0.2f, -0.4f, 0.4f, 0.1f, 0.0f, -0.2f, 0.5f, 0.2f},
+            {0.0f, 0.0f, 0.1f, -0.3f, 0.1f, -0.2f, 0.1f, 0.0f, -0.1f, 0.2f, 0.0f},
+            {0.0f, 0.0f, 0.1f, 0.0f, 0.2f, 0.0f, 0.0f, 0.1f, 0.0f, -0.1f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, -0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f, -0.1f}};
 
-    static private final long BASE_TIME =
-            new GregorianCalendar(2015, 1, 1).getTimeInMillis();
+    static private final long BASE_TIME = new Calendar.Builder()
+            .setTimeZone(TimeZone.getTimeZone("UTC"))
+            .setDate(2020, Calendar.JANUARY, 1)
+            .build()
+            .getTimeInMillis();
 
     // The ratio between the Gauss-normalized associated Legendre functions and
     // the Schmid quasi-normalized ones. Compute these once staticly since they
@@ -190,7 +194,7 @@ public class GeomagneticField {
         // We now compute the magnetic field strength given the geocentric
         // location. The magnetic field is the derivative of the potential
         // function defined by the model. See NOAA Technical Report: The US/UK
-        // World Magnetic Model for 2015-2020 for the derivation.
+        // World Magnetic Model for 2020-2025 for the derivation.
         float gcX = 0.0f;  // Geocentric northwards component.
         float gcY = 0.0f;  // Geocentric eastwards component.
         float gcZ = 0.0f;  // Geocentric downwards component.
@@ -203,7 +207,7 @@ public class GeomagneticField {
 
                 // Negative derivative with respect to latitude, divided by
                 // radius.  This looks like the negation of the version in the
-                // NOAA Techincal report because that report used
+                // NOAA Technical report because that report used
                 // P_n^m(sin(theta)) and we use P_n^m(cos(90 - theta)), so the
                 // derivative with respect to theta is negated.
                 gcX += relativeRadiusPower[n+2]

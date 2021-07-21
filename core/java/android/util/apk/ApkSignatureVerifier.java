@@ -27,6 +27,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 import android.os.Trace;
 import android.util.jar.StrictJarFile;
@@ -45,6 +46,7 @@ import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 
@@ -91,6 +93,20 @@ public class ApkSignatureVerifier {
     private static PackageParser.SigningDetails verifySignatures(String apkPath,
             @SignatureSchemeVersion int minSignatureSchemeVersion, boolean verifyFull)
             throws PackageParserException {
+        return verifySignaturesInternal(apkPath, minSignatureSchemeVersion,
+                verifyFull).signingDetails;
+    }
+
+    /**
+     * Verifies the provided APK using all allowed signing schemas.
+     * @return the certificates associated with each signer and content digests.
+     * @param verifyFull whether to verify all contents of this APK or just collect certificates.
+     * @throws PackageParserException if there was a problem collecting certificates
+     * @hide
+     */
+    public static SigningDetailsWithDigests verifySignaturesInternal(String apkPath,
+            @SignatureSchemeVersion int minSignatureSchemeVersion, boolean verifyFull)
+            throws PackageParserException {
 
         if (minSignatureSchemeVersion > SignatureSchemeVersion.SIGNING_BLOCK_V4) {
             // V3 and before are older than the requested minimum signing version
@@ -120,7 +136,7 @@ public class ApkSignatureVerifier {
         return verifyV3AndBelowSignatures(apkPath, minSignatureSchemeVersion, verifyFull);
     }
 
-    private static PackageParser.SigningDetails verifyV3AndBelowSignatures(String apkPath,
+    private static SigningDetailsWithDigests verifyV3AndBelowSignatures(String apkPath,
             @SignatureSchemeVersion int minSignatureSchemeVersion, boolean verifyFull)
             throws PackageParserException {
         // try v3
@@ -173,7 +189,7 @@ public class ApkSignatureVerifier {
      * @throws SignatureNotFoundException if there are no V4 signatures in the APK
      * @throws PackageParserException     if there was a problem collecting certificates
      */
-    private static PackageParser.SigningDetails verifyV4Signature(String apkPath,
+    private static SigningDetailsWithDigests verifyV4Signature(String apkPath,
             @SignatureSchemeVersion int minSignatureSchemeVersion, boolean verifyFull)
             throws SignatureNotFoundException, PackageParserException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, verifyFull ? "verifyV4" : "certsOnlyV4");
@@ -182,23 +198,33 @@ public class ApkSignatureVerifier {
                     ApkSignatureSchemeV4Verifier.extractCertificates(apkPath);
             Certificate[][] signerCerts = new Certificate[][]{vSigner.certs};
             Signature[] signerSigs = convertToSignatures(signerCerts);
+            Signature[] pastSignerSigs = null;
 
             if (verifyFull) {
-                byte[] nonstreamingDigest = null;
-                Certificate[][] nonstreamingCerts = null;
+                Map<Integer, byte[]> nonstreamingDigests;
+                Certificate[][] nonstreamingCerts;
 
                 try {
                     // v4 is an add-on and requires v2 or v3 signature to validate against its
                     // certificate and digest
                     ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
                             ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
-                    nonstreamingDigest = v3Signer.digest;
+                    nonstreamingDigests = v3Signer.contentDigests;
                     nonstreamingCerts = new Certificate[][]{v3Signer.certs};
+                    if (v3Signer.por != null) {
+                        // populate proof-of-rotation information
+                        pastSignerSigs = new Signature[v3Signer.por.certs.size()];
+                        for (int i = 0; i < pastSignerSigs.length; i++) {
+                            pastSignerSigs[i] = new Signature(
+                                    v3Signer.por.certs.get(i).getEncoded());
+                            pastSignerSigs[i].setFlags(v3Signer.por.flagsList.get(i));
+                        }
+                    }
                 } catch (SignatureNotFoundException e) {
                     try {
                         ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
                                 ApkSignatureSchemeV2Verifier.verify(apkPath, false);
-                        nonstreamingDigest = v2Signer.digest;
+                        nonstreamingDigests = v2Signer.contentDigests;
                         nonstreamingCerts = v2Signer.certs;
                     } catch (SignatureNotFoundException ee) {
                         throw new SecurityException(
@@ -220,14 +246,22 @@ public class ApkSignatureVerifier {
                     }
                 }
 
-                if (!ArrayUtils.equals(vSigner.apkDigest, nonstreamingDigest,
-                        vSigner.apkDigest.length)) {
+                boolean found = false;
+                for (byte[] nonstreamingDigest : nonstreamingDigests.values()) {
+                    if (ArrayUtils.equals(vSigner.apkDigest, nonstreamingDigest,
+                            vSigner.apkDigest.length)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     throw new SecurityException("APK digest in V4 signature does not match V2/V3");
                 }
             }
 
-            return new PackageParser.SigningDetails(signerSigs,
-                    SignatureSchemeVersion.SIGNING_BLOCK_V4);
+            return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
+                    SignatureSchemeVersion.SIGNING_BLOCK_V4, pastSignerSigs),
+                    vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -248,8 +282,8 @@ public class ApkSignatureVerifier {
      * @throws SignatureNotFoundException if there are no V3 signatures in the APK
      * @throws PackageParserException     if there was a problem collecting certificates
      */
-    private static PackageParser.SigningDetails verifyV3Signature(String apkPath,
-            boolean verifyFull) throws SignatureNotFoundException, PackageParserException {
+    private static SigningDetailsWithDigests verifyV3Signature(String apkPath, boolean verifyFull)
+            throws SignatureNotFoundException, PackageParserException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, verifyFull ? "verifyV3" : "certsOnlyV3");
         try {
             ApkSignatureSchemeV3Verifier.VerifiedSigner vSigner =
@@ -267,8 +301,9 @@ public class ApkSignatureVerifier {
                     pastSignerSigs[i].setFlags(vSigner.por.flagsList.get(i));
                 }
             }
-            return new PackageParser.SigningDetails(signerSigs,
-                    SignatureSchemeVersion.SIGNING_BLOCK_V3, pastSignerSigs);
+            return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
+                    SignatureSchemeVersion.SIGNING_BLOCK_V3, pastSignerSigs),
+                    vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -289,15 +324,16 @@ public class ApkSignatureVerifier {
      * @throws SignatureNotFoundException if there are no V2 signatures in the APK
      * @throws PackageParserException     if there was a problem collecting certificates
      */
-    private static PackageParser.SigningDetails verifyV2Signature(String apkPath,
-            boolean verifyFull) throws SignatureNotFoundException, PackageParserException {
+    private static SigningDetailsWithDigests verifyV2Signature(String apkPath, boolean verifyFull)
+            throws SignatureNotFoundException, PackageParserException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, verifyFull ? "verifyV2" : "certsOnlyV2");
         try {
-            Certificate[][] signerCerts = verifyFull ? ApkSignatureSchemeV2Verifier.verify(apkPath)
-                    : ApkSignatureSchemeV2Verifier.unsafeGetCertsWithoutVerification(apkPath);
+            ApkSignatureSchemeV2Verifier.VerifiedSigner vSigner =
+                    ApkSignatureSchemeV2Verifier.verify(apkPath, verifyFull);
+            Certificate[][] signerCerts = vSigner.certs;
             Signature[] signerSigs = convertToSignatures(signerCerts);
-            return new PackageParser.SigningDetails(signerSigs,
-                    SignatureSchemeVersion.SIGNING_BLOCK_V2);
+            return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
+                    SignatureSchemeVersion.SIGNING_BLOCK_V2), vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -316,8 +352,7 @@ public class ApkSignatureVerifier {
      * @param verifyFull whether to verify all contents of this APK or just collect certificates.
      * @throws PackageParserException if there was a problem collecting certificates
      */
-    private static PackageParser.SigningDetails verifyV1Signature(
-            String apkPath, boolean verifyFull)
+    private static SigningDetailsWithDigests verifyV1Signature(String apkPath, boolean verifyFull)
             throws PackageParserException {
         StrictJarFile jarFile = null;
 
@@ -338,7 +373,7 @@ public class ApkSignatureVerifier {
             // Gather certs from AndroidManifest.xml, which every APK must have, as an optimization
             // to not need to verify the whole APK when verifyFUll == false.
             final ZipEntry manifestEntry = jarFile.findEntry(
-                    PackageParser.ANDROID_MANIFEST_FILENAME);
+                    ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
             if (manifestEntry == null) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
                         "Package " + apkPath + " has no manifest");
@@ -347,7 +382,7 @@ public class ApkSignatureVerifier {
             if (ArrayUtils.isEmpty(lastCerts)) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES, "Package "
                         + apkPath + " has no certificates at entry "
-                        + PackageParser.ANDROID_MANIFEST_FILENAME);
+                        + ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
             }
             lastSigs = convertToSignatures(lastCerts);
 
@@ -360,7 +395,7 @@ public class ApkSignatureVerifier {
 
                     final String entryName = entry.getName();
                     if (entryName.startsWith("META-INF/")) continue;
-                    if (entryName.equals(PackageParser.ANDROID_MANIFEST_FILENAME)) continue;
+                    if (entryName.equals(ParsingPackageUtils.ANDROID_MANIFEST_FILENAME)) continue;
 
                     toVerify.add(entry);
                 }
@@ -383,7 +418,8 @@ public class ApkSignatureVerifier {
                     }
                 }
             }
-            return new PackageParser.SigningDetails(lastSigs, SignatureSchemeVersion.JAR);
+            return new SigningDetailsWithDigests(
+                    new PackageParser.SigningDetails(lastSigs, SignatureSchemeVersion.JAR), null);
         } catch (GeneralSecurityException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
                     "Failed to collect certificates from " + apkPath, e);
@@ -532,6 +568,29 @@ public class ApkSignatureVerifier {
             return ApkSignatureSchemeV2Verifier.generateApkVerityRootHash(apkPath);
         } catch (SignatureNotFoundException e) {
             return null;
+        }
+    }
+
+    /**
+     * Extended signing details.
+     * @hide for internal use only.
+     */
+    public static class SigningDetailsWithDigests {
+        public final PackageParser.SigningDetails signingDetails;
+
+        /**
+         * APK Signature Schemes v2/v3/v4 might contain multiple content digests.
+         * SignatureVerifier usually chooses one of them to verify.
+         * For certain signature schemes, e.g. v4, this digest is verified continuously.
+         * For others, e.g. v2, the caller has to specify if they want to verify.
+         * Please refer to documentation for more details.
+         */
+        public final Map<Integer, byte[]> contentDigests;
+
+        SigningDetailsWithDigests(PackageParser.SigningDetails signingDetails,
+                Map<Integer, byte[]> contentDigests) {
+            this.signingDetails = signingDetails;
+            this.contentDigests = contentDigests;
         }
     }
 }

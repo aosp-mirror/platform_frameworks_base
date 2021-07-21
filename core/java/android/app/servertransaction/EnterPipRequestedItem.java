@@ -16,20 +16,21 @@
 
 package android.app.servertransaction;
 
+import android.annotation.Nullable;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
-import android.os.IBinder;
 import android.os.Parcel;
 
 /**
  * Request an activity to enter picture-in-picture mode.
  * @hide
  */
-public final class EnterPipRequestedItem extends ClientTransactionItem {
+public final class EnterPipRequestedItem extends ActivityTransactionItem {
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
-        client.handlePictureInPictureRequested(token);
+        client.handlePictureInPictureRequested(r);
     }
 
     // ObjectPoolItem implementation
@@ -67,7 +68,7 @@ public final class EnterPipRequestedItem extends ClientTransactionItem {
             };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return this == o;
     }
 

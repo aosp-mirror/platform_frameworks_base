@@ -17,8 +17,9 @@ package com.android.server.power.batterysaver;
 
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
-import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -26,7 +27,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -93,6 +93,20 @@ public class BatterySavingStats {
         }
     }
 
+    /** Whether the device is plugged in or not. */
+    interface PlugState {
+        int UNPLUGGED = 0;
+        int PLUGGED = 1;
+
+        int SHIFT = DozeState.SHIFT + DozeState.BITS;
+        int BITS = 1;
+        int MASK = (1 << BITS) - 1;
+
+        static int fromIndex(int index) {
+            return (index >> SHIFT) & MASK;
+        }
+    }
+
     /**
      * Various stats in each state.
      */
@@ -140,7 +154,6 @@ public class BatterySavingStats {
     private BatteryManagerInternal mBatteryManagerInternal;
 
     private static final int STATE_NOT_INITIALIZED = -1;
-    private static final int STATE_CHARGING = -2;
 
     /**
      * Current state, one of STATE_* or values returned by {@link #statesToIndex}.
@@ -153,19 +166,25 @@ public class BatterySavingStats {
      */
     @VisibleForTesting
     @GuardedBy("mLock")
-    final ArrayMap<Integer, Stat> mStats = new ArrayMap<>();
+    final SparseArray<Stat> mStats = new SparseArray<>();
 
     @GuardedBy("mLock")
     private int mBatterySaverEnabledCount = 0;
-
-    @GuardedBy("mLock")
-    private boolean mIsBatterySaverEnabled;
 
     @GuardedBy("mLock")
     private long mLastBatterySaverEnabledTime = 0;
 
     @GuardedBy("mLock")
     private long mLastBatterySaverDisabledTime = 0;
+
+    @GuardedBy("mLock")
+    private int mAdaptiveBatterySaverEnabledCount = 0;
+
+    @GuardedBy("mLock")
+    private long mLastAdaptiveBatterySaverEnabledTime = 0;
+
+    @GuardedBy("mLock")
+    private long mLastAdaptiveBatterySaverDisabledTime = 0;
 
     /** Visible for unit tests */
     @VisibleForTesting
@@ -189,10 +208,11 @@ public class BatterySavingStats {
      */
     @VisibleForTesting
     static int statesToIndex(
-            int batterySaverState, int interactiveState, int dozeState) {
+            int batterySaverState, int interactiveState, int dozeState, int plugState) {
         int ret = batterySaverState & BatterySaverState.MASK;
         ret |= (interactiveState & InteractiveState.MASK) << InteractiveState.SHIFT;
         ret |= (dozeState & DozeState.MASK) << DozeState.SHIFT;
+        ret |= (plugState & PlugState.MASK) << PlugState.SHIFT;
         return ret;
     }
 
@@ -204,12 +224,11 @@ public class BatterySavingStats {
         switch (state) {
             case STATE_NOT_INITIALIZED:
                 return "NotInitialized";
-            case STATE_CHARGING:
-                return "Charging";
         }
         return "BS=" + BatterySaverState.fromIndex(state)
                 + ",I=" + InteractiveState.fromIndex(state)
-                + ",D=" + DozeState.fromIndex(state);
+                + ",D=" + DozeState.fromIndex(state)
+                + ",P=" + PlugState.fromIndex(state);
     }
 
     /**
@@ -230,8 +249,9 @@ public class BatterySavingStats {
     /**
      * @return {@link Stat} fo a given state triplet.
      */
-    private Stat getStat(int batterySaverState, int interactiveState, int dozeState) {
-        return getStat(statesToIndex(batterySaverState, interactiveState, dozeState));
+    private Stat getStat(int batterySaverState, int interactiveState, int dozeState,
+            int plugState) {
+        return getStat(statesToIndex(batterySaverState, interactiveState, dozeState, plugState));
     }
 
     @VisibleForTesting
@@ -258,23 +278,14 @@ public class BatterySavingStats {
     }
 
     /**
-     * Called from the outside whenever any of the states changes, when the device is not plugged
-     * in.
+     * Called from the outside whenever any of the states change.
      */
-    public void transitionState(int batterySaverState, int interactiveState, int dozeState) {
+    void transitionState(int batterySaverState, int interactiveState, int dozeState,
+            int plugState) {
         synchronized (mLock) {
             final int newState = statesToIndex(
-                    batterySaverState, interactiveState, dozeState);
+                    batterySaverState, interactiveState, dozeState, plugState);
             transitionStateLocked(newState);
-        }
-    }
-
-    /**
-     * Called from the outside when the device is plugged in.
-     */
-    public void startCharging() {
-        synchronized (mLock) {
-            transitionStateLocked(STATE_CHARGING);
         }
     }
 
@@ -287,17 +298,33 @@ public class BatterySavingStats {
         final int batteryLevel = injectBatteryLevel();
         final int batteryPercent = injectBatteryPercent();
 
-        final boolean oldBatterySaverEnabled =
-                BatterySaverState.fromIndex(mCurrentState) != BatterySaverState.OFF;
-        final boolean newBatterySaverEnabled =
-                BatterySaverState.fromIndex(newState) != BatterySaverState.OFF;
-        if (oldBatterySaverEnabled != newBatterySaverEnabled) {
-            mIsBatterySaverEnabled = newBatterySaverEnabled;
-            if (newBatterySaverEnabled) {
-                mBatterySaverEnabledCount++;
-                mLastBatterySaverEnabledTime = injectCurrentTime();
-            } else {
-                mLastBatterySaverDisabledTime = injectCurrentTime();
+        final int oldBatterySaverState = mCurrentState < 0
+                ? BatterySaverState.OFF : BatterySaverState.fromIndex(mCurrentState);
+        final int newBatterySaverState = newState < 0
+                ? BatterySaverState.OFF : BatterySaverState.fromIndex(newState);
+        if (oldBatterySaverState != newBatterySaverState) {
+            switch (newBatterySaverState) {
+                case BatterySaverState.ON:
+                    mBatterySaverEnabledCount++;
+                    mLastBatterySaverEnabledTime = now;
+                    if (oldBatterySaverState == BatterySaverState.ADAPTIVE) {
+                        mLastAdaptiveBatterySaverDisabledTime = now;
+                    }
+                    break;
+                case BatterySaverState.OFF:
+                    if (oldBatterySaverState == BatterySaverState.ON) {
+                        mLastBatterySaverDisabledTime = now;
+                    } else {
+                        mLastAdaptiveBatterySaverDisabledTime = now;
+                    }
+                    break;
+                case BatterySaverState.ADAPTIVE:
+                    mAdaptiveBatterySaverEnabledCount++;
+                    mLastAdaptiveBatterySaverEnabledTime = now;
+                    if (oldBatterySaverState == BatterySaverState.ON) {
+                        mLastBatterySaverDisabledTime = now;
+                    }
+                    break;
             }
         }
 
@@ -364,23 +391,30 @@ public class BatterySavingStats {
         stat.endTime = 0;
     }
 
-    public void dump(PrintWriter pw, String indent) {
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("Battery saving stats:");
+        pw.increaseIndent();
+
         synchronized (mLock) {
-            pw.print(indent);
-            pw.println("Battery saving stats:");
-
-            indent = indent + "  ";
-
             final long now = System.currentTimeMillis();
             final long nowElapsed = injectCurrentTime();
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-            pw.print(indent);
             pw.print("Battery Saver is currently: ");
-            pw.println(mIsBatterySaverEnabled ? "ON" : "OFF");
+            switch (BatterySaverState.fromIndex(mCurrentState)) {
+                case BatterySaverState.OFF:
+                    pw.println("OFF");
+                    break;
+                case BatterySaverState.ON:
+                    pw.println("ON");
+                    break;
+                case BatterySaverState.ADAPTIVE:
+                    pw.println("ADAPTIVE");
+                    break;
+            }
+
+            pw.increaseIndent();
             if (mLastBatterySaverEnabledTime > 0) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print("Last ON time: ");
                 pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverEnabledTime)));
                 pw.print(" ");
@@ -389,8 +423,6 @@ public class BatterySavingStats {
             }
 
             if (mLastBatterySaverDisabledTime > 0) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print("Last OFF time: ");
                 pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverDisabledTime)));
                 pw.print(" ");
@@ -398,46 +430,64 @@ public class BatterySavingStats {
                 pw.println();
             }
 
-            pw.print(indent);
-            pw.print("  ");
-            pw.print("Times enabled: ");
+            pw.print("Times full enabled: ");
             pw.println(mBatterySaverEnabledCount);
 
+            if (mLastAdaptiveBatterySaverEnabledTime > 0) {
+                pw.print("Last ADAPTIVE ON time: ");
+                pw.print(sdf.format(
+                        new Date(now - nowElapsed + mLastAdaptiveBatterySaverEnabledTime)));
+                pw.print(" ");
+                TimeUtils.formatDuration(mLastAdaptiveBatterySaverEnabledTime, nowElapsed, pw);
+                pw.println();
+            }
+            if (mLastAdaptiveBatterySaverDisabledTime > 0) {
+                pw.print("Last ADAPTIVE OFF time: ");
+                pw.print(sdf.format(
+                        new Date(now - nowElapsed + mLastAdaptiveBatterySaverDisabledTime)));
+                pw.print(" ");
+                TimeUtils.formatDuration(mLastAdaptiveBatterySaverDisabledTime, nowElapsed, pw);
+                pw.println();
+            }
+            pw.print("Times adaptive enabled: ");
+            pw.println(mAdaptiveBatterySaverEnabledCount);
+
+            pw.decreaseIndent();
             pw.println();
 
-            pw.print(indent);
             pw.println("Drain stats:");
 
-            pw.print(indent);
             pw.println("                   Battery saver OFF                          ON");
-            dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
+            dumpLineLocked(pw, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.NOT_DOZING, "NonDoze");
-            dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
+            dumpLineLocked(pw, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.NOT_DOZING, "       ");
 
-            dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
+            dumpLineLocked(pw, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.DEEP, "Deep   ");
-            dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
+            dumpLineLocked(pw, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.DEEP, "       ");
 
-            dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
+            dumpLineLocked(pw, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.LIGHT, "Light  ");
-            dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
+            dumpLineLocked(pw, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.LIGHT, "       ");
         }
+        pw.decreaseIndent();
     }
 
-    private void dumpLineLocked(PrintWriter pw, String indent,
+    private void dumpLineLocked(IndentingPrintWriter pw,
             int interactiveState, String interactiveLabel,
             int dozeState, String dozeLabel) {
-        pw.print(indent);
         pw.print(dozeLabel);
         pw.print(" ");
         pw.print(interactiveLabel);
         pw.print(": ");
 
-        final Stat offStat = getStat(BatterySaverState.OFF, interactiveState, dozeState);
-        final Stat onStat = getStat(BatterySaverState.ON, interactiveState, dozeState);
+        final Stat offStat = getStat(BatterySaverState.OFF, interactiveState, dozeState,
+                PlugState.UNPLUGGED);
+        final Stat onStat = getStat(BatterySaverState.ON, interactiveState, dozeState,
+                PlugState.UNPLUGGED);
 
         pw.println(String.format("%6dm %6dmAh(%3d%%) %8.1fmAh/h     %6dm %6dmAh(%3d%%) %8.1fmAh/h",
                 offStat.totalMinutes(),

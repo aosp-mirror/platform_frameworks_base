@@ -16,13 +16,18 @@
 
 package android.bluetooth.le;
 
-import android.bluetooth.le.ScanRecord;
+import android.os.BytesMatcher;
 import android.os.ParcelUuid;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.internal.util.HexDump;
+
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Unit test cases for {@link ScanRecord}.
@@ -31,6 +36,66 @@ import java.util.Arrays;
  * 'com.android.bluetooth.tests/android.bluetooth.BluetoothTestRunner'
  */
 public class ScanRecordTest extends TestCase {
+    /**
+     * Example raw beacons captured from a Blue Charm BC011
+     */
+    private static final String RECORD_URL = "0201060303AAFE1716AAFE10EE01626C7565636861726D626561636F6E730009168020691E0EFE13551109426C7565436861726D5F313639363835000000";
+    private static final String RECORD_UUID = "0201060303AAFE1716AAFE00EE626C7565636861726D31000000000001000009168020691E0EFE13551109426C7565436861726D5F313639363835000000";
+    private static final String RECORD_TLM = "0201060303AAFE1116AAFE20000BF017000008874803FB93540916802069080EFE13551109426C7565436861726D5F313639363835000000000000000000";
+    private static final String RECORD_IBEACON = "0201061AFF4C000215426C7565436861726D426561636F6E730EFE1355C509168020691E0EFE13551109426C7565436861726D5F31363936383500000000";
+
+    @SmallTest
+    public void testMatchesAnyField_Eddystone_Parser() {
+        final List<String> found = new ArrayList<>();
+        final Predicate<byte[]> matcher = (v) -> {
+            found.add(HexDump.toHexString(v));
+            return false;
+        };
+        ScanRecord.parseFromBytes(HexDump.hexStringToByteArray(RECORD_URL))
+                .matchesAnyField(matcher);
+
+        assertEquals(Arrays.asList(
+                "020106",
+                "0303AAFE",
+                "1716AAFE10EE01626C7565636861726D626561636F6E7300",
+                "09168020691E0EFE1355",
+                "1109426C7565436861726D5F313639363835"), found);
+    }
+
+    @SmallTest
+    public void testMatchesAnyField_Eddystone() {
+        final BytesMatcher matcher = BytesMatcher.decode("⊆0016AAFE/00FFFFFF");
+        assertMatchesAnyField(RECORD_URL, matcher);
+        assertMatchesAnyField(RECORD_UUID, matcher);
+        assertMatchesAnyField(RECORD_TLM, matcher);
+        assertNotMatchesAnyField(RECORD_IBEACON, matcher);
+    }
+
+    @SmallTest
+    public void testMatchesAnyField_iBeacon_Parser() {
+        final List<String> found = new ArrayList<>();
+        final Predicate<byte[]> matcher = (v) -> {
+            found.add(HexDump.toHexString(v));
+            return false;
+        };
+        ScanRecord.parseFromBytes(HexDump.hexStringToByteArray(RECORD_IBEACON))
+                .matchesAnyField(matcher);
+
+        assertEquals(Arrays.asList(
+                "020106",
+                "1AFF4C000215426C7565436861726D426561636F6E730EFE1355C5",
+                "09168020691E0EFE1355",
+                "1109426C7565436861726D5F313639363835"), found);
+    }
+
+    @SmallTest
+    public void testMatchesAnyField_iBeacon() {
+        final BytesMatcher matcher = BytesMatcher.decode("⊆00FF4C0002/00FFFFFFFF");
+        assertNotMatchesAnyField(RECORD_URL, matcher);
+        assertNotMatchesAnyField(RECORD_UUID, matcher);
+        assertNotMatchesAnyField(RECORD_TLM, matcher);
+        assertMatchesAnyField(RECORD_IBEACON, matcher);
+    }
 
     @SmallTest
     public void testParser() {
@@ -69,5 +134,15 @@ public class ScanRecordTest extends TestCase {
                     "> but was:<" + Arrays.toString(actual) + ">");
         }
 
+    }
+
+    private static void assertMatchesAnyField(String record, BytesMatcher matcher) {
+        assertTrue(ScanRecord.parseFromBytes(HexDump.hexStringToByteArray(record))
+                .matchesAnyField(matcher));
+    }
+
+    private static void assertNotMatchesAnyField(String record, BytesMatcher matcher) {
+        assertFalse(ScanRecord.parseFromBytes(HexDump.hexStringToByteArray(record))
+                .matchesAnyField(matcher));
     }
 }

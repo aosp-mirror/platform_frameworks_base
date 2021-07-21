@@ -74,6 +74,7 @@ public class NekoControlsService : ControlsProviderService(), PrefState.PrefsLis
     private val controls = HashMap<String, Control>()
     private val publishers = ArrayList<UglyPublisher>()
     private val rng = Random()
+    private val metricsLogger = MetricsLogger()
 
     private var lastToyIcon: Icon? = null
 
@@ -184,7 +185,6 @@ public class NekoControlsService : ControlsProviderService(), PrefState.PrefsLis
         return getPendingIntent()
     }
 
-
     override fun performControlAction(
         controlId: String,
         action: ControlAction,
@@ -196,7 +196,7 @@ public class NekoControlsService : ControlsProviderService(), PrefState.PrefsLis
                 controls[CONTROL_ID_FOOD] = makeFoodBowlControl(true)
                 Log.v(TAG, "Bowl refilled. (Registering job.)")
                 NekoService.registerJob(this, FOOD_SPAWN_CAT_DELAY_MINS)
-                MetricsLogger.histogram(this, "egg_neko_offered_food", 11)
+                metricsLogger.histogram("egg_neko_offered_food", 11)
                 prefs.foodState = 11
             }
             CONTROL_ID_TOY -> {

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.collection;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.collection.coordinator.PreparationCoordinator;
 
 import java.util.ArrayList;
@@ -39,9 +38,8 @@ public class GroupEntry extends ListEntry {
             Collections.unmodifiableList(mChildren);
     private int mUntruncatedChildCount;
 
-    @VisibleForTesting
-    public GroupEntry(String key) {
-        super(key);
+    GroupEntry(String key, long creationTime) {
+        super(key, creationTime);
     }
 
     @Override
@@ -59,8 +57,7 @@ public class GroupEntry extends ListEntry {
         return mUnmodifiableChildren;
     }
 
-    @VisibleForTesting
-    public void setSummary(@Nullable NotificationEntry summary) {
+    void setSummary(@Nullable NotificationEntry summary) {
         mSummary = summary;
     }
 
@@ -98,6 +95,6 @@ public class GroupEntry extends ListEntry {
         return mChildren;
     }
 
-    public static final GroupEntry ROOT_ENTRY = new GroupEntry("<root>");
+    public static final GroupEntry ROOT_ENTRY = new GroupEntry("<root>", 0);
 
 }

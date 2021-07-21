@@ -19,10 +19,10 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Version of Space that can be resized by a tunable setting.
@@ -77,7 +77,7 @@ public class TunablePadding implements Tunable {
     /**
      * Exists for easy injecting in tests.
      */
-    @Singleton
+    @SysUISingleton
     public static class TunablePaddingService {
 
         private final TunerService mTunerService;

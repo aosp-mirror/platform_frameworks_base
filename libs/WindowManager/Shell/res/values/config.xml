@@ -1,21 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
-** Copyright 2019, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
--->
+    Copyright (C) 2020 The Android Open Source Project
 
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
 <resources>
+    <!-- Animation duration for PIP when entering. -->
+    <integer name="config_pipEnterAnimationDuration">425</integer>
+
+    <!-- Animation duration for PIP when exiting. -->
+    <integer name="config_pipExitAnimationDuration">250</integer>
+
+    <!-- Animation duration for resizing of PIP. -->
+    <integer name="config_pipResizeAnimationDuration">425</integer>
+
+    <!-- Animation duration for crossfading of PIP (specifically to fade out the layer on top). -->
+    <integer name="config_pipCrossfadeAnimationDuration">150</integer>
+
+    <!-- Allow dragging the PIP to a location to close it -->
+    <bool name="config_pipEnableDismissDragToEdge">true</bool>
+
+    <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
+    <bool name="config_pipEnableResizeForMenu">true</bool>
+
+    <!-- Allow PIP to resize via dragging the corner of PiP. -->
+    <bool name="config_pipEnableDragCornerResize">false</bool>
+
+    <!-- PiP minimum size, which is a % based off the shorter side of display width and height -->
+    <fraction name="config_pipShortestEdgePercent">40%</fraction>
+
+    <!-- Animation duration when using long press on recents to dock -->
+    <integer name="long_press_dock_anim_duration">250</integer>
+
+    <!-- Animation duration for translating of one handed when trigger / dismiss. -->
+    <integer name="config_one_handed_translate_animation_duration">600</integer>
+
+    <!-- One handed mode default offset % of display size -->
+    <fraction name="config_one_handed_offset">40%</fraction>
+
+    <!-- Allow one handed to enable round corner -->
+    <bool name="config_one_handed_enable_round_corner">true</bool>
+
+    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
+     when the PIP menu is shown in center. -->
+    <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
+
+    <!-- Animation duration when exit starting window: fade out icon -->
+    <integer name="starting_window_app_reveal_icon_fade_out_duration">133</integer>
+
+    <!-- Animation duration when exit starting window: reveal app -->
+    <integer name="starting_window_app_reveal_anim_delay">83</integer>
+
+    <!-- Animation duration when exit starting window: reveal app -->
+    <integer name="starting_window_app_reveal_anim_duration">266</integer>
 </resources>

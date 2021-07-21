@@ -26,8 +26,8 @@ import android.widget.TextView;
 import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
 import com.android.internal.widget.ViewClippingUtil;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
@@ -41,6 +41,7 @@ public class TransformState {
     public static final int TRANSFORM_X = 0x1;
     public static final int TRANSFORM_Y = 0x10;
     public static final int TRANSFORM_ALL = TRANSFORM_X | TRANSFORM_Y;
+    public static final int ALIGN_END_TAG = R.id.align_transform_end_tag;
 
     private static final float UNDEFINED = -1f;
     private static final int TRANSFORMATION_START_X = R.id.transformation_start_x_tag;
@@ -78,11 +79,13 @@ public class TransformState {
     private boolean mSameAsAny;
     private float mTransformationEndY = UNDEFINED;
     private float mTransformationEndX = UNDEFINED;
+    private boolean mAlignEnd;
     protected Interpolator mDefaultInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     public void initFrom(View view, TransformInfo transformInfo) {
         mTransformedView = view;
         mTransformInfo = transformInfo;
+        mAlignEnd = Boolean.TRUE.equals(view.getTag(ALIGN_END_TAG));
     }
 
     /**
@@ -135,13 +138,16 @@ public class TransformState {
         final View transformedView = mTransformedView;
         boolean transformX = (transformationFlags & TRANSFORM_X) != 0;
         boolean transformY = (transformationFlags & TRANSFORM_Y) != 0;
-        int viewHeight = getViewHeight();
-        int otherHeight = otherState.getViewHeight();
-        boolean differentHeight = otherHeight != viewHeight && otherHeight != 0 && viewHeight != 0;
-        int viewWidth = getViewWidth();
-        int otherWidth = otherState.getViewWidth();
-        boolean differentWidth = otherWidth != viewWidth && otherWidth != 0 && viewWidth != 0;
-        boolean transformScale = transformScale(otherState) && (differentHeight || differentWidth);
+        int ownContentHeight = getContentHeight();
+        int otherContentHeight = otherState.getContentHeight();
+        boolean differentHeight = otherContentHeight != ownContentHeight
+                && otherContentHeight != 0 && ownContentHeight != 0;
+        int ownContentWidth = getContentWidth();
+        int otherContentWidth = otherState.getContentWidth();
+        boolean differentWidth = otherContentWidth != ownContentWidth
+                && otherContentWidth != 0 && ownContentWidth != 0;
+        boolean transformScale = (differentHeight || differentWidth) && transformScale(otherState);
+        boolean transformRightEdge = transformRightEdge(otherState);
         // lets animate the positions correctly
         if (transformationAmount == 0.0f
                 || transformX && getTransformationStartX() == UNDEFINED
@@ -159,7 +165,14 @@ public class TransformState {
             if (customTransformation == null
                     || !customTransformation.initTransformation(this, otherState)) {
                 if (transformX) {
-                    setTransformationStartX(otherPosition[0] - ownStablePosition[0]);
+                    if (transformRightEdge) {
+                        int otherViewWidth = otherState.getTransformedView().getWidth();
+                        int ownViewWidth = transformedView.getWidth();
+                        setTransformationStartX((otherPosition[0] + otherViewWidth)
+                                - (ownStablePosition[0] + ownViewWidth));
+                    } else {
+                        setTransformationStartX(otherPosition[0] - ownStablePosition[0]);
+                    }
                 }
                 if (transformY) {
                     setTransformationStartY(otherPosition[1] - ownStablePosition[1]);
@@ -167,15 +180,15 @@ public class TransformState {
                 // we also want to animate the scale if we're the same
                 View otherView = otherState.getTransformedView();
                 if (transformScale && differentWidth) {
-                    setTransformationStartScaleX(otherWidth * otherView.getScaleX()
-                            / (float) viewWidth);
-                    transformedView.setPivotX(0);
+                    setTransformationStartScaleX(otherContentWidth * otherView.getScaleX()
+                            / (float) ownContentWidth);
+                    transformedView.setPivotX(transformRightEdge ? transformedView.getWidth() : 0);
                 } else {
                     setTransformationStartScaleX(UNDEFINED);
                 }
                 if (transformScale && differentHeight) {
-                    setTransformationStartScaleY(otherHeight * otherView.getScaleY()
-                            / (float) viewHeight);
+                    setTransformationStartScaleY(otherContentHeight * otherView.getScaleY()
+                            / (float) ownContentHeight);
                     transformedView.setPivotY(0);
                 } else {
                     setTransformationStartScaleY(UNDEFINED);
@@ -239,16 +252,30 @@ public class TransformState {
         }
     }
 
-    protected int getViewWidth() {
+    /**
+     * The width of the content of this view.  For some views, like TextViews, this will be the
+     * width of content inside the view which is transforming, rather than the view's full width.
+     */
+    protected int getContentWidth() {
         return mTransformedView.getWidth();
     }
 
-    protected int getViewHeight() {
+    /**
+     * The height of the content of this view.  For some views, like TextViews, this will be the
+     * height of content inside the view which is transforming, rather than the view's full height.
+     */
+    protected int getContentHeight() {
         return mTransformedView.getHeight();
     }
 
     protected boolean transformScale(TransformState otherState) {
         return sameAs(otherState);
+    }
+
+    protected boolean transformRightEdge(TransformState otherState) {
+        boolean alignEnd = mAlignEnd && otherState.mAlignEnd;
+        boolean isRtl = mTransformedView.isLayoutRtl() && otherState.mTransformedView.isLayoutRtl();
+        return alignEnd ^ isRtl;
     }
 
     /**
@@ -302,6 +329,9 @@ public class TransformState {
         boolean transformX = (transformationFlags & TRANSFORM_X) != 0;
         boolean transformY = (transformationFlags & TRANSFORM_Y) != 0;
         boolean transformScale = transformScale(otherState);
+        boolean transformRightEdge = transformRightEdge(otherState);
+        int ownContentWidth = getContentWidth();
+        int otherContentWidth = otherState.getContentWidth();
         // lets animate the positions correctly
         if (transformationAmount == 0.0f) {
             if (transformX) {
@@ -316,14 +346,13 @@ public class TransformState {
                         : transformedView.getTranslationY();
                 setTransformationStartY(start);
             }
-            View otherView = otherState.getTransformedView();
-            if (transformScale && otherState.getViewWidth() != getViewWidth()) {
+            if (transformScale && otherContentWidth != ownContentWidth) {
                 setTransformationStartScaleX(transformedView.getScaleX());
-                transformedView.setPivotX(0);
+                transformedView.setPivotX(transformRightEdge ? transformedView.getWidth() : 0);
             } else {
                 setTransformationStartScaleX(UNDEFINED);
             }
-            if (transformScale && otherState.getViewHeight() != getViewHeight()) {
+            if (transformScale && otherState.getContentHeight() != getContentHeight()) {
                 setTransformationStartScaleY(transformedView.getScaleY());
                 transformedView.setPivotY(0);
             } else {
@@ -336,7 +365,11 @@ public class TransformState {
         int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
         int[] ownPosition = getLaidOutLocationOnScreen();
         if (transformX) {
-            float endX = otherStablePosition[0] - ownPosition[0];
+            int ownViewWidth = transformedView.getWidth();
+            int otherViewWidth = otherState.getTransformedView().getWidth();
+            float endX = transformRightEdge
+                    ? (otherStablePosition[0] + otherViewWidth) - (ownPosition[0] + ownViewWidth)
+                    : otherStablePosition[0] - ownPosition[0];
             float interpolation = interpolatedValue;
             if (customTransformation != null) {
                 if (customTransformation.customTransformTarget(this, otherState)) {
@@ -370,19 +403,18 @@ public class TransformState {
                     interpolation));
         }
         if (transformScale) {
-            View otherView = otherState.getTransformedView();
             float transformationStartScaleX = getTransformationStartScaleX();
             if (transformationStartScaleX != UNDEFINED) {
                 transformedView.setScaleX(
                         NotificationUtils.interpolate(transformationStartScaleX,
-                                (otherState.getViewWidth() / (float) getViewWidth()),
+                                (otherContentWidth / (float) ownContentWidth),
                                 interpolatedValue));
             }
             float transformationStartScaleY = getTransformationStartScaleY();
             if (transformationStartScaleY != UNDEFINED) {
                 transformedView.setScaleY(
                         NotificationUtils.interpolate(transformationStartScaleY,
-                                (otherState.getViewHeight() / (float) getViewHeight()),
+                                (otherState.getContentHeight() / (float) getContentHeight()),
                                 interpolatedValue));
             }
         }
@@ -456,9 +488,6 @@ public class TransformState {
         if (view instanceof ImageView) {
             ImageTransformState result = ImageTransformState.obtain();
             result.initFrom(view, transformInfo);
-            if (view.getId() == com.android.internal.R.id.reply_icon_action) {
-                ((TransformState) result).setIsSameAsAnyView(true);
-            }
             return result;
         }
         if (view instanceof ProgressBar) {
@@ -532,6 +561,7 @@ public class TransformState {
         mSameAsAny = false;
         mTransformationEndX = UNDEFINED;
         mTransformationEndY = UNDEFINED;
+        mAlignEnd = false;
         mDefaultInterpolator = Interpolators.FAST_OUT_SLOW_IN;
     }
 

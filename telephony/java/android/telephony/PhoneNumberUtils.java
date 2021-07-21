@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
@@ -477,7 +478,9 @@ public class PhoneNumberUtils {
 
     /**
      * Compare phone numbers a and b, return true if they're identical enough for caller ID purposes.
+     * @deprecated use {@link #areSamePhoneNumber(String, String, String)} instead
      */
+    @Deprecated
     public static boolean compare(String a, String b) {
         // We've used loose comparation at least Eclair, which may change in the future.
 
@@ -488,7 +491,9 @@ public class PhoneNumberUtils {
      * Compare phone numbers a and b, and return true if they're identical
      * enough for caller ID purposes. Checks a resource to determine whether
      * to use a strict or loose comparison algorithm.
+     * @deprecated use {@link #areSamePhoneNumber(String, String, String)} instead
      */
+    @Deprecated
     public static boolean compare(Context context, String a, String b) {
         boolean useStrict = context.getResources().getBoolean(
                com.android.internal.R.bool.config_use_strict_phone_number_comparation);
@@ -1832,7 +1837,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Deprecated
     public static boolean isPotentialEmergencyNumber(int subId, String number) {
         // Check against the emergency numbers listed by the RIL / SIM,
@@ -2108,7 +2113,7 @@ public class PhoneNumberUtils {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean isPotentialLocalEmergencyNumber(Context context, String number) {
         return isPotentialLocalEmergencyNumber(context, getDefaultVoiceSubId(), number);
     }
@@ -2138,7 +2143,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Deprecated
     public static boolean isPotentialLocalEmergencyNumber(Context context, int subId,
             String number) {
@@ -3217,7 +3222,7 @@ public class PhoneNumberUtils {
         }
 
         // The conversion map is not defined (this is default). Skip conversion.
-        if (sConvertToEmergencyMap == null || sConvertToEmergencyMap.length == 0 ) {
+        if (sConvertToEmergencyMap == null || sConvertToEmergencyMap.length == 0) {
             return number;
         }
 
@@ -3252,5 +3257,48 @@ public class PhoneNumberUtils {
             }
         }
         return number;
+    }
+
+    /**
+     * Determines if two phone numbers are the same.
+     * <p>
+     * Matching is based on <a href="https://github.com/google/libphonenumber>libphonenumber</a>.
+     * Unlike {@link #compare(String, String)}, matching takes into account national
+     * dialing plans rather than simply matching the last 7 digits of the two phone numbers. As a
+     * result, it is expected that some numbers which would match using the previous method will no
+     * longer match using this new approach.
+     *
+     * @param number1
+     * @param number2
+     * @param defaultCountryIso The lowercase two letter ISO 3166-1 country code. Used when parsing
+     *                          the phone numbers where it is not possible to determine the country
+     *                          associated with a phone number based on the number alone. It
+     *                          is recommended to pass in
+     *                          {@link TelephonyManager#getNetworkCountryIso()}.
+     * @return True if the two given phone number are same.
+     */
+    public static boolean areSamePhoneNumber(@NonNull String number1,
+            @NonNull String number2, @NonNull String defaultCountryIso) {
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        PhoneNumber n1;
+        PhoneNumber n2;
+        defaultCountryIso = defaultCountryIso.toUpperCase();
+        try {
+            n1 = util.parseAndKeepRawInput(number1, defaultCountryIso);
+            n2 = util.parseAndKeepRawInput(number2, defaultCountryIso);
+        } catch (NumberParseException e) {
+            return false;
+        }
+
+        PhoneNumberUtil.MatchType matchType = util.isNumberMatch(n1, n2);
+        if (matchType == PhoneNumberUtil.MatchType.EXACT_MATCH
+                || matchType == PhoneNumberUtil.MatchType.NSN_MATCH) {
+            return true;
+        } else if (matchType == PhoneNumberUtil.MatchType.SHORT_NSN_MATCH) {
+            return (n1.getNationalNumber() == n2.getNationalNumber()
+                    && n1.getCountryCode() == n2.getCountryCode());
+        } else {
+            return false;
+        }
     }
 }

@@ -21,6 +21,20 @@
           "include-filter": "android.appsecurity.cts.OverlayHostTest"
         }
       ]
+    },
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.om.cts"
+        }
+      ]
     }
   ]
 }

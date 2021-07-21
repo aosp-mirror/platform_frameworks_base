@@ -24,21 +24,20 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -84,8 +83,7 @@ class TransferOwnershipMetadataManager {
         FileOutputStream stream = null;
         try {
             stream = atomicFile.startWrite();
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(stream, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(stream);
             serializer.startDocument(null, true);
             insertSimpleTag(serializer, TAG_USER_ID, Integer.toString(params.userId));
             insertSimpleTag(serializer,
@@ -105,7 +103,7 @@ class TransferOwnershipMetadataManager {
         return false;
     }
 
-    private void insertSimpleTag(XmlSerializer serializer, String tagName, String value)
+    private void insertSimpleTag(TypedXmlSerializer serializer, String tagName, String value)
             throws IOException {
         serializer.startTag(null, tagName);
         serializer.text(value);
@@ -122,8 +120,7 @@ class TransferOwnershipMetadataManager {
         Slog.d(TAG, "Loading TransferOwnershipMetadataManager from "
                 + transferOwnershipMetadataFile);
         try (FileInputStream stream = new FileInputStream(transferOwnershipMetadataFile)) {
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            final TypedXmlPullParser parser = Xml.resolvePullParser(stream);
             return parseMetadataFile(parser);
         } catch (IOException | XmlPullParserException | IllegalArgumentException e) {
             Slog.e(TAG, "Caught exception while trying to load the "
@@ -132,7 +129,7 @@ class TransferOwnershipMetadataManager {
         return null;
     }
 
-    private Metadata parseMetadataFile(XmlPullParser parser)
+    private Metadata parseMetadataFile(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type;
         final int outerDepth = parser.getDepth();

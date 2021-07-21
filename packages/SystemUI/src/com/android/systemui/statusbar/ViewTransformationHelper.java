@@ -25,8 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -106,12 +106,8 @@ public class ViewTransformationHelper implements TransformableView,
             mViewTransformationAnimation.cancel();
         }
         mViewTransformationAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
-        mViewTransformationAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                transformTo(notification, animation.getAnimatedFraction());
-            }
-        });
+        mViewTransformationAnimation.addUpdateListener(
+                animation -> transformTo(notification, animation.getAnimatedFraction()));
         mViewTransformationAnimation.setInterpolator(Interpolators.LINEAR);
         mViewTransformationAnimation.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
         mViewTransformationAnimation.addListener(new AnimatorListenerAdapter() {
@@ -167,12 +163,8 @@ public class ViewTransformationHelper implements TransformableView,
             mViewTransformationAnimation.cancel();
         }
         mViewTransformationAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
-        mViewTransformationAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                transformFrom(notification, animation.getAnimatedFraction());
-            }
-        });
+        mViewTransformationAnimation.addUpdateListener(
+                animation -> transformFrom(notification, animation.getAnimatedFraction()));
         mViewTransformationAnimation.addListener(new AnimatorListenerAdapter() {
             public boolean mCancelled;
 

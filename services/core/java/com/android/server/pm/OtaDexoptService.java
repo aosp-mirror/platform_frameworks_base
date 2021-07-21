@@ -128,12 +128,12 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         synchronized (mPackageManagerService.mLock) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
-                    mPackageManagerService.mSettings.mPackages.values(), mPackageManagerService,
-                    DEBUG_DEXOPT);
+                    mPackageManagerService.mSettings.getPackagesLocked().values(),
+                    mPackageManagerService, DEBUG_DEXOPT);
             // Remove Platform Package from A/B OTA b/160735835.
             important.removeIf(isPlatformPackage);
             // Others: we should optimize this with the (first-)boot compiler-reason.
-            others = new ArrayList<>(mPackageManagerService.mSettings.mPackages.values());
+            others = new ArrayList<>(mPackageManagerService.mSettings.getPackagesLocked().values());
             others.removeAll(important);
             others.removeIf(PackageManagerServiceUtils.REMOVE_IF_NULL_PKG);
             others.removeIf(isPlatformPackage);
@@ -384,17 +384,17 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 continue;
             }
-            if (pkg.getCodePath() == null) {
+            if (pkg.getPath() == null) {
                 Slog.w(TAG, "Package " + pkg + " can be optimized but has null codePath");
                 continue;
             }
 
             // If the path is in /system, /vendor, /product or /system_ext, ignore. It will
             // have been ota-dexopted into /data/ota and moved into the dalvik-cache already.
-            if (pkg.getCodePath().startsWith("/system")
-                    || pkg.getCodePath().startsWith("/vendor")
-                    || pkg.getCodePath().startsWith("/product")
-                    || pkg.getCodePath().startsWith("/system_ext")) {
+            if (pkg.getPath().startsWith("/system")
+                    || pkg.getPath().startsWith("/vendor")
+                    || pkg.getPath().startsWith("/product")
+                    || pkg.getPath().startsWith("/system_ext")) {
                 continue;
             }
 
@@ -408,7 +408,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                 for (String path : paths) {
                     String oatDir = PackageDexOptimizer.getOatDir(
-                            new File(pkg.getCodePath())).getAbsolutePath();
+                            new File(pkg.getPath())).getAbsolutePath();
 
                     // TODO: Check first whether there is an artifact, to save the roundtrip time.
 

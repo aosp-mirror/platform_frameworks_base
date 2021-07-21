@@ -1,0 +1,101 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.util.settings;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import android.database.ContentObserver;
+import android.provider.Settings;
+import android.testing.AndroidTestingRunner;
+
+import androidx.test.filters.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Collection;
+import java.util.Map;
+
+@SmallTest
+@RunWith(AndroidTestingRunner.class)
+public class FakeSettingsTest extends SysuiTestCase {
+    @Mock
+    ContentObserver mContentObserver;
+
+    private FakeSettings mFakeSettings;
+
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        mFakeSettings = new FakeSettings();
+    }
+
+    /**
+     * Test FakeExecutor that receives non-delayed items to execute.
+     */
+    @Test
+    public void testPutAndGet() throws Settings.SettingNotFoundException {
+        mFakeSettings.putInt("foobar", 1);
+        assertThat(mFakeSettings.getInt("foobar")).isEqualTo(1);
+    }
+
+    @Test
+    public void testInitialize() {
+        mFakeSettings = new FakeSettings("abra", "cadabra");
+        assertThat(mFakeSettings.getString("abra")).isEqualTo("cadabra");
+    }
+
+    @Test
+    public void testInitializeWithMap() {
+        mFakeSettings = new FakeSettings(Map.of("one fish", "two fish", "red fish", "blue fish"));
+        assertThat(mFakeSettings.getString("red fish")).isEqualTo("blue fish");
+        assertThat(mFakeSettings.getString("one fish")).isEqualTo("two fish");
+    }
+
+    @Test
+    public void testRegisterContentObserver() {
+        mFakeSettings.registerContentObserver("cat", mContentObserver);
+
+        mFakeSettings.putString("cat", "hat");
+
+        verify(mContentObserver).dispatchChange(anyBoolean(), any(Collection.class), anyInt());
+    }
+
+    @Test
+    public void testUnregisterContentObserver() {
+        mFakeSettings.registerContentObserver("cat", mContentObserver);
+        mFakeSettings.unregisterContentObserver(mContentObserver);
+
+        mFakeSettings.putString("cat", "hat");
+
+        verify(mContentObserver, never()).dispatchChange(
+                anyBoolean(), any(Collection.class), anyInt());
+    }
+}

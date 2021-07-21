@@ -15,11 +15,11 @@
  */
 package com.android.server.content;
 
+import android.app.ActivityManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.os.SystemClock;
 import android.util.Pair;
 
-import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 
 import java.util.HashMap;
@@ -57,12 +57,7 @@ class SyncAdapterStateFetcher {
      * Return UID active state.
      */
     public boolean isAppActive(int uid) {
-        final AppStateTracker ast =
-                LocalServices.getService(AppStateTracker.class);
-        if (ast == null) {
-            return false;
-        }
-
-        return ast.isUidActive(uid);
+        final ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
+        return (ami != null) ? ami.isUidActive(uid) : false;
     }
 }

@@ -1,0 +1,4 @@
+include /BATTERY_STATS_OWNERS
+
+# CPU
+per-file *Cpu* = file:/core/java/com/android/internal/os/CPU_OWNERS

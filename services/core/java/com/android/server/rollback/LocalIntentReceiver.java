@@ -41,7 +41,7 @@ class LocalIntentReceiver {
         }
     };
 
-    public IntentSender getIntentSender() {
+    IntentSender getIntentSender() {
         return new IntentSender((IIntentSender) mLocalSender);
     }
 }

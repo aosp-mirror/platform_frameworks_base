@@ -21,7 +21,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
@@ -46,6 +45,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Xfermode;
+import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -808,10 +808,7 @@ public abstract class Drawable {
      *
      * @return {@code true} if {@link android.R.attr#state_focused} is specified
      * for this drawable.
-     *
-     * @hide
      */
-    @TestApi
     public boolean hasFocusStateSpecified() {
         return false;
     }
@@ -1719,7 +1716,7 @@ public abstract class Drawable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static BlendMode parseBlendMode(int value, BlendMode defaultMode) {
         switch (value) {
             case 3: return BlendMode.SRC_OVER;

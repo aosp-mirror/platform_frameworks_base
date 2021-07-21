@@ -16,8 +16,8 @@
 
 package com.android.systemui.util
 
+import android.util.IndentingPrintWriter
 import android.view.ViewGroup
-import com.android.internal.util.IndentingPrintWriter
 import java.io.PrintWriter
 
 /** [Sequence] that yields all of the direct children of this [ViewGroup] */

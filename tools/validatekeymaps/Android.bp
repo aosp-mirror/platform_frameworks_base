@@ -4,6 +4,15 @@
 // Keymap validation tool.
 //
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_binary_host {
     name: "validatekeymaps",
 
@@ -20,12 +29,21 @@ cc_binary_host {
         "libutils",
         "libcutils",
         "liblog",
+        "libui-types",
     ],
+    target: {
+        linux_glibc: {
+            static_libs: [
+                // libbinder is only available for linux
+                "libbinder",
+            ],
+        },
+    },
 
     // This tool is prebuilt if we're doing an app-only build.
     product_variables: {
         unbundled_build: {
-          enabled: false,
+            enabled: false,
         },
     },
 }

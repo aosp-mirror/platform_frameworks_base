@@ -36,6 +36,22 @@ public class WifiUtils {
 
     private static final int INVALID_RSSI = -127;
 
+    static final int[] WIFI_PIE = {
+            com.android.internal.R.drawable.ic_wifi_signal_0,
+            com.android.internal.R.drawable.ic_wifi_signal_1,
+            com.android.internal.R.drawable.ic_wifi_signal_2,
+            com.android.internal.R.drawable.ic_wifi_signal_3,
+            com.android.internal.R.drawable.ic_wifi_signal_4
+    };
+
+    static final int[] NO_INTERNET_WIFI_PIE = {
+            R.drawable.ic_no_internet_wifi_signal_0,
+            R.drawable.ic_no_internet_wifi_signal_1,
+            R.drawable.ic_no_internet_wifi_signal_2,
+            R.drawable.ic_no_internet_wifi_signal_3,
+            R.drawable.ic_no_internet_wifi_signal_4
+    };
+
     public static String buildLoggingSummary(AccessPoint accessPoint, WifiConfiguration config) {
         final StringBuilder summary = new StringBuilder();
         final WifiInfo info = accessPoint.getInfo();
@@ -93,6 +109,7 @@ public class WifiUtils {
         StringBuilder visibility = new StringBuilder();
         StringBuilder scans24GHz = new StringBuilder();
         StringBuilder scans5GHz = new StringBuilder();
+        StringBuilder scans60GHz = new StringBuilder();
         String bssid = null;
 
         if (accessPoint.isActive() && info != null) {
@@ -115,10 +132,12 @@ public class WifiUtils {
 
         int maxRssi5 = INVALID_RSSI;
         int maxRssi24 = INVALID_RSSI;
+        int maxRssi60 = INVALID_RSSI;
         final int maxDisplayedScans = 4;
         int num5 = 0; // number of scanned BSSID on 5GHz band
         int num24 = 0; // number of scanned BSSID on 2.4Ghz band
-        int numBlackListed = 0;
+        int num60 = 0; // number of scanned BSSID on 60Ghz band
+        int numBlockListed = 0;
 
         // TODO: sort list by RSSI or age
         long nowMs = SystemClock.elapsedRealtime();
@@ -152,6 +171,19 @@ public class WifiUtils {
                             verboseScanResultSummary(accessPoint, result, bssid,
                                     nowMs));
                 }
+            } else if (result.frequency >= AccessPoint.LOWER_FREQ_60GHZ
+                    && result.frequency <= AccessPoint.HIGHER_FREQ_60GHZ) {
+                // Strictly speaking: [60000, 61000]
+                num60++;
+
+                if (result.level > maxRssi60) {
+                    maxRssi60 = result.level;
+                }
+                if (num60 <= maxDisplayedScans) {
+                    scans60GHz.append(
+                            verboseScanResultSummary(accessPoint, result, bssid,
+                                    nowMs));
+                }
             }
         }
         visibility.append(" [");
@@ -170,8 +202,16 @@ public class WifiUtils {
             }
             visibility.append(scans5GHz.toString());
         }
-        if (numBlackListed > 0) {
-            visibility.append("!").append(numBlackListed);
+        visibility.append(";");
+        if (num60 > 0) {
+            visibility.append("(").append(num60).append(")");
+            if (num60 > maxDisplayedScans) {
+                visibility.append("max=").append(maxRssi60).append(",");
+            }
+            visibility.append(scans60GHz.toString());
+        }
+        if (numBlockListed > 0) {
+            visibility.append("!").append(numBlockListed);
         }
         visibility.append("]");
 
@@ -219,6 +259,20 @@ public class WifiUtils {
             return context.getString(R.string.wifi_metered_label);
         }
         return context.getString(R.string.wifi_unmetered_label);
+    }
+
+    /**
+     * Returns the Internet icon resource for a given RSSI level.
+     *
+     * @param level The number of bars to show (0-4)
+     * @param noInternet True if a connected Wi-Fi network cannot access the Internet
+     * @throws IllegalArgumentException if an invalid RSSI level is given.
+     */
+    public static int getInternetIconResource(int level, boolean noInternet) {
+        if (level < 0 || level >= WIFI_PIE.length) {
+            throw new IllegalArgumentException("No Wifi icon found for level: " + level);
+        }
+        return noInternet ? NO_INTERNET_WIFI_PIE[level] : WIFI_PIE[level];
     }
 
     public static boolean isMeteredOverridden(WifiConfiguration config) {

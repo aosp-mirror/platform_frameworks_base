@@ -1,4 +1,4 @@
-# See system/core/logcat/event.logtags for a description of the format of this file.
+# See system/logging/logcat/event.logtags for a description of the format of this file.
 
 option java_package com.android.server
 
@@ -173,6 +173,10 @@ option java_package com.android.server
 3120 pm_critical_info (msg|3)
 # Disk usage stats for verifying quota correctness
 3121 pm_package_stats (manual_time|2|3),(quota_time|2|3),(manual_data|2|2),(quota_data|2|2),(manual_cache|2|2),(quota_cache|2|2)
+# Snapshot statistics
+3130 pm_snapshot_stats (build_count|1|1),(reuse_count|1|1),(big_builds|1|1),(short_lived|1|1),(max_build_time|1|3),(cumm_build_time|2|3)
+# Snapshot rebuild instance
+3131 pm_snapshot_rebuild (build_time|1|3),(lifetime|1|3)
 
 # ---------------------------
 # InputMethodManagerService.java

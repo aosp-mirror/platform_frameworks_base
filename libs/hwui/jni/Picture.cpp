@@ -111,7 +111,7 @@ sk_sp<SkPicture> Picture::makePartialCopy() const {
 
     SkPictureRecorder reRecorder;
 
-    SkCanvas* canvas = reRecorder.beginRecording(mWidth, mHeight, NULL, 0);
+    SkCanvas* canvas = reRecorder.beginRecording(mWidth, mHeight);
     mRecorder->partialReplay(canvas);
     return reRecorder.finishRecordingAsPicture();
 }

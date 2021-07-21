@@ -29,6 +29,8 @@ import android.view.Surface;
 import android.hardware.input.TouchCalibration;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import java.io.BufferedInputStream;
@@ -214,10 +216,9 @@ final class PersistentDataStore {
             return;
         }
 
-        XmlPullParser parser;
+        TypedXmlPullParser parser;
         try {
-            parser = Xml.newPullParser();
-            parser.setInput(new BufferedInputStream(is), StandardCharsets.UTF_8.name());
+            parser = Xml.resolvePullParser(is);
             loadFromXml(parser);
         } catch (IOException ex) {
             Slog.w(InputManagerService.TAG, "Failed to load input manager persistent store data.", ex);
@@ -236,8 +237,7 @@ final class PersistentDataStore {
             os = mAtomicFile.startWrite();
             boolean success = false;
             try {
-                XmlSerializer serializer = new FastXmlSerializer();
-                serializer.setOutput(new BufferedOutputStream(os), StandardCharsets.UTF_8.name());
+                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
                 saveToXml(serializer);
                 serializer.flush();
                 success = true;
@@ -253,7 +253,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void loadFromXml(XmlPullParser parser)
+    private void loadFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         XmlUtils.beginDocument(parser, "input-manager-state");
         final int outerDepth = parser.getDepth();
@@ -264,7 +264,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void loadInputDevicesFromXml(XmlPullParser parser)
+    private void loadInputDevicesFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -285,7 +285,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void saveToXml(XmlSerializer serializer) throws IOException {
+    private void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startTag(null, "input-manager-state");
@@ -422,7 +422,7 @@ final class PersistentDataStore {
             return changed;
         }
 
-        public void loadFromXml(XmlPullParser parser)
+        public void loadFromXml(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -505,12 +505,12 @@ final class PersistentDataStore {
             }
         }
 
-        public void saveToXml(XmlSerializer serializer) throws IOException {
+        public void saveToXml(TypedXmlSerializer serializer) throws IOException {
             for (String layout : mKeyboardLayouts) {
                 serializer.startTag(null, "keyboard-layout");
                 serializer.attribute(null, "descriptor", layout);
                 if (layout.equals(mCurrentKeyboardLayout)) {
-                    serializer.attribute(null, "current", "true");
+                    serializer.attributeBoolean(null, "current", true);
                 }
                 serializer.endTag(null, "keyboard-layout");
             }

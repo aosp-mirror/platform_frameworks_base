@@ -34,7 +34,7 @@ interface ITextServicesManager {
             boolean allowImplicitlySelectedSubtype);
     oneway void getSpellCheckerService(int userId, String sciId, in String locale,
             in ITextServicesSessionListener tsListener,
-            in ISpellCheckerSessionListener scListener, in Bundle bundle);
+            in ISpellCheckerSessionListener scListener, in Bundle bundle, int supportedAttributes);
     oneway void finishSpellCheckerService(int userId, in ISpellCheckerSessionListener listener);
     boolean isSpellCheckerEnabled(int userId);
     SpellCheckerInfo[] getEnabledSpellCheckers(int userId);

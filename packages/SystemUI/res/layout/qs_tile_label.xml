@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2016 The Android Open Source Project
+    Copyright (C) 2021 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,83 +14,40 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<com.android.systemui.qs.tileimpl.ButtonRelativeLayout
+<com.android.systemui.qs.tileimpl.IgnorableChildLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
+    android:layout_weight="1"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="48dp"
-    android:paddingTop="12dp">
-    <LinearLayout
-        android:id="@+id/label_group"
-        android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_marginStart="@dimen/qs_label_container_margin"
+    android:layout_marginEnd="0dp"
+    android:layout_gravity="center_vertical | start">
+
+    <TextView
+        android:id="@+id/tile_label"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:gravity="center"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="horizontal">
-        <Space
-            android:id="@+id/expand_space"
-            android:layout_width="22dp"
-            android:layout_height="0dp" />
-
-        <TextView
-            android:id="@+id/tile_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:padding="0dp"
-            android:gravity="center"
-            android:ellipsize="marquee"
-            android:textAppearance="@style/TextAppearance.QS.TileLabel"/>
-
-        <ImageView android:id="@+id/restricted_padlock"
-            android:layout_width="@dimen/qs_tile_text_size"
-            android:layout_height="match_parent"
-            android:paddingBottom="@dimen/qs_tile_text_size"
-            android:src="@drawable/ic_info"
-            android:layout_marginLeft="@dimen/restricted_padlock_pading"
-            android:scaleType="centerInside"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/expand_indicator"
-            android:layout_marginStart="4dp"
-            android:layout_width="18dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/qs_dual_tile_caret"
-            android:tint="?android:attr/textColorPrimary"
-            android:visibility="gone" />
-    </LinearLayout>
+        android:gravity="start"
+        android:textDirection="locale"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="1"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.QS.TileLabel"/>
 
     <TextView
         android:id="@+id/app_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@id/label_group"
-        android:layout_alignEnd="@id/label_group"
-        android:layout_below="@id/label_group"
-        android:clickable="false"
+        android:gravity="start"
+        android:textDirection="locale"
         android:ellipsize="marquee"
+        android:marqueeRepeatLimit="1"
         android:singleLine="true"
-        android:padding="0dp"
         android:visibility="gone"
-        android:gravity="center"
         android:textAppearance="@style/TextAppearance.QS.TileLabel.Secondary"
         android:textColor="?android:attr/textColorSecondary"/>
 
-    <View
-        android:id="@+id/underline"
-        android:layout_width="30dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="2dp"
-        android:layout_alignStart="@id/label_group"
-        android:layout_alignEnd="@id/label_group"
-        android:layout_below="@id/label_group"
-        android:visibility="gone"
-        android:alpha="?android:attr/disabledAlpha"
-        android:background="?android:attr/colorForeground"/>
-
-</com.android.systemui.qs.tileimpl.ButtonRelativeLayout>
+</com.android.systemui.qs.tileimpl.IgnorableChildLinearLayout>

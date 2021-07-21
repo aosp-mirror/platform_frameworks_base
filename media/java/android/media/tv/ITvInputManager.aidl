@@ -25,6 +25,7 @@ import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.ITvInputManagerCallback;
+import android.media.tv.TunedInfo;
 import android.media.tv.TvContentRatingSystemInfo;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
@@ -88,9 +89,13 @@ interface ITvInputManager {
     void timeShiftSetPlaybackParams(in IBinder sessionToken, in PlaybackParams params, int userId);
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
+    List<TunedInfo> getCurrentTunedInfos(int userId);
+
     // For the recording session
     void startRecording(in IBinder sessionToken, in Uri programUri, in Bundle params, int userId);
     void stopRecording(in IBinder sessionToken, int userId);
+    void pauseRecording(in IBinder sessionToken, in Bundle params, int userId);
+    void resumeRecording(in IBinder sessionToken, in Bundle params, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

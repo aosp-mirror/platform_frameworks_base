@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.row;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -35,9 +34,8 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
@@ -168,9 +166,6 @@ public class NotificationGuts extends FrameLayout {
                 }
             }
         };
-        final TypedArray ta = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Theme, 0, 0);
-        ta.recycle();
     }
 
     public NotificationGuts(Context context) {
@@ -295,10 +290,6 @@ public class NotificationGuts extends FrameLayout {
      */
     private void closeControls(int x, int y, boolean save, boolean force) {
         // First try to dismiss any blocking helper.
-        boolean wasBlockingHelperDismissed =
-                Dependency.get(NotificationBlockingHelperManager.class)
-                        .dismissCurrentBlockingHelper();
-
         if (getWindowToken() == null) {
             if (mClosedListener != null) {
                 mClosedListener.onGutsClosed(this);
@@ -307,10 +298,9 @@ public class NotificationGuts extends FrameLayout {
         }
 
         if (mGutsContent == null
-                || !mGutsContent.handleCloseControls(save, force)
-                || wasBlockingHelperDismissed) {
+                || !mGutsContent.handleCloseControls(save, force)) {
             // We only want to do a circular reveal if we're not showing the blocking helper.
-            animateClose(x, y, !wasBlockingHelperDismissed /* shouldDoCircularReveal */);
+            animateClose(x, y, true /* shouldDoCircularReveal */);
 
             setExposed(false, mNeedsFalsingProtection);
             if (mClosedListener != null) {

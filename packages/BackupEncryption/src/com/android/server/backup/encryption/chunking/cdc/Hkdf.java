@@ -40,18 +40,18 @@ public final class Hkdf {
      *
      * <p>IMPORTANT: The use or edit of this method requires a security review.
      *
-     * @param masterKey Master key from which to derive sub-keys.
+     * @param mainKey Main key from which to derive sub-keys.
      * @param salt A randomly generated 256-bit byte string.
      * @param data Arbitrary information that is bound to the derived key (i.e., used in its
      *     creation).
-     * @return Raw derived key bytes = HKDF-SHA256(masterKey, salt, data).
+     * @return Raw derived key bytes = HKDF-SHA256(mainKey, salt, data).
      * @throws InvalidKeyException If the salt can not be used as a valid key.
      */
-    static byte[] hkdf(byte[] masterKey, byte[] salt, byte[] data) throws InvalidKeyException {
-        Objects.requireNonNull(masterKey, "HKDF requires master key to be set.");
+    static byte[] hkdf(byte[] mainKey, byte[] salt, byte[] data) throws InvalidKeyException {
+        Objects.requireNonNull(mainKey, "HKDF requires main key to be set.");
         Objects.requireNonNull(salt, "HKDF requires a salt.");
         Objects.requireNonNull(data, "No data provided to HKDF.");
-        return hkdfSha256Expand(hkdfSha256Extract(masterKey, salt), data);
+        return hkdfSha256Expand(hkdfSha256Extract(mainKey, salt), data);
     }
 
     private Hkdf() {}

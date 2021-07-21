@@ -16,10 +16,11 @@
 
 package com.android.systemui.dock;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import com.android.systemui.dagger.SysUISingleton;
 
-@Singleton
+import javax.inject.Inject;
+
+@SysUISingleton
 public class DockManagerImpl implements DockManager {
 
     @Inject

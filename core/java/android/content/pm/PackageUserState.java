@@ -31,6 +31,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
+import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.BaseBundle;
 import android.os.Debug;
@@ -41,18 +43,17 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -76,19 +77,19 @@ public class PackageUserState {
     public boolean virtualPreload;
     public int enabled;
     public String lastDisableAppCaller;
-    public int domainVerificationStatus;
-    public int appLinkGeneration;
     public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
     public int installReason;
     public @PackageManager.UninstallReason int uninstallReason;
     public String harmfulAppWarning;
+    public String splashScreenTheme;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
 
-    private String[] overlayPaths;
-    private ArrayMap<String, String[]> sharedLibraryOverlayPaths; // Lib name to overlay paths
-    private String[] cachedOverlayPaths;
+    private OverlayPaths overlayPaths;
+    // Maps library name to overlay paths.
+    private ArrayMap<String, OverlayPaths> sharedLibraryOverlayPaths;
+    private OverlayPaths cachedOverlayPaths;
 
     @Nullable
     private ArrayMap<ComponentName, Pair<String, Integer>> componentLabelIconOverrideMap;
@@ -99,8 +100,6 @@ public class PackageUserState {
         hidden = false;
         suspended = false;
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
-        domainVerificationStatus =
-                PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         installReason = PackageManager.INSTALL_REASON_UNKNOWN;
         uninstallReason = PackageManager.UNINSTALL_REASON_UNKNOWN;
     }
@@ -119,15 +118,12 @@ public class PackageUserState {
         virtualPreload = o.virtualPreload;
         enabled = o.enabled;
         lastDisableAppCaller = o.lastDisableAppCaller;
-        domainVerificationStatus = o.domainVerificationStatus;
-        appLinkGeneration = o.appLinkGeneration;
         categoryHint = o.categoryHint;
         installReason = o.installReason;
         uninstallReason = o.uninstallReason;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
-        overlayPaths =
-            o.overlayPaths == null ? null : Arrays.copyOf(o.overlayPaths, o.overlayPaths.length);
+        overlayPaths = o.overlayPaths;
         if (o.sharedLibraryOverlayPaths != null) {
             sharedLibraryOverlayPaths = new ArrayMap<>(o.sharedLibraryOverlayPaths);
         }
@@ -135,27 +131,58 @@ public class PackageUserState {
         if (o.componentLabelIconOverrideMap != null) {
             this.componentLabelIconOverrideMap = new ArrayMap<>(o.componentLabelIconOverrideMap);
         }
+        splashScreenTheme = o.splashScreenTheme;
     }
 
-    public String[] getOverlayPaths() {
+    @Nullable
+    public OverlayPaths getOverlayPaths() {
         return overlayPaths;
     }
 
-    public void setOverlayPaths(String[] paths) {
-        overlayPaths = paths;
-        cachedOverlayPaths = null;
-    }
-
-    public Map<String, String[]> getSharedLibraryOverlayPaths() {
+    @Nullable
+    public Map<String, OverlayPaths> getSharedLibraryOverlayPaths() {
         return sharedLibraryOverlayPaths;
     }
 
-    public void setSharedLibraryOverlayPaths(String library, String[] paths) {
+    /**
+     * Sets the path of overlays currently enabled for this package and user combination.
+     * @return true if the path contents differ than what they were previously
+     */
+    @Nullable
+    public boolean setOverlayPaths(@Nullable OverlayPaths paths) {
+        if (Objects.equals(paths, overlayPaths)) {
+            return false;
+        }
+        if ((overlayPaths == null && paths.isEmpty())
+                || (paths == null && overlayPaths.isEmpty())) {
+            return false;
+        }
+        overlayPaths = paths;
+        cachedOverlayPaths = null;
+        return true;
+    }
+
+    /**
+     * Sets the path of overlays currently enabled for a library that this package uses.
+     *
+     * @return true if the path contents for the library differ than what they were previously
+     */
+    public boolean setSharedLibraryOverlayPaths(@NonNull String library,
+            @Nullable OverlayPaths paths) {
         if (sharedLibraryOverlayPaths == null) {
             sharedLibraryOverlayPaths = new ArrayMap<>();
         }
-        sharedLibraryOverlayPaths.put(library, paths);
+        final OverlayPaths currentPaths = sharedLibraryOverlayPaths.get(library);
+        if (Objects.equals(paths, currentPaths)) {
+            return false;
+        }
         cachedOverlayPaths = null;
+        if (paths == null || paths.isEmpty()) {
+            return sharedLibraryOverlayPaths.remove(library) != null;
+        } else {
+            sharedLibraryOverlayPaths.put(library, paths);
+            return true;
+        }
     }
 
     /**
@@ -216,6 +243,7 @@ public class PackageUserState {
 
         return componentLabelIconOverrideMap.get(componentName);
     }
+
 
     /**
      * Test if this package is installed.
@@ -285,6 +313,20 @@ public class PackageUserState {
         return result;
     }
 
+    public boolean isPackageEnabled(@NonNull ParsingPackageRead pkg) {
+        switch (this.enabled) {
+            case COMPONENT_ENABLED_STATE_ENABLED:
+                return true;
+            case COMPONENT_ENABLED_STATE_DISABLED:
+            case COMPONENT_ENABLED_STATE_DISABLED_USER:
+            case COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                return false;
+            default:
+            case COMPONENT_ENABLED_STATE_DEFAULT:
+                return pkg.isEnabled();
+        }
+    }
+
     public boolean isEnabled(ComponentInfo componentInfo, int flags) {
         return isEnabled(componentInfo.applicationInfo.enabled, componentInfo.enabled,
                 componentInfo.name, flags);
@@ -337,40 +379,26 @@ public class PackageUserState {
         return isComponentEnabled;
     }
 
-    public String[] getAllOverlayPaths() {
+    public OverlayPaths getAllOverlayPaths() {
         if (overlayPaths == null && sharedLibraryOverlayPaths == null) {
             return null;
         }
-
         if (cachedOverlayPaths != null) {
             return cachedOverlayPaths;
         }
-
-        final LinkedHashSet<String> paths = new LinkedHashSet<>();
-        if (overlayPaths != null) {
-            final int N = overlayPaths.length;
-            for (int i = 0; i < N; i++) {
-                paths.add(overlayPaths[i]);
-            }
-        }
-
+        final OverlayPaths.Builder newPaths = new OverlayPaths.Builder();
+        newPaths.addAll(overlayPaths);
         if (sharedLibraryOverlayPaths != null) {
-            for (String[] libOverlayPaths : sharedLibraryOverlayPaths.values()) {
-                if (libOverlayPaths != null) {
-                    final int N = libOverlayPaths.length;
-                    for (int i = 0; i < N; i++) {
-                        paths.add(libOverlayPaths[i]);
-                    }
-                }
+            for (final OverlayPaths libOverlayPaths : sharedLibraryOverlayPaths.values()) {
+                newPaths.addAll(libOverlayPaths);
             }
         }
-
-        cachedOverlayPaths = paths.toArray(new String[0]);
+        cachedOverlayPaths = newPaths.build();
         return cachedOverlayPaths;
     }
 
     @Override
-    final public boolean equals(Object obj) {
+    final public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof PackageUserState)) {
             return false;
         }
@@ -415,12 +443,6 @@ public class PackageUserState {
                         && !lastDisableAppCaller.equals(oldState.lastDisableAppCaller))) {
             return false;
         }
-        if (domainVerificationStatus != oldState.domainVerificationStatus) {
-            return false;
-        }
-        if (appLinkGeneration != oldState.appLinkGeneration) {
-            return false;
-        }
         if (categoryHint != oldState.categoryHint) {
             return false;
         }
@@ -460,7 +482,11 @@ public class PackageUserState {
         }
         if (harmfulAppWarning == null && oldState.harmfulAppWarning != null
                 || (harmfulAppWarning != null
-                        && !harmfulAppWarning.equals(oldState.harmfulAppWarning))) {
+                && !harmfulAppWarning.equals(oldState.harmfulAppWarning))) {
+            return false;
+        }
+
+        if (!Objects.equals(splashScreenTheme, oldState.splashScreenTheme)) {
             return false;
         }
         return true;
@@ -480,14 +506,13 @@ public class PackageUserState {
         hashCode = 31 * hashCode + Boolean.hashCode(virtualPreload);
         hashCode = 31 * hashCode + enabled;
         hashCode = 31 * hashCode + Objects.hashCode(lastDisableAppCaller);
-        hashCode = 31 * hashCode + domainVerificationStatus;
-        hashCode = 31 * hashCode + appLinkGeneration;
         hashCode = 31 * hashCode + categoryHint;
         hashCode = 31 * hashCode + installReason;
         hashCode = 31 * hashCode + uninstallReason;
         hashCode = 31 * hashCode + Objects.hashCode(disabledComponents);
         hashCode = 31 * hashCode + Objects.hashCode(enabledComponents);
         hashCode = 31 * hashCode + Objects.hashCode(harmfulAppWarning);
+        hashCode = 31 * hashCode + Objects.hashCode(splashScreenTheme);
         return hashCode;
     }
 
@@ -528,7 +553,7 @@ public class PackageUserState {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -561,7 +586,7 @@ public class PackageUserState {
          * @param out the {@link XmlSerializer} object
          * @throws IOException
          */
-        public void saveToXml(XmlSerializer out) throws IOException {
+        public void saveToXml(TypedXmlSerializer out) throws IOException {
             if (dialogInfo != null) {
                 out.startTag(null, TAG_DIALOG_INFO);
                 dialogInfo.saveToXml(out);
@@ -595,7 +620,7 @@ public class PackageUserState {
          * @param in the reader
          * @return
          */
-        public static SuspendParams restoreFromXml(XmlPullParser in) throws IOException {
+        public static SuspendParams restoreFromXml(TypedXmlPullParser in) throws IOException {
             SuspendDialogInfo readDialogInfo = null;
             PersistableBundle readAppExtras = null;
             PersistableBundle readLauncherExtras = null;

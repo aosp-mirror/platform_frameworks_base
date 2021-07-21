@@ -276,21 +276,23 @@ final class NotificationController {
             intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId.flattenToString());
             intent.setData(Uri.fromParts("printjob", printJobId.flattenToString(), null));
         }
-        return PendingIntent.getActivity(mContext, 0, intent, 0);
+        return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private PendingIntent createCancelIntent(PrintJobInfo printJob) {
         Intent intent = new Intent(mContext, NotificationBroadcastReceiver.class);
         intent.setAction(INTENT_ACTION_CANCEL_PRINTJOB + "_" + printJob.getId().flattenToString());
         intent.putExtra(EXTRA_PRINT_JOB_ID, printJob.getId());
-        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        return PendingIntent.getBroadcast(mContext, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private PendingIntent createRestartIntent(PrintJobId printJobId) {
         Intent intent = new Intent(mContext, NotificationBroadcastReceiver.class);
         intent.setAction(INTENT_ACTION_RESTART_PRINTJOB + "_" + printJobId.flattenToString());
         intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId);
-        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        return PendingIntent.getBroadcast(mContext, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private static boolean shouldNotifyForState(int state) {

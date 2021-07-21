@@ -18,6 +18,7 @@
 <!-- extends FrameLayout -->
 <com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/expandableNotificationRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="true"

@@ -387,7 +387,7 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
-                .setName(surface + " - animation-leash")
+                .setName(surface + " - animation-leash of " + animationTypeToString(type))
                 // TODO(b/151665759) Defer reparent calls
                 // We want the leash to be visible immediately because the transaction which shows
                 // the leash may be deferred but the reparent will not. This will cause the leashed
@@ -429,7 +429,7 @@ class SurfaceAnimator {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        pw.print(" mAnimationType=" + mAnimationType);
+        pw.print(" mAnimationType=" + animationTypeToString(mAnimationType));
         pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
         pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
@@ -442,56 +442,62 @@ class SurfaceAnimator {
      * No animation is specified.
      * @hide
      */
-    static final int ANIMATION_TYPE_NONE = 0;
+    public static final int ANIMATION_TYPE_NONE = 0;
 
     /**
      * Animation for an app transition.
      * @hide
      */
-    static final int ANIMATION_TYPE_APP_TRANSITION = 1;
+    public static final int ANIMATION_TYPE_APP_TRANSITION = 1;
 
     /**
      * Animation for screen rotation.
      * @hide
      */
-    static final int ANIMATION_TYPE_SCREEN_ROTATION = 1 << 1;
+    public static final int ANIMATION_TYPE_SCREEN_ROTATION = 1 << 1;
 
     /**
      * Animation for dimming.
      * @hide
      */
-    static final int ANIMATION_TYPE_DIMMER = 1 << 2;
+    public static final int ANIMATION_TYPE_DIMMER = 1 << 2;
 
     /**
      * Animation for recent apps.
      * @hide
      */
-    static final int ANIMATION_TYPE_RECENTS = 1 << 3;
+    public static final int ANIMATION_TYPE_RECENTS = 1 << 3;
 
     /**
      * Animation for a {@link WindowState} without animating the activity.
      * @hide
      */
-    static final int ANIMATION_TYPE_WINDOW_ANIMATION = 1 << 4;
+    public static final int ANIMATION_TYPE_WINDOW_ANIMATION = 1 << 4;
 
     /**
      * Animation to control insets. This is actually not an animation, but is used to give the
      * client a leash over the system window causing insets.
      * @hide
      */
-    static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
+    public static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
 
     /**
      * Animation when a fixed rotation transform is applied to a window token.
      * @hide
      */
-    static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
+    public static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
+
+    /**
+     * Animation when a reveal starting window animation is applied to app window.
+     * @hide
+     */
+    public static final int ANIMATION_TYPE_STARTING_REVEAL = 1 << 7;
 
     /**
      * Bitmask to include all animation types. This is NOT an {@link AnimationType}
      * @hide
      */
-    static final int ANIMATION_TYPE_ALL = -1;
+    public static final int ANIMATION_TYPE_ALL = -1;
 
     /**
      * The type of the animation.
@@ -505,10 +511,29 @@ class SurfaceAnimator {
             ANIMATION_TYPE_RECENTS,
             ANIMATION_TYPE_WINDOW_ANIMATION,
             ANIMATION_TYPE_INSETS_CONTROL,
-            ANIMATION_TYPE_FIXED_TRANSFORM
+            ANIMATION_TYPE_FIXED_TRANSFORM,
+            ANIMATION_TYPE_STARTING_REVEAL
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface AnimationType {}
+
+    /**
+     * Converts {@link AnimationType} to String.
+     */
+    static String animationTypeToString(@AnimationType int type) {
+        switch (type) {
+            case ANIMATION_TYPE_NONE: return "none";
+            case ANIMATION_TYPE_APP_TRANSITION: return "app_transition";
+            case ANIMATION_TYPE_SCREEN_ROTATION: return "screen_rotation";
+            case ANIMATION_TYPE_DIMMER: return "dimmer";
+            case ANIMATION_TYPE_RECENTS: return "recents_animation";
+            case ANIMATION_TYPE_WINDOW_ANIMATION: return "window_animation";
+            case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
+            case ANIMATION_TYPE_FIXED_TRANSFORM: return "fixed_rotation";
+            case ANIMATION_TYPE_STARTING_REVEAL: return "starting_reveal";
+            default: return "unknown type:" + type;
+        }
+    }
 
     /**
      * Callback to be passed into {@link AnimationAdapter#startAnimation} to be invoked by the

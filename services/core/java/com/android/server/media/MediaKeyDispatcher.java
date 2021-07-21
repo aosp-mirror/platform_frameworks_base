@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.os.Binder;
@@ -60,7 +61,7 @@ public abstract class MediaKeyDispatcher {
 
     private Map<Integer, Integer> mOverriddenKeyEvents;
 
-    public MediaKeyDispatcher() {
+    public MediaKeyDispatcher(Context context) {
         // Constructor used for reflection
         mOverriddenKeyEvents = new HashMap<>();
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_PLAY, 0);
@@ -76,7 +77,7 @@ public abstract class MediaKeyDispatcher {
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_MUTE, 0);
     }
 
-    // TODO: Move this method into SessionPolicyProvider.java for better readability.
+    // TODO: Move this method into MediaSessionPolicyProvider.java for better readability.
     /**
      * Implement this to customize the logic for which MediaSession should consume which key event.
      *
@@ -99,15 +100,13 @@ public abstract class MediaKeyDispatcher {
     /**
      * Implement this to customize the logic for which MediaButtonReceiver should consume a
      * dispatched key event.
-     *
-     * Note: This pending intent will have lower priority over the {@link MediaSession.Token}
+     * <p>
+     * This pending intent will have lower priority over the {@link MediaSession.Token}
      * returned from {@link #getMediaSession(KeyEvent, int, boolean)}.
+     * <p>
+     * Use a pending intent with an explicit intent; setting a pending intent with an implicit
+     * intent that cannot be resolved to a certain component name will fail.
      *
-     * @param keyEvent a non-null KeyEvent whose key code is one of the supported media buttons.
-     * @param uid the uid value retrieved by calling {@link Binder#getCallingUid()} from
-     *         {@link ISessionManager#dispatchMediaKeyEvent(String, boolean, KeyEvent, boolean)}
-     * @param asSystemService {@code true} if the event came from the system service via hardware
-     *         devices. {@code false} if the event came from the app process through key injection.
      * @return a {@link PendingIntent} instance that should receive the dispatched key event.
      */
     @Nullable

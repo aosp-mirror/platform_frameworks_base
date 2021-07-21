@@ -26,6 +26,12 @@ import android.util.SparseArray;
 
 import com.android.internal.os.SomeArgs;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
@@ -38,12 +44,17 @@ public class Device {
     private static final int MSG_SEND_GET_FEATURE_REPORT_REPLY = 3;
     private static final int MSG_CLOSE_DEVICE = 4;
 
+    // Sync with linux uhid_event_type::UHID_OUTPUT
+    private static final byte UHID_EVENT_TYPE_UHID_OUTPUT = 6;
+    // Sync with linux uhid_event_type::UHID_SET_REPORT
+    private static final byte UHID_EVENT_TYPE_SET_REPORT = 13;
     private final int mId;
     private final HandlerThread mThread;
     private final DeviceHandler mHandler;
     // mFeatureReports is limited to 256 entries, because the report number is 8-bit
     private final SparseArray<byte[]> mFeatureReports;
     private final Map<ByteBuffer, byte[]> mOutputs;
+    private final OutputStream mOutputStream;
     private long mTimeToSend;
 
     private final Object mCond = new Object();
@@ -66,6 +77,7 @@ public class Device {
         mHandler = new DeviceHandler(mThread.getLooper());
         mFeatureReports = featureReports;
         mOutputs = outputs;
+        mOutputStream = System.out;
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = id;
         args.argi2 = vid;
@@ -187,8 +199,40 @@ public class Device {
             mHandler.sendMessageAtTime(msg, mTimeToSend);
         }
 
+        // Send out the report to HID command output
+        private void sendReportOutput(byte eventId, byte rtype, byte[] data) {
+            JSONObject json = new JSONObject();
+            try {
+                json.put("eventId", eventId);
+                json.put("deviceId", mId);
+                json.put("reportType", rtype);
+                JSONArray dataArray = new JSONArray();
+                for (int i = 0; i < data.length; i++) {
+                    dataArray.put(data[i] & 0xFF);
+                }
+                json.put("reportData", dataArray);
+            } catch (JSONException e) {
+                throw new RuntimeException("Could not create JSON object ", e);
+            }
+            try {
+                mOutputStream.write(json.toString().getBytes());
+                mOutputStream.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
         // native callback
-        public void onDeviceOutput(byte[] data) {
+        public void onDeviceSetReport(byte rtype, byte[] data) {
+            // We don't need to reply for the SET_REPORT but just send it to HID output for test
+            // verification.
+            sendReportOutput(UHID_EVENT_TYPE_SET_REPORT, rtype, data);
+        }
+
+        // native callback
+        public void onDeviceOutput(byte rtype, byte[] data) {
+            sendReportOutput(UHID_EVENT_TYPE_UHID_OUTPUT, rtype, data);
             if (mOutputs == null) {
                 Log.e(TAG, "Received OUTPUT request, but 'outputs' section is not found");
                 return;

@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.radio.V1_4.CellInfo.Info;
-import android.hardware.radio.V1_5.CellInfo.CellInfoRatSpecificInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -352,6 +351,13 @@ public abstract class CellInfo implements Parcelable {
     }
 
     /** @hide */
+    protected CellInfo(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
+        this.mRegistered = ci.registered;
+        this.mTimeStamp = timeStamp;
+        this.mCellConnectionStatus = ci.connectionStatus;
+    }
+
+    /** @hide */
     public static CellInfo create(android.hardware.radio.V1_0.CellInfo ci) {
         if (ci == null) return null;
         switch(ci.cellInfoType) {
@@ -395,17 +401,49 @@ public abstract class CellInfo implements Parcelable {
     public static CellInfo create(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
         if (ci == null) return null;
         switch (ci.ratSpecificInfo.getDiscriminator()) {
-            case CellInfoRatSpecificInfo.hidl_discriminator.gsm:
+            case android.hardware.radio.V1_5.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.gsm:
                 return new CellInfoGsm(ci, timeStamp);
-            case CellInfoRatSpecificInfo.hidl_discriminator.cdma:
+            case android.hardware.radio.V1_5.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.cdma:
                 return new CellInfoCdma(ci, timeStamp);
-            case CellInfoRatSpecificInfo.hidl_discriminator.lte:
+            case android.hardware.radio.V1_5.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.lte:
                 return new CellInfoLte(ci, timeStamp);
-            case CellInfoRatSpecificInfo.hidl_discriminator.wcdma:
+            case android.hardware.radio.V1_5.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.wcdma:
                 return new CellInfoWcdma(ci, timeStamp);
-            case CellInfoRatSpecificInfo.hidl_discriminator.tdscdma:
+            case android.hardware.radio.V1_5.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.tdscdma:
                 return new CellInfoTdscdma(ci, timeStamp);
-            case CellInfoRatSpecificInfo.hidl_discriminator.nr:
+            case android.hardware.radio.V1_5.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.nr:
+                return new CellInfoNr(ci, timeStamp);
+            default: return null;
+        }
+    }
+
+    /** @hide */
+    public static CellInfo create(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
+        if (ci == null) return null;
+        switch (ci.ratSpecificInfo.getDiscriminator()) {
+            case android.hardware.radio.V1_6.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.gsm:
+                return new CellInfoGsm(ci, timeStamp);
+            case android.hardware.radio.V1_6.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.cdma:
+                return new CellInfoCdma(ci, timeStamp);
+            case android.hardware.radio.V1_6.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.lte:
+                return new CellInfoLte(ci, timeStamp);
+            case android.hardware.radio.V1_6.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.wcdma:
+                return new CellInfoWcdma(ci, timeStamp);
+            case android.hardware.radio.V1_6.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.tdscdma:
+                return new CellInfoTdscdma(ci, timeStamp);
+            case android.hardware.radio.V1_6.CellInfo
+                    .CellInfoRatSpecificInfo.hidl_discriminator.nr:
                 return new CellInfoNr(ci, timeStamp);
             default: return null;
         }

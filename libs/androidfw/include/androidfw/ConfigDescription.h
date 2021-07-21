@@ -151,8 +151,8 @@ inline ConfigDescription::ConfigDescription(const android::ResTable_config& o) {
   size = sizeof(android::ResTable_config);
 }
 
-inline ConfigDescription::ConfigDescription(const ConfigDescription& o) {
-  *static_cast<android::ResTable_config*>(this) = o;
+inline ConfigDescription::ConfigDescription(const ConfigDescription& o)
+  : android::ResTable_config(o) {
 }
 
 inline ConfigDescription::ConfigDescription(ConfigDescription&& o) noexcept {
@@ -177,9 +177,8 @@ inline ConfigDescription& ConfigDescription::operator=(ConfigDescription&& o) no
   return *this;
 }
 
-inline bool ConfigDescription::MatchWithDensity(
-    const ConfigDescription& o) const {
-  return match(o) && (density == 0 || density == o.density);
+inline bool ConfigDescription::MatchWithDensity(const ConfigDescription& o) const {
+  return match(o) && (density == 0 || o.density != 0);
 }
 
 inline bool ConfigDescription::operator<(const ConfigDescription& o) const {

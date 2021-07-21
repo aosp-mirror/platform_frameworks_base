@@ -17,6 +17,7 @@
 package android.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.SystemClock;
 
 import java.io.FileDescriptor;
@@ -60,10 +61,9 @@ public final class LocalLog {
         }
         final String logLine;
         if (mUseLocalTimestamps) {
-            logLine = String.format("%s - %s", LocalDateTime.now(), msg);
+            logLine = LocalDateTime.now() + " - " + msg;
         } else {
-            logLine = String.format(
-                    "%s / %s - %s", SystemClock.elapsedRealtime(), Instant.now(), msg);
+            logLine = SystemClock.elapsedRealtime() + " / " + Instant.now() + " - " + msg;
         }
         append(logLine);
     }
@@ -113,7 +113,7 @@ public final class LocalLog {
         ReadOnlyLocalLog(LocalLog log) {
             mLog = log;
         }
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             mLog.dump(pw);
         }
@@ -128,7 +128,7 @@ public final class LocalLog {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ReadOnlyLocalLog readOnlyLocalLog() {
         return new ReadOnlyLocalLog(this);
     }

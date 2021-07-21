@@ -18,6 +18,8 @@ package android.window;
 
 import android.view.SurfaceControl;
 import android.app.ActivityManager;
+import android.graphics.Rect;
+import android.window.StartingWindowInfo;
 import android.window.WindowContainerToken;
 
 /**
@@ -25,6 +27,35 @@ import android.window.WindowContainerToken;
  * {@hide}
  */
 oneway interface ITaskOrganizer {
+    /**
+     * Called when a Task is starting and the system would like to show a UI to indicate that an
+     * application is starting. The client is responsible to add/remove the starting window if it
+     * has create a starting window for the Task.
+     *
+     * @param info The information about the Task that's available
+     * @param appToken Token of the application being started.
+     */
+    void addStartingWindow(in StartingWindowInfo info, IBinder appToken);
+
+    /**
+     * Called when the Task want to remove the starting window.
+     * @param leash A persistent leash for the top window in this task.
+     * @param frame Window frame of the top window.
+     * @param playRevealAnimation Play vanish animation.
+     */
+    void removeStartingWindow(int taskId, in SurfaceControl leash, in Rect frame,
+            in boolean playRevealAnimation);
+
+    /**
+     * Called when the Task want to copy the splash screen.
+     */
+    void copySplashScreenView(int taskId);
+
+    /**
+     * Called when the Task removed the splash screen.
+     */
+    void onAppSplashScreenViewRemoved(int taskId);
+
     /**
      * A callback when the Task is available for the registered organizer. The client is responsible
      * for releasing the SurfaceControl in the callback. For non-root tasks, the leash may initially

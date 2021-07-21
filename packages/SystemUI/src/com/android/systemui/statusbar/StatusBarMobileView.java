@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -59,14 +58,22 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     private View mMobileRoamingSpace;
     private int mVisibleState = -1;
     private DualToneHandler mDualToneHandler;
+    private boolean mForceHidden;
+    private boolean mProviderModel;
 
-    public static StatusBarMobileView fromContext(Context context, String slot) {
+    /**
+     * Designated constructor
+     */
+    public static StatusBarMobileView fromContext(
+            Context context,
+            String slot,
+            boolean providerModel
+    ) {
         LayoutInflater inflater = LayoutInflater.from(context);
         StatusBarMobileView v = (StatusBarMobileView)
                 inflater.inflate(R.layout.status_bar_mobile_signal_group, null);
-
         v.setSlot(slot);
-        v.init();
+        v.init(providerModel);
         v.setVisibleState(STATE_ICON);
         return v;
     }
@@ -99,12 +106,17 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         outRect.bottom += translationY;
     }
 
-    private void init() {
+    private void init(boolean providerModel) {
+        mProviderModel = providerModel;
         mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_group);
         mMobile = findViewById(R.id.mobile_signal);
         mMobileType = findViewById(R.id.mobile_type);
-        mMobileRoaming = findViewById(R.id.mobile_roaming);
+        if (mProviderModel) {
+            mMobileRoaming = findViewById(R.id.mobile_roaming_large);
+        } else {
+            mMobileRoaming = findViewById(R.id.mobile_roaming);
+        }
         mMobileRoamingSpace = findViewById(R.id.mobile_roaming_space);
         mIn = findViewById(R.id.mobile_in);
         mOut = findViewById(R.id.mobile_out);
@@ -147,7 +159,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
 
     private void initViewState() {
         setContentDescription(mState.contentDescription);
-        if (!mState.visible) {
+        if (!mState.visible || mForceHidden) {
             mMobileGroup.setVisibility(View.GONE);
         } else {
             mMobileGroup.setVisibility(View.VISIBLE);
@@ -160,7 +172,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         } else {
             mMobileType.setVisibility(View.GONE);
         }
-
+        mMobile.setVisibility(mState.showTriangle ? View.VISIBLE : View.GONE);
         mMobileRoaming.setVisibility(mState.roaming ? View.VISIBLE : View.GONE);
         mMobileRoamingSpace.setVisibility(mState.roaming ? View.VISIBLE : View.GONE);
         mIn.setVisibility(mState.activityIn ? View.VISIBLE : View.GONE);
@@ -173,8 +185,9 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         boolean needsLayout = false;
 
         setContentDescription(state.contentDescription);
-        if (mState.visible != state.visible) {
-            mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
+        int newVisibility = state.visible && !mForceHidden ? View.VISIBLE : View.GONE;
+        if (newVisibility != mMobileGroup.getVisibility()) {
+            mMobileGroup.setVisibility(newVisibility);
             needsLayout = true;
         }
         if (mState.strengthId != state.strengthId) {
@@ -191,6 +204,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
             }
         }
 
+        mMobile.setVisibility(state.showTriangle ? View.VISIBLE : View.GONE);
         mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
         mMobileRoamingSpace.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
         mIn.setVisibility(state.activityIn ? View.VISIBLE : View.GONE);
@@ -200,7 +214,8 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
 
         needsLayout |= state.roaming != mState.roaming
                 || state.activityIn != mState.activityIn
-                || state.activityOut != mState.activityOut;
+                || state.activityOut != mState.activityOut
+                || state.showTriangle != mState.showTriangle;
 
         mState = state;
         return needsLayout;
@@ -232,11 +247,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     @Override
     public void setStaticDrawableColor(int color) {
         ColorStateList list = ColorStateList.valueOf(color);
-        float intensity = color == Color.WHITE ? 0 : 1;
-        // We want the ability to change the theme from the one set by SignalDrawable in certain
-        // surfaces. In this way, we can pass a theme to the view.
-        mMobileDrawable.setTintList(
-                ColorStateList.valueOf(mDualToneHandler.getSingleColor(intensity)));
+        mMobileDrawable.setTintList(list);
         mIn.setImageTintList(list);
         mOut.setImageTintList(list);
         mMobileType.setImageTintList(list);
@@ -251,7 +262,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
 
     @Override
     public boolean isIconVisible() {
-        return mState.visible;
+        return mState.visible && !mForceHidden;
     }
 
     @Override
@@ -275,6 +286,23 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
                 mMobileGroup.setVisibility(View.INVISIBLE);
                 mDotView.setVisibility(View.INVISIBLE);
                 break;
+        }
+    }
+
+    /**
+     * Forces the state to be hidden (views will be GONE) and if necessary updates the layout.
+     *
+     * Makes sure that the {@link StatusBarIconController} cannot make it visible while this flag
+     * is enabled.
+     * @param forceHidden {@code true} if the icon should be GONE in its view regardless of its
+     *                                state.
+     *               {@code false} if the icon should show as determined by its controller.
+     */
+    public void forceHidden(boolean forceHidden) {
+        if (mForceHidden != forceHidden) {
+            mForceHidden = forceHidden;
+            updateState(mState);
+            requestLayout();
         }
     }
 

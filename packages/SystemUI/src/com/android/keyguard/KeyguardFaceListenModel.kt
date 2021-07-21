@@ -12,15 +12,17 @@ data class KeyguardFaceListenModel(
     val isListeningForFace: Boolean,
     val isBouncer: Boolean,
     val isAuthInterruptActive: Boolean,
+    val isOccludingAppRequestingFaceAuth: Boolean,
     val isKeyguardAwake: Boolean,
     val isListeningForFaceAssistant: Boolean,
     val isSwitchingUser: Boolean,
     val isFaceDisabled: Boolean,
     val isBecauseCannotSkipBouncer: Boolean,
     val isKeyguardGoingAway: Boolean,
-    val isFaceSettingEnabledForUser: Boolean,
+    val isBiometricSettingEnabledForUser: Boolean,
     val isLockIconPressed: Boolean,
     val isScanningAllowedByStrongAuth: Boolean,
     val isPrimaryUser: Boolean,
-    val isSecureCameraLaunched: Boolean
+    val isSecureCameraLaunched: Boolean,
+    val isFaceAuthenticated: Boolean
 )

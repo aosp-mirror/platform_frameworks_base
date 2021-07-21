@@ -115,7 +115,7 @@ public class SensorNotificationService extends SystemService
                 "Location is (%f, %f), h %f, acc %f, mocked %b",
                 location.getLatitude(), location.getLongitude(),
                 location.getAltitude(), location.getAccuracy(),
-                location.isFromMockProvider()));
+                location.isMock()));
 
         // lat long == 0 usually means invalid location
         if (location.getLatitude() == 0 && location.getLongitude() == 0) {
@@ -130,7 +130,7 @@ public class SensorNotificationService extends SystemService
         long time = System.currentTimeMillis();
         // Mocked location should not be used. Except in test, only use mocked location
         // Wrong system clock also gives bad values so ignore as well.
-        if (useMockedLocation() == location.isFromMockProvider() || time < MILLIS_2010_1_1) {
+        if (useMockedLocation() == location.isMock() || time < MILLIS_2010_1_1) {
             return;
         }
 

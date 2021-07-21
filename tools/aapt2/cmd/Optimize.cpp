@@ -132,8 +132,8 @@ class Optimizer {
     if (context_->IsVerbose()) {
       context_->GetDiagnostics()->Note(DiagMessage() << "Optimizing APK...");
     }
-    if (!options_.resources_blacklist.empty()) {
-      ResourceFilter filter(options_.resources_blacklist);
+    if (!options_.resources_exclude_list.empty()) {
+      ResourceFilter filter(options_.resources_exclude_list);
       if (!filter.Consume(context_, apk->GetResourceTable())) {
         context_->GetDiagnostics()->Error(DiagMessage() << "failed filtering resources");
         return 1;
@@ -328,7 +328,7 @@ bool ParseConfig(const std::string& content, IAaptContext* context, OptimizeOpti
     }
     for (StringPiece directive : util::Tokenize(directives, ',')) {
       if (directive == "remove") {
-        options->resources_blacklist.insert(resource_name.ToResourceName());
+        options->resources_exclude_list.insert(resource_name.ToResourceName());
       } else if (directive == "no_collapse" || directive == "no_obfuscate") {
         options->table_flattener_options.name_collapse_exemptions.insert(
             resource_name.ToResourceName());

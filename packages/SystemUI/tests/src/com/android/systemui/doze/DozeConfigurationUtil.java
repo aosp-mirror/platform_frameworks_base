@@ -16,12 +16,12 @@
 
 package com.android.systemui.doze;
 
-import android.hardware.display.AmbientDisplayConfiguration;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+
+import android.hardware.display.AmbientDisplayConfiguration;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.FakeSensorManager;
@@ -37,9 +37,12 @@ public class DozeConfigurationUtil {
         when(params.getPulseOnSigMotion()).thenReturn(false);
         when(params.getPickupVibrationThreshold()).thenReturn(0);
         when(params.getProxCheckBeforePulse()).thenReturn(true);
-        when(params.getPolicy()).thenReturn(mock(AlwaysOnDisplayPolicy.class));
         when(params.doubleTapReportsTouchCoordinates()).thenReturn(false);
         when(params.getDisplayNeedsBlanking()).thenReturn(false);
+        when(params.getSelectivelyRegisterSensorsUsingProx()).thenReturn(false);
+        when(params.singleTapUsesProx()).thenReturn(true);
+        when(params.longPressUsesProx()).thenReturn(true);
+        when(params.getQuickPickupAodDuration()).thenReturn(500);
 
         doneHolder[0] = true;
         return params;
@@ -60,6 +63,8 @@ public class DozeConfigurationUtil {
         when(config.doubleTapSensorType()).thenReturn(null);
         when(config.tapSensorType()).thenReturn(null);
         when(config.longPressSensorType()).thenReturn(null);
+        when(config.udfpsLongPressSensorType()).thenReturn(null);
+        when(config.quickPickupSensorType()).thenReturn(null);
 
         when(config.tapGestureEnabled(anyInt())).thenReturn(true);
         when(config.tapSensorAvailable()).thenReturn(true);
@@ -67,6 +72,8 @@ public class DozeConfigurationUtil {
 
         when(config.dozePickupSensorAvailable()).thenReturn(false);
         when(config.wakeScreenGestureAvailable()).thenReturn(false);
+        when(config.quickPickupSensorEnabled(anyInt())).thenReturn(false);
+        when(config.screenOffUdfpsEnabled(anyInt())).thenReturn(false);
 
         doneHolder[0] = true;
         return config;

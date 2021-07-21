@@ -17,6 +17,7 @@
 package android.speech;
 
 import android.os.Bundle;
+import android.content.AttributionSource;
 import android.content.Intent;
 import android.speech.IRecognitionListener;
 
@@ -39,11 +40,10 @@ oneway interface IRecognitionService {
      *        this intent can contain extra parameters to manipulate the behavior of the recognition
      *        client. For more information see {@link RecognizerIntent}.
      * @param listener to receive callbacks, note that this must be non-null
-     * @param packageName the package name calling this API
-     * @param featureId The feature in the package
+     * @param attributionSource The attribution source of the caller.
      */
     void startListening(in Intent recognizerIntent, in IRecognitionListener listener,
-            String packageName, String featureId);
+            in AttributionSource attributionSource);
 
     /**
      * Stops listening for speech. Speech captured so far will be recognized as
@@ -51,17 +51,13 @@ oneway interface IRecognitionService {
      * is called during the speech capturing.
      *
      * @param listener to receive callbacks, note that this must be non-null
-     * @param packageName the package name calling this API
-     * @param featureId The feature in the package
      */
-    void stopListening(in IRecognitionListener listener, String packageName, String featureId);
+    void stopListening(in IRecognitionListener listener);
 
     /**
      * Cancels the speech recognition.
      *
      * @param listener to receive callbacks, note that this must be non-null
-     * @param packageName the package name calling this API
-     * @param featureId The feature in the package
      */
-    void cancel(in IRecognitionListener listener, String packageName, String featureId);
+    void cancel(in IRecognitionListener listener, boolean isShutdown);
 }

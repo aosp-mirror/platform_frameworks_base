@@ -16,10 +16,9 @@
   -->
 
 <resources>
-    <style name="SettingsActionButton" parent="android:Widget.DeviceDefault.Button.Borderless.Colored">
+    <style name="SettingsLibActionButton" parent="android:Widget.DeviceDefault.Button.Borderless.Colored">
         <item name="android:drawablePadding">4dp</item>
         <item name="android:drawableTint">@*android:color/btn_colored_borderless_text_material</item>
-        <item name="android:layout_marginEnd">8dp</item>
         <item name="android:paddingTop">20dp</item>
         <item name="android:paddingBottom">20dp</item>
     </style>

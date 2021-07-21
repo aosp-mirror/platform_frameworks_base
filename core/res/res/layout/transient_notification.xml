@@ -18,24 +18,28 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?android:attr/toastFrameBackground">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:maxWidth="@dimen/toast_width"
+    android:background="?android:attr/toastFrameBackground"
+    android:elevation="@dimen/toast_elevation"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
     <TextView
         android:id="@android:id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginVertical="15dp"
-        android:layout_gravity="center_horizontal"
-        android:textAppearance="@style/TextAppearance.Toast"
-        android:textColor="@color/primary_text_default_material_light"
-        />
-
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:lineHeight="20sp"
+        android:textAppearance="@style/TextAppearance.Toast"/>
 </LinearLayout>
-
-

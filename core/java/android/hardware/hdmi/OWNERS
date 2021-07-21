@@ -1,0 +1,7 @@
+# Bug component: 826094
+
+include /services/core/java/com/android/server/display/OWNERS
+
+marvinramin@google.com
+nchalko@google.com
+lcnathalie@google.com

@@ -44,7 +44,7 @@ public class NetworkPolicyEditorTest {
 
     @Before
     public void setUp() {
-        mNetworkTemplate = NetworkTemplate.buildTemplateMobileAll("123456789123456");
+        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered("123456789123456");
         NetworkPolicyManager policyManager = NetworkPolicyManager.from(InstrumentationRegistry
                 .getContext());
         mNetworkPolicyEditor = new NetworkPolicyEditor(policyManager);

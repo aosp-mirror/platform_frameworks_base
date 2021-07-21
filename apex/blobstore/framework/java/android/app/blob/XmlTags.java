@@ -36,7 +36,7 @@ public final class XmlTags {
     // For BlobAccessMode
     public static final String TAG_ACCESS_MODE = "am";
     public static final String ATTR_TYPE = "t";
-    public static final String TAG_WHITELISTED_PACKAGE = "wl";
+    public static final String TAG_ALLOWED_PACKAGE = "wl";
     public static final String ATTR_CERTIFICATE = "ct";
 
     // For BlobHandle

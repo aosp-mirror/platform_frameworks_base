@@ -95,7 +95,7 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
                 return platformCompat.isChangeEnabled(changeId, appInfo);
             } catch (Exception e) {
                 // This shouldn't happen, but assume enforcement if it does
-                Slog.wtf(ParsingUtils.TAG, "IPlatformCompat query failed", e);
+                Slog.wtf(TAG, "IPlatformCompat query failed", e);
                 return true;
             }
         });
@@ -119,13 +119,15 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
             // how many APKs they're going through.
             mDeferredErrors.erase();
         }
+        mPackageName = null;
+        mTargetSdkVersion = null;
         return this;
     }
 
     @Override
     public <ResultType> ParseResult<ResultType> success(ResultType result) {
         if (mErrorCode != PackageManager.INSTALL_SUCCEEDED) {
-            Slog.wtf(ParsingUtils.TAG, "Cannot set to success after set to error, was "
+            Slog.wtf(TAG, "Cannot set to success after set to error, was "
                     + mErrorMessage, mException);
         }
         mResult = result;

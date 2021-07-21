@@ -43,17 +43,24 @@ class UsageStatsQueryHelper {
     private final Function<String, PackageData> mPackageDataGetter;
     // Activity name -> Conversation start event (LOCUS_ID_SET)
     private final Map<ComponentName, UsageEvents.Event> mConvoStartEvents = new ArrayMap<>();
+    private final EventListener mEventListener;
     private long mLastEventTimestamp;
+
+    interface EventListener {
+        void onEvent(PackageData packageData, ConversationInfo conversationInfo, Event event);
+    }
 
     /**
      * @param userId The user whose events are to be queried.
      * @param packageDataGetter The function to get {@link PackageData} with a package name.
+     * @param eventListener A listener that listens to the new event.
      */
     UsageStatsQueryHelper(@UserIdInt int userId,
-            Function<String, PackageData> packageDataGetter) {
+            Function<String, PackageData> packageDataGetter, EventListener eventListener) {
         mUsageStatsManagerInternal = getUsageStatsManagerInternal();
         mUserId = userId;
         mPackageDataGetter = packageDataGetter;
+        mEventListener = eventListener;
     }
 
     /**
@@ -198,21 +205,27 @@ class UsageStatsQueryHelper {
     }
 
     private void addEventByShortcutId(PackageData packageData, String shortcutId, Event event) {
-        if (packageData.getConversationStore().getConversation(shortcutId) == null) {
+        ConversationInfo conversationInfo =
+                packageData.getConversationStore().getConversation(shortcutId);
+        if (conversationInfo == null) {
             return;
         }
         EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
                 EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
         eventHistory.addEvent(event);
+        mEventListener.onEvent(packageData, conversationInfo, event);
     }
 
     private void addEventByLocusId(PackageData packageData, LocusId locusId, Event event) {
-        if (packageData.getConversationStore().getConversationByLocusId(locusId) == null) {
+        ConversationInfo conversationInfo =
+                packageData.getConversationStore().getConversationByLocusId(locusId);
+        if (conversationInfo == null) {
             return;
         }
         EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
                 EventStore.CATEGORY_LOCUS_ID_BASED, locusId.getId());
         eventHistory.addEvent(event);
+        mEventListener.onEvent(packageData, conversationInfo, event);
     }
 
     private static UsageStatsManagerInternal getUsageStatsManagerInternal() {

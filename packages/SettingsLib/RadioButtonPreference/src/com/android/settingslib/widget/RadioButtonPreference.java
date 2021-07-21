@@ -20,7 +20,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;
@@ -34,6 +34,9 @@ import androidx.preference.PreferenceViewHolder;
  * In other words, there's no "RadioButtonPreferenceGroup" in this
  * implementation. When you check one RadioButtonPreference, if you want to
  * uncheck all the other preferences, you should do that by code yourself.
+ *
+ * RadioButtonPreference can assign a extraWidgetListener to show a gear icon
+ * on the right side that can open another page.
  */
 public class RadioButtonPreference extends CheckBoxPreference {
 
@@ -53,6 +56,10 @@ public class RadioButtonPreference extends CheckBoxPreference {
     private View mAppendix;
     private int mAppendixVisibility = -1;
 
+    private View mExtraWidgetContainer;
+    private ImageView mExtraWidget;
+
+    private View.OnClickListener mExtraWidgetOnClickListener;
 
     /**
      * Perform inflation from XML and apply a class-specific base style.
@@ -68,7 +75,6 @@ public class RadioButtonPreference extends CheckBoxPreference {
         super(context, attrs, defStyle);
         init();
     }
-
 
     /**
      * Perform inflation from XML and apply a class-specific base style.
@@ -136,11 +142,10 @@ public class RadioButtonPreference extends CheckBoxPreference {
             }
         }
 
-        TextView title = (TextView) holder.findViewById(android.R.id.title);
-        if (title != null) {
-            title.setSingleLine(false);
-            title.setMaxLines(3);
-        }
+        mExtraWidget = (ImageView) holder.findViewById(R.id.radio_extra_widget);
+        mExtraWidgetContainer = holder.findViewById(R.id.radio_extra_widget_container);
+
+        setExtraWidgetOnClickListener(mExtraWidgetOnClickListener);
     }
 
     /**
@@ -153,6 +158,24 @@ public class RadioButtonPreference extends CheckBoxPreference {
             mAppendix.setVisibility(visibility);
         }
         mAppendixVisibility = visibility;
+    }
+
+    /**
+     * Sets the callback to be invoked when extra widget is clicked by the user.
+     *
+     * @param listener The callback to be invoked
+     */
+    public void setExtraWidgetOnClickListener(View.OnClickListener listener) {
+        mExtraWidgetOnClickListener = listener;
+
+        if (mExtraWidget == null || mExtraWidgetContainer == null) {
+            return;
+        }
+
+        mExtraWidget.setOnClickListener(mExtraWidgetOnClickListener);
+
+        mExtraWidgetContainer.setVisibility((mExtraWidgetOnClickListener != null)
+                ? View.VISIBLE : View.GONE);
     }
 
     private void init() {

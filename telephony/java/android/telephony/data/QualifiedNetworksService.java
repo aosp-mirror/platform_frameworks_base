@@ -28,6 +28,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.Annotation.ApnType;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -65,6 +66,7 @@ public abstract class QualifiedNetworksService extends Service {
     private static final int QNS_REMOVE_NETWORK_AVAILABILITY_PROVIDER               = 2;
     private static final int QNS_REMOVE_ALL_NETWORK_AVAILABILITY_PROVIDERS          = 3;
     private static final int QNS_UPDATE_QUALIFIED_NETWORKS                          = 4;
+    private static final int QNS_APN_THROTTLE_STATUS_CHANGED                        = 5;
 
     private final HandlerThread mHandlerThread;
 
@@ -160,6 +162,17 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         /**
+         * The framework calls this method when the throttle status of an APN changes.
+         *
+         * This method is meant to be overridden.
+         *
+         * @param statuses the statuses that have changed
+         */
+        public void reportThrottleStatusChanged(@NonNull List<ThrottleStatus> statuses) {
+            Log.d(TAG, "reportThrottleStatusChanged: statuses size=" + statuses.size());
+        }
+
+        /**
          * Called when the qualified networks provider is removed. The extended class should
          * implement this method to perform cleanup works.
          */
@@ -195,6 +208,12 @@ public abstract class QualifiedNetworksService extends Service {
                     } else {
                         loge("Failed to create network availability provider. slot index = "
                                 + slotIndex);
+                    }
+                    break;
+                case QNS_APN_THROTTLE_STATUS_CHANGED:
+                    if (provider != null) {
+                        List<ThrottleStatus> statuses = (List<ThrottleStatus>) message.obj;
+                        provider.reportThrottleStatusChanged(statuses);
                     }
                     break;
 
@@ -284,6 +303,13 @@ public abstract class QualifiedNetworksService extends Service {
         @Override
         public void removeNetworkAvailabilityProvider(int slotIndex) {
             mHandler.obtainMessage(QNS_REMOVE_NETWORK_AVAILABILITY_PROVIDER, slotIndex, 0)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void reportThrottleStatusChanged(int slotIndex,
+                List<ThrottleStatus> statuses) {
+            mHandler.obtainMessage(QNS_APN_THROTTLE_STATUS_CHANGED, slotIndex, 0, statuses)
                     .sendToTarget();
         }
     }

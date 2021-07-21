@@ -18,6 +18,7 @@
 
 #include <private/hwui/WebViewFunctor.h>
 #include "Properties.h"
+#include "renderthread/CanvasContext.h"
 #include "renderthread/RenderThread.h"
 
 #include <log/log.h>
@@ -25,6 +26,35 @@
 #include <atomic>
 
 namespace android::uirenderer {
+
+namespace {
+class ScopedCurrentFunctor {
+public:
+    ScopedCurrentFunctor(WebViewFunctor* functor) {
+        ALOG_ASSERT(!sCurrentFunctor);
+        ALOG_ASSERT(functor);
+        sCurrentFunctor = functor;
+    }
+    ~ScopedCurrentFunctor() {
+        ALOG_ASSERT(sCurrentFunctor);
+        sCurrentFunctor = nullptr;
+    }
+
+    static ASurfaceControl* getSurfaceControl() {
+        ALOG_ASSERT(sCurrentFunctor);
+        return sCurrentFunctor->getSurfaceControl();
+    }
+    static void mergeTransaction(ASurfaceTransaction* transaction) {
+        ALOG_ASSERT(sCurrentFunctor);
+        sCurrentFunctor->mergeTransaction(transaction);
+    }
+
+private:
+    static WebViewFunctor* sCurrentFunctor;
+};
+
+WebViewFunctor* ScopedCurrentFunctor::sCurrentFunctor = nullptr;
+}  // namespace
 
 RenderMode WebViewFunctor_queryPlatformRenderMode() {
     auto pipelineType = Properties::getRenderPipelineType();
@@ -78,12 +108,43 @@ void WebViewFunctor::sync(const WebViewSyncData& syncData) const {
     mCallbacks.onSync(mFunctor, mData, syncData);
 }
 
+void WebViewFunctor::onRemovedFromTree() {
+    ATRACE_NAME("WebViewFunctor::onRemovedFromTree");
+    if (mSurfaceControl) {
+        removeOverlays();
+    }
+}
+
 void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
     ATRACE_NAME("WebViewFunctor::drawGl");
     if (!mHasContext) {
         mHasContext = true;
     }
-    mCallbacks.gles.draw(mFunctor, mData, drawInfo);
+    ScopedCurrentFunctor currentFunctor(this);
+
+    WebViewOverlayData overlayParams = {
+            .overlaysMode = OverlaysMode::Disabled,
+            .getSurfaceControl = currentFunctor.getSurfaceControl,
+            .mergeTransaction = currentFunctor.mergeTransaction,
+    };
+
+    if (Properties::enableWebViewOverlays && !drawInfo.isLayer) {
+        renderthread::CanvasContext* activeContext =
+                renderthread::CanvasContext::getActiveContext();
+        if (activeContext != nullptr) {
+            ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
+            if (rootSurfaceControl) {
+                overlayParams.overlaysMode = OverlaysMode::Enabled;
+                int32_t rgid = activeContext->getSurfaceControlGenerationId();
+                if (mParentSurfaceControlGenerationId != rgid) {
+                    reparentSurfaceControl(rootSurfaceControl);
+                    mParentSurfaceControlGenerationId = rgid;
+                }
+            }
+        }
+    }
+
+    mCallbacks.gles.draw(mFunctor, mData, drawInfo, overlayParams);
 }
 
 void WebViewFunctor::initVk(const VkFunctorInitParams& params) {
@@ -98,7 +159,16 @@ void WebViewFunctor::initVk(const VkFunctorInitParams& params) {
 
 void WebViewFunctor::drawVk(const VkFunctorDrawParams& params) {
     ATRACE_NAME("WebViewFunctor::drawVk");
-    mCallbacks.vk.draw(mFunctor, mData, params);
+    ScopedCurrentFunctor currentFunctor(this);
+
+    WebViewOverlayData overlayParams = {
+            .overlaysMode = OverlaysMode::Disabled,
+            .getSurfaceControl = currentFunctor.getSurfaceControl,
+            .mergeTransaction = currentFunctor.mergeTransaction,
+    };
+
+    // TODO, enable surface control once offscreen mode figured out
+    mCallbacks.vk.draw(mFunctor, mData, params, overlayParams);
 }
 
 void WebViewFunctor::postDrawVk() {
@@ -118,13 +188,95 @@ void WebViewFunctor::destroyContext() {
     }
 }
 
+void WebViewFunctor::removeOverlays() {
+    ScopedCurrentFunctor currentFunctor(this);
+    mCallbacks.removeOverlays(mFunctor, mData, currentFunctor.mergeTransaction);
+    if (mSurfaceControl) {
+        reparentSurfaceControl(nullptr);
+        auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+        funcs.releaseFunc(mSurfaceControl);
+        mSurfaceControl = nullptr;
+    }
+}
+
+ASurfaceControl* WebViewFunctor::getSurfaceControl() {
+    ATRACE_NAME("WebViewFunctor::getSurfaceControl");
+    if (mSurfaceControl != nullptr) return mSurfaceControl;
+
+    renderthread::CanvasContext* activeContext = renderthread::CanvasContext::getActiveContext();
+    LOG_ALWAYS_FATAL_IF(activeContext == nullptr, "Null active canvas context!");
+
+    ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
+    LOG_ALWAYS_FATAL_IF(rootSurfaceControl == nullptr, "Null root surface control!");
+
+    auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+    mParentSurfaceControlGenerationId = activeContext->getSurfaceControlGenerationId();
+    mSurfaceControl = funcs.createFunc(rootSurfaceControl, "Webview Overlay SurfaceControl");
+    ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
+    activeContext->prepareSurfaceControlForWebview();
+    funcs.transactionSetZOrderFunc(transaction, mSurfaceControl, -1);
+    funcs.transactionSetVisibilityFunc(transaction, mSurfaceControl,
+                                       ASURFACE_TRANSACTION_VISIBILITY_SHOW);
+    funcs.transactionApplyFunc(transaction);
+    funcs.transactionDeleteFunc(transaction);
+    return mSurfaceControl;
+}
+
+void WebViewFunctor::mergeTransaction(ASurfaceTransaction* transaction) {
+    ATRACE_NAME("WebViewFunctor::mergeTransaction");
+    if (transaction == nullptr) return;
+    bool done = false;
+    renderthread::CanvasContext* activeContext = renderthread::CanvasContext::getActiveContext();
+    // activeContext might be null when called from mCallbacks.removeOverlays()
+    if (activeContext != nullptr) {
+        done = activeContext->mergeTransaction(transaction, mSurfaceControl);
+    }
+    if (!done) {
+        auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+        funcs.transactionApplyFunc(transaction);
+    }
+}
+
+void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {
+    ATRACE_NAME("WebViewFunctor::reparentSurfaceControl");
+    if (mSurfaceControl == nullptr) return;
+
+    auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+    ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
+    funcs.transactionReparentFunc(transaction, mSurfaceControl, parent);
+    mergeTransaction(transaction);
+    funcs.transactionDeleteFunc(transaction);
+}
+
 WebViewFunctorManager& WebViewFunctorManager::instance() {
     static WebViewFunctorManager sInstance;
     return sInstance;
 }
 
+static void validateCallbacks(const WebViewFunctorCallbacks& callbacks) {
+    // TODO: Should we do a stack peek to see if this is really webview?
+    LOG_ALWAYS_FATAL_IF(callbacks.onSync == nullptr, "onSync is null");
+    LOG_ALWAYS_FATAL_IF(callbacks.onContextDestroyed == nullptr, "onContextDestroyed is null");
+    LOG_ALWAYS_FATAL_IF(callbacks.onDestroyed == nullptr, "onDestroyed is null");
+    LOG_ALWAYS_FATAL_IF(callbacks.removeOverlays == nullptr, "removeOverlays is null");
+    switch (auto mode = WebViewFunctor_queryPlatformRenderMode()) {
+        case RenderMode::OpenGL_ES:
+            LOG_ALWAYS_FATAL_IF(callbacks.gles.draw == nullptr, "gles.draw is null");
+            break;
+        case RenderMode::Vulkan:
+            LOG_ALWAYS_FATAL_IF(callbacks.vk.initialize == nullptr, "vk.initialize is null");
+            LOG_ALWAYS_FATAL_IF(callbacks.vk.draw == nullptr, "vk.draw is null");
+            LOG_ALWAYS_FATAL_IF(callbacks.vk.postDraw == nullptr, "vk.postDraw is null");
+            break;
+        default:
+            LOG_ALWAYS_FATAL("unknown platform mode? %d", (int)mode);
+            break;
+    }
+}
+
 int WebViewFunctorManager::createFunctor(void* data, const WebViewFunctorCallbacks& callbacks,
                                          RenderMode functorMode) {
+    validateCallbacks(callbacks);
     auto object = std::make_unique<WebViewFunctor>(data, callbacks, functorMode);
     int id = object->id();
     auto handle = object->createHandle();

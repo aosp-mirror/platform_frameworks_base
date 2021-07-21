@@ -110,11 +110,11 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public int[] endConfigure(int operatingMode, CameraMetadataNative sessionParams)
-           throws CameraAccessException {
+    public int[] endConfigure(int operatingMode, CameraMetadataNative sessionParams,
+            long startTimeMs) throws CameraAccessException {
         try {
             return mRemoteDevice.endConfigure(operatingMode, (sessionParams == null) ?
-                    new CameraMetadataNative() : sessionParams);
+                    new CameraMetadataNative() : sessionParams, startTimeMs);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);
@@ -140,9 +140,10 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public int createInputStream(int width, int height, int format) throws CameraAccessException {
+    public int createInputStream(int width, int height, int format, boolean isMultiResolution)
+            throws CameraAccessException {
         try {
-            return mRemoteDevice.createInputStream(width, height, format);
+            return mRemoteDevice.createInputStream(width, height, format, isMultiResolution);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);

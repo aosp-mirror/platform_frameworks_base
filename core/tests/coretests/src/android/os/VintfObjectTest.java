@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 
 public class VintfObjectTest extends TestCase {
     /**
-     * Sanity check for {@link VintfObject#report VintfObject.report()}.
+     * Quick check for {@link VintfObject#report VintfObject.report()}.
      */
     public void testReport() {
         String[] xmls = VintfObject.report();

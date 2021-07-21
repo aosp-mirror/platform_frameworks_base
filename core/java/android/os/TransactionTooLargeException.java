@@ -23,9 +23,11 @@ import android.os.RemoteException;
  * During a remote procedure call, the arguments and the return value of the call
  * are transferred as {@link Parcel} objects stored in the Binder transaction buffer.
  * If the arguments or the return value are too large to fit in the transaction buffer,
- * then the call will fail and {@link TransactionTooLargeException} will be thrown.
+ * then the call will fail.  {@link TransactionTooLargeException} is thrown as a
+ * heuristic when a transaction is large, and it fails, since these are the transactions
+ * which are most likely to overfill the transaction buffer.
  * </p><p>
- * The Binder transaction buffer has a limited fixed size, currently 1Mb, which
+ * The Binder transaction buffer has a limited fixed size, currently 1MB, which
  * is shared by all transactions in progress for the process.  Consequently this
  * exception can be thrown when there are many transactions in progress even when
  * most of the individual transactions are of moderate size.

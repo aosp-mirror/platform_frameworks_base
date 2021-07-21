@@ -19,7 +19,6 @@ package com.android.server.locksettings;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -37,15 +36,12 @@ import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.authsecret.V1_0.IAuthSecret;
-import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.security.KeyStore;
@@ -58,6 +54,7 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -169,7 +166,7 @@ public abstract class BaseLockSettingsServiceTests {
 
         final ArrayList<UserInfo> allUsers = new ArrayList<>(mPrimaryUserProfiles);
         allUsers.add(SECONDARY_USER_INFO);
-        when(mUserManager.getUsers(anyBoolean())).thenReturn(allUsers);
+        when(mUserManager.getUsers()).thenReturn(allUsers);
 
         when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
                 new Answer<Boolean>() {
@@ -262,13 +259,12 @@ public abstract class BaseLockSettingsServiceTests {
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                Fingerprint fp = (Fingerprint) invocation.getArguments()[0];
                 FingerprintManager.RemovalCallback callback =
-                        (FingerprintManager.RemovalCallback) invocation.getArguments()[2];
-                callback.onRemovalSucceeded(fp, 0);
+                        (FingerprintManager.RemovalCallback) invocation.getArguments()[1];
+                callback.onRemovalSucceeded(null, 0);
                 return null;
             }
-        }).when(mFingerprintManager).remove(any(), eq(userId), any());
+        }).when(mFingerprintManager).removeAll(eq(userId), any());
 
 
         // Hardware must be detected and templates must be enrolled
@@ -278,13 +274,12 @@ public abstract class BaseLockSettingsServiceTests {
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                Face face = (Face) invocation.getArguments()[0];
                 FaceManager.RemovalCallback callback =
-                        (FaceManager.RemovalCallback) invocation.getArguments()[2];
-                callback.onRemovalSucceeded(face, 0);
+                        (FaceManager.RemovalCallback) invocation.getArguments()[1];
+                callback.onRemovalSucceeded(null, 0);
                 return null;
             }
-        }).when(mFaceManager).remove(any(), eq(userId), any());
+        }).when(mFaceManager).removeAll(eq(userId), any());
     }
 
     @After

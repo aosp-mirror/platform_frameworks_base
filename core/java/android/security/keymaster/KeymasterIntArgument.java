@@ -17,16 +17,17 @@
 package android.security.keymaster;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 
 /**
  * @hide
  */
 class KeymasterIntArgument extends KeymasterArgument {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int value;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public KeymasterIntArgument(int tag, int value) {
         super(tag);
         switch (KeymasterDefs.getTagType(tag)) {
@@ -41,7 +42,7 @@ class KeymasterIntArgument extends KeymasterArgument {
         this.value = value;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public KeymasterIntArgument(int tag, Parcel in) {
         super(tag);
         value = in.readInt();

@@ -31,7 +31,7 @@ import java.util.List;
  * Class for pushing rules used to check the integrity of app installs.
  *
  * <p>Note: applications using methods of this class must be a system app and have their package
- * name whitelisted as an integrity rule provider. Otherwise a {@link SecurityException} will be
+ * name allowlisted as an integrity rule provider. Otherwise a {@link SecurityException} will be
  * thrown.
  *
  * @hide
@@ -124,7 +124,7 @@ public class AppIntegrityManager {
     }
 
     /**
-     * Get the package names of all whitelisted rule providers.
+     * Get the package names of all allowlisted rule providers.
      *
      * <p>Warning: this method is only used for tests.
      *

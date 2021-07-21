@@ -22,6 +22,9 @@ include $(LOCAL_PATH)/common.mk
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := validate_framework_keymaps
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 intermediates := $(call intermediates-dir-for,ETC,$(LOCAL_MODULE),,COMMON)
 LOCAL_BUILT_MODULE := $(intermediates)/stamp
 

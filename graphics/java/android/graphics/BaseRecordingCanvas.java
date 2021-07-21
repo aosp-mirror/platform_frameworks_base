@@ -18,9 +18,11 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.graphics.fonts.Font;
 import android.graphics.text.MeasuredText;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
@@ -29,7 +31,11 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
 
+import com.android.internal.util.Preconditions;
+
 import dalvik.annotation.optimization.FastNative;
+
+import java.util.Objects;
 
 /**
  * This class is a base class for canvases that defer drawing operations, so all
@@ -409,6 +415,34 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
+    public void drawGlyphs(
+            @NonNull int[] glyphIds,
+            @IntRange(from = 0) int glyphIdOffset,
+            @NonNull float[] positions,
+            @IntRange(from = 0) int positionOffset,
+            @IntRange(from = 0) int glyphCount,
+            @NonNull Font font,
+            @NonNull Paint paint) {
+        Objects.requireNonNull(glyphIds, "glyphIds must not be null.");
+        Objects.requireNonNull(positions, "positions must not be null.");
+        Objects.requireNonNull(font, "font must not be null.");
+        Objects.requireNonNull(paint, "paint must not be null.");
+        Preconditions.checkArgumentNonnegative(glyphCount);
+
+        if (glyphIdOffset < 0 || glyphIdOffset + glyphCount > glyphIds.length) {
+            throw new IndexOutOfBoundsException(
+                    "glyphIds must have at least " + (glyphIdOffset + glyphCount) + " of elements");
+        }
+        if (positionOffset < 0 || positionOffset + glyphCount * 2 > positions.length) {
+            throw new IndexOutOfBoundsException(
+                    "positions must have at least " + (positionOffset + glyphCount * 2)
+                            + " of elements");
+        }
+        nDrawGlyphs(mNativeCanvasWrapper, glyphIds, positions, glyphIdOffset, positionOffset,
+                glyphCount, font.getNativePtr(), paint.getNativeInstance());
+    }
+
+    @Override
     public final void drawText(@NonNull char[] text, int index, int count, float x, float y,
             @NonNull Paint paint) {
         if ((index | count | (index + count)
@@ -576,6 +610,14 @@ public class BaseRecordingCanvas extends Canvas {
                 indices, indexOffset, indexCount, paint.getNativeInstance());
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    }
+
     @FastNative
     private static native void nDrawBitmap(long nativeCanvas, long bitmapHandle, float left,
             float top, long nativePaintOrZero, int canvasDensity, int screenDensity,
@@ -674,6 +716,10 @@ public class BaseRecordingCanvas extends Canvas {
             short[] indices, int indexOffset, int indexCount, long nativePaint);
 
     @FastNative
+    private static native void nDrawGlyphs(long nativeCanvas, int[] glyphIds, float[] positions,
+            int glyphIdStart, int positionStart, int glyphCount, long nativeFont, long nativePaint);
+
+    @FastNative
     private static native void nDrawText(long nativeCanvas, char[] text, int index, int count,
             float x, float y, int flags, long nativePaint);
 
@@ -697,4 +743,8 @@ public class BaseRecordingCanvas extends Canvas {
     @FastNative
     private static native void nDrawTextOnPath(long nativeCanvas, String text, long nativePath,
             float hOffset, float vOffset, int flags, long nativePaint);
+
+    @FastNative
+    private static native void nPunchHole(long renderer, float left, float top, float right,
+            float bottom, float rx, float ry);
 }

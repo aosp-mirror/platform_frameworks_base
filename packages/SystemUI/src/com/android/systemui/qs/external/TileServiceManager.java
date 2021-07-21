@@ -15,7 +15,6 @@
  */
 package com.android.systemui.qs.external;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,7 +25,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
@@ -36,6 +34,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+import com.android.systemui.settings.UserTracker;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,6 +59,7 @@ public class TileServiceManager {
     private final TileServices mServices;
     private final TileLifecycleManager mStateManager;
     private final Handler mHandler;
+    private final UserTracker mUserTracker;
     private boolean mBindRequested;
     private boolean mBindAllowed;
     private boolean mBound;
@@ -73,25 +73,26 @@ public class TileServiceManager {
     private boolean mStarted = false;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
-            Tile tile, BroadcastDispatcher broadcastDispatcher) {
-        this(tileServices, handler, new TileLifecycleManager(handler,
+            Tile tile, BroadcastDispatcher broadcastDispatcher, UserTracker userTracker) {
+        this(tileServices, handler, userTracker, new TileLifecycleManager(handler,
                 tileServices.getContext(), tileServices, tile, new Intent().setComponent(component),
-                new UserHandle(ActivityManager.getCurrentUser()), broadcastDispatcher));
+                userTracker.getUserHandle(), broadcastDispatcher));
     }
 
     @VisibleForTesting
-    TileServiceManager(TileServices tileServices, Handler handler,
+    TileServiceManager(TileServices tileServices, Handler handler, UserTracker userTracker,
             TileLifecycleManager tileLifecycleManager) {
         mServices = tileServices;
         mHandler = handler;
         mStateManager = tileLifecycleManager;
+        mUserTracker = userTracker;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         Context context = mServices.getContext();
-        context.registerReceiverAsUser(mUninstallReceiver,
-                new UserHandle(ActivityManager.getCurrentUser()), filter, null, mHandler);
+        context.registerReceiverAsUser(mUninstallReceiver, userTracker.getUserHandle(), filter,
+                null, mHandler);
     }
 
     boolean isLifecycleStarted() {
@@ -279,7 +280,7 @@ public class TileServiceManager {
                 queryIntent.setPackage(pkgName);
                 PackageManager pm = context.getPackageManager();
                 List<ResolveInfo> services = pm.queryIntentServicesAsUser(
-                        queryIntent, 0, ActivityManager.getCurrentUser());
+                        queryIntent, 0, mUserTracker.getUserId());
                 for (ResolveInfo info : services) {
                     if (Objects.equals(info.serviceInfo.packageName, component.getPackageName())
                             && Objects.equals(info.serviceInfo.name, component.getClassName())) {

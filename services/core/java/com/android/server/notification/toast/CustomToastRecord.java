@@ -37,9 +37,10 @@ public class CustomToastRecord extends ToastRecord {
     public final ITransientNotification callback;
 
     public CustomToastRecord(NotificationManagerService notificationManager, int uid, int pid,
-            String packageName, IBinder token, ITransientNotification callback, int duration,
-            Binder windowToken, int displayId) {
-        super(notificationManager, uid, pid, packageName, token, duration, windowToken, displayId);
+            String packageName, boolean isSystemToast, IBinder token,
+            ITransientNotification callback, int duration, Binder windowToken, int displayId) {
+        super(notificationManager, uid, pid, packageName, isSystemToast, token, duration,
+                windowToken, displayId);
         this.callback = checkNotNull(callback);
     }
 
@@ -71,10 +72,23 @@ public class CustomToastRecord extends ToastRecord {
     }
 
     @Override
+    public boolean keepProcessAlive() {
+        // As custom toasts are rendered by the app, we need to keep the app alive for it to show
+        // the toast.
+        return true;
+    }
+
+    @Override
+    public boolean isAppRendered() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "CustomToastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + pid + ":" +  pkg + "/" + UserHandle.formatUid(uid)
+                + " isSystemToast=" + isSystemToast
                 + " token=" + token
                 + " callback=" + callback
                 + " duration=" + getDuration()

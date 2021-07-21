@@ -27,12 +27,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /**
  * Used during Service and Activity instantiation to make them injectable.
  */
-@Singleton
+@SysUISingleton
 public class ContextComponentResolver implements ContextComponentHelper {
     private final Map<Class<?>, Provider<Activity>> mActivityCreators;
     private final Map<Class<?>, Provider<Service>> mServiceCreators;

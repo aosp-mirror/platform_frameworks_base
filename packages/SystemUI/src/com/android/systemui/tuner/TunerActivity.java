@@ -31,6 +31,7 @@ import androidx.preference.PreferenceScreen;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.fragments.FragmentService;
 
 import javax.inject.Inject;
@@ -41,9 +42,14 @@ public class TunerActivity extends Activity implements
 
     private static final String TAG_TUNER = "tuner";
 
+    private final DemoModeController mDemoModeController;
+    private final TunerService mTunerService;
+
     @Inject
-    TunerActivity() {
+    TunerActivity(DemoModeController demoModeController, TunerService tunerService) {
         super();
+        mDemoModeController = demoModeController;
+        mTunerService = tunerService;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +67,9 @@ public class TunerActivity extends Activity implements
             final String action = getIntent().getAction();
             boolean showDemoMode = action != null && action.equals(
                     "com.android.settings.action.DEMO_MODE");
-            final PreferenceFragment fragment = showDemoMode ? new DemoModeFragment()
-                    : new TunerFragment();
+            final PreferenceFragment fragment = showDemoMode
+                    ? new DemoModeFragment(mDemoModeController)
+                    : new TunerFragment(mTunerService);
             getFragmentManager().beginTransaction().replace(R.id.content_frame,
                     fragment, TAG_TUNER).commit();
         }

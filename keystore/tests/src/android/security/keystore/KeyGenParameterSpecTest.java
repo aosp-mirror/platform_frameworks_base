@@ -21,8 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import android.security.ParcelableKeyGenParameterSpecTest;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -41,7 +39,7 @@ public final class KeyGenParameterSpecTest {
         KeyGenParameterSpec copiedSpec =
                 new KeyGenParameterSpec.Builder(spec).build();
         ParcelableKeyGenParameterSpecTest.validateSpecValues(
-                copiedSpec, spec.getUid(), spec.getKeystoreAlias());
+                copiedSpec, spec.getNamespace(), spec.getKeystoreAlias());
     }
 
     @Test

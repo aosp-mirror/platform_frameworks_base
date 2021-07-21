@@ -11,7 +11,9 @@ package com.android.xml.permission.configfile {
 
   public class AllowIgnoreLocationSettings {
     ctor public AllowIgnoreLocationSettings();
+    method public String getAttributionTag();
     method public String get_package();
+    method public void setAttributionTag(String);
     method public void set_package(String);
   }
 

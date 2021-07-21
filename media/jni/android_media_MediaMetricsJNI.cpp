@@ -18,7 +18,6 @@
 
 #include <binder/Parcel.h>
 #include <jni.h>
-#include <media/IMediaMetricsService.h>
 #include <media/MediaMetricsItem.h>
 #include <nativehelper/JNIHelp.h>
 #include <variant>
@@ -151,12 +150,7 @@ static jint android_media_MediaMetrics_submit_bytebuffer(
         return (jint)BAD_VALUE;
     }
 
-    sp<IMediaMetricsService> service = mediametrics::BaseItem::getService();
-    if (service == nullptr) {
-        ALOGW("Cannot retrieve mediametrics service");
-        return (jint)NO_INIT;
-    }
-    return (jint)service->submitBuffer((char *)buffer, length);
+    return (jint)mediametrics::BaseItem::submitBuffer((char *)buffer, length);
 }
 
 // Helper function to convert a native PersistableBundle to a Java

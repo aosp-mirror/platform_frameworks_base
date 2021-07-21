@@ -24,5 +24,22 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.perftests.blob" />
         <option name="hidden-api-checks" value="false"/>
+
+        <!-- TODO: Add PerfettoListener to automatically capture perfetto traces for each test-->
+        <!-- Listener related args for collecting the traces and waiting for the device
+             to stabilize. -->
+        <option name="device-listeners"
+                value="android.device.collectors.ProcLoadListener" />
+        <!-- Guarantee that user defined RunListeners will be running before any of the default
+             listeners defined in this runner. -->
+        <option name="instrumentation-arg" key="newRunListenerMode" value="true" />
+
+        <!-- ProcLoadListener related arguments -->
+        <!-- Wait for device last minute threshold to reach 3 with 2 minute timeout before
+             starting the test run -->
+        <option name="instrumentation-arg" key="procload-collector:per_run" value="true" />
+        <option name="instrumentation-arg" key="proc-loadavg-threshold" value="3" />
+        <option name="instrumentation-arg" key="proc-loadavg-timeout" value="120000" />
+        <option name="instrumentation-arg" key="proc-loadavg-interval" value="10000" />
     </test>
 </configuration>

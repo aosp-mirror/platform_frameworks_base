@@ -14,34 +14,29 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.frameworks.servicestests.install_intent_filters">
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     package="com.android.frameworks.servicestests.install_intent_filters">
 
 <!--
-     This manifest declares an activity for testing intent filters.
-     The implementing class is an empty implementation.
--->
+         This manifest declares an activity for testing intent filters.
+         The implementing class is an empty implementation.
+    -->
 
-    <uses-feature
-        android:name="com.android.frameworks.servicestests.nonexistent" />
-    <uses-configuration
-        android:reqFiveWayNav="false" />
+    <uses-feature android:name="com.android.frameworks.servicestests.nonexistent"/>
+    <uses-configuration android:reqFiveWayNav="false"/>
 
-    <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.android.frameworks.coretests"
-        android:label="Frameworks Core Tests" />
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+         android:targetPackage="com.android.frameworks.coretests"
+         android:label="Frameworks Core Tests"/>
 
-    <permission
-        android:label="test permission"
-        android:name="test_permission"
-        android:protectionLevel="normal" />
+    <permission android:label="test permission"
+         android:name="test_permission"
+         android:protectionLevel="normal"/>
 
-    <application
-        android:hasCode="true">
-        <activity
-            android:name="com.android.frameworks.servicestests.TestActivity">
+    <application android:hasCode="true">
+        <activity android:name="com.android.frameworks.servicestests.TestActivity"
+             android:exported="true">
             <intent-filter>
                 <action android:name="action1"/>
                 <data android:mimeGroup="mime_group_1"/>

@@ -51,6 +51,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -90,6 +91,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -158,6 +160,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
     @Mock private AccessibilityWindowManager mMockA11yWindowManager;
     @Mock private AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
+    @Mock private AccessibilityTrace mMockA11yTrace;
     @Mock private WindowManagerInternal mMockWindowManagerInternal;
     @Mock private SystemActionPerformer mMockSystemActionPerformer;
     @Mock private IBinder mMockService;
@@ -166,7 +169,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Mock private IAccessibilityInteractionConnection mMockIA11yInteractionConnection;
     @Mock private IAccessibilityInteractionConnectionCallback mMockCallback;
     @Mock private FingerprintGestureDispatcher mMockFingerprintGestureDispatcher;
-    @Mock private MagnificationController mMockMagnificationController;
+    @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private RemoteCallback.OnResultListener mMockListener;
 
     @Before
@@ -177,8 +180,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mMockKeyEventDispatcher);
         when(mMockSystemSupport.getFingerprintGestureDispatcher())
                 .thenReturn(mMockFingerprintGestureDispatcher);
-        when(mMockSystemSupport.getMagnificationController())
-                .thenReturn(mMockMagnificationController);
+        when(mMockSystemSupport.getFullScreenMagnificationController())
+                .thenReturn(mMockFullScreenMagnificationController);
 
         PowerManager powerManager =
                 new PowerManager(mMockContext, mMockIPowerManager, mMockIThermalService, mHandler);
@@ -186,6 +189,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.hasSystemFeature(FEATURE_FINGERPRINT)).thenReturn(true);
 
+        when(mMockA11yTrace.isA11yTracingEnabled()).thenReturn(false);
         // Fake a11yWindowInfo and remote a11y connection for tests.
         addA11yWindowInfo(mA11yWindowInfos, WINDOWID, false, Display.DEFAULT_DISPLAY);
         addA11yWindowInfo(mA11yWindowInfos, PIP_WINDOWID, true, Display.DEFAULT_DISPLAY);
@@ -225,8 +229,8 @@ public class AbstractAccessibilityServiceConnectionTest {
 
         mServiceConnection = new TestAccessibilityServiceConnection(mMockContext, COMPONENT_NAME,
                 mSpyServiceInfo, SERVICE_ID, mHandler, new Object(), mMockSecurityPolicy,
-                mMockSystemSupport, mMockWindowManagerInternal, mMockSystemActionPerformer,
-                mMockA11yWindowManager);
+                mMockSystemSupport, mMockA11yTrace, mMockWindowManagerInternal,
+                mMockSystemActionPerformer, mMockA11yWindowManager);
         // Assume that the service is connected
         mServiceConnection.mService = mMockService;
         mServiceConnection.mServiceInterface = mMockServiceInterface;
@@ -268,6 +272,25 @@ public class AbstractAccessibilityServiceConnectionTest {
 
         mServiceConnection.setServiceInfo(serviceInfo);
         verify(mMockSystemSupport).onClientChangeLocked(true);
+    }
+
+    @Test
+    public void setServiceInfo_ChangePackageNames_updateSuccess() {
+        assertTrue(mServiceConnection.mPackageNames.isEmpty());
+
+        final AccessibilityServiceInfo serviceInfo = new AccessibilityServiceInfo();
+        updateServiceInfo(serviceInfo, 0, 0, A11Y_SERVICE_FLAG,
+                new String[] {PACKAGE_NAME1, PACKAGE_NAME2},
+                1000);
+
+        mServiceConnection.setServiceInfo(serviceInfo);
+        assertEquals(serviceInfo.packageNames.length, mServiceConnection.mPackageNames.size());
+        assertTrue(mServiceConnection.mPackageNames.containsAll(
+                Arrays.asList(mServiceConnection.getServiceInfo().packageNames)));
+
+        updateServiceInfo(serviceInfo, 0, 0, A11Y_SERVICE_FLAG, null, 1000);
+        mServiceConnection.setServiceInfo(serviceInfo);
+        assertTrue(mServiceConnection.mPackageNames.isEmpty());
     }
 
     @Test
@@ -472,7 +495,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         mServiceConnection.performAccessibilityAction(PIP_WINDOWID, ROOT_NODE_ID,
                 ACTION_ACCESSIBILITY_FOCUS, null, INTERACTION_ID, mMockCallback, TID);
 
-        verify(mMockIPowerManager).userActivity(anyLong(), anyInt(), anyInt());
+        verify(mMockIPowerManager).userActivity(eq(Display.DEFAULT_DISPLAY), anyLong(), anyInt(),
+                anyInt());
         verify(mMockIA11yInteractionConnection).performAccessibilityAction(eq(ROOT_NODE_ID),
                 eq(ACTION_ACCESSIBILITY_FOCUS), any(), eq(INTERACTION_ID), eq(mMockCallback),
                 anyInt(), eq(PID), eq(TID));
@@ -533,7 +557,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     public void getMagnificationScale() {
         final int displayId = 1;
         final float scale = 2.0f;
-        when(mMockMagnificationController.getScale(displayId)).thenReturn(scale);
+        when(mMockFullScreenMagnificationController.getScale(displayId)).thenReturn(scale);
 
         final float result = mServiceConnection.getMagnificationScale(displayId);
         assertThat(result, is(scale));
@@ -543,7 +567,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     public void getMagnificationScale_serviceNotBelongCurrentUser_returnNoScale() {
         final int displayId = 1;
         final float scale = 2.0f;
-        when(mMockMagnificationController.getScale(displayId)).thenReturn(scale);
+        when(mMockFullScreenMagnificationController.getScale(displayId)).thenReturn(scale);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final float result = mServiceConnection.getMagnificationScale(displayId);
@@ -557,13 +581,14 @@ public class AbstractAccessibilityServiceConnectionTest {
         doAnswer((invocation) -> {
             ((Region) invocation.getArguments()[1]).set(region);
             return null;
-        }).when(mMockMagnificationController).getMagnificationRegion(eq(displayId), any());
-        when(mMockMagnificationController.isRegistered(displayId)).thenReturn(false);
+        }).when(mMockFullScreenMagnificationController).getMagnificationRegion(eq(displayId),
+                any());
+        when(mMockFullScreenMagnificationController.isRegistered(displayId)).thenReturn(false);
 
         final Region result = mServiceConnection.getMagnificationRegion(displayId);
         assertThat(result, is(region));
-        verify(mMockMagnificationController).register(displayId);
-        verify(mMockMagnificationController).unregister(displayId);
+        verify(mMockFullScreenMagnificationController).register(displayId);
+        verify(mMockFullScreenMagnificationController).unregister(displayId);
     }
 
     @Test
@@ -573,7 +598,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         doAnswer((invocation) -> {
             ((Region) invocation.getArguments()[1]).set(region);
             return null;
-        }).when(mMockMagnificationController).getMagnificationRegion(eq(displayId), any());
+        }).when(mMockFullScreenMagnificationController).getMagnificationRegion(eq(displayId),
+                any());
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final Region result = mServiceConnection.getMagnificationRegion(displayId);
@@ -584,20 +610,20 @@ public class AbstractAccessibilityServiceConnectionTest {
     public void getMagnificationCenterX_notRegistered_shouldRegisterThenUnregister() {
         final int displayId = 1;
         final float centerX = 480.0f;
-        when(mMockMagnificationController.getCenterX(displayId)).thenReturn(centerX);
-        when(mMockMagnificationController.isRegistered(displayId)).thenReturn(false);
+        when(mMockFullScreenMagnificationController.getCenterX(displayId)).thenReturn(centerX);
+        when(mMockFullScreenMagnificationController.isRegistered(displayId)).thenReturn(false);
 
         final float result = mServiceConnection.getMagnificationCenterX(displayId);
         assertThat(result, is(centerX));
-        verify(mMockMagnificationController).register(displayId);
-        verify(mMockMagnificationController).unregister(displayId);
+        verify(mMockFullScreenMagnificationController).register(displayId);
+        verify(mMockFullScreenMagnificationController).unregister(displayId);
     }
 
     @Test
     public void getMagnificationCenterX_serviceNotBelongCurrentUser_returnZero() {
         final int displayId = 1;
         final float centerX = 480.0f;
-        when(mMockMagnificationController.getCenterX(displayId)).thenReturn(centerX);
+        when(mMockFullScreenMagnificationController.getCenterX(displayId)).thenReturn(centerX);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final float result = mServiceConnection.getMagnificationCenterX(displayId);
@@ -608,20 +634,20 @@ public class AbstractAccessibilityServiceConnectionTest {
     public void getMagnificationCenterY_notRegistered_shouldRegisterThenUnregister() {
         final int displayId = 1;
         final float centerY = 640.0f;
-        when(mMockMagnificationController.getCenterY(displayId)).thenReturn(centerY);
-        when(mMockMagnificationController.isRegistered(displayId)).thenReturn(false);
+        when(mMockFullScreenMagnificationController.getCenterY(displayId)).thenReturn(centerY);
+        when(mMockFullScreenMagnificationController.isRegistered(displayId)).thenReturn(false);
 
         final float result = mServiceConnection.getMagnificationCenterY(displayId);
         assertThat(result, is(centerY));
-        verify(mMockMagnificationController).register(displayId);
-        verify(mMockMagnificationController).unregister(displayId);
+        verify(mMockFullScreenMagnificationController).register(displayId);
+        verify(mMockFullScreenMagnificationController).unregister(displayId);
     }
 
     @Test
     public void getMagnificationCenterY_serviceNotBelongCurrentUser_returnZero() {
         final int displayId = 1;
         final float centerY = 640.0f;
-        when(mMockMagnificationController.getCenterY(displayId)).thenReturn(centerY);
+        when(mMockFullScreenMagnificationController.getCenterY(displayId)).thenReturn(centerY);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final float result = mServiceConnection.getMagnificationCenterY(displayId);
@@ -631,7 +657,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void resetMagnification() {
         final int displayId = 1;
-        when(mMockMagnificationController.reset(displayId, true)).thenReturn(true);
+        when(mMockFullScreenMagnificationController.reset(displayId, true)).thenReturn(true);
 
         final boolean result = mServiceConnection.resetMagnification(displayId, true);
         assertThat(result, is(true));
@@ -640,7 +666,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void resetMagnification_cantControlMagnification_returnFalse() {
         final int displayId = 1;
-        when(mMockMagnificationController.reset(displayId, true)).thenReturn(true);
+        when(mMockFullScreenMagnificationController.reset(displayId, true)).thenReturn(true);
         when(mMockSecurityPolicy.canControlMagnification(mServiceConnection)).thenReturn(false);
 
         final boolean result = mServiceConnection.resetMagnification(displayId, true);
@@ -650,7 +676,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void resetMagnification_serviceNotBelongCurrentUser_returnFalse() {
         final int displayId = 1;
-        when(mMockMagnificationController.reset(displayId, true)).thenReturn(true);
+        when(mMockFullScreenMagnificationController.reset(displayId, true)).thenReturn(true);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final boolean result = mServiceConnection.resetMagnification(displayId, true);
@@ -663,14 +689,14 @@ public class AbstractAccessibilityServiceConnectionTest {
         final float scale = 1.8f;
         final float centerX = 50.5f;
         final float centerY = 100.5f;
-        when(mMockMagnificationController.setScaleAndCenter(displayId,
+        when(mMockFullScreenMagnificationController.setScaleAndCenter(displayId,
                 scale, centerX, centerY, true, SERVICE_ID)).thenReturn(true);
-        when(mMockMagnificationController.isRegistered(displayId)).thenReturn(false);
+        when(mMockFullScreenMagnificationController.isRegistered(displayId)).thenReturn(false);
 
         final boolean result = mServiceConnection.setMagnificationScaleAndCenter(
                 displayId, scale, centerX, centerY, true);
         assertThat(result, is(true));
-        verify(mMockMagnificationController).register(displayId);
+        verify(mMockFullScreenMagnificationController).register(displayId);
     }
 
     @Test
@@ -679,7 +705,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         final float scale = 1.8f;
         final float centerX = 50.5f;
         final float centerY = 100.5f;
-        when(mMockMagnificationController.setScaleAndCenter(displayId,
+        when(mMockFullScreenMagnificationController.setScaleAndCenter(displayId,
                 scale, centerX, centerY, true, SERVICE_ID)).thenReturn(true);
         when(mMockSecurityPolicy.canControlMagnification(mServiceConnection)).thenReturn(false);
 
@@ -694,7 +720,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         final float scale = 1.8f;
         final float centerX = 50.5f;
         final float centerY = 100.5f;
-        when(mMockMagnificationController.setScaleAndCenter(displayId,
+        when(mMockFullScreenMagnificationController.setScaleAndCenter(displayId,
                 scale, centerX, centerY, true, SERVICE_ID)).thenReturn(true);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
@@ -826,12 +852,13 @@ public class AbstractAccessibilityServiceConnectionTest {
         TestAccessibilityServiceConnection(Context context, ComponentName componentName,
                 AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
                 Object lock, AccessibilitySecurityPolicy securityPolicy,
-                SystemSupport systemSupport, WindowManagerInternal windowManagerInternal,
+                SystemSupport systemSupport, AccessibilityTrace trace,
+                WindowManagerInternal windowManagerInternal,
                 SystemActionPerformer systemActionPerfomer,
                 AccessibilityWindowManager a11yWindowManager) {
             super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
-                    securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer,
-                    a11yWindowManager);
+                    securityPolicy, systemSupport, trace, windowManagerInternal,
+                    systemActionPerfomer, a11yWindowManager);
             mResolvedUserId = USER_ID;
         }
 

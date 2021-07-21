@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Instaluesi i paketës"</string>
     <string name="install" msgid="711829760615509273">"Instalo"</string>
+    <string name="update" msgid="3932142540719227615">"Përditëso"</string>
     <string name="done" msgid="6632441120016885253">"U krye"</string>
     <string name="cancel" msgid="1018267193425558088">"Anulo"</string>
     <string name="installing" msgid="4921993079741206516">"Po instalohet…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Po instalohet <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikacioni u instalua."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Dëshiron ta instalosh këtë aplikacion?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Dëshiron të instalosh një përditësim të këtij aplikacioni ekzistues? Të dhënat e tua ekzistuese nuk do të humbasin."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Dëshiron të instalosh një përditësim të këtij aplikacioni ekzistues? Të dhënat e tua ekzistuese nuk do të humbasin."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Dëshiron ta instalosh këtë aplikacion?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Dëshiron ta përditësosh këtë aplikacion?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikacioni nuk u instalua."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalimi paketës u bllokua."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacioni nuk u instalua pasi paketa është në konflikt me një paketë ekzistuese."</string>
@@ -67,12 +67,12 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> u çinstalua"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Çinstalimi nuk pati sukses."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Çinstalimi i <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nuk u krye me sukses."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nuk mund të çinstalohet aplikacioni aktiv i administratorit të pajisjes"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Nuk mund të çinstalohet aplikacioni aktiv i administratorit të pajisjes për <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nuk mund të çinstalohet aplikacioni aktiv i administrimit të pajisjes"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Nuk mund të çinstalohet aplikacioni aktiv i administrimit të pajisjes për <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ky aplikacion kërkohet për disa përdorues ose profile dhe është çinstaluar për të tjerët"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Ky aplikacion nevojitet për profilin tënd dhe nuk mund të çinstalohet."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Ky aplikacion kërkohet nga administratori i pajisjes dhe nuk mund të çinstalohet."</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"Menaxho aplikacionet e administratorit të pajisjes"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Menaxho aplikacionet e administrimit të pajisjes"</string>
     <string name="manage_users" msgid="1243995386982560813">"Menaxho përdoruesit"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të çinstalohej."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Kishte një problem me analizimin e paketës."</string>
@@ -80,12 +80,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Instalo/çinstalo veprimet që nuk mbështeten në Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Po vihet në përdorim aplikacioni..."</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"I panjohur"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Për sigurinë tënde, tableti yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Për sigurinë tënde, televizori yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Për sigurinë tënde, telefoni yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefoni dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj telefonit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tableti dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj tabletit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televizori dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj televizorit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Për sigurinë tënde, tableti yt nuk lejohet aktualisht të instalojë aplikacione të panjohura nga ky burim. Këtë mund ta ndryshosh te \"Cilësimet\"."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Për sigurinë tënde, televizori yt nuk lejohet aktualisht të instalojë aplikacione të panjohura nga ky burim. Këtë mund ta ndryshosh te \"Cilësimet\"."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Për sigurinë tënde, telefoni yt nuk lejohet aktualisht të instalojë aplikacione të panjohura nga ky burim. Këtë mund ta ndryshosh te \"Cilësimet\"."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefoni dhe të dhënat e tua personale janë më të cenueshme nga sulmet nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj telefonit tënd ose çdo humbje të të dhënave që mund të rezultojë nga përdorimi i tij."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tableti dhe të dhënat e tua personale janë më të cenueshme nga sulmet nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj tabletit tënd ose çdo humbje të të dhënave që mund të rezultojë nga përdorimi i tij."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televizori dhe të dhënat e tua personale janë më të cenueshme nga sulmet nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj televizorit tënd ose çdo humbje të të dhënave që mund të rezultojë nga përdorimi i tij."</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Vazhdo"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Cilësimet"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalimi/çinstalimi i aplikacioneve të Wear"</string>

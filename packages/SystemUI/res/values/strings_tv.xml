@@ -17,22 +17,23 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- Picture-in-Picture (PIP) notification -->
-    <!-- Title for the notification channel for TV PIP controls. [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_tv_pip">Picture-in-Picture</string>
-    <!-- Title of the picture-in-picture (PIP) notification title
-         when the media doesn't have title [CHAR LIMIT=NONE] -->
-    <string name="pip_notification_unknown_title">(No title program)</string>
-
-    <!-- Picture-in-Picture (PIP) menu -->
-    <eat-comment />
-    <!-- Button to close picture-in-picture (PIP) in PIP menu [CHAR LIMIT=30] -->
-    <string name="pip_close">Close PIP</string>
-    <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
-    <string name="pip_fullscreen">Full screen</string>
-
     <!-- Title and subtitle for AudioRecordingIndicator -->
     <string name="mic_active">Microphone Active</string>
     <string name="app_accessed_mic">%1$s accessed your microphone</string>
+
+    <string name="notification_vpn_connected">VPN is connected</string>
+    <string name="notification_vpn_disconnected">VPN is disconnected</string>
+    <!-- Disclosure text in the connected notification that indicates that the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=40] -->
+    <string name="notification_disclosure_vpn_text">Via <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+
+    <string name="tv_notification_panel_title">Notifications</string>
+    <string name="tv_notification_panel_no_notifications">No Notifications</string>
+
+    <string name="mic_recording_announcement">Microphone is recording</string>
+    <string name="camera_recording_announcement">Camera is recording</string>
+    <string name="mic_and_camera_recording_announcement">Camera and Microphone are recording</string>
+    <string name="mic_stopped_recording_announcement">Microphone stopped recording</string>
+    <string name="camera_stopped_recording_announcement">Camera stopped recording</string>
+    <string name="mic_camera_stopped_recording_announcement">Camera and Microphone stopped recording</string>
+
 </resources>

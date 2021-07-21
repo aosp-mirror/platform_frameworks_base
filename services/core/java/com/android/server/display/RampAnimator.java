@@ -20,13 +20,11 @@ import android.animation.ValueAnimator;
 import android.util.FloatProperty;
 import android.view.Choreographer;
 
-import com.android.internal.BrightnessSynchronizer;
-
 /**
  * A custom animator that progressively updates a property value at
  * a given variable rate until it reaches a particular target value.
  */
-final class RampAnimator<T> {
+class RampAnimator<T> {
     private final T mObject;
     private final FloatProperty<T> mProperty;
     private final Choreographer mChoreographer;
@@ -157,10 +155,10 @@ final class RampAnimator<T> {
             }
             final float oldCurrentValue = mCurrentValue;
             mCurrentValue = mAnimatedValue;
-            if (!BrightnessSynchronizer.floatEquals(oldCurrentValue, mCurrentValue)) {
+            if (oldCurrentValue != mCurrentValue) {
                 mProperty.setValue(mObject, mCurrentValue);
             }
-            if (!BrightnessSynchronizer.floatEquals(mTargetValue, mCurrentValue)) {
+            if (mTargetValue != mCurrentValue) {
                 postAnimationCallback();
             } else {
                 mAnimating = false;
@@ -173,5 +171,53 @@ final class RampAnimator<T> {
 
     public interface Listener {
         void onAnimationEnd();
+    }
+
+    static class DualRampAnimator<T> {
+        private final RampAnimator<T> mFirst;
+        private final RampAnimator<T> mSecond;
+        private final Listener mInternalListener = new Listener() {
+            @Override
+            public void onAnimationEnd() {
+                if (mListener != null && !isAnimating()) {
+                    mListener.onAnimationEnd();
+                }
+            }
+        };
+
+        private Listener mListener;
+
+        DualRampAnimator(T object, FloatProperty<T> firstProperty,
+                FloatProperty<T> secondProperty) {
+            mFirst = new RampAnimator(object, firstProperty);
+            mFirst.setListener(mInternalListener);
+            mSecond = new RampAnimator(object, secondProperty);
+            mSecond.setListener(mInternalListener);
+        }
+
+        /**
+         * Starts animating towards the specified values.
+         *
+         * If this is the first time the property is being set or if the rate is 0,
+         * the value jumps directly to the target.
+         *
+         * @param firstTarget The first target value.
+         * @param secondTarget The second target value.
+         * @param rate The convergence rate in units per second, or 0 to set the value immediately.
+         * @return True if either target differs from the previous target.
+         */
+        public boolean animateTo(float firstTarget, float secondTarget, float rate) {
+            final boolean firstRetval = mFirst.animateTo(firstTarget, rate);
+            final boolean secondRetval = mSecond.animateTo(secondTarget, rate);
+            return firstRetval && secondRetval;
+        }
+
+        public void setListener(Listener listener) {
+            mListener = listener;
+        }
+
+        public boolean isAnimating() {
+            return mFirst.isAnimating() && mSecond.isAnimating();
+        }
     }
 }

@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"පැකේජ ස්ථාපනකරු"</string>
     <string name="install" msgid="711829760615509273">"ස්ථාපනය කරන්න"</string>
+    <string name="update" msgid="3932142540719227615">"යාවත්කාලීන කර."</string>
     <string name="done" msgid="6632441120016885253">"කළා"</string>
     <string name="cancel" msgid="1018267193425558088">"අවලංගු කරන්න"</string>
     <string name="installing" msgid="4921993079741206516">"ස්ථාපනය කරමින්…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ස්ථාපනය කරමින්…"</string>
     <string name="install_done" msgid="5987363587661783896">"යෙදුම ස්ථාපනය කර ඇත."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"මෙම යෙදුම ස්ථාපනය කිරීමට ඔබට අවශ්‍යද?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"මෙම යෙදුම සඳහා යාවත්කාලීන ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති වනු ඇත."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"මෙම ඇමිණූ යෙදුමට යාවත්කාලීන ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති වනු ඇත."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"මෙම යෙදුම ස්ථාපනය කිරීමට ඔබට අවශ්‍යද?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"ඔබට මෙම යෙදුම යාවත්කාලීන කිරීමට අවශ්‍යද?"</string>
     <string name="install_failed" msgid="5777824004474125469">"යෙදුම ස්ථාපනය කර නැත."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"මෙම පැකේජය ස්ථාපනය කිරීම අවහිර කරන ලදි."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"පැකේජය දැනට පවතින පැකේජයක් සමග ගැටෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear මත ස්ථාපන/අස්ථාපනය ක්‍රියා සහාය දක්වන්නේ නැත."</string>
     <string name="message_staging" msgid="8032722385658438567">"යෙදුම වේදිකාගත කරමින්..."</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"නොදනී"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ආරක්ෂාව සඳහා, ඔබගේ ටැබ්ලටය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ආරක්ෂාව සඳහා, ඔබගේ රූපවාහිනිය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ආරක්ෂාව සඳහා, ඔබගේ දුරකථනය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"ඔබගේ ආරක්ෂාව සඳහා, ඔබගේ ටැබ්ලටයට දැනට මෙම මූලාශ්‍රයෙන් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට ඉඩ නොදේ. ඔබට සැකසීම් තුළ මෙය වෙනස් කළ හැකිය."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"ඔබගේ ආරක්ෂාව සඳහා, ඔබගේ TV හට දැනට මෙම මූලාශ්‍රයෙන් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට ඉඩ නොදේ. ඔබට සැකසීම් තුළ මෙය වෙනස් කළ හැකිය."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"ඔබගේ ආරක්ෂාව සඳහා, ඔබගේ දුරකථනයට දැනට මෙම මූලාශ්‍රයෙන් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට ඉඩ නොදේ. ඔබට සැකසීම් තුළ මෙය වෙනස් කළ හැකිය."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ඔබගේ දුරකථනය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ දුරකථනය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ඔබගේ ටැබ්ලට් පරිගණකය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ ටැබ්ලට් පරිගණකය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ඔබගේ TV සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ TV සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>

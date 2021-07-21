@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2021 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+    <!-- Material next state on color-->
+    <color name="settingslib_state_on_color">@android:color/system_accent1_100</color>
+
+    <!-- Material next state off color-->
+    <color name="settingslib_state_off_color">@android:color/system_accent2_100</color>
+
+    <!-- Material next thumb disable color-->
+    <color name="settingslib_thumb_disabled_color">@android:color/system_neutral2_100</color>
+
+    <!-- Material next thumb off color-->
+    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_300</color>
+
+    <!-- Material next track on color-->
+    <color name="settingslib_track_on_color">@android:color/system_accent1_600</color>
+
+    <!-- Material next track off color-->
+    <color name="settingslib_track_off_color">@color/settingslib_switch_track_off</color>
+
+    <!-- Dialog accent color -->
+    <color name="settingslib_dialog_accent">@android:color/system_accent1_600</color>
+    <!-- Dialog background color -->
+    <color name="settingslib_dialog_background">@*android:color/surface_light</color>
+    <!-- Dialog error color. -->
+    <color name="settingslib_dialog_colorError">#d93025</color> <!-- Red 600 -->
+
+    <color name="settingslib_colorSurfaceVariant">@android:color/system_neutral2_100</color>
+</resources>

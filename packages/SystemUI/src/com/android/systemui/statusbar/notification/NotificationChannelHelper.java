@@ -47,7 +47,7 @@ public class NotificationChannelHelper {
         final String pkg = entry.getSbn().getPackageName();
         final int appUid = entry.getSbn().getUid();
         if (TextUtils.isEmpty(conversationId) || TextUtils.isEmpty(pkg)
-            || entry.getRanking().getShortcutInfo() == null) {
+            || entry.getRanking().getConversationShortcutInfo() == null) {
             return channel;
         }
 
@@ -56,7 +56,7 @@ public class NotificationChannelHelper {
         try {
             channel.setName(getName(entry));
             notificationManager.createConversationNotificationChannelForPackage(
-                    pkg, appUid, entry.getSbn().getKey(), channel,
+                    pkg, appUid, channel,
                     conversationId);
             channel = notificationManager.getConversationNotificationChannel(
                     context.getOpPackageName(), UserHandle.getUserId(appUid), pkg,
@@ -68,8 +68,8 @@ public class NotificationChannelHelper {
     }
 
     private static CharSequence getName(NotificationEntry entry) {
-        if (entry.getRanking().getShortcutInfo().getLabel() != null) {
-            return entry.getRanking().getShortcutInfo().getLabel().toString();
+        if (entry.getRanking().getConversationShortcutInfo().getLabel() != null) {
+            return entry.getRanking().getConversationShortcutInfo().getLabel().toString();
         }
         Bundle extras = entry.getSbn().getNotification().extras;
         CharSequence nameString = extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE);

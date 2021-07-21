@@ -16,6 +16,7 @@
 package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
+import static android.view.contentcapture.ContentCaptureManager.DEBUG;
 import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import android.annotation.IntDef;
@@ -25,8 +26,12 @@ import android.annotation.SystemApi;
 import android.graphics.Insets;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Selection;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.autofill.AutofillId;
+import android.view.inputmethod.BaseInputConnection;
 
 import com.android.internal.util.Preconditions;
 
@@ -132,6 +137,9 @@ public final class ContentCaptureEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
 
+    /** @hide */
+    public static final int MAX_INVALID_VALUE = -1;
+
     private final int mSessionId;
     private final int mType;
     private final long mEventTime;
@@ -142,6 +150,14 @@ public final class ContentCaptureEvent implements Parcelable {
     private int mParentSessionId = NO_SESSION_ID;
     private @Nullable ContentCaptureContext mClientContext;
     private @Nullable Insets mInsets;
+
+    private int mComposingStart = MAX_INVALID_VALUE;
+    private int mComposingEnd = MAX_INVALID_VALUE;
+    private int mSelectionStartIndex = MAX_INVALID_VALUE;
+    private int mSelectionEndIndex = MAX_INVALID_VALUE;
+
+    /** Only used in the main Content Capture session, no need to parcel */
+    private boolean mTextHasComposingSpan;
 
     /** @hide */
     public ContentCaptureEvent(int sessionId, int type, long eventTime) {
@@ -246,6 +262,81 @@ public final class ContentCaptureEvent implements Parcelable {
     public ContentCaptureEvent setText(@Nullable CharSequence text) {
         mText = text;
         return this;
+    }
+
+    /** @hide */
+    @NonNull
+    public ContentCaptureEvent setComposingIndex(int start, int end) {
+        mComposingStart = start;
+        mComposingEnd = end;
+        return this;
+    }
+
+    /** @hide */
+    @NonNull
+    public boolean hasComposingSpan() {
+        return mComposingStart > MAX_INVALID_VALUE;
+    }
+
+    /** @hide */
+    @NonNull
+    public ContentCaptureEvent setSelectionIndex(int start, int end) {
+        mSelectionStartIndex = start;
+        mSelectionEndIndex = end;
+        return this;
+    }
+
+    boolean hasSameComposingSpan(@NonNull ContentCaptureEvent other) {
+        return mComposingStart == other.mComposingStart && mComposingEnd == other.mComposingEnd;
+    }
+
+    boolean hasSameSelectionSpan(@NonNull ContentCaptureEvent other) {
+        return mSelectionStartIndex == other.mSelectionStartIndex
+                && mSelectionEndIndex == other.mSelectionEndIndex;
+    }
+
+    private int getComposingStart() {
+        return mComposingStart;
+    }
+
+    private int getComposingEnd() {
+        return mComposingEnd;
+    }
+
+    private int getSelectionStart() {
+        return mSelectionStartIndex;
+    }
+
+    private int getSelectionEnd() {
+        return mSelectionEndIndex;
+    }
+
+    private void restoreComposingSpan() {
+        if (mComposingStart <= MAX_INVALID_VALUE
+                || mComposingEnd <= MAX_INVALID_VALUE) {
+            return;
+        }
+        if (mText instanceof Spannable) {
+            BaseInputConnection.setComposingSpans((Spannable) mText, mComposingStart,
+                    mComposingEnd);
+        } else {
+            Log.w(TAG, "Text is not a Spannable.");
+        }
+    }
+
+    private void restoreSelectionSpans() {
+        if (mSelectionStartIndex <= MAX_INVALID_VALUE
+                || mSelectionEndIndex <= MAX_INVALID_VALUE) {
+            return;
+        }
+
+        if (mText instanceof SpannableString) {
+            SpannableString ss = (SpannableString) mText;
+            ss.setSpan(Selection.SELECTION_START, mSelectionStartIndex, mSelectionStartIndex, 0);
+            ss.setSpan(Selection.SELECTION_END, mSelectionEndIndex, mSelectionEndIndex, 0);
+        } else {
+            Log.w(TAG, "Text is not a SpannableString.");
+        }
     }
 
     /** @hide */
@@ -362,6 +453,8 @@ public final class ContentCaptureEvent implements Parcelable {
                     + "TYPE_VIEW_DISAPPEARED event with neither id or ids: " + event);
         } else if (eventType == TYPE_VIEW_TEXT_CHANGED) {
             setText(event.getText());
+            setComposingIndex(event.getComposingStart(), event.getComposingEnd());
+            setSelectionIndex(event.getSelectionStart(), event.getSelectionEnd());
         } else {
             Log.e(TAG, "mergeEvent(" + getTypeAsString(eventType)
                     + ") does not support this event type.");
@@ -396,6 +489,14 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mInsets != null) {
             pw.print(", insets="); pw.println(mInsets);
         }
+        if (mComposingStart > MAX_INVALID_VALUE) {
+            pw.print(", composing("); pw.print(mComposingStart);
+            pw.print(", "); pw.print(mComposingEnd); pw.print(")");
+        }
+        if (mSelectionStartIndex > MAX_INVALID_VALUE) {
+            pw.print(", selection("); pw.print(mSelectionStartIndex);
+            pw.print(", "); pw.print(mSelectionEndIndex); pw.print(")");
+        }
     }
 
     @NonNull
@@ -415,19 +516,31 @@ public final class ContentCaptureEvent implements Parcelable {
         }
         if (mNode != null) {
             final String className = mNode.getClassName();
-            if (mNode != null) {
-                string.append(", class=").append(className);
-            }
+            string.append(", class=").append(className);
             string.append(", id=").append(mNode.getAutofillId());
+            if (mNode.getText() != null) {
+                string.append(", text=")
+                        .append(DEBUG ? mNode.getText() : getSanitizedString(mNode.getText()));
+            }
         }
         if (mText != null) {
-            string.append(", text=").append(getSanitizedString(mText));
+            string.append(", text=")
+                    .append(DEBUG ? mText : getSanitizedString(mText));
         }
         if (mClientContext != null) {
             string.append(", context=").append(mClientContext);
         }
         if (mInsets != null) {
             string.append(", insets=").append(mInsets);
+        }
+        if (mComposingStart > MAX_INVALID_VALUE) {
+            string.append(", composing=[")
+                    .append(mComposingStart).append(",").append(mComposingEnd).append("]");
+        }
+        if (mSelectionStartIndex > MAX_INVALID_VALUE) {
+            string.append(", selection=[")
+                    .append(mSelectionStartIndex).append(",")
+                    .append(mSelectionEndIndex).append("]");
         }
         return string.append(']').toString();
     }
@@ -454,6 +567,12 @@ public final class ContentCaptureEvent implements Parcelable {
         }
         if (mType == TYPE_VIEW_INSETS_CHANGED) {
             parcel.writeParcelable(mInsets, flags);
+        }
+        if (mType == TYPE_VIEW_TEXT_CHANGED) {
+            parcel.writeInt(mComposingStart);
+            parcel.writeInt(mComposingEnd);
+            parcel.writeInt(mSelectionStartIndex);
+            parcel.writeInt(mSelectionEndIndex);
         }
     }
 
@@ -488,6 +607,12 @@ public final class ContentCaptureEvent implements Parcelable {
             }
             if (type == TYPE_VIEW_INSETS_CHANGED) {
                 event.setInsets(parcel.readParcelable(null));
+            }
+            if (type == TYPE_VIEW_TEXT_CHANGED) {
+                event.setComposingIndex(parcel.readInt(), parcel.readInt());
+                event.restoreComposingSpan();
+                event.setSelectionIndex(parcel.readInt(), parcel.readInt());
+                event.restoreSelectionSpans();
             }
             return event;
         }

@@ -16,15 +16,19 @@
 
 package com.android.systemui.statusbar.notification.collection
 
+import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_MIN
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.NotificationMediaManager
+import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationRanker
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
@@ -33,7 +37,6 @@ import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVI
 import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
-import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy
 import java.util.Objects
@@ -52,16 +55,17 @@ private const val TAG = "NotifRankingManager"
  */
 open class NotificationRankingManager @Inject constructor(
     private val mediaManagerLazy: Lazy<NotificationMediaManager>,
-    private val groupManager: NotificationGroupManager,
+    private val groupManager: NotificationGroupManagerLegacy,
     private val headsUpManager: HeadsUpManager,
     private val notifFilter: NotificationFilter,
     private val logger: NotificationEntryManagerLogger,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
-    private val highPriorityProvider: HighPriorityProvider
-) {
+    private val highPriorityProvider: HighPriorityProvider,
+    private val keyguardEnvironment: KeyguardEnvironment
+) : LegacyNotificationRanker {
 
-    var rankingMap: RankingMap? = null
+    override var rankingMap: RankingMap? = null
         protected set
     private val mediaManager by lazy {
         mediaManagerLazy.get()
@@ -76,6 +80,9 @@ open class NotificationRankingManager @Inject constructor(
 
         val aIsFsn = a.isColorizedForegroundService()
         val bIsFsn = b.isColorizedForegroundService()
+
+        val aCall = a.isImportantCall()
+        val bCall = b.isImportantCall()
 
         val aPersonType = a.getPeopleNotificationType()
         val bPersonType = b.getPeopleNotificationType()
@@ -96,6 +103,7 @@ open class NotificationRankingManager @Inject constructor(
             // Provide consistent ranking with headsUpManager
             aHeadsUp -> headsUpManager.compare(a, b)
             aIsFsn != bIsFsn -> if (aIsFsn) -1 else 1
+            aCall != bCall -> if (aCall) -1 else 1
             usePeopleFiltering && aPersonType != bPersonType ->
                 peopleNotificationIdentifier.compareTo(aPersonType, bPersonType)
             // Upsort current media notification.
@@ -109,7 +117,7 @@ open class NotificationRankingManager @Inject constructor(
         }
     }
 
-    fun updateRanking(
+    override fun updateRanking(
         newRankingMap: RankingMap?,
         entries: Collection<NotificationEntry>,
         reason: String
@@ -123,6 +131,12 @@ open class NotificationRankingManager @Inject constructor(
         return synchronized(this) {
             filterAndSortLocked(entries, reason)
         }
+    }
+
+    override fun isNotificationForCurrentProfiles(
+        entry: NotificationEntry
+    ): Boolean {
+        return keyguardEnvironment.isNotificationForCurrentProfiles(entry.sbn)
     }
 
     /** Uses the [rankingComparator] to sort notifications which aren't filtered */
@@ -150,11 +164,12 @@ open class NotificationRankingManager @Inject constructor(
 
     @PriorityBucket
     private fun getBucketForEntry(entry: NotificationEntry): Int {
+        val isImportantCall = entry.isImportantCall()
         val isHeadsUp = entry.isRowHeadsUp
         val isMedia = entry.isImportantMedia()
         val isSystemMax = entry.isSystemMax()
         return when {
-            entry.isColorizedForegroundService() -> BUCKET_FOREGROUND_SERVICE
+            entry.isColorizedForegroundService() || isImportantCall -> BUCKET_FOREGROUND_SERVICE
             usePeopleFiltering && entry.isConversation() -> BUCKET_PEOPLE
             isHeadsUp || isMedia || isSystemMax || entry.isHighPriority() -> BUCKET_ALERTING
             else -> BUCKET_SILENT
@@ -186,12 +201,12 @@ open class NotificationRankingManager @Inject constructor(
     }
 
     private fun NotificationEntry.isImportantMedia() =
-            key == mediaManager.mediaNotificationKey && ranking.importance > IMPORTANCE_MIN
+            key == mediaManager.mediaNotificationKey && importance > IMPORTANCE_MIN
 
     private fun NotificationEntry.isConversation() = getPeopleNotificationType() != TYPE_NON_PERSON
 
     private fun NotificationEntry.getPeopleNotificationType() =
-            peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+            peopleNotificationIdentifier.getPeopleNotificationType(this)
 
     private fun NotificationEntry.isHighPriority() =
             highPriorityProvider.isHighPriority(this)
@@ -203,6 +218,9 @@ private fun NotificationEntry.isSystemMax() =
 
 private fun StatusBarNotification.isSystemNotification() =
         "android" == packageName || "com.android.systemui" == packageName
+
+private fun NotificationEntry.isImportantCall() =
+        sbn.notification.isStyle(Notification.CallStyle::class.java) && importance > IMPORTANCE_MIN
 
 private fun NotificationEntry.isColorizedForegroundService() = sbn.notification.run {
     isForegroundService && isColorized && importance > IMPORTANCE_MIN

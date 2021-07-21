@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <bool name="are_flags_overrideable">false</bool>
+
+    <bool name="flag_notification_pipeline2">true</bool>
+    <bool name="flag_notification_pipeline2_rendering">false</bool>
+    <bool name="flag_notif_updates">true</bool>
+
+    <bool name="flag_monet">false</bool>
+
+    <!-- b/171917882 -->
+    <bool name="flag_notification_twocolumn">false</bool>
+
+    <!-- AOD/Lockscreen alternate layout -->
+    <bool name="flag_keyguard_layout">true</bool>
+
+    <!-- People Tile flag -->
+    <bool name="flag_conversations">false</bool>
+
+    <!-- The new animations to/from lockscreen and AOD! -->
+    <bool name="flag_lockscreen_animations">true</bool>
+
+    <!-- The new swipe to unlock animation, which shows the app/launcher behind the keyguard during
+    the swipe. -->
+    <bool name="flag_new_unlock_swipe_animation">true</bool>
+
+    <!-- The shared-element transition between lockscreen smartspace and launcher smartspace. -->
+    <bool name="flag_smartspace_shared_element_transition">false</bool>
+
+    <bool name="flag_pm_lite">true</bool>
+
+    <bool name="flag_charging_ripple">false</bool>
+
+    <bool name="flag_ongoing_call_status_bar_chip">true</bool>
+
+    <bool name="flag_smartspace">false</bool>
+
+    <bool name="flag_smartspace_deduping">true</bool>
+
+    <bool name="flag_combined_status_bar_signal_icons">false</bool>
+</resources>

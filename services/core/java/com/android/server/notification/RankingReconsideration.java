@@ -90,7 +90,7 @@ public abstract class RankingReconsideration implements Runnable {
 
     /**
      * Apply any computed changes to the notification record.  This method will be
-     * called on the main service thread, synchronized on he mNotificationList.
+     * called on the main service thread, synchronized on the mNotificationList.
      * @param record The locked record to be updated.
      */
     public abstract void applyChangesLocked(NotificationRecord record);

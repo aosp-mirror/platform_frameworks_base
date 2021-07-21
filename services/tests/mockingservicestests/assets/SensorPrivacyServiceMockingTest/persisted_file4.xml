@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<sensor-privacy persistence-version="1" version="1">
+    <user id="0" enabled="false">
+        <individual-sensor-privacy sensor="1" enabled="true" />
+        <individual-sensor-privacy sensor="2" enabled="false" />
+    </user>
+    <user id="10" enabled="false">
+        <individual-sensor-privacy sensor="1" enabled="false" />
+    </user>
+</sensor-privacy>

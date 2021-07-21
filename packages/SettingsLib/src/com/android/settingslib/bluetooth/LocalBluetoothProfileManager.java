@@ -441,6 +441,10 @@ public class LocalBluetoothProfileManager {
         return mHearingAidProfile;
     }
 
+    SapProfile getSapProfile() {
+        return mSapProfile;
+    }
+
     @VisibleForTesting
     HidProfile getHidProfile() {
         return mHidProfile;
@@ -543,12 +547,13 @@ public class LocalBluetoothProfileManager {
             mPbapProfile.setEnabled(device, true);
         }
 
-        if (mMapClientProfile != null) {
+        if ((mMapClientProfile != null)
+                && BluetoothUuid.containsAnyUuid(uuids, MapClientProfile.UUIDS)) {
             profiles.add(mMapClientProfile);
             removedProfiles.remove(mMapClientProfile);
         }
 
-        if ((mPbapClientProfile != null) && ArrayUtils.contains(localUuids, BluetoothUuid.PBAP_PCE)
+        if ((mPbapClientProfile != null)
                 && BluetoothUuid.containsAnyUuid(uuids, PbapClientProfile.SRC_UUIDS)) {
             profiles.add(mPbapClientProfile);
             removedProfiles.remove(mPbapClientProfile);

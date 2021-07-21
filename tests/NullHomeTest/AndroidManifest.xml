@@ -21,7 +21,7 @@
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="21" />
 
     <instrumentation
-        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.test.nullhome"
         android:label="Check if no null Home exists/is enabled" />
 

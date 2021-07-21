@@ -33,7 +33,6 @@
 #include <debuggerd/client.h>
 #include <dumputils/dump_utils.h>
 #include <log/log_event_list.h>
-#include <log/log_read.h>
 #include <log/logprint.h>
 #include <private/android_logger.h>
 #include <sys/mman.h>

@@ -34,7 +34,7 @@ public class EntropyMixerTest extends AndroidTestCase {
         assertEquals(0, FileUtils.readTextFile(file, 0, null).length());
 
         // The constructor has the side effect of writing to file
-        new EntropyMixer(getContext(), "/dev/null", file.getCanonicalPath(), "/dev/null");
+        new EntropyMixer(getContext(), "/dev/null", file.getCanonicalPath());
 
         assertTrue(FileUtils.readTextFile(file, 0, null).length() > 0);
     }

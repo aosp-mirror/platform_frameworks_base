@@ -68,6 +68,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.Toast;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
@@ -148,7 +149,8 @@ public class AccessibilityShortcutControllerTest {
 
         // Use the extra level of indirection in the object to mock framework objects
         AccessibilityManager accessibilityManager =
-                new AccessibilityManager(mHandler, mAccessibilityManagerService, 0);
+                new AccessibilityManager(InstrumentationRegistry.getContext(), mHandler,
+                        mAccessibilityManagerService, 0, true);
         when(mFrameworkObjectProvider.getAccessibilityManagerInstance(mContext))
                 .thenReturn(accessibilityManager);
         when(mContext.getSystemService(Context.ACCESSIBILITY_SERVICE))

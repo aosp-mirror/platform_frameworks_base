@@ -32,9 +32,8 @@
 
     <com.android.keyguard.KeyguardSecurityContainer
         android:id="@+id/keyguard_security_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        androidprv:layout_maxHeight="@dimen/keyguard_security_max_height"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:padding="0dp"
@@ -42,13 +41,14 @@
         android:layout_gravity="center">
         <com.android.keyguard.KeyguardSecurityViewFlipper
             android:id="@+id/view_flipper"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:paddingTop="@dimen/keyguard_security_view_top_margin"
             android:paddingStart="@dimen/keyguard_security_view_lateral_margin"
             android:paddingEnd="@dimen/keyguard_security_view_lateral_margin"
+            android:layout_gravity="center"
             android:gravity="center">
         </com.android.keyguard.KeyguardSecurityViewFlipper>
     </com.android.keyguard.KeyguardSecurityContainer>

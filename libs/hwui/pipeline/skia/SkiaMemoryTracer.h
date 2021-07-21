@@ -34,8 +34,10 @@ public:
     SkiaMemoryTracer(const char* categoryKey, bool itemizeType);
     ~SkiaMemoryTracer() override {}
 
+    bool hasOutput();
     void logOutput(String8& log);
     void logTotals(String8& log);
+    size_t total();
 
     void dumpNumericValue(const char* dumpName, const char* valueName, const char* units,
                           uint64_t value) override;

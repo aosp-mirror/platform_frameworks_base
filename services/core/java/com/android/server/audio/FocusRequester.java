@@ -70,6 +70,11 @@ public class FocusRequester {
      */
     private boolean mFocusLossWasNotified;
     /**
+     * whether this focus owner has already lost focus, but is being faded out until focus loss
+     * dispatch occurs. It's in "limbo" mode: has lost focus but not released yet until notified
+     */
+    boolean mFocusLossFadeLimbo;
+    /**
      * the audio attributes associated with the focus request
      */
     private final @NonNull AudioAttributes mAttributes;
@@ -102,6 +107,7 @@ public class FocusRequester {
         mGrantFlags = grantFlags;
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
         mFocusLossWasNotified = true;
+        mFocusLossFadeLimbo = false;
         mFocusController = ctlr;
         mSdkTarget = sdk;
     }
@@ -115,6 +121,7 @@ public class FocusRequester {
         mFocusGainRequest = afi.getGainRequest();
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
         mFocusLossWasNotified = true;
+        mFocusLossFadeLimbo = false;
         mGrantFlags = afi.getFlags();
         mSdkTarget = afi.getSdkTarget();
 
@@ -132,12 +139,23 @@ public class FocusRequester {
         return ((mGrantFlags & AudioManager.AUDIOFOCUS_FLAG_LOCK) != 0);
     }
 
+    /**
+     * @return true if the focus requester is scheduled to receive a focus loss
+     */
+    boolean isInFocusLossLimbo() {
+        return mFocusLossFadeLimbo;
+    }
+
     boolean hasSameBinder(IBinder ib) {
         return (mSourceRef != null) && mSourceRef.equals(ib);
     }
 
     boolean hasSameDispatcher(IAudioFocusDispatcher fd) {
         return (mFocusDispatcher != null) && mFocusDispatcher.equals(fd);
+    }
+
+    @NonNull String getPackageName() {
+        return mPackageName;
     }
 
     boolean hasSamePackage(@NonNull String pack) {
@@ -164,7 +182,7 @@ public class FocusRequester {
         return mGrantFlags;
     }
 
-    AudioAttributes getAudioAttributes() {
+    @NonNull AudioAttributes getAudioAttributes() {
         return mAttributes;
     }
 
@@ -227,11 +245,21 @@ public class FocusRequester {
                 + " -- flags: " + flagsToString(mGrantFlags)
                 + " -- loss: " + focusLossToString()
                 + " -- notified: " + mFocusLossWasNotified
+                + " -- limbo" + mFocusLossFadeLimbo
                 + " -- uid: " + mCallingUid
                 + " -- attr: " + mAttributes
                 + " -- sdk:" + mSdkTarget);
     }
 
+    /**
+     * Clear all references, except for instances in "loss limbo" due to the current fade out
+     * for which there will be an attempt to be clear after the loss has been notified
+     */
+    void maybeRelease() {
+        if (!mFocusLossFadeLimbo) {
+            release();
+        }
+    }
 
     void release() {
         final IBinder srcRef = mSourceRef;
@@ -311,6 +339,7 @@ public class FocusRequester {
     void handleFocusGain(int focusGain) {
         try {
             mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
+            mFocusLossFadeLimbo = false;
             mFocusController.notifyExtPolicyFocusGrant_syncAf(toAudioFocusInfo(),
                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
             final IAudioFocusDispatcher fd = mFocusDispatcher;
@@ -323,7 +352,7 @@ public class FocusRequester {
                     fd.dispatchAudioFocusChange(focusGain, mClientId);
                 }
             }
-            mFocusController.unduckPlayers(this);
+            mFocusController.restoreVShapedPlayers(this);
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal gain of audio focus due to: ", e);
         }
@@ -332,7 +361,7 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     void handleFocusGainFromRequest(int focusRequestResult) {
         if (focusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mFocusController.unduckPlayers(this);
+            mFocusController.restoreVShapedPlayers(this);
         }
     }
 
@@ -371,7 +400,7 @@ public class FocusRequester {
                 if (handled) {
                     if (DEBUG) {
                         Log.v(TAG, "NOT dispatching " + focusChangeToString(mFocusLossReceived)
-                            + " to " + mClientId + ", ducking implemented by framework");
+                                + " to " + mClientId + ", response handled by framework");
                     }
                     mFocusController.notifyExtPolicyFocusLoss_syncAf(
                             toAudioFocusInfo(), false /* wasDispatched */);
@@ -431,8 +460,27 @@ public class FocusRequester {
                 return false;
             }
 
-            return mFocusController.duckPlayers(frWinner, this, forceDuck);
+            return mFocusController.duckPlayers(frWinner, /*loser*/ this, forceDuck);
         }
+
+        if (focusLoss == AudioManager.AUDIOFOCUS_LOSS) {
+            if (!MediaFocusControl.ENFORCE_FADEOUT_FOR_FOCUS_LOSS) {
+                return false;
+            }
+
+            // candidate for fade-out before a receiving a loss
+            boolean playersAreFaded =  mFocusController.fadeOutPlayers(frWinner, /* loser */ this);
+            if (playersAreFaded) {
+                // active players are being faded out, delay the dispatch of focus loss
+                // mark this instance as being faded so it's not released yet as the focus loss
+                // will be dispatched later, it is now in limbo mode
+                mFocusLossFadeLimbo = true;
+                mFocusController.postDelayedLossAfterFade(this,
+                        FadeOutManager.FADE_OUT_DURATION_MS);
+                return true;
+            }
+        }
+
         return false;
     }
 

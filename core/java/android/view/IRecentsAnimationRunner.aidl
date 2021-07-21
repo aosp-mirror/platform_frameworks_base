@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
 import android.view.IRecentsAnimationController;
+import android.window.TaskSnapshot;
 
 /**
  * Interface that is used to callback from window manager to the process that runs a recents
@@ -42,8 +43,7 @@ oneway interface IRecentsAnimationRunner {
      *
      * @see {@link RecentsAnimationController#cleanupScreenshot}
      */
-    @UnsupportedAppUsage
-    void onAnimationCanceled(in @nullable ActivityManager.TaskSnapshot taskSnapshot) = 1;
+    void onAnimationCanceled(in @nullable TaskSnapshot taskSnapshot) = 1;
 
     /**
      * Called when the system is ready for the handler to start animating all the visible tasks.
@@ -52,7 +52,7 @@ oneway interface IRecentsAnimationRunner {
      * @param minimizedHomeBounds Specifies the bounds of the minimized home app, will be
      *                            {@code null} if the device is not currently in split screen
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
             in Rect homeContentInsets, in Rect minimizedHomeBounds) = 2;

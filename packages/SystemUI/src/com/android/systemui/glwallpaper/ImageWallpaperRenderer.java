@@ -46,6 +46,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
     private final ImageGLWallpaper mWallpaper;
     private final Rect mSurfaceSize = new Rect();
     private final WallpaperTexture mTexture;
+    private Consumer<Bitmap> mOnBitmapUpdated;
 
     public ImageWallpaperRenderer(Context context) {
         final WallpaperManager wpm = context.getSystemService(WallpaperManager.class);
@@ -56,6 +57,13 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
         mTexture = new WallpaperTexture(wpm);
         mProgram = new ImageGLProgram(context);
         mWallpaper = new ImageGLWallpaper(mProgram);
+    }
+
+    /**
+     * @hide
+     */
+    public void setOnBitmapChanged(Consumer<Bitmap> c) {
+        mOnBitmapUpdated = c;
     }
 
     @Override
@@ -72,6 +80,8 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
         mTexture.use(bitmap -> {
             if (bitmap == null) {
                 Log.w(TAG, "reload texture failed!");
+            } else if (mOnBitmapUpdated != null) {
+                mOnBitmapUpdated.accept(bitmap);
             }
             mWallpaper.setup(bitmap);
         });

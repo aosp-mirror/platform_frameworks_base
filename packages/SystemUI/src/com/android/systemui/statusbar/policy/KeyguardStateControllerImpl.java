@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.os.Trace;
 
 import androidx.annotation.VisibleForTesting;
@@ -31,6 +32,9 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,21 +42,22 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class KeyguardStateControllerImpl implements KeyguardStateController, Dumpable {
 
     private static final boolean DEBUG_AUTH_WITH_ADB = false;
     private static final String AUTH_BROADCAST_KEY = "debug_trigger_auth";
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final Context mContext;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new UpdateMonitorCallback();
+    private final SmartspaceTransitionController mSmartspaceTransitionController;
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
@@ -70,14 +75,39 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private boolean mDebugUnlocked = false;
     private boolean mFaceAuthEnabled;
 
+    private float mDismissAmount = 0f;
+    private boolean mDismissingFromTouch = false;
+
+    /**
+     * Whether the panel is currently flinging to a collapsed state, which means we're dismissing
+     * the keyguard.
+     */
+    private boolean mFlingingToDismissKeyguard = false;
+
+    /**
+     * Whether the panel is currently flinging to a collapsed state, which means we're dismissing
+     * the keyguard, and the fling started during a swipe gesture. This means that we need to take
+     * over the gesture and animate the rest of the way dismissed.
+     */
+    private boolean mFlingingToDismissKeyguardDuringSwipeGesture = false;
+
+    /**
+     * Whether the panel is currently flinging to an expanded state, which means we cancelled the
+     * dismiss gesture and are snapping back to the keyguard state.
+     */
+    private boolean mSnappingKeyguardBackAfterSwipe = false;
+
     /**
      */
     @Inject
     public KeyguardStateControllerImpl(Context context,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
+            SmartspaceTransitionController smartspaceTransitionController) {
+        mContext = context;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+        mSmartspaceTransitionController = smartspaceTransitionController;
 
         update(true /* updateAlways */);
         if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {
@@ -136,6 +166,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         mShowing = showing;
         mOccluded = occluded;
         notifyKeyguardChanged();
+
+        // Update the dismiss amount to the full 0f/1f if we explicitly show or hide the keyguard.
+        // Otherwise, the dismiss amount could be left at a random value if we show/hide during a
+        // dismiss gesture, canceling the gesture.
+        notifyKeyguardDismissAmountChanged(showing ? 0f : 1f, false);
     }
 
     private void notifyKeyguardChanged() {
@@ -206,6 +241,18 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
+    public boolean canPerformSmartSpaceTransition() {
+        return canDismissLockScreen()
+                && mSmartspaceTransitionController.isSmartspaceTransitionPossible();
+    }
+
+    @Override
+    public boolean isKeyguardScreenRotationAllowed() {
+        return SystemProperties.getBoolean("lockscreen.rot_override", false)
+                || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation);
+    }
+
+    @Override
     public boolean isFaceAuthEnabled() {
         return mFaceAuthEnabled;
     }
@@ -241,8 +288,56 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
+    public boolean isFlingingToDismissKeyguard() {
+        return mFlingingToDismissKeyguard;
+    }
+
+    @Override
+    public boolean isFlingingToDismissKeyguardDuringSwipeGesture() {
+        return mFlingingToDismissKeyguardDuringSwipeGesture;
+    }
+
+    @Override
+    public boolean isSnappingKeyguardBackAfterSwipe() {
+        return mSnappingKeyguardBackAfterSwipe;
+    }
+
+    @Override
+    public float getDismissAmount() {
+        return mDismissAmount;
+    }
+
+    @Override
+    public boolean isDismissingFromSwipe() {
+        return mDismissingFromTouch;
+    }
+
+    @Override
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
         mKeyguardGoingAway = keyguardGoingAway;
+    }
+
+    @Override
+    public void notifyPanelFlingEnd() {
+        mFlingingToDismissKeyguard = false;
+        mFlingingToDismissKeyguardDuringSwipeGesture = false;
+        mSnappingKeyguardBackAfterSwipe = false;
+    }
+
+    @Override
+    public void notifyPanelFlingStart(boolean flingToDismiss) {
+        mFlingingToDismissKeyguard = flingToDismiss;
+        mFlingingToDismissKeyguardDuringSwipeGesture =
+                flingToDismiss && mDismissingFromTouch;
+        mSnappingKeyguardBackAfterSwipe = !flingToDismiss;
+    }
+
+    @Override
+    public void notifyKeyguardDismissAmountChanged(float dismissAmount,
+            boolean dismissingFromTouch) {
+        mDismissAmount = dismissAmount;
+        mDismissingFromTouch = dismissingFromTouch;
+        new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardDismissAmountChanged);
     }
 
     @Override

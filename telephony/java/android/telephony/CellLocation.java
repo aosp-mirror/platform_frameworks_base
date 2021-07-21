@@ -16,7 +16,9 @@
 
 package android.telephony;
 
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.cdma.CdmaCellLocation;
@@ -27,15 +29,34 @@ import com.android.internal.telephony.PhoneConstants;
 
 /**
  * Abstract class that represents the location of the device.  {@more}
+ *
+ * @deprecated use {@link android.telephony.CellIdentity CellIdentity}.
  */
+@Deprecated
 public abstract class CellLocation {
 
     /**
-     * Request an update of the current location.  If the location has changed,
-     * a broadcast will be sent to everyone registered with {@link
-     * PhoneStateListener#LISTEN_CELL_LOCATION}.
+     * Request an updated CellLocation for callers targeting SDK 30 or older.
+     *
+     * Whenever Android is aware of location changes, a callback will automatically be sent to
+     * all registrants of {@link PhoneStateListener#LISTEN_CELL_LOCATION}. This API requests an
+     * additional location update for cases where power saving might cause location updates to be
+     * missed.
+     *
+     * <p>This method is a no-op for callers targeting SDK level 31 or greater.
+     * <p>This method is a no-op for callers that target SDK level 29 or 30 and lack
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     * <p>This method is a no-op for callers that target SDK level 28 or below and lack
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
+     * @deprecated use {@link TelephonyManager#requestCellInfoUpdate}.
      */
+    @Deprecated
     public static void requestLocationUpdate() {
+        // Since this object doesn't have a context, this is the best we can do.
+        final Context appContext = ActivityThread.currentApplication();
+        if (appContext == null) return; // should never happen
+
         try {
             ITelephony phone = ITelephony.Stub.asInterface(
                     TelephonyFrameworkInitializer
@@ -43,7 +64,7 @@ public abstract class CellLocation {
                             .getTelephonyServiceRegisterer()
                             .get());
             if (phone != null) {
-                phone.updateServiceLocation();
+                phone.updateServiceLocationWithPackageName(appContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -77,12 +98,14 @@ public abstract class CellLocation {
     /**
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract void fillInNotifierBundle(Bundle bundle);
 
     /**
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract boolean isEmpty();
 
@@ -90,6 +113,7 @@ public abstract class CellLocation {
      * Invalidate this object.  The location area code and the cell id are set to -1.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract void setStateInvalid();
 
     /**

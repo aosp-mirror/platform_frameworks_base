@@ -88,7 +88,7 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
     }
 
     public void testNotForeground() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             makeCallerBackground();
@@ -105,8 +105,8 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
     }
 
     private void checkRequestPinAppWidget(@Nullable PendingIntent resultIntent) {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
-        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
+        setDefaultLauncher(USER_10, LAUNCHER_2);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             AppWidgetProviderInfo info = makeProviderInfo("c1");
@@ -147,7 +147,7 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
 
     public void testRequestPinAppWidget_withCallback() {
         final PendingIntent resultIntent =
-                PendingIntent.getActivity(getTestContext(), 0, new Intent(), 0);
+                PendingIntent.getActivity(getTestContext(), 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         checkRequestPinAppWidget(resultIntent);
     }

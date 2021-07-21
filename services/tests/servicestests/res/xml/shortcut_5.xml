@@ -73,7 +73,7 @@
             android:action="action"
             android:data="http://www/"
             android:targetPackage="abc"
-            android:targetClass=".xyz"
+            android:targetClass="abc.xyz"
             android:mimeType="foo/bar"
             >
             <categories android:name="cat1" />

@@ -35,4 +35,6 @@
     <string name="effect_attach_off">Attach</string>
     <string name="effect_attach_on">Detach</string>
     <string name="send_level_name">Send Level</string>
+    <!-- Toggles use of a multi-threaded client for an effect [CHAR LIMIT=24] -->
+    <string name="effect_multithreaded">Multithreaded Use</string>
 </resources>

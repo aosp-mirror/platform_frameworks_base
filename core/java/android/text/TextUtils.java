@@ -2080,6 +2080,119 @@ public class TextUtils {
     }
 
     /**
+     * Simple alternative to {@link String#format} which purposefully supports
+     * only a small handful of substitutions to improve execution speed.
+     * Benchmarking reveals this optimized alternative performs 6.5x faster for
+     * a typical format string.
+     * <p>
+     * Below is a summary of the limited grammar supported by this method; if
+     * you need advanced features, please continue using {@link String#format}.
+     * <ul>
+     * <li>{@code %b} for {@code boolean}
+     * <li>{@code %c} for {@code char}
+     * <li>{@code %d} for {@code int} or {@code long}
+     * <li>{@code %f} for {@code float} or {@code double}
+     * <li>{@code %s} for {@code String}
+     * <li>{@code %x} for hex representation of {@code int} or {@code long}
+     * <li>{@code %%} for literal {@code %}
+     * <li>{@code %04d} style grammar to specify the argument width, such as
+     * {@code %04d} to prefix an {@code int} with zeros or {@code %10b} to
+     * prefix a {@code boolean} with spaces
+     * </ul>
+     *
+     * @throws IllegalArgumentException if the format string or arguments don't
+     *             match the supported grammar described above.
+     * @hide
+     */
+    public static @NonNull String formatSimple(@NonNull String format, Object... args) {
+        final StringBuilder sb = new StringBuilder(format);
+        int j = 0;
+        for (int i = 0; i < sb.length(); ) {
+            if (sb.charAt(i) == '%') {
+                char code = sb.charAt(i + 1);
+
+                // Decode any argument width request
+                char prefixChar = '\0';
+                int prefixLen = 0;
+                int consume = 2;
+                while ('0' <= code && code <= '9') {
+                    if (prefixChar == '\0') {
+                        prefixChar = (code == '0') ? '0' : ' ';
+                    }
+                    prefixLen *= 10;
+                    prefixLen += Character.digit(code, 10);
+                    consume += 1;
+                    code = sb.charAt(i + consume - 1);
+                }
+
+                final String repl;
+                switch (code) {
+                    case 'b': {
+                        if (j == args.length) {
+                            throw new IllegalArgumentException("Too few arguments");
+                        }
+                        final Object arg = args[j++];
+                        if (arg instanceof Boolean) {
+                            repl = Boolean.toString((boolean) arg);
+                        } else {
+                            repl = Boolean.toString(arg != null);
+                        }
+                        break;
+                    }
+                    case 'c':
+                    case 'd':
+                    case 'f':
+                    case 's': {
+                        if (j == args.length) {
+                            throw new IllegalArgumentException("Too few arguments");
+                        }
+                        final Object arg = args[j++];
+                        repl = String.valueOf(arg);
+                        break;
+                    }
+                    case 'x': {
+                        if (j == args.length) {
+                            throw new IllegalArgumentException("Too few arguments");
+                        }
+                        final Object arg = args[j++];
+                        if (arg instanceof Integer) {
+                            repl = Integer.toHexString((int) arg);
+                        } else if (arg instanceof Long) {
+                            repl = Long.toHexString((long) arg);
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Unsupported hex type " + arg.getClass());
+                        }
+                        break;
+                    }
+                    case '%': {
+                        repl = "%";
+                        break;
+                    }
+                    default: {
+                        throw new IllegalArgumentException("Unsupported format code " + code);
+                    }
+                }
+
+                sb.replace(i, i + consume, repl);
+
+                // Apply any argument width request
+                final int prefixInsert = (prefixChar == '0' && repl.charAt(0) == '-') ? 1 : 0;
+                for (int k = repl.length(); k < prefixLen; k++) {
+                    sb.insert(i + prefixInsert, prefixChar);
+                }
+                i += Math.max(repl.length(), prefixLen);
+            } else {
+                i++;
+            }
+        }
+        if (j != args.length) {
+            throw new IllegalArgumentException("Too many arguments");
+        }
+        return sb.toString();
+    }
+
+    /**
      * Returns whether or not the specified spanned text has a style span.
      * @hide
      */
@@ -2173,7 +2286,7 @@ public class TextUtils {
     public static <T extends CharSequence> T trimToLengthWithEllipsis(@Nullable T text,
             @IntRange(from = 1) int size) {
         T trimmed = trimToSize(text, size);
-        if (trimmed.length() < text.length()) {
+        if (text != null && trimmed.length() < text.length()) {
             trimmed = (T) (trimmed.toString() + "...");
         }
         return trimmed;

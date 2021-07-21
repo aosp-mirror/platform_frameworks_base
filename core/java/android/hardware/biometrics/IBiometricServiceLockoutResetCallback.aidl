@@ -26,5 +26,5 @@ oneway interface IBiometricServiceLockoutResetCallback {
     /**
      * A wakelock will be held until the reciever calls back into {@param callback}
      */
-    void onLockoutReset(long deviceId, IRemoteCallback callback);
+    void onLockoutReset(int sensorId, IRemoteCallback callback);
 }

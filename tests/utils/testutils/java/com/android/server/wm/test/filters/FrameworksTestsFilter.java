@@ -30,12 +30,21 @@ import com.android.test.filters.SelectTest;
  *     -e selectTest_verbose true \
  *     com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  * </pre>
+ *
+ * <p>Use this filter when running FrameworksMockingCoreTests as
+ * <pre>
+ * adb shell am instrument -w \
+ *     -e filter com.android.server.wm.test.filters.FrameworksTestsFilter \
+ *     -e selectTest_verbose true \
+ *     com.android.frameworks.mockingcoretests/androidx.test.runner.AndroidJUnitRunner
+ * </pre>
  */
 public final class FrameworksTestsFilter extends SelectTest {
 
     private static final String[] SELECTED_TESTS = {
             // Test specifications for FrameworksMockingCoreTests.
             "android.app.activity.ActivityThreadClientTest",
+            "android.view.DisplayTest",
             // Test specifications for FrameworksCoreTests.
             "android.app.servertransaction.", // all tests under the package.
             "android.view.CutoutSpecificationTest",
@@ -46,10 +55,14 @@ public final class FrameworksTestsFilter extends SelectTest {
             "android.view.InsetsSourceTest",
             "android.view.InsetsSourceConsumerTest",
             "android.view.InsetsStateTest",
+            "android.view.RoundedCornerTest",
+            "android.view.RoundedCornersTest",
             "android.view.WindowMetricsTest",
             "android.view.PendingInsetsControllerTest",
-            "android.app.WindowContextTest",
-            "android.window.WindowMetricsHelperTest"
+            "android.window.WindowContextTest",
+            "android.window.WindowMetricsHelperTest",
+            "android.app.activity.ActivityThreadTest",
+            "android.window.WindowContextControllerTest"
     };
 
     public FrameworksTestsFilter(Bundle testArgs) {

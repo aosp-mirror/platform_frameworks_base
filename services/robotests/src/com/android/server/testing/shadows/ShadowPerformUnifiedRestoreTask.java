@@ -25,6 +25,7 @@ import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -67,7 +68,8 @@ public class ShadowPerformUnifiedRestoreTask {
             int pmToken,
             boolean isFullSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
         mPackage = targetPackage;
         mIsFullSystemRestore = isFullSystemRestore;

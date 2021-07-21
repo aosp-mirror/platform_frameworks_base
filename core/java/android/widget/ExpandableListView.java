@@ -1007,7 +1007,7 @@ public class ExpandableListView extends ListView {
 
             flatChildPos = mConnector.getFlattenedPos(elChildPos);
 
-            // Sanity check
+            // Validity check
             if (flatChildPos == null) {
                 throw new IllegalStateException("Could not find child");
             }

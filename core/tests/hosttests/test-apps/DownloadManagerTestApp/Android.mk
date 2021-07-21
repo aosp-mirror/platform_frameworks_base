@@ -24,6 +24,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-common mockwebserver junit
 LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_PACKAGE_NAME := DownloadManagerTestApp
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../NOTICE
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
 ifneq ($(TARGET_BUILD_VARIANT),user)

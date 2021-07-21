@@ -123,6 +123,13 @@ class XmlPullParser : public IPackageDeclStack {
    */
   Maybe<ExtractedPackage> TransformPackageAlias(const android::StringPiece& alias) const override;
 
+  struct PackageDecl {
+    std::string prefix;
+    ExtractedPackage package;
+  };
+
+  const std::vector<PackageDecl>& package_decls() const;
+
   //
   // Remaining methods are for retrieving information about attributes
   // associated with a StartElement.
@@ -180,11 +187,6 @@ class XmlPullParser : public IPackageDeclStack {
   const std::string empty_;
   size_t depth_;
   std::stack<std::string> namespace_uris_;
-
-  struct PackageDecl {
-    std::string prefix;
-    ExtractedPackage package;
-  };
   std::vector<PackageDecl> package_aliases_;
 };
 

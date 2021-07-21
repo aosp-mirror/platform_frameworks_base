@@ -234,7 +234,7 @@ public final class Channel implements java.nio.channels.Channel {
      * response of the SELECT command.
 
      * @return <code>true</code> if new Applet was selected on this channel.
-               <code>false</code> he already selected Applet stays selected on this channel.
+               <code>false</code> the already selected Applet stays selected on this channel.
      *
      * @throws IOException if there is a communication problem to the reader or the Secure Element.
      * @throws IllegalStateException if the channel is used after being closed.

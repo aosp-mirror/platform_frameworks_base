@@ -167,10 +167,17 @@ public class LauncherApps {
      */
     public static final int FLAG_CACHE_BUBBLE_SHORTCUTS = 1;
 
+    /**
+     * Cache shortcuts which are used in People Tile.
+     * @hide
+     */
+    public static final int FLAG_CACHE_PEOPLE_TILE_SHORTCUTS = 2;
+
     /** @hide */
     @IntDef(flag = false, prefix = { "FLAG_CACHE_" }, value = {
             FLAG_CACHE_NOTIFICATION_SHORTCUTS,
             FLAG_CACHE_BUBBLE_SHORTCUTS,
+            FLAG_CACHE_PEOPLE_TILE_SHORTCUTS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutCacheFlags {}
@@ -323,6 +330,16 @@ public class LauncherApps {
         public void onShortcutsChanged(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
         }
+
+        /**
+         * Indicates that the loading progress of an installed package has changed.
+         *
+         * @param packageName The name of the package that has changed.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param progress The new progress value, between [0, 1].
+         */
+        public void onPackageLoadingProgressChanged(@NonNull String packageName,
+                @NonNull UserHandle user, float progress) {}
     }
 
     /**
@@ -422,13 +439,26 @@ public class LauncherApps {
          */
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
+        /**
+         * Populate the persons field in the result. See {@link ShortcutInfo#getPersons()}.
+         *
+         * <p>The caller must have the system {@code ACCESS_SHORTCUTS} permission.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS)
+        public static final int FLAG_GET_PERSONS_DATA = 1 << 11;
+
         /** @hide */
         @IntDef(flag = true, prefix = { "FLAG_" }, value = {
                 FLAG_MATCH_DYNAMIC,
                 FLAG_MATCH_PINNED,
                 FLAG_MATCH_MANIFEST,
                 FLAG_MATCH_CACHED,
+                FLAG_MATCH_PINNED_BY_ANY_LAUNCHER,
                 FLAG_GET_KEY_FIELDS_ONLY,
+                FLAG_GET_PERSONS_DATA,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
@@ -705,6 +735,29 @@ public class LauncherApps {
     }
 
     /**
+     * Returns a PendingIntent that would start the same activity started from
+     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.
+     *
+     * @param component The ComponentName of the activity to launch
+     * @param startActivityOptions Options to pass to startActivity
+     * @param user The UserHandle of the profile
+     * @hide
+     */
+    @Nullable
+    public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
+            @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        if (DEBUG) {
+            Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
+        }
+        try {
+            return mService.getActivityLaunchIntent(component, startActivityOptions, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the activity info for a given intent and user handle, if it resolves. Otherwise it
      * returns null.
      *
@@ -715,16 +768,15 @@ public class LauncherApps {
     public LauncherActivityInfo resolveActivity(Intent intent, UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            ActivityInfo ai = mService.resolveActivity(mContext.getPackageName(),
-                    intent.getComponent(), user);
-            if (ai != null) {
-                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ai, user);
-                return info;
+            LauncherActivityInfoInternal ai = mService.resolveLauncherActivityInternal(
+                    mContext.getPackageName(), intent.getComponent(), user);
+            if (ai == null) {
+                return null;
             }
+            return new LauncherActivityInfo(mContext, user, ai);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -790,6 +842,30 @@ public class LauncherApps {
     }
 
     /**
+     * Returns PendingIntent associated with specified shortcut.
+     *
+     * @param packageName The packageName of the shortcut
+     * @param shortcutId The id of the shortcut
+     * @param opts Options to pass to the PendingIntent
+     * @param user The UserHandle of the profile
+     */
+    @Nullable
+    public PendingIntent getShortcutIntent(@NonNull final String packageName,
+            @NonNull final String shortcutId, @Nullable final Bundle opts,
+            @NonNull final UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        if (DEBUG) {
+            Log.i(TAG, "GetShortcutIntent " + packageName + "/" + shortcutId + " " + user);
+        }
+        try {
+            return mService.getShortcutIntent(
+                    mContext.getPackageName(), packageName, shortcutId, opts, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Retrieves a list of config activities for creating {@link ShortcutInfo}.
      *
      * @param packageName The specific package to query. If null, it checks all installed packages
@@ -813,13 +889,13 @@ public class LauncherApps {
     }
 
     private List<LauncherActivityInfo> convertToActivityList(
-            @Nullable ParceledListSlice<ResolveInfo> activities, UserHandle user) {
-        if (activities == null) {
+            @Nullable ParceledListSlice<LauncherActivityInfoInternal> internals, UserHandle user) {
+        if (internals == null || internals.getList().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         ArrayList<LauncherActivityInfo> lais = new ArrayList<>();
-        for (ResolveInfo ri : activities.getList()) {
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri.activityInfo, user);
+        for (LauncherActivityInfoInternal internal : internals.getList()) {
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, user, internal);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
                         + lai.getComponentName());
@@ -1133,6 +1209,7 @@ public class LauncherApps {
      * <ul>
      *     <li>{@link #FLAG_CACHE_NOTIFICATION_SHORTCUTS}
      *     <li>{@link #FLAG_CACHE_BUBBLE_SHORTCUTS}
+     *     <li>{@link #FLAG_CACHE_PEOPLE_TILE_SHORTCUTS}
      * </ul>
      * @throws IllegalStateException when the user is locked, or when the {@code user} user
      * is locked or not running.
@@ -1163,6 +1240,7 @@ public class LauncherApps {
      * <ul>
      *     <li>{@link #FLAG_CACHE_NOTIFICATION_SHORTCUTS}
      *     <li>{@link #FLAG_CACHE_BUBBLE_SHORTCUTS}
+     *     <li>{@link #FLAG_CACHE_PEOPLE_TILE_SHORTCUTS}
      * </ul>
      * @throws IllegalStateException when the user is locked, or when the {@code user} user
      * is locked or not running.
@@ -1667,6 +1745,19 @@ public class LauncherApps {
                 }
             }
         }
+
+        public void onPackageLoadingProgressChanged(UserHandle user, String packageName,
+                float progress) {
+            if (DEBUG) {
+                Log.d(TAG, "onPackageLoadingProgressChanged " + user.getIdentifier() + ","
+                        + packageName + "," + progress);
+            }
+            synchronized (LauncherApps.this) {
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackageLoadingProgressChanged(user, packageName, progress);
+                }
+            }
+        }
     };
 
     private static class CallbackMessageHandler extends Handler {
@@ -1678,6 +1769,7 @@ public class LauncherApps {
         private static final int MSG_SUSPENDED = 6;
         private static final int MSG_UNSUSPENDED = 7;
         private static final int MSG_SHORTCUT_CHANGED = 8;
+        private static final int MSG_LOADING_PROGRESS_CHANGED = 9;
 
         private LauncherApps.Callback mCallback;
 
@@ -1688,6 +1780,7 @@ public class LauncherApps {
             boolean replacing;
             UserHandle user;
             List<ShortcutInfo> shortcuts;
+            float mLoadingProgress;
         }
 
         public CallbackMessageHandler(Looper looper, LauncherApps.Callback callback) {
@@ -1726,6 +1819,10 @@ public class LauncherApps {
                     break;
                 case MSG_SHORTCUT_CHANGED:
                     mCallback.onShortcutsChanged(info.packageName, info.shortcuts, info.user);
+                    break;
+                case MSG_LOADING_PROGRESS_CHANGED:
+                    mCallback.onPackageLoadingProgressChanged(info.packageName, info.user,
+                            info.mLoadingProgress);
                     break;
             }
         }
@@ -1792,6 +1889,15 @@ public class LauncherApps {
             info.user = user;
             info.shortcuts = shortcuts;
             obtainMessage(MSG_SHORTCUT_CHANGED, info).sendToTarget();
+        }
+
+        public void postOnPackageLoadingProgressChanged(UserHandle user, String packageName,
+                float progress) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageName = packageName;
+            info.user = user;
+            info.mLoadingProgress = progress;
+            obtainMessage(MSG_LOADING_PROGRESS_CHANGED, info).sendToTarget();
         }
     }
 

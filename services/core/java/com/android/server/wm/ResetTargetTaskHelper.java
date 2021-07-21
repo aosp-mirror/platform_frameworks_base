@@ -16,17 +16,15 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityStack.TAG_ADD_REMOVE;
-import static com.android.server.wm.ActivityStack.TAG_TASKS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Debug;
-import android.util.Slog;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -37,7 +35,7 @@ import java.util.ArrayList;
 class ResetTargetTaskHelper {
     private Task mTask;
     private Task mTargetTask;
-    private ActivityStack mTargetStack;
+    private Task mTargetRootTask;
     private ActivityRecord mRoot;
     private boolean mForceReset;
     private boolean mCanMoveOptions;
@@ -61,7 +59,7 @@ class ResetTargetTaskHelper {
         mForceReset = forceReset;
         mTargetTask = targetTask;
         mTargetTaskFound = false;
-        mTargetStack = targetTask.getStack();
+        mTargetRootTask = targetTask.getRootTask();
         mActivityReparentPosition = -1;
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
@@ -116,7 +114,7 @@ class ResetTargetTaskHelper {
                         && !r.taskAffinity.equals(mTask.affinity)) {
                     // If this activity has an affinity for another task, then we need to move
                     // it out of here. We will move it as far out of the way as possible, to the
-                    // bottom of the activity stack. This also keeps it correctly ordered with
+                    // bottom of the activity root task. This also keeps it correctly ordered with
                     // any activities we previously moved.
 
                     // Handle this activity after we have done traversing the hierarchy.
@@ -201,8 +199,8 @@ class ResetTargetTaskHelper {
 
             noOptions = takeOption(p, noOptions);
 
-            if (DEBUG_TASKS) Slog.w(TAG_TASKS,
-                    "resetTaskIntendedTask: calling finishActivity on " + p);
+            ProtoLog.w(WM_DEBUG_TASKS, "resetTaskIntendedTask: calling finishActivity "
+                    + "on %s", p);
             p.finishIfPossible(reason, false /* oomAdj */);
         }
     }
@@ -213,15 +211,15 @@ class ResetTargetTaskHelper {
 
         while (!mResultActivities.isEmpty()) {
             final ActivityRecord p = mResultActivities.remove(0);
-            if (ignoreFinishing&& p.finishing) continue;
+            if (ignoreFinishing && p.finishing) continue;
 
             if (takeOptions) {
                 noOptions = takeOption(p, noOptions);
             }
-            if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE, "Removing activity " + p + " from task="
-                    + mTask + " adding to task=" + targetTask + " Callers=" + Debug.getCallers(4));
-            if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                    "Pushing next activity " + p + " out to target's task " + target);
+            ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Removing activity %s from task=%s "
+                    + "adding to task=%s Callers=%s", p, mTask, targetTask, Debug.getCallers(4));
+            ProtoLog.v(WM_DEBUG_TASKS, "Pushing next activity %s out to target's task %s", p,
+                    target);
             p.reparent(targetTask, position, "resetTargetTaskIfNeeded");
         }
     }
@@ -231,51 +229,47 @@ class ResetTargetTaskHelper {
             return;
         }
 
-        final ActivityTaskManagerService atmService = mTargetStack.mAtmService;
-        TaskDisplayArea taskDisplayArea = mTargetStack.getDisplayArea();
-        final boolean singleTaskInstanceDisplay =
-                taskDisplayArea.mDisplayContent.isSingleTaskInstance();
-        if (singleTaskInstanceDisplay) {
-            taskDisplayArea = atmService.mRootWindowContainer.getDefaultTaskDisplayArea();
-        }
+        final ActivityTaskManagerService atmService = mTargetRootTask.mAtmService;
+        TaskDisplayArea taskDisplayArea = mTargetRootTask.getDisplayArea();
 
-        final int windowingMode = mTargetStack.getWindowingMode();
-        final int activityType = mTargetStack.getActivityType();
+        final int windowingMode = mTargetRootTask.getWindowingMode();
+        final int activityType = mTargetRootTask.getActivityType();
 
         while (!mPendingReparentActivities.isEmpty()) {
             final ActivityRecord r = mPendingReparentActivities.remove(0);
-            final boolean alwaysCreateTask = DisplayContent.alwaysCreateStack(windowingMode,
+            final boolean alwaysCreateTask = DisplayContent.alwaysCreateRootTask(windowingMode,
                     activityType);
             final Task task = alwaysCreateTask
-                    ? taskDisplayArea.getBottomMostTask() : mTargetStack.getBottomMostTask();
+                    ? taskDisplayArea.getBottomMostTask() : mTargetRootTask.getBottomMostTask();
             Task targetTask = null;
             if (task != null && r.taskAffinity.equals(task.affinity)) {
                 // If the activity currently at the bottom has the same task affinity as
                 // the one we are moving, then merge it into the same task.
                 targetTask = task;
-                if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
-                        + r + " out to bottom task " + targetTask);
+                ProtoLog.v(WM_DEBUG_TASKS, "Start pushing activity %s out to bottom task %s", r,
+                        targetTask);
             }
             if (targetTask == null) {
                 if (alwaysCreateTask) {
-                    targetTask = taskDisplayArea.getOrCreateStack(windowingMode,
+                    targetTask = taskDisplayArea.getOrCreateRootTask(windowingMode,
                             activityType, false /* onTop */);
                 } else {
-                    targetTask = mTargetStack.reuseOrCreateTask(r.info, null /*intent*/,
+                    targetTask = mTargetRootTask.reuseOrCreateTask(r.info, null /*intent*/,
                             false /*toTop*/);
                 }
                 targetTask.affinityIntent = r.intent;
             }
             r.reparent(targetTask, 0 /* position */, "resetTargetTaskIfNeeded");
-            atmService.mStackSupervisor.mRecentTasks.add(targetTask);
+            atmService.mTaskSupervisor.mRecentTasks.add(targetTask);
         }
     }
 
     private boolean takeOption(ActivityRecord p, boolean noOptions) {
         mCanMoveOptions = false;
         if (noOptions && mTopOptions == null) {
-            mTopOptions = p.takeOptionsLocked(false /* fromClient */);
+            mTopOptions = p.getOptions();
             if (mTopOptions != null) {
+                p.clearOptionsAnimation();
                 noOptions = false;
             }
         }

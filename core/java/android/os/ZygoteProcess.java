@@ -251,11 +251,11 @@ public class ZygoteProcess {
     private final Object mLock = new Object();
 
     /**
-     * List of exemptions to the API blacklist. These are prefix matches on the runtime format
+     * List of exemptions to the API deny list. These are prefix matches on the runtime format
      * symbol signature. Any matching symbol is treated by the runtime as being on the light grey
      * list.
      */
-    private List<String> mApiBlacklistExemptions = Collections.emptyList();
+    private List<String> mApiDenylistExemptions = Collections.emptyList();
 
     /**
      * Proportion of hidden API accesses that should be logged to the event log; 0 - 0x10000.
@@ -333,7 +333,7 @@ public class ZygoteProcess {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
-     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     * @param allowlistedDataInfoList Map from allowlisted package names to private data directory
      *                       volume UUID and inode number.
      * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
@@ -359,7 +359,7 @@ public class ZygoteProcess {
                                                   @Nullable Map<String, Pair<String, Long>>
                                                           pkgDataInfoMap,
                                                   @Nullable Map<String, Pair<String, Long>>
-                                                          whitelistedDataInfoMap,
+                                                          allowlistedDataInfoList,
                                                   boolean bindMountAppsData,
                                                   boolean bindMountAppStorageDirs,
                                                   @Nullable String[] zygoteArgs) {
@@ -373,7 +373,7 @@ public class ZygoteProcess {
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, zygotePolicyFlags, isTopApp, disabledCompatChanges,
-                    pkgDataInfoMap, whitelistedDataInfoMap, bindMountAppsData,
+                    pkgDataInfoMap, allowlistedDataInfoList, bindMountAppsData,
                     bindMountAppStorageDirs, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
@@ -426,7 +426,7 @@ public class ZygoteProcess {
         // avoid writing a partial response to the zygote.
         for (String arg : args) {
             // Making two indexOf calls here is faster than running a manually fused loop due
-            // to the fact that indexOf is a optimized intrinsic.
+            // to the fact that indexOf is an optimized intrinsic.
             if (arg.indexOf('\n') >= 0) {
                 throw new ZygoteStartFailedEx("Embedded newlines not allowed");
             } else if (arg.indexOf('\r') >= 0) {
@@ -562,7 +562,7 @@ public class ZygoteProcess {
         "--preload-package",
         "--preload-app",
         "--start-child-zygote",
-        "--set-api-blacklist-exemptions",
+        "--set-api-denylist-exemptions",
         "--hidden-api-log-sampling-rate",
         "--hidden-api-statslog-sampling-rate",
         "--invoke-with"
@@ -615,7 +615,7 @@ public class ZygoteProcess {
      * @param disabledCompatChanges a list of disabled compat changes for the process being started.
      * @param pkgDataInfoMap Map from related package names to private data directory volume UUID
      *                       and inode number.
-     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     * @param allowlistedDataInfoList Map from allowlisted package names to private data directory
      *                       volume UUID and inode number.
      * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
@@ -642,7 +642,7 @@ public class ZygoteProcess {
                                                       @Nullable Map<String, Pair<String, Long>>
                                                               pkgDataInfoMap,
                                                       @Nullable Map<String, Pair<String, Long>>
-                                                              whitelistedDataInfoMap,
+                                                              allowlistedDataInfoList,
                                                       boolean bindMountAppsData,
                                                       boolean bindMountAppStorageDirs,
                                                       @Nullable String[] extraArgs)
@@ -657,16 +657,8 @@ public class ZygoteProcess {
         argsForZygote.add("--runtime-flags=" + runtimeFlags);
         if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
             argsForZygote.add("--mount-external-default");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
-            argsForZygote.add("--mount-external-read");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
-            argsForZygote.add("--mount-external-write");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_FULL) {
-            argsForZygote.add("--mount-external-full");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
             argsForZygote.add("--mount-external-installer");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_LEGACY) {
-            argsForZygote.add("--mount-external-legacy");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
             argsForZygote.add("--mount-external-pass-through");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
@@ -741,12 +733,12 @@ public class ZygoteProcess {
             }
             argsForZygote.add(sb.toString());
         }
-        if (whitelistedDataInfoMap != null && whitelistedDataInfoMap.size() > 0) {
+        if (allowlistedDataInfoList != null && allowlistedDataInfoList.size() > 0) {
             StringBuilder sb = new StringBuilder();
-            sb.append(Zygote.WHITELISTED_DATA_INFO_MAP);
+            sb.append(Zygote.ALLOWLISTED_DATA_INFO_MAP);
             sb.append("=");
             boolean started = false;
-            for (Map.Entry<String, Pair<String, Long>> entry : whitelistedDataInfoMap.entrySet()) {
+            for (Map.Entry<String, Pair<String, Long>> entry : allowlistedDataInfoList.entrySet()) {
                 if (started) {
                     sb.append(',');
                 }
@@ -922,20 +914,20 @@ public class ZygoteProcess {
     }
 
     /**
-     * Push hidden API blacklisting exemptions into the zygote process(es).
+     * Push hidden API deny-listing exemptions into the zygote process(es).
      *
      * <p>The list of exemptions will take affect for all new processes forked from the zygote after
      * this call.
      *
      * @param exemptions List of hidden API exemption prefixes. Any matching members are treated as
-     *        whitelisted/public APIs (i.e. allowed, no logging of usage).
+     *        allowed/public APIs (i.e. allowed, no logging of usage).
      */
-    public boolean setApiBlacklistExemptions(List<String> exemptions) {
+    public boolean setApiDenylistExemptions(List<String> exemptions) {
         synchronized (mLock) {
-            mApiBlacklistExemptions = exemptions;
-            boolean ok = maybeSetApiBlacklistExemptions(primaryZygoteState, true);
+            mApiDenylistExemptions = exemptions;
+            boolean ok = maybeSetApiDenylistExemptions(primaryZygoteState, true);
             if (ok) {
-                ok = maybeSetApiBlacklistExemptions(secondaryZygoteState, true);
+                ok = maybeSetApiDenylistExemptions(secondaryZygoteState, true);
             }
             return ok;
         }
@@ -972,32 +964,32 @@ public class ZygoteProcess {
     }
 
     @GuardedBy("mLock")
-    private boolean maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
+    private boolean maybeSetApiDenylistExemptions(ZygoteState state, boolean sendIfEmpty) {
         if (state == null || state.isClosed()) {
-            Slog.e(LOG_TAG, "Can't set API blacklist exemptions: no zygote connection");
+            Slog.e(LOG_TAG, "Can't set API denylist exemptions: no zygote connection");
             return false;
-        } else if (!sendIfEmpty && mApiBlacklistExemptions.isEmpty()) {
+        } else if (!sendIfEmpty && mApiDenylistExemptions.isEmpty()) {
             return true;
         }
 
         try {
-            state.mZygoteOutputWriter.write(Integer.toString(mApiBlacklistExemptions.size() + 1));
+            state.mZygoteOutputWriter.write(Integer.toString(mApiDenylistExemptions.size() + 1));
             state.mZygoteOutputWriter.newLine();
-            state.mZygoteOutputWriter.write("--set-api-blacklist-exemptions");
+            state.mZygoteOutputWriter.write("--set-api-denylist-exemptions");
             state.mZygoteOutputWriter.newLine();
-            for (int i = 0; i < mApiBlacklistExemptions.size(); ++i) {
-                state.mZygoteOutputWriter.write(mApiBlacklistExemptions.get(i));
+            for (int i = 0; i < mApiDenylistExemptions.size(); ++i) {
+                state.mZygoteOutputWriter.write(mApiDenylistExemptions.get(i));
                 state.mZygoteOutputWriter.newLine();
             }
             state.mZygoteOutputWriter.flush();
             int status = state.mZygoteInputStream.readInt();
             if (status != 0) {
-                Slog.e(LOG_TAG, "Failed to set API blacklist exemptions; status " + status);
+                Slog.e(LOG_TAG, "Failed to set API denylist exemptions; status " + status);
             }
             return true;
         } catch (IOException ioe) {
-            Slog.e(LOG_TAG, "Failed to set API blacklist exemptions", ioe);
-            mApiBlacklistExemptions = Collections.emptyList();
+            Slog.e(LOG_TAG, "Failed to set API denylist exemptions", ioe);
+            mApiDenylistExemptions = Collections.emptyList();
             return false;
         }
     }
@@ -1054,7 +1046,7 @@ public class ZygoteProcess {
             primaryZygoteState =
                     ZygoteState.connect(mZygoteSocketAddress, mUsapPoolSocketAddress);
 
-            maybeSetApiBlacklistExemptions(primaryZygoteState, false);
+            maybeSetApiDenylistExemptions(primaryZygoteState, false);
             maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
         }
     }
@@ -1069,7 +1061,7 @@ public class ZygoteProcess {
                     ZygoteState.connect(mZygoteSecondarySocketAddress,
                             mUsapPoolSecondarySocketAddress);
 
-            maybeSetApiBlacklistExemptions(secondaryZygoteState, false);
+            maybeSetApiDenylistExemptions(secondaryZygoteState, false);
             maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
         }
     }
@@ -1326,7 +1318,7 @@ public class ZygoteProcess {
                     true /* startChildZygote */, null /* packageName */,
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS /* zygotePolicyFlags */, false /* isTopApp */,
                     null /* disabledCompatChanges */, null /* pkgDataInfoMap */,
-                    null /* whitelistedDataInfoMap */, true /* bindMountAppsData*/,
+                    null /* allowlistedDataInfoList */, true /* bindMountAppsData*/,
                     /* bindMountAppStorageDirs */ false, extraArgs);
 
         } catch (ZygoteStartFailedEx ex) {

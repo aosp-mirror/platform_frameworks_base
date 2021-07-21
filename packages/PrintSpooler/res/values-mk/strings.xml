@@ -49,7 +49,7 @@
     <string name="print_options_collapsed" msgid="7455930445670414332">"Опциите на печатачот се сокриени"</string>
     <string name="search" msgid="5421724265322228497">"Пребарај"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Сите печатачи"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"Додај услуга"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Додајте услуга"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Полето за пребарување е прикажано"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Полето за пребарување е скриено"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Додај печатач"</string>

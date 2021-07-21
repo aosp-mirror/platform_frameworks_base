@@ -17,7 +17,7 @@
         package="com.android.frameworks.servicestests.install_uses_sdk">
 
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="29">
-        <extension-sdk android:sdkVersion="10000" android:minExtensionVersion="0" />
+        <extension-sdk android:sdkVersion="30" android:minExtensionVersion="0" />
     </uses-sdk>
 
     <application>

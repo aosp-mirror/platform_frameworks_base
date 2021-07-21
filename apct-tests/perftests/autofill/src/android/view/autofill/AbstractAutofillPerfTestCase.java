@@ -11,51 +11,80 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package android.view.autofill;
+
+import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static org.junit.Assert.assertTrue;
 
 import android.os.Looper;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
-import android.perftests.utils.SettingsHelper;
 import android.perftests.utils.SettingsStateKeeperRule;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.rules.RuleChain;
 
 /**
  * Base class for all autofill tests.
  */
-@LargeTest
 public abstract class AbstractAutofillPerfTestCase {
+
+    private static final String TAG = "AbstractAutofillPerfTestCase";
 
     @ClassRule
     public static final SettingsStateKeeperRule mServiceSettingsKeeper =
             new SettingsStateKeeperRule(InstrumentationRegistry.getTargetContext(),
                     Settings.Secure.AUTOFILL_SERVICE);
 
-    @Rule
-    public ActivityTestRule<PerfTestActivity> mActivityRule =
+    protected final AutofillTestWatcher mTestWatcher = MyAutofillService.getTestWatcher();
+    protected ActivityTestRule<PerfTestActivity> mActivityRule =
             new ActivityTestRule<>(PerfTestActivity.class);
+    protected PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Rule
-    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    public final RuleChain mAllRules = RuleChain
+            .outerRule(mTestWatcher)
+            .around(mPerfStatusReporter)
+            .around(mActivityRule);
 
     private final int mLayoutId;
 
     protected AbstractAutofillPerfTestCase(int layoutId) {
         mLayoutId = layoutId;
+    }
+
+    @BeforeClass
+    public static void disableDefaultAugmentedService() {
+        Log.v(TAG, "@BeforeClass: disableDefaultAugmentedService()");
+        setDefaultAugmentedAutofillServiceEnabled(false);
+    }
+
+    @AfterClass
+    public static void enableDefaultAugmentedService() {
+        Log.v(TAG, "@AfterClass: enableDefaultAugmentedService()");
+        setDefaultAugmentedAutofillServiceEnabled(true);
+    }
+
+    /**
+     * Enables / disables the default augmented autofill service.
+     */
+    private static void setDefaultAugmentedAutofillServiceEnabled(boolean enabled) {
+        Log.d(TAG, "setDefaultAugmentedAutofillServiceEnabled(): " + enabled);
+        runShellCommand("cmd autofill set default-augmented-service-enabled 0 %s",
+                Boolean.toString(enabled));
     }
 
     /**
@@ -74,41 +103,8 @@ public abstract class AbstractAutofillPerfTestCase {
         });
     }
 
-    @Before
-    public void enableService() {
-        MyAutofillService.resetStaticState();
-        MyAutofillService.setEnabled(true);
-    }
-
-    @After
-    public void disableService() {
-        // Must disable service so calls are ignored in case of errors during the test case;
-        // otherwise, other tests will fail because these calls are made in the UI thread (as both
-        // the service, the tests, and the app run in the same process).
-        MyAutofillService.setEnabled(false);
-    }
-
     /**
      * Initializes the {@link PerfTestActivity} after it was launched.
      */
     protected abstract void onCreate(PerfTestActivity activity);
-
-    /**
-     * Uses the {@code settings} binary to set the autofill service.
-     */
-    protected void setService() {
-        SettingsHelper.syncSet(InstrumentationRegistry.getTargetContext(),
-                SettingsHelper.NAMESPACE_SECURE,
-                Settings.Secure.AUTOFILL_SERVICE,
-                MyAutofillService.COMPONENT_NAME);
-    }
-
-    /**
-     * Uses the {@code settings} binary to reset the autofill service.
-     */
-    protected void resetService() {
-        SettingsHelper.syncDelete(InstrumentationRegistry.getTargetContext(),
-                SettingsHelper.NAMESPACE_SECURE,
-                Settings.Secure.AUTOFILL_SERVICE);
-    }
 }

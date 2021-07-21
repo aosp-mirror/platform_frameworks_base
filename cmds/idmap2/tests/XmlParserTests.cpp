@@ -19,25 +19,25 @@
 #include <string>
 
 #include "TestHelpers.h"
-#include "gmock/gmock.h"
+#include "androidfw/AssetsProvider.h"
 #include "gtest/gtest.h"
 #include "idmap2/XmlParser.h"
-#include "idmap2/ZipFile.h"
 
 namespace android::idmap2 {
 
-Result<std::unique_ptr<const XmlParser>> CreateTestParser(const std::string& test_file) {
-  auto zip = ZipFile::Open(GetTestDataPath() + "/target/target.apk");
+Result<XmlParser> CreateTestParser(const std::string& test_file) {
+  auto zip = ZipAssetsProvider::Create(GetTestDataPath() + "/target/target.apk", 0 /* flags */);
   if (zip == nullptr) {
     return Error("Failed to open zip file");
   }
 
-  auto data = zip->Uncompress(test_file);
+  auto data = zip->Open(test_file);
   if (data == nullptr) {
     return Error("Failed to open xml file");
   }
 
-  return XmlParser::Create(data->buf, data->size, /* copy_data */ true);
+  return XmlParser::Create(data->getBuffer(true /* aligned*/), data->getLength(),
+                           /* copy_data */ true);
 }
 
 TEST(XmlParserTests, Create) {
@@ -54,7 +54,7 @@ TEST(XmlParserTests, NextChild) {
   auto xml = CreateTestParser("res/xml/test.xml");
   ASSERT_TRUE(xml) << xml.GetErrorMessage();
 
-  auto root_iter = (*xml)->tree_iterator();
+  auto root_iter = xml->tree_iterator();
   ASSERT_EQ(root_iter->event(), XmlParser::Event::START_TAG);
   ASSERT_EQ(root_iter->name(), "a");
 
@@ -85,7 +85,7 @@ TEST(XmlParserTests, AttributeValues) {
   ASSERT_TRUE(xml) << xml.GetErrorMessage();
 
   // Start at the <a> tag.
-  auto root_iter = (*xml)->tree_iterator();
+  auto root_iter = xml->tree_iterator();
 
   // Start at the <b> tag.
   auto a_iter = root_iter.begin();
@@ -111,8 +111,8 @@ TEST(XmlParserTests, IteratorEquality) {
   ASSERT_TRUE(xml) << xml.GetErrorMessage();
 
   // Start at the <a> tag.
-  auto root_iter_1 = (*xml)->tree_iterator();
-  auto root_iter_2 = (*xml)->tree_iterator();
+  auto root_iter_1 = xml->tree_iterator();
+  auto root_iter_2 = xml->tree_iterator();
   ASSERT_EQ(root_iter_1, root_iter_2);
   ASSERT_EQ(*root_iter_1, *root_iter_2);
 
@@ -146,7 +146,7 @@ TEST(XmlParserTests, Backtracking) {
   ASSERT_TRUE(xml) << xml.GetErrorMessage();
 
   // Start at the <a> tag.
-  auto root_iter_1 = (*xml)->tree_iterator();
+  auto root_iter_1 = xml->tree_iterator();
 
   // Start at the <b> tag.
   auto a_iter_1 = root_iter_1.begin();

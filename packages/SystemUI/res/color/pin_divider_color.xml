@@ -15,5 +15,5 @@
   ~ limitations under the License
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:alpha="0.45" android:color="?attr/wallpaperTextColorSecondary" />
+    <item android:alpha="0.45" android:color="?android:attr/textColorSecondary" />
 </selector>

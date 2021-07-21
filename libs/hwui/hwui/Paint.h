@@ -17,11 +17,11 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H_
 #define ANDROID_GRAPHICS_PAINT_H_
 
+#include "BlurDrawLooper.h"
 #include "Typeface.h"
 
 #include <cutils/compiler.h>
 
-#include <SkDrawLooper.h>
 #include <SkFont.h>
 #include <SkPaint.h>
 #include <string>
@@ -32,7 +32,7 @@
 
 namespace android {
 
-class ANDROID_API Paint : public SkPaint {
+class Paint : public SkPaint {
 public:
     // Default values for underlined and strikethrough text,
     // as defined by Skia in SkTextFormatParams.h.
@@ -59,8 +59,8 @@ public:
     SkFont& getSkFont() { return mFont; }
     const SkFont& getSkFont() const { return mFont; }
 
-    SkDrawLooper* getLooper() const { return mLooper.get(); }
-    void setLooper(sk_sp<SkDrawLooper> looper) { mLooper = std::move(looper); }
+    BlurDrawLooper* getLooper() const { return mLooper.get(); }
+    void setLooper(sk_sp<BlurDrawLooper> looper) { mLooper = std::move(looper); }
 
     // These shadow the methods on SkPaint, but we need to so we can keep related
     // attributes in-sync.
@@ -137,6 +137,9 @@ public:
     bool isDevKern() const { return mDevKern; }
     void setDevKern(bool d) { mDevKern = d; }
 
+    // Deprecated -- bitmapshaders will be taking this flag explicitly
+    bool isFilterBitmap() const { return this->getFilterQuality() != kNone_SkFilterQuality; }
+
     // The Java flags (Paint.java) no longer fit into the native apis directly.
     // These methods handle converting to and from them and the native representations
     // in android::Paint.
@@ -149,10 +152,10 @@ public:
     // The only respected flags are : [ antialias, dither, filterBitmap ]
     static uint32_t GetSkPaintJavaFlags(const SkPaint&);
     static void SetSkPaintJavaFlags(SkPaint*, uint32_t flags);
- 
+
 private:
     SkFont mFont;
-    sk_sp<SkDrawLooper> mLooper;
+    sk_sp<BlurDrawLooper> mLooper;
 
     float mLetterSpacing = 0;
     float mWordSpacing = 0;

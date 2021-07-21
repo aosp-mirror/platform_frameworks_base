@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
+import android.net.TetheringManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -75,6 +76,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     private Context mContext;
     protected List<ScanResult> mLastScanResult;
     protected Object mWifiScanResultLock = new Object();
+    public TetheringManager mTetheringManager;
 
     /* Control Wifi States */
     public WifiManager mWifiManager;
@@ -128,6 +130,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         mCm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
+        mTetheringManager = mContext.getSystemService(TetheringManager.class);
 
         // register a connectivity receiver for CONNECTIVITY_ACTION;
         mConnectivityReceiver = new ConnectivityReceiver();
@@ -141,7 +144,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         mIntentFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
+        mIntentFilter.addAction(TetheringManager.ACTION_TETHER_STATE_CHANGED);
         mContext.registerReceiver(mWifiReceiver, mIntentFilter);
 
         logv("Clear Wifi before we start the test.");
@@ -215,13 +218,13 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
      */
     protected boolean waitForTetherStateChange(long timeout) {
         long startTime = SystemClock.uptimeMillis();
-        String[] wifiRegexes = mCm.getTetherableWifiRegexs();
+        String[] wifiRegexes = mTetheringManager.getTetherableWifiRegexs();
         while (true) {
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
                 return false;
             }
-            String[] active = mCm.getTetheredIfaces();
-            String[] error = mCm.getTetheringErroredIfaces();
+            String[] active = mTetheringManager.getTetheredIfaces();
+            String[] error = mTetheringManager.getTetheringErroredIfaces();
             for (String iface: active) {
                 for (String regex: wifiRegexes) {
                     if (iface.matches(regex)) {

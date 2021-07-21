@@ -83,4 +83,29 @@ public abstract class BatteryManagerInternal {
      * wait on the battery service lock.
      */
     public abstract int getInvalidCharger();
+
+    /**
+     * Sets battery AC charger to enabled/disabled, and freezes the battery state.
+     */
+    public abstract void setChargerAcOnline(boolean online, boolean forceUpdate);
+
+    /**
+     * Sets battery level, and freezes the battery state.
+     */
+    public abstract void setBatteryLevel(int level, boolean forceUpdate);
+
+    /**
+     * Unplugs battery, and freezes the battery state.
+     */
+    public abstract void unplugBattery(boolean forceUpdate);
+
+    /**
+     * Unfreezes battery state, returning to current hardware values.
+     */
+    public abstract void resetBattery(boolean forceUpdate);
+
+    /**
+     * Suspend charging even if plugged in.
+     */
+    public abstract void suspendBatteryInput();
 }

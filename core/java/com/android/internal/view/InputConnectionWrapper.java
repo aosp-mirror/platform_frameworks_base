@@ -17,13 +17,16 @@
 package com.android.internal.view;
 
 import android.annotation.AnyThread;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.Log;
+import android.util.imetracing.ImeTracing;
+import android.util.imetracing.InputConnectionHelper;
+import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -33,12 +36,13 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.ResultCallbacks;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.TimeUnit;
 
 public class InputConnectionWrapper implements InputConnection {
     private static final String TAG = "InputConnectionWrapper";
@@ -70,71 +74,64 @@ public class InputConnectionWrapper implements InputConnection {
         mCancellationGroup = cancellationGroup;
     }
 
-    @AnyThread
-    private static void logInternal(@Nullable String methodName, boolean timedOut,
-            @Nullable Object defaultValue) {
-        if (timedOut) {
-            Log.w(TAG, methodName + " didn't respond in " + MAX_WAIT_TIME_MILLIS + " msec."
-                    + " Returning default: " + defaultValue);
-        } else {
-            Log.w(TAG, methodName + " was canceled before complete. Returning default: "
-                    + defaultValue);
-        }
-    }
-
-    @AnyThread
-    private static int getResultOrZero(@NonNull CancellationGroup.Completable.Int value,
-             @NonNull String methodName) {
-        final boolean timedOut = value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS);
-        if (value.hasValue()) {
-            return value.getValue();
-        }
-        logInternal(methodName, timedOut, 0);
-        return 0;
-    }
-
-    @AnyThread
+    /**
+     * See {@link InputConnection#getTextAfterCursor(int, int)}.
+     */
     @Nullable
-    private static <T> T getResultOrNull(@NonNull CancellationGroup.Completable.Values<T> value,
-            @NonNull String methodName) {
-        final boolean timedOut = value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS);
-        if (value.hasValue()) {
-            return value.getValue();
-        }
-        logInternal(methodName, timedOut, null);
-        return null;
-    }
-
     @AnyThread
-    public CharSequence getTextAfterCursor(int length, int flags) {
-        if (mCancellationGroup.isCanceled()) {
+    public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
+        if (length < 0 || mCancellationGroup.isCanceled()) {
             return null;
         }
 
-        final CancellationGroup.Completable.CharSequence value =
-                mCancellationGroup.createCompletableCharSequence();
+        final Completable.CharSequence value = Completable.createCharSequence();
         try {
             mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getTextAfterCursor()");
+        CharSequence result = Completable.getResultOrNull(
+                value, TAG, "getTextAfterCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetTextAfterCursorProto(length,
+                    flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextAfterCursor",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
+    /**
+     * See {@link InputConnection#getTextBeforeCursor(int, int)}.
+     */
+    @Nullable
     @AnyThread
-    public CharSequence getTextBeforeCursor(int length, int flags) {
-        if (mCancellationGroup.isCanceled()) {
+    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
+        if (length < 0 || mCancellationGroup.isCanceled()) {
             return null;
         }
 
-        final CancellationGroup.Completable.CharSequence value =
-                mCancellationGroup.createCompletableCharSequence();
+        final Completable.CharSequence value = Completable.createCharSequence();
         try {
             mIInputContext.getTextBeforeCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getTextBeforeCursor()");
+        CharSequence result = Completable.getResultOrNull(
+                value, TAG, "getTextBeforeCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetTextBeforeCursorProto(length,
+                    flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextBeforeCursor",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -147,14 +144,68 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final CancellationGroup.Completable.CharSequence value =
-                mCancellationGroup.createCompletableCharSequence();
+        final Completable.CharSequence value = Completable.createCharSequence();
         try {
             mIInputContext.getSelectedText(flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getSelectedText()");
+        CharSequence result = Completable.getResultOrNull(
+                value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetSelectedTextProto(flags,
+                    result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getSelectedText",
+                    inputMethodService, icProto);
+        }
+
+        return result;
+    }
+
+    /**
+     * Get {@link SurroundingText} around the current cursor, with <var>beforeLength</var>
+     * characters of text before the cursor, <var>afterLength</var> characters of text after the
+     * cursor, and all of the selected text.
+     * @param beforeLength The expected length of the text before the cursor
+     * @param afterLength The expected length of the text after the cursor
+     * @param flags Supplies additional options controlling how the text is returned. May be either
+     *              0 or {@link #GET_TEXT_WITH_STYLES}.
+     * @return the surrounding text around the cursor position; the length of the returned text
+     * might be less than requested.  It could also be {@code null} when the editor or system could
+     * not support this protocol.
+     */
+    @AnyThread
+    public SurroundingText getSurroundingText(
+            @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength, int flags) {
+        if (beforeLength < 0 || afterLength < 0 || mCancellationGroup.isCanceled()) {
+            return null;
+        }
+
+        if (isMethodMissing(MissingMethodFlags.GET_SURROUNDING_TEXT)) {
+            // This method is not implemented.
+            return null;
+        }
+        final Completable.SurroundingText value = Completable.createSurroundingText();
+        try {
+            mIInputContext.getSurroundingText(beforeLength, afterLength, flags,
+                    ResultCallbacks.of(value));
+        } catch (RemoteException e) {
+            return null;
+        }
+        SurroundingText result = Completable.getResultOrNull(
+                value, TAG, "getSurroundingText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetSurroundingTextProto(
+                    beforeLength, afterLength, flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getSurroundingText",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -163,14 +214,24 @@ public class InputConnectionWrapper implements InputConnection {
             return 0;
         }
 
-        final CancellationGroup.Completable.Int value =
-                mCancellationGroup.createCompletableInt();
+        final Completable.Int value = Completable.createInt();
         try {
             mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return 0;
         }
-        return getResultOrZero(value, "getCursorCapsMode()");
+        int result = Completable.getResultOrZero(
+                value, TAG, "getCursorCapsMode()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetCursorCapsModeProto(
+                    reqModes, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getCursorCapsMode",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -179,14 +240,24 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final CancellationGroup.Completable.ExtractedText value =
-                mCancellationGroup.createCompletableExtractedText();
+        final Completable.ExtractedText value = Completable.createExtractedText();
         try {
             mIInputContext.getExtractedText(request, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getExtractedText()");
+        ExtractedText result = Completable.getResultOrNull(
+                value, TAG, "getExtractedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetExtractedTextProto(
+                    request, flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getExtractedText",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -371,6 +442,17 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     @AnyThread
+    @Override
+    public boolean performSpellCheck() {
+        try {
+            mIInputContext.performSpellCheck();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    @AnyThread
     public boolean performPrivateCommand(String action, Bundle data) {
         try {
             mIInputContext.performPrivateCommand(action, data);
@@ -390,14 +472,15 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final CancellationGroup.Completable.Int value = mCancellationGroup.createCompletableInt();
+        final Completable.Int value = Completable.createInt();
         try {
             mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode,
                     ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return false;
         }
-        return getResultOrZero(value, "requestUpdateCursorAnchorInfo()") != 0;
+        return Completable.getResultOrZero(value, TAG, "requestUpdateCursorAnchorInfo()",
+                mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
     }
 
     @AnyThread
@@ -431,13 +514,27 @@ public class InputConnectionWrapper implements InputConnection {
             inputMethodService.exposeContent(inputContentInfo, this);
         }
 
-        final CancellationGroup.Completable.Int value = mCancellationGroup.createCompletableInt();
+        final Completable.Int value = Completable.createInt();
         try {
             mIInputContext.commitContent(inputContentInfo, flags, opts, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return false;
         }
-        return getResultOrZero(value, "commitContent()") != 0;
+        return Completable.getResultOrZero(
+                value, TAG, "commitContent()", mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
+    }
+
+    /**
+     * See {@link InputConnection#setImeConsumesInput(boolean)}.
+     */
+    @AnyThread
+    public boolean setImeConsumesInput(boolean imeConsumesInput) {
+        try {
+            mIInputContext.setImeConsumesInput(imeConsumesInput);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     @AnyThread

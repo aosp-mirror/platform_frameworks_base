@@ -18,7 +18,7 @@ package com.android.server.blob;
 import static android.app.blob.XmlTags.ATTR_CERTIFICATE;
 import static android.app.blob.XmlTags.ATTR_PACKAGE;
 import static android.app.blob.XmlTags.ATTR_TYPE;
-import static android.app.blob.XmlTags.TAG_WHITELISTED_PACKAGE;
+import static android.app.blob.XmlTags.TAG_ALLOWED_PACKAGE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -27,8 +27,8 @@ import android.content.pm.PackageManager;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.DebugUtils;
+import android.util.IndentingPrintWriter;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -52,21 +52,21 @@ class BlobAccessMode {
             ACCESS_TYPE_PRIVATE,
             ACCESS_TYPE_PUBLIC,
             ACCESS_TYPE_SAME_SIGNATURE,
-            ACCESS_TYPE_WHITELIST,
+            ACCESS_TYPE_ALLOWLIST,
     })
     @interface AccessType {}
     public static final int ACCESS_TYPE_PRIVATE = 1 << 0;
     public static final int ACCESS_TYPE_PUBLIC = 1 << 1;
     public static final int ACCESS_TYPE_SAME_SIGNATURE = 1 << 2;
-    public static final int ACCESS_TYPE_WHITELIST = 1 << 3;
+    public static final int ACCESS_TYPE_ALLOWLIST = 1 << 3;
 
     private int mAccessType = ACCESS_TYPE_PRIVATE;
 
-    private final ArraySet<PackageIdentifier> mWhitelistedPackages = new ArraySet<>();
+    private final ArraySet<PackageIdentifier> mAllowedPackages = new ArraySet<>();
 
     void allow(BlobAccessMode other) {
-        if ((other.mAccessType & ACCESS_TYPE_WHITELIST) != 0) {
-            mWhitelistedPackages.addAll(other.mWhitelistedPackages);
+        if ((other.mAccessType & ACCESS_TYPE_ALLOWLIST) != 0) {
+            mAllowedPackages.addAll(other.mAllowedPackages);
         }
         mAccessType |= other.mAccessType;
     }
@@ -80,8 +80,8 @@ class BlobAccessMode {
     }
 
     void allowPackageAccess(@NonNull String packageName, @NonNull byte[] certificate) {
-        mAccessType |= ACCESS_TYPE_WHITELIST;
-        mWhitelistedPackages.add(PackageIdentifier.create(packageName, certificate));
+        mAccessType |= ACCESS_TYPE_ALLOWLIST;
+        mAllowedPackages.add(PackageIdentifier.create(packageName, certificate));
     }
 
     boolean isPublicAccessAllowed() {
@@ -93,10 +93,10 @@ class BlobAccessMode {
     }
 
     boolean isPackageAccessAllowed(@NonNull String packageName, @NonNull byte[] certificate) {
-        if ((mAccessType & ACCESS_TYPE_WHITELIST) == 0) {
+        if ((mAccessType & ACCESS_TYPE_ALLOWLIST) == 0) {
             return false;
         }
-        return mWhitelistedPackages.contains(PackageIdentifier.create(packageName, certificate));
+        return mAllowedPackages.contains(PackageIdentifier.create(packageName, certificate));
     }
 
     boolean isAccessAllowedForCaller(Context context,
@@ -113,9 +113,9 @@ class BlobAccessMode {
             }
         }
 
-        if ((mAccessType & ACCESS_TYPE_WHITELIST) != 0) {
-            for (int i = 0; i < mWhitelistedPackages.size(); ++i) {
-                final PackageIdentifier packageIdentifier = mWhitelistedPackages.valueAt(i);
+        if ((mAccessType & ACCESS_TYPE_ALLOWLIST) != 0) {
+            for (int i = 0; i < mAllowedPackages.size(); ++i) {
+                final PackageIdentifier packageIdentifier = mAllowedPackages.valueAt(i);
                 if (packageIdentifier.packageName.equals(callingPackage)
                         && pm.hasSigningCertificate(callingPackage, packageIdentifier.certificate,
                                 PackageManager.CERT_INPUT_SHA256)) {
@@ -131,20 +131,20 @@ class BlobAccessMode {
         return mAccessType;
     }
 
-    int getNumWhitelistedPackages() {
-        return mWhitelistedPackages.size();
+    int getAllowedPackagesCount() {
+        return mAllowedPackages.size();
     }
 
     void dump(IndentingPrintWriter fout) {
         fout.println("accessType: " + DebugUtils.flagsToString(
                 BlobAccessMode.class, "ACCESS_TYPE_", mAccessType));
-        fout.print("Whitelisted pkgs:");
-        if (mWhitelistedPackages.isEmpty()) {
+        fout.print("Explicitly allowed pkgs:");
+        if (mAllowedPackages.isEmpty()) {
             fout.println(" (Empty)");
         } else {
             fout.increaseIndent();
-            for (int i = 0, count = mWhitelistedPackages.size(); i < count; ++i) {
-                fout.println(mWhitelistedPackages.valueAt(i).toString());
+            for (int i = 0, count = mAllowedPackages.size(); i < count; ++i) {
+                fout.println(mAllowedPackages.valueAt(i).toString());
             }
             fout.decreaseIndent();
         }
@@ -152,12 +152,12 @@ class BlobAccessMode {
 
     void writeToXml(@NonNull XmlSerializer out) throws IOException {
         XmlUtils.writeIntAttribute(out, ATTR_TYPE, mAccessType);
-        for (int i = 0, count = mWhitelistedPackages.size(); i < count; ++i) {
-            out.startTag(null, TAG_WHITELISTED_PACKAGE);
-            final PackageIdentifier packageIdentifier = mWhitelistedPackages.valueAt(i);
+        for (int i = 0, count = mAllowedPackages.size(); i < count; ++i) {
+            out.startTag(null, TAG_ALLOWED_PACKAGE);
+            final PackageIdentifier packageIdentifier = mAllowedPackages.valueAt(i);
             XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageIdentifier.packageName);
             XmlUtils.writeByteArrayAttribute(out, ATTR_CERTIFICATE, packageIdentifier.certificate);
-            out.endTag(null, TAG_WHITELISTED_PACKAGE);
+            out.endTag(null, TAG_ALLOWED_PACKAGE);
         }
     }
 
@@ -171,7 +171,7 @@ class BlobAccessMode {
 
         final int depth = in.getDepth();
         while (XmlUtils.nextElementWithin(in, depth)) {
-            if (TAG_WHITELISTED_PACKAGE.equals(in.getName())) {
+            if (TAG_ALLOWED_PACKAGE.equals(in.getName())) {
                 final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
                 final byte[] certificate = XmlUtils.readByteArrayAttribute(in, ATTR_CERTIFICATE);
                 blobAccessMode.allowPackageAccess(packageName, certificate);

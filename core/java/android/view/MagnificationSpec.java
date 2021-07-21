@@ -16,9 +16,9 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Pools.SynchronizedPool;
 
 /**
  * This class represents spec for performing screen magnification.
@@ -26,9 +26,6 @@ import android.util.Pools.SynchronizedPool;
  * @hide
  */
 public class MagnificationSpec implements Parcelable {
-    private static final int MAX_POOL_SIZE = 20;
-    private static final SynchronizedPool<MagnificationSpec> sPool =
-            new SynchronizedPool<>(MAX_POOL_SIZE);
 
     /** The magnification scaling factor. */
     public float scale = 1.0f;
@@ -45,10 +42,6 @@ public class MagnificationSpec implements Parcelable {
      */
     public float offsetY;
 
-    private MagnificationSpec() {
-        /* do nothing - reducing visibility */
-    }
-
     public void initialize(float scale, float offsetX, float offsetY) {
         if (scale < 1) {
             throw new IllegalArgumentException("Scale must be greater than or equal to one!");
@@ -60,24 +53,6 @@ public class MagnificationSpec implements Parcelable {
 
     public boolean isNop() {
         return scale == 1.0f && offsetX == 0 && offsetY == 0;
-    }
-
-    public static MagnificationSpec obtain(MagnificationSpec other) {
-        MagnificationSpec info = obtain();
-        info.scale = other.scale;
-        info.offsetX = other.offsetX;
-        info.offsetY = other.offsetY;
-        return info;
-    }
-
-    public static MagnificationSpec obtain() {
-        MagnificationSpec spec = sPool.acquire();
-        return (spec != null) ? spec : new MagnificationSpec();
-    }
-
-    public void recycle() {
-        clear();
-        sPool.release(this);
     }
 
     public void clear() {
@@ -102,11 +77,10 @@ public class MagnificationSpec implements Parcelable {
         parcel.writeFloat(scale);
         parcel.writeFloat(offsetX);
         parcel.writeFloat(offsetY);
-        recycle();
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (this == other) {
             return true;
         }
@@ -154,7 +128,7 @@ public class MagnificationSpec implements Parcelable {
 
         @Override
         public MagnificationSpec createFromParcel(Parcel parcel) {
-            MagnificationSpec spec = MagnificationSpec.obtain();
+            MagnificationSpec spec = new MagnificationSpec();
             spec.initFromParcel(parcel);
             return spec;
         }

@@ -111,10 +111,10 @@ static jint backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
         return (jint) -1;
     }
 
-    off_t tarSize = 0;
+    off64_t tarSize = 0;
     jint err = write_tarfile(packageName, domain, rootpath, path, &tarSize, writer);
     if (!err) {
-        //ALOGI("measured [%s] at %lld", path.string(), (long long) tarSize);
+        ALOGI("measured [%s] at %lld", path.string(), (long long)tarSize);
         env->CallVoidMethod(dataOutputObj, sFullBackupDataOutput.addSize, (jlong) tarSize);
     }
 

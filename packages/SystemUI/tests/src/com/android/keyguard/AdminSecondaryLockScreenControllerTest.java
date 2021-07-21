@@ -41,8 +41,6 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceView;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -67,7 +65,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     private ComponentName mComponentName;
     private Intent mServiceIntent;
     private TestableLooper mTestableLooper;
-    private ViewGroup mParent;
+    private KeyguardSecurityContainer mKeyguardSecurityContainer;
 
     @Mock
     private Handler mHandler;
@@ -84,8 +82,8 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mParent = spy(new FrameLayout(mContext));
-        ViewUtils.attachView(mParent);
+        mKeyguardSecurityContainer = spy(new KeyguardSecurityContainer(mContext));
+        ViewUtils.attachView(mKeyguardSecurityContainer);
 
         mTestableLooper = TestableLooper.get(this);
         mComponentName = new ComponentName(mContext, "FakeKeyguardClient.class");
@@ -96,13 +94,14 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         when(mKeyguardClient.queryLocalInterface(anyString())).thenReturn(mKeyguardClient);
         when(mKeyguardClient.asBinder()).thenReturn(mKeyguardClient);
 
-        mTestController = new AdminSecondaryLockScreenController(
-                mContext, mParent, mUpdateMonitor, mKeyguardCallback, mHandler);
+        mTestController = new AdminSecondaryLockScreenController.Factory(
+                mContext, mKeyguardSecurityContainer, mUpdateMonitor, mHandler)
+                .create(mKeyguardCallback);
     }
 
     @After
     public void tearDown() {
-        ViewUtils.detachView(mParent);
+        ViewUtils.detachView(mKeyguardSecurityContainer);
     }
 
     @Test
@@ -146,7 +145,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         SurfaceView v = verifySurfaceReady();
 
         mTestController.hide();
-        verify(mParent).removeView(v);
+        verify(mKeyguardSecurityContainer).removeView(v);
         assertThat(mContext.isBound(mComponentName)).isFalse();
     }
 
@@ -154,7 +153,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     public void testHide_notShown() throws Exception {
         mTestController.hide();
         // Nothing should happen if trying to hide when the view isn't attached yet.
-        verify(mParent, never()).removeView(any(SurfaceView.class));
+        verify(mKeyguardSecurityContainer, never()).removeView(any(SurfaceView.class));
     }
 
     @Test
@@ -182,7 +181,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     private SurfaceView verifySurfaceReady() throws Exception {
         mTestableLooper.processAllMessages();
         ArgumentCaptor<SurfaceView> captor = ArgumentCaptor.forClass(SurfaceView.class);
-        verify(mParent).addView(captor.capture());
+        verify(mKeyguardSecurityContainer).addView(captor.capture());
 
         mTestableLooper.processAllMessages();
         verify(mKeyguardClient).onCreateKeyguardSurface(any(), any(IKeyguardCallback.class));
@@ -190,7 +189,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     }
 
     private void verifyViewDismissed(SurfaceView v) throws Exception {
-        verify(mParent).removeView(v);
+        verify(mKeyguardSecurityContainer).removeView(v);
         verify(mKeyguardCallback).dismiss(true, TARGET_USER_ID, true);
         assertThat(mContext.isBound(mComponentName)).isFalse();
     }

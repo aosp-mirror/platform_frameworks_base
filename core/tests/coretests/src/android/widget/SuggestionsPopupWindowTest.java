@@ -41,7 +41,9 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.content.res.TypedArray;
 import android.text.Selection;
@@ -354,6 +356,73 @@ public class SuggestionsPopupWindowTest {
             onView(withId(R.id.textview))
                     .inRoot(withDecorView(is(getActivity().getWindow().getDecorView())))
                     .perform(clearText());
+        }
+    }
+
+    @Test
+    public void testCursorVisibility() {
+        final TextView textView = getActivity().findViewById(R.id.textview);
+        final String text = "abc";
+
+        assertTrue(textView.isCursorVisible());
+
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        final SuggestionSpan suggestionSpan = new SuggestionSpan(getActivity(),
+                new String[]{"ABC"}, SuggestionSpan.FLAG_AUTO_CORRECTION);
+        setSuggestionSpan(suggestionSpan, text.indexOf('a'), text.indexOf('c') + 1);
+        showSuggestionsPopup();
+
+        assertSuggestionsPopupIsDisplayed();
+        assertSuggestionsPopupContainsItem("ABC");
+        assertFalse(textView.isCursorVisible());
+
+        // Delete an item.
+        clickSuggestionsPopupItem(
+                getActivity().getString(com.android.internal.R.string.delete));
+        assertSuggestionsPopupIsNotDisplayed();
+        assertTrue(textView.isCursorVisible());
+    }
+
+    @Test
+    public void testCursorVisibilityWhenImeConsumesInput() {
+        final TextView textView = getActivity().findViewById(R.id.textview);
+        final String text = "abc";
+
+        assertTrue(textView.isCursorVisible());
+
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        setImeConsumesInputWithExpect(textView, true /* imeConsumesInput */,
+                false /* expectedCursorVisibility */);
+        final SuggestionSpan suggestionSpan = new SuggestionSpan(getActivity(),
+                new String[]{"ABC"}, SuggestionSpan.FLAG_AUTO_CORRECTION);
+        setSuggestionSpan(suggestionSpan, text.indexOf('a'), text.indexOf('c') + 1);
+        showSuggestionsPopup();
+
+        assertSuggestionsPopupIsDisplayed();
+        assertSuggestionsPopupContainsItem("ABC");
+        assertFalse(textView.isCursorVisible());
+
+        // Delete an item.
+        clickSuggestionsPopupItem(
+                getActivity().getString(com.android.internal.R.string.delete));
+        assertSuggestionsPopupIsNotDisplayed();
+        assertFalse(textView.isCursorVisible());
+
+        // Set IME not consumes input, cursor should be back to visible.
+        setImeConsumesInputWithExpect(textView, false /* imeConsumesInput */,
+                true /* expectedCursorVisibility */);
+    }
+
+    private void setImeConsumesInputWithExpect(
+            final TextView textView, boolean imeConsumesInput, boolean expectedCursorVisibility) {
+        textView.post(() -> textView.setImeConsumesInput(imeConsumesInput));
+        getInstrumentation().waitForIdleSync();
+        if (expectedCursorVisibility) {
+            assertTrue(textView.isCursorVisible());
+        } else {
+            assertFalse(textView.isCursorVisible());
         }
     }
 }

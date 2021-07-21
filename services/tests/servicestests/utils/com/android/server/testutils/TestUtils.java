@@ -52,7 +52,7 @@ public class TestUtils {
      * EasyMock-style "strict" mock that throws immediately on any interaction that was not
      * explicitly allowed.
      *
-     * You can allow certain method calls on a whitelist basis by stubbing them e.g. with
+     * You can allow certain method calls on a allowlist basis by stubbing them e.g. with
      * {@link Mockito#doAnswer}, {@link Mockito#doNothing}, etc.
      */
     public static <T> T strictMock(Class<T> c) {

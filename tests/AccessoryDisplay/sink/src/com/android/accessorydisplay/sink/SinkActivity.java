@@ -167,7 +167,7 @@ public class SinkActivity extends Activity {
             Intent intent = new Intent(ACTION_USB_DEVICE_PERMISSION);
             intent.setPackage(getPackageName());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                    this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
             mUsbManager.requestPermission(device, pendingIntent);
             return;
         }

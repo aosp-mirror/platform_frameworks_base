@@ -16,15 +16,15 @@
 
 package com.android.systemui.statusbar.notification.stack
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationSectionLog
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val TAG = "NotifSections"
 
-@Singleton
+@SysUISingleton
 class NotificationSectionsLogger @Inject constructor(
     @NotificationSectionLog private val logBuffer: LogBuffer
 ) {

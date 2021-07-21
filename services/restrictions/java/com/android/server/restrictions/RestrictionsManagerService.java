@@ -76,7 +76,7 @@ public final class RestrictionsManagerService extends SystemService {
         public boolean hasRestrictionsProvider() throws RemoteException {
             int userHandle = UserHandle.getCallingUserId();
             if (mDpm != null) {
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     return mDpm.getRestrictionsProvider(userHandle) != null;
                 } finally {
@@ -97,7 +97,7 @@ public final class RestrictionsManagerService extends SystemService {
             int callingUid = Binder.getCallingUid();
             int userHandle = UserHandle.getUserId(callingUid);
             if (mDpm != null) {
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     ComponentName restrictionsProvider =
                             mDpm.getRestrictionsProvider(userHandle);
@@ -130,7 +130,7 @@ public final class RestrictionsManagerService extends SystemService {
             }
             final int userHandle = UserHandle.getCallingUserId();
             if (mDpm != null) {
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     ComponentName restrictionsProvider =
                             mDpm.getRestrictionsProvider(userHandle);
@@ -163,7 +163,7 @@ public final class RestrictionsManagerService extends SystemService {
             int callingUid = Binder.getCallingUid();
             int userHandle = UserHandle.getUserId(callingUid);
             if (mDpm != null) {
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     ComponentName permProvider = mDpm.getRestrictionsProvider(userHandle);
                     if (permProvider == null) {

@@ -1,6 +1,49 @@
 {
   "presubmit": [
     {
+      "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
+      "name": "FrameworksCoreTests",
+      "options": [
+        { "include-filter": "com.android.internal.os.BatteryStatsTests" },
+        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
+      ]
+    },
+    {
+      "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
+      "name": "BatteryUsageStatsProtoTests"
+    },
+    {
+      "file_patterns": [
+        "BinderDeathDispatcher\\.java"
+      ],
+      "name": "FrameworksCoreTests",
+      "options": [
+        { "include-filter": "com.android.internal.os.BinderDeathDispatcherTest" },
+        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
+      ]
+    },
+    {
+      "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
+      "name": "FrameworksServicesTests",
+      "options": [
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
+        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
+        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+      ]
+    },
+    {
       "name": "FrameworksCoreTests",
       "options": [
         {
@@ -23,6 +66,21 @@
       "file_patterns": [
         "KernelCpuUidTimeReader\\.java",
         "KernelCpuUidBpfMapReader\\.java",
+        "KernelSingleUidTimeReader\\.java"
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.os.BstatsCpuTimesValidationTest"
+        }
+      ],
+      "file_patterns": [
+        "BatteryStatsImpl\\.java",
+        "KernelCpuUidFreqTimeReader\\.java",
         "KernelSingleUidTimeReader\\.java"
       ]
     }

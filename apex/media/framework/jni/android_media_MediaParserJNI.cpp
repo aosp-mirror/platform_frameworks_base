@@ -29,6 +29,7 @@ namespace {
 
 constexpr char kMediaMetricsKey[] = "mediaparser";
 
+constexpr char kAttributeLogSessionId[] = "android.media.mediaparser.logSessionId";
 constexpr char kAttributeParserName[] = "android.media.mediaparser.parserName";
 constexpr char kAttributeCreatedByName[] = "android.media.mediaparser.createdByName";
 constexpr char kAttributeParserPool[] = "android.media.mediaparser.parserPool";
@@ -65,11 +66,14 @@ public:
 
 } // namespace
 
-JNI_FUNCTION(void, nativeSubmitMetrics, jstring parserNameJstring, jboolean createdByName,
-             jstring parserPoolJstring, jstring lastExceptionJstring, jlong resourceByteCount,
-             jlong durationMillis, jstring trackMimeTypesJstring, jstring trackCodecsJstring,
-             jstring alteredParameters, jint videoWidth, jint videoHeight) {
+JNI_FUNCTION(void, nativeSubmitMetrics, jstring logSessionIdJstring, jstring parserNameJstring,
+             jboolean createdByName, jstring parserPoolJstring, jstring lastExceptionJstring,
+             jlong resourceByteCount, jlong durationMillis, jstring trackMimeTypesJstring,
+             jstring trackCodecsJstring, jstring alteredParameters, jint videoWidth,
+             jint videoHeight) {
     mediametrics_handle_t item(mediametrics_create(kMediaMetricsKey));
+    mediametrics_setCString(item, kAttributeLogSessionId,
+                            JstringHandle(env, logSessionIdJstring).value());
     mediametrics_setCString(item, kAttributeParserName,
                             JstringHandle(env, parserNameJstring).value());
     mediametrics_setInt32(item, kAttributeCreatedByName, createdByName ? 1 : 0);

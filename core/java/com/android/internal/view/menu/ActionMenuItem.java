@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -70,7 +71,7 @@ public class ActionMenuItem implements MenuItem {
     private static final int HIDDEN         = 0x00000008;
     private static final int ENABLED        = 0x00000010;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ActionMenuItem(Context context, int group, int id, int categoryOrder, int ordering,
             CharSequence title) {
         mContext = context;

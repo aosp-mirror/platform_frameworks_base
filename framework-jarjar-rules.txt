@@ -1,6 +1,7 @@
+# This rule is meant to be reused across libraries in the bootclasspath that depend
+# on the HIDL libraries.
 rule android.hidl.** android.internal.hidl.@1
-rule android.net.wifi.WifiAnnotations* android.internal.wifi.WifiAnnotations@1
 
-# Hide media mainline module implementation classes to avoid collisions with
-# app-bundled ExoPlayer classes.
-rule com.google.android.exoplayer2.** android.media.internal.exo.@1
+# Framework-specific renames.
+rule android.net.wifi.WifiAnnotations* android.internal.wifi.WifiAnnotations@1
+rule com.android.server.vcn.util.** com.android.server.vcn.repackaged.util.@1

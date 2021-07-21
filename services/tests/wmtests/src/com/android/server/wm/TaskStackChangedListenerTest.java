@@ -16,9 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
+import static com.android.server.wm.utils.CommonUtils.runWithShellPermissionIdentity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,38 +30,37 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.ActivityView;
-import android.app.IActivityManager;
 import android.app.ITaskStackListener;
-import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
-
-import com.android.internal.annotations.GuardedBy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -70,69 +73,80 @@ import java.util.function.Predicate;
 @MediumTest
 public class TaskStackChangedListenerTest {
 
-    private IActivityManager mService;
-    private ITaskStackListener mTaskStackListener;
+    private static final int VIRTUAL_DISPLAY_WIDTH = 800;
+    private static final int VIRTUAL_DISPLAY_HEIGHT = 600;
+    private static final int VIRTUAL_DISPLAY_DENSITY = 160;
 
+    private ITaskStackListener mTaskStackListener;
+    private DisplayManager mDisplayManager;
+    private VirtualDisplay mVirtualDisplay;
+
+    private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
-    @GuardedBy("sLock")
-    private static boolean sTaskStackChangedCalled;
-    private static boolean sActivityBResumed;
 
     @Before
-    public void setUp() throws Exception {
-        mService = ActivityManager.getService();
-        sTaskStackChangedCalled = false;
+    public void setUp() {
+        mDisplayManager = getInstrumentation().getContext().getSystemService(
+                DisplayManager.class);
+        mVirtualDisplay = createVirtualDisplay(
+                getClass().getSimpleName() + "_virtualDisplay",
+                VIRTUAL_DISPLAY_WIDTH, VIRTUAL_DISPLAY_HEIGHT, VIRTUAL_DISPLAY_DENSITY);
     }
 
     @After
     public void tearDown() throws Exception {
         ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
         mTaskStackListener = null;
+        mVirtualDisplay.release();
+    }
+
+    private VirtualDisplay createVirtualDisplay(String name, int width, int height, int density) {
+        VirtualDisplay virtualDisplay = null;
+        try (ImageReader reader = ImageReader.newInstance(width, height,
+                /* format= */ PixelFormat.RGBA_8888, /* maxImages= */ 2)) {
+            int flags = VIRTUAL_DISPLAY_FLAG_PRESENTATION | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                    | VIRTUAL_DISPLAY_FLAG_PUBLIC;
+            virtualDisplay = mDisplayManager.createVirtualDisplay(
+                    name, width, height, density, reader.getSurface(), flags);
+            virtualDisplay.setSurface(reader.getSurface());
+        }
+        assertTrue("display id must be unique",
+                virtualDisplay.getDisplay().getDisplayId() != Display.DEFAULT_DISPLAY);
+        assertNotNull("display must be registered",
+                Arrays.asList(mDisplayManager.getDisplays()).stream().filter(
+                        d -> d.getName().equals(name)).findAny());
+        return virtualDisplay;
     }
 
     @Test
     @Presubmit
-    @FlakyTest(bugId = 130388819)
     public void testTaskStackChanged_afterFinish() throws Exception {
+        final TestActivity activity = startTestActivity(ActivityA.class);
+        final CountDownLatch latch = new CountDownLatch(1);
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
             public void onTaskStackChanged() throws RemoteException {
-                synchronized (sLock) {
-                    sTaskStackChangedCalled = true;
-                }
+                latch.countDown();
             }
         });
 
-        Context context = getInstrumentation().getContext();
-        context.startActivity(
-                new Intent(context, ActivityA.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        UiDevice.getInstance(getInstrumentation()).waitForIdle();
-        synchronized (sLock) {
-            assertTrue(sTaskStackChangedCalled);
-        }
-        assertTrue(sActivityBResumed);
+        activity.finish();
+        waitForCallback(latch);
     }
 
     @Test
     @Presubmit
     public void testTaskStackChanged_resumeWhilePausing() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
             public void onTaskStackChanged() throws RemoteException {
-                synchronized (sLock) {
-                    sTaskStackChangedCalled = true;
-                }
+                latch.countDown();
             }
         });
 
-        final Context context = getInstrumentation().getContext();
-        context.startActivity(new Intent(context, ResumeWhilePausingActivity.class).addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK));
-        UiDevice.getInstance(getInstrumentation()).waitForIdle();
-
-        synchronized (sLock) {
-            assertTrue(sTaskStackChangedCalled);
-        }
+        startTestActivity(ResumeWhilePausingActivity.class);
+        waitForCallback(latch);
     }
 
     @Test
@@ -226,6 +240,10 @@ public class TaskStackChangedListenerTest {
 
             @Override
             public void onTaskRemoved(int taskId) throws RemoteException {
+                if (taskCreatedLaunchLatch.getCount() == 1) {
+                    // The test activity hasn't started. Ignore the noise from previous test.
+                    return;
+                }
                 params[0] = taskId;
                 taskRemovedLatch.countDown();
             }
@@ -236,18 +254,12 @@ public class TaskStackChangedListenerTest {
         activity.setDetachedFromWindowLatch(onDetachedFromWindowLatch);
         final int id = activity.getTaskId();
 
-        // Test for onTaskCreated.
-        waitForCallback(taskCreatedLaunchLatch);
+        // Test for onTaskCreated and onTaskMovedToFront
+        waitForCallback(taskMovedToFrontLatch);
+        assertEquals(0, taskCreatedLaunchLatch.getCount());
         assertEquals(id, params[0]);
         ComponentName componentName = (ComponentName) params[1];
         assertEquals(ActivityTaskChangeCallbacks.class.getName(), componentName.getClassName());
-
-        // Test for onTaskMovedToFront.
-        assertEquals(1, taskMovedToFrontLatch.getCount());
-        mService.moveTaskToFront(null, getInstrumentation().getContext().getPackageName(), id, 0,
-                null);
-        waitForCallback(taskMovedToFrontLatch);
-        assertEquals(activity.getTaskId(), params[0]);
 
         // Test for onTaskRemovalStarted.
         assertEquals(1, taskRemovalStartedLatch.getCount());
@@ -266,136 +278,18 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
-    public void testTaskOnSingleTaskDisplayDrawn() throws Exception {
-        final Instrumentation instrumentation = getInstrumentation();
-
-        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
-        final CountDownLatch singleTaskDisplayDrawnLatch = new CountDownLatch(1);
-        registerTaskStackChangedListener(new TaskStackListener() {
-            @Override
-            public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
-                singleTaskDisplayDrawnLatch.countDown();
-            }
-        });
-        final ActivityViewTestActivity activity =
-                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
-        final ActivityView activityView = activity.getActivityView();
-        activityView.setCallback(new ActivityView.StateCallback() {
-            @Override
-            public void onActivityViewReady(ActivityView view) {
-                activityViewReadyLatch.countDown();
-            }
-
-            @Override
-            public void onActivityViewDestroyed(ActivityView view) {
-            }
-        });
-        waitForCallback(activityViewReadyLatch);
-
-        final Context context = instrumentation.getContext();
-        Intent intent = new Intent(context, ActivityInActivityView.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        activityView.startActivity(intent);
-        waitForCallback(singleTaskDisplayDrawnLatch);
-    }
-
-    public static class ActivityLaunchesNewActivityInActivityView extends TestActivity {
-        private boolean mActivityBLaunched = false;
-
-        @Override
-        protected void onPostResume() {
-            super.onPostResume();
-            if (mActivityBLaunched) {
-                return;
-            }
-            mActivityBLaunched = true;
-            startActivity(new Intent(this, ActivityB.class));
-        }
-    }
-
-    @Test
-    public void testSingleTaskDisplayEmpty() throws Exception {
-        final Instrumentation instrumentation = getInstrumentation();
-
-        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
-        final CountDownLatch activityViewDestroyedLatch = new CountDownLatch(1);
-        final CountDownLatch singleTaskDisplayDrawnLatch = new CountDownLatch(1);
-        final CountDownLatch singleTaskDisplayEmptyLatch = new CountDownLatch(1);
-
-        registerTaskStackChangedListener(new TaskStackListener() {
-            @Override
-            public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
-                singleTaskDisplayDrawnLatch.countDown();
-            }
-            @Override
-            public void onSingleTaskDisplayEmpty(int displayId)
-                    throws RemoteException {
-                singleTaskDisplayEmptyLatch.countDown();
-            }
-        });
-        final ActivityViewTestActivity activity =
-                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
-        final ActivityView activityView = activity.getActivityView();
-        activityView.setCallback(new ActivityView.StateCallback() {
-            @Override
-            public void onActivityViewReady(ActivityView view) {
-                activityViewReadyLatch.countDown();
-            }
-
-            @Override
-            public void onActivityViewDestroyed(ActivityView view) {
-                activityViewDestroyedLatch.countDown();
-            }
-        });
-        waitForCallback(activityViewReadyLatch);
-
-        // 1. start ActivityLaunchesNewActivityInActivityView in an ActivityView
-        // 2. ActivityLaunchesNewActivityInActivityView launches ActivityB
-        // 3. ActivityB finishes self.
-        // 4. Verify ITaskStackListener#onSingleTaskDisplayEmpty is not called yet.
-        final Context context = instrumentation.getContext();
-        Intent intent = new Intent(context, ActivityLaunchesNewActivityInActivityView.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        activityView.startActivity(intent);
-        waitForCallback(singleTaskDisplayDrawnLatch);
-        UiDevice.getInstance(getInstrumentation()).waitForIdle();
-        assertEquals(1, singleTaskDisplayEmptyLatch.getCount());
-
-        // 5. Release the container, and ActivityLaunchesNewActivityInActivityView finishes.
-        // 6. Verify ITaskStackListener#onSingleTaskDisplayEmpty is called.
-        activityView.release();
-        waitForCallback(activityViewDestroyedLatch);
-        waitForCallback(singleTaskDisplayEmptyLatch);
-    }
-
-    @Test
     public void testTaskDisplayChanged() throws Exception {
-        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
-        final ActivityViewTestActivity activity =
-                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
-        final ActivityView activityView = activity.getActivityView();
-        activityView.setCallback(new ActivityView.StateCallback() {
-            @Override
-            public void onActivityViewReady(ActivityView view) {
-                activityViewReadyLatch.countDown();
-            }
-            @Override
-            public void onActivityViewDestroyed(ActivityView view) {}
-        });
-        waitForCallback(activityViewReadyLatch);
+        int virtualDisplayId = mVirtualDisplay.getDisplay().getDisplayId();
 
-        // Launch a Activity inside ActivityView.
+        // Launch a Activity inside VirtualDisplay
+        CountDownLatch displayChangedLatch1 = new CountDownLatch(1);
         final Object[] params1 = new Object[1];
-        final CountDownLatch displayChangedLatch1 = new CountDownLatch(1);
-        final int activityViewDisplayId = activityView.getVirtualDisplayId();
-        registerTaskStackChangedListener(
-                new TaskDisplayChangedListener(
-                        activityViewDisplayId, params1, displayChangedLatch1));
+        registerTaskStackChangedListener(new TaskDisplayChangedListener(
+                virtualDisplayId, params1, displayChangedLatch1));
+        ActivityOptions options1 = ActivityOptions.makeBasic().setLaunchDisplayId(virtualDisplayId);
         int taskId1;
-        ActivityOptions options1 = ActivityOptions.makeBasic()
-                .setLaunchDisplayId(activityView.getVirtualDisplayId());
         synchronized (sLock) {
-            taskId1 = startTestActivity(ActivityInActivityView.class, options1).getTaskId();
+            taskId1 = startTestActivity(ActivityInVirtualDisplay.class, options1).getTaskId();
         }
         waitForCallback(displayChangedLatch1);
 
@@ -411,7 +305,7 @@ public class TaskStackChangedListenerTest {
         ActivityOptions options2 = ActivityOptions.makeBasic()
                 .setLaunchDisplayId(Display.DEFAULT_DISPLAY);
         synchronized (sLock) {
-            taskId2 = startTestActivity(ActivityInActivityView.class, options2).getTaskId();
+            taskId2 = startTestActivity(ActivityInVirtualDisplay.class, options2).getTaskId();
         }
         waitForCallback(displayChangedLatch2);
 
@@ -486,10 +380,11 @@ public class TaskStackChangedListenerTest {
         final ActivityMonitor monitor = new ActivityMonitor(activityClass.getName(), null, false);
         getInstrumentation().addMonitor(monitor);
         final Context context = getInstrumentation().getContext();
-        context.startActivity(
+        runWithShellPermissionIdentity(() -> context.startActivity(
                 new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                options.toBundle());
-        final TestActivity activity = (TestActivity) monitor.waitForActivityWithTimeout(1000);
+                options.toBundle()));
+        final TestActivity activity =
+                (TestActivity) monitor.waitForActivityWithTimeout(WAIT_TIMEOUT_MS);
         if (activity == null) {
             throw new RuntimeException("Timed out waiting for Activity");
         }
@@ -507,9 +402,9 @@ public class TaskStackChangedListenerTest {
 
     private void waitForCallback(CountDownLatch latch) {
         try {
-            final boolean result = latch.await(4, TimeUnit.SECONDS);
+            final boolean result = latch.await(WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             if (!result) {
-                throw new RuntimeException("Timed out waiting for task stack change notification");
+                throw new AssertionError("Timed out waiting for task stack change notification");
             }
         } catch (InterruptedException e) {
         }
@@ -559,37 +454,19 @@ public class TaskStackChangedListenerTest {
                 if (mIsResumed == isResumed) {
                     return;
                 }
-                wait(5000);
+                wait(WAIT_TIMEOUT_MS);
             }
             assertEquals("The activity resume state change timed out", isResumed, mIsResumed);
         }
     }
 
-    public static class ActivityA extends TestActivity {
-
-        private boolean mActivityBLaunched = false;
-
-        @Override
-        protected void onPostResume() {
-            super.onPostResume();
-            if (mActivityBLaunched) {
-                return;
-            }
-            mActivityBLaunched = true;
-            finish();
-            startActivity(new Intent(this, ActivityB.class));
-        }
-    }
+    public static class ActivityA extends TestActivity {}
 
     public static class ActivityB extends TestActivity {
 
         @Override
         protected void onPostResume() {
             super.onPostResume();
-            synchronized (sLock) {
-                sTaskStackChangedCalled = false;
-            }
-            sActivityBResumed = true;
             finish();
         }
     }
@@ -635,30 +512,19 @@ public class TaskStackChangedListenerTest {
         }
     }
 
-    public static class ActivityViewTestActivity extends TestActivity {
-        private ActivityView mActivityView;
+    public static class ActivityInVirtualDisplay extends TestActivity {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mActivityView = new ActivityView(this, null /* attrs */, 0 /* defStyle */,
-                    true /* singleTaskInstance */);
-            setContentView(mActivityView);
-
-            ViewGroup.LayoutParams layoutParams = mActivityView.getLayoutParams();
-            layoutParams.width = MATCH_PARENT;
-            layoutParams.height = MATCH_PARENT;
-            mActivityView.requestLayout();
-        }
-
-        ActivityView getActivityView() {
-            return mActivityView;
+            LinearLayout layout = new LinearLayout(this);
+            layout.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            setContentView(layout);
         }
     }
-
-    // Activity that has {@link android.R.attr#resizeableActivity} attribute set to {@code true}
-    public static class ActivityInActivityView extends TestActivity {}
 
     public static class ResumeWhilePausingActivity extends TestActivity {}
 

@@ -99,7 +99,7 @@ public class UsbAoapDeviceTestActivity extends Activity {
             Intent intent = new Intent(ACTION_USB_ACCESSORY_PERMISSION);
             intent.setPackage(getPackageName());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                    this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
             mUsbManager.requestPermission(accessory, pendingIntent);
             return;
         }

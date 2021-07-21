@@ -20,6 +20,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,17 +30,20 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.Slog;
+import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.R;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +53,7 @@ import java.util.Set;
 /**
  * Utility class to find what personal apps should be suspended to limit personal device use.
  */
-public class PersonalAppsSuspensionHelper {
+public final class PersonalAppsSuspensionHelper {
     private static final String LOG_TAG = DevicePolicyManagerService.LOG_TAG;
 
     // Flags to get all packages even if the user is still locked.
@@ -60,9 +64,17 @@ public class PersonalAppsSuspensionHelper {
     private final PackageManager mPackageManager;
 
     /**
+     * Factory method
+     */
+    public static PersonalAppsSuspensionHelper forUser(Context context, @UserIdInt int userId) {
+        return new PersonalAppsSuspensionHelper(context.createContextAsUser(UserHandle.of(userId),
+                /* flags= */ 0));
+    }
+
+    /**
      * @param context Context for the user whose apps should to be suspended.
      */
-    public PersonalAppsSuspensionHelper(Context context) {
+    private PersonalAppsSuspensionHelper(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
     }
@@ -94,7 +106,9 @@ public class PersonalAppsSuspensionHelper {
             result.remove(pkg);
         }
 
-        Slog.i(LOG_TAG, "Packages subject to suspension: " + String.join(",", result));
+        if (Log.isLoggable(LOG_TAG, Log.INFO)) {
+            Slogf.i(LOG_TAG, "Packages subject to suspension: %s", String.join(",", result));
+        }
         return result.toArray(new String[0]);
     }
 
@@ -107,7 +121,7 @@ public class PersonalAppsSuspensionHelper {
         for (final ResolveInfo resolveInfo : matchingActivities) {
             if (resolveInfo.activityInfo == null
                     || TextUtils.isEmpty(resolveInfo.activityInfo.packageName)) {
-                Slog.wtf(LOG_TAG, "Could not find package name for launcher app" + resolveInfo);
+                Slogf.wtf(LOG_TAG, "Could not find package name for launcher app %s", resolveInfo);
                 continue;
             }
             final String packageName = resolveInfo.activityInfo.packageName;
@@ -118,16 +132,29 @@ public class PersonalAppsSuspensionHelper {
                     result.add(packageName);
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(LOG_TAG, "Could not find application info for launcher app: " + packageName);
+                Slogf.e(LOG_TAG, "Could not find application info for launcher app: %s",
+                        packageName);
             }
         }
         return result;
     }
 
     private List<String> getAccessibilityServices() {
-        final List<AccessibilityServiceInfo> accessibilityServiceInfos =
-                getAccessibilityManagerForUser(mContext.getUserId())
-                        .getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
+        final List<AccessibilityServiceInfo> accessibilityServiceInfos;
+        // Not using AccessibilityManager.getInstance because that guesses
+        // at the user you require based on callingUid and caches for a given
+        // process.
+        final IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
+        final IAccessibilityManager service = iBinder == null
+                ? null : IAccessibilityManager.Stub.asInterface(iBinder);
+        final AccessibilityManager am =
+                new AccessibilityManager(mContext, service, mContext.getUserId());
+        try {
+            accessibilityServiceInfos = am.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
+        } finally {
+            am.removeClient();
+        }
+
         final List<String> result = new ArrayList<>();
         for (final AccessibilityServiceInfo serviceInfo : accessibilityServiceInfos) {
             final ComponentName componentName =
@@ -175,10 +202,21 @@ public class PersonalAppsSuspensionHelper {
         return resolveInfos != null && !resolveInfos.isEmpty();
     }
 
-    private AccessibilityManager getAccessibilityManagerForUser(int userId) {
-        final IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
-        final IAccessibilityManager service =
-                iBinder == null ? null : IAccessibilityManager.Stub.asInterface(iBinder);
-        return new AccessibilityManager(mContext, service, userId);
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("PersonalAppsSuspensionHelper");
+        pw.increaseIndent();
+
+        DevicePolicyManagerService.dumpApps(pw, "critical packages", getCriticalPackages());
+        DevicePolicyManagerService.dumpApps(pw, "launcher packages", getSystemLauncherPackages());
+        DevicePolicyManagerService.dumpApps(pw, "accessibility services",
+                getAccessibilityServices());
+        DevicePolicyManagerService.dumpApps(pw, "input method packages", getInputMethodPackages());
+        pw.printf("SMS package: %s\n", Telephony.Sms.getDefaultSmsPackage(mContext));
+        pw.printf("Settings package: %s\n", getSettingsPackageName());
+        DevicePolicyManagerService.dumpApps(pw, "Packages subject to suspension",
+                getPersonalAppsForSuspension());
+
+        pw.decreaseIndent();
     }
 }

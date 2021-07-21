@@ -39,37 +39,40 @@ namespace android {
 
 class MinikinUtils {
 public:
-    ANDROID_API static minikin::MinikinPaint prepareMinikinPaint(const Paint* paint,
+    static minikin::MinikinPaint prepareMinikinPaint(const Paint* paint,
                                                                  const Typeface* typeface);
 
-    ANDROID_API static minikin::Layout doLayout(const Paint* paint, minikin::Bidi bidiFlags,
+    static minikin::Layout doLayout(const Paint* paint, minikin::Bidi bidiFlags,
                                                 const Typeface* typeface, const uint16_t* buf,
                                                 size_t bufSize, size_t start, size_t count,
                                                 size_t contextStart, size_t contextCount,
                                                 minikin::MeasuredText* mt);
 
-    ANDROID_API static float measureText(const Paint* paint, minikin::Bidi bidiFlags,
+    static void getBounds(const Paint* paint, minikin::Bidi bidiFlags, const Typeface* typeface,
+                          const uint16_t* buf, size_t bufSize, minikin::MinikinRect* out);
+
+    static float measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                          const Typeface* typeface, const uint16_t* buf,
                                          size_t start, size_t count, size_t bufSize,
                                          float* advances);
 
-    ANDROID_API static bool hasVariationSelector(const Typeface* typeface, uint32_t codepoint,
+    static bool hasVariationSelector(const Typeface* typeface, uint32_t codepoint,
                                                  uint32_t vs);
 
-    ANDROID_API static float xOffsetForTextAlign(Paint* paint, const minikin::Layout& layout);
+    static float xOffsetForTextAlign(Paint* paint, const minikin::Layout& layout);
 
-    ANDROID_API static float hOffsetForTextAlign(Paint* paint, const minikin::Layout& layout,
+    static float hOffsetForTextAlign(Paint* paint, const minikin::Layout& layout,
                                                  const SkPath& path);
     // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
-    ANDROID_API static void forFontRun(const minikin::Layout& layout, Paint* paint, F& f) {
+    static void forFontRun(const minikin::Layout& layout, Paint* paint, F& f) {
         float saveSkewX = paint->getSkFont().getSkewX();
         bool savefakeBold = paint->getSkFont().isEmbolden();
         const minikin::MinikinFont* curFont = nullptr;
         size_t start = 0;
         size_t nGlyphs = layout.nGlyphs();
         for (size_t i = 0; i < nGlyphs; i++) {
-            const minikin::MinikinFont* nextFont = layout.getFont(i);
+            const minikin::MinikinFont* nextFont = layout.getFont(i)->typeface().get();
             if (i > 0 && nextFont != curFont) {
                 SkFont* skfont = &paint->getSkFont();
                 MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));

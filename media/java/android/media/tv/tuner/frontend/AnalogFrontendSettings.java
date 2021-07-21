@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -164,9 +165,32 @@ public class AnalogFrontendSettings extends FrontendSettings {
      */
     public static final int SIF_L_PRIME = Constants.FrontendAnalogSifStandard.L_PRIME;
 
+    /** @hide */
+    @IntDef(prefix = "AFT_FLAG_",
+            value = {AFT_FLAG_UNDEFINED, AFT_FLAG_TRUE, AFT_FLAG_FALSE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AftFlag {}
+
+    /**
+     * Aft flag is not defined.
+     */
+    public static final int AFT_FLAG_UNDEFINED =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendAnalogAftFlag.UNDEFINED;
+    /**
+     * Aft flag is set true.
+     */
+    public static final int AFT_FLAG_TRUE =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendAnalogAftFlag.AFT_TRUE;
+    /**
+     * Aft flag is not set.
+     */
+    public static final int AFT_FLAG_FALSE =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendAnalogAftFlag.AFT_FALSE;
+
 
     private final int mSignalType;
     private final int mSifStandard;
+    private final int mAftFlag;
 
     @Override
     public int getType() {
@@ -191,6 +215,14 @@ public class AnalogFrontendSettings extends FrontendSettings {
     }
 
     /**
+     * Gets AFT flag.
+     */
+    @AftFlag
+    public int getAftFlag() {
+        return mAftFlag;
+    }
+
+    /**
      * Creates a builder for {@link AnalogFrontendSettings}.
      */
     @NonNull
@@ -198,10 +230,11 @@ public class AnalogFrontendSettings extends FrontendSettings {
         return new Builder();
     }
 
-    private AnalogFrontendSettings(int frequency, int signalType, int sifStandard) {
+    private AnalogFrontendSettings(int frequency, int signalType, int sifStandard, int aftFlag) {
         super(frequency);
         mSignalType = signalType;
         mSifStandard = sifStandard;
+        mAftFlag = aftFlag;
     }
 
     /**
@@ -211,6 +244,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
         private int mFrequency = 0;
         private int mSignalType = SIGNAL_TYPE_UNDEFINED;
         private int mSifStandard = SIF_UNDEFINED;
+        private int mAftFlag = AFT_FLAG_UNDEFINED;
 
         private Builder() {}
 
@@ -223,6 +257,24 @@ public class AnalogFrontendSettings extends FrontendSettings {
         @IntRange(from = 1)
         public Builder setFrequency(int frequency) {
             mFrequency = frequency;
+            return this;
+        }
+
+        /**
+         * Set Aft flag.
+         *
+         * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+         *
+         * @param aftFlag the value to set the aft flag. The default value is
+         * {@link #AFT_FLAG_UNDEFINED}.
+         */
+        @NonNull
+        public Builder setAftFlag(@AftFlag int aftFlag) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_1_1, "setAftFlag")) {
+                mAftFlag = aftFlag;
+            }
             return this;
         }
 
@@ -253,7 +305,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
          */
         @NonNull
         public AnalogFrontendSettings build() {
-            return new AnalogFrontendSettings(mFrequency, mSignalType, mSifStandard);
+            return new AnalogFrontendSettings(mFrequency, mSignalType, mSifStandard, mAftFlag);
         }
     }
 }

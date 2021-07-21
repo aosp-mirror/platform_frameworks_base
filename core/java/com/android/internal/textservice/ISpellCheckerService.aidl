@@ -39,9 +39,11 @@ oneway interface ISpellCheckerService {
      *                 {@link android.service.textservice.SpellCheckerService.Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)} and
      *                 {@link android.service.textservice.SpellCheckerService.Session#onGetSuggestions(TextInfo, int)}
      * @param bundle bundle to be returned from {@link android.service.textservice.SpellCheckerService.Session#getBundle()}
+     * @param supportedAttributes supported attributes to be returned from {@link android.service.textservice.SpellCheckerService.Session#getSupportedAttributes()}
      * @param callback IPC channel to return the result to the caller in an asynchronous manner
      */
     void getISpellCheckerSession(
             String locale, ISpellCheckerSessionListener listener, in Bundle bundle,
+            int supportedAttributes,
             ISpellCheckerServiceCallback callback);
 }

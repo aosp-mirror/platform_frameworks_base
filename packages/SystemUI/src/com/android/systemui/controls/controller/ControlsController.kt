@@ -40,11 +40,6 @@ import java.util.function.Consumer
  */
 interface ControlsController : UserAwareController {
 
-    /**
-     * Whether the controls system is available for the current user.
-     */
-    val available: Boolean
-
     // SERVICE COMMUNICATION
 
     /**
@@ -188,6 +183,9 @@ interface ControlsController : UserAwareController {
      * @return the number of current favorites for the given component
      */
     fun countFavoritesForComponent(componentName: ComponentName): Int
+
+    /** See [ControlsUiController.getPreferredStructure]. */
+    fun getPreferredStructure(): StructureInfo
 
     /**
      * Interface for structure to pass data to [ControlsFavoritingActivity].

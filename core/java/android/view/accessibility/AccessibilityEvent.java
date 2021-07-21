@@ -605,7 +605,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
      * state description of the node as returned by
-     * {@link AccessibilityNodeInfo#getStateDescription} changed.
+     * {@link AccessibilityNodeInfo#getStateDescription} changed. If part of the state description
+     * changes, the changed part can be put into event text. For example, if state description
+     * changed from "on, wifi signal full" to "on, wifi three bars", "wifi three bars" can be put
+     * into the event text.
      */
     public static final int CONTENT_CHANGE_TYPE_STATE_DESCRIPTION = 0x00000040;
 

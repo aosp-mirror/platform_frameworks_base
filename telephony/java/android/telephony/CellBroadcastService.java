@@ -28,6 +28,11 @@ import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 
+import com.android.internal.util.FastPrintWriter;
+
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -185,6 +190,17 @@ public abstract class CellBroadcastService extends Service {
         @Override
         public @NonNull CharSequence getCellBroadcastAreaInfo(int slotIndex) {
             return CellBroadcastService.this.getCellBroadcastAreaInfo(slotIndex);
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+            CellBroadcastService.this.dump(fd, fout, args);
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, String[] args) {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd));
+            CellBroadcastService.this.dump(fd, pw, args);
         }
     }
 }

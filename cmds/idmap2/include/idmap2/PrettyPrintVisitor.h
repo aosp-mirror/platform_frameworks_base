@@ -41,8 +41,8 @@ class PrettyPrintVisitor : public Visitor {
 
  private:
   std::ostream& stream_;
-  std::unique_ptr<const ApkAssets> target_apk_;
-  AssetManager2 target_am_;
+  std::unique_ptr<TargetResourceContainer> target_;
+  std::unique_ptr<OverlayResourceContainer> overlay_;
 };
 
 }  // namespace idmap2

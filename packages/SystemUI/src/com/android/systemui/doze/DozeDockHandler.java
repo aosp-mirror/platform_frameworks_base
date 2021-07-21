@@ -22,30 +22,38 @@ import android.util.Log;
 
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
+import com.android.systemui.doze.dagger.DozeScope;
 
 import java.io.PrintWriter;
+
+import javax.inject.Inject;
 
 /**
  * Handles dock events for ambient state changes.
  */
+@DozeScope
 public class DozeDockHandler implements DozeMachine.Part {
 
     private static final String TAG = "DozeDockHandler";
     private static final boolean DEBUG = DozeService.DEBUG;
 
     private final AmbientDisplayConfiguration mConfig;
-    private final DozeMachine mMachine;
+    private DozeMachine mMachine;
     private final DockManager mDockManager;
     private final DockEventListener mDockEventListener;
 
     private int mDockState = DockManager.STATE_NONE;
 
-    DozeDockHandler(AmbientDisplayConfiguration config, DozeMachine machine,
-            DockManager dockManager) {
-        mMachine = machine;
+    @Inject
+    DozeDockHandler(AmbientDisplayConfiguration config, DockManager dockManager) {
         mConfig = config;
         mDockManager = dockManager;
         mDockEventListener = new DockEventListener();
+    }
+
+    @Override
+    public void setDozeMachine(DozeMachine dozeMachine) {
+        mMachine = dozeMachine;
     }
 
     @Override

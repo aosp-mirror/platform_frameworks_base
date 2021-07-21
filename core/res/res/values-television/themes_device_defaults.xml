@@ -16,7 +16,7 @@
 <resources>
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.Leanback.Dialog.AppError" />
-    <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
+    <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
 
     <!-- TODO(b/116457731): remove colorBackground from colors_material.xml if not used anymore -->
     <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material">

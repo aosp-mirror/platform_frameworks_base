@@ -21,9 +21,11 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -34,6 +36,7 @@ import java.util.Objects;
  * A class containing information about a pending system update.
  */
 public final class SystemUpdateInfo implements Parcelable {
+    private static final String TAG = "SystemUpdateInfo";
 
     /**
      * Represents it is unknown whether the system update is a security patch.
@@ -125,27 +128,32 @@ public final class SystemUpdateInfo implements Parcelable {
             };
 
     /** @hide */
-    public void writeToXml(XmlSerializer out, String tag) throws IOException {
+    public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
         out.startTag(null, tag);
-        out.attribute(null, ATTR_RECEIVED_TIME, String.valueOf(mReceivedTime));
-        out.attribute(null, ATTR_SECURITY_PATCH_STATE, String.valueOf(mSecurityPatchState));
+        out.attributeLong(null, ATTR_RECEIVED_TIME, mReceivedTime);
+        out.attributeInt(null, ATTR_SECURITY_PATCH_STATE, mSecurityPatchState);
         out.attribute(null, ATTR_ORIGINAL_BUILD , Build.FINGERPRINT);
         out.endTag(null, tag);
     }
 
     /** @hide */
     @Nullable
-    public static SystemUpdateInfo readFromXml(XmlPullParser parser) {
+    public static SystemUpdateInfo readFromXml(TypedXmlPullParser parser) {
         // If an OTA has been applied (build fingerprint has changed), discard stale info.
         final String buildFingerprint = parser.getAttributeValue(null, ATTR_ORIGINAL_BUILD );
         if (!Build.FINGERPRINT.equals(buildFingerprint)) {
             return null;
         }
-        final long receivedTime =
-                Long.parseLong(parser.getAttributeValue(null, ATTR_RECEIVED_TIME));
-        final int securityPatchState =
-                Integer.parseInt(parser.getAttributeValue(null, ATTR_SECURITY_PATCH_STATE));
-        return new SystemUpdateInfo(receivedTime, securityPatchState);
+        try {
+            final long receivedTime =
+                    parser.getAttributeLong(null, ATTR_RECEIVED_TIME);
+            final int securityPatchState =
+                    parser.getAttributeInt(null, ATTR_SECURITY_PATCH_STATE);
+            return new SystemUpdateInfo(receivedTime, securityPatchState);
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "Load xml failed", e);
+            return null;
+        }
     }
 
     @Override
@@ -179,7 +187,7 @@ public final class SystemUpdateInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SystemUpdateInfo that = (SystemUpdateInfo) o;

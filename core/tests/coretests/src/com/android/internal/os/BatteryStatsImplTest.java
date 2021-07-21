@@ -69,7 +69,8 @@ public class BatteryStatsImplTest {
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         mBatteryStatsImpl = new MockBatteryStatsImpl()
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
-                .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader);
+                .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
+                .setTrackingCpuByProcStateEnabled(true);
     }
 
     @Test

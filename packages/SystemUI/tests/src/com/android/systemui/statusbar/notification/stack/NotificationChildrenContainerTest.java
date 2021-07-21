@@ -57,7 +57,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     public void testGetMaxAllowedVisibleChildren_lowPriority() {
         mChildrenContainer.setIsLowPriority(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
-            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         mChildrenContainer.setIsLowPriority(true);
         mChildrenContainer.setChildrenExpanded(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
-            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
     }
 
     @Test
@@ -80,13 +80,13 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         mChildrenContainer.setIsLowPriority(true);
         mChildrenContainer.setUserLocked(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
-            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
     }
 
     @Test
     public void testGetMaxAllowedVisibleChildren_likeCollapsed() {
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(true),
-            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
     }
 
 
@@ -136,12 +136,13 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     @Test
     public void testLowPriorityHeaderCleared() {
         mGroup.setIsLowPriority(true);
-        NotificationHeaderView lowPriorityHeaderView = mChildrenContainer.getLowPriorityHeaderView();
-        Assert.assertTrue(lowPriorityHeaderView.getVisibility() == View.VISIBLE);
-        Assert.assertTrue(lowPriorityHeaderView.getParent() == mChildrenContainer);
+        NotificationHeaderView lowPriorityHeaderView =
+                mChildrenContainer.getLowPriorityViewWrapper().getNotificationHeader();
+        Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
+        Assert.assertSame(mChildrenContainer, lowPriorityHeaderView.getParent());
         mGroup.setIsLowPriority(false);
-        Assert.assertTrue(lowPriorityHeaderView.getParent() == null);
-        Assert.assertTrue(mChildrenContainer.getLowPriorityHeaderView() == null);
+        Assert.assertNull(lowPriorityHeaderView.getParent());
+        Assert.assertNull(mChildrenContainer.getLowPriorityViewWrapper());
     }
 
     @Test

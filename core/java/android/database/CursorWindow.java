@@ -17,11 +17,13 @@
 package android.database;
 
 import android.annotation.BytesLong;
+import android.annotation.IntRange;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -230,7 +232,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      *
      * @return The zero-based start position.
      */
-    public int getStartPosition() {
+    public @IntRange(from = 0) int getStartPosition() {
         return mStartPos;
     }
 
@@ -243,7 +245,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      *
      * @param pos The new zero-based start position.
      */
-    public void setStartPosition(int pos) {
+    public void setStartPosition(@IntRange(from = 0) int pos) {
         mStartPos = pos;
     }
 
@@ -252,7 +254,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      *
      * @return The number of rows in this cursor window.
      */
-    public int getNumRows() {
+    public @IntRange(from = 0) int getNumRows() {
         acquireReference();
         try {
             return nativeGetNumRows(mWindowPtr);
@@ -272,7 +274,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param columnNum The new number of columns.
      * @return True if successful.
      */
-    public boolean setNumColumns(int columnNum) {
+    public boolean setNumColumns(@IntRange(from = 0) int columnNum) {
         acquireReference();
         try {
             return nativeSetNumColumns(mWindowPtr, columnNum);
@@ -317,7 +319,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @deprecated Use {@link #getType(int, int)} instead.
      */
     @Deprecated
-    public boolean isNull(int row, int column) {
+    public boolean isNull(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         return getType(row, column) == Cursor.FIELD_TYPE_NULL;
     }
 
@@ -332,7 +334,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @deprecated Use {@link #getType(int, int)} instead.
      */
     @Deprecated
-    public boolean isBlob(int row, int column) {
+    public boolean isBlob(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         int type = getType(row, column);
         return type == Cursor.FIELD_TYPE_BLOB || type == Cursor.FIELD_TYPE_NULL;
     }
@@ -347,7 +349,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @deprecated Use {@link #getType(int, int)} instead.
      */
     @Deprecated
-    public boolean isLong(int row, int column) {
+    public boolean isLong(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         return getType(row, column) == Cursor.FIELD_TYPE_INTEGER;
     }
 
@@ -361,7 +363,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @deprecated Use {@link #getType(int, int)} instead.
      */
     @Deprecated
-    public boolean isFloat(int row, int column) {
+    public boolean isFloat(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         return getType(row, column) == Cursor.FIELD_TYPE_FLOAT;
     }
 
@@ -376,29 +378,20 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @deprecated Use {@link #getType(int, int)} instead.
      */
     @Deprecated
-    public boolean isString(int row, int column) {
+    public boolean isString(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         int type = getType(row, column);
         return type == Cursor.FIELD_TYPE_STRING || type == Cursor.FIELD_TYPE_NULL;
     }
 
     /**
      * Returns the type of the field at the specified row and column index.
-     * <p>
-     * The returned field types are:
-     * <ul>
-     * <li>{@link Cursor#FIELD_TYPE_NULL}</li>
-     * <li>{@link Cursor#FIELD_TYPE_INTEGER}</li>
-     * <li>{@link Cursor#FIELD_TYPE_FLOAT}</li>
-     * <li>{@link Cursor#FIELD_TYPE_STRING}</li>
-     * <li>{@link Cursor#FIELD_TYPE_BLOB}</li>
-     * </ul>
-     * </p>
      *
      * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The field type.
      */
-    public int getType(int row, int column) {
+    public @Cursor.FieldType int getType(@IntRange(from = 0) int row,
+            @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativeGetType(mWindowPtr, row - mStartPos, column);
@@ -428,7 +421,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as a byte array.
      */
-    public byte[] getBlob(int row, int column) {
+    public byte[] getBlob(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativeGetBlob(mWindowPtr, row - mStartPos, column);
@@ -463,7 +456,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as a string.
      */
-    public String getString(int row, int column) {
+    public String getString(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativeGetString(mWindowPtr, row - mStartPos, column);
@@ -502,7 +495,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param buffer The {@link CharArrayBuffer} to hold the string.  It is automatically
      * resized if the requested string is larger than the buffer's current capacity.
       */
-    public void copyStringToBuffer(int row, int column, CharArrayBuffer buffer) {
+    public void copyStringToBuffer(@IntRange(from = 0) int row, @IntRange(from = 0) int column,
+            CharArrayBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException("CharArrayBuffer should not be null");
         }
@@ -536,7 +530,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as a <code>long</code>.
      */
-    public long getLong(int row, int column) {
+    public long getLong(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativeGetLong(mWindowPtr, row - mStartPos, column);
@@ -568,7 +562,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as a <code>double</code>.
      */
-    public double getDouble(int row, int column) {
+    public double getDouble(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativeGetDouble(mWindowPtr, row - mStartPos, column);
@@ -589,7 +583,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as a <code>short</code>.
      */
-    public short getShort(int row, int column) {
+    public short getShort(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         return (short) getLong(row, column);
     }
 
@@ -605,7 +599,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as an <code>int</code>.
      */
-    public int getInt(int row, int column) {
+    public int getInt(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         return (int) getLong(row, column);
     }
 
@@ -621,7 +615,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return The value of the field as an <code>float</code>.
      */
-    public float getFloat(int row, int column) {
+    public float getFloat(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         return (float) getDouble(row, column);
     }
 
@@ -633,7 +627,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return True if successful.
      */
-    public boolean putBlob(byte[] value, int row, int column) {
+    public boolean putBlob(byte[] value,
+            @IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativePutBlob(mWindowPtr, value, row - mStartPos, column);
@@ -650,7 +645,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return True if successful.
      */
-    public boolean putString(String value, int row, int column) {
+    public boolean putString(String value,
+            @IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativePutString(mWindowPtr, value, row - mStartPos, column);
@@ -667,7 +663,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return True if successful.
      */
-    public boolean putLong(long value, int row, int column) {
+    public boolean putLong(long value,
+            @IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativePutLong(mWindowPtr, value, row - mStartPos, column);
@@ -685,7 +682,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return True if successful.
      */
-    public boolean putDouble(double value, int row, int column) {
+    public boolean putDouble(double value,
+            @IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativePutDouble(mWindowPtr, value, row - mStartPos, column);
@@ -701,7 +699,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param column The zero-based column index.
      * @return True if successful.
      */
-    public boolean putNull(int row, int column) {
+    public boolean putNull(@IntRange(from = 0) int row, @IntRange(from = 0) int column) {
         acquireReference();
         try {
             return nativePutNull(mWindowPtr, row - mStartPos, column);
@@ -770,7 +768,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String printStats() {
         StringBuilder buff = new StringBuilder();
         int myPid = Process.myPid();
@@ -795,10 +793,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             if (pid == myPid) {
                 buff.append("this proc=");
             } else {
-                buff.append("pid " + pid + "=");
+                buff.append("pid ").append(pid).append('=');
             }
             int num = pidCounts.get(pid);
-            buff.append(num + ")");
+            buff.append(num).append(')');
             total += num;
         }
         // limit the returned string size to 1000

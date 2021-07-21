@@ -18,18 +18,26 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas.VertexMode;
+import android.graphics.fonts.Font;
 import android.graphics.text.MeasuredText;
+import android.graphics.text.TextRunShaper;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
 import android.text.PrecomputedText;
 import android.text.SpannableString;
 import android.text.SpannedString;
+import android.text.TextShaper;
 import android.text.TextUtils;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * This class is a base class for Canvas's drawing operations. Any modifications here
@@ -443,6 +451,58 @@ public abstract class BaseCanvas {
                 paint.getNativeInstance());
     }
 
+    /**
+     * Draw array of glyphs with specified font.
+     *
+     * @param glyphIds Array of glyph IDs. The length of array must be greater than or equal to
+     *                 {@code glyphStart + glyphCount}.
+     * @param glyphIdOffset Number of elements to skip before drawing in <code>glyphIds</code>
+     *                     array.
+     * @param positions A flattened X and Y position array. The first glyph X position must be
+     *                  stored at {@code positionOffset}. The first glyph Y position must be stored
+     *                  at {@code positionOffset + 1}, then the second glyph X position must be
+     *                  stored at {@code positionOffset + 2}.
+     *                 The length of array must be greater than or equal to
+     *                 {@code positionOffset + glyphCount * 2}.
+     * @param positionOffset Number of elements to skip before drawing in {@code positions}.
+     *                       The first glyph X position must be stored at {@code positionOffset}.
+     *                       The first glyph Y position must be stored at
+     *                       {@code positionOffset + 1}, then the second glyph X position must be
+     *                       stored at {@code positionOffset + 2}.
+     * @param glyphCount Number of glyphs to be drawn.
+     * @param font Font used for drawing.
+     * @param paint Paint used for drawing. The typeface set to this paint is ignored.
+     *
+     * @see TextRunShaper
+     * @see TextShaper
+     */
+    public void drawGlyphs(
+            @NonNull int[] glyphIds,
+            @IntRange(from = 0) int glyphIdOffset,
+            @NonNull float[] positions,
+            @IntRange(from = 0) int positionOffset,
+            @IntRange(from = 0) int glyphCount,
+            @NonNull Font font,
+            @NonNull Paint paint) {
+        Objects.requireNonNull(glyphIds, "glyphIds must not be null.");
+        Objects.requireNonNull(positions, "positions must not be null.");
+        Objects.requireNonNull(font, "font must not be null.");
+        Objects.requireNonNull(paint, "paint must not be null.");
+        Preconditions.checkArgumentNonnegative(glyphCount);
+
+        if (glyphIdOffset < 0 || glyphIdOffset + glyphCount > glyphIds.length) {
+            throw new IndexOutOfBoundsException(
+                    "glyphIds must have at least " + (glyphIdOffset + glyphCount) + " of elements");
+        }
+        if (positionOffset < 0 || positionOffset + glyphCount * 2 > positions.length) {
+            throw new IndexOutOfBoundsException(
+                    "positions must have at least " + (positionOffset + glyphCount * 2)
+                            + " of elements");
+        }
+        nDrawGlyphs(mNativeCanvasWrapper, glyphIds, positions, glyphIdOffset, positionOffset,
+                glyphCount, font.getNativePtr(), paint.getNativeInstance());
+    }
+
     public void drawText(@NonNull char[] text, int index, int count, float x, float y,
             @NonNull Paint paint) {
         if ((index | count | (index + count) |
@@ -613,6 +673,13 @@ public abstract class BaseCanvas {
     /**
      * @hide
      */
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    }
+
+    /**
+     * @hide
+     */
     public void setHwBitmapsInSwModeEnabled(boolean enabled) {
         mAllowHwBitmapsInSwMode = enabled;
     }
@@ -734,6 +801,9 @@ public abstract class BaseCanvas {
             int vertOffset, float[] texs, int texOffset, int[] colors, int colorOffset,
             short[] indices, int indexOffset, int indexCount, long nativePaint);
 
+    private static native void nDrawGlyphs(long nativeCanvas, int[] glyphIds, float[] positions,
+            int glyphIdStart, int positionStart, int glyphCount, long nativeFont, long nativePaint);
+
     private static native void nDrawText(long nativeCanvas, char[] text, int index, int count,
             float x, float y, int flags, long nativePaint);
 
@@ -752,4 +822,7 @@ public abstract class BaseCanvas {
 
     private static native void nDrawTextOnPath(long nativeCanvas, String text, long nativePath,
             float hOffset, float vOffset, int flags, long nativePaint);
+
+    private static native void nPunchHole(long renderer, float left, float top, float right,
+            float bottom, float rx, float ry);
 }

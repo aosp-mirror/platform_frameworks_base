@@ -1,13 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.tests.appwidgetprovider">
-    <uses-permission android:name="android.permission.VIBRATE" />
+     package="com.android.tests.appwidgetprovider">
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application>
-        <receiver android:name="TestAppWidgetProvider">
+        <receiver android:name="TestAppWidgetProvider"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget_info" />
+            <meta-data android:name="android.appwidget.provider"
+                 android:resource="@xml/appwidget_info"/>
         </receiver>
     </application>
 </manifest>

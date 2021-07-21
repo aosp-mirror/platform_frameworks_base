@@ -30,10 +30,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.MotionEvent;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.os.SomeArgs;
-import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +56,6 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
      */
     private static final int EVENT_META_STATE = 0;
     private static final int EVENT_BUTTON_STATE = 0;
-    private static final int EVENT_DEVICE_ID = 0;
     private static final int EVENT_EDGE_FLAGS = 0;
     private static final int EVENT_SOURCE = InputDevice.SOURCE_TOUCHSCREEN;
     private static final int EVENT_FLAGS = 0;
@@ -122,6 +122,9 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             return;
         }
         cancelAnyPendingInjectedEvents();
+        // Indicate that the input event is injected from accessibility, to let applications
+        // distinguish it from events injected by other means.
+        policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
         sendMotionEventToNext(event, rawEvent, policyFlags);
     }
 
@@ -156,7 +159,9 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             return false;
         }
         MotionEvent motionEvent = (MotionEvent) message.obj;
-        sendMotionEventToNext(motionEvent, motionEvent, WindowManagerPolicy.FLAG_PASS_TO_USER);
+        sendMotionEventToNext(motionEvent, motionEvent,
+                WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY);
         boolean isEndOfSequence = message.arg1 != 0;
         if (isEndOfSequence) {
             notifyService(mServiceInterfaceForCurrentGesture, mSequencesInProgress.get(0), true);
@@ -308,7 +313,8 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             MotionEvent cancelEvent =
                     obtainMotionEvent(now, now, MotionEvent.ACTION_CANCEL, getLastTouchPoints(), 1);
             sendMotionEventToNext(cancelEvent, cancelEvent,
-                    WindowManagerPolicy.FLAG_PASS_TO_USER);
+                    WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                    | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY);
             mOpenGesturesInProgress.put(source, false);
         }
     }
@@ -474,8 +480,8 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
         }
         return MotionEvent.obtain(downTime, eventTime, action, touchPointsSize,
                 sPointerProps, sPointerCoords, EVENT_META_STATE, EVENT_BUTTON_STATE,
-                EVENT_X_PRECISION, EVENT_Y_PRECISION, EVENT_DEVICE_ID, EVENT_EDGE_FLAGS,
-                EVENT_SOURCE, EVENT_FLAGS);
+                EVENT_X_PRECISION, EVENT_Y_PRECISION, KeyCharacterMap.VIRTUAL_KEYBOARD,
+                EVENT_EDGE_FLAGS, EVENT_SOURCE, EVENT_FLAGS);
     }
 
     private static int findPointByStrokeId(TouchPoint[] touchPoints, int touchPointsSize,

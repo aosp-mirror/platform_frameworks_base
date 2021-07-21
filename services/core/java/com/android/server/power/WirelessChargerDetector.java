@@ -92,7 +92,7 @@ public class WirelessChargerDetector {
     // cosine of the maximum angle variance that we tolerate while at rest.
     private static final double MOVEMENT_ANGLE_COS_THRESHOLD = Math.cos(5 * Math.PI / 180);
 
-    // Sanity thresholds for the gravity vector.
+    // Validity thresholds for the gravity vector.
     private static final double MIN_GRAVITY = SensorManager.GRAVITY_EARTH - 1.0f;
     private static final double MAX_GRAVITY = SensorManager.GRAVITY_EARTH + 1.0f;
 

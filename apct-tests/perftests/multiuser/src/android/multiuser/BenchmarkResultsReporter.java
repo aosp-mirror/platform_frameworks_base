@@ -15,6 +15,8 @@
  */
 package android.multiuser;
 
+import static android.multiuser.BenchmarkResults.DECLARED_VALUE_IF_ERROR_MS;
+
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Bundle;
@@ -40,28 +42,70 @@ public class BenchmarkResultsReporter implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                base.evaluate();
-                final Bundle stats = mRunner.getStatsToReport();
-                final String summary = getSummaryString(description.getMethodName(),
-                        mRunner.getStatsToLog());
-                logSummary(description.getTestClass().getSimpleName(), summary,
-                        mRunner.getAllDurations());
-                stats.putString(Instrumentation.REPORT_KEY_STREAMRESULT, summary);
-                InstrumentationRegistry.getInstrumentation().sendStatus(
-                        Activity.RESULT_OK, stats);
+                final String tag = description.getTestClass().getSimpleName();
+                final String methodName = description.getMethodName();
+                Throwable error = null;
+
+                try {
+                    base.evaluate();
+                    error = mRunner.getErrorOrNull();
+                } catch (Exception e) {
+                    error = e;
+                }
+
+                if (error != null) {
+                    Log.e(tag, "Test " + methodName + " failed.", error);
+                    Log.d(tag, "Logcat displays the results ignoring the fact that it failed;\n"
+                            + "however, fake results of " + DECLARED_VALUE_IF_ERROR_MS + "ms "
+                            + "will be reported to the instrumentation caller to signify failure.");
+                }
+
+                final String summary = getSummaryString(methodName, mRunner.getStatsToLog());
+                logSummary(tag, summary, mRunner.getAllDurations());
+
+                Bundle stats;
+                if (error == null) {
+                    stats = mRunner.getStatsToReport();
+                    stats.putString(Instrumentation.REPORT_KEY_STREAMRESULT, summary);
+                } else {
+                    stats = BenchmarkResults.getFailedStatsToReport();
+                    final String failSummary = getSummaryString(methodName,
+                            BenchmarkResults.getFailedStatsToLog());
+                    stats.putString(Instrumentation.REPORT_KEY_STREAMRESULT, failSummary);
+                }
+                InstrumentationRegistry.getInstrumentation().sendStatus(Activity.RESULT_OK, stats);
+
+                if (error != null) {
+                    throw error;
+                }
             }
         };
     }
 
+    /**
+     * Prints, for example:
+     *  UserLifecycleTests: (summary string)
+     *  UserLifecycleTests: 1->101
+     *  UserLifecycleTests: 2->102
+     *  UserLifecycleTests: 3->103
+     *  UserLifecycleTests: 4->102
+     */
     private void logSummary(String tag, String summary, ArrayList<Long> durations) {
         final StringBuilder sb = new StringBuilder(summary);
         final int size = durations.size();
         for (int i = 0; i < size; ++i) {
-            sb.append("\n").append(i).append("->").append(durations.get(i));
+            sb.append("\n").append(i+1).append("->").append(durations.get(i));
         }
         Log.d(tag, sb.toString());
     }
 
+    /**
+     * For example:
+     *  testName
+     *  Sigma (ms): 1
+     *  Mean (ms): 2
+     *  Median (ms): 3
+     */
     private String getSummaryString(String testName, Bundle stats) {
         final StringBuilder sb = new StringBuilder();
         sb.append("\n\n").append(getKey(testName));

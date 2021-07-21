@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.stats.camera;
+
+option java_package = "android.stats.camera";
+option java_outer_classname = "CameraProtos";
+
+/**
+ * CameraStreamProto from atoms.proto, duplicated here so that it's accessible from the
+ * logging code. Must be kept in sync with the definition in atoms.proto.
+ */
+message CameraStreamProto {
+    // The stream width (in pixels)
+    optional int32 width = 1;
+    // The stream height (in pixels)
+    optional int32 height = 2;
+    // The format of the stream
+    optional int32 format = 3;
+    // The dataspace of the stream
+    optional int32 data_space = 4;
+    // The usage flag of the stream
+    optional int64 usage = 5;
+
+    // The number of requests for this stream
+    optional int64 request_count = 6;
+    // The number of buffer error for this stream
+    optional int64 error_count = 7;
+    // The capture latency of first request for this stream
+    optional int32 first_capture_latency_millis = 8;
+
+    // The maximum number of hal buffers
+    optional int32 max_hal_buffers = 9;
+    // The maximum number of app buffers
+    optional int32 max_app_buffers = 10;
+
+    // Type of stream histogram
+    // 1: Capture latency: bin size in milliseconds
+    enum HistogramType {
+        UNKNOWN = 0;
+        CAPTURE_LATENCY = 1;
+    }
+    optional HistogramType histogram_type = 11;
+    // The boundary values between histogram bins
+    // Expected number of fields: 9
+    repeated float histogram_bins = 12;
+    // The frame counts for each histogram bins
+    // Expected number of fields: 10
+    repeated int64 histogram_counts = 13;
+}

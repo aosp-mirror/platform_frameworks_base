@@ -243,7 +243,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return mDrawableContainerState.isStateful();
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         if (mCurrDrawable != null) {

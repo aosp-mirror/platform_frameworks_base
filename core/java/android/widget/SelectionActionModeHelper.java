@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.ViewConfiguration;
 import android.view.textclassifier.ExtrasUtils;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
@@ -108,7 +109,7 @@ public final class SelectionActionModeHelper {
      *
      * @return the swap result, index 0 is the start index and index 1 is the end index.
      */
-    private static int[] sortSelctionIndices(int selectionStart, int selectionEnd) {
+    private static int[] sortSelectionIndices(int selectionStart, int selectionEnd) {
         if (selectionStart < selectionEnd) {
             return new int[]{selectionStart, selectionEnd};
         }
@@ -122,11 +123,11 @@ public final class SelectionActionModeHelper {
      * @param textView the selected TextView.
      * @return the swap result, index 0 is the start index and index 1 is the end index.
      */
-    private static int[] sortSelctionIndicesFromTextView(TextView textView) {
+    private static int[] sortSelectionIndicesFromTextView(TextView textView) {
         int selectionStart = textView.getSelectionStart();
         int selectionEnd = textView.getSelectionEnd();
 
-        return sortSelctionIndices(selectionStart, selectionEnd);
+        return sortSelectionIndices(selectionStart, selectionEnd);
     }
 
     /**
@@ -135,7 +136,7 @@ public final class SelectionActionModeHelper {
     public void startSelectionActionModeAsync(boolean adjustSelection) {
         // Check if the smart selection should run for editable text.
         adjustSelection &= getTextClassificationSettings().isSmartSelectionEnabled();
-        int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(mTextView);
+        int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(mTextView);
 
         mSelectionTracker.onOriginalSelection(
                 getText(mTextView),
@@ -165,7 +166,7 @@ public final class SelectionActionModeHelper {
      * Starts Link ActionMode.
      */
     public void startLinkActionModeAsync(int start, int end) {
-        int[] indexResult = sortSelctionIndices(start, end);
+        int[] indexResult = sortSelectionIndices(start, end);
         mSelectionTracker.onOriginalSelection(getText(mTextView), indexResult[0], indexResult[1],
                 true /*isLink*/);
         cancelAsyncTask();
@@ -201,21 +202,21 @@ public final class SelectionActionModeHelper {
 
     /** Reports a selection action event. */
     public void onSelectionAction(int menuItemId, @Nullable String actionLabel) {
-        int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(mTextView);
+        int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(mTextView);
         mSelectionTracker.onSelectionAction(
                 sortedSelectionIndices[0], sortedSelectionIndices[1],
                 getActionType(menuItemId), actionLabel, mTextClassification);
     }
 
     public void onSelectionDrag() {
-        int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(mTextView);
+        int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(mTextView);
         mSelectionTracker.onSelectionAction(
                 sortedSelectionIndices[0], sortedSelectionIndices[1],
                 SelectionEvent.ACTION_DRAG, /* actionLabel= */ null, mTextClassification);
     }
 
     public void onTextChanged(int start, int end) {
-        int[] sortedSelectionIndices = sortSelctionIndices(start, end);
+        int[] sortedSelectionIndices = sortSelectionIndices(start, end);
         mSelectionTracker.onTextChanged(sortedSelectionIndices[0], sortedSelectionIndices[1],
                 mTextClassification);
     }
@@ -296,12 +297,12 @@ public final class SelectionActionModeHelper {
         } else {
             mTextClassification = null;
         }
+        final SelectionModifierCursorController controller = mEditor.getSelectionController();
+        if (controller != null
+                && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
+            controller.show();
+        }
         if (mEditor.startActionModeInternal(actionMode)) {
-            final SelectionModifierCursorController controller = mEditor.getSelectionController();
-            if (controller != null
-                    && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
-                controller.show();
-            }
             if (result != null) {
                 switch (actionMode) {
                     case Editor.TextActionMode.SELECTION:
@@ -334,7 +335,7 @@ public final class SelectionActionModeHelper {
             startSelectionActionMode(startSelectionResult);
         };
         // TODO do not trigger the animation if the change included only non-printable characters
-        int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(mTextView);
+        int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(mTextView);
         final boolean didSelectionChange =
                 result != null && (sortedSelectionIndices[0] != result.mStart
                         || sortedSelectionIndices[1] != result.mEnd);
@@ -486,7 +487,7 @@ public final class SelectionActionModeHelper {
         if (actionMode != null) {
             actionMode.invalidate();
         }
-        final int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(mTextView);
+        final int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(mTextView);
         mSelectionTracker.onSelectionUpdated(
                 sortedSelectionIndices[0], sortedSelectionIndices[1], mTextClassification);
         mTextClassificationAsyncTask = null;
@@ -495,7 +496,7 @@ public final class SelectionActionModeHelper {
     private void resetTextClassificationHelper(int selectionStart, int selectionEnd) {
         if (selectionStart < 0 || selectionEnd < 0) {
             // Use selection indices
-            int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(mTextView);
+            int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(mTextView);
             selectionStart = sortedSelectionIndices[0];
             selectionEnd = sortedSelectionIndices[1];
         }
@@ -564,6 +565,7 @@ public final class SelectionActionModeHelper {
          */
         public void onSmartSelection(SelectionResult result) {
             onClassifiedSelection(result);
+            mTextView.notifyContentCaptureTextChanged();
             mLogger.logSelectionModified(
                     result.mStart, result.mEnd, result.mClassification, result.mSelection);
         }
@@ -594,6 +596,7 @@ public final class SelectionActionModeHelper {
                 mSelectionStart = selectionStart;
                 mSelectionEnd = selectionEnd;
                 mAllowReset = false;
+                mTextView.notifyContentCaptureTextChanged();
                 mLogger.logSelectionModified(selectionStart, selectionEnd, classification, null);
             }
         }
@@ -603,6 +606,7 @@ public final class SelectionActionModeHelper {
          */
         public void onSelectionDestroyed() {
             mAllowReset = false;
+            mTextView.notifyContentCaptureTextChanged();
             // Wait a few ms to see if the selection was destroyed because of a text change event.
             mDelayedLogAbandon.schedule(100 /* ms */);
         }
@@ -637,7 +641,7 @@ public final class SelectionActionModeHelper {
                 mAllowReset = false;
                 boolean selected = editor.selectCurrentWord();
                 if (selected) {
-                    final int[] sortedSelectionIndices = sortSelctionIndicesFromTextView(textView);
+                    final int[] sortedSelectionIndices = sortSelectionIndicesFromTextView(textView);
                     mSelectionStart = sortedSelectionIndices[0];
                     mSelectionEnd = sortedSelectionIndices[1];
                     mLogger.logSelectionAction(
@@ -1022,7 +1026,13 @@ public final class SelectionActionModeHelper {
         protected SelectionResult doInBackground(Void... params) {
             final Runnable onTimeOut = this::onTimeOut;
             mTextView.postDelayed(onTimeOut, mTimeOutDuration);
-            final SelectionResult result = mSelectionResultSupplier.get();
+            SelectionResult result = null;
+            try {
+                result = mSelectionResultSupplier.get();
+            } catch (IllegalStateException e) {
+                // TODO(b/174300371): Only swallows the exception if the TCSession is destroyed
+                Log.w(LOG_TAG, "TextClassificationAsyncTask failed.", e);
+            }
             mTextView.removeCallbacks(onTimeOut);
             return result;
         }
@@ -1050,10 +1060,12 @@ public final class SelectionActionModeHelper {
      */
     private static final class TextClassificationHelper {
 
-        private static final int TRIM_DELTA = 120;  // characters
+        // The fixed upper bound of context size.
+        private static final int TRIM_DELTA_UPPER_BOUND = 240;
 
         private final Context mContext;
         private Supplier<TextClassifier> mTextClassifier;
+        private final ViewConfiguration mViewConfiguration;
 
         /** The original TextView text. **/
         private String mText;
@@ -1082,12 +1094,13 @@ public final class SelectionActionModeHelper {
         private SelectionResult mLastClassificationResult;
 
         /** Whether the TextClassifier has been initialized. */
-        private boolean mHot;
+        private boolean mInitialized;
 
         TextClassificationHelper(Context context, Supplier<TextClassifier> textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             init(textClassifier, text, selectionStart, selectionEnd, locales);
             mContext = Objects.requireNonNull(context);
+            mViewConfiguration = ViewConfiguration.get(mContext);
         }
 
         @UiThread
@@ -1104,13 +1117,13 @@ public final class SelectionActionModeHelper {
 
         @WorkerThread
         public SelectionResult classifyText() {
-            mHot = true;
+            mInitialized = true;
             return performClassification(null /* selection */);
         }
 
         @WorkerThread
         public SelectionResult suggestSelection() {
-            mHot = true;
+            mInitialized = true;
             trimText();
             final TextSelection selection;
             if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
@@ -1118,6 +1131,7 @@ public final class SelectionActionModeHelper {
                         mTrimmedText, mRelativeStart, mRelativeEnd)
                         .setDefaultLocales(mDefaultLocales)
                         .setDarkLaunchAllowed(true)
+                        .setIncludeTextClassification(true)
                         .build();
                 selection = mTextClassifier.get().suggestSelection(request);
             } else {
@@ -1141,16 +1155,15 @@ public final class SelectionActionModeHelper {
         /**
          * Maximum time (in milliseconds) to wait for a textclassifier result before timing out.
          */
-        // TODO: Consider making this a ViewConfiguration.
         public int getTimeoutDuration() {
-            if (mHot) {
-                return 200;
+            if (mInitialized) {
+                return mViewConfiguration.getSmartSelectionInitializedTimeout();
             } else {
                 // Return a slightly larger number than usual when the TextClassifier is first
                 // initialized. Initialization would usually take longer than subsequent calls to
                 // the TextClassifier. The impact of this on the UI is that we do not show the
                 // selection handles or toolbar until after this timeout.
-                return 500;
+                return mViewConfiguration.getSmartSelectionInitializingTimeout();
             }
         }
 
@@ -1175,6 +1188,8 @@ public final class SelectionActionModeHelper {
                     // Do not show smart actions for text containing unsupported characters.
                     android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
                     classification = TextClassification.EMPTY;
+                } else if (selection != null && selection.getTextClassification() != null) {
+                    classification = selection.getTextClassification();
                 } else if (mContext.getApplicationInfo().targetSdkVersion
                         >= Build.VERSION_CODES.P) {
                     final TextClassification.Request request =
@@ -1196,8 +1211,11 @@ public final class SelectionActionModeHelper {
         }
 
         private void trimText() {
-            mTrimStart = Math.max(0, mSelectionStart - TRIM_DELTA);
-            final int referenceEnd = Math.min(mText.length(), mSelectionEnd + TRIM_DELTA);
+            final int trimDelta = Math.min(
+                    TextClassificationManager.getSettings(mContext).getSmartSelectionTrimDelta(),
+                    TRIM_DELTA_UPPER_BOUND);
+            mTrimStart = Math.max(0, mSelectionStart - trimDelta);
+            final int referenceEnd = Math.min(mText.length(), mSelectionEnd + trimDelta);
             mTrimmedText = mText.subSequence(mTrimStart, referenceEnd);
             mRelativeStart = mSelectionStart - mTrimStart;
             mRelativeEnd = mSelectionEnd - mTrimStart;
@@ -1215,7 +1233,7 @@ public final class SelectionActionModeHelper {
 
         SelectionResult(int start, int end,
                 @Nullable TextClassification classification, @Nullable TextSelection selection) {
-            int[] sortedIndices = sortSelctionIndices(start, end);
+            int[] sortedIndices = sortSelectionIndices(start, end);
             mStart = sortedIndices[0];
             mEnd = sortedIndices[1];
             mClassification = classification;

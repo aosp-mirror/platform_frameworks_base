@@ -18,6 +18,7 @@
 
 #include <cerrno>
 #include <thread>
+#include <limits>
 
 #include <android/thermal.h>
 #include <android/os/BnThermalStatusListener.h>
@@ -52,6 +53,7 @@ struct AThermalManager {
         status_t getCurrentThermalStatus(int32_t *status);
         status_t addListener(AThermal_StatusCallback, void *data);
         status_t removeListener(AThermal_StatusCallback, void *data);
+        status_t getThermalHeadroom(int32_t forecastSeconds, float *result);
    private:
        AThermalManager(sp<IThermalService> service);
        sp<IThermalService> mThermalSvc;
@@ -184,6 +186,18 @@ status_t AThermalManager::getCurrentThermalStatus(int32_t *status) {
     return OK;
 }
 
+status_t AThermalManager::getThermalHeadroom(int32_t forecastSeconds, float *result) {
+    binder::Status ret = mThermalSvc->getThermalHeadroom(forecastSeconds, result);
+
+    if (!ret.isOk()) {
+        if (ret.exceptionCode() == binder::Status::EX_SECURITY) {
+            return EPERM;
+        }
+        return EPIPE;
+    }
+    return OK;
+}
+
 /**
   * Acquire an instance of the thermal manager. This must be freed using
   * {@link AThermal_releaseManager}.
@@ -258,4 +272,33 @@ int AThermal_registerThermalStatusListener(AThermalManager *manager,
 int AThermal_unregisterThermalStatusListener(AThermalManager *manager,
         AThermal_StatusCallback callback, void *data) {
     return manager->removeListener(callback, data);
+}
+
+/**
+ * Provides an estimate of how much thermal headroom the device currently has
+ * before hitting severe throttling.
+ *
+ * Note that this only attempts to track the headroom of slow-moving sensors,
+ * such as the skin temperature sensor. This means that there is no benefit to
+ * calling this function more frequently than about once per second, and attempts
+ * to call significantly more frequently may result in the function returning {@code NaN}.
+ *
+ * See also PowerManager#getThermalHeadroom.
+ *
+ * @param manager The manager instance to use
+ * @param forecastSeconds how many seconds in the future to forecast
+ * @return a value greater than or equal to 0.0 where 1.0 indicates the SEVERE throttling
+ *  	   threshold. Returns NaN if the device does not support this functionality or if
+ * 	       this function is called significantly faster than once per second.
+ */
+float AThermal_getThermalHeadroom(AThermalManager *manager,
+        int forecastSeconds) {
+    float result = 0.0f;
+    status_t ret = manager->getThermalHeadroom(forecastSeconds, &result);
+
+    if (ret != OK) {
+        result = std::numeric_limits<float>::quiet_NaN();
+    }
+
+    return result;
 }

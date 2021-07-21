@@ -20,7 +20,25 @@ import android.content.ComponentName;
 
 public class ActivityOptions {
     public static final String EXTRA_STARVE_UI_THREAD = "StarveUiThread";
+    public static final String FLICKER_APP_PACKAGE = "com.android.server.wm.flicker.testapp";
+
+    public static final String SEAMLESS_ACTIVITY_LAUNCHER_NAME = "SeamlessApp";
     public static final ComponentName SEAMLESS_ACTIVITY_COMPONENT_NAME =
-            new ComponentName("com.android.server.wm.flicker.testapp",
-                    "com.android.server.wm.flicker.testapp.SeamlessRotationActivity");
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".SeamlessRotationActivity");
+
+    public static final String IME_ACTIVITY_AUTO_FOCUS_LAUNCHER_NAME = "ImeAppAutoFocus";
+    public static final ComponentName IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ImeActivityAutoFocus");
+
+    public static final String IME_ACTIVITY_LAUNCHER_NAME = "ImeActivity";
+    public static final ComponentName IME_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ImeActivity");
+
+    public static final String SIMPLE_ACTIVITY_LAUNCHER_NAME = "SimpleApp";
+    public static final ComponentName SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".SimpleActivity");
 }

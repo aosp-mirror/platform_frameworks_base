@@ -451,7 +451,7 @@ static jobject android_media_MediaSync_getSyncParams(JNIEnv *env, jobject thiz) 
     ALOGV("getSyncParams: %d %d %f %f",
             scs.sync.mSource, scs.sync.mAudioAdjustMode, scs.sync.mTolerance, scs.frameRate);
 
-    // sanity check params
+    // check params
     if (scs.sync.mSource >= AVSYNC_SOURCE_MAX
             || scs.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
             || scs.sync.mTolerance < 0.f

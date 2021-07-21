@@ -13,6 +13,7 @@ package com.android.settingslib.wifi;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +26,6 @@ import android.net.NetworkKey;
 import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
 import android.net.ScoredNetwork;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
@@ -34,19 +34,31 @@ import android.os.Looper;
 import android.provider.Settings;
 
 import com.android.settingslib.R;
+import com.android.settingslib.Utils;
 
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Track status of Wi-Fi for the Sys UI.
  */
 public class WifiStatusTracker {
+    private static final int HISTORY_SIZE = 32;
+    private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     private final Context mContext;
     private final WifiNetworkScoreCache mWifiNetworkScoreCache;
     private final WifiManager mWifiManager;
     private final NetworkScoreManager mNetworkScoreManager;
     private final ConnectivityManager mConnectivityManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Set<Integer> mNetworks = new HashSet<>();
+    // Save the previous HISTORY_SIZE states for logging.
+    private final String[] mHistory = new String[HISTORY_SIZE];
+    // Where to copy the next state into.
+    private int mHistoryIndex;
     private final WifiNetworkScoreCache.CacheListener mCacheListener =
             new WifiNetworkScoreCache.CacheListener(mHandler) {
                 @Override
@@ -58,46 +70,101 @@ public class WifiStatusTracker {
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
-    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
+    private final NetworkCallback mNetworkCallback =
+            new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
         // Note: onCapabilitiesChanged is guaranteed to be called "immediately" after onAvailable
         // and onLinkPropertiesChanged.
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
+            boolean isVcnOverWifi = false;
+            boolean isWifi = false;
+            WifiInfo wifiInfo = null;
+            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                wifiInfo = Utils.tryGetWifiInfoForVcn(networkCapabilities);
+                isVcnOverWifi = (wifiInfo != null);
+            } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
+                isWifi = true;
+            }
+            // As long as it is a WiFi network, we will log it in the dumpsys for debugging.
+            if (isVcnOverWifi || isWifi) {
+                String log = new StringBuilder()
+                        .append(SSDF.format(System.currentTimeMillis())).append(",")
+                        .append("onCapabilitiesChanged: ")
+                        .append("network=").append(network).append(",")
+                        .append("networkCapabilities=").append(networkCapabilities)
+                        .toString();
+                recordLastWifiNetwork(log);
+            }
+            // Ignore the WiFi network if it doesn't contain any valid WifiInfo, or it is not the
+            // primary WiFi.
+            if (wifiInfo == null || !wifiInfo.isPrimary()) {
+                // Remove the network from the tracking list once it becomes non-primary.
+                if (mNetworks.contains(network.getNetId())) {
+                    mNetworks.remove(network.getNetId());
+                }
+                return;
+            }
+            if (!mNetworks.contains(network.getNetId())) {
+                mNetworks.add(network.getNetId());
+            }
+            updateWifiInfo(wifiInfo);
+            updateStatusLabel();
+            mCallback.run();
+        }
+
+        @Override
+        public void onLost(Network network) {
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append("onLost: ")
+                    .append("network=").append(network)
+                    .toString();
+            recordLastWifiNetwork(log);
+            if (mNetworks.contains(network.getNetId())) {
+                mNetworks.remove(network.getNetId());
+                updateWifiInfo(null);
+                updateStatusLabel();
+                mCallback.run();
+            }
+        }
+    };
+    private final NetworkCallback mDefaultNetworkCallback =
+            new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities nc) {
+            // network is now the default network, and its capabilities are nc.
+            // This method will always be called immediately after the network becomes the
+            // default, in addition to any time the capabilities change while the network is
+            // the default.
+            mDefaultNetwork = network;
+            mDefaultNetworkCapabilities = nc;
+            updateStatusLabel();
+            mCallback.run();
+        }
+        @Override
+        public void onLost(Network network) {
+            // The system no longer has a default network.
+            mDefaultNetwork = null;
+            mDefaultNetworkCapabilities = null;
             updateStatusLabel();
             mCallback.run();
         }
     };
-    private final NetworkCallback mDefaultNetworkCallback = new NetworkCallback() {
-                @Override
-                public void onCapabilitiesChanged(Network network, NetworkCapabilities nc) {
-                    // network is now the default network, and its capabilities are nc.
-                    // This method will always be called immediately after the network becomes the
-                    // default, in addition to any time the capabilities change while the network is
-                    // the default.
-                    mDefaultNetwork = network;
-                    mDefaultNetworkCapabilities = nc;
-                    updateStatusLabel();
-                    mCallback.run();
-                }
-                @Override
-                public void onLost(Network network) {
-                    // The system no longer has a default network.
-                    mDefaultNetwork = null;
-                    mDefaultNetworkCapabilities = null;
-                    updateStatusLabel();
-                    mCallback.run();
-                }
-            };
     private Network mDefaultNetwork = null;
     private NetworkCapabilities mDefaultNetworkCapabilities = null;
     private final Runnable mCallback;
+    private final boolean mSupportMergedUi;
 
     private WifiInfo mWifiInfo;
     public boolean enabled;
     public boolean isCaptivePortal;
     public boolean isDefaultNetwork;
+    public boolean isCarrierMerged;
+    public int subId;
     public int state;
     public boolean connected;
     public String ssid;
@@ -114,6 +181,7 @@ public class WifiStatusTracker {
         mNetworkScoreManager = networkScoreManager;
         mConnectivityManager = connectivityManager;
         mCallback = callback;
+        mSupportMergedUi = false;
     }
 
     public void setListening(boolean listening) {
@@ -155,6 +223,10 @@ public class WifiStatusTracker {
                 } else {
                     ssid = getValidSsid(mWifiInfo);
                 }
+                if (mSupportMergedUi) {
+                    isCarrierMerged = mWifiInfo.isCarrierMerged();
+                    subId = mWifiInfo.getSubscriptionId();
+                }
                 updateRssi(mWifiInfo.getRssi());
                 maybeRequestNetworkScore();
             }
@@ -169,36 +241,34 @@ public class WifiStatusTracker {
         String action = intent.getAction();
         if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
             updateWifiState();
-        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            updateWifiState();
-            final NetworkInfo networkInfo =
-                    intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            connected = networkInfo != null && networkInfo.isConnected();
-            mWifiInfo = null;
-            ssid = null;
-            if (connected) {
-                mWifiInfo = mWifiManager.getConnectionInfo();
-                if (mWifiInfo != null) {
-                    if (mWifiInfo.isPasspointAp() || mWifiInfo.isOsuAp()) {
-                        ssid = mWifiInfo.getPasspointProviderFriendlyName();
-                    } else {
-                        ssid = getValidSsid(mWifiInfo);
-                    }
-                    updateRssi(mWifiInfo.getRssi());
-                    maybeRequestNetworkScore();
-                }
+        }
+    }
+
+    private void updateWifiInfo(WifiInfo wifiInfo) {
+        updateWifiState();
+        connected = wifiInfo != null;
+        mWifiInfo = wifiInfo;
+        ssid = null;
+        if (mWifiInfo != null) {
+            if (mWifiInfo.isPasspointAp() || mWifiInfo.isOsuAp()) {
+                ssid = mWifiInfo.getPasspointProviderFriendlyName();
+            } else {
+                ssid = getValidSsid(mWifiInfo);
             }
-            updateStatusLabel();
-        } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
-            // Default to -200 as its below WifiManager.MIN_RSSI.
-            updateRssi(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200));
-            updateStatusLabel();
+            if (mSupportMergedUi) {
+                isCarrierMerged = mWifiInfo.isCarrierMerged();
+                subId = mWifiInfo.getSubscriptionId();
+            }
+            updateRssi(mWifiInfo.getRssi());
+            maybeRequestNetworkScore();
         }
     }
 
     private void updateWifiState() {
         state = mWifiManager.getWifiState();
         enabled = state == WifiManager.WIFI_STATE_ENABLED;
+        isCarrierMerged = false;
+        subId = 0;
     }
 
     private void updateRssi(int newRssi) {
@@ -214,14 +284,25 @@ public class WifiStatusTracker {
     }
 
     private void updateStatusLabel() {
+        if (mWifiManager == null) {
+            return;
+        }
         NetworkCapabilities networkCapabilities;
-        final Network currentWifiNetwork = mWifiManager.getCurrentNetwork();
-        if (currentWifiNetwork != null && currentWifiNetwork.equals(mDefaultNetwork)) {
+        isDefaultNetwork = false;
+        if (mDefaultNetworkCapabilities != null) {
+            boolean isWifi = mDefaultNetworkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_WIFI);
+            boolean isVcnOverWifi = mDefaultNetworkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_CELLULAR)
+                            && (Utils.tryGetWifiInfoForVcn(mDefaultNetworkCapabilities) != null);
+            if (isWifi || isVcnOverWifi) {
+                isDefaultNetwork = true;
+            }
+        }
+        if (isDefaultNetwork) {
             // Wifi is connected and the default network.
-            isDefaultNetwork = true;
             networkCapabilities = mDefaultNetworkCapabilities;
         } else {
-            isDefaultNetwork = false;
             networkCapabilities = mConnectivityManager.getNetworkCapabilities(
                     mWifiManager.getCurrentNetwork());
         }
@@ -243,6 +324,10 @@ public class WifiStatusTracker {
                     statusLabel = mContext.getString(R.string.wifi_status_no_internet);
                 }
                 return;
+            } else if (!isDefaultNetwork && mDefaultNetworkCapabilities != null
+                    && mDefaultNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+                statusLabel = mContext.getString(R.string.wifi_connected_low_quality);
+                return;
             }
         }
 
@@ -263,14 +348,27 @@ public class WifiStatusTracker {
         if (ssid != null && !WifiManager.UNKNOWN_SSID.equals(ssid)) {
             return ssid;
         }
-        // OK, it's not in the connectionInfo; we have to go hunting for it
-        List<WifiConfiguration> networks = mWifiManager.getConfiguredNetworks();
-        int length = networks.size();
-        for (int i = 0; i < length; i++) {
-            if (networks.get(i).networkId == info.getNetworkId()) {
-                return networks.get(i).SSID;
-            }
-        }
         return null;
+    }
+
+    private void recordLastWifiNetwork(String log) {
+        mHistory[mHistoryIndex] = log;
+        mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
+    }
+
+    /** Dump function. */
+    public void dump(PrintWriter pw) {
+        pw.println("  - WiFi Network History ------");
+        int size = 0;
+        for (int i = 0; i < HISTORY_SIZE; i++) {
+            if (mHistory[i] != null) size++;
+        }
+        // Print out the previous states in ordered number.
+        for (int i = mHistoryIndex + HISTORY_SIZE - 1;
+                i >= mHistoryIndex + HISTORY_SIZE - size; i--) {
+            pw.println("  Previous WiFiNetwork("
+                    + (mHistoryIndex + HISTORY_SIZE - i) + "): "
+                    + mHistory[i & (HISTORY_SIZE - 1)]);
+        }
     }
 }

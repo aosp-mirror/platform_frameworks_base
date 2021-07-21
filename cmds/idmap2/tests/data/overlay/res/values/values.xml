@@ -18,4 +18,25 @@
     <string name="str3">overlay-3</string>
     <integer name="int1">-1</integer>
     <integer name="not_in_target">-1</integer>
+
+    <!-- This overlay will fulfill the policies "public|system". This allows it overlay the
+     following resources. -->
+    <string name="overlay_policy_system">overlaid</string>
+    <string name="overlay_policy_system_vendor">overlaid</string>
+    <string name="overlay_policy_public">overlaid</string>
+
+    <!-- Requests to overlay a resource that belongs to a policy the overlay does not fulfill. -->
+    <string name="overlay_policy_product">overlaid</string>
+    <string name="overlay_policy_signature">overlaid</string>
+    <string name="overlay_policy_odm">overlaid</string>
+    <string name="overlay_policy_oem">overlaid</string>
+    <string name="overlay_policy_actor">overlaid</string>
+    <string name="overlay_policy_config_signature">overlaid</string>
+
+    <!-- Requests to overlay a resource that is not declared as overlayable. -->
+    <string name="overlay_not_overlayable">overlaid</string>
+
+    <!-- Requests to overlay a resource that is defined in an overlayable with a name other than
+         the targetName in the manifest. -->
+    <string name="overlay_other">overlaid</string>
 </resources>

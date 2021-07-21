@@ -95,7 +95,8 @@ public class UninstallUninstalling extends Activity implements
                 broadcastIntent.setPackage(getPackageName());
 
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(this, mUninstallId,
-                        broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                                | PendingIntent.FLAG_MUTABLE);
 
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;

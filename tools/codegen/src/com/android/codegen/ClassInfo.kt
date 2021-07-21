@@ -1,12 +1,14 @@
 package com.android.codegen
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.TypeDeclaration
 
 open class ClassInfo(val classAst: ClassOrInterfaceDeclaration, val fileInfo: FileInfo) {
 
     val fileAst = fileInfo.fileAst
 
     val nestedClasses = classAst.members.filterIsInstance<ClassOrInterfaceDeclaration>()
+    val nestedTypes = classAst.members.filterIsInstance<TypeDeclaration<*>>()
 
     val superInterfaces = classAst.implementedTypes.map { it.asString() }
     val superClass = classAst.extendedTypes.getOrNull(0)

@@ -110,7 +110,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         mPinnedSliceManager.pin("pkg", FIRST_SPECS, mToken);
         TestableLooper.get(this).processAllMessages();
 
-        verify(mIContentProvider).call(anyString(), nullable(String.class), anyString(),
+        verify(mIContentProvider).call(any(), anyString(),
                 eq(SliceProvider.METHOD_PIN), eq(null), argThat(b -> {
                     assertEquals(TEST_URI, b.getParcelable(SliceProvider.EXTRA_BIND_URI));
                     return true;
@@ -168,8 +168,8 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         // Throw exception when trying to pin
         doAnswer(invocation -> {
             throw new Exception("Pin failed");
-        }).when(mIContentProvider).call(anyString(), nullable(String.class), anyString(),
-                anyString(), eq(null), any());
+        }).when(mIContentProvider).call(any(), anyString(), anyString(),
+                nullable(String.class), any());
 
         TestableLooper.get(this).processAllMessages();
 
@@ -177,7 +177,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         mPinnedSliceManager.pin("pkg", FIRST_SPECS, mToken);
         TestableLooper.get(this).processAllMessages();
 
-        verify(mIContentProvider).call(anyString(), nullable(String.class), anyString(),
+        verify(mIContentProvider).call(any(), anyString(),
                 eq(SliceProvider.METHOD_PIN), eq(null), argThat(b -> {
                     assertEquals(TEST_URI, b.getParcelable(SliceProvider.EXTRA_BIND_URI));
                     return true;
