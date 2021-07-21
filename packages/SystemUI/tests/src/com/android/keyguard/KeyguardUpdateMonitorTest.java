@@ -754,6 +754,28 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testActiveSubscriptionBecomesInactive() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
+        mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
+                TEST_SUBSCRIPTION.getSubscriptionId());
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mSimDatas.get(TEST_SUBSCRIPTION.getSubscriptionId()))
+                .isNotNull();
+
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(null);
+        mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.mSimDatas.get(TEST_SUBSCRIPTION.getSubscriptionId()))
+                .isNull();
+        assertThat(mKeyguardUpdateMonitor.mSimDatas.get(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID)).isNull();
+    }
+
+    @Test
     public void testIsUserUnlocked() {
         // mUserManager will report the user as unlocked on @Before
         assertThat(mKeyguardUpdateMonitor.isUserUnlocked(KeyguardUpdateMonitor.getCurrentUser()))
