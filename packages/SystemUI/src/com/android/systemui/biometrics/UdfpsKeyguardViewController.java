@@ -378,6 +378,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public boolean onTouch(MotionEvent event) {
+                    if (mTransitionToFullShadeProgress != 0) {
+                        return false;
+                    }
                     return mUdfpsController.onTouch(event);
                 }
 
