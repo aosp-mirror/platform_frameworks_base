@@ -50,7 +50,7 @@ public final class UserTypeDetails {
     /** Name of the user type, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}. */
     private final @NonNull String mName;
 
-    // TODO(b/142482943): Currently unused. Hook this up.
+    /** Whether users of this type can be created. */
     private final boolean mEnabled;
 
     // TODO(b/142482943): Currently unused and not set. Hook this up.
@@ -195,7 +195,10 @@ public final class UserTypeDetails {
         return mName;
     }
 
-    // TODO(b/142482943) Hook this up or delete it.
+    /**
+     * Returns whether this user type is enabled.
+     * If it is not enabled, all future attempts to create users of this type will be rejected.
+     */
     public boolean isEnabled() {
         return mEnabled;
     }
@@ -390,7 +393,7 @@ public final class UserTypeDetails {
         private @Nullable Bundle mDefaultSecureSettings = null;
         private @Nullable List<DefaultCrossProfileIntentFilter> mDefaultCrossProfileIntentFilters =
                 null;
-        private boolean mEnabled = true;
+        private int mEnabled = 1;
         private int mLabel = Resources.ID_NULL;
         private @Nullable int[] mBadgeLabels = null;
         private @Nullable int[] mBadgeColors = null;
@@ -405,7 +408,7 @@ public final class UserTypeDetails {
             return this;
         }
 
-        public Builder setEnabled(boolean enabled) {
+        public Builder setEnabled(int enabled) {
             mEnabled = enabled;
             return this;
         }
@@ -522,12 +525,25 @@ public final class UserTypeDetails {
                         "UserTypeDetails %s has a non empty "
                                 + "defaultCrossProfileIntentFilters", mName);
             }
-            return new UserTypeDetails(mName, mEnabled, mMaxAllowed, mBaseType,
-                    mDefaultUserInfoPropertyFlags, mLabel, mMaxAllowedPerParent,
-                    mIconBadge, mBadgePlain, mBadgeNoBackground, mBadgeLabels, mBadgeColors,
+            return new UserTypeDetails(
+                    mName,
+                    mEnabled != 0,
+                    mMaxAllowed,
+                    mBaseType,
+                    mDefaultUserInfoPropertyFlags,
+                    mLabel,
+                    mMaxAllowedPerParent,
+                    mIconBadge,
+                    mBadgePlain,
+                    mBadgeNoBackground,
+                    mBadgeLabels,
+                    mBadgeColors,
                     mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,
-                    mDefaultRestrictions, mDefaultSystemSettings, mDefaultSecureSettings,
-                    mDefaultCrossProfileIntentFilters, mIsMediaSharedWithParent);
+                    mDefaultRestrictions,
+                    mDefaultSystemSettings,
+                    mDefaultSecureSettings,
+                    mDefaultCrossProfileIntentFilters,
+                    mIsMediaSharedWithParent);
         }
 
         private boolean hasBadge() {

@@ -2352,6 +2352,9 @@ public class UserManagerService extends IUserManager.Stub {
      * {@link #canAddMoreProfilesToUser}.
      */
     private boolean canAddMoreUsersOfType(UserTypeDetails userTypeDetails) {
+        if (!userTypeDetails.isEnabled()) {
+            return false;
+        }
         final int max = userTypeDetails.getMaxAllowed();
         if (max == UserTypeDetails.UNLIMITED_NUMBER_OF_USERS) {
             return true; // Indicates that there is no max.
@@ -2392,7 +2395,7 @@ public class UserManagerService extends IUserManager.Stub {
             boolean allowedToRemoveOne) {
         checkManageUsersPermission("check if more profiles can be added.");
         final UserTypeDetails type = mUserTypes.get(userType);
-        if (type == null) {
+        if (type == null || !type.isEnabled()) {
             return false;
         }
         // Managed profiles have their own specific rules.
@@ -3549,6 +3552,12 @@ public class UserManagerService extends IUserManager.Stub {
                     + ") indicated SYSTEM user, which cannot be created.");
             return null;
         }
+        if (!userTypeDetails.isEnabled()) {
+            throwCheckedUserOperationException(
+                    "Cannot add a user of disabled type " + userType + ".",
+                    UserManager.USER_OPERATION_ERROR_MAX_USERS);
+        }
+
         synchronized (mUsersLock) {
             if (mForceEphemeralUsers) {
                 flags |= UserInfo.FLAG_EPHEMERAL;
