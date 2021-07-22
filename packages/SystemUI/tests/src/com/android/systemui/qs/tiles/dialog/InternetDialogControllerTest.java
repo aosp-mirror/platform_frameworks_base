@@ -138,9 +138,12 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getSubtitleText_withWifiOn_returnSearchWifi() {
+    public void getSubtitleText_withNoWifiEntry_returnSearchWifi() {
         mInternetDialogController.setAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        List<ScanResult> wifiScanResults = mock(ArrayList.class);
+        doReturn(0).when(wifiScanResults).size();
+        when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(true),
                 getResourcesString("wifi_empty_list_wifi_on")));
