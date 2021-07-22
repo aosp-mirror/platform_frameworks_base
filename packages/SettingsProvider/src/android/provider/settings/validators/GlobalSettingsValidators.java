@@ -291,6 +291,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.HFP_CLIENT_PROFILE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.COMPANION_OS_VERSION, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.ENABLE_ALL_LANGUAGES, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.OEM_SETUP_VERSION, ANY_INTEGER_VALIDATOR);
     }
 }
 

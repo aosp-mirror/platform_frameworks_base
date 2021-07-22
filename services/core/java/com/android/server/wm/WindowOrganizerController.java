@@ -878,8 +878,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private void sanitizeWindowContainer(WindowContainer wc) {
-        if (!(wc instanceof Task) && !(wc instanceof DisplayArea)) {
-            throw new RuntimeException("Invalid token in task or displayArea transaction");
+        if (!(wc instanceof TaskFragment) && !(wc instanceof DisplayArea)) {
+            throw new RuntimeException("Invalid token in task fragment or displayArea transaction");
         }
     }
 

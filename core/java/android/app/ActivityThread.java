@@ -3552,6 +3552,13 @@ public final class ActivityThread extends ClientTransactionHandler
                     + ", comp=" + r.intent.getComponent().toShortString()
                     + ", dir=" + r.packageInfo.getAppDir());
 
+            // updatePendingActivityConfiguration() reads from mActivities to update
+            // ActivityClientRecord which runs in a different thread. Protect modifications to
+            // mActivities to avoid race.
+            synchronized (mResourcesManager) {
+                mActivities.put(r.token, r);
+            }
+
             if (activity != null) {
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config =
@@ -3612,13 +3619,6 @@ public final class ActivityThread extends ClientTransactionHandler
                         config.windowConfiguration.getWindowingMode());
             }
             r.setState(ON_CREATE);
-
-            // updatePendingActivityConfiguration() reads from mActivities to update
-            // ActivityClientRecord which runs in a different thread. Protect modifications to
-            // mActivities to avoid race.
-            synchronized (mResourcesManager) {
-                mActivities.put(r.token, r);
-            }
 
         } catch (SuperNotCalledException e) {
             throw e;

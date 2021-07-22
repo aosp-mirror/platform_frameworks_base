@@ -60,7 +60,6 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val scrimController: ScrimController,
     private val depthController: NotificationShadeDepthController,
-    private val featureFlags: FeatureFlags,
     private val context: Context,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager
@@ -134,7 +133,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 R.dimen.lockscreen_shade_scrim_transition_distance)
         fullTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance)
-        useSplitShade = Utils.shouldUseSplitNotificationShade(featureFlags, context.resources)
+        useSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {

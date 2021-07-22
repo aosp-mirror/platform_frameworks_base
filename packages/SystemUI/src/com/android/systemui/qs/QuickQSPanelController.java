@@ -29,7 +29,6 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.FeatureFlags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,11 +57,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager, FeatureFlags featureFlags,
+            DumpManager dumpManager,
             QuickQSBrightnessController quickQSBrightnessController
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
-                uiEventLogger, qsLogger, dumpManager, featureFlags);
+                uiEventLogger, qsLogger, dumpManager);
         mBrightnessController = quickQSBrightnessController;
     }
 

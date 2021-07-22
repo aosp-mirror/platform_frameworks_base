@@ -190,6 +190,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
+        public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
+            return null;
+        }
+
+        @Override
         public Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
             return null;
         }

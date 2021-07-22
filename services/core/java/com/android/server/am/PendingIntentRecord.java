@@ -24,6 +24,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -408,6 +409,18 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 }
                 controller.mAmInternal.tempAllowlistForPendingIntent(callingPid, callingUid,
                         uid, duration.duration, duration.type, duration.reasonCode, tag.toString());
+            } else if (key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE
+                    && options != null) {
+                // If this is a getForegroundService() type pending intent, use its BroadcastOptions
+                // temp allowlist duration as its pending intent temp allowlist duration.
+                BroadcastOptions brOptions = new BroadcastOptions(options);
+                if (brOptions.getTemporaryAppAllowlistDuration() > 0) {
+                    controller.mAmInternal.tempAllowlistForPendingIntent(callingPid, callingUid,
+                            uid, brOptions.getTemporaryAppAllowlistDuration(),
+                            brOptions.getTemporaryAppAllowlistType(),
+                            brOptions.getTemporaryAppAllowlistReasonCode(),
+                            brOptions.getTemporaryAppAllowlistReason());
+                }
             }
 
             boolean sendFinish = finishedReceiver != null;
@@ -468,7 +481,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                 key.featureId, uid, callingUid, callingPid, finalIntent,
                                 resolvedType, finishedReceiver, code, null, null,
                                 requiredPermission, options, (finishedReceiver != null), false,
-                                userId, allowedByToken || allowTrampoline, bgStartsToken);
+                                userId, allowedByToken || allowTrampoline, bgStartsToken,
+                                null /* broadcastAllowList */);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }

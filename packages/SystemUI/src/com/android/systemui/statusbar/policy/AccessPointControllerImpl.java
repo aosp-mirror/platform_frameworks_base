@@ -119,6 +119,11 @@ public class AccessPointControllerImpl
                 new UserHandle(mCurrentUser));
     }
 
+    public boolean canConfigMobileData() {
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+                UserHandle.of(mCurrentUser));
+    }
+
     public void onUserSwitched(int newUserId) {
         mCurrentUser = newUserId;
     }
