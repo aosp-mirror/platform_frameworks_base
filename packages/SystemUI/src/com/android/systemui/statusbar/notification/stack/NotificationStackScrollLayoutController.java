@@ -682,7 +682,13 @@ public class NotificationStackScrollLayoutController {
                 NotificationPanelEvent.fromSelection(selection)));
         mView.setFooterDismissListener(() ->
                 mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
-        mView.setRemoteInputManager(mRemoteInputManager);
+        mView.setIsRemoteInputActive(mRemoteInputManager.isRemoteInputActive());
+        mRemoteInputManager.addControllerCallback(new RemoteInputController.Callback() {
+            @Override
+            public void onRemoteInputActive(boolean active) {
+                mView.setIsRemoteInputActive(active);
+            }
+        });
         mView.setShadeController(mShadeController);
 
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {

@@ -1245,7 +1245,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             @Override
             public boolean shouldHideOnTouch() {
-                return !mRemoteInputManager.getController().isRemoteInputActive();
+                return !mRemoteInputManager.isRemoteInputActive();
             }
 
             @Override
@@ -1465,7 +1465,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationInterruptStateProvider);
 
         mNotificationShelfController.setOnActivatedListener(mPresenter);
-        mRemoteInputManager.getController().addCallback(mNotificationShadeWindowController);
+        mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
 
         mNotificationActivityStarter =
                 mStatusBarNotificationActivityStarterBuilder
@@ -1640,7 +1640,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
+        mRemoteInputManager.addControllerCallback(mStatusBarKeyguardViewManager);
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
@@ -3058,9 +3058,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 KeyboardShortcuts.dismiss();
-                if (mRemoteInputManager.getController() != null) {
-                    mRemoteInputManager.getController().closeRemoteInputs();
-                }
+                mRemoteInputManager.closeRemoteInputs();
                 if (mBubblesOptional.isPresent() && mBubblesOptional.get().isStackExpanded()) {
                     mBubblesOptional.get().collapseStack();
                 }
