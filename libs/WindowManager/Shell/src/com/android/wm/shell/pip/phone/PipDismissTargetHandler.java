@@ -158,14 +158,16 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                mMainExecutor.executeDelayed(() -> {
-                    mMotionHelper.notifyDismissalPending();
-                    mMotionHelper.animateDismiss();
-                    hideDismissTargetMaybe();
+                if (mEnableDismissDragToEdge) {
+                    mMainExecutor.executeDelayed(() -> {
+                        mMotionHelper.notifyDismissalPending();
+                        mMotionHelper.animateDismiss();
+                        hideDismissTargetMaybe();
 
-                    mPipUiEventLogger.log(
-                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
-                }, 0);
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
+                    }, 0);
+                }
             }
         });
 
