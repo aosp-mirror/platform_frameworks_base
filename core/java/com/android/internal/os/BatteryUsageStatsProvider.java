@@ -256,7 +256,7 @@ public class BatteryUsageStatsProvider {
 
     private long elapsedRealtime() {
         if (mStats instanceof BatteryStatsImpl) {
-            return ((BatteryStatsImpl) mStats).mClocks.elapsedRealtime();
+            return ((BatteryStatsImpl) mStats).mClock.elapsedRealtime();
         } else {
             return SystemClock.elapsedRealtime();
         }
@@ -264,7 +264,7 @@ public class BatteryUsageStatsProvider {
 
     private long uptimeMillis() {
         if (mStats instanceof BatteryStatsImpl) {
-            return ((BatteryStatsImpl) mStats).mClocks.uptimeMillis();
+            return ((BatteryStatsImpl) mStats).mClock.uptimeMillis();
         } else {
             return SystemClock.uptimeMillis();
         }
@@ -272,7 +272,7 @@ public class BatteryUsageStatsProvider {
 
     private long currentTimeMillis() {
         if (mStats instanceof BatteryStatsImpl) {
-            return ((BatteryStatsImpl) mStats).mClocks.currentTimeMillis();
+            return ((BatteryStatsImpl) mStats).mClock.currentTimeMillis();
         } else {
             return System.currentTimeMillis();
         }

@@ -50,7 +50,7 @@ public class BatteryUsageStatsRule implements TestRule {
                     .build();
 
     private final PowerProfile mPowerProfile;
-    private final MockClocks mMockClocks = new MockClocks();
+    private final MockClock mMockClock = new MockClock();
     private final MockBatteryStatsImpl mBatteryStats;
 
     private BatteryUsageStats mBatteryUsageStats;
@@ -63,8 +63,8 @@ public class BatteryUsageStatsRule implements TestRule {
     public BatteryUsageStatsRule(long currentTime) {
         Context context = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
-        mMockClocks.currentTime = currentTime;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
+        mMockClock.currentTime = currentTime;
+        mBatteryStats = new MockBatteryStatsImpl(mMockClock);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.onSystemReady();
     }
@@ -166,12 +166,12 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public void setTime(long realtimeMs, long uptimeMs) {
-        mMockClocks.realtime = realtimeMs;
-        mMockClocks.uptime = uptimeMs;
+        mMockClock.realtime = realtimeMs;
+        mMockClock.uptime = uptimeMs;
     }
 
     public void setCurrentTime(long currentTimeMs) {
-        mMockClocks.currentTime = currentTimeMs;
+        mMockClock.currentTime = currentTimeMs;
     }
 
     BatteryUsageStats apply(PowerCalculator... calculators) {
@@ -191,7 +191,7 @@ public class BatteryUsageStatsRule implements TestRule {
         }
 
         for (PowerCalculator calculator : calculators) {
-            calculator.calculate(builder, mBatteryStats, mMockClocks.realtime, mMockClocks.uptime,
+            calculator.calculate(builder, mBatteryStats, mMockClock.realtime, mMockClock.uptime,
                     query);
         }
 
