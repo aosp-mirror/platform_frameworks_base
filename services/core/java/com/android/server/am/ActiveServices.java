@@ -1934,6 +1934,28 @@ public final class ActiveServices {
                 if (smap != null) {
                     decActiveForegroundAppLocked(smap, r);
                 }
+
+                // Adjust notification handling before setting isForeground to false, because
+                // that state is relevant to the notification policy side.
+                // Leave the time-to-display as already set: re-entering foreground mode will
+                // only resume the previous quiet timeout, or will display immediately if the
+                // deferral period had already passed.
+                if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
+                    cancelForegroundNotificationLocked(r);
+                    r.foregroundId = 0;
+                    r.foregroundNoti = null;
+                } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
+                    // if it's been deferred, force to visibility
+                    if (!r.mFgsNotificationShown) {
+                        r.postNotification();
+                    }
+                    dropFgsNotificationStateLocked(r);
+                    if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
+                        r.foregroundId = 0;
+                        r.foregroundNoti = null;
+                    }
+                }
+
                 r.isForeground = false;
                 r.mFgsExitTime = SystemClock.uptimeMillis();
                 ServiceState stracker = r.getTracker();
@@ -1955,20 +1977,6 @@ public final class ActiveServices {
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);
                     updateServiceForegroundLocked(r.app.mServices, true);
-                }
-            }
-            // Leave the time-to-display as already set: re-entering foreground mode will
-            // only resume the previous quiet timeout, or will display immediately if the
-            // deferral period had already passed.
-            if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
-                cancelForegroundNotificationLocked(r);
-                r.foregroundId = 0;
-                r.foregroundNoti = null;
-            } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
-                dropFgsNotificationStateLocked(r);
-                if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
-                    r.foregroundId = 0;
-                    r.foregroundNoti = null;
                 }
             }
         }

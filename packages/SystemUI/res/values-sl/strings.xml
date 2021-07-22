@@ -437,8 +437,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo fotoaparata."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo fotoaparata ali mikrofona."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Naprava"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Za preklop aplikacij povlecite navzgor"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Povlecite v desno za hiter preklop med aplikacijami"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Vklop/izklop pregleda"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Baterija napolnjena"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Polnjenje"</string>
