@@ -299,7 +299,12 @@ public class ImsRcsManager {
             imsRcsController.getImsRcsRegistrationState(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> stateCallback.accept(result));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> stateCallback.accept(result));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             });
         } catch (RemoteException e) {
@@ -343,7 +348,12 @@ public class ImsRcsManager {
                     new IIntegerConsumer.Stub() {
                         @Override
                         public void accept(int result) {
-                            executor.execute(() -> transportTypeCallback.accept(result));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> transportTypeCallback.accept(result));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     });
         } catch (RemoteException e) {

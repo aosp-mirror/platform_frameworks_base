@@ -444,7 +444,12 @@ public class ImsMmTelManager implements RegistrationManager {
             iTelephony.getImsMmTelRegistrationState(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> stateCallback.accept(result));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> stateCallback.accept(result));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             });
         } catch (RemoteException e) {
@@ -485,7 +490,12 @@ public class ImsMmTelManager implements RegistrationManager {
                     new IIntegerConsumer.Stub() {
                         @Override
                         public void accept(int result) {
-                            executor.execute(() -> transportTypeCallback.accept(result));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> transportTypeCallback.accept(result));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     });
         } catch (RemoteException e) {
@@ -802,7 +812,12 @@ public class ImsMmTelManager implements RegistrationManager {
             iTelephony.isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> callback.accept(result == 1));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.accept(result == 1));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             }, capability, transportType);
         } catch (ServiceSpecificException sse) {
@@ -1348,7 +1363,12 @@ public class ImsMmTelManager implements RegistrationManager {
             iTelephony.getImsMmTelFeatureState(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> callback.accept(result));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.accept(result));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             });
         } catch (ServiceSpecificException sse) {

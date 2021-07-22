@@ -126,6 +126,35 @@ public class HdmiUtilsTest {
     }
 
     @Test
+    public void testEqualsDeviceConfig() {
+        String name = "Name";
+
+        CodecSad expectedCodec1 = new CodecSad(Constants.AUDIO_CODEC_LPCM, "011a03");
+        CodecSad expectedCodec2 = new CodecSad(Constants.AUDIO_CODEC_DD, "0d0506");
+        CodecSad expectedCodec3 = new CodecSad(Constants.AUDIO_CODEC_LPCM, "010203");
+        CodecSad expectedCodec4 = new CodecSad(Constants.AUDIO_CODEC_DD, "040506");
+
+        List<CodecSad> list1 = new ArrayList();
+        list1.add(expectedCodec1);
+        list1.add(expectedCodec2);
+        list1.add(expectedCodec3);
+
+        List<CodecSad> list1Duplicate = new ArrayList(list1);
+
+        List<CodecSad> list2 = new ArrayList(list1);
+        list2.add(expectedCodec4);
+
+        new EqualsTester()
+                .addEqualityGroup(
+                        new HdmiUtils.DeviceConfig(name, list1),
+                        new HdmiUtils.DeviceConfig(name, list1Duplicate))
+                .addEqualityGroup(new HdmiUtils.DeviceConfig(name, list2))
+                .addEqualityGroup(new HdmiUtils.DeviceConfig("my" + name, list1))
+                .addEqualityGroup(new HdmiUtils.DeviceConfig("my" + name, list2))
+                .testEquals();
+    }
+
+    @Test
     public void parseSampleXML() {
         List<DeviceConfig> config = new ArrayList<>();
         try {
