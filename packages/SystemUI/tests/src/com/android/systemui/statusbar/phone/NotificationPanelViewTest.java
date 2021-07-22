@@ -88,6 +88,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.communal.CommunalHostViewController;
+import com.android.systemui.communal.dagger.CommunalViewComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
@@ -246,6 +248,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
     @Mock
+    private CommunalViewComponent.Factory mCommunalViewComponentFactory;
+    @Mock
+    private CommunalViewComponent mCommunalViewComponent;
+    @Mock
+    private CommunalHostViewController mCommunalHostViewController;
+    @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
     private KeyguardStatusViewController mKeyguardStatusViewController;
@@ -389,6 +397,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusBarViewComponent);
         when(mKeyguardStatusBarViewComponent.getKeyguardStatusBarViewController())
                 .thenReturn(mKeyguardStatusBarViewController);
+        when(mCommunalViewComponentFactory.build(any()))
+                .thenReturn(mCommunalViewComponent);
+        when(mCommunalViewComponent.getCommunalHostViewController())
+                .thenReturn(mCommunalHostViewController);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_status_view), any(), anyBoolean()))
                 .thenReturn(mKeyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
@@ -416,6 +428,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardQsUserSwitchComponentFactory,
                 mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
+                mCommunalViewComponentFactory,
                 mLockscreenShadeTransitionController,
                 mQSDetailDisplayer,
                 mGroupManager,

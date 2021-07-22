@@ -31,6 +31,7 @@ import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.UdfpsHbmProvider;
 import com.android.systemui.classifier.FalsingModule;
+import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
@@ -97,6 +98,7 @@ import dagger.Provides;
             AppOpsModule.class,
             AssistModule.class,
             ClockModule.class,
+            CommunalModule.class,
             ControlsModule.class,
             DemoModeModule.class,
             FalsingModule.class,
