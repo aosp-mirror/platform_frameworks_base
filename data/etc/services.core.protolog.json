@@ -3139,6 +3139,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "1494644409": {
+      "message": "  Rejecting as detached: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "1495525537": {
       "message": "createWallpaperAnimations()",
       "level": "DEBUG",

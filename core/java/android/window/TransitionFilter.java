@@ -21,7 +21,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -140,6 +142,7 @@ public final class TransitionFilter implements Parcelable {
         public int mActivityType = ACTIVITY_TYPE_UNDEFINED;
         public int[] mModes = null;
         public @ContainerOrder int mOrder = CONTAINER_ORDER_ANY;
+        public ComponentName mTopActivity;
 
         public Requirement() {
         }
@@ -148,6 +151,7 @@ public final class TransitionFilter implements Parcelable {
             mActivityType = in.readInt();
             mModes = in.createIntArray();
             mOrder = in.readInt();
+            mTopActivity = in.readTypedObject(ComponentName.CREATOR);
         }
 
         /** Go through changes and find if at-least one change matches this filter */
@@ -167,6 +171,7 @@ public final class TransitionFilter implements Parcelable {
                         continue;
                     }
                 }
+                if (!matchesTopActivity(change.getTaskInfo())) continue;
                 if (mModes != null) {
                     boolean pass = false;
                     for (int m = 0; m < mModes.length; ++m) {
@@ -182,12 +187,20 @@ public final class TransitionFilter implements Parcelable {
             return false;
         }
 
+        private boolean matchesTopActivity(ActivityManager.RunningTaskInfo info) {
+            if (mTopActivity == null) return true;
+            if (info == null) return false;
+            final ComponentName component = info.topActivity;
+            return mTopActivity.equals(component);
+        }
+
         /** Check if the request matches this filter. It may generate false positives */
         boolean matches(@NonNull TransitionRequestInfo request) {
             // Can't check modes/order since the transition hasn't been built at this point.
             if (mActivityType == ACTIVITY_TYPE_UNDEFINED) return true;
             return request.getTriggerTask() != null
-                    && request.getTriggerTask().getActivityType() == mActivityType;
+                    && request.getTriggerTask().getActivityType() == mActivityType
+                    && matchesTopActivity(request.getTriggerTask());
         }
 
         @Override
@@ -196,6 +209,7 @@ public final class TransitionFilter implements Parcelable {
             dest.writeInt(mActivityType);
             dest.writeIntArray(mModes);
             dest.writeInt(mOrder);
+            dest.writeTypedObject(mTopActivity, flags);
         }
 
         @NonNull
@@ -230,6 +244,7 @@ public final class TransitionFilter implements Parcelable {
             }
             out.append("]").toString();
             out.append(" order=" + containerOrderToString(mOrder));
+            out.append(" topActivity=").append(mTopActivity);
             return out.toString();
         }
     }

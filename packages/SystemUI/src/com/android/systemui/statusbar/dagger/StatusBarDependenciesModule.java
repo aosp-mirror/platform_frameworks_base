@@ -27,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -253,4 +254,9 @@ public interface StatusBarDependenciesModule {
         ongoingCallController.init();
         return ongoingCallController;
     }
+
+    /** */
+    @Binds
+    QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
+            QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
 }

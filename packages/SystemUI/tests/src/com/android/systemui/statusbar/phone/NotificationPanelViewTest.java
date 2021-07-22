@@ -99,7 +99,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -265,8 +264,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private ScrimController mScrimController;
     @Mock
     private MediaDataManager mMediaDataManager;
-    @Mock
-    private FeatureFlags mFeatureFlags;
     @Mock
     private AmbientState mAmbientState;
     @Mock
@@ -434,7 +431,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mAmbientState,
                 mLockIconViewController,
-                mFeatureFlags,
                 mKeyguardMediaController,
                 mPrivacyDotViewController,
                 mTapAgainViewController,
@@ -560,7 +556,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testAllChildrenOfNotificationContainer_haveIds() {
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
         mNotificationContainerParent.removeAllViews();
         mNotificationContainerParent.addView(newViewWithId(1));
         mNotificationContainerParent.addView(newViewWithId(View.NO_ID));
@@ -573,7 +569,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testSinglePaneShadeLayout_isAlignedToParent() {
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        enableSplitShade(/* enabled= */ false);
 
         mNotificationPanelViewController.updateResources();
 
@@ -586,7 +582,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Test
     public void testKeyguardStatusViewInSplitShade_changesConstraintsDependingOnNotifications() {
         mStatusBarStateController.setState(KEYGUARD);
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         mNotificationPanelViewController.updateResources();
@@ -633,7 +629,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testSplitShadeLayout_isAlignedToGuideline() {
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
 
         mNotificationPanelViewController.updateResources();
 
@@ -645,7 +641,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testSinglePaneShadeLayout_childrenHaveConstantWidth() {
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        enableSplitShade(/* enabled= */ false);
 
         mNotificationPanelViewController.updateResources();
 
@@ -657,7 +653,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testSplitShadeLayout_childrenHaveZeroWidth() {
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
 
         mNotificationPanelViewController.updateResources();
 
@@ -669,7 +665,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     public void testOnDragDownEvent_horizontalTranslationIsZeroForSplitShade() {
         when(mNotificationStackScrollLayoutController.getWidth()).thenReturn(350f);
         when(mView.getWidth()).thenReturn(800);
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
 
         onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN,
                 200f /* x position */, 0f, 0));
@@ -703,7 +699,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Test
     public void testCanCollapsePanelOnTouch_falseInDualPaneShade() {
         mStatusBarStateController.setState(SHADE);
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
         mNotificationPanelViewController.setQsExpanded(true);
 
         assertThat(mNotificationPanelViewController.canCollapsePanelOnTouch()).isFalse();
@@ -773,7 +769,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Test
     public void testSwitchesToCorrectClockInSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         triggerPositionClockAndNotifications();
@@ -788,7 +784,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Test
     public void testDisplaysSmallClockOnLockscreenInSplitShadeWhenMediaIsPlaying() {
         mStatusBarStateController.setState(KEYGUARD);
-        enableSplitShade();
+        enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
 
         // one notification + media player visible
@@ -837,9 +833,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         return constraintSet.getConstraint(id).layout;
     }
 
-    private void enableSplitShade() {
-        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+    private void enableSplitShade(boolean enabled) {
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(enabled);
         mNotificationPanelViewController.updateResources();
     }
 

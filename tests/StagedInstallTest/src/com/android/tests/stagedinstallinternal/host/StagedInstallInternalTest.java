@@ -346,6 +346,49 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+        assumeTrue("Device does not support file-system checkpoint",
+                mHostUtils.isCheckpointSupported());
+
+        // Install something so that /data/apex/active is not empty
+        runPhase("testActiveApexIsRevertedOnCheckpointRollback_Prepare");
+        getDevice().reboot();
+
+        // Stage another session which will be installed during fs-rollback mode
+        runPhase("testActiveApexIsRevertedOnCheckpointRollback_Commit");
+
+        // Set checkpoint to 0 so that we enter fs-rollback mode immediately on reboot
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("vdc checkpoint startCheckpoint 0");
+        getDevice().disableAdbRoot();
+        getDevice().reboot();
+
+        // Verify that session was reverted and we have fallen back to
+        // apex installed during preparation stage.
+        runPhase("testActiveApexIsRevertedOnCheckpointRollback_VerifyPostReboot");
+    }
+
+    @Test
+    public void testApexIsNotActivatedIfNotInCheckpointMode() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+        assumeTrue("Device does not support file-system checkpoint",
+                mHostUtils.isCheckpointSupported());
+
+        runPhase("testApexIsNotActivatedIfNotInCheckpointMode_Commit");
+        // Delete checkpoint file in /metadata so that device thinks
+        // fs-checkpointing was never activated
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("rm /metadata/vold/checkpoint");
+        getDevice().disableAdbRoot();
+        getDevice().reboot();
+        // Verify that session was not installed when not in fs-checkpoint mode
+        runPhase("testApexIsNotActivatedIfNotInCheckpointMode_VerifyPostReboot");
+    }
+
+    @Test
     public void testRebootlessUpdates() throws Exception {
         pushTestApex("test.rebootless_apex_v1.apex");
         runPhase("testRebootlessUpdates");
