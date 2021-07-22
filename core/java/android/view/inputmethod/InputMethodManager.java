@@ -407,7 +407,7 @@ public final class InputMethodManager {
     /**
      * The InputConnection that was last retrieved from the served view.
      */
-    IInputConnectionWrapper mServedInputConnectionWrapper;
+    IInputConnectionWrapper mServedInputConnection;
     /**
      * The completions that were last provided by the served view.
      */
@@ -696,8 +696,8 @@ public final class InputMethodManager {
          */
         @Override
         public void finishComposingText() {
-            if (mServedInputConnectionWrapper != null) {
-                mServedInputConnectionWrapper.finishComposingText();
+            if (mServedInputConnection != null) {
+                mServedInputConnection.finishComposingText();
             }
         }
 
@@ -751,9 +751,9 @@ public final class InputMethodManager {
                     return false;
                 }
 
-                return mServedInputConnectionWrapper != null
-                        && mServedInputConnectionWrapper.isActive()
-                        && mServedInputConnectionWrapper.getServedView() == view;
+                return mServedInputConnection != null
+                        && mServedInputConnection.isActive()
+                        && mServedInputConnection.getServedView() == view;
             }
         }
     }
@@ -952,9 +952,8 @@ public final class InputMethodManager {
                     final boolean fullscreen = msg.arg1 != 0;
                     InputConnection ic = null;
                     synchronized (mH) {
-                        if (mFullscreenMode != fullscreen
-                                && mServedInputConnectionWrapper != null) {
-                            ic = mServedInputConnectionWrapper.getInputConnection();
+                        if (mFullscreenMode != fullscreen && mServedInputConnection != null) {
+                            ic = mServedInputConnection.getInputConnection();
                             mFullscreenMode = fullscreen;
                         }
                     }
@@ -1394,8 +1393,8 @@ public final class InputMethodManager {
     public boolean isAcceptingText() {
         checkFocus();
         synchronized (mH) {
-            return mServedInputConnectionWrapper != null
-                    && mServedInputConnectionWrapper.getInputConnection() != null;
+            return mServedInputConnection != null
+                    && mServedInputConnection.getInputConnection() != null;
         }
     }
 
@@ -1449,9 +1448,9 @@ public final class InputMethodManager {
      */
     void clearConnectionLocked() {
         mCurrentTextBoxAttribute = null;
-        if (mServedInputConnectionWrapper != null) {
-            mServedInputConnectionWrapper.deactivate();
-            mServedInputConnectionWrapper = null;
+        if (mServedInputConnection != null) {
+            mServedInputConnection.deactivate();
+            mServedInputConnection = null;
         }
     }
 
@@ -1947,11 +1946,11 @@ public final class InputMethodManager {
             mCurrentTextBoxAttribute = tba;
 
             mServedConnecting = false;
-            if (mServedInputConnectionWrapper != null) {
-                mServedInputConnectionWrapper.deactivate();
-                mServedInputConnectionWrapper = null;
+            if (mServedInputConnection != null) {
+                mServedInputConnection.deactivate();
+                mServedInputConnection = null;
             }
-            IInputConnectionWrapper servedContext;
+            IInputConnectionWrapper servedInputConnection;
             final int missingMethodFlags;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
@@ -1968,14 +1967,14 @@ public final class InputMethodManager {
                 } else {
                     icHandler = ic.getHandler();
                 }
-                servedContext = new IInputConnectionWrapper(
+                servedInputConnection = new IInputConnectionWrapper(
                         icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this, view);
             } else {
-                servedContext = null;
+                servedInputConnection = null;
                 missingMethodFlags = 0;
                 icHandler = null;
             }
-            mServedInputConnectionWrapper = servedContext;
+            mServedInputConnection = servedInputConnection;
 
             if (DEBUG) {
                 Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
@@ -1985,7 +1984,7 @@ public final class InputMethodManager {
             try {
                 res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
-                        softInputMode, windowFlags, tba, servedContext, missingMethodFlags,
+                        softInputMode, windowFlags, tba, servedInputConnection, missingMethodFlags,
                         view.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -3101,7 +3100,7 @@ public final class InputMethodManager {
         } else {
             p.println("  mCurrentTextBoxAttribute: null");
         }
-        p.println("  mServedInputConnectionWrapper=" + mServedInputConnectionWrapper);
+        p.println("  mServedInputConnection=" + mServedInputConnection);
         p.println("  mCompletions=" + Arrays.toString(mCompletions));
         p.println("  mCursorRect=" + mCursorRect);
         p.println("  mCursorSelStart=" + mCursorSelStart
@@ -3227,8 +3226,8 @@ public final class InputMethodManager {
             if (mImeInsetsConsumer != null) {
                 mImeInsetsConsumer.dumpDebug(proto, IME_INSETS_SOURCE_CONSUMER);
             }
-            if (mServedInputConnectionWrapper != null) {
-                mServedInputConnectionWrapper.dumpDebug(proto, INPUT_CONNECTION);
+            if (mServedInputConnection != null) {
+                mServedInputConnection.dumpDebug(proto, INPUT_CONNECTION);
             }
             if (icProto != null) {
                 proto.write(INPUT_CONNECTION_CALL, icProto);
