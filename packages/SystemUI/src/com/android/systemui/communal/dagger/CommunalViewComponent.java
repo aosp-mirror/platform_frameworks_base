@@ -16,13 +16,23 @@
 
 package com.android.systemui.communal.dagger;
 
-import dagger.Module;
+import com.android.systemui.communal.CommunalHostView;
+import com.android.systemui.communal.CommunalHostViewController;
+
+import dagger.BindsInstance;
+import dagger.Subcomponent;
 
 /**
- * Dagger Module providing Communal-related functionality.
+ * Subcomponent for working with {@link CommunalHostView}.
  */
-@Module(subcomponents = {
-        CommunalViewComponent.class,
-})
-public class CommunalModule {
+@Subcomponent
+public interface CommunalViewComponent {
+    /** Simple factory for {@link CommunalViewComponent}. */
+    @Subcomponent.Factory
+    interface Factory {
+        CommunalViewComponent build(@BindsInstance CommunalHostView view);
+    }
+
+    /** Builds a {@link CommunalHostViewController}. */
+    CommunalHostViewController getCommunalHostViewController();
 }
