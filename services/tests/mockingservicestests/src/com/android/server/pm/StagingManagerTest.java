@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,9 +29,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
 
+import android.apex.ApexInfo;
 import android.apex.ApexSessionInfo;
+import android.apex.ApexSessionParams;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller;
@@ -39,6 +41,7 @@ import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.os.SystemProperties;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
+import android.util.IntArray;
 import android.util.SparseArray;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -53,15 +56,19 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 @Presubmit
@@ -519,6 +526,174 @@ public class StagingManagerTest {
         assertThat(mStagingManager.getSessionIdByPackageName("com.bar")).isEqualTo(-1);
     }
 
+    @Test
+    public void getStagedApexInfos_validatePreConditions() throws Exception {
+        // Invalid session: null session
+        {
+            // Call and verify
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                    () -> mStagingManager.getStagedApexInfos(null));
+            assertThat(thrown).hasMessageThat().contains("Session is null");
+        }
+        // Invalid session: has parent
+        {
+            FakeStagedSession session = new FakeStagedSession(241);
+            session.setParentSessionId(239);
+            session.setSessionReady();
+            // Call and verify
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                    () -> mStagingManager.getStagedApexInfos(session));
+            assertThat(thrown).hasMessageThat().contains("241 session has parent");
+        }
+
+        // Invalid session: does not contain apex
+        {
+            FakeStagedSession session = new FakeStagedSession(241);
+            session.setSessionReady();
+            // Call and verify
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                    () -> mStagingManager.getStagedApexInfos(session));
+            assertThat(thrown).hasMessageThat().contains("241 session does not contain apex");
+        }
+        // Invalid session: not ready
+        {
+            FakeStagedSession session = new FakeStagedSession(239);
+            session.setIsApex(true);
+            // Call and verify
+            Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(session);
+            assertThat(result).isEmpty();
+        }
+        // Invalid session: destroyed
+        {
+            FakeStagedSession session = new FakeStagedSession(240);
+            session.setSessionReady();
+            session.setIsApex(true);
+            session.setDestroyed(true);
+            // Call and verify
+            Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(session);
+            assertThat(result).isEmpty();
+        }
+    }
+
+    private ApexInfo[] getFakeApexInfo(List<String> moduleNames) {
+        List<ApexInfo> result = new ArrayList<>();
+        for (String moduleName : moduleNames) {
+            ApexInfo info = new ApexInfo();
+            info.moduleName = moduleName;
+            result.add(info);
+        }
+        return result.toArray(new ApexInfo[0]);
+    }
+
+    @Test
+    public void getStagedApexInfos_nonParentSession() throws Exception {
+        FakeStagedSession validSession = new FakeStagedSession(239);
+        validSession.setIsApex(true);
+        validSession.setSessionReady();
+        ApexInfo[] fakeApexInfos = getFakeApexInfo(Arrays.asList("module1"));
+        when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
+
+        // Call and verify
+        Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(validSession);
+        assertThat(result).containsExactly(fakeApexInfos[0].moduleName, fakeApexInfos[0]);
+
+        ArgumentCaptor<ApexSessionParams> argumentCaptor =
+                ArgumentCaptor.forClass(ApexSessionParams.class);
+        verify(mApexManager, times(1)).getStagedApexInfos(argumentCaptor.capture());
+        ApexSessionParams params = argumentCaptor.getValue();
+        assertThat(params.sessionId).isEqualTo(239);
+    }
+
+    @Test
+    public void getStagedApexInfos_parentSession() throws Exception {
+        FakeStagedSession childSession1 = new FakeStagedSession(201);
+        childSession1.setIsApex(true);
+        FakeStagedSession childSession2 = new FakeStagedSession(202);
+        childSession2.setIsApex(true);
+        FakeStagedSession nonApexChild = new FakeStagedSession(203);
+        FakeStagedSession parentSession = new FakeStagedSession(239,
+                Arrays.asList(childSession1, childSession2, nonApexChild));
+        parentSession.setSessionReady();
+        ApexInfo[] fakeApexInfos = getFakeApexInfo(Arrays.asList("module1", "module2"));
+        when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
+
+        // Call and verify
+        Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(parentSession);
+        assertThat(result).containsExactly(fakeApexInfos[0].moduleName, fakeApexInfos[0],
+                fakeApexInfos[1].moduleName, fakeApexInfos[1]);
+
+        ArgumentCaptor<ApexSessionParams> argumentCaptor =
+                ArgumentCaptor.forClass(ApexSessionParams.class);
+        verify(mApexManager, times(1)).getStagedApexInfos(argumentCaptor.capture());
+        ApexSessionParams params = argumentCaptor.getValue();
+        assertThat(params.sessionId).isEqualTo(239);
+        assertThat(params.childSessionIds).asList().containsExactly(201, 202);
+    }
+
+    @Test
+    public void getStagedApexModuleNames_returnsStagedApexModules() throws Exception {
+        FakeStagedSession validSession1 = new FakeStagedSession(239);
+        validSession1.setIsApex(true);
+        validSession1.setSessionReady();
+        mStagingManager.createSession(validSession1);
+
+        FakeStagedSession childSession1 = new FakeStagedSession(123);
+        childSession1.setIsApex(true);
+        FakeStagedSession childSession2 = new FakeStagedSession(124);
+        childSession2.setIsApex(true);
+        FakeStagedSession nonApexChild = new FakeStagedSession(125);
+        FakeStagedSession parentSession = new FakeStagedSession(240,
+                Arrays.asList(childSession1, childSession2, nonApexChild));
+        parentSession.setSessionReady();
+        mStagingManager.createSession(parentSession);
+
+        // Make mApexManager return ApexInfo with same module name as the sessionId
+        // of the parameter that was passed into it
+        when(mApexManager.getStagedApexInfos(any())).thenAnswer(new Answer<ApexInfo[]>() {
+            @Override
+            public ApexInfo[] answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                ApexSessionParams params = (ApexSessionParams) args[0];
+                IntArray sessionsToProcess = new IntArray();
+                if (params.childSessionIds.length == 0) {
+                    sessionsToProcess.add(params.sessionId);
+                } else {
+                    sessionsToProcess.addAll(params.childSessionIds);
+                }
+                List<ApexInfo> result = new ArrayList<>();
+                for (int session : sessionsToProcess.toArray()) {
+                    ApexInfo info = new ApexInfo();
+                    info.moduleName = String.valueOf(session);
+                    result.add(info);
+                }
+                return result.toArray(new ApexInfo[0]);
+            }
+        });
+
+        List<String> result = mStagingManager.getStagedApexModuleNames();
+        assertThat(result).containsExactly("239", "123", "124");
+        verify(mApexManager, times(2)).getStagedApexInfos(any());
+    }
+
+    @Test
+    public void getStagedApexInfo() throws Exception {
+        FakeStagedSession validSession1 = new FakeStagedSession(239);
+        validSession1.setIsApex(true);
+        validSession1.setSessionReady();
+        mStagingManager.createSession(validSession1);
+        ApexInfo[] fakeApexInfos = getFakeApexInfo(Arrays.asList("module1"));
+        when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
+
+        // Verify null is returned if module name is not found
+        ApexInfo result = mStagingManager.getStagedApexInfo("not found");
+        assertThat(result).isNull();
+        verify(mApexManager, times(1)).getStagedApexInfos(any());
+        // Otherwise, the correct object is returned
+        result = mStagingManager.getStagedApexInfo("module1");
+        assertThat(result).isEqualTo(fakeApexInfos[0]);
+        verify(mApexManager, times(2)).getStagedApexInfos(any());
+    }
+
     private StagingManager.StagedSession createSession(int sessionId, String packageName,
             long committedMillis) {
         PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
@@ -582,10 +757,16 @@ public class StagingManagerTest {
         private String mPackageName;
         private boolean mIsAbandonded = false;
         private boolean mPreRebootVerificationStarted = false;
-        private final List<StagingManager.StagedSession> mChildSessions = new ArrayList<>();
+        private final List<StagingManager.StagedSession> mChildSessions;
 
         private FakeStagedSession(int sessionId) {
             mSessionId = sessionId;
+            mChildSessions = new ArrayList<>();
+        }
+
+        private FakeStagedSession(int sessionId, List<StagingManager.StagedSession> childSessions) {
+            mSessionId = sessionId;
+            mChildSessions = childSessions;
         }
 
         private void setParentSessionId(int parentSessionId) {
