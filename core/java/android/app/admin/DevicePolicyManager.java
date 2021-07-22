@@ -333,8 +333,12 @@ public class DevicePolicyManager {
      * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE} to be launched.
      * Only one {@link ComponentName} in the entire system should be enabled, and the rest of the
      * components are not started by this intent.
+     *
+     * @deprecated Starting from Android T, the system no longer launches an intent with this action
+     * when user provisioning completes.
      * @hide
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_STATE_USER_SETUP_COMPLETE =

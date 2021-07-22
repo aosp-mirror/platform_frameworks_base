@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateViewController;
 import com.android.systemui.util.ViewController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -80,6 +79,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private boolean mMicCameraIndicatorsEnabled;
     private boolean mLocationIndicatorsEnabled;
     private boolean mPrivacyChipLogged;
+    private final String mCameraSlot;
+    private final String mMicSlot;
+    private final String mLocationSlot;
 
     private SysuiColorExtractor mColorExtractor;
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
@@ -108,8 +110,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
 
         private void update() {
-            StatusIconContainer iconContainer = mView.requireViewById(R.id.statusIcons);
-            iconContainer.setIgnoredSlots(getIgnoredIconSlots());
+            updatePrivacyIconSlots();
             setChipVisibility(!mPrivacyChip.getPrivacyList().isEmpty());
         }
     };
@@ -165,7 +166,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mView.requireViewById(R.id.date_clock)
         );
 
-        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, mFeatureFlags);
+        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, featureFlags);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mColorExtractor = colorExtractor;
         mOnColorsChangedListener = (extractor, which) -> {
@@ -173,6 +174,10 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             mClockView.onColorsChanged(lightTheme);
         };
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
+
+        mCameraSlot = getResources().getString(com.android.internal.R.string.status_bar_camera);
+        mMicSlot = getResources().getString(com.android.internal.R.string.status_bar_microphone);
+        mLocationSlot = getResources().getString(com.android.internal.R.string.status_bar_location);
     }
 
     @Override
@@ -183,14 +188,30 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mLocationIndicatorsEnabled = mPrivacyItemController.getLocationAvailable();
 
         // Ignore privacy icons because they show in the space above QQS
-        mIconContainer.setIgnoredSlots(getIgnoredIconSlots());
+        updatePrivacyIconSlots();
         mIconContainer.setShouldRestrictIcons(false);
         mStatusBarIconController.addIconGroup(mIconManager);
 
         setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
 
-        mView.onAttach(mIconManager, mQSExpansionPathInterpolator,
-                mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
+        mView.setIsSingleCarrier(mQSCarrierGroupController.isSingleCarrier());
+        mQSCarrierGroupController
+                .setOnSingleCarrierChangedListener(mView::setIsSingleCarrier);
+
+        List<String> rssiIgnoredSlots;
+
+        if (mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+            rssiIgnoredSlots = List.of(
+                    getResources().getString(com.android.internal.R.string.status_bar_no_calling),
+                    getResources().getString(com.android.internal.R.string.status_bar_call_strength)
+            );
+        } else {
+            rssiIgnoredSlots = List.of(
+                    getResources().getString(com.android.internal.R.string.status_bar_mobile)
+            );
+        }
+
+        mView.onAttach(mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots);
 
         mDemoModeController.addCallback(mDemoModeReceiver);
 
@@ -203,6 +224,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mColorExtractor.removeOnColorsChangedListener(mOnColorsChangedListener);
         mPrivacyChip.setOnClickListener(null);
         mStatusBarIconController.removeIconGroup(mIconManager);
+        mQSCarrierGroupController.setOnSingleCarrierChangedListener(null);
         mDemoModeController.removeCallback(mDemoModeReceiver);
         setListening(false);
     }
@@ -250,21 +272,25 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mView.setChipVisibility(chipVisible);
     }
 
-    private List<String> getIgnoredIconSlots() {
-        ArrayList<String> ignored = new ArrayList<>();
+    private void updatePrivacyIconSlots() {
         if (getChipEnabled()) {
             if (mMicCameraIndicatorsEnabled) {
-                ignored.add(mView.getResources().getString(
-                        com.android.internal.R.string.status_bar_camera));
-                ignored.add(mView.getResources().getString(
-                        com.android.internal.R.string.status_bar_microphone));
+                mIconContainer.addIgnoredSlot(mCameraSlot);
+                mIconContainer.addIgnoredSlot(mMicSlot);
+            } else {
+                mIconContainer.removeIgnoredSlot(mCameraSlot);
+                mIconContainer.removeIgnoredSlot(mMicSlot);
             }
             if (mLocationIndicatorsEnabled) {
-                ignored.add(mView.getResources().getString(
-                        com.android.internal.R.string.status_bar_location));
+                mIconContainer.addIgnoredSlot(mLocationSlot);
+            } else {
+                mIconContainer.removeIgnoredSlot(mLocationSlot);
             }
+        } else {
+            mIconContainer.removeIgnoredSlot(mCameraSlot);
+            mIconContainer.removeIgnoredSlot(mMicSlot);
+            mIconContainer.removeIgnoredSlot(mLocationSlot);
         }
-        return ignored;
     }
 
     private boolean getChipEnabled() {

@@ -126,6 +126,7 @@ public class InternetDialog extends SystemUIDialog implements
     private int mListMaxHeight;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mIsProgressBarVisible;
+    private boolean mCanConfigMobileData;
 
     private final ViewTreeObserver.OnGlobalLayoutListener mInternetListLayoutListener = () -> {
         // Set max height for list
@@ -137,7 +138,7 @@ public class InternetDialog extends SystemUIDialog implements
     };
 
     public InternetDialog(Context context, InternetDialogFactory internetDialogFactory,
-            InternetDialogController internetDialogController,
+            InternetDialogController internetDialogController, boolean canConfigMobileData,
             boolean aboveStatusBar, UiEventLogger uiEventLogger, @Main Handler handler) {
         super(context, R.style.Theme_SystemUI_Dialog_Internet);
         if (DEBUG) {
@@ -151,6 +152,7 @@ public class InternetDialog extends SystemUIDialog implements
         mDefaultDataSubId = mInternetDialogController.getDefaultDataSubscriptionId();
         mTelephonyManager = mInternetDialogController.getTelephonyManager();
         mWifiManager = mInternetDialogController.getWifiManager();
+        mCanConfigMobileData = canConfigMobileData;
 
         mLayoutManager = new LinearLayoutManager(mContext) {
             @Override
@@ -317,8 +319,13 @@ public class InternetDialog extends SystemUIDialog implements
             mMobileDataToggle.setChecked(mInternetDialogController.isMobileDataEnabled());
             mMobileNetworkLayout.setVisibility(View.VISIBLE);
             mMobileTitleText.setText(getMobileNetworkTitle());
-            mMobileSummaryText.setText(
-                    Html.fromHtml(getMobileNetworkSummary(), Html.FROM_HTML_MODE_LEGACY));
+            if (!TextUtils.isEmpty(getMobileNetworkSummary())) {
+                mMobileSummaryText.setText(
+                        Html.fromHtml(getMobileNetworkSummary(), Html.FROM_HTML_MODE_LEGACY));
+                mMobileSummaryText.setVisibility(View.VISIBLE);
+            } else {
+                mMobileSummaryText.setVisibility(View.GONE);
+            }
             mSignalIcon.setImageDrawable(getSignalStrengthDrawable());
             int titleColor = isCellularNetwork ? mContext.getColor(
                     R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
@@ -329,6 +336,8 @@ public class InternetDialog extends SystemUIDialog implements
             mMobileTitleText.setTextColor(titleColor);
             mMobileSummaryText.setTextColor(summaryColor);
             mMobileNetworkLayout.setBackground(isCellularNetwork ? mBackgroundOn : null);
+
+            mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
         }
     }
 

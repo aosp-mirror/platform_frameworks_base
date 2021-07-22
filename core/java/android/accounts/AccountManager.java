@@ -27,6 +27,7 @@ import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -349,6 +350,7 @@ public class AccountManager {
 
     private static final class UserIdPackage
     {
+        @UserIdInt
         public int userId;
         public String packageName;
 
@@ -379,7 +381,8 @@ public class AccountManager {
     }
 
     PropertyInvalidatedCache<UserIdPackage, Account[]> mAccountsForUserCache =
-        new PropertyInvalidatedCache<UserIdPackage, Account[]>(CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
+                new PropertyInvalidatedCache<UserIdPackage, Account[]>(
+                CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
         @Override
         protected Account[] recompute(UserIdPackage userAndPackage) {
             try {
@@ -387,6 +390,10 @@ public class AccountManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+        @Override
+        protected boolean bypass(UserIdPackage query) {
+            return query.userId < 0;
         }
         @Override
         protected boolean debugCompareQueryResults(Account[] l, Account[] r) {

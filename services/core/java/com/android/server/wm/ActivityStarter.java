@@ -872,7 +872,7 @@ class ActivityStarter {
         ActivityRecord sourceRecord = null;
         ActivityRecord resultRecord = null;
         if (resultTo != null) {
-            sourceRecord = mRootWindowContainer.isInAnyTask(resultTo);
+            sourceRecord = ActivityRecord.isInAnyTask(resultTo);
             if (DEBUG_RESULTS) {
                 Slog.v(TAG_RESULTS, "Will send result to " + resultTo + " " + sourceRecord);
             }
@@ -1559,6 +1559,7 @@ class ActivityStarter {
             TaskFragment inTaskFragment, boolean restrictedBgActivity,
             NeededUriGrants intentGrants) {
         int result = START_CANCELED;
+        boolean startResultSuccessful = false;
         final Task startedActivityRootTask;
 
         // Create a transition now to record the original intent of actions taken within
@@ -1584,6 +1585,15 @@ class ActivityStarter {
             result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, inTaskFragment, restrictedBgActivity,
                     intentGrants);
+            startResultSuccessful = ActivityManager.isStartResultSuccessful(result);
+            final boolean taskAlwaysOnTop = options != null && options.getTaskAlwaysOnTop();
+            // Apply setAlwaysOnTop when starting an Activity is successful regardless of creating
+            // a new Activity or recycling the existing Activity.
+            if (taskAlwaysOnTop && startResultSuccessful) {
+                final Task targetRootTask =
+                        mTargetRootTask != null ? mTargetRootTask : mTargetTask.getRootTask();
+                targetRootTask.setAlwaysOnTop(true);
+            }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityRootTask = handleStartResult(r, result);
@@ -1591,7 +1601,7 @@ class ActivityStarter {
             mSupervisor.mUserLeaving = false;
 
             // Transition housekeeping
-            if (!ActivityManager.isStartResultSuccessful(result)) {
+            if (!startResultSuccessful) {
                 if (newTransition != null) {
                     newTransition.abort();
                 }
@@ -1755,11 +1765,6 @@ class ActivityStarter {
 
         if (!mAvoidMoveToFront && mDoResume) {
             mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-            if (mOptions != null) {
-                if (mOptions.getTaskAlwaysOnTop()) {
-                    mTargetRootTask.setAlwaysOnTop(true);
-                }
-            }
             if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.mInternal.isDreaming()) {
                 // Launching underneath dream activity (fullscreen, always-on-top). Run the launch-
                 // -behind transition so the Activity gets created and starts in visible state.

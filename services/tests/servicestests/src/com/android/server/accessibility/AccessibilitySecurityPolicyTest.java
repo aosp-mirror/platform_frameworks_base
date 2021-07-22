@@ -261,8 +261,8 @@ public class AccessibilitySecurityPolicyTest {
     @Test
     public void resolveValidReportedPackage_uidAndPkgNameMatched_returnPkgName()
             throws PackageManager.NameNotFoundException {
-        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(APP_UID);
+        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME,
+                PackageManager.MATCH_ANY_USER, TEST_USER_ID)).thenReturn(APP_UID);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
                 PACKAGE_NAME, APP_UID, TEST_USER_ID, APP_PID),

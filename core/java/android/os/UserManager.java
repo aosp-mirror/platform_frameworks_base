@@ -2491,6 +2491,10 @@ public class UserManager {
                         throw re.rethrowFromSystemServer();
                     }
                 }
+                @Override
+                protected boolean bypass(Integer query) {
+                    return query < 0;
+                }
             };
 
     // Uses IS_USER_UNLOCKED_PROPERTY for invalidation as the APIs have the same dependencies.
@@ -2504,6 +2508,10 @@ public class UserManager {
                     } catch (RemoteException re) {
                         throw re.rethrowFromSystemServer();
                     }
+                }
+                @Override
+                protected boolean bypass(Integer query) {
+                    return query < 0;
                 }
             };
 

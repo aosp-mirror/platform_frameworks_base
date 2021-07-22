@@ -89,7 +89,6 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
 
     @GuardedBy("mLock")
     @Nullable
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private InputConnection mInputConnection;
 
     private Looper mMainLooper;

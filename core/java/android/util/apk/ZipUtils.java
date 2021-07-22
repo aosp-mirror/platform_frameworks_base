@@ -63,7 +63,8 @@ abstract class ZipUtils {
         // exactly the remaining bytes in the buffer. The search is bounded because the maximum
         // size of the comment field is 65535 bytes because the field is an unsigned 16-bit number.
 
-        long fileSize = zip.length();
+        // TODO(b/193592496) RandomAccessFile#length
+        long fileSize = zip.getChannel().size();
         if (fileSize < ZIP_EOCD_REC_MIN_SIZE) {
             return null;
         }
@@ -110,7 +111,8 @@ abstract class ZipUtils {
             throw new IllegalArgumentException("maxCommentSize: " + maxCommentSize);
         }
 
-        long fileSize = zip.length();
+        // TODO(b/193592496) RandomAccessFile#length
+        long fileSize = zip.getChannel().size();
         if (fileSize < ZIP_EOCD_REC_MIN_SIZE) {
             // No space for EoCD record in the file.
             return null;

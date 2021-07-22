@@ -300,9 +300,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @VisibleForTesting
     public final class UidToRemove {
-        int startUid;
-        int endUid;
-        long mTimeAddedInQueueMs;
+        private final int mStartUid;
+        private final int mEndUid;
+        private final long mUidRemovalTimestamp;
 
         /** Remove just one UID */
         public UidToRemove(int uid, long timestamp) {
@@ -311,38 +311,18 @@ public class BatteryStatsImpl extends BatteryStats {
 
         /** Remove a range of UIDs, startUid must be smaller than endUid. */
         public UidToRemove(int startUid, int endUid, long timestamp) {
-            this.startUid = startUid;
-            this.endUid = endUid;
-            mTimeAddedInQueueMs = timestamp;
+            mStartUid = startUid;
+            mEndUid = endUid;
+            mUidRemovalTimestamp = timestamp;
         }
 
-        void remove() {
-            if (startUid == endUid) {
-                mCpuUidUserSysTimeReader.removeUid(startUid);
-                mCpuUidFreqTimeReader.removeUid(startUid);
-                if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-                    mCpuUidActiveTimeReader.removeUid(startUid);
-                    mCpuUidClusterTimeReader.removeUid(startUid);
-                }
-                if (mKernelSingleUidTimeReader != null) {
-                    mKernelSingleUidTimeReader.removeUid(startUid);
-                }
-                mNumUidsRemoved++;
-            } else if (startUid < endUid) {
-                mCpuUidFreqTimeReader.removeUidsInRange(startUid, endUid);
-                mCpuUidUserSysTimeReader.removeUidsInRange(startUid, endUid);
-                if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-                    mCpuUidActiveTimeReader.removeUidsInRange(startUid, endUid);
-                    mCpuUidClusterTimeReader.removeUidsInRange(startUid, endUid);
-                }
-                if (mKernelSingleUidTimeReader != null) {
-                    mKernelSingleUidTimeReader.removeUidsInRange(startUid, endUid);
-                }
-                // Treat as one. We don't know how many uids there are in between.
-                mNumUidsRemoved++;
-            } else {
-                Slog.w(TAG, "End UID " + endUid + " is smaller than start UID " + startUid);
-            }
+        public long getUidRemovalTimestamp() {
+            return mUidRemovalTimestamp;
+        }
+
+        @GuardedBy("BatteryStatsImpl.this")
+        void removeLocked() {
+            removeCpuStatsForUidRangeLocked(mStartUid, mEndUid);
         }
     }
 
@@ -526,11 +506,16 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void clearPendingRemovedUids() {
+    /**
+     * Removes kernel CPU stats for removed UIDs, in the order they were added to the
+     * mPendingRemovedUids queue.
+     */
+    @GuardedBy("this")
+    public void clearPendingRemovedUidsLocked() {
         long cutOffTimeMs = mClocks.elapsedRealtime() - mConstants.UID_REMOVE_DELAY_MS;
         while (!mPendingRemovedUids.isEmpty()
-                && mPendingRemovedUids.peek().mTimeAddedInQueueMs < cutOffTimeMs) {
-            mPendingRemovedUids.poll().remove();
+                && mPendingRemovedUids.peek().getUidRemovalTimestamp() < cutOffTimeMs) {
+            mPendingRemovedUids.poll().removeLocked();
         }
     }
 
@@ -694,6 +679,8 @@ public class BatteryStatsImpl extends BatteryStats {
         Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis);
         void cancelCpuSyncDueToWakelockChange();
         Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis);
+        /** Schedule removal of UIDs corresponding to a removed user */
+        Future<?> scheduleCleanupDueToRemovedUser(int userId);
     }
 
     public Handler mHandler;
@@ -14390,6 +14377,18 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void onUserRemovedLocked(int userId) {
+        if (mExternalSync != null) {
+            // Clear out the removed user's UIDs after a short delay. The delay is needed
+            // because at the point that this method is called, some activities are still
+            // being wrapped up by those UIDs
+            mExternalSync.scheduleCleanupDueToRemovedUser(userId);
+        }
+    }
+
+    /**
+     * Removes battery stats for UIDs corresponding to a removed user.
+     */
+    public void clearRemovedUserUidsLocked(int userId) {
         final int firstUidForUser = UserHandle.getUid(userId, 0);
         final int lastUidForUser = UserHandle.getUid(userId, UserHandle.PER_USER_RANGE - 1);
         mUidStats.put(firstUidForUser, null);
@@ -14403,6 +14402,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
         mUidStats.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
+        removeCpuStatsForUidRangeLocked(firstUidForUser, lastUidForUser);
     }
 
     /**
@@ -14423,6 +14423,39 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         mUidStats.remove(uid);
         mPendingRemovedUids.add(new UidToRemove(uid, elapsedRealtimeMs));
+    }
+
+    /**
+     * Removes the data for the deleted UIDs from the underlying kernel eBPF tables.
+     */
+    @GuardedBy("this")
+    private void removeCpuStatsForUidRangeLocked(int startUid, int endUid) {
+        if (startUid == endUid) {
+            mCpuUidUserSysTimeReader.removeUid(startUid);
+            mCpuUidFreqTimeReader.removeUid(startUid);
+            if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+                mCpuUidActiveTimeReader.removeUid(startUid);
+                mCpuUidClusterTimeReader.removeUid(startUid);
+            }
+            if (mKernelSingleUidTimeReader != null) {
+                mKernelSingleUidTimeReader.removeUid(startUid);
+            }
+            mNumUidsRemoved++;
+        } else if (startUid < endUid) {
+            mCpuUidFreqTimeReader.removeUidsInRange(startUid, endUid);
+            mCpuUidUserSysTimeReader.removeUidsInRange(startUid, endUid);
+            if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+                mCpuUidActiveTimeReader.removeUidsInRange(startUid, endUid);
+                mCpuUidClusterTimeReader.removeUidsInRange(startUid, endUid);
+            }
+            if (mKernelSingleUidTimeReader != null) {
+                mKernelSingleUidTimeReader.removeUidsInRange(startUid, endUid);
+            }
+            // Treat as one. We don't know how many uids there are in between.
+            mNumUidsRemoved++;
+        } else {
+            Slog.w(TAG, "End UID " + endUid + " is smaller than start UID " + startUid);
+        }
     }
 
     /**
@@ -14729,7 +14762,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         private void updateUidRemoveDelay(long newTimeMs) {
             UID_REMOVE_DELAY_MS = newTimeMs;
-            clearPendingRemovedUids();
+            clearPendingRemovedUidsLocked();
         }
 
         public void dumpLocked(PrintWriter pw) {

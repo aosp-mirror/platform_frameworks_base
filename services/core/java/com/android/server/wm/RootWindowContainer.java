@@ -1980,8 +1980,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
-        if (mTaskSupervisor.inActivityVisibilityUpdate()
-                || mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+        if (mTaskSupervisor.inActivityVisibilityUpdate()) {
             // Don't do recursive work.
             return;
         }
@@ -3437,14 +3436,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }, true /* traverseTopToBottom */);
     }
 
-    void cancelInitializingActivities() {
-        forAllRootTasks(task -> {
-            // We don't want to clear starting window for activities that aren't occluded
-            // as we need to display their starting window until they are done initializing.
-            task.forAllOccludedActivities(ActivityRecord::cancelInitializing);
-        });
-    }
-
     Task anyTaskForId(int id) {
         return anyTaskForId(id, MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE);
     }
@@ -3522,11 +3513,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         if (DEBUG_RECENTS) Slog.w(TAG_RECENTS, "Restored task id=" + id + " from in recents");
         return task;
-    }
-
-    ActivityRecord isInAnyTask(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null && r.isDescendantOf(this)) ? r : null;
     }
 
     @VisibleForTesting

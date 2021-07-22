@@ -4407,11 +4407,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // reader
             final AndroidPackage p = mPackages.get(packageName);
             if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
-                PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
-                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return -1;
+                final PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
+                if (ps != null && ps.getInstalled(userId)
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    return UserHandle.getUid(userId, p.getUid());
                 }
-                return UserHandle.getUid(userId, p.getUid());
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
@@ -8799,13 +8799,11 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
             if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
-                PackageSetting ps = getPackageSetting(p.getPackageName());
-                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return null;
+                final PackageSetting ps = getPackageSetting(p.getPackageName());
+                if (ps != null && ps.getInstalled(userId)
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
                 }
-                // TODO: Shouldn't this be checking for package installed state for userId and
-                // return null?
-                return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
@@ -12488,6 +12486,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         builder.append(" to access user ");
+        builder.append(userId);
         builder.append(".");
         return builder.toString();
     }
@@ -27126,6 +27125,18 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.filterAppAccess(uid, callingUid);
     }
 
+    private int[] getVisibilityAllowList(@NonNull String packageName, int userId) {
+        synchronized (mLock) {
+            final PackageSetting ps = getPackageSettingInternal(packageName, Process.SYSTEM_UID);
+            if (ps == null) {
+                return null;
+            }
+            final SparseArray<int[]> visibilityAllowList = mAppsFilter.getVisibilityAllowList(ps,
+                    new int[]{userId}, mSettings.getPackagesLocked());
+            return visibilityAllowList != null ? visibilityAllowList.get(userId) : null;
+        }
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
@@ -27211,6 +27222,11 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(int uid, int callingUid) {
             return PackageManagerService.this.filterAppAccess(uid, callingUid);
+        }
+
+        @Nullable
+        public int[] getVisibilityAllowList(@NonNull String packageName, int userId) {
+            return PackageManagerService.this.getVisibilityAllowList(packageName, userId);
         }
 
         @Override

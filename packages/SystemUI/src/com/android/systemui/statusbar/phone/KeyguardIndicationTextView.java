@@ -62,6 +62,14 @@ public class KeyguardIndicationTextView extends TextView {
     }
 
     /**
+     * Clears message queue.
+     */
+    public void clearMessages() {
+        mMessages.clear();
+        mKeyguardIndicationInfo.clear();
+    }
+
+    /**
      * Changes the text with an animation and makes sure a single indication is shown long enough.
      */
     public void switchIndication(int textResId) {

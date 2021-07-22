@@ -228,6 +228,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         int getIcon(WifiEntry ap);
         boolean connect(WifiEntry ap);
         boolean canConfigWifi();
+        boolean canConfigMobileData();
 
         public interface AccessPointCallback {
             void onAccessPointsChanged(List<WifiEntry> accessPoints);

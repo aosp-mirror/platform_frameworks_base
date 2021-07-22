@@ -16666,6 +16666,12 @@ public final class Settings {
              * @hide
              */
             public static final String SETUP_LOCALE = "setup_locale";
+
+            /**
+             * The version of oem setup present.
+             * @hide
+             */
+            public static final String OEM_SETUP_VERSION = "oem_setup_version";
         }
     }
 

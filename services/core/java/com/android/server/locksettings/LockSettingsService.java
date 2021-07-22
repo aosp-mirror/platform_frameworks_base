@@ -2485,6 +2485,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void removeUser(int userId, boolean unknownUser) {
         Slog.i(TAG, "RemoveUser: " + userId);
+        removeBiometricsForUser(userId);
         mSpManager.removeUser(userId);
         mStrongAuth.removeUser(userId);
 
