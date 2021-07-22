@@ -18836,12 +18836,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Reflect the rename in scanned details
             try {
-                parsedPackage.setCodePath(afterCodeFile.getCanonicalPath());
+                parsedPackage.setPath(afterCodeFile.getCanonicalPath());
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to get path: " + afterCodeFile, e);
                 return false;
             }
-            parsedPackage.setBaseCodePath(FileUtils.rewriteAfterRename(beforeCodeFile,
+            parsedPackage.setBaseApkPath(FileUtils.rewriteAfterRename(beforeCodeFile,
                     afterCodeFile, parsedPackage.getBaseApkPath()));
             parsedPackage.setSplitCodePaths(FileUtils.rewriteAfterRename(beforeCodeFile,
                     afterCodeFile, parsedPackage.getSplitCodePaths()));

@@ -30,7 +30,7 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 /** @hide **/
 public class ParsedService extends ParsedMainComponent {
 
-    int foregroundServiceType;
+    private int foregroundServiceType;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String permission;
@@ -39,6 +39,11 @@ public class ParsedService extends ParsedMainComponent {
         super(other);
         this.foregroundServiceType = other.foregroundServiceType;
         this.permission = other.permission;
+    }
+
+    public ParsedService setForegroundServiceType(int foregroundServiceType) {
+        this.foregroundServiceType = foregroundServiceType;
+        return this;
     }
 
     public ParsedMainComponent setPermission(String permission) {

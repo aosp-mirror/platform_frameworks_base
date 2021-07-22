@@ -36,18 +36,30 @@ public class ParsedInstrumentation extends ParsedComponent {
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String targetProcesses;
-    boolean handleProfiling;
-    boolean functionalTest;
+    private boolean handleProfiling;
+    private boolean functionalTest;
 
     public ParsedInstrumentation() {
     }
 
-    public void setTargetPackage(@Nullable String targetPackage) {
-        this.targetPackage = TextUtils.safeIntern(targetPackage);
+    public ParsedInstrumentation setFunctionalTest(boolean functionalTest) {
+        this.functionalTest = functionalTest;
+        return this;
     }
 
-    public void setTargetProcesses(@Nullable String targetProcesses) {
+    public ParsedInstrumentation setHandleProfiling(boolean handleProfiling) {
+        this.handleProfiling = handleProfiling;
+        return this;
+    }
+
+    public ParsedInstrumentation setTargetPackage(@Nullable String targetPackage) {
+        this.targetPackage = TextUtils.safeIntern(targetPackage);
+        return this;
+    }
+
+    public ParsedInstrumentation setTargetProcesses(@Nullable String targetProcesses) {
         this.targetProcesses = TextUtils.safeIntern(targetProcesses);
+        return this;
     }
 
     public String toString() {

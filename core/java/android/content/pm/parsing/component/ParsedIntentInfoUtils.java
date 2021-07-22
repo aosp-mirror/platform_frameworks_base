@@ -60,19 +60,20 @@ public class ParsedIntentInfoUtils {
 
             TypedValue v = sa.peekValue(R.styleable.AndroidManifestIntentFilter_label);
             if (v != null) {
-                intentInfo.labelRes = v.resourceId;
+                intentInfo.setLabelRes(v.resourceId);
                 if (v.resourceId == 0) {
-                    intentInfo.nonLocalizedLabel = v.coerceToString();
+                    intentInfo.setNonLocalizedLabel(v.coerceToString());
                 }
             }
 
             if (ParsingPackageUtils.sUseRoundIcon) {
-                intentInfo.icon = sa.getResourceId(
-                        R.styleable.AndroidManifestIntentFilter_roundIcon, 0);
+                intentInfo.setIcon(sa.getResourceId(
+                        R.styleable.AndroidManifestIntentFilter_roundIcon, 0));
             }
 
-            if (intentInfo.icon == 0) {
-                intentInfo.icon = sa.getResourceId(R.styleable.AndroidManifestIntentFilter_icon, 0);
+            if (intentInfo.getIcon() == 0) {
+                intentInfo.setIcon(
+                        sa.getResourceId(R.styleable.AndroidManifestIntentFilter_icon, 0));
             }
 
             if (allowAutoVerify) {
@@ -140,7 +141,7 @@ public class ParsedIntentInfoUtils {
             }
         }
 
-        intentInfo.hasDefault = intentInfo.hasCategory(Intent.CATEGORY_DEFAULT);
+        intentInfo.setHasDefault(intentInfo.hasCategory(Intent.CATEGORY_DEFAULT));
 
         if (DEBUG) {
             final StringBuilder cats = new StringBuilder("Intent d=");

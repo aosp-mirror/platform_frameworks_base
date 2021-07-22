@@ -152,7 +152,7 @@ public class ComponentParseUtils {
     @Nullable
     public static CharSequence getNonLocalizedLabel(
             ParsedComponent component) {
-        return component.nonLocalizedLabel;
+        return component.getNonLocalizedLabel();
     }
 
     /**
@@ -161,7 +161,7 @@ public class ComponentParseUtils {
      * This is a method of the utility class to discourage use.
      */
     public static int getIcon(ParsedComponent component) {
-        return component.icon;
+        return component.getIcon();
     }
 
     public static boolean isMatch(PackageUserState state, boolean isSystem,

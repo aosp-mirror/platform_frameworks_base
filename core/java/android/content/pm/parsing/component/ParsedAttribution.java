@@ -34,7 +34,7 @@ import java.util.List;
  *
  * @hide
  */
-@DataClass(genAidl = false)
+@DataClass(genAidl = false, genSetters = true, genBuilder = false)
 public class ParsedAttribution implements Parcelable {
     /** Maximum length of attribution tag */
     public static final int MAX_ATTRIBUTION_TAG_LEN = 50;
@@ -43,13 +43,15 @@ public class ParsedAttribution implements Parcelable {
     private static final int MAX_NUM_ATTRIBUTIONS = 10000;
 
     /** Tag of the attribution */
-    public final @NonNull String tag;
+    private @NonNull String tag;
 
     /** User visible label fo the attribution */
-    public final @StringRes int label;
+    private @StringRes int label;
 
     /** Ids of previously declared attributions this attribution inherits from */
-    public final @NonNull List<String> inheritFrom;
+    private @NonNull List<String> inheritFrom;
+
+    public ParsedAttribution() {}
 
     /**
      * @return Is this set of attributions a valid combination for a single package?
@@ -160,6 +162,63 @@ public class ParsedAttribution implements Parcelable {
         // onConstructed(); // You can define this method to get a callback
     }
 
+    /**
+     * Tag of the attribution
+     */
+    @DataClass.Generated.Member
+    public @NonNull String getTag() {
+        return tag;
+    }
+
+    /**
+     * User visible label fo the attribution
+     */
+    @DataClass.Generated.Member
+    public @StringRes int getLabel() {
+        return label;
+    }
+
+    /**
+     * Ids of previously declared attributions this attribution inherits from
+     */
+    @DataClass.Generated.Member
+    public @NonNull List<String> getInheritFrom() {
+        return inheritFrom;
+    }
+
+    /**
+     * Tag of the attribution
+     */
+    @DataClass.Generated.Member
+    public @NonNull ParsedAttribution setTag(@NonNull String value) {
+        tag = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, tag);
+        return this;
+    }
+
+    /**
+     * User visible label fo the attribution
+     */
+    @DataClass.Generated.Member
+    public @NonNull ParsedAttribution setLabel(@StringRes int value) {
+        label = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                StringRes.class, null, label);
+        return this;
+    }
+
+    /**
+     * Ids of previously declared attributions this attribution inherits from
+     */
+    @DataClass.Generated.Member
+    public @NonNull ParsedAttribution setInheritFrom(@NonNull List<String> value) {
+        inheritFrom = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, inheritFrom);
+        return this;
+    }
+
     @Override
     @DataClass.Generated.Member
     public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -215,10 +274,10 @@ public class ParsedAttribution implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1618351459610L,
+            time = 1624050667337L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedAttribution.java",
-            inputSignatures = "public static final  int MAX_ATTRIBUTION_TAG_LEN\nprivate static final  int MAX_NUM_ATTRIBUTIONS\npublic final @android.annotation.NonNull java.lang.String tag\npublic final @android.annotation.StringRes int label\npublic final @android.annotation.NonNull java.util.List<java.lang.String> inheritFrom\npublic static  boolean isCombinationValid(java.util.List<android.content.pm.parsing.component.ParsedAttribution>)\nclass ParsedAttribution extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=false)")
+            inputSignatures = "public static final  int MAX_ATTRIBUTION_TAG_LEN\nprivate static final  int MAX_NUM_ATTRIBUTIONS\nprivate @android.annotation.NonNull java.lang.String tag\nprivate @android.annotation.StringRes int label\nprivate @android.annotation.NonNull java.util.List<java.lang.String> inheritFrom\npublic static  boolean isCombinationValid(java.util.List<android.content.pm.parsing.component.ParsedAttribution>)\nclass ParsedAttribution extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=false, genSetters=true, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

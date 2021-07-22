@@ -38,8 +38,8 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 /** @hide **/
 public class ParsedActivity extends ParsedMainComponent {
 
-    int theme;
-    int uiOptions;
+    private int theme;
+    private int uiOptions;
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -49,22 +49,22 @@ public class ParsedActivity extends ParsedMainComponent {
     @DataClass.ParcelWith(ForInternedString.class)
     private String parentActivityName;
     @Nullable
-    String taskAffinity;
-    int privateFlags;
+    private String taskAffinity;
+    private int privateFlags;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String permission;
 
-    int launchMode;
-    int documentLaunchMode;
-    int maxRecents;
-    int configChanges;
-    int softInputMode;
-    int persistableMode;
-    int lockTaskLaunchMode;
+    private int launchMode;
+    private int documentLaunchMode;
+    private int maxRecents;
+    private int configChanges;
+    private int softInputMode;
+    private int persistableMode;
+    private int lockTaskLaunchMode;
 
-    int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-    int resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+    private int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    private int resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
     @Nullable
     private Float maxAspectRatio;
@@ -75,12 +75,12 @@ public class ParsedActivity extends ParsedMainComponent {
     private boolean supportsSizeChanges;
 
     @Nullable
-    String requestedVrComponent;
-    int rotationAnimation = -1;
-    int colorMode;
+    private String requestedVrComponent;
+    private int rotationAnimation = -1;
+    private int colorMode;
 
     @Nullable
-    ActivityInfo.WindowLayout windowLayout;
+    private ActivityInfo.WindowLayout windowLayout;
 
     public ParsedActivity(ParsedActivity other) {
         super(other);
@@ -188,6 +188,35 @@ public class ParsedActivity extends ParsedMainComponent {
 //        alias.metaData = target.metaData;
     }
 
+    public boolean isSupportsSizeChanges() {
+        return supportsSizeChanges;
+    }
+
+    public ParsedActivity setColorMode(int colorMode) {
+        this.colorMode = colorMode;
+        return this;
+    }
+
+    public ParsedActivity setConfigChanges(int configChanges) {
+        this.configChanges = configChanges;
+        return this;
+    }
+
+    public ParsedActivity setDocumentLaunchMode(int documentLaunchMode) {
+        this.documentLaunchMode = documentLaunchMode;
+        return this;
+    }
+
+    public ParsedActivity setLaunchMode(int launchMode) {
+        this.launchMode = launchMode;
+        return this;
+    }
+
+    public ParsedActivity setLockTaskLaunchMode(int lockTaskLaunchMode) {
+        this.lockTaskLaunchMode = lockTaskLaunchMode;
+        return this;
+    }
+
     public ParsedActivity setMaxAspectRatio(int resizeMode, float maxAspectRatio) {
         if (resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE
                 || resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
@@ -201,6 +230,16 @@ public class ParsedActivity extends ParsedMainComponent {
         }
 
         this.maxAspectRatio = maxAspectRatio;
+        return this;
+    }
+
+    public ParsedActivity setMaxAspectRatio(Float maxAspectRatio) {
+        this.maxAspectRatio = maxAspectRatio;
+        return this;
+    }
+
+    public ParsedActivity setMaxRecents(int maxRecents) {
+        this.maxRecents = maxRecents;
         return this;
     }
 
@@ -220,13 +259,48 @@ public class ParsedActivity extends ParsedMainComponent {
         return this;
     }
 
-    public ParsedActivity setSupportsSizeChanges(boolean supportsSizeChanges) {
-        this.supportsSizeChanges = supportsSizeChanges;
+    public ParsedActivity setMinAspectRatio(Float minAspectRatio) {
+        this.minAspectRatio = minAspectRatio;
         return this;
     }
 
-    public ParsedActivity setFlags(int flags) {
-        this.flags = flags;
+    public ParsedActivity setParentActivityName(String parentActivityName) {
+        this.parentActivityName = parentActivityName;
+        return this;
+    }
+
+    public ParsedActivity setPersistableMode(int persistableMode) {
+        this.persistableMode = persistableMode;
+        return this;
+    }
+
+    public ParsedActivity setPrivateFlags(int privateFlags) {
+        this.privateFlags = privateFlags;
+        return this;
+    }
+
+    public ParsedActivity setRequestedVrComponent(String requestedVrComponent) {
+        this.requestedVrComponent = requestedVrComponent;
+        return this;
+    }
+
+    public ParsedActivity setRotationAnimation(int rotationAnimation) {
+        this.rotationAnimation = rotationAnimation;
+        return this;
+    }
+
+    public ParsedActivity setScreenOrientation(int screenOrientation) {
+        this.screenOrientation = screenOrientation;
+        return this;
+    }
+
+    public ParsedActivity setSoftInputMode(int softInputMode) {
+        this.softInputMode = softInputMode;
+        return this;
+    }
+
+    public ParsedActivity setSupportsSizeChanges(boolean supportsSizeChanges) {
+        this.supportsSizeChanges = supportsSizeChanges;
         return this;
     }
 
@@ -240,14 +314,29 @@ public class ParsedActivity extends ParsedMainComponent {
         return this;
     }
 
-    public ParsedActivity setParentActivity(String parentActivity) {
-        this.parentActivityName = TextUtils.safeIntern(parentActivity);
-        return this;
-    }
-
     public ParsedActivity setPermission(String permission) {
         // Empty string must be converted to null
         this.permission = TextUtils.isEmpty(permission) ? null : permission.intern();
+        return this;
+    }
+
+    public ParsedActivity setTaskAffinity(String taskAffinity) {
+        this.taskAffinity = taskAffinity;
+        return this;
+    }
+
+    public ParsedActivity setTheme(int theme) {
+        this.theme = theme;
+        return this;
+    }
+
+    public ParsedActivity setUiOptions(int uiOptions) {
+        this.uiOptions = uiOptions;
+        return this;
+    }
+
+    public ParsedActivity setWindowLayout(ActivityInfo.WindowLayout windowLayout) {
+        this.windowLayout = windowLayout;
         return this;
     }
 
