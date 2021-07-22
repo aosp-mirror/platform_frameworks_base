@@ -74,7 +74,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
     private final IFaceService mService;
     private final Context mContext;
-    private IBinder mToken = new Binder();
+    private final IBinder mToken = new Binder();
     @Nullable private AuthenticationCallback mAuthenticationCallback;
     @Nullable private FaceDetectionCallback mFaceDetectionCallback;
     @Nullable private EnrollmentCallback mEnrollmentCallback;
@@ -86,7 +86,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private Face mRemovalFace;
     private Handler mHandler;
 
-    private IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
+    private final IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
 
         @Override // binder call
         public void onEnrollResult(Face face, int remaining) {
@@ -293,7 +293,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
     /**
      * Defaults to {@link FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback,
-     * int[], Surface)} with {@code surface} set to null.
+     * int[], Surface)} with {@code previewSurface} set to null.
      *
      * @see FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback, int[], Surface)
      * @hide
@@ -301,8 +301,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
-        enroll(userId, hardwareAuthToken, cancel, callback, disabledFeatures, null /* surface */,
-                false /* debugConsent */);
+        enroll(userId, hardwareAuthToken, cancel, callback, disabledFeatures,
+                null /* previewSurface */, false /* debugConsent */);
     }
 
     /**
@@ -319,14 +319,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @param cancel            an object that can be used to cancel enrollment
      * @param userId            the user to whom this face will belong to
      * @param callback          an object to receive enrollment events
-     * @param surface           optional camera preview surface for a single-camera device.
+     * @param previewSurface    optional camera preview surface for a single-camera device.
      *                          Must be null if not used.
      * @param debugConsent      a feature flag that the user has consented to debug.
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
-            EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface surface,
+            EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface previewSurface,
             boolean debugConsent) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
@@ -346,7 +346,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
                 mService.enroll(userId, mToken, hardwareAuthToken, mServiceReceiver,
-                        mContext.getOpPackageName(), disabledFeatures, surface, debugConsent);
+                        mContext.getOpPackageName(), disabledFeatures, previewSurface,
+                        debugConsent);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
@@ -853,10 +854,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     public static class AuthenticationResult {
-        private Face mFace;
-        private CryptoObject mCryptoObject;
-        private int mUserId;
-        private boolean mIsStrongBiometric;
+        private final Face mFace;
+        private final CryptoObject mCryptoObject;
+        private final int mUserId;
+        private final boolean mIsStrongBiometric;
 
         /**
          * Authentication result
@@ -1127,7 +1128,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     private class OnAuthenticationCancelListener implements OnCancelListener {
-        private CryptoObject mCrypto;
+        private final CryptoObject mCrypto;
 
         OnAuthenticationCancelListener(CryptoObject crypto) {
             mCrypto = crypto;

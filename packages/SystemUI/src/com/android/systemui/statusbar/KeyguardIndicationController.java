@@ -94,7 +94,7 @@ import javax.inject.Inject;
  * Controls the indications and error messages shown on the Keyguard
  */
 @SysUISingleton
-public class KeyguardIndicationController implements KeyguardStateController.Callback {
+public class KeyguardIndicationController {
 
     private static final String TAG = "KeyguardIndication";
     private static final boolean DEBUG_CHARGING_SPEED = false;
@@ -206,7 +206,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
         mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mKeyguardStateController.addCallback(this);
+        mKeyguardStateController.addCallback(mKeyguardStateCallback);
 
         mStatusBarStateListener.onDozingChanged(mStatusBarStateController.isDozing());
     }
@@ -827,11 +827,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         mRotateTextViewController.dump(fd, pw, args);
     }
 
-    @Override
-    public void onUnlockedChanged() {
-        updateIndication(false);
-    }
-
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
         public static final int HIDE_DELAY_MS = 5000;
 
@@ -890,10 +885,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
-                if (biometricSourceType == BiometricSourceType.FACE
-                        && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                    // suggest trying fingerprint
-                    showTransientIndication(R.string.keyguard_try_fingerprint);
+                if (biometricSourceType == BiometricSourceType.FACE && shouldSuppressFaceMsg()) {
                     return;
                 }
                 showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
@@ -911,11 +903,9 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 return;
             }
             if (biometricSourceType == BiometricSourceType.FACE
-                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
+                    && shouldSuppressFaceMsg()
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()
                     && mKeyguardUpdateMonitor.isScreenOn()) {
-                // suggest trying fingerprint
-                showTransientIndication(R.string.keyguard_try_fingerprint);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -966,11 +956,9 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
         }
 
-        private boolean shouldSuppressFaceMsgAndShowTryFingerprintMsg() {
-            // For dual biometric, don't show face auth messages unless face auth was explicitly
-            // requested by the user.
+        private boolean shouldSuppressFaceMsg() {
+            // For dual biometric, don't show face auth messages
             return mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
-                && !mKeyguardUpdateMonitor.isFaceAuthUserRequested()
                 && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
                     true /* isStrongBiometric */);
         }
@@ -1066,6 +1054,22 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 hideTransientIndication();
             }
             updateIndication(false);
+        }
+    };
+
+    private KeyguardStateController.Callback mKeyguardStateCallback =
+            new KeyguardStateController.Callback() {
+        @Override
+        public void onUnlockedChanged() {
+            updateIndication(false);
+        }
+
+        @Override
+        public void onKeyguardShowingChanged() {
+            if (!mKeyguardStateController.isShowing()) {
+                mTopIndicationView.clearMessages();
+                mLockScreenIndicationView.clearMessages();
+            }
         }
     };
 }

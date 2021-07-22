@@ -18,7 +18,6 @@ package com.android.server.appsearch;
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
 import static android.os.Process.INVALID_UID;
 
-import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
@@ -1354,43 +1353,26 @@ public class AppSearchManagerService extends SystemService {
     /**
      * Helper for dealing with incoming user arguments to system service calls.
      *
-     * <p>Takes care of checking permissions and converting USER_CURRENT to the actual current user.
-     *
      * @param requestedUser The user which the caller is requesting to execute as.
      * @param callingUid The actual uid of the caller as determined by Binder.
      * @return the user handle that the call should run as. Will always be a concrete user.
      */
     @NonNull
     private UserHandle handleIncomingUser(@NonNull UserHandle requestedUser, int callingUid) {
-        int callingPid = Binder.getCallingPid();
         UserHandle callingUser = UserHandle.getUserHandleForUid(callingUid);
         if (callingUser.equals(requestedUser)) {
             return requestedUser;
         }
+
         // Duplicates UserController#ensureNotSpecialUser
         if (requestedUser.getIdentifier() < 0) {
             throw new IllegalArgumentException(
                     "Call does not support special user " + requestedUser);
         }
-        boolean canInteractAcrossUsers = mContext.checkPermission(
-                Manifest.permission.INTERACT_ACROSS_USERS,
-                callingPid,
-                callingUid) == PackageManager.PERMISSION_GRANTED;
-        if (!canInteractAcrossUsers) {
-            canInteractAcrossUsers = mContext.checkPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    callingPid,
-                    callingUid) == PackageManager.PERMISSION_GRANTED;
-        }
-        if (canInteractAcrossUsers) {
-            return requestedUser;
-        }
+
         throw new SecurityException(
-                "Permission denied while calling from uid " + callingUid
-                        + " with " + requestedUser + "; Need to run as either the calling user ("
-                        + callingUser + "), or with one of the following permissions: "
-                        + Manifest.permission.INTERACT_ACROSS_USERS + " or "
-                        + Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+                "Requested user, " + requestedUser + ", is not the same as the calling user, "
+                        + callingUser + ".");
     }
 
     /**
