@@ -126,6 +126,7 @@ public class AuthContainerView extends LinearLayout
         boolean mCredentialAllowed;
         boolean mSkipIntro;
         long mOperationId;
+        long mRequestId;
         @BiometricMultiSensorMode int mMultiSensorConfig;
     }
 
@@ -169,6 +170,12 @@ public class AuthContainerView extends LinearLayout
 
         public Builder setOperationId(long operationId) {
             mConfig.mOperationId = operationId;
+            return this;
+        }
+
+        /** Unique id for this request. */
+        public Builder setRequestId(long requestId) {
+            mConfig.mRequestId = requestId;
             return this;
         }
 

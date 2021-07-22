@@ -74,6 +74,7 @@ import java.util.function.Consumer;
 public class AuthSessionTest {
 
     private static final String TEST_PACKAGE = "test_package";
+    private static final long TEST_REQUEST_ID = 22;
 
     @Mock private Context mContext;
     @Mock private ITrustManager mTrustManager;
@@ -112,6 +113,7 @@ public class AuthSessionTest {
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
                 0 /* operationId */,
                 0 /* userId */);
 
@@ -133,6 +135,7 @@ public class AuthSessionTest {
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
                 operationId,
                 userId);
         assertEquals(mSensors.size(), session.mPreAuthInfo.eligibleSensors.size());
@@ -153,6 +156,7 @@ public class AuthSessionTest {
                     eq(userId),
                     eq(mSensorReceiver),
                     eq(TEST_PACKAGE),
+                    eq(TEST_REQUEST_ID),
                     eq(sensor.getCookie()),
                     anyBoolean() /* allowBackgroundAuthentication */);
         }
@@ -193,6 +197,7 @@ public class AuthSessionTest {
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
                 44 /* operationId */,
                 2 /* userId */);
 
@@ -238,6 +243,7 @@ public class AuthSessionTest {
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
                 operationId,
                 userId);
         assertEquals(mSensors.size(), session.mPreAuthInfo.eligibleSensors.size());
@@ -264,7 +270,7 @@ public class AuthSessionTest {
         // fingerprint sensor does not start even if all cookies are received
         assertEquals(STATE_AUTH_STARTED, session.getState());
         verify(mStatusBarService).showAuthenticationDialog(any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyInt(), any(), anyLong(), anyInt());
+                anyBoolean(), anyBoolean(), anyInt(), anyLong(), any(), anyLong(), anyInt());
 
         // Notify AuthSession that the UI is shown. Then, fingerprint sensor should be started.
         session.onDialogAnimatedIn();
@@ -303,6 +309,7 @@ public class AuthSessionTest {
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
                 0 /* operationId */,
                 0 /* userId */);
 
@@ -311,7 +318,8 @@ public class AuthSessionTest {
 
         sessionConsumer.accept(session);
 
-        verify(faceAuthenticator).cancelAuthenticationFromService(eq(mToken), eq(TEST_PACKAGE));
+        verify(faceAuthenticator).cancelAuthenticationFromService(
+                eq(mToken), eq(TEST_PACKAGE), eq(TEST_REQUEST_ID));
     }
 
     private PreAuthInfo createPreAuthInfo(List<BiometricSensor> sensors, int userId,
@@ -328,14 +336,14 @@ public class AuthSessionTest {
 
     private AuthSession createAuthSession(List<BiometricSensor> sensors,
             boolean checkDevicePolicyManager, @Authenticators.Types int authenticators,
-            long operationId, int userId) throws RemoteException {
+            long requestId, long operationId, int userId) throws RemoteException {
 
         final PromptInfo promptInfo = createPromptInfo(authenticators);
 
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
         return new AuthSession(mContext, mStatusBarService, mSysuiReceiver, mKeyStore,
-                mRandom, mClientDeathReceiver, preAuthInfo, mToken, operationId, userId,
+                mRandom, mClientDeathReceiver, preAuthInfo, mToken, requestId, operationId, userId,
                 mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo,
                 false /* debugEnabled */, mFingerprintSensorProps);
     }
