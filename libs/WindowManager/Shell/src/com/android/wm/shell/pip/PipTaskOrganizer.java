@@ -1383,11 +1383,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
         animator.setDuration(mCrossFadeAnimationDuration);
         animator.addUpdateListener(animation -> {
-            final float alpha = (float) animation.getAnimatedValue();
-            final SurfaceControl.Transaction transaction =
-                    mSurfaceControlTransactionFactory.getTransaction();
-            transaction.setAlpha(surface, alpha);
-            transaction.apply();
+            if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+                // Could happen if onTaskVanished happens during the animation since we may have
+                // set a start delay on this animation.
+                Log.d(TAG, "Task vanished, skip fadeOutAndRemoveOverlay");
+                animation.removeAllListeners();
+                animation.removeAllUpdateListeners();
+                animation.cancel();
+            } else {
+                final float alpha = (float) animation.getAnimatedValue();
+                final SurfaceControl.Transaction transaction =
+                        mSurfaceControlTransactionFactory.getTransaction();
+                transaction.setAlpha(surface, alpha);
+                transaction.apply();
+            }
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1400,6 +1409,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void removeContentOverlay(SurfaceControl surface, Runnable callback) {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+            // Avoid double removal, which is fatal.
+            return;
+        }
         final SurfaceControl.Transaction tx =
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.remove(surface);
