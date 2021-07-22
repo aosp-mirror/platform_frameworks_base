@@ -72,7 +72,10 @@ import javax.inject.Inject;
  */
 @StatusBarComponent.StatusBarScope
 public class LockIconViewController extends ViewController<LockIconView> implements Dumpable {
-
+    private static final float sDefaultDensity =
+            (float) DisplayMetrics.DENSITY_DEVICE_STABLE / (float) DisplayMetrics.DENSITY_DEFAULT;
+    private static final int sLockIconRadiusPx = (int) (sDefaultDensity * 36);
+    private static final float sDistAboveKgBottomAreaPx = sDefaultDensity * 12;
     private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -111,9 +114,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mHasUdfps;
     private float mHeightPixels;
     private float mWidthPixels;
-    private float mDensity;
-    private int mAmbientIndicationHeight; // in pixels
-    private int mKgIndicationHeight; // in pixels
+    private int mBottomPadding; // in pixels
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -318,11 +319,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         final DisplayMetrics metrics = mView.getContext().getResources().getDisplayMetrics();
         mWidthPixels = metrics.widthPixels;
         mHeightPixels = metrics.heightPixels;
-        mDensity = metrics.density;
-        mKgIndicationHeight = mView.getContext().getResources().getDimensionPixelSize(
-                R.dimen.keyguard_indication_margin_bottom)
-            + mView.getContext().getResources().getDimensionPixelSize(
-                R.dimen.keyguard_indication_bottom_padding);
+        mBottomPadding = mView.getContext().getResources().getDimensionPixelSize(
+                R.dimen.lock_icon_margin_bottom);
         updateLockIconLocation();
     }
 
@@ -332,24 +330,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setCenterLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
                     props.sensorRadius);
         } else {
-            final float distAboveKgBottomArea = 12 * mDensity;
-            final float radius = 36 * mDensity;
-            final int kgBottomAreaHeight = Math.max(mKgIndicationHeight, mAmbientIndicationHeight);
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - kgBottomAreaHeight - distAboveKgBottomArea
-                            - radius / 2), (int) radius);
+                        mHeightPixels - mBottomPadding - sDistAboveKgBottomAreaPx
+                            - sLockIconRadiusPx), sLockIconRadiusPx);
         }
 
         mView.getHitRect(mSensorTouchLocation);
-    }
-
-    /**
-     * Set the location of ambient indication if showing (ie: now playing)
-     */
-    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
-        mAmbientIndicationHeight = ambientIndicationBottomPadding;
-        updateLockIconLocation();
     }
 
     @Override
