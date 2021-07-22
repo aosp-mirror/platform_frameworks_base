@@ -1164,7 +1164,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteResetBleScan() {
+    public void noteBleScanReset() {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteResetBluetoothScanLocked();
