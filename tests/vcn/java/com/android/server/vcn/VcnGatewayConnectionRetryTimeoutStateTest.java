@@ -90,6 +90,10 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
+        // Verify that sending a non-quitting disconnect request does not unset the isQuitting flag
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
         verifyRetryTimeoutAlarmAndGetCallback(mFirstRetryInterval, true /* expectCanceled */);
 

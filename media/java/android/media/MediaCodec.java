@@ -72,6 +72,37 @@ import java.util.concurrent.locks.ReentrantLock;
  Finally, you request (or receive) a filled output buffer, consume its contents and release it
  back to the codec.
 
+ <h3 id=qualityFloor><a name="qualityFloor">Minimum Quality Floor for Video Encoding</h3>
+ <p>
+ Beginning with {@link android.os.Build.VERSION_CODES#S}, Android's Video MediaCodecs enforce a
+ minimum quality floor. The intent is to eliminate poor quality video encodings. This quality
+ floor is applied when the codec is in Variable Bitrate (VBR) mode; it is not applied when
+ the codec is in Constant Bitrate (CBR) mode. The quality floor enforcement is also restricted
+ to a particular size range; this size range is currently for video resolutions
+ larger than 320x240 up through 1920x1080.
+
+ <p>
+ When this quality floor is in effect, the codec and supporting framework code will work to
+ ensure that the generated video is of at least a "fair" or "good" quality. The metric
+ used to choose these targets is the VMAF (Video Multi-method Assessment Function) with a
+ target score of 70 for selected test sequences.
+
+ <p>
+ The typical effect is that
+ some videos will generate a higher bitrate than originally configured. This will be most
+ notable for videos which were configured with very low bitrates; the codec will use a bitrate
+ that is determined to be more likely to generate an "fair" or "good" quality video. Another
+ situation is where a video includes very complicated content (lots of motion and detail);
+ in such configurations, the codec will use extra bitrate as needed to avoid losing all of
+ the content's finer detail.
+
+ <p>
+ This quality floor will not impact content captured at high bitrates (a high bitrate should
+ already provide the codec with sufficient capacity to encode all of the detail).
+ The quality floor does not operate on CBR encodings.
+ The quality floor currently does not operate on resolutions of 320x240 or lower, nor on
+ videos with resolution above 1920x1080.
+
  <h3>Data Types</h3>
  <p>
  Codecs operate on three kinds of data: compressed data, raw audio data and raw video data.

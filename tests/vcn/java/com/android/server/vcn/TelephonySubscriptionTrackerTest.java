@@ -21,6 +21,7 @@ import static android.telephony.CarrierConfigManager.EXTRA_SLOT_INDEX;
 import static android.telephony.CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+import static android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
 
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
@@ -54,6 +55,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 
@@ -178,6 +180,14 @@ public class TelephonySubscriptionTrackerTest {
         return captor.getValue();
     }
 
+    private ActiveDataSubscriptionIdListener getActiveDataSubscriptionIdListener() {
+        final ArgumentCaptor<TelephonyCallback> captor =
+                ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManager).registerTelephonyCallback(any(), captor.capture());
+
+        return (ActiveDataSubscriptionIdListener) captor.getValue();
+    }
+
     private Intent buildTestBroadcastIntent(boolean hasValidSubscription) {
         Intent intent = new Intent(ACTION_CARRIER_CONFIG_CHANGED);
         intent.putExtra(EXTRA_SLOT_INDEX, TEST_SIM_SLOT_INDEX);
@@ -196,7 +206,14 @@ public class TelephonySubscriptionTrackerTest {
     private TelephonySubscriptionSnapshot buildExpectedSnapshot(
             Map<Integer, SubscriptionInfo> subIdToInfoMap,
             Map<ParcelUuid, Set<String>> privilegedPackages) {
-        return new TelephonySubscriptionSnapshot(subIdToInfoMap, privilegedPackages);
+        return new TelephonySubscriptionSnapshot(0, subIdToInfoMap, privilegedPackages);
+    }
+
+    private TelephonySubscriptionSnapshot buildExpectedSnapshot(
+            int activeSubId,
+            Map<Integer, SubscriptionInfo> subIdToInfoMap,
+            Map<ParcelUuid, Set<String>> privilegedPackages) {
+        return new TelephonySubscriptionSnapshot(activeSubId, subIdToInfoMap, privilegedPackages);
     }
 
     private void verifyNoActiveSubscriptions() {
@@ -247,6 +264,26 @@ public class TelephonySubscriptionTrackerTest {
         mTestLooper.dispatchAll();
 
         verifyNoActiveSubscriptions();
+    }
+
+    @Test
+    public void testOnSubscriptionsChangedFired_onActiveSubIdsChanged() throws Exception {
+        setupReadySubIds();
+        setPrivilegedPackagesForMock(Collections.emptyList());
+
+        doReturn(TEST_SUBSCRIPTION_ID_2).when(mDeps).getActiveDataSubscriptionId();
+        final ActiveDataSubscriptionIdListener listener = getActiveDataSubscriptionIdListener();
+        listener.onActiveDataSubscriptionIdChanged(TEST_SUBSCRIPTION_ID_2);
+        mTestLooper.dispatchAll();
+
+        ArgumentCaptor<TelephonySubscriptionSnapshot> snapshotCaptor =
+                ArgumentCaptor.forClass(TelephonySubscriptionSnapshot.class);
+        verify(mCallback).onNewSnapshot(snapshotCaptor.capture());
+
+        TelephonySubscriptionSnapshot snapshot = snapshotCaptor.getValue();
+        assertNotNull(snapshot);
+        assertEquals(TEST_SUBSCRIPTION_ID_2, snapshot.getActiveDataSubscriptionId());
+        assertEquals(TEST_PARCEL_UUID, snapshot.getActiveDataSubscriptionGroup());
     }
 
     @Test
@@ -371,7 +408,8 @@ public class TelephonySubscriptionTrackerTest {
     @Test
     public void testTelephonySubscriptionSnapshotGetGroupForSubId() throws Exception {
         final TelephonySubscriptionSnapshot snapshot =
-                new TelephonySubscriptionSnapshot(TEST_SUBID_TO_INFO_MAP, emptyMap());
+                new TelephonySubscriptionSnapshot(
+                        TEST_SUBSCRIPTION_ID_1, TEST_SUBID_TO_INFO_MAP, emptyMap());
 
         assertEquals(TEST_PARCEL_UUID, snapshot.getGroupForSubId(TEST_SUBSCRIPTION_ID_1));
         assertEquals(TEST_PARCEL_UUID, snapshot.getGroupForSubId(TEST_SUBSCRIPTION_ID_2));
@@ -380,7 +418,8 @@ public class TelephonySubscriptionTrackerTest {
     @Test
     public void testTelephonySubscriptionSnapshotGetAllSubIdsInGroup() throws Exception {
         final TelephonySubscriptionSnapshot snapshot =
-                new TelephonySubscriptionSnapshot(TEST_SUBID_TO_INFO_MAP, emptyMap());
+                new TelephonySubscriptionSnapshot(
+                        TEST_SUBSCRIPTION_ID_1, TEST_SUBID_TO_INFO_MAP, emptyMap());
 
         assertEquals(
                 new ArraySet<>(Arrays.asList(TEST_SUBSCRIPTION_ID_1, TEST_SUBSCRIPTION_ID_2)),

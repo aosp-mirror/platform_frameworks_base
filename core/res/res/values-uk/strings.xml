@@ -2017,7 +2017,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Завершити"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Вхідний виклик"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Активний виклик"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Фільтрування вхідного виклику"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Вхідний виклик (Фільтр)"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="few">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>

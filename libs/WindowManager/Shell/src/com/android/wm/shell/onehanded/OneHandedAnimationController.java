@@ -163,6 +163,7 @@ public class OneHandedAnimationController {
             mOneHandedAnimationCallbacks.forEach(
                     (callback) -> callback.onOneHandedAnimationEnd(tx, this)
             );
+            mOneHandedAnimationCallbacks.clear();
         }
 
         @Override
@@ -171,6 +172,7 @@ public class OneHandedAnimationController {
             mOneHandedAnimationCallbacks.forEach(
                     (callback) -> callback.onOneHandedAnimationCancel(this)
             );
+            mOneHandedAnimationCallbacks.clear();
         }
 
         @Override
@@ -182,7 +184,7 @@ public class OneHandedAnimationController {
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
             applySurfaceControlTransaction(mLeash, tx, animation.getAnimatedFraction());
             mOneHandedAnimationCallbacks.forEach(
-                    (callback) -> callback.onAnimationUpdate(0f, (float) mCurrentValue)
+                    (callback) -> callback.onAnimationUpdate(0f, mCurrentValue)
             );
         }
 
@@ -216,7 +218,7 @@ public class OneHandedAnimationController {
         }
 
         float getDestinationOffset() {
-            return ((float) mEndValue - (float) mStartValue);
+            return (mEndValue - mStartValue);
         }
 
         @TransitionDirection
@@ -302,7 +304,7 @@ public class OneHandedAnimationController {
         @Override
         public float getInterpolation(float input) {
             return (float) (Math.pow(2, -10 * input) * Math.sin(((input - 4.0f) / 4.0f)
-                    * (2.0f * Math.PI) / 4.0f) + 1);
+                    * (2.0f * Math.PI) / 4.0f) + 1.0f);
         }
     }
 

@@ -2289,7 +2289,7 @@
     <string name="dismiss_action" msgid="1728820550388704784">"Cerrar"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Desbloquea el micrófono del dispositivo"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Desbloquea la cámara del dispositivo"</string>
-    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Para &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; y todos los servicios y las aplicaciones"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Para &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; y todas las aplicaciones y servicios"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Desbloquear"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidad del sensor"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icono de aplicación"</string>

@@ -14,23 +14,19 @@ Copyright (C) 2019 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="26dp"
-        android:height="36dp"
-        android:viewportWidth="26"
-        android:viewportHeight="36">
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M13.75 27.5 C15.13,27.5 16.25,26.38 16.25,25 C16.25,23.62 15.13,22.5 13.75,22.5 C12.37,22.5 11.25,23.62 11.25,25 C11.25,26.38 12.37,27.5 13.75,27.5c " />
+        android:pathData="M16,22C17.1046,22 18,21.1046 18,20C18,18.8954 17.1046,18 16,18C14.8954,18 14,18.8954 14,20C14,21.1046 14.8954,22 16,22Z"
+        android:fillColor="#FF000000"/>
     <path
-        android:strokeColor="#FF000000"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="2.5"
-        android:pathData="M4.5 15 C4.5,15 23,15 23,15 C24.1,15 25,15.9 25,17 C25,17 25,33 25,33 C25,34.1 24.1,35 23,35 C23,35 4.5,35 4.5,35 C3.4,35 2.5,34.1 2.5,33 C2.5,33 2.5,17 2.5,17 C2.5,15.9 3.4,15 4.5,15c " />
+        android:pathData="M9,12L23,12A2,2 0,0 1,25 14L25,26A2,2 0,0 1,23 28L9,28A2,2 0,0 1,7 26L7,14A2,2 0,0 1,9 12z"
+        android:strokeWidth="2"
+        android:strokeColor="#FF000000"/>
     <path
-        android:strokeColor="#FF000000"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="2.5"
-        android:pathData="M7.5 15 C7.5,15 7.5,8.61 7.5,8.61 C7.5,5.24 10.3,2.5 13.75,2.5 C17.2,2.5 20,5.24 20,8.61 C20,8.61 20,15 20,15 " />
+        android:pathData="M11,12V6.8889C11,4.1888 13.2386,2 16,2C18.7614,2 21,4.1888 21,6.8889V12"
+        android:strokeWidth="2"
+        android:strokeColor="#FF000000"/>
 </vector>

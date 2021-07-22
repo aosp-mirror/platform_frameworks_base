@@ -48,6 +48,7 @@ public class DvrRecorder implements AutoCloseable {
     private int mSegmentId = 0;
     private int mOverflow;
     private Boolean mIsStopped = true;
+    private final Object mListenerLock = new Object();
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
@@ -69,16 +70,20 @@ public class DvrRecorder implements AutoCloseable {
     /** @hide */
     public void setListener(
             @NonNull Executor executor, @NonNull OnRecordStatusChangedListener listener) {
-        mExecutor = executor;
-        mListener = listener;
+        synchronized (mListenerLock) {
+            mExecutor = executor;
+            mListener = listener;
+        }
     }
 
     private void onRecordStatusChanged(int status) {
         if (status == Filter.STATUS_OVERFLOW) {
             mOverflow++;
         }
-        if (mExecutor != null && mListener != null) {
-            mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
+        synchronized (mListenerLock) {
+            if (mExecutor != null && mListener != null) {
+                mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
+            }
         }
     }
 

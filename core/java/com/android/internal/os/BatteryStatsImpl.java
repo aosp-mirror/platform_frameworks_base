@@ -1106,8 +1106,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     protected PowerProfile mPowerProfile;
 
+    @VisibleForTesting
     @GuardedBy("this")
-    final Constants mConstants;
+    protected final Constants mConstants;
 
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,

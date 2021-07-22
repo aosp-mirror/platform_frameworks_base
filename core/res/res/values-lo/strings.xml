@@ -2290,7 +2290,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ຍົກເລີກການບລັອກໄມໂຄຣໂຟນອຸປະກອນ"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ຍົກເລີກການບລັອກອຸປະກອນກ້ອງຖ່າຍຮູບ"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"ສຳລັບ &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ແລະ ແອັບ ແລະ ບໍລິການທັງໝົດ"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ຍົກເລີກການບລັອກ"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ປົດບລັອກ"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ຄວາມເປັນສ່ວນຕົວເຊັນເຊີ"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ໄອຄອນແອັບພລິເຄຊັນ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ຮູບແບຣນແອັບພລິເຄຊັນ"</string>

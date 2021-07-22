@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"اس سے آپ کا کیمرا استعمال کرنے کے لیے اجازت یافتہ سبھی ایپس اور سروسز کے لیے رسائی غیر مسدود ہو جاتی ہے۔"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"اس سے آپ کا کیمرا یا مائیکروفون استعمال کرنے کے لیے اجازت یافتہ سبھی ایپس اور سروسز کے لیے رسائی غیر مسدود ہو جاتی ہے۔"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"آلہ"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ایپس سوئچ کرنے کیلئے اوپر سوائپ کریں"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"تیزی سے ایپس کو سوئچ کرنے کے لیے دائیں طرف گھسیٹیں"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"مجموعی جائزہ ٹوگل کریں"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"چارج ہوگئی"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"چارج ہو رہی ہے"</string>
@@ -1149,8 +1147,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک پیغام بھیجا: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک تصویر بھیجی"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> نے اسٹیٹس کو اپ ڈیٹ کر دیا ہے: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"دستیاب ہے"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"آپ کے بیٹری میٹر کو پڑھنے میں دشواری"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"مزید معلومات کے لیے تھپتھپائیں"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"کوئی الارم سیٹ نہیں ہے"</string>

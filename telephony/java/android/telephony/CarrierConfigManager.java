@@ -286,6 +286,21 @@ public class CarrierConfigManager {
             "call_barring_default_service_class_int";
 
     /**
+     * This carrier supports dialing USSD codes to enable/disable supplementary services such as
+     * call forwarding and call waiting over CDMA.
+     * <p>
+     * The supplementary service menu will still need to be set as visible, see
+     * {@link #KEY_CALL_FORWARDING_VISIBILITY_BOOL} and
+     * {@link #KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL}.
+     * <p>
+     * If this is set as false and the supplementary service menu is visible, the associated setting
+     * will be enabled and disabled based on the availability of supplementary services over UT. See
+     * {@link #KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_SS_OVER_CDMA_BOOL = "support_ss_over_cdma_bool";
+
+    /**
      * Flag indicating whether the Phone app should ignore EVENT_SIM_NETWORK_LOCKED
      * events from the Sim.
      * If true, this will prevent the IccNetworkDepersonalizationPanel from being shown, and
@@ -5120,6 +5135,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_PASSWORD_CHANGE_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL, true);
         sDefaults.putInt(KEY_CALL_BARRING_DEFAULT_SERVICE_CLASS_INT, SERVICE_CLASS_VOICE);
+        sDefaults.putBoolean(KEY_SUPPORT_SS_OVER_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNANSWERED_SUPPORTED_BOOL, true);

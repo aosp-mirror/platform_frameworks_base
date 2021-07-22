@@ -72,7 +72,7 @@ class HighBrightnessModeController {
     private final Injector mInjector;
     private final BrightnessSettingListener mBrightnessSettingListener = this::onBrightnessChanged;
 
-    private SurfaceControlHdrLayerInfoListener mHdrListener;
+    private HdrListener mHdrListener;
     private HighBrightnessModeData mHbmData;
     private IBinder mRegisteredDisplayToken;
 
@@ -249,6 +249,11 @@ class HighBrightnessModeController {
 
     void dump(PrintWriter pw) {
         mHandler.runWithScissors(() -> dumpLocal(pw), 1000);
+    }
+
+    @VisibleForTesting
+    HdrListener getHdrListener() {
+        return mHdrListener;
     }
 
     private void dumpLocal(PrintWriter pw) {
@@ -487,7 +492,8 @@ class HighBrightnessModeController {
         }
     }
 
-    private class HdrListener extends SurfaceControlHdrLayerInfoListener {
+    @VisibleForTesting
+    class HdrListener extends SurfaceControlHdrLayerInfoListener {
         @Override
         public void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers,
                 int maxW, int maxH, int flags) {

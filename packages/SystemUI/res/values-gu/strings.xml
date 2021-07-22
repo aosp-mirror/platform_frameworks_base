@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"આ તમારા કૅમેરાનો ઉપયોગ કરવાની મંજૂરી ધરાવતી તમામ ઍપ અને સેવાઓ માટે ઍક્સેસને અનબ્લૉક કરે છે."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"આ તમારા કૅમેરા અથવા માઇક્રોફોનનો ઉપયોગ કરવાની મંજૂરી ધરાવતી તમામ ઍપ અને સેવાઓ માટે ઍક્સેસને અનબ્લૉક કરે છે."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ડિવાઇસ"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ઍપ સ્વિચ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ઍપને ઝડપથી સ્વિચ કરવા માટે જમણે ખેંચો"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ઝલકને ટૉગલ કરો"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ચાર્જ થઈ ગયું"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ચાર્જ થઈ રહ્યું છે"</string>
@@ -1149,8 +1147,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ સંદેશ મોકલવામાં આવ્યો: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ છબી મોકલવામાં આવી"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા નવી સ્ટેટસ અપડેટ પોસ્ટ કરવામાં આવી: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"ઉપલબ્ધ છે"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"તમારું બૅટરી મીટર વાંચવામાં સમસ્યા આવી"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"વધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"કોઈ અલાર્મ સેટ નથી"</string>

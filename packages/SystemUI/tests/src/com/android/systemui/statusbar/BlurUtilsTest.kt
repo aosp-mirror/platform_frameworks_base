@@ -27,6 +27,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -38,13 +39,13 @@ class BlurUtilsTest : SysuiTestCase() {
     @Mock lateinit var resources: Resources
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var transaction: SurfaceControl.Transaction
-    @Mock lateinit var corssWindowBlurListeners: CrossWindowBlurListeners
+    @Mock lateinit var crossWindowBlurListeners: CrossWindowBlurListeners
     lateinit var blurUtils: BlurUtils
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        `when`(corssWindowBlurListeners.isCrossWindowBlurEnabled).thenReturn(true)
+        `when`(crossWindowBlurListeners.isCrossWindowBlurEnabled).thenReturn(true)
         blurUtils = TestableBlurUtils()
     }
 
@@ -74,7 +75,21 @@ class BlurUtilsTest : SysuiTestCase() {
         verify(transaction).apply()
     }
 
-    inner class TestableBlurUtils() : BlurUtils(resources, corssWindowBlurListeners, dumpManager) {
+    @Test
+    fun testEarlyWakeUp() {
+        val radius = 10
+        val surfaceControl = mock(SurfaceControl::class.java)
+        val viewRootImpl = mock(ViewRootImpl::class.java)
+        `when`(viewRootImpl.surfaceControl).thenReturn(surfaceControl)
+        `when`(surfaceControl.isValid).thenReturn(true)
+        blurUtils.applyBlur(viewRootImpl, radius, true /* opaque */)
+        verify(transaction).setEarlyWakeupStart()
+        clearInvocations(transaction)
+        blurUtils.applyBlur(viewRootImpl, 0, true /* opaque */)
+        verify(transaction).setEarlyWakeupEnd()
+    }
+
+    inner class TestableBlurUtils() : BlurUtils(resources, crossWindowBlurListeners, dumpManager) {
         override fun supportsBlursOnWindows(): Boolean {
             return true
         }

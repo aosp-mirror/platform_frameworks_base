@@ -528,18 +528,15 @@ public class Vcn extends Handler {
     private void logVdbg(String msg) {
         if (VDBG) {
             Slog.v(TAG, getLogPrefix() + msg);
-            LOCAL_LOG.log(getLogPrefix() + "VDBG: " + msg);
         }
     }
 
     private void logDbg(String msg) {
         Slog.d(TAG, getLogPrefix() + msg);
-        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg);
     }
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
-        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg + tr);
     }
 
     private void logErr(String msg) {

@@ -437,7 +437,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスが ON になっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>

@@ -22,11 +22,14 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -35,14 +38,14 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.navigationbar.buttons.ContextualButton;
-import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
-import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /** atest NavigationBarContextTest */
 @SmallTest
@@ -57,6 +60,11 @@ public class NavigationBarContextTest extends SysuiTestCase {
     private static final float DARK_INTENSITY_ERR = 0.0002f;
     private static final int ICON_RES_ID = 1;
 
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
+
     private ContextualButtonGroup mGroup;
     private ContextualButton mBtn0;
     private ContextualButton mBtn1;
@@ -64,7 +72,14 @@ public class NavigationBarContextTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
+                .thenReturn(mEdgeBackGestureHandler);
+
         mDependency.injectMockDependency(AssistManager.class);
+        mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
+                mEdgeBackGestureHandlerFactory);
 
         mGroup = new ContextualButtonGroup(GROUP_ID);
         mBtn0 = new ContextualButton(BUTTON_0_ID, mContext, ICON_RES_ID);

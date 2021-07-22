@@ -33,7 +33,6 @@ public abstract class AlarmHelper {
             WorkSource workSource) {
         // helps ensure that we're not wasting system resources by setting alarms in the past/now
         Preconditions.checkArgument(delayMs > 0);
-        Preconditions.checkArgument(workSource != null);
         setDelayedAlarmInternal(delayMs, listener, workSource);
     }
 

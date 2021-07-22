@@ -18,12 +18,14 @@ package com.android.systemui.navigationbar;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.IWindowManager;
@@ -42,23 +44,34 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class NavigationBarTransitionsTest extends SysuiTestCase {
 
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
     private NavigationBarTransitions mTransitions;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
+                .thenReturn(mEdgeBackGestureHandler);
         mDependency.injectMockDependency(IWindowManager.class);
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
+        mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
+                mEdgeBackGestureHandlerFactory);
         doReturn(mContext)
                 .when(mDependency.injectMockDependency(NavigationModeController.class))
                 .getCurrentUserContext();

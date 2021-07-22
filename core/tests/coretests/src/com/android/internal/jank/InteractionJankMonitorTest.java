@@ -99,6 +99,8 @@ public class InteractionJankMonitorTest {
                 new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
                 /*traceThresholdFrameTimeMillis=*/ -1, null));
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
+        doNothing().when(tracker).triggerPerfetto();
+        doNothing().when(tracker).postTraceStartMarker();
 
         // Simulate a trace session and see if begin / end are invoked.
         assertThat(monitor.begin(mView, session.getCuj())).isTrue();
@@ -146,6 +148,8 @@ public class InteractionJankMonitorTest {
                 new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
                 /*traceThresholdFrameTimeMillis=*/ -1, null));
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
+        doNothing().when(tracker).triggerPerfetto();
+        doNothing().when(tracker).postTraceStartMarker();
 
         assertThat(monitor.begin(mView, session.getCuj())).isTrue();
         verify(tracker).begin();

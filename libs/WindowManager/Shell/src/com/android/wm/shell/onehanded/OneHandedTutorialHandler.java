@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.onehanded;
 
+import static android.view.View.LAYER_TYPE_HARDWARE;
+import static android.view.View.LAYER_TYPE_NONE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
@@ -45,9 +47,8 @@ import java.io.PrintWriter;
 
 /**
  * Handles tutorial visibility and synchronized transition for One Handed operations,
- * TargetViewContainer only be created and attach to window when
- * shown counts < {@link MAX_TUTORIAL_SHOW_COUNT}, and detach TargetViewContainer from window
- * after exiting one handed mode.
+ * TargetViewContainer only be created and always attach to window,
+ * detach TargetViewContainer from window after exiting one handed mode.
  */
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         OneHandedState.OnStateChangedListener {
@@ -58,7 +59,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     private final float mTutorialHeightRatio;
     private final WindowManager mWindowManager;
 
-    private boolean mIsShowing;
     private @OneHandedState.State int mCurrentState;
     private int mTutorialAreaHeight;
 
@@ -80,11 +80,10 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         mAnimationCallback = new OneHandedAnimationCallback() {
             @Override
             public void onAnimationUpdate(float xPos, float yPos) {
-                if (!isShowing()) {
+                if (!isAttached()) {
                     return;
                 }
-                mTargetViewContainer.setTransitionGroup(true);
-                mTargetViewContainer.setTranslationY(yPos - mTargetViewContainer.getHeight());
+                mTargetViewContainer.setTranslationY(yPos - mTutorialAreaHeight);
             }
         };
     }
@@ -101,7 +100,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
                 // no - op
                 break;
             case STATE_NONE:
-                removeTutorialFromWindowManager(true /* increment */);
+                removeTutorialFromWindowManager();
                 break;
             default:
                 break;
@@ -124,13 +123,14 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
 
     @VisibleForTesting
     void createViewAndAttachToWindow(Context context) {
-        if (isShowing()) {
+        if (isAttached()) {
             return;
         }
         mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial, null);
         mTargetViewContainer = new FrameLayout(context);
         mTargetViewContainer.setClipChildren(false);
         mTargetViewContainer.addView(mTutorialView);
+        mTargetViewContainer.setLayerType(LAYER_TYPE_HARDWARE, null);
 
         attachTargetToWindow();
     }
@@ -139,29 +139,27 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
      * Adds the tutorial target view to the WindowManager and update its layout.
      */
     private void attachTargetToWindow() {
-        if (!mTargetViewContainer.isAttachedToWindow()) {
-            try {
-                mWindowManager.addView(mTargetViewContainer, getTutorialTargetLayoutParams());
-                mIsShowing = true;
-            } catch (IllegalStateException e) {
-                // This shouldn't happen, but if the target is already added, just update its
-                // layout params.
-                mWindowManager.updateViewLayout(
-                        mTargetViewContainer, getTutorialTargetLayoutParams());
-            }
+        try {
+            mWindowManager.addView(mTargetViewContainer, getTutorialTargetLayoutParams());
+        } catch (IllegalStateException e) {
+            // This shouldn't happen, but if the target is already added, just update its
+            // layout params.
+            mWindowManager.updateViewLayout(mTargetViewContainer, getTutorialTargetLayoutParams());
         }
     }
 
     @VisibleForTesting
-    void removeTutorialFromWindowManager(boolean increment) {
-        if (mTargetViewContainer != null && mTargetViewContainer.isAttachedToWindow()) {
-            mWindowManager.removeViewImmediate(mTargetViewContainer);
-            mIsShowing = false;
+    void removeTutorialFromWindowManager() {
+        if (!isAttached()) {
+            return;
         }
+        mTargetViewContainer.setLayerType(LAYER_TYPE_NONE, null);
+        mWindowManager.removeViewImmediate(mTargetViewContainer);
+        mTargetViewContainer = null;
     }
 
     @Nullable OneHandedAnimationCallback getAnimationCallback() {
-        return isShowing() ? mAnimationCallback : null /* Disabled */;
+        return mAnimationCallback;
     }
 
     /**
@@ -183,15 +181,15 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     }
 
     @VisibleForTesting
-    boolean isShowing() {
-        return mIsShowing;
+    boolean isAttached() {
+        return mTargetViewContainer != null && mTargetViewContainer.isAttachedToWindow();
     }
 
     /**
      * onConfigurationChanged events for updating tutorial text.
      */
     public void onConfigurationChanged() {
-        removeTutorialFromWindowManager(false /* increment */);
+        removeTutorialFromWindowManager();
         if (mCurrentState == STATE_ENTERING || mCurrentState == STATE_ACTIVE) {
             createViewAndAttachToWindow(mContext);
         }
@@ -200,8 +198,8 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG);
-        pw.print(innerPrefix + "mIsShowing=");
-        pw.println(mIsShowing);
+        pw.print(innerPrefix + "isAttached=");
+        pw.println(isAttached());
         pw.print(innerPrefix + "mCurrentState=");
         pw.println(mCurrentState);
         pw.print(innerPrefix + "mDisplayBounds=");
