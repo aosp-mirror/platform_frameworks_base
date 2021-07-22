@@ -40,7 +40,7 @@ class ParsedComponentUtils {
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    static <Component extends ParsedComponent> ParseResult<Component> parseComponent(
+    static <Component extends ParsedComponentImpl> ParseResult<Component> parseComponent(
             Component component, String tag, ParsingPackage pkg, TypedArray array,
             boolean useRoundIcon, ParseInput input, int bannerAttr, int descriptionAttr,
             int iconAttr, int labelAttr, int logoAttr, int nameAttr, int roundIconAttr) {
@@ -96,7 +96,7 @@ class ParsedComponentUtils {
         return input.success(component);
     }
 
-    static ParseResult<Bundle> addMetaData(ParsedComponent component, ParsingPackage pkg,
+    static ParseResult<Bundle> addMetaData(ParsedComponentImpl component, ParsingPackage pkg,
             Resources resources, XmlResourceParser parser, ParseInput input) {
         ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, component,
                 resources, parser, "<meta-data>", input);
@@ -110,7 +110,7 @@ class ParsedComponentUtils {
         return input.success(component.getMetaData());
     }
 
-    static ParseResult<Property> addProperty(ParsedComponent component, ParsingPackage pkg,
+    static ParseResult<Property> addProperty(ParsedComponentImpl component, ParsingPackage pkg,
             Resources resources, XmlResourceParser parser, ParseInput input) {
         ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, component,
                 resources, parser, "<property>", input);

@@ -34,7 +34,7 @@ import java.util.Locale;
 import java.util.Set;
 
 /** @hide */
-public class ParsedPermission extends ParsedComponent {
+public class ParsedPermission extends ParsedComponentImpl {
 
     private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
 

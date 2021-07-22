@@ -51,7 +51,7 @@ public class ComponentParseUtils {
                 || intentInfo.hasAction(Intent.ACTION_SEND_MULTIPLE);
     }
 
-    static <Component extends ParsedComponent> ParseResult<Component> parseAllMetaData(
+    static <Component extends ParsedComponentImpl> ParseResult<Component> parseAllMetaData(
             ParsingPackage pkg, Resources res, XmlResourceParser parser, String tag,
             Component component, ParseInput input) throws XmlPullParserException, IOException {
         final int depth = parser.getDepth();

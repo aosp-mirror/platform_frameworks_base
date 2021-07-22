@@ -27,7 +27,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide */
-public class ParsedMainComponent extends ParsedComponent {
+public class ParsedMainComponent extends ParsedComponentImpl {
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)

@@ -18,6 +18,7 @@ package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedComponent
+import android.content.pm.parsing.component.ParsedComponentImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.os.Bundle
 import android.os.Parcelable
@@ -57,14 +58,14 @@ abstract class ParsedComponentTest(kClass: KClass<out Parcelable>) :
     final override fun extraParams() = subclassExtraParams() + listOf(
         getSetByValue(
             ParsedComponent::getIntents,
-            ParsedComponent::addIntent,
+            ParsedComponentImpl::addIntent,
             "TestLabel",
             transformGet = { it.singleOrNull()?.nonLocalizedLabel },
             transformSet = { ParsedIntentInfo().setNonLocalizedLabel(it) },
         ),
         getSetByValue(
             ParsedComponent::getProperties,
-            ParsedComponent::addProperty,
+            ParsedComponentImpl::addProperty,
             PackageManager.Property(
                 "testPropertyName",
                 "testPropertyValue",
@@ -84,7 +85,7 @@ abstract class ParsedComponentTest(kClass: KClass<out Parcelable>) :
         ),
         getSetByValue(
             ParsedComponent::getMetaData,
-            ParsedComponent::setMetaData,
+            ParsedComponentImpl::setMetaData,
             "testBundleKey" to "testBundleValue",
             transformGet = { "testBundleKey" to it?.getString("testBundleKey") },
             transformSet = { Bundle().apply { putString(it.first, it.second) } }

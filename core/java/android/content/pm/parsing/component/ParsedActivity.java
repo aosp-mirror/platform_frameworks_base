@@ -145,17 +145,17 @@ public class ParsedActivity extends ParsedMainComponent {
         alias.setPackageName(target.getPackageName());
         alias.setTargetActivity(targetActivityName);
         alias.configChanges = target.configChanges;
-        alias.flags = target.flags;
+        alias.setFlags(target.getFlags());
         alias.privateFlags = target.privateFlags;
-        alias.icon = target.icon;
-        alias.logo = target.logo;
-        alias.banner = target.banner;
-        alias.labelRes = target.labelRes;
-        alias.nonLocalizedLabel = target.nonLocalizedLabel;
+        alias.setIcon(target.getIcon());
+        alias.setLogo(target.getLogo());
+        alias.setBanner(target.getBanner());
+        alias.setLabelRes(target.getLabelRes());
+        alias.setNonLocalizedLabel(target.getNonLocalizedLabel());
         alias.launchMode = target.launchMode;
         alias.lockTaskLaunchMode = target.lockTaskLaunchMode;
         alias.documentLaunchMode = target.documentLaunchMode;
-        alias.descriptionRes = target.descriptionRes;
+        alias.setDescriptionRes(target.getDescriptionRes());
         alias.screenOrientation = target.screenOrientation;
         alias.taskAffinity = target.taskAffinity;
         alias.theme = target.theme;
@@ -379,7 +379,7 @@ public class ParsedActivity extends ParsedMainComponent {
         dest.writeString(this.requestedVrComponent);
         dest.writeInt(this.rotationAnimation);
         dest.writeInt(this.colorMode);
-        dest.writeBundle(this.metaData);
+        dest.writeBundle(this.getMetaData());
 
         if (windowLayout != null) {
             dest.writeInt(1);
@@ -416,7 +416,7 @@ public class ParsedActivity extends ParsedMainComponent {
         this.requestedVrComponent = in.readString();
         this.rotationAnimation = in.readInt();
         this.colorMode = in.readInt();
-        this.metaData = in.readBundle();
+        this.setMetaData(in.readBundle());
         if (in.readBoolean()) {
             windowLayout = new ActivityInfo.WindowLayout(in);
         }

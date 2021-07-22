@@ -27,6 +27,7 @@ import android.content.pm.parsing.ParsingPackage
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedAttribution
 import android.content.pm.parsing.component.ParsedComponent
+import android.content.pm.parsing.component.ParsedComponentImpl
 import android.content.pm.parsing.component.ParsedInstrumentation
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.parsing.component.ParsedPermission
@@ -562,7 +563,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         .generateKeyPair()
         .public
 
-    private fun <T : ParsedComponent> T.withMimeGroups() = apply {
+    private fun <T : ParsedComponentImpl> T.withMimeGroups() = apply {
         val componentName = name
         addIntent(ParsedIntentInfo().apply {
             addMimeGroup("$componentName/mimeGroup")

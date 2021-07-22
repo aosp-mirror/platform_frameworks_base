@@ -24,7 +24,7 @@ import com.android.internal.util.DataClass;
 /** @hide */
 @DataClass(genGetters = true, genSetters = true, genBuilder = false, genParcelable = true,
         genAidl = false)
-public class ParsedPermissionGroup extends ParsedComponent {
+public class ParsedPermissionGroup extends ParsedComponentImpl {
 
     private int requestDetailResourceId;
     private int backgroundRequestResourceId;
@@ -185,10 +185,10 @@ public class ParsedPermissionGroup extends ParsedComponent {
     };
 
     @DataClass.Generated(
-            time = 1624052057830L,
+            time = 1626919339483L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedPermissionGroup.java",
-            inputSignatures = "private  int requestDetailResourceId\nprivate  int backgroundRequestResourceId\nprivate  int backgroundRequestDetailResourceId\nprivate  int requestRes\nprivate  int priority\npublic  java.lang.String toString()\nclass ParsedPermissionGroup extends android.content.pm.parsing.component.ParsedComponent implements []\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=true, genAidl=false)")
+            inputSignatures = "private  int requestDetailResourceId\nprivate  int backgroundRequestResourceId\nprivate  int backgroundRequestDetailResourceId\nprivate  int requestRes\nprivate  int priority\npublic  java.lang.String toString()\nclass ParsedPermissionGroup extends android.content.pm.parsing.component.ParsedComponentImpl implements []\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=true, genAidl=false)")
     @Deprecated
     private void __metadata() {}
 
