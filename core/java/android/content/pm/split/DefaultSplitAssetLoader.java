@@ -15,10 +15,6 @@
  */
 package android.content.pm.split;
 
-import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -52,23 +48,21 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
     }
 
     private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
-            throws PackageParserException {
+            throws IllegalArgumentException {
         if ((flags & ParsingPackageUtils.PARSE_MUST_BE_APK) != 0
                 && !ApkLiteParseUtils.isApkPath(path)) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                    "Invalid package file: " + path);
+            throw new IllegalArgumentException("Invalid package file: " + path);
         }
 
         try {
             return ApkAssets.loadFromPath(path);
         } catch (IOException e) {
-            throw new PackageParserException(INSTALL_FAILED_INVALID_APK,
-                    "Failed to load APK at path " + path, e);
+            throw new IllegalArgumentException("Failed to load APK at path " + path, e);
         }
     }
 
     @Override
-    public AssetManager getBaseAssetManager() throws PackageParserException {
+    public AssetManager getBaseAssetManager() throws IllegalArgumentException {
         if (mCachedAssetManager != null) {
             return mCachedAssetManager;
         }
@@ -97,7 +91,7 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
     }
 
     @Override
-    public AssetManager getSplitAssetManager(int splitIdx) throws PackageParserException {
+    public AssetManager getSplitAssetManager(int splitIdx) throws IllegalArgumentException {
         return getBaseAssetManager();
     }
 

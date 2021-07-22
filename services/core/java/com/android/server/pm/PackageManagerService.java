@@ -132,6 +132,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTi
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.makeDirRecursive;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
+import static com.android.server.pm.parsing.PackageInfoUtils.checkUseInstalledOrHidden;
 
 import android.Manifest;
 import android.annotation.AppIdInt;
@@ -211,7 +212,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackagePartitions;
 import android.content.pm.PackagePartitions.SystemPartition;
 import android.content.pm.PackageStats;
@@ -7975,7 +7975,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private boolean enableCompressedPackage(AndroidPackage stubPkg,
             @NonNull PackageSetting stubPkgSetting) {
         final int parseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_CHATTY
-                | PackageParser.PARSE_ENFORCE_CODE;
+                | ParsingPackageUtils.PARSE_ENFORCE_CODE;
         synchronized (mInstallLock) {
             final AndroidPackage pkg;
             try (PackageFreezer freezer =
@@ -8634,7 +8634,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     final PackageUserState state = ps.readUserState(userId);
                     if (state != null) {
-                        return PackageParser.isAvailable(state);
+                        return checkUseInstalledOrHidden(p, ps, state, 0 /*flags*/);
                     }
                 }
             }
@@ -11894,9 +11894,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     errorMsg = "Failed to scan " + parseResult.scanFile + ": " + e.getMessage();
                     Slog.w(TAG, errorMsg);
                 }
-            } else if (throwable instanceof PackageParserException) {
-                PackageParserException e = (PackageParserException)
-                        throwable;
+            } else if (throwable instanceof PackageManagerException) {
+                PackageManagerException e = (PackageManagerException) throwable;
                 errorCode = e.error;
                 errorMsg = "Failed to parse " + parseResult.scanFile + ": " + e.getMessage();
                 Slog.w(TAG, errorMsg);
@@ -11956,10 +11955,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
-            parsedPackage.setSigningDetails(
-                    ParsingPackageUtils.getSigningDetails(parsedPackage, skipVerify));
-        } catch (PackageParserException e) {
-            throw PackageManagerException.from(e);
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<SigningDetails> result = ParsingPackageUtils.getSigningDetails(
+                    input, parsedPackage, skipVerify);
+            if (result.isError()) {
+                throw new PackageManagerException(
+                        result.getErrorCode(), result.getErrorMessage(), result.getException());
+            }
+            parsedPackage.setSigningDetails(result.getResult());
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -12016,8 +12019,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final ParsedPackage parsedPackage;
         try (PackageParser2 pp = mInjector.getScanningPackageParser()) {
             parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
-        } catch (PackageParserException e) {
-            throw PackageManagerException.from(e);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -19039,12 +19040,6 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.w(TAG, msg);
         }
 
-        public void setError(String msg, PackageParserException e) {
-            setReturnCode(e.error);
-            setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
-            Slog.w(TAG, msg, e);
-        }
-
         public void setError(String msg, PackageManagerException e) {
             returnCode = e.error;
             setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
@@ -20369,9 +20364,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         PrepareFailure(String message, Exception e) {
-            super(e instanceof PackageParserException
-                    ? ((PackageParserException) e).error
-                    : ((PackageManagerException) e).error,
+            super(((PackageManagerException) e).error,
                     ExceptionUtils.getCompleteMessage(message, e));
         }
 
@@ -20484,7 +20477,7 @@ public class PackageManagerService extends IPackageManager.Stub
         try (PackageParser2 pp = mInjector.getPreparingPackageParser()) {
             parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
             AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
-        } catch (PackageParserException e) {
+        } catch (PackageManagerException e) {
             throw new PrepareFailure("Failed parse during installPackageLI", e);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -20525,16 +20518,18 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        try {
-            // either use what we've been given or parse directly from the APK
-            if (args.signingDetails != SigningDetails.UNKNOWN) {
-                parsedPackage.setSigningDetails(args.signingDetails);
-            } else {
-                parsedPackage.setSigningDetails(ParsingPackageUtils.getSigningDetails(
-                        parsedPackage, false /* skipVerify */));
+        // either use what we've been given or parse directly from the APK
+        if (args.signingDetails != SigningDetails.UNKNOWN) {
+            parsedPackage.setSigningDetails(args.signingDetails);
+        } else {
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<SigningDetails> result = ParsingPackageUtils.getSigningDetails(
+                    input, parsedPackage, false /*skipVerify*/);
+            if (result.isError()) {
+                throw new PrepareFailure("Failed collect during installPackageLI",
+                        result.getException());
             }
-        } catch (PackageParserException e) {
-            throw new PrepareFailure("Failed collect during installPackageLI", e);
+            parsedPackage.setSigningDetails(result.getResult());
         }
 
         if (instantApp && parsedPackage.getSigningDetails().getSignatureSchemeVersion()
@@ -27285,8 +27280,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         /**
-         * Only keep package names that refer to {@link PackageParser.Package#isSystem system}
-         * packages.
+         * Only keep package names that refer to {@link AndroidPackage#isSystem system} packages.
          *
          * @param pkgNames The packages to filter
          *

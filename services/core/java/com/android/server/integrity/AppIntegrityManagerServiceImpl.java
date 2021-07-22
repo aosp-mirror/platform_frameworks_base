@@ -44,8 +44,11 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -580,8 +583,14 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
             // APK signatures is already verified elsewhere in PackageManager. We do not need to
             // verify it again since it could cause a timeout for large APKs.
-            pkg.setSigningDetails(
-                    ParsingPackageUtils.getSigningDetails(pkg, /* skipVerify= */ true));
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<SigningDetails> result = ParsingPackageUtils.getSigningDetails(
+                    input, pkg, /* skipVerify= */ true);
+            if (result.isError()) {
+                Slog.w(TAG, result.getErrorMessage(), result.getException());
+                return null;
+            }
+            pkg.setSigningDetails(result.getResult());
             return PackageInfoUtils.generate(
                     pkg,
                     null,
