@@ -169,14 +169,14 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     public void testShouldLogShow() {
         mGlobalActionsDialogLite.onShow(null);
         mTestableLooper.processAllMessages();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_POWER_MENU_OPEN);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_POWER_MENU_OPEN);
     }
 
     @Test
     public void testShouldLogDismiss() {
         mGlobalActionsDialogLite.onDismiss(mGlobalActionsDialogLite.mDialog);
         mTestableLooper.processAllMessages();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_POWER_MENU_CLOSE);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_POWER_MENU_CLOSE);
     }
 
     @Test
@@ -186,16 +186,16 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
         GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
         dialog.onBackPressed();
         mTestableLooper.processAllMessages();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_CLOSE_BACK);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_BACK);
     }
 
     @Test
@@ -205,17 +205,17 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
         GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
 
         GestureDetector.SimpleOnGestureListener gestureListener = spy(dialog.mGestureListener);
         gestureListener.onSingleTapConfirmed(null);
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
     }
 
     @Test
@@ -226,10 +226,10 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         doReturn(true).when(mStatusBar).isKeyguardShowing();
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
         GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
@@ -238,7 +238,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent start = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
         verify(mStatusBar).animateExpandSettingsPanel(null);
     }
 
@@ -250,10 +250,10 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         doReturn(false).when(mStatusBar).isKeyguardShowing();
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
         GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
@@ -262,40 +262,40 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent start = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
         verify(mStatusBar).animateExpandNotificationsPanel();
     }
 
     @Test
     public void testShouldLogBugreportPress() throws InterruptedException {
-        GlobalActionsDialog.BugReportAction bugReportAction =
+        GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
         bugReportAction.onPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_BUGREPORT_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_BUGREPORT_PRESS);
     }
 
     @Test
     public void testShouldLogBugreportLongPress() {
-        GlobalActionsDialog.BugReportAction bugReportAction =
+        GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
         bugReportAction.onLongPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
     }
 
     @Test
     public void testShouldLogEmergencyDialerPress() {
-        GlobalActionsDialog.EmergencyDialerAction emergencyDialerAction =
+        GlobalActionsDialogLite.EmergencyDialerAction emergencyDialerAction =
                 mGlobalActionsDialogLite.makeEmergencyDialerActionForTesting();
         emergencyDialerAction.onPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
     }
 
     @Test
     public void testShouldLogScreenshotPress() {
-        GlobalActionsDialog.ScreenshotAction screenshotAction =
+        GlobalActionsDialogLite.ScreenshotAction screenshotAction =
                 mGlobalActionsDialogLite.makeScreenshotActionForTesting();
         screenshotAction.onPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_SCREENSHOT_PRESS);
     }
 
     @Test
@@ -304,7 +304,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 com.android.internal.R.integer.config_navBarInteractionMode,
                 WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON);
 
-        GlobalActionsDialog.ScreenshotAction screenshotAction =
+        GlobalActionsDialogLite.ScreenshotAction screenshotAction =
                 mGlobalActionsDialogLite.makeScreenshotActionForTesting();
         assertThat(screenshotAction.shouldShow()).isTrue();
     }
@@ -315,12 +315,12 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 com.android.internal.R.integer.config_navBarInteractionMode,
                 WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON);
 
-        GlobalActionsDialog.ScreenshotAction screenshotAction =
+        GlobalActionsDialogLite.ScreenshotAction screenshotAction =
                 mGlobalActionsDialogLite.makeScreenshotActionForTesting();
         assertThat(screenshotAction.shouldShow()).isFalse();
     }
 
-    private void verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent event) {
+    private void verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent event) {
         mTestableLooper.processAllMessages();
         verify(mUiEventLogger, times(1))
                 .log(event);
@@ -341,19 +341,19 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
         mGlobalActionsDialogLite.createActionItems();
 
         assertItemsOfType(mGlobalActionsDialogLite.mItems,
-                GlobalActionsDialog.EmergencyAction.class,
-                GlobalActionsDialog.LockDownAction.class,
-                GlobalActionsDialog.ShutDownAction.class,
-                GlobalActionsDialog.RestartAction.class);
+                GlobalActionsDialogLite.EmergencyAction.class,
+                GlobalActionsDialogLite.LockDownAction.class,
+                GlobalActionsDialogLite.ShutDownAction.class,
+                GlobalActionsDialogLite.RestartAction.class);
         assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
         assertThat(mGlobalActionsDialogLite.mPowerItems).isEmpty();
     }
@@ -365,19 +365,19 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         // make sure lockdown action will NOT be shown
         doReturn(false).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 // lockdown action not allowed
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
         mGlobalActionsDialogLite.createActionItems();
 
         assertItemsOfType(mGlobalActionsDialogLite.mItems,
-                GlobalActionsDialog.EmergencyAction.class,
-                GlobalActionsDialog.ShutDownAction.class,
-                GlobalActionsDialog.RestartAction.class);
+                GlobalActionsDialogLite.EmergencyAction.class,
+                GlobalActionsDialogLite.ShutDownAction.class,
+                GlobalActionsDialogLite.RestartAction.class);
         assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
         assertThat(mGlobalActionsDialogLite.mPowerItems).isEmpty();
     }
@@ -387,7 +387,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         GlobalActionsDialogLite.LockDownAction lockDownAction =
                 mGlobalActionsDialogLite.new LockDownAction();
         lockDownAction.onPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_LOCKDOWN_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_LOCKDOWN_PRESS);
     }
 
     @Test
@@ -395,7 +395,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         GlobalActionsDialogLite.ShutDownAction shutDownAction =
                 mGlobalActionsDialogLite.new ShutDownAction();
         shutDownAction.onPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SHUTDOWN_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_SHUTDOWN_PRESS);
     }
 
     @Test
@@ -403,7 +403,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         GlobalActionsDialogLite.ShutDownAction shutDownAction =
                 mGlobalActionsDialogLite.new ShutDownAction();
         shutDownAction.onLongPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SHUTDOWN_LONG_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_SHUTDOWN_LONG_PRESS);
     }
 
     @Test
@@ -411,7 +411,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         GlobalActionsDialogLite.RestartAction restartAction =
                 mGlobalActionsDialogLite.new RestartAction();
         restartAction.onPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_REBOOT_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_REBOOT_PRESS);
     }
 
     @Test
@@ -419,6 +419,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         GlobalActionsDialogLite.RestartAction restartAction =
                 mGlobalActionsDialogLite.new RestartAction();
         restartAction.onLongPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_REBOOT_LONG_PRESS);
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_REBOOT_LONG_PRESS);
     }
 }
