@@ -3740,6 +3740,7 @@
     <string-array translatable="false" name="config_nonBlockableNotificationPackages">
         <item>com.android.dialer</item>
         <item>com.android.messaging</item>
+        <item>com.android.cellbroadcastreceiver.module</item>
     </string-array>
 
     <!-- An array of packages that can make sound on the ringer stream in priority-only DND

@@ -18,8 +18,6 @@ package com.android.internal.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -89,12 +87,11 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
 
     @GuardedBy("mLock")
     @Nullable
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private InputConnection mInputConnection;
 
     private Looper mMainLooper;
     private Handler mH;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private boolean mFinished = false;

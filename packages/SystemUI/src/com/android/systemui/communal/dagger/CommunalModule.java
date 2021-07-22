@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.split;
 
-import android.content.res.ApkAssets;
-import android.content.res.AssetManager;
+package com.android.systemui.communal.dagger;
+
+import dagger.Module;
 
 /**
- * Simple interface for loading base Assets and Splits. Used by ParsingPackageUtils when parsing
- * split APKs.
- *
- * @hide
+ * Dagger Module providing Communal-related functionality.
  */
-public interface SplitAssetLoader extends AutoCloseable {
-    AssetManager getBaseAssetManager() throws IllegalArgumentException;
-    AssetManager getSplitAssetManager(int splitIdx) throws IllegalArgumentException;
-
-    ApkAssets getBaseApkAssets();
+@Module
+public class CommunalModule {
 }

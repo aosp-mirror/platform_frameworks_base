@@ -84,7 +84,6 @@ import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.SigningDetails;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLite;
@@ -3431,13 +3430,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private SigningDetails unsafeGetCertsWithoutVerification(String path)
             throws PackageManagerException {
-        try {
-            return ApkSignatureVerifier.unsafeGetCertsWithoutVerification(path,
-                    SigningDetails.SignatureSchemeVersion.JAR);
-        } catch (PackageParserException e) {
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<SigningDetails> result =
+                ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
+                        input, path, SigningDetails.SignatureSchemeVersion.JAR);
+        if (result.isError()) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Couldn't obtain signatures from APK : " + path);
         }
+        return result.getResult();
     }
 
     /**

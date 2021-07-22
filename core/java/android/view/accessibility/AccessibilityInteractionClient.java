@@ -1328,6 +1328,8 @@ public final class AccessibilityInteractionClient
     private void logTraceClient(
             IAccessibilityServiceConnection connection, String method, String params) {
         logTrace(connection, method, params, Binder.getCallingUid(),
-                Collections.emptyList(), null, FLAGS_ACCESSIBILITY_INTERACTION_CLIENT);
+                Arrays.asList(Thread.currentThread().getStackTrace()),
+                new HashSet<String>(Arrays.asList("getStackTrace", "logTraceClient")),
+                FLAGS_ACCESSIBILITY_INTERACTION_CLIENT);
     }
 }

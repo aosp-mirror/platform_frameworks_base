@@ -15,11 +15,7 @@
  */
 package android.content.pm.split;
 
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-
 import android.annotation.NonNull;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -40,7 +36,7 @@ import java.util.Collections;
  * is to be used when an application opts-in to isolated split loading.
  * @hide
  */
-public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackageParserException>
+public class SplitAssetDependencyLoader extends SplitDependencyLoader<IllegalArgumentException>
         implements SplitAssetLoader {
     private final String[] mSplitPaths;
     private final @ParseFlags int mFlags;
@@ -67,18 +63,16 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
     }
 
     private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
-            throws PackageParserException {
+            throws IllegalArgumentException {
         if ((flags & ParsingPackageUtils.PARSE_MUST_BE_APK) != 0
                 && !ApkLiteParseUtils.isApkPath(path)) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                    "Invalid package file: " + path);
+            throw new IllegalArgumentException("Invalid package file: " + path);
         }
 
         try {
             return ApkAssets.loadFromPath(path);
         } catch (IOException e) {
-            throw new PackageParserException(PackageManager.INSTALL_FAILED_INVALID_APK,
-                    "Failed to load APK at path " + path, e);
+            throw new IllegalArgumentException("Failed to load APK at path " + path, e);
         }
     }
 
@@ -92,7 +86,7 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
 
     @Override
     protected void constructSplit(int splitIdx, @NonNull int[] configSplitIndices,
-            int parentSplitIdx) throws PackageParserException {
+            int parentSplitIdx) throws IllegalArgumentException {
         final ArrayList<ApkAssets> assets = new ArrayList<>();
 
         // Include parent ApkAssets.
@@ -114,13 +108,13 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
     }
 
     @Override
-    public AssetManager getBaseAssetManager() throws PackageParserException {
+    public AssetManager getBaseAssetManager() throws IllegalArgumentException {
         loadDependenciesForSplit(0);
         return mCachedAssetManagers[0];
     }
 
     @Override
-    public AssetManager getSplitAssetManager(int idx) throws PackageParserException {
+    public AssetManager getSplitAssetManager(int idx) throws IllegalArgumentException {
         // Since we insert the base at position 0, and PackageParser keeps splits separate from
         // the base, we need to adjust the index.
         loadDependenciesForSplit(idx + 1);

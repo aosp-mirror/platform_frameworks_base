@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import android.content.pm.PackageParser;
 import android.os.Process;
 import android.os.Trace;
 
@@ -33,7 +32,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Helper class for parallel parsing of packages using {@link PackageParser}.
+ * Helper class for parallel parsing of packages using {@link PackageParser2}.
  * <p>Parsing requests are processed by a thread-pool of {@link #MAX_THREADS}.
  * At any time, at most {@link #QUEUE_CAPACITY} results are kept in RAM</p>
  */
@@ -125,7 +124,7 @@ class ParallelPackageParser {
 
     @VisibleForTesting
     protected ParsedPackage parsePackage(File scanFile, int parseFlags)
-            throws PackageParser.PackageParserException {
+            throws PackageManagerException {
         return mPackageParser.parsePackage(scanFile, parseFlags, true);
     }
 }

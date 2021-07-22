@@ -18,7 +18,6 @@ package com.android.server.pm
 import android.content.pm.ApplicationInfo.FLAG_SYSTEM
 import android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
 import android.content.pm.PackageManager
-import android.content.pm.PackageParser
 import android.os.Build
 import android.os.Process
 import android.util.Log
@@ -122,7 +121,7 @@ class PackageManagerServiceBootTest {
                 argThat { path: File -> path.path.contains("a.data.package") },
                 anyInt(),
                 anyBoolean()))
-                .thenThrow(PackageParser.PackageParserException(
+                .thenThrow(PackageManagerException(
                         PackageManager.INSTALL_FAILED_INVALID_APK, "Oh no!"))
         val pm = createPackageManagerService()
         verify(rule.mocks().settings, Mockito.never()).insertPackageSettingLPw(

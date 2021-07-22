@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.DexMetadataHelper;
@@ -31,12 +30,15 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.incremental.IncrementalManager;
 import android.text.TextUtils;
 
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
+import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.PackageSetting;
 
 import java.io.IOException;
@@ -120,15 +122,21 @@ public class AndroidPackageUtils {
     /**
      * Validate the dex metadata files installed for the given package.
      *
-     * @throws PackageParserException in case of errors.
+     * @throws PackageManagerException in case of errors.
      */
     public static void validatePackageDexMetadata(AndroidPackage pkg)
-            throws PackageParserException {
+            throws PackageManagerException {
         Collection<String> apkToDexMetadataList = getPackageDexMetadata(pkg).values();
         String packageName = pkg.getPackageName();
         long versionCode = pkg.toAppInfoWithoutState().longVersionCode;
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (String dexMetadata : apkToDexMetadataList) {
-            DexMetadataHelper.validateDexMetadataFile(dexMetadata, packageName, versionCode);
+            final ParseResult result = DexMetadataHelper.validateDexMetadataFile(
+                    input.reset(), dexMetadata, packageName, versionCode);
+            if (result.isError()) {
+                throw new PackageManagerException(
+                        result.getErrorCode(), result.getErrorMessage(), result.getException());
+            }
         }
     }
 

@@ -34,7 +34,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
@@ -574,7 +573,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
         ParsingPackage pkg;
 
-        InstallParams(String outFileName, int rawResId) throws PackageParserException {
+        InstallParams(String outFileName, int rawResId) {
             this.pkg = getParsedPackage(outFileName, rawResId);
             this.packageURI = Uri.fromFile(new File(pkg.getPath()));
         }

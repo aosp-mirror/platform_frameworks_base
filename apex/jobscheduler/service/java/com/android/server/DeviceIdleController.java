@@ -2150,7 +2150,7 @@ public class DeviceIdleController extends SystemService
         private LocationManager mLocationManager;
 
         Injector(Context ctx) {
-            mContext = ctx;
+            mContext = ctx.createAttributionContext(TAG);
         }
 
         AlarmManager getAlarmManager() {

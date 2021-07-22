@@ -15,7 +15,9 @@
   limitations under the License.
   -->
 
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:targetApi="28">
     <style name="SettingsLibActionButton" parent="android:Widget.DeviceDefault.Button.Borderless.Colored">
         <item name="android:drawablePadding">4dp</item>
         <item name="android:drawableTint">@*android:color/btn_colored_borderless_text_material</item>

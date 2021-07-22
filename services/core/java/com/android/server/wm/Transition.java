@@ -46,11 +46,13 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_W
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -65,6 +67,7 @@ import android.window.TransitionInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -130,7 +133,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The final animation targets derived from participants after promotion. */
     private ArraySet<WindowContainer> mTargets = null;
 
+    /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
+    private IRemoteCallback mClientAnimationStartCallback = null;
+    private IRemoteCallback mClientAnimationFinishCallback = null;
 
     private @TransitionState int mState = STATE_COLLECTING;
     private final ReadyTracker mReadyTracker = new ReadyTracker();
@@ -226,13 +232,26 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mChanges.get(wc).mExistenceChanged = true;
     }
 
+    private void sendRemoteCallback(@Nullable IRemoteCallback callback) {
+        if (callback == null) return;
+        mController.mAtm.mH.sendMessage(PooledLambda.obtainMessage(cb -> {
+            try {
+                cb.sendResult(null);
+            } catch (RemoteException e) { }
+        }, callback));
+    }
+
     /**
      * Set animation options for collecting transition by ActivityRecord.
      * @param options AnimationOptions captured from ActivityOptions
      */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options) {
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+            @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mSyncId < 0) return;
         mOverrideOptions = options;
+        sendRemoteCallback(mClientAnimationStartCallback);
+        mClientAnimationStartCallback = startCallback;
+        mClientAnimationFinishCallback = finishCallback;
     }
 
     /**
@@ -352,7 +371,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
             if (wt != null && !wt.isVisibleRequested()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "  Commit wallpaper becoming invisible: %s", ar);
+                        "  Commit wallpaper becoming invisible: %s", wt);
                 wt.commitVisibility(false /* visible */);
             }
         }
@@ -362,6 +381,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mController.mAtm.mTaskSupervisor
                     .scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
         }
+
+        sendRemoteCallback(mClientAnimationFinishCallback);
 
         legacyRestoreNavigationBarFromApp();
     }
@@ -426,6 +447,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         reportStartReasonsToLogger();
 
+        // The callback is only populated for custom activity-level client animations
+        sendRemoteCallback(mClientAnimationStartCallback);
+
         // Manually show any activities that are visibleRequested. This is needed to properly
         // support simultaneous animation queueing/merging. Specifically, if transition A makes
         // an activity invisible, it's finishTransaction (which is applied *after* the animation)
@@ -437,6 +461,25 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar == null || !ar.mVisibleRequested) continue;
             transaction.show(ar.getSurfaceControl());
+
+            // Also manually show any non-reported parents. This is necessary in a few cases
+            // where a task is NOT organized but had its visibility changed within its direct
+            // parent. An example of this is if an alternate home leaf-task HB is started atop the
+            // normal home leaf-task HA: these are both in the Home root-task HR, so there will be a
+            // transition containing HA and HB where HA surface is hidden. If a standard task SA is
+            // launched on top, then HB finishes, no transition will happen since neither home is
+            // visible. When SA finishes, the transition contains HR rather than HA. Since home
+            // leaf-tasks are NOT organized, HA won't be in the transition and thus its surface
+            // wouldn't be shown. Just show is safe here since all other properties will have
+            // already been reset by the original hiding-transition's finishTransaction (we can't
+            // show in the finishTransaction because by then the activity doesn't hide until
+            // surface placement).
+            for (WindowContainer p = ar.getParent(); p != null && !mTargets.contains(p);
+                    p = p.getParent()) {
+                if (p.getSurfaceControl() != null) {
+                    transaction.show(p.getSurfaceControl());
+                }
+            }
         }
 
         mStartTransaction = transaction;
@@ -808,7 +851,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // of participants that should always be reported even if they aren't top.
         for (WindowContainer wc : participants) {
             // Don't include detached windows.
-            if (!wc.isAttached()) continue;
+            if (!wc.isAttached()) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "  Rejecting as detached: %s", wc);
+                continue;
+            }
 
             final ChangeInfo changeInfo = changes.get(wc);
 

@@ -17,6 +17,8 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+       xmlns:tools="http://schemas.android.com/tools"
+       tools:targetApi="28"
        android:shape="rectangle">
     <solid android:color="?androidprv:attr/colorSurface" />
     <corners

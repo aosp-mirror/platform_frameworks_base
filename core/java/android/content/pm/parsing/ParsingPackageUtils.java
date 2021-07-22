@@ -18,8 +18,10 @@ package android.content.pm.parsing;
 
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
@@ -46,7 +48,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ComponentParseUtils;
@@ -274,31 +275,25 @@ public class ParsingPackageUtils {
                                 manifestArray);
                     }
                 });
-        try {
-            result = parser.parsePackage(input, file, parseFlags);
-            if (result.isError()) {
-                return result;
-            }
-        } catch (PackageParser.PackageParserException e) {
-            return input.error(PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Error parsing package", e);
+        result = parser.parsePackage(input, file, parseFlags);
+        if (result.isError()) {
+            return input.error(result);
         }
 
-        try {
-            ParsingPackage pkg = result.getResult();
-            if (collectCertificates) {
-                pkg.setSigningDetails(
-                        ParsingPackageUtils.getSigningDetails(pkg, false /* skipVerify */));
+        final ParsingPackage pkg = result.getResult();
+        if (collectCertificates) {
+            final ParseResult<SigningDetails> ret =
+                    ParsingPackageUtils.getSigningDetails(input, pkg, false /*skipVerify*/);
+            if (ret.isError()) {
+                return input.error(ret);
             }
-
-            // Need to call this to finish the parsing stage
-            pkg.hideAsParsed();
-
-            return input.success(pkg);
-        } catch (PackageParser.PackageParserException e) {
-            return input.error(PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Error collecting package certificates", e);
+            pkg.setSigningDetails(ret.getResult());
         }
+
+        // Need to call this to finish the parsing stage
+        pkg.hideAsParsed();
+
+        return input.success(pkg);
     }
 
     private boolean mOnlyCoreApps;
@@ -328,8 +323,8 @@ public class ParsingPackageUtils {
      * requiring identical package name and version codes, a single base APK,
      * and unique split names.
      * <p>
-     * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #getSigningDetails(ParsingPackageRead, boolean)}.
+     * Note that this <em>does not</em> perform signature verification; that must
+     * be done separately in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
      *
      * If {@code useCaches} is true, the package parser might return a cached
      * result from a previous parse of the same {@code packageFile} with the same
@@ -338,9 +333,7 @@ public class ParsingPackageUtils {
      *
      * @see PackageParser#parsePackageLite(File, int)
      */
-    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile,
-            int flags)
-            throws PackageParserException {
+    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags) {
         if (packageFile.isDirectory()) {
             return parseClusterPackage(input, packageFile, flags);
         } else {
@@ -354,8 +347,8 @@ public class ParsingPackageUtils {
      * identical package name and version codes, a single base APK, and unique
      * split names.
      * <p>
-     * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #getSigningDetails(ParsingPackageRead, boolean)}.
+     * Note that this <em>does not</em> perform signature verification; that must
+     * be done separately in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
      */
     private ParseResult<ParsingPackage> parseClusterPackage(ParseInput input, File packageDir,
             int flags) {
@@ -405,15 +398,19 @@ public class ParsingPackageUtils {
 
                 for (int i = 0; i < num; i++) {
                     final AssetManager splitAssets = assetLoader.getSplitAssetManager(i);
-                    parseSplitApk(input, pkg, i, splitAssets, flags);
+                    final ParseResult<ParsingPackage> split =
+                            parseSplitApk(input, pkg, i, splitAssets, flags);
+                    if (split.isError()) {
+                        return input.error(split);
+                    }
                 }
             }
 
             pkg.setUse32BitAbi(lite.isUse32bitAbi());
             return input.success(pkg);
-        } catch (PackageParserException e) {
-            return input.error(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Failed to load assets: " + lite.getBaseApkPath(), e);
+        } catch (IllegalArgumentException e) {
+            return input.error(e.getCause() instanceof IOException ? INSTALL_FAILED_INVALID_APK
+                    : INSTALL_PARSE_FAILED_NOT_APK, e.getMessage(), e);
         } finally {
             IoUtils.closeQuietly(assetLoader);
         }
@@ -422,11 +419,11 @@ public class ParsingPackageUtils {
     /**
      * Parse the given APK file, treating it as as a single monolithic package.
      * <p>
-     * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #getSigningDetails(ParsingPackageRead, boolean)}.
+     * Note that this <em>does not</em> perform signature verification; that must
+     * be done separately in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
      */
     private ParseResult<ParsingPackage> parseMonolithicPackage(ParseInput input, File apkFile,
-            int flags) throws PackageParserException {
+            int flags) {
         final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseMonolithicPackageLite(input, apkFile, flags);
         if (liteResult.isError()) {
@@ -460,8 +457,7 @@ public class ParsingPackageUtils {
     }
 
     private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, File apkFile,
-            String codePath, SplitAssetLoader assetLoader, int flags)
-            throws PackageParserException {
+            String codePath, SplitAssetLoader assetLoader, int flags) {
         final String apkPath = apkFile.getAbsolutePath();
 
         String volumeUuid = null;
@@ -472,7 +468,13 @@ public class ParsingPackageUtils {
 
         if (DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
 
-        final AssetManager assets = assetLoader.getBaseAssetManager();
+        final AssetManager assets;
+        try {
+            assets = assetLoader.getBaseAssetManager();
+        } catch (IllegalArgumentException e) {
+            return input.error(e.getCause() instanceof IOException ? INSTALL_FAILED_INVALID_APK
+                    : INSTALL_PARSE_FAILED_NOT_APK, e.getMessage(), e);
+        }
         final int cookie = assets.findCookieForPath(apkPath);
         if (cookie == 0) {
             return input.error(INSTALL_PARSE_FAILED_BAD_MANIFEST,
@@ -529,7 +531,12 @@ public class ParsingPackageUtils {
             pkg.setVolumeUuid(volumeUuid);
 
             if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
-                pkg.setSigningDetails(getSigningDetails(pkg, false));
+                final ParseResult<SigningDetails> ret =
+                        getSigningDetails(input, pkg, false /*skipVerify*/);
+                if (ret.isError()) {
+                    return input.error(ret);
+                }
+                pkg.setSigningDetails(ret.getResult());
             } else {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
             }
@@ -635,11 +642,13 @@ public class ParsingPackageUtils {
      */
     private ParseResult<ParsingPackage> parseSplitApk(ParseInput input, ParsingPackage pkg,
             Resources res, XmlResourceParser parser, int flags, int splitIndex)
-            throws XmlPullParserException, IOException, PackageParserException {
-        AttributeSet attrs = parser;
-
+            throws XmlPullParserException, IOException {
         // We parsed manifest tag earlier; just skip past it
-        PackageParser.parsePackageSplitNames(parser, attrs);
+        final ParseResult<Pair<String, String>> packageSplitResult =
+                ApkLiteParseUtils.parsePackageSplitNames(input, parser);
+        if (packageSplitResult.isError()) {
+            return input.error(packageSplitResult);
+        }
 
         int type;
 
@@ -2961,11 +2970,9 @@ public class ParsingPackageUtils {
      *  construct a dummy ParseInput.
      */
     @CheckResult
-    public static SigningDetails getSigningDetails(ParsingPackageRead pkg, boolean skipVerify)
-            throws PackageParserException {
+    public static ParseResult<SigningDetails> getSigningDetails(ParseInput input,
+            ParsingPackageRead pkg, boolean skipVerify) {
         SigningDetails signingDetails = SigningDetails.UNKNOWN;
-
-        ParseInput input = ParseTypeImpl.forDefaultParsing().reset();
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
@@ -2978,8 +2985,7 @@ public class ParsingPackageUtils {
                     pkg.getTargetSdkVersion()
             );
             if (result.isError()) {
-                throw new PackageParser.PackageParserException(result.getErrorCode(),
-                        result.getErrorMessage(), result.getException());
+                return input.error(result);
             }
 
             signingDetails = result.getResult();
@@ -2996,15 +3002,11 @@ public class ParsingPackageUtils {
                             pkg.getTargetSdkVersion()
                     );
                     if (result.isError()) {
-                        throw new PackageParser.PackageParserException(result.getErrorCode(),
-                                result.getErrorMessage(), result.getException());
+                        return input.error(result);
                     }
-
-
-                    signingDetails = result.getResult();
                 }
             }
-            return signingDetails;
+            return result;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3020,30 +3022,29 @@ public class ParsingPackageUtils {
             // must use v2 signing scheme
             minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2;
         }
-        SigningDetails verified;
-        try {
-            if (skipVerify) {
-                // systemDir APKs are already trusted, save time by not verifying; since the
-                // signature is not verified and some system apps can have their V2+ signatures
-                // stripped allow pulling the certs from the jar signature.
-                verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                        baseCodePath, SigningDetails.SignatureSchemeVersion.JAR);
-            } else {
-                verified = ApkSignatureVerifier.verify(baseCodePath, minSignatureScheme);
-            }
-        } catch (PackageParserException e) {
-            return input.error(PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                    "Failed collecting certificates for " + baseCodePath, e);
+        final ParseResult<SigningDetails> verified;
+        if (skipVerify) {
+            // systemDir APKs are already trusted, save time by not verifying; since the
+            // signature is not verified and some system apps can have their V2+ signatures
+            // stripped allow pulling the certs from the jar signature.
+            verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(input, baseCodePath,
+                    SigningDetails.SignatureSchemeVersion.JAR);
+        } else {
+            verified = ApkSignatureVerifier.verify(input, baseCodePath, minSignatureScheme);
+        }
+
+        if (verified.isError()) {
+            return input.error(verified);
         }
 
         // Verify that entries are signed consistently with the first pkg
         // we encountered. Note that for splits, certificates may have
         // already been populated during an earlier parse of a base APK.
         if (existingSigningDetails == SigningDetails.UNKNOWN) {
-            return input.success(verified);
+            return verified;
         } else {
             if (!Signature.areExactMatch(existingSigningDetails.getSignatures(),
-                    verified.getSignatures())) {
+                    verified.getResult().getSignatures())) {
                 return input.error(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                         baseCodePath + " has mismatched certificates");
             }

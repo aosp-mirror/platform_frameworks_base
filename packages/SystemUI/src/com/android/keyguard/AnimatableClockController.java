@@ -134,11 +134,15 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     };
 
     @Override
+    protected void onInit() {
+        mIsDozing = mStatusBarStateController.isDozing();
+    }
+
+    @Override
     protected void onViewAttached() {
         updateLocale();
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
-        mIsDozing = mStatusBarStateController.isDozing();
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBatteryController.addCallback(mBatteryCallback);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);

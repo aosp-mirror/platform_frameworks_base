@@ -1190,7 +1190,7 @@
          <code>dalvik.system.DelegateLastClassLoader</code>. If unspecified,
          the default value of this attribute is <code>dalvik.system.PathClassLoader</code>.
 
-         If an unknown classloader is provided, a PackageParserException with cause
+         If an unknown classloader is provided, a PackageManagerException with cause
          <code>PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED</code> will be
          thrown and the app will not be installed.
          -->

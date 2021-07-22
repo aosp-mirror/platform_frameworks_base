@@ -3691,6 +3691,8 @@ class Task extends TaskFragment {
             }
             sb.append(" visible=");
             sb.append(shouldBeVisible(null /* starting */));
+            sb.append(" visibleRequested=");
+            sb.append(isVisibleRequested());
             sb.append(" mode=");
             sb.append(windowingModeToString(getWindowingMode()));
             sb.append(" translucent=");
@@ -4640,10 +4642,8 @@ class Task extends TaskFragment {
             mAtmService.continueWindowLayout();
         }
 
-        if (!mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
-            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            mRootWindowContainer.resumeFocusedTasksTopActivities();
-        }
+        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+        mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     void resumeNextFocusAfterReparent() {

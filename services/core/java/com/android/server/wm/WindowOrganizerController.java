@@ -319,7 +319,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
-        mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
         try {
             if (transition != null) {
                 // First check if we have a display rotation transition and if so, update it.
@@ -408,7 +407,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 task.setMainWindowSizeChangeTransaction(sft);
             }
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
-                mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
                 mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -430,7 +428,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
             }
         } finally {
-            mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             mService.continueWindowLayout();
         }
     }
@@ -1094,11 +1091,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         final TaskFragment taskFragment = new TaskFragment(mService,
                 creationParams.getFragmentToken(), true /* createdByOrganizer */);
+        // Set task fragment organizer immediately, since it might have to be notified about further
+        // actions.
+        taskFragment.setTaskFragmentOrganizer(
+                creationParams.getOrganizer(), ownerActivity.getPid());
         ownerActivity.getTask().addChild(taskFragment, POSITION_TOP);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
-        taskFragment.setTaskFragmentOrganizer(
-                creationParams.getOrganizer(), ownerActivity.getPid());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
     }
 
