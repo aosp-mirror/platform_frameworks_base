@@ -55,6 +55,7 @@ import com.android.server.appsearch.external.localstorage.converter.SearchSpecTo
 import com.android.server.appsearch.external.localstorage.converter.SetSchemaResponseToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.TypePropertyPathToProtoConverter;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
@@ -284,6 +285,9 @@ public final class AppSearchImpl implements Closeable {
 
                 // Log the time it took to read the data that goes into the cache maps
                 if (initStatsBuilder != null) {
+                    // In case there is some error for getAllNamespaces, we can still
+                    // set the latency for preparation.
+                    // If there is no error, the value will be overridden by the actual one later.
                     initStatsBuilder
                             .setStatusCode(
                                     statusProtoToResultCode(
@@ -1326,8 +1330,7 @@ public final class AppSearchImpl implements Closeable {
                     deleteResultProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
 
             // Update derived maps
-            int numDocumentsDeleted =
-                    deleteResultProto.getDeleteStats().getNumDocumentsDeleted();
+            int numDocumentsDeleted = deleteResultProto.getDeleteStats().getNumDocumentsDeleted();
             updateDocumentCountAfterRemovalLocked(packageName, numDocumentsDeleted);
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -2162,12 +2165,13 @@ public final class AppSearchImpl implements Closeable {
      *     #CHECK_OPTIMIZE_INTERVAL}, {@link IcingSearchEngine#getOptimizeInfo()} will be triggered
      *     and the counter will be reset.
      */
-    public void checkForOptimize(int mutationSize) throws AppSearchException {
+    public void checkForOptimize(int mutationSize, @Nullable OptimizeStats.Builder builder)
+            throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
             mOptimizeIntervalCountLocked += mutationSize;
             if (mOptimizeIntervalCountLocked >= CHECK_OPTIMIZE_INTERVAL) {
-                checkForOptimize();
+                checkForOptimize(builder);
             }
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -2183,14 +2187,15 @@ public final class AppSearchImpl implements Closeable {
      * <p>{@link IcingSearchEngine#optimize()} should be called only if {@link
      * OptimizeStrategy#shouldOptimize(GetOptimizeInfoResultProto)} return true.
      */
-    public void checkForOptimize() throws AppSearchException {
+    public void checkForOptimize(@Nullable OptimizeStats.Builder builder)
+            throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
             GetOptimizeInfoResultProto optimizeInfo = getOptimizeInfoResultLocked();
             checkSuccess(optimizeInfo.getStatus());
             mOptimizeIntervalCountLocked = 0;
             if (mOptimizeStrategy.shouldOptimize(optimizeInfo)) {
-                optimize();
+                optimize(builder);
             }
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -2201,13 +2206,18 @@ public final class AppSearchImpl implements Closeable {
     }
 
     /** Triggers {@link IcingSearchEngine#optimize()} directly. */
-    public void optimize() throws AppSearchException {
+    public void optimize(@Nullable OptimizeStats.Builder builder) throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
             mLogUtil.piiTrace("optimize, request");
             OptimizeResultProto optimizeResultProto = mIcingSearchEngineLocked.optimize();
             mLogUtil.piiTrace(
                     "optimize, response", optimizeResultProto.getStatus(), optimizeResultProto);
+            if (builder != null) {
+                builder.setStatusCode(statusProtoToResultCode(optimizeResultProto.getStatus()));
+                AppSearchLoggerHelper.copyNativeStats(
+                        optimizeResultProto.getOptimizeStats(), builder);
+            }
             checkSuccess(optimizeResultProto.getStatus());
         } finally {
             mReadWriteLock.writeLock().unlock();
