@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
-import com.android.internal.inputmethod.InputConnectionCommand;
-
-/**
- * Interface from an input method to the application, allowing it to perform
- * edits on the current input field and other interactions with the application.
- * {@hide}
- */
-oneway interface IInputContext {
-    void doEdit(in InputConnectionCommand command);
-}
+parcelable InputConnectionCommand;
