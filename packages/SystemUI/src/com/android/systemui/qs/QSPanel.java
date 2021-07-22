@@ -55,6 +55,8 @@ public class QSPanel extends LinearLayout implements Tunable {
     private static final String TAG = "QSPanel";
 
     protected final Context mContext;
+    private final int mMediaTopMargin;
+    private final int mMediaTotalBottomMargin;
 
     /**
      * The index where the content starts that needs to be moved between parents
@@ -98,13 +100,14 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected LinearLayout mHorizontalContentContainer;
 
     protected QSTileLayout mTileLayout;
-    private int mMediaTotalBottomMargin;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
+        mMediaTopMargin = getResources().getDimensionPixelSize(
+                R.dimen.qs_tile_margin_vertical);
         mContext = context;
 
         setOrientation(VERTICAL);
@@ -326,7 +329,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private void updateHorizontalLinearLayoutMargins() {
         if (mHorizontalLinearLayout != null && !displayMediaMarginsOnMedia()) {
             LayoutParams lp = (LayoutParams) mHorizontalLinearLayout.getLayoutParams();
-            lp.bottomMargin = mMediaTotalBottomMargin - getPaddingBottom();
+            lp.bottomMargin = Math.max(mMediaTotalBottomMargin - getPaddingBottom(), 0);
             mHorizontalLinearLayout.setLayoutParams(lp);
         }
     }
@@ -339,6 +342,13 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     protected boolean displayMediaMarginsOnMedia() {
         return true;
+    }
+
+    /**
+     * @return true if the media view needs margin on the top to separate it from the qs tiles
+     */
+    protected boolean mediaNeedsTopMargin() {
+        return false;
     }
 
     private boolean needsDynamicRowsAndColumns() {
@@ -405,7 +415,9 @@ public class QSPanel extends LinearLayout implements Tunable {
             // necessary if the view isn't horizontal, since otherwise the padding is
             // carried in the parent of this view (to ensure correct vertical alignment)
             layoutParams.bottomMargin = !horizontal || displayMediaMarginsOnMedia()
-                    ? mMediaTotalBottomMargin - getPaddingBottom() : 0;
+                    ? Math.max(mMediaTotalBottomMargin - getPaddingBottom(), 0) : 0;
+            layoutParams.topMargin = mediaNeedsTopMargin() && !horizontal
+                    ? mMediaTopMargin : 0;
         }
     }
 
@@ -673,6 +685,7 @@ public class QSPanel extends LinearLayout implements Tunable {
                 mTileLayout.setMaxColumns(horizontal ? 2 : 4);
             }
             updateMargins(mediaHostView);
+            mHorizontalLinearLayout.setVisibility(horizontal ? View.VISIBLE : View.GONE);
         }
     }
 
