@@ -1091,11 +1091,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         final TaskFragment taskFragment = new TaskFragment(mService,
                 creationParams.getFragmentToken(), true /* createdByOrganizer */);
+        // Set task fragment organizer immediately, since it might have to be notified about further
+        // actions.
+        taskFragment.setTaskFragmentOrganizer(
+                creationParams.getOrganizer(), ownerActivity.getPid());
         ownerActivity.getTask().addChild(taskFragment, POSITION_TOP);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
-        taskFragment.setTaskFragmentOrganizer(
-                creationParams.getOrganizer(), ownerActivity.getPid());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
     }
 
