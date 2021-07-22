@@ -18,7 +18,6 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.util.ArraySet;
 
@@ -340,17 +339,6 @@ public class SetSchemaResponse {
         @NonNull
         public String getNamespace() {
             return mBundle.getString(NAMESPACE_FIELD, /*defaultValue=*/ "");
-        }
-
-        /**
-         * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-         * @hide
-         */
-        @Deprecated
-        @UnsupportedAppUsage
-        @NonNull
-        public String getUri() {
-            return getDocumentId();
         }
 
         /** Returns the id of the {@link GenericDocument} that failed to be migrated. */
