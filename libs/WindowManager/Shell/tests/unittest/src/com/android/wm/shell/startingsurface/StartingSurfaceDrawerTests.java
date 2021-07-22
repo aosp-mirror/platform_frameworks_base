@@ -214,6 +214,7 @@ public class StartingSurfaceDrawerTests {
         final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.topActivityInfo = info;
         taskInfo.taskId = taskId;
+        windowInfo.targetActivityInfo = info;
         windowInfo.taskInfo = taskInfo;
         return windowInfo;
     }
