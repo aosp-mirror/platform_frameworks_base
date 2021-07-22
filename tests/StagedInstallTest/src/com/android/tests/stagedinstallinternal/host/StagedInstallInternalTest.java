@@ -470,6 +470,14 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         runPhase("testRebootlessUpdates");
     }
 
+    @Test
+    public void testRebootlessUpdate_hasStagedSessionWithSameApex_fails() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        runPhase("testRebootlessUpdate_hasStagedSessionWithSameApex_fails");
+    }
+
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {
         String baseDir = "/data/app-staging";
         try {

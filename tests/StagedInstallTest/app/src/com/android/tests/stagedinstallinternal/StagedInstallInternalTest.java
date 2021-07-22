@@ -57,6 +57,9 @@ public class StagedInstallInternalTest {
     private static final TestApp APEX_WRONG_SHA_V2 = new TestApp(
             "ApexWrongSha2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
             "com.android.apex.cts.shim.v2_wrong_sha.apex");
+    private static final TestApp APEX_V2 = new TestApp(
+            "ApexV2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
+            "com.android.apex.cts.shim.v2.apex");
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -386,6 +389,19 @@ public class StagedInstallInternalTest {
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
         }
+    }
+
+    @Test
+    public void testRebootlessUpdate_hasStagedSessionWithSameApex_fails() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+
+        int sessionId = Install.single(APEX_V2).setStaged().commit();
+        assertSessionReady(sessionId);
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Staged session " + sessionId + " already contains " + SHIM_APEX_PACKAGE_NAME,
+                Install.single(APEX_V2));
+
     }
 
     private static void assertSessionApplied(int sessionId) {
