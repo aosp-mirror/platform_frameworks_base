@@ -9753,6 +9753,17 @@ package android.telephony {
     field public static final int REASON_UNSPECIFIED = 0; // 0x0
   }
 
+  public final class PhoneCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public int[] getDeviceNrCapabilities();
+    method @IntRange(from=1) public int getMaxActiveDataSubscriptions();
+    method @IntRange(from=1) public int getMaxActiveVoiceSubscriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
+    field public static final int DEVICE_NR_CAPABILITY_NSA = 1; // 0x1
+    field public static final int DEVICE_NR_CAPABILITY_SA = 2; // 0x2
+  }
+
   public final class PhoneNumberRange implements android.os.Parcelable {
     ctor public PhoneNumberRange(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
     method public int describeContents();
@@ -10272,6 +10283,7 @@ package android.telephony {
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getMergedImsisFromGroup();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.PhoneCapability getPhoneCapability();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();

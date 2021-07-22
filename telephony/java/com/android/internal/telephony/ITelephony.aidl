@@ -43,6 +43,7 @@ import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
+import android.telephony.PhoneCapability;
 import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
 import android.telephony.RadioAccessSpecifier;
@@ -2440,4 +2441,9 @@ interface ITelephony {
      * of error.
      */
     int prepareForUnattendedReboot();
+
+    /**
+     * Gets the current phone capability.
+     */
+    PhoneCapability getPhoneCapability();
 }
