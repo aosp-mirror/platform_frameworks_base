@@ -211,7 +211,9 @@ class PinnedTaskController {
         }
         mFreezingTaskConfig = true;
         mDestRotatedBounds = new Rect(bounds);
-        continueOrientationChange();
+        if (!mService.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            continueOrientationChange();
+        }
     }
 
     /**
