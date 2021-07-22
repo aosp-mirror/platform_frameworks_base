@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
@@ -238,6 +239,133 @@ public final class InputMethodDebug {
                 return "SHOW_SOFT_INPUT_BY_INSETS_API";
             default:
                 return "Unknown=" + reason;
+        }
+    }
+
+    /**
+     * Converts {@link InputConnectionCommandType} to human readable {@link String}.
+     */
+    public static String inputConnectionCommandTypeToString(@InputConnectionCommandType int type) {
+        switch (type) {
+            case InputConnectionCommandType.BEGIN_BATCH_EDIT:
+                return "beginBatchEdit";
+            case InputConnectionCommandType.CLEAR_META_KEY_STATES:
+                return "clearMetaKeyStates";
+            case InputConnectionCommandType.COMMIT_COMPLETION:
+                return "commitCompletion";
+            case InputConnectionCommandType.COMMIT_CONTENT:
+                return "commitContent";
+            case InputConnectionCommandType.COMMIT_CORRECTION:
+                return "commitCorrection";
+            case InputConnectionCommandType.COMMIT_TEXT:
+                return "commitText";
+            case InputConnectionCommandType.DELETE_SURROUNDING_TEXT:
+                return "deleteSurroundingText";
+            case InputConnectionCommandType.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS:
+                return "deleteSurroundingTextInCodePoints";
+            case InputConnectionCommandType.END_BATCH_EDIT:
+                return "endBatchEdit";
+            case InputConnectionCommandType.FINISH_COMPOSING_TEXT:
+                return "finishComposingText";
+            case InputConnectionCommandType.GET_CURSOR_CAPS_MODE:
+                return "getCursorCapsMode";
+            case InputConnectionCommandType.GET_EXTRACTED_TEXT:
+                return "getExtractedText";
+            case InputConnectionCommandType.GET_SELECTED_TEXT:
+                return "getSelectedText";
+            case InputConnectionCommandType.GET_SURROUNDING_TEXT:
+                return "getSurroundingText";
+            case InputConnectionCommandType.GET_TEXT_AFTER_CURSOR:
+                return "getTextAfterCursor";
+            case InputConnectionCommandType.GET_TEXT_BEFORE_CURSOR:
+                return "getTextBeforeCursor";
+            case InputConnectionCommandType.PERFORM_CONTEXT_MENU_ACTION:
+                return "performContextMenuAction";
+            case InputConnectionCommandType.PERFORM_EDITOR_ACTION:
+                return "performEditorAction";
+            case InputConnectionCommandType.PERFORM_SPELL_CHECK:
+                return "performSpellCheck";
+            case InputConnectionCommandType.REQUEST_CURSOR_UPDATES:
+                return "requestCursorUpdates";
+            case InputConnectionCommandType.SEND_KEY_EVENT:
+                return "sendKeyEvent";
+            case InputConnectionCommandType.SET_COMPOSING_REGION:
+                return "setComposingRegion";
+            case InputConnectionCommandType.SET_COMPOSING_TEXT:
+                return "setComposingText";
+            case InputConnectionCommandType.SET_IME_CONSUMES_INPUT:
+                return "setImeConsumesInput";
+            case InputConnectionCommandType.SET_SELECTION:
+                return "setSelection";
+            default:
+                return "Unknown=" + type;
+        }
+    }
+
+    /**
+     * Converts {@link InputConnectionCommand} to human readable {@link String}.
+     */
+    @NonNull
+    public static String dumpInputConnectionCommand(@Nullable InputConnectionCommand command) {
+        if (command == null) {
+            return "null";
+        }
+        switch (command.mCommandType) {
+            case InputConnectionCommandType.BEGIN_BATCH_EDIT:
+                return "beginBatchEdit()";
+            case InputConnectionCommandType.CLEAR_META_KEY_STATES:
+                return "clearMetaKeyStates(" + command.mIntArg0 + ")";
+            case InputConnectionCommandType.COMMIT_COMPLETION:
+                return "commitCompletion(" + command.mParcelable + ")";
+            case InputConnectionCommandType.COMMIT_CONTENT:
+                return "commitContent(" + command.mParcelable + ", " + command.mFlags + ", "
+                        + command.mBundle + ")";
+            case InputConnectionCommandType.COMMIT_CORRECTION:
+                return "commitCorrection(" + command.mParcelable + ")";
+            case InputConnectionCommandType.COMMIT_TEXT:
+                return "commitText(" + command.mCharSequence + ", " + command.mIntArg0 + ")";
+            case InputConnectionCommandType.DELETE_SURROUNDING_TEXT:
+                return "deleteSurroundingText(" + command.mIntArg0 + ", " + command.mIntArg1 + ")";
+            case InputConnectionCommandType.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS:
+                return "deleteSurroundingTextInCodePoints(" + command.mIntArg0 + ", "
+                        + command.mIntArg1 + ")";
+            case InputConnectionCommandType.END_BATCH_EDIT:
+                return "endBatchEdit()";
+            case InputConnectionCommandType.FINISH_COMPOSING_TEXT:
+                return "finishComposingText()";
+            case InputConnectionCommandType.GET_CURSOR_CAPS_MODE:
+                return "getCursorCapsMode(" + command.mIntArg0 + ")";
+            case InputConnectionCommandType.GET_EXTRACTED_TEXT:
+                return "getExtractedText(" + command.mParcelable + ", " + command.mFlags + ")";
+            case InputConnectionCommandType.GET_SELECTED_TEXT:
+                return "getSelectedText(" + command.mFlags + ")";
+            case InputConnectionCommandType.GET_SURROUNDING_TEXT:
+                return "getSurroundingText(" + command.mIntArg0 + ", " + command.mIntArg1 + ", "
+                        + command.mFlags + ")";
+            case InputConnectionCommandType.GET_TEXT_AFTER_CURSOR:
+                return "getTextAfterCursor(" + command.mIntArg0 + ", " + command.mFlags + ")";
+            case InputConnectionCommandType.GET_TEXT_BEFORE_CURSOR:
+                return "getTextBeforeCursor(" + command.mIntArg0 + ", " + command.mFlags + ")";
+            case InputConnectionCommandType.PERFORM_CONTEXT_MENU_ACTION:
+                return "performContextMenuAction(" + command.mIntArg0 + ")";
+            case InputConnectionCommandType.PERFORM_EDITOR_ACTION:
+                return "performEditorAction(" + command.mIntArg0 + ")";
+            case InputConnectionCommandType.PERFORM_SPELL_CHECK:
+                return "performSpellCheck()";
+            case InputConnectionCommandType.REQUEST_CURSOR_UPDATES:
+                return "requestCursorUpdates(" + command.mIntArg0 + ")";
+            case InputConnectionCommandType.SEND_KEY_EVENT:
+                return "sendKeyEvent(" + command.mParcelable + ")";
+            case InputConnectionCommandType.SET_COMPOSING_REGION:
+                return "setComposingRegion(" + command.mIntArg0 + ", " + command.mIntArg1 + ")";
+            case InputConnectionCommandType.SET_COMPOSING_TEXT:
+                return "setComposingText(" + command.mCharSequence + ", " + command.mIntArg0 + ")";
+            case InputConnectionCommandType.SET_IME_CONSUMES_INPUT:
+                return "setImeConsumesInput(" + (command.mIntArg0 != 0) + ")";
+            case InputConnectionCommandType.SET_SELECTION:
+                return "setSelection(" + command.mIntArg0 + ", " + command.mIntArg1 + ")";
+            default:
+                return "unknown(type=" + command.mCommandType + ")";
         }
     }
 
