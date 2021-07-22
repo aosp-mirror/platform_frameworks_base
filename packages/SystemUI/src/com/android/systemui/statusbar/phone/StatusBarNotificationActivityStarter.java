@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -230,12 +229,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLogger.logStartingActivityFromClick(sbn.getKey());
 
         final NotificationEntry entry = row.getEntry();
-        RemoteInputController controller = mRemoteInputManager.getController();
-        if (controller.isRemoteInputActive(entry)
+        if (mRemoteInputManager.isRemoteInputActive(entry)
                 && !TextUtils.isEmpty(row.getActiveRemoteInputText())) {
             // We have an active remote input typed and the user clicked on the notification.
             // this was probably unintentional, so we're closing the edit text instead.
-            controller.closeRemoteInputs();
+            mRemoteInputManager.closeRemoteInputs();
             return;
         }
         Notification notification = sbn.getNotification();
@@ -265,8 +263,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             @Override
             public boolean onDismiss() {
                 return handleNotificationClickAfterKeyguardDismissed(
-                        entry, row, controller, intent,
-                        isActivityIntent, animate, showOverLockscreen);
+                        entry, row, intent, isActivityIntent, animate, showOverLockscreen);
             }
 
             @Override
@@ -286,7 +283,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private boolean handleNotificationClickAfterKeyguardDismissed(
             NotificationEntry entry,
             ExpandableNotificationRow row,
-            RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
             boolean animate,
@@ -294,8 +290,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLogger.logHandleClickAfterKeyguardDismissed(entry.getKey());
 
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
-                entry, row, controller, intent,
-                isActivityIntent, animate);
+                entry, row, intent, isActivityIntent, animate);
 
         if (showOverLockscreen) {
             mShadeController.addPostCollapseAction(runnable);
@@ -315,7 +310,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private void handleNotificationClickAfterPanelCollapsed(
             NotificationEntry entry,
             ExpandableNotificationRow row,
-            RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
             boolean animate) {
@@ -354,7 +348,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
         }
-        if (!TextUtils.isEmpty(remoteInputText) && !controller.isSpinning(notificationKey)) {
+        if (!TextUtils.isEmpty(remoteInputText)
+                && !mRemoteInputManager.isSpinning(notificationKey)) {
             fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                     remoteInputText.toString());
         }

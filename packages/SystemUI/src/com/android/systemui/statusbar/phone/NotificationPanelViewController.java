@@ -1602,7 +1602,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private boolean isQsExpansionEnabled() {
         return mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient
-                && !mRemoteInputManager.getController().isRemoteInputActive();
+                && !mRemoteInputManager.isRemoteInputActive();
     }
 
     public void expandWithQs() {
