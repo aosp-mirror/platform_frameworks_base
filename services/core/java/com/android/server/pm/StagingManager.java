@@ -58,6 +58,7 @@ import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -66,8 +67,10 @@ import android.util.SparseIntArray;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -84,7 +87,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -1297,6 +1302,86 @@ public class StagingManager {
             session = mStagedSessions.get(sessionId);
         }
         return session;
+    }
+
+    /**
+     * Returns ApexInfo about APEX contained inside the session as a {@code Map<String, ApexInfo>},
+     * where the key of the map is the module name of the ApexInfo.
+     *
+     * Returns an empty map if there is any error.
+     */
+    @VisibleForTesting
+    @NonNull
+    Map<String, ApexInfo> getStagedApexInfos(@NonNull PackageInstallerSession session) {
+        Preconditions.checkArgument(session != null, "Session is null");
+        Preconditions.checkArgument(!session.hasParentSessionId(),
+                session.sessionId + " session has parent session");
+        Preconditions.checkArgument(sessionContainsApex(session),
+                session.sessionId + " session does not contain apex");
+
+        // Even if caller calls this method on ready session, the session could be abandoned
+        // right after this method is called.
+        if (!session.isStagedSessionReady() || session.isDestroyed()) {
+            return Collections.emptyMap();
+        }
+
+        ApexSessionParams params = new ApexSessionParams();
+        params.sessionId = session.sessionId;
+        final IntArray childSessionIds = new IntArray();
+        if (session.isMultiPackage()) {
+            for (int id : session.getChildSessionIds()) {
+                if (isApexSession(getStagedSession(id))) {
+                    childSessionIds.add(id);
+                }
+            }
+        }
+        params.childSessionIds = childSessionIds.toArray();
+
+        ApexInfo[] infos = mApexManager.getStagedApexInfos(params);
+        Map<String, ApexInfo> result = new ArrayMap<>();
+        for (ApexInfo info : infos) {
+            result.put(info.moduleName, info);
+        }
+        return result;
+    }
+
+    /**
+     * Returns apex module names of all packages that are staged ready
+     */
+    List<String> getStagedApexModuleNames() {
+        List<String> result = new ArrayList<>();
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final PackageInstallerSession session = mStagedSessions.valueAt(i);
+                if (!session.isStagedSessionReady() || session.isDestroyed()
+                        || session.hasParentSessionId() || !sessionContainsApex(session)) {
+                    continue;
+                }
+                result.addAll(getStagedApexInfos(session).keySet());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns ApexInfo of the {@code moduleInfo} provided if it is staged, otherwise returns null.
+     */
+    @Nullable
+    ApexInfo getStagedApexInfo(String moduleName) {
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final PackageInstallerSession session = mStagedSessions.valueAt(i);
+                if (!session.isStagedSessionReady() || session.isDestroyed()
+                        || session.hasParentSessionId() || !sessionContainsApex(session)) {
+                    continue;
+                }
+                ApexInfo result = getStagedApexInfos(session).get(moduleName);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
     }
 
     private final class PreRebootVerificationHandler extends Handler {
