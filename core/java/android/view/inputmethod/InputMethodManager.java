@@ -1201,8 +1201,14 @@ public final class InputMethodManager {
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * No longer used.  Do not use.
+     *
+     * TODO(b/192412909) Remove this method.
+     *
+     * @deprecated Was kept due to {@link UnsupportedAppUsage}.  Will be removed soon.
+     * @hide
+     */
     public IInputMethodClient getClient() {
         return mClient;
     }
