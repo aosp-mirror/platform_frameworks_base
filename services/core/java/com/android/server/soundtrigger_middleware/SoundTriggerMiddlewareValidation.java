@@ -279,6 +279,9 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         /** Activity state. */
         Activity activityState = Activity.LOADED;
 
+        /** Recognition config, used to start the model. */
+        RecognitionConfig config;
+
         /** Human-readable description of the model. */
         final String description;
 
@@ -455,6 +458,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 // From here on, every exception isn't client's fault.
                 try {
                     mDelegate.startRecognition(modelHandle, config);
+                    modelState.config = config;
                     modelState.activityState = ModelState.Activity.ACTIVE;
                 } catch (Exception e) {
                     throw handleException(e);
@@ -508,6 +512,27 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 // After the call, the state is LOADED, unless it has been first preempted.
                 if (modelState.activityState != ModelState.Activity.PREEMPTED) {
                     modelState.activityState = ModelState.Activity.LOADED;
+                }
+            }
+        }
+
+        private void restartIfIntercepted(int modelHandle) {
+            synchronized (SoundTriggerMiddlewareValidation.this) {
+                // State validation.
+                if (mState == ModuleStatus.DETACHED) {
+                    return;
+                }
+                ModelState modelState = mLoadedModels.get(modelHandle);
+                if (modelState == null
+                        || modelState.activityState != ModelState.Activity.INTERCEPTED) {
+                    return;
+                }
+                try {
+                    mDelegate.startRecognition(modelHandle, modelState.config);
+                    modelState.activityState = ModelState.Activity.ACTIVE;
+                    Log.i(TAG, "Restarted intercepted model " + modelHandle);
+                } catch (Exception e) {
+                    Log.i(TAG, "Failed to restart intercepted model " + modelHandle, e);
                 }
             }
         }
@@ -720,6 +745,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                         ModelState modelState = mLoadedModels.get(modelHandle);
                         if (event.status != RecognitionStatus.FORCED) {
                             modelState.activityState = ModelState.Activity.INTERCEPTED;
+                            // If we failed to deliver an actual event to the client, they would
+                            // never know to restart it whenever circumstances change. Thus, we
+                            // restart it here. We do this from a separate thread to avoid any
+                            // race conditions.
+                            new Thread(() -> restartIfIntercepted(modelHandle)).start();
                         }
                     }
                 }
@@ -744,6 +774,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                         ModelState modelState = mLoadedModels.get(modelHandle);
                         if (event.common.status != RecognitionStatus.FORCED) {
                             modelState.activityState = ModelState.Activity.INTERCEPTED;
+                            // If we failed to deliver an actual event to the client, they would
+                            // never know to restart it whenever circumstances change. Thus, we
+                            // restart it here. We do this from a separate thread to avoid any
+                            // race conditions.
+                            new Thread(() -> restartIfIntercepted(modelHandle)).start();
                         }
                     }
                 }
