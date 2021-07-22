@@ -171,6 +171,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mCameraSlot = getResources().getString(com.android.internal.R.string.status_bar_camera);
         mMicSlot = getResources().getString(com.android.internal.R.string.status_bar_microphone);
         mLocationSlot = getResources().getString(com.android.internal.R.string.status_bar_location);
+
+        // Don't need to worry about tuner settings for this icon
+        mBatteryMeterViewController.ignoreTunerUpdates();
     }
 
     @Override

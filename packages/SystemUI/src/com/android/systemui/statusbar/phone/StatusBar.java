@@ -224,6 +224,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.unfold.config.UnfoldTransitionConfig;
@@ -540,6 +541,7 @@ public class StatusBar extends SystemUI implements
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final WallpaperManager mWallpaperManager;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final TunerService mTunerService;
 
     private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
@@ -873,7 +875,8 @@ public class StatusBar extends SystemUI implements
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             WallpaperManager wallpaperManager,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            Optional<StartingSurface> startingSurfaceOptional) {
+            Optional<StartingSurface> startingSurfaceOptional,
+            TunerService tunerService) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -956,6 +959,7 @@ public class StatusBar extends SystemUI implements
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mWallpaperManager = wallpaperManager;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mTunerService = tunerService;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1212,7 +1216,9 @@ public class StatusBar extends SystemUI implements
                     mPhoneStatusBarViewController.init();
 
                     mBatteryMeterViewController = new BatteryMeterViewController(
-                            mStatusBarView.findViewById(R.id.battery), mConfigurationController
+                            mStatusBarView.findViewById(R.id.battery),
+                            mConfigurationController,
+                            mTunerService
                     );
                     mBatteryMeterViewController.init();
 
