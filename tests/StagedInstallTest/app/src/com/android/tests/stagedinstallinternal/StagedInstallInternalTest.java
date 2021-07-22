@@ -55,7 +55,7 @@ public class StagedInstallInternalTest {
     private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
             APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
     private static final TestApp APEX_WRONG_SHA_V2 = new TestApp(
-            "ApexWrongSha2", SHIM_APEX_PACKAGE_NAME, 2, /*isApex*/true,
+            "ApexWrongSha2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
             "com.android.apex.cts.shim.v2_wrong_sha.apex");
 
     private File mTestStateFile = new File(
@@ -234,6 +234,96 @@ public class StagedInstallInternalTest {
         int sessionId = retrieveLastSessionId();
         assertSessionFailed(sessionId);
         assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+    }
+
+    @Test
+    public void testApexInstallerNotInAllowListCanNotInstall_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+        // We don't really care which APEX we are trying to install here, since the session creation
+        // should fail immediately.
+        InstallUtils.commitExpectingFailure(
+                SecurityException.class,
+                "Installer not allowed to commit staged install",
+                Install.single(APEX_WRONG_SHA_V2).setBypassStangedInstallerCheck(false)
+                        .setStaged());
+    }
+
+    @Test
+    public void testApexInstallerNotInAllowListCanNotInstall_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+        // We don't really care which APEX we are trying to install here, since the session creation
+        // should fail immediately.
+        InstallUtils.commitExpectingFailure(
+                SecurityException.class,
+                "Installer not allowed to commit non-staged APEX install",
+                Install.single(APEX_WRONG_SHA_V2).setBypassStangedInstallerCheck(false));
+    }
+
+    @Test
+    public void testApexNotInAllowListCanNotInstall_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false).setStaged());
+    }
+
+    @Test
+    public void testApexNotInAllowListCanNotInstall_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false));
+    }
+
+    @Test
+    public void testVendorApexWrongInstaller_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false).setStaged());
+    }
+
+    @Test
+    public void testVendorApexWrongInstaller_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false));
+    }
+
+    @Test
+    public void testVendorApexCorrectInstaller_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        int sessionId =
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false).setStaged().commit();
+        InstallUtils.getPackageInstaller().abandonSession(sessionId);
+    }
+
+    @Test
+    public void testVendorApexCorrectInstaller_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        Install.single(apex).setBypassAllowedApexUpdateCheck(false).commit();
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(2);
     }
 
     @Test
