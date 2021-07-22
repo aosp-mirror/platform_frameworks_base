@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -44,6 +45,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -369,7 +371,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final boolean isInLockTaskMode = mService.isInLockTaskMode();
                 for (int i = 0; i < hopSize; ++i) {
                     effects |= applyHierarchyOp(hops.get(i), effects, syncId, transition,
-                            isInLockTaskMode, caller);
+                            isInLockTaskMode, caller, t.getErrorCallbackToken(),
+                            t.getTaskFragmentOrganizer());
                 }
             }
             // Queue-up bounds-change transactions for tasks which are now organized. Do
@@ -525,7 +528,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int applyHierarchyOp(WindowContainerTransaction.HierarchyOp hop, int effects,
             int syncId, @Nullable Transition transition, boolean isInLockTaskMode,
-            @Nullable CallerInfo caller) {
+            @Nullable CallerInfo caller, @Nullable IBinder errorCallbackToken,
+            @Nullable ITaskFragmentOrganizer organizer) {
         final int type = hop.getType();
         switch (type) {
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
@@ -652,7 +656,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
                         hop.getTaskFragmentCreationOptions();
-                createTaskFragment(taskFragmentCreationOptions);
+                createTaskFragment(taskFragmentCreationOptions, errorCallbackToken);
                 break;
             case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT:
                 wc = WindowContainer.fromBinder(hop.getContainer());
@@ -665,28 +669,36 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     throw new IllegalArgumentException(
                             "Can only delete organized TaskFragment, but not Task.");
                 }
-                deleteTaskFragment(taskFragment);
+                deleteTaskFragment(taskFragment, errorCallbackToken);
                 break;
             case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 fragmentToken = hop.getContainer();
                 if (!mLaunchTaskFragments.containsKey(fragmentToken)) {
-                    throw new IllegalArgumentException(
+                    final Throwable exception = new IllegalArgumentException(
                             "Not allowed to operate with invalid fragment token");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
                 }
                 final Intent activityIntent = hop.getActivityIntent();
                 final Bundle activityOptions = hop.getLaunchOptions();
-                mService.getActivityStartController()
-                        .startActivityInTaskFragment(mLaunchTaskFragments.get(fragmentToken),
-                                activityIntent, activityOptions);
-                // TODO(b/189385246) : report the failure back to the organizer if the activity
-                // start failed
+                final TaskFragment tf = mLaunchTaskFragments.get(fragmentToken);
+                final int result = mService.getActivityStartController()
+                        .startActivityInTaskFragment(tf, activityIntent, activityOptions);
+                if (!isStartResultSuccessful(result)) {
+                    final Throwable exception =
+                            new ActivityNotFoundException("start activity in taskFragment failed");
+                    sendTaskFragmentOperationFailure(tf.getTaskFragmentOrganizer(),
+                            errorCallbackToken, exception);
+                }
                 break;
             case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
                 fragmentToken = hop.getNewParent();
                 final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
                 if (!mLaunchTaskFragments.containsKey(fragmentToken) || activity == null) {
-                    throw new IllegalArgumentException(
+                    final Throwable exception = new IllegalArgumentException(
                             "Not allowed to operate with invalid fragment token or activity.");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
                 }
                 activity.reparent(mLaunchTaskFragments.get(fragmentToken), POSITION_TOP);
                 break;
@@ -700,7 +712,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             + oldParent);
                     break;
                 }
-                reparentTaskFragment(oldParent, newParent);
+                reparentTaskFragment(oldParent, newParent, errorCallbackToken);
                 break;
         }
         return effects;
@@ -1076,17 +1088,25 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams) {
+    void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams,
+            @Nullable IBinder errorCallbackToken) {
         final ActivityRecord ownerActivity =
                 ActivityRecord.forTokenLocked(creationParams.getOwnerToken());
         if (ownerActivity == null || ownerActivity.getTask() == null) {
-            // TODO(b/189385246)  : report the failure back to the organizer
+            final Throwable exception =
+                    new IllegalArgumentException("Not allowed to operate with invalid ownerToken");
+            sendTaskFragmentOperationFailure(creationParams.getOrganizer(), errorCallbackToken,
+                    exception);
             return;
         }
         // The ownerActivity has to belong to the same app as the root Activity of the target Task.
         final ActivityRecord rootActivity = ownerActivity.getTask().getRootActivity();
         if (rootActivity.getUid() != ownerActivity.getUid()) {
-            // TODO(b/189385246) : report the failure back to the organizer
+            final Throwable exception =
+                    new IllegalArgumentException("Not allowed to operate with the ownerToken while "
+                            + "the root activity of the target task belong to the different app");
+            sendTaskFragmentOperationFailure(creationParams.getOrganizer(), errorCallbackToken,
+                    exception);
             return;
         }
         final TaskFragment taskFragment = new TaskFragment(mService,
@@ -1102,13 +1122,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     void reparentTaskFragment(@NonNull WindowContainer oldParent,
-            @Nullable WindowContainer newParent) {
+            @Nullable WindowContainer newParent,  @Nullable IBinder errorCallbackToken) {
         WindowContainer parent = newParent;
         if (parent == null && oldParent.asTaskFragment() != null) {
             parent = oldParent.asTaskFragment().getTask();
         }
         if (parent == null) {
-            // TODO(b/189385246)  : report the failure back to the organizer
+            final Throwable exception =
+                    new IllegalArgumentException("Not allowed to operate with invalid container");
+            sendTaskFragmentOperationFailure(oldParent.asTaskFragment().getTaskFragmentOrganizer(),
+                    errorCallbackToken, exception);
             return;
         }
         while (oldParent.hasChild()) {
@@ -1116,11 +1139,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    void deleteTaskFragment(@NonNull TaskFragment taskFragment) {
+    void deleteTaskFragment(@NonNull TaskFragment taskFragment,
+            @Nullable IBinder errorCallbackToken) {
         final int index = mLaunchTaskFragments.indexOfValue(taskFragment);
         if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Not allowed to operate with invalid taskFragment");
+            final Throwable exception =
+                    new IllegalArgumentException("Not allowed to operate with invalid "
+                            + "taskFragment");
+            sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
+                    errorCallbackToken, exception);
+            return;
         }
         mLaunchTaskFragments.removeAt(index);
         taskFragment.removeImmediately();
@@ -1134,5 +1162,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             mPid = Binder.getCallingPid();
             mUid = Binder.getCallingUid();
         }
+    }
+
+    void sendTaskFragmentOperationFailure(@NonNull ITaskFragmentOrganizer organizer,
+            @Nullable IBinder errorCallbackToken, @NonNull Throwable exception) {
+        if (organizer == null) {
+            throw new IllegalArgumentException("Not allowed to operate with invalid organizer");
+        }
+        mService.mTaskFragmentOrganizerController
+                .onTaskFragmentError(organizer, errorCallbackToken, exception);
     }
 }
