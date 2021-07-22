@@ -23,12 +23,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
-import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -416,34 +414,6 @@ public final class Completable {
     }
 
     /**
-     * @return an instance of {@link Completable.InputBindResult}.
-     */
-    public static Completable.InputBindResult createInputBindResult() {
-        return new Completable.InputBindResult();
-    }
-
-    /**
-     * @return an instance of {@link Completable.InputMethodSubtype}.
-     */
-    public static Completable.InputMethodSubtype createInputMethodSubtype() {
-        return new Completable.InputMethodSubtype();
-    }
-
-    /**
-     * @return an instance of {@link Completable.InputMethodSubtypeList}.
-     */
-    public static Completable.InputMethodSubtypeList createInputMethodSubtypeList() {
-        return new Completable.InputMethodSubtypeList();
-    }
-
-    /**
-     * @return an instance of {@link Completable.InputMethodInfoList}.
-     */
-    public static Completable.InputMethodInfoList createInputMethodInfoList() {
-        return new Completable.InputMethodInfoList();
-    }
-
-    /**
      * @return an instance of {@link Completable.IInputContentUriToken}.
      */
     public static Completable.IInputContentUriToken createIInputContentUriToken() {
@@ -478,30 +448,6 @@ public final class Completable {
      */
     public static final class SurroundingText
             extends Values<android.view.inputmethod.SurroundingText> { }
-
-    /**
-     * Completable object of {@link com.android.internal.view.InputBindResult}.
-     */
-    public static final class InputBindResult
-            extends Values<com.android.internal.view.InputBindResult> { }
-
-    /**
-     * Completable object of {@link android.view.inputmethod.InputMethodSubtype}.
-     */
-    public static final class InputMethodSubtype
-            extends Values<android.view.inputmethod.InputMethodSubtype> { }
-
-    /**
-     * Completable object of {@link List<android.view.inputmethod.InputMethodSubtype>}.
-     */
-    public static final class InputMethodSubtypeList
-            extends Values<List<android.view.inputmethod.InputMethodSubtype>> { }
-
-    /**
-     * Completable object of {@link List<android.view.inputmethod.InputMethodInfo>}.
-     */
-    public static final class InputMethodInfoList
-            extends Values<List<android.view.inputmethod.InputMethodInfo>> { }
 
     /**
      * Completable object of {@link IInputContentUriToken>}.
