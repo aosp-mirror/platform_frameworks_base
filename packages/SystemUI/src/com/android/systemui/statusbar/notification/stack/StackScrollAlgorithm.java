@@ -394,7 +394,8 @@ public class StackScrollAlgorithm {
                     ambientState.getExpansionFraction(), true /* notification */);
         }
 
-        if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
+        if (ambientState.isShadeExpanded() && view.mustStayOnScreen()
+                && viewState.yTranslation >= 0) {
             // Even if we're not scrolled away we're in view and we're also not in the
             // shelf. We can relax the constraints and let us scroll off the top!
             float end = viewState.yTranslation + viewState.height + ambientState.getStackY();
