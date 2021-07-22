@@ -3365,6 +3365,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
             pw.println("    mFingerprintLockedOut=" + mFingerprintLockedOut);
+            pw.println("    mFingerprintLockedOutPermanent=" + mFingerprintLockedOutPermanent);
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
             if (isUdfpsEnrolled()) {
                 pw.println("        shouldListenForUdfps=" + shouldListenForFingerprint(true));
@@ -3386,8 +3387,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
             pw.println("    disabled(DPM)=" + isFaceDisabled(userId));
             pw.println("    possible=" + isUnlockWithFacePossible(userId));
+            pw.println("    listening: actual=" + mFaceRunningState
+                    + " expected=(" + (shouldListenForFace() ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
+            pw.println("    mFaceLockedOutPermanent=" + mFaceLockedOutPermanent);
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
         }
