@@ -885,7 +885,10 @@ public class KeyguardIndicationController {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
-                if (biometricSourceType == BiometricSourceType.FACE && shouldSuppressFaceMsg()) {
+                if (biometricSourceType == BiometricSourceType.FACE
+                        && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
+                    // suggest trying fingerprint
+                    showTransientIndication(R.string.keyguard_try_fingerprint);
                     return;
                 }
                 showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
@@ -903,9 +906,11 @@ public class KeyguardIndicationController {
                 return;
             }
             if (biometricSourceType == BiometricSourceType.FACE
-                    && shouldSuppressFaceMsg()
+                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()
                     && mKeyguardUpdateMonitor.isScreenOn()) {
+                // suggest trying fingerprint
+                showTransientIndication(R.string.keyguard_try_fingerprint);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -956,7 +961,7 @@ public class KeyguardIndicationController {
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
         }
 
-        private boolean shouldSuppressFaceMsg() {
+        private boolean shouldSuppressFaceMsgAndShowTryFingerprintMsg() {
             // For dual biometric, don't show face auth messages
             return mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
                 && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
