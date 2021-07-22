@@ -29,12 +29,14 @@ import android.app.appsearch.exceptions.AppSearchException;
 
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
 import com.android.server.appsearch.icing.proto.DeleteStatsProto;
 import com.android.server.appsearch.icing.proto.DocumentProto;
 import com.android.server.appsearch.icing.proto.InitializeStatsProto;
+import com.android.server.appsearch.icing.proto.OptimizeStatsProto;
 import com.android.server.appsearch.icing.proto.PutDocumentStatsProto;
 import com.android.server.appsearch.icing.proto.PutResultProto;
 import com.android.server.appsearch.icing.proto.QueryStatsProto;
@@ -81,6 +83,7 @@ public class AppSearchLoggerTest {
         @Nullable InitializeStats mInitializeStats;
         @Nullable SearchStats mSearchStats;
         @Nullable RemoveStats mRemoveStats;
+        @Nullable OptimizeStats mOptimizeStats;
 
         @Override
         public void logStats(@NonNull CallStats stats) {
@@ -105,6 +108,11 @@ public class AppSearchLoggerTest {
         @Override
         public void logStats(@NonNull RemoveStats stats) {
             mRemoveStats = stats;
+        }
+
+        @Override
+        public void logStats(@NonNull OptimizeStats stats) {
+            mOptimizeStats = stats;
         }
     }
 
@@ -284,6 +292,48 @@ public class AppSearchLoggerTest {
         assertThat(rStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
         assertThat(rStats.getDeleteType()).isEqualTo(nativeDeleteType);
         assertThat(rStats.getDeletedDocumentCount()).isEqualTo(nativeNumDocumentDeleted);
+    }
+
+    @Test
+    public void testAppSearchLoggerHelper_testCopyNativeStats_optimize() {
+        int nativeLatencyMillis = 1;
+        int nativeDocumentStoreOptimizeLatencyMillis = 2;
+        int nativeIndexRestorationLatencyMillis = 3;
+        int nativeNumOriginalDocuments = 4;
+        int nativeNumDeletedDocuments = 5;
+        int nativeNumExpiredDocuments = 6;
+        long nativeStorageSizeBeforeBytes = Integer.MAX_VALUE + 1;
+        long nativeStorageSizeAfterBytes = Integer.MAX_VALUE + 2;
+        long nativeTimeSinceLastOptimizeMillis = Integer.MAX_VALUE + 3;
+        OptimizeStatsProto optimizeStatsProto =
+                OptimizeStatsProto.newBuilder()
+                        .setLatencyMs(nativeLatencyMillis)
+                        .setDocumentStoreOptimizeLatencyMs(nativeDocumentStoreOptimizeLatencyMillis)
+                        .setIndexRestorationLatencyMs(nativeIndexRestorationLatencyMillis)
+                        .setNumOriginalDocuments(nativeNumOriginalDocuments)
+                        .setNumDeletedDocuments(nativeNumDeletedDocuments)
+                        .setNumExpiredDocuments(nativeNumExpiredDocuments)
+                        .setStorageSizeBefore(nativeStorageSizeBeforeBytes)
+                        .setStorageSizeAfter(nativeStorageSizeAfterBytes)
+                        .setTimeSinceLastOptimizeMs(nativeTimeSinceLastOptimizeMillis)
+                        .build();
+        OptimizeStats.Builder oBuilder = new OptimizeStats.Builder();
+
+        AppSearchLoggerHelper.copyNativeStats(optimizeStatsProto, oBuilder);
+
+        OptimizeStats oStats = oBuilder.build();
+        assertThat(oStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
+        assertThat(oStats.getDocumentStoreOptimizeLatencyMillis())
+                .isEqualTo(nativeDocumentStoreOptimizeLatencyMillis);
+        assertThat(oStats.getIndexRestorationLatencyMillis())
+                .isEqualTo(nativeIndexRestorationLatencyMillis);
+        assertThat(oStats.getOriginalDocumentCount()).isEqualTo(nativeNumOriginalDocuments);
+        assertThat(oStats.getDeletedDocumentCount()).isEqualTo(nativeNumDeletedDocuments);
+        assertThat(oStats.getExpiredDocumentCount()).isEqualTo(nativeNumExpiredDocuments);
+        assertThat(oStats.getStorageSizeBeforeBytes()).isEqualTo(nativeStorageSizeBeforeBytes);
+        assertThat(oStats.getStorageSizeAfterBytes()).isEqualTo(nativeStorageSizeAfterBytes);
+        assertThat(oStats.getTimeSinceLastOptimizeMillis())
+                .isEqualTo(nativeTimeSinceLastOptimizeMillis);
     }
 
     //
