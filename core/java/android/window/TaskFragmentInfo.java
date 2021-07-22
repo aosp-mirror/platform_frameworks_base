@@ -18,9 +18,12 @@ package android.window;
 
 import static android.app.WindowConfiguration.WindowingMode;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,7 +38,7 @@ import java.util.List;
 public final class TaskFragmentInfo implements Parcelable {
 
     /**
-     * Client assigned unique token in {@link TaskFragmentCreationParams#fragmentToken} to create
+     * Client assigned unique token in {@link TaskFragmentCreationParams#mFragmentToken} to create
      * this TaskFragment with.
      */
     @NonNull
@@ -59,19 +62,20 @@ public final class TaskFragmentInfo implements Parcelable {
      */
     private final List<IBinder> mActivities = new ArrayList<>();
 
+    /** Relative position of the fragment's top left corner in the parent container. */
+    private final Point mPositionInParent;
+
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
             @NonNull Configuration configuration, boolean isEmpty, boolean isVisible,
-            List<IBinder> activities) {
-        if (fragmentToken == null) {
-            throw new IllegalArgumentException("Invalid TaskFragmentInfo.");
-        }
-        mFragmentToken = fragmentToken;
-        mToken = token;
+            List<IBinder> activities, @NonNull Point positionInParent) {
+        mFragmentToken = requireNonNull(fragmentToken);
+        mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
         mIsEmpty = isEmpty;
         mIsVisible = isVisible;
         mActivities.addAll(activities);
+        mPositionInParent = requireNonNull(positionInParent);
     }
 
     public IBinder getFragmentToken() {
@@ -98,6 +102,12 @@ public final class TaskFragmentInfo implements Parcelable {
         return mActivities;
     }
 
+    /** Returns the relative position of the fragment's top left corner in the parent container. */
+    @NonNull
+    public Point getPositionInParent() {
+        return mPositionInParent;
+    }
+
     @WindowingMode
     public int getWindowingMode() {
         return mConfiguration.windowConfiguration.getWindowingMode();
@@ -117,7 +127,8 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mIsEmpty == that.mIsEmpty
                 && mIsVisible == that.mIsVisible
                 && getWindowingMode() == that.getWindowingMode()
-                && mActivities.equals(that.mActivities);
+                && mActivities.equals(that.mActivities)
+                && mPositionInParent.equals(that.mPositionInParent);
     }
 
     private TaskFragmentInfo(Parcel in) {
@@ -127,6 +138,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mIsEmpty = in.readBoolean();
         mIsVisible = in.readBoolean();
         in.readBinderList(mActivities);
+        mPositionInParent = requireNonNull(in.readTypedObject(Point.CREATOR));
     }
 
     @Override
@@ -137,6 +149,7 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeBoolean(mIsEmpty);
         dest.writeBoolean(mIsVisible);
         dest.writeBinderList(mActivities);
+        dest.writeTypedObject(mPositionInParent, flags);
     }
 
     @NonNull
@@ -160,6 +173,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " token=" + mToken
                 + " isEmpty=" + mIsEmpty
                 + " isVisible=" + mIsVisible
+                + " positionInParent=" + mPositionInParent
                 + "}";
     }
 

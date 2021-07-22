@@ -89,6 +89,9 @@ class NotificationShadeDepthController @Inject constructor(
     private var prevShadeDirection = 0
     private var prevShadeVelocity = 0f
 
+    // Only for dumpsys
+    private var lastAppliedBlur = 0
+
     @VisibleForTesting
     var shadeSpring = DepthAnimation()
     var shadeAnimation = DepthAnimation()
@@ -201,6 +204,7 @@ class NotificationShadeDepthController @Inject constructor(
         val opaque = scrimsVisible && !blursDisabledForAppLaunch
         Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
+        lastAppliedBlur = blur
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
                 wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
@@ -270,6 +274,11 @@ class NotificationShadeDepthController @Inject constructor(
                 shadeAnimation.finishIfRunning()
                 brightnessMirrorSpring.finishIfRunning()
             }
+        }
+
+        override fun onDozeAmountChanged(linear: Float, eased: Float) {
+            wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
+            scheduleUpdate()
         }
     }
 
@@ -428,6 +437,9 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
             it.println("blursDisabledForAppLaunch: $blursDisabledForAppLaunch")
+            it.println("qsPanelExpansion: $qsPanelExpansion")
+            it.println("transitionToFullShadeProgress: $transitionToFullShadeProgress")
+            it.println("lastAppliedBlur: $lastAppliedBlur")
         }
     }
 

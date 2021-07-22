@@ -52,6 +52,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
+    private boolean mIsPointerDown;
 
     FingerprintAuthenticationClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
@@ -160,6 +161,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
+        mIsPointerDown = true;
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
         if (getListener() != null) {
             try {
@@ -172,6 +174,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     @Override
     public void onPointerUp() {
+        mIsPointerDown = false;
         UdfpsHelper.onFingerUp(getFreshDaemon());
         if (getListener() != null) {
             try {
@@ -180,6 +183,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                 Slog.e(TAG, "Remote exception", e);
             }
         }
+    }
+
+    @Override
+    public boolean isPointerDown() {
+        return mIsPointerDown;
     }
 
     @Override
