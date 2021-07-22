@@ -112,6 +112,8 @@ filegroup {
     srcs: [
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
+        "android/os/IHintManager.aidl",
+        "android/os/IHintSession.aidl",
         "android/os/IThermalEventListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
