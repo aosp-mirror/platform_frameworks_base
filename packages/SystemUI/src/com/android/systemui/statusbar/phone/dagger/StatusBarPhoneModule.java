@@ -48,6 +48,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -105,6 +106,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -213,6 +215,8 @@ public interface StatusBarPhoneModule {
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
+            UnfoldTransitionConfig unfoldTransitionConfig,
+            Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -302,6 +306,8 @@ public interface StatusBarPhoneModule {
                 notificationIconAreaController,
                 brightnessSliderFactory,
                 chargingRippleAnimationController,
+                unfoldTransitionConfig,
+                unfoldLightRevealOverlayAnimation,
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,
