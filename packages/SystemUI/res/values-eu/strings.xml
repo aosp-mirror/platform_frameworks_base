@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kamera atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kamera edo mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dituzte."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Gailua"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Egin gora aplikazioa aldatzeko"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastatu eskuinera aplikazioa azkar aldatzeko"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aldatu ikuspegi orokorra"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Kargatuta"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Kargatzen"</string>

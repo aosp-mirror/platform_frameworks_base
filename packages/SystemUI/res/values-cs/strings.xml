@@ -437,8 +437,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš fotoaparát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš fotoaparát či mikrofon."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Zařízení"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Přejetím nahoru přepnete aplikace"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Přetažením doprava rychle přepnete aplikace"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Přepnout přehled"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Nabito"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Nabíjení"</string>

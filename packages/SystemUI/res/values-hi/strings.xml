@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, कैमरे का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे का इस्तेमाल करने की अनुमति दी गई है."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरा या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें ये इस्तेमाल करने की अनुमति है."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"डिवाइस"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"खास जानकारी टॉगल करें"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज हो रही है"</string>
