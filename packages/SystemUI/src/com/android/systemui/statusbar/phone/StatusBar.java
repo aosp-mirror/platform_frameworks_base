@@ -444,6 +444,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mStatusBarLocationPublisher;
+    private final StatusBarIconController mStatusBarIconController;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -810,6 +811,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
+            StatusBarIconController statusBarIconController,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -898,6 +900,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
+        mStatusBarIconController = statusBarIconController;
         mFeatureFlags = featureFlags;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
@@ -1205,7 +1208,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 mStatusBarLocationPublisher,
                                 mNotificationIconAreaController,
                                 mFeatureFlags,
-                                () -> Optional.of(this)),
+
+                                () -> Optional.of(this),
+                                mStatusBarIconController,
+                                mKeyguardStateController,
+                                mNetworkController,
+                                mStatusBarStateController,
+                                mCommandQueue
+                        ),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 

@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.events
 
 import android.animation.Animator
 import android.annotation.UiThread
+import android.graphics.Point
+import android.graphics.Rect
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -31,9 +33,16 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
-import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
-import com.android.systemui.statusbar.phone.StatusBarMarginUpdatedListener
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.leak.RotationUtils
+import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
+import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
+import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
+import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
+import com.android.systemui.util.leak.RotationUtils.Rotation
 
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
@@ -58,7 +67,8 @@ import javax.inject.Inject
 class PrivacyDotViewController @Inject constructor(
     @Main private val mainExecutor: Executor,
     private val stateController: StatusBarStateController,
-    private val locationPublisher: StatusBarLocationPublisher,
+    private val configurationController: ConfigurationController,
+    private val contentInsetsProvider: StatusBarContentInsetsProvider,
     private val animationScheduler: SystemStatusAnimationScheduler
 ) {
     private var sbHeightPortrait = 0
@@ -84,18 +94,27 @@ class PrivacyDotViewController @Inject constructor(
     // Privacy dots are created in ScreenDecoration's UiThread, which is not the main thread
     private var uiExecutor: DelayableExecutor? = null
 
-    private val marginListener: StatusBarMarginUpdatedListener =
-            object : StatusBarMarginUpdatedListener {
-        override fun onStatusBarMarginUpdated(marginLeft: Int, marginRight: Int) {
-            setStatusBarMargins(marginLeft, marginRight)
-        }
-    }
-
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
     init {
-        locationPublisher.addCallback(marginListener)
+        contentInsetsProvider.addCallback(object : StatusBarContentInsetsChangedListener {
+            override fun onStatusBarContentInsetsChanged() {
+                dlog("onStatusBarContentInsetsChanged: ")
+                setNewLayoutRects()
+            }
+        })
+        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
+            override fun onLayoutDirectionChanged(isRtl: Boolean) {
+                synchronized(this) {
+                    val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
+                    nextViewState = nextViewState.copy(
+                            layoutRtl = isRtl,
+                            designatedCorner = corner
+                    )
+                }
+            }
+        })
 
         stateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onExpandedChanged(isExpanded: Boolean) {
@@ -123,16 +142,19 @@ class PrivacyDotViewController @Inject constructor(
     fun setNewRotation(rot: Int) {
         dlog("updateRotation: $rot")
 
+        val isRtl: Boolean
         synchronized(lock) {
             if (rot == nextViewState.rotation) {
                 return
             }
+
+            isRtl = nextViewState.layoutRtl
         }
 
         // If we rotated, hide all dotes until the next state resolves
         setCornerVisibilities(View.INVISIBLE)
 
-        val newCorner = selectDesignatedCorner(rot)
+        val newCorner = selectDesignatedCorner(rot, isRtl)
         val index = newCorner.cornerIndex()
 
         val h = when (rot) {
@@ -222,14 +244,76 @@ class PrivacyDotViewController @Inject constructor(
         }
     }
 
+    @UiThread
+    private fun setCornerSizes(state: ViewState) {
+        // StatusBarContentInsetsProvider can tell us the location of the privacy indicator dot
+        // in every rotation. The only thing we need to check is rtl
+        val rtl = state.layoutRtl
+        val size = Point()
+        tl.context.display.getRealSize(size)
+        val currentRotation = RotationUtils.getExactRotation(tl.context)
+
+        val displayWidth: Int
+        val displayHeight: Int
+        if (currentRotation == ROTATION_LANDSCAPE || currentRotation == ROTATION_SEASCAPE) {
+            displayWidth = size.y
+            displayHeight = size.x
+        } else {
+            displayWidth = size.x
+            displayHeight = size.y
+        }
+
+        var rot = activeRotationForCorner(tl, rtl)
+        var contentInsets = state.contentRectForRotation(rot)
+        (tl.layoutParams as FrameLayout.LayoutParams).apply {
+            height = contentInsets.height()
+            if (rtl) {
+                width = contentInsets.left
+            } else {
+                width = displayHeight - contentInsets.right
+            }
+        }
+
+        rot = activeRotationForCorner(tr, rtl)
+        contentInsets = state.contentRectForRotation(rot)
+        (tr.layoutParams as FrameLayout.LayoutParams).apply {
+            height = contentInsets.height()
+            if (rtl) {
+                width = contentInsets.left
+            } else {
+                width = displayWidth - contentInsets.right
+            }
+        }
+
+        rot = activeRotationForCorner(br, rtl)
+        contentInsets = state.contentRectForRotation(rot)
+        (br.layoutParams as FrameLayout.LayoutParams).apply {
+            height = contentInsets.height()
+            if (rtl) {
+                width = contentInsets.left
+            } else {
+                width = displayHeight - contentInsets.right
+            }
+        }
+
+        rot = activeRotationForCorner(bl, rtl)
+        contentInsets = state.contentRectForRotation(rot)
+        (bl.layoutParams as FrameLayout.LayoutParams).apply {
+            height = contentInsets.height()
+            if (rtl) {
+                width = contentInsets.left
+            } else {
+                width = displayWidth - contentInsets.right
+            }
+        }
+    }
+
     // Designated view will be the one at statusbar's view.END
     @UiThread
-    private fun selectDesignatedCorner(r: Int): View? {
+    private fun selectDesignatedCorner(r: Int, isRtl: Boolean): View? {
         if (!this::tl.isInitialized) {
             return null
         }
-
-        val isRtl = tl.isLayoutRtl
 
         return when (r) {
             0 -> if (isRtl) tl else tr
@@ -282,6 +366,17 @@ class PrivacyDotViewController @Inject constructor(
         return modded
     }
 
+    @Rotation
+    private fun activeRotationForCorner(corner: View, rtl: Boolean): Int {
+        // Each corner will only be visible in a single rotation, based on rtl
+        return when (corner) {
+            tr -> if (rtl) ROTATION_LANDSCAPE else ROTATION_NONE
+            tl -> if (rtl) ROTATION_NONE else ROTATION_SEASCAPE
+            br -> if (rtl) ROTATION_UPSIDE_DOWN else ROTATION_LANDSCAPE
+            else /* bl */ -> if (rtl) ROTATION_SEASCAPE else ROTATION_UPSIDE_DOWN
+        }
+    }
+
     private fun widthForCorner(corner: Int, left: Int, right: Int): Int {
         return when (corner) {
             TOP_LEFT, BOTTOM_LEFT -> left
@@ -303,15 +398,32 @@ class PrivacyDotViewController @Inject constructor(
         bl = bottomLeft
         br = bottomRight
 
-        val dc = selectDesignatedCorner(0)
+        val rtl = configurationController.isLayoutRtl
+        val dc = selectDesignatedCorner(0, rtl)
+
         val index = dc.cornerIndex()
 
         mainExecutor.execute {
             animationScheduler.addCallback(systemStatusAnimationCallback)
         }
 
+        val left = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_SEASCAPE)
+        val top = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        val right = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_LANDSCAPE)
+        val bottom = contentInsetsProvider
+                .getStatusBarContentInsetsForRotation(ROTATION_UPSIDE_DOWN)
+
         synchronized(lock) {
-            nextViewState = nextViewState.copy(designatedCorner = dc, cornerIndex = index)
+            nextViewState = nextViewState.copy(
+                    viewInitialized = true,
+                    designatedCorner = dc,
+                    cornerIndex = index,
+                    seascapeRect = left,
+                    portraitRect = top,
+                    landscapeRect = right,
+                    upsideDownRect = bottom,
+                    layoutRtl = rtl
+            )
         }
     }
 
@@ -322,19 +434,6 @@ class PrivacyDotViewController @Inject constructor(
     fun setStatusBarHeights(portrait: Int, landscape: Int) {
         sbHeightPortrait = portrait
         sbHeightLandscape = landscape
-    }
-
-    /**
-     * The dot view containers will fill the margin in order to position the dots correctly
-     *
-     * @param left the space between the status bar contents and the left side of the screen
-     * @param right space between the status bar contents and the right side of the screen
-     */
-    private fun setStatusBarMargins(left: Int, right: Int) {
-        dlog("setStatusBarMargins l=$left r=$right")
-        synchronized(lock) {
-            nextViewState = nextViewState.copy(marginLeft = left, marginRight = right)
-        }
     }
 
     private fun updateStatusBarState() {
@@ -377,6 +476,11 @@ class PrivacyDotViewController @Inject constructor(
     @UiThread
     private fun resolveState(state: ViewState) {
         dlog("resolveState $state")
+        if (!state.viewInitialized) {
+            dlog("resolveState: view is not initialized. skipping.")
+            return
+        }
+
         if (state == currentViewState) {
             dlog("resolveState: skipping")
             return
@@ -387,21 +491,13 @@ class PrivacyDotViewController @Inject constructor(
             updateRotations(state.rotation)
         }
 
-        if (state.height != currentViewState.height) {
-            updateHeights(state.rotation)
-        }
-
-        if (state.marginLeft != currentViewState.marginLeft ||
-                state.marginRight != currentViewState.marginRight) {
-            updateCornerSizes(state.marginLeft, state.marginRight, state.rotation)
+        if (state.needsLayout(currentViewState)) {
+            setCornerSizes(state)
+            views.forEach { it.requestLayout() }
         }
 
         if (state.designatedCorner != currentViewState.designatedCorner) {
             updateDesignatedCorner(state.designatedCorner, state.shouldShowDot())
-        }
-
-        if (state.needsLayout(currentViewState)) {
-            views.forEach { it.requestLayout() }
         }
 
         val shouldShow = state.shouldShowDot()
@@ -441,6 +537,30 @@ class PrivacyDotViewController @Inject constructor(
         }
         return -1
     }
+
+    // Returns [left, top, right, bottom] aka [seascape, none, landscape, upside-down]
+    private fun getLayoutRects(): List<Rect> {
+        val left = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_SEASCAPE)
+        val top = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        val right = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_LANDSCAPE)
+        val bottom = contentInsetsProvider
+                .getStatusBarContentInsetsForRotation(ROTATION_UPSIDE_DOWN)
+
+        return listOf(left, top, right, bottom)
+    }
+
+    private fun setNewLayoutRects() {
+        val rects = getLayoutRects()
+
+        synchronized(lock) {
+            nextViewState = nextViewState.copy(
+                    seascapeRect = rects[0],
+                    portraitRect = rects[1],
+                    landscapeRect = rects[2],
+                    upsideDownRect = rects[3]
+            )
+        }
+    }
 }
 
 private fun dlog(s: String) {
@@ -461,7 +581,7 @@ const val BOTTOM_RIGHT = 2
 const val BOTTOM_LEFT = 3
 private const val DURATION = 160L
 private const val TAG = "PrivacyDotViewController"
-private const val DEBUG = true
+private const val DEBUG = false
 private const val DEBUG_VERBOSE = false
 
 private fun Int.toGravity(): Int {
@@ -485,14 +605,20 @@ private fun Int.innerGravity(): Int {
 }
 
 private data class ViewState(
+    val viewInitialized: Boolean = false,
+
     val systemPrivacyEventIsActive: Boolean = false,
     val shadeExpanded: Boolean = false,
     val qsExpanded: Boolean = false,
 
+    val portraitRect: Rect? = null,
+    val landscapeRect: Rect? = null,
+    val upsideDownRect: Rect? = null,
+    val seascapeRect: Rect? = null,
+    val layoutRtl: Boolean = false,
+
     val rotation: Int = 0,
     val height: Int = 0,
-    val marginLeft: Int = 0,
-    val marginRight: Int = 0,
     val cornerIndex: Int = -1,
     val designatedCorner: View? = null
 ) {
@@ -502,7 +628,20 @@ private data class ViewState(
 
     fun needsLayout(other: ViewState): Boolean {
         return rotation != other.rotation ||
-                marginRight != other.marginRight ||
-                height != other.height
+                layoutRtl != other.layoutRtl ||
+                portraitRect != other.portraitRect ||
+                landscapeRect != other.landscapeRect ||
+                upsideDownRect != other.upsideDownRect ||
+                seascapeRect != other.seascapeRect
+    }
+
+    fun contentRectForRotation(@Rotation rot: Int): Rect {
+        return when (rot) {
+            ROTATION_NONE -> portraitRect!!
+            ROTATION_LANDSCAPE -> landscapeRect!!
+            ROTATION_UPSIDE_DOWN -> upsideDownRect!!
+            ROTATION_SEASCAPE -> seascapeRect!!
+            else -> throw IllegalArgumentException("not a rotation ($rot)")
+        }
     }
 }
