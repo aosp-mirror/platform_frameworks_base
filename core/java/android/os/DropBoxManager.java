@@ -72,7 +72,7 @@ public class DropBoxManager {
     /** Flag value: Content is human-readable UTF-8 text (can be combined with IS_GZIPPED). */
     public static final int IS_TEXT = 2;
 
-    /** Flag value: Content can be decompressed with {@link java.util.zip.GZIPOutputStream}. */
+    /** Flag value: Content can be decompressed with java.util.zip.GZIPOutputStream. */
     public static final int IS_GZIPPED = 4;
 
     /** Flag value for serialization only: Value is a byte array, not a file descriptor */

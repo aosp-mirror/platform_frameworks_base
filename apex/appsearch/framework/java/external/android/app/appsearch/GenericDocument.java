@@ -51,9 +51,6 @@ import java.util.Set;
 public class GenericDocument {
     private static final String TAG = "AppSearchGenericDocumen";
 
-    /** The maximum {@link String#length} of a {@link String} field. */
-    private static final int MAX_STRING_LENGTH = 20_000;
-
     /** The maximum number of indexed properties a document can have. */
     private static final int MAX_INDEXED_PROPERTIES = 16;
 
@@ -1286,15 +1283,6 @@ public class GenericDocument {
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
                     throw new IllegalArgumentException("The String at " + i + " is null.");
-                } else if (values[i].length() > MAX_STRING_LENGTH) {
-                    throw new IllegalArgumentException(
-                            "The String at "
-                                    + i
-                                    + " length is: "
-                                    + values[i].length()
-                                    + ", which exceeds length limit: "
-                                    + MAX_STRING_LENGTH
-                                    + ".");
                 }
             }
             mProperties.putStringArray(name, values);

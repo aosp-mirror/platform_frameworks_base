@@ -355,11 +355,14 @@ public class BiometricScheduler {
 
     /**
      * Creates a new scheduler.
+     * @param context system_server context.
      * @param tag for the specific instance of the scheduler. Should be unique.
+     * @param sensorType the sensorType that this scheduler is handling.
      * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
      *                                      (such as fingerprint swipe).
      */
-    public BiometricScheduler(@NonNull String tag, @SensorType int sensorType,
+    public BiometricScheduler(@NonNull String tag,
+            @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         this(tag, sensorType, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
                 ServiceManager.getService(Context.BIOMETRIC_SERVICE)), LOG_NUM_RECENT_OPERATIONS,

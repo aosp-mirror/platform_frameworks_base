@@ -4635,7 +4635,6 @@ public class AlarmManagerService extends SystemService {
                 Slog.d(TAG, "Package " + packageName + " for user " + userId + " now in bucket " +
                         bucket);
             }
-            mHandler.removeMessages(AlarmHandler.APP_STANDBY_BUCKET_CHANGED);
             mHandler.obtainMessage(AlarmHandler.APP_STANDBY_BUCKET_CHANGED, userId, -1, packageName)
                     .sendToTarget();
         }
