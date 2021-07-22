@@ -52,10 +52,9 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -96,13 +95,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
-    @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
-    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -127,7 +123,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 new NotificationSection[]{
                         mNotificationSection
                 });
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         // Interact with real instance of AmbientState.
         mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
@@ -153,7 +148,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScrollLayoutController.getNoticationRoundessManager())
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
-        mStackScroller.setRemoteInputManager(mRemoteInputManager);
 
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)
@@ -301,7 +295,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(row.canViewBeDismissed()).thenReturn(true);
         when(mStackScroller.getChildCount()).thenReturn(1);
         when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
-        when(mRemoteInputController.isRemoteInputActive()).thenReturn(true);
+        mStackScroller.setIsRemoteInputActive(true);
         when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
                 .thenReturn(true);
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
