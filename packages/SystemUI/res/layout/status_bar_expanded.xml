@@ -106,6 +106,9 @@
             systemui:layout_constraintEnd_toEndOf="parent"
         />
 
+        <include layout="@layout/communal_host_view"
+                 android:visibility="gone"/>
+
         <include layout="@layout/ambient_indication"
             android:id="@+id/ambient_indication_container" />
 

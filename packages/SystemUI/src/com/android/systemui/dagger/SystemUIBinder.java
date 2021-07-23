@@ -23,7 +23,6 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
@@ -56,7 +55,6 @@ import dagger.multibindings.IntoMap;
         RecentsModule.class,
         StatusBarModule.class,
         KeyguardModule.class,
-        CommunalModule.class,
 })
 public abstract class SystemUIBinder {
     /** Inject into AuthController. */

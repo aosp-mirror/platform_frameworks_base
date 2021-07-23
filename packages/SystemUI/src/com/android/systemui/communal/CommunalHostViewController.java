@@ -18,12 +18,22 @@ package com.android.systemui.communal;
 
 import android.view.View;
 
+import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.util.ViewController;
+
+import javax.inject.Inject;
 
 /**
  * Injectable controller for {@link CommunalHostView}.
  */
 public class CommunalHostViewController extends ViewController<CommunalHostView> {
+    private static final AnimationProperties ANIMATION_PROPERTIES =
+            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+
+    @Inject
     protected CommunalHostViewController(CommunalHostView view) {
         super(view);
     }
@@ -43,5 +53,15 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
      */
     public void show(boolean visible) {
         mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    /**
+     * Sets the Y position of the {@link CommunalHostView}
+     *
+     * @param y       Offset from parent top.
+     * @param animate Whether the change should be animated.
+     */
+    public void updatePositionY(int y, boolean animate) {
+        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, ANIMATION_PROPERTIES, animate);
     }
 }
