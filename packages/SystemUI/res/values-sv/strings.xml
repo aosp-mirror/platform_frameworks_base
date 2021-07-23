@@ -149,21 +149,21 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Slutför genom att trycka på Bekräfta"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentiserad"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Använd pinkod"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd grafiskt lösenord"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd mönster"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Använd lösenord"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Fel pinkod"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel grafiskt lösenord"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel mönster"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Fel lösenord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"För många felaktiga försök.\nFörsök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Försök igen. Försök <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Din data raderas."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Enhetens data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Enhetens data raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Användaren raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Den här användaren raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jobbprofilen och dess data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Din jobbprofil och dess data raderas om du anger fel lösenord vid nästa försök."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"För många felaktiga försök. Enhetens data raderas."</string>
