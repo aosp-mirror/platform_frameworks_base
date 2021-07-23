@@ -608,6 +608,11 @@ public class NotificationPanelViewController extends PanelViewController {
      * Is the current animator resetting the qs translation.
      */
     private boolean mIsQsTranslationResetAnimator;
+
+    /**
+     * Is the current animator resetting the pulse expansion after a drag down
+     */
+    private boolean mIsPulseExpansionResetAnimator;
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
     private final Region mQsInterceptRegion = new Region();
 
@@ -884,14 +889,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mWakeUpCoordinator.setStackScroller(mNotificationStackScrollLayoutController);
         mQsFrame = mView.findViewById(R.id.qs_frame);
-        mPulseExpansionHandler.setUp(mNotificationStackScrollLayoutController,
-                amount -> {
-                    float progress = amount / mView.getHeight();
-                    float overstretch = Interpolators.getOvershootInterpolation(progress,
-                            (float) mMaxOverscrollAmountForPulse / mView.getHeight(),
-                            0.2f);
-                    setOverStrechAmount(overstretch);
-                });
+        mPulseExpansionHandler.setUp(mNotificationStackScrollLayoutController);
         mWakeUpCoordinator.addListener(new NotificationWakeUpCoordinator.WakeUpListener() {
             @Override
             public void onFullyHiddenChanged(boolean isFullyHidden) {
@@ -903,7 +901,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 if (mKeyguardBypassController.getBypassEnabled()) {
                     // Position the notifications while dragging down while pulsing
                     requestScrollerTopPaddingUpdate(false /* animate */);
-                    updateQSPulseExpansion();
                 }
             }
         });
@@ -941,8 +938,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.notification_panel_min_side_margin);
         mIndicationBottomPadding = mResources.getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
-        mQsNotificationTopPadding = mResources.getDimensionPixelSize(
-                R.dimen.qs_notification_padding);
         mShelfHeight = mResources.getDimensionPixelSize(R.dimen.notification_shelf_height);
         mDarkIconSize = mResources.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
         int statusbarHeight = mResources.getDimensionPixelSize(
@@ -1341,8 +1336,7 @@ public class NotificationPanelViewController extends PanelViewController {
      * @return the padding of the stackscroller when unlocked
      */
     private int getUnlockedStackScrollerPadding() {
-        return (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight
-                + mQsNotificationTopPadding;
+        return (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight;
     }
 
     /**
@@ -2239,7 +2233,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    protected void updateQsExpansion() {
+    private void updateQsExpansion() {
         if (mQs == null) return;
         float qsExpansionFraction = computeQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
@@ -2298,9 +2292,20 @@ public class NotificationPanelViewController extends PanelViewController {
                 top = mTransitionToFullShadeQSPosition;
             } else {
                 final float notificationTop = getQSEdgePosition();
-                top = (int) (isOnKeyguard() ? Math.min(qsPanelBottomY, notificationTop)
-                        : notificationTop);
+                if (isOnKeyguard()) {
+                    if (mKeyguardBypassController.getBypassEnabled()) {
+                        // When bypassing on the keyguard, let's use the panel bottom.
+                        // this should go away once we unify the stackY position and don't have
+                        // to do this min anymore below.
+                        top = qsPanelBottomY;
+                    } else {
+                        top = (int) Math.min(qsPanelBottomY, notificationTop);
+                    }
+                } else {
+                    top = (int) notificationTop;
+                }
             }
+            top += mOverStretchAmount;
             bottom = getView().getBottom();
             // notification bounds should take full screen width regardless of insets
             left = 0;
@@ -2353,6 +2358,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 public void onAnimationEnd(Animator animation) {
                     mQsClippingAnimation = null;
                     mIsQsTranslationResetAnimator = false;
+                    mIsPulseExpansionResetAnimator = false;
                 }
             });
             mQsClippingAnimation.start();
@@ -2378,9 +2384,17 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         if (mQs != null) {
             float qsTranslation = 0;
-            if (mTransitioningToFullShadeProgress > 0.0f || (mQsClippingAnimation != null
-                    && mIsQsTranslationResetAnimator)) {
-                qsTranslation = (top - mQs.getHeader().getHeight()) * QS_PARALLAX_AMOUNT;
+            boolean pulseExpanding = mPulseExpansionHandler.isExpanding();
+            if (mTransitioningToFullShadeProgress > 0.0f || pulseExpanding
+                    || (mQsClippingAnimation != null
+                        && (mIsQsTranslationResetAnimator || mIsPulseExpansionResetAnimator))) {
+                if (pulseExpanding || mIsPulseExpansionResetAnimator) {
+                    // qsTranslation should only be positive during pulse expansion because it's
+                    // already translating in from the top
+                    qsTranslation = Math.max(0, (top - mQs.getHeader().getHeight()) / 2.0f);
+                } else {
+                    qsTranslation = (top - mQs.getHeader().getHeight()) * QS_PARALLAX_AMOUNT;
+                }
             }
             mQsTranslationForFullShadeTransition = qsTranslation;
             updateQsFrameTranslation();
@@ -2447,7 +2461,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private float calculateNotificationsTopPadding() {
         if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
-            return mSplitShadeNotificationsTopPadding + mQsNotificationTopPadding;
+            return mSplitShadeNotificationsTopPadding;
         }
         if (mKeyguardShowing && (mQsExpandImmediate
                 || mIsExpanding && mQsExpandedWhenExpandingStarted)) {
@@ -2458,7 +2472,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // panel. We need to take the maximum and linearly interpolate with the panel expansion
             // for a nice motion.
             int maxNotificationPadding = getKeyguardNotificationStaticPadding();
-            int maxQsPadding = mQsMaxExpansionHeight + mQsNotificationTopPadding;
+            int maxQsPadding = mQsMaxExpansionHeight;
             int max = mBarState == KEYGUARD ? Math.max(
                     maxNotificationPadding, maxQsPadding) : maxQsPadding;
             return (int) MathUtils.lerp((float) mQsMinExpansionHeight, (float) max,
@@ -2471,10 +2485,10 @@ public class NotificationPanelViewController extends PanelViewController {
             // We can only do the smoother transition on Keyguard when we also are not collapsing
             // from a scrolled quick settings.
             return MathUtils.lerp((float) getKeyguardNotificationStaticPadding(),
-                    (float) (mQsMaxExpansionHeight + mQsNotificationTopPadding),
+                    (float) (mQsMaxExpansionHeight),
                     computeQsExpansionFraction());
         } else {
-            return mQsExpansionHeight + mQsNotificationTopPadding;
+            return mQsExpansionHeight;
         }
     }
 
@@ -2506,14 +2520,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardShowing && mKeyguardBypassController.getBypassEnabled()) {
             // update the position of the header
             updateQsExpansion();
-        }
-    }
-
-    private void updateQSPulseExpansion() {
-        if (mQs != null) {
-            mQs.setPulseExpanding(
-                    mKeyguardShowing && mKeyguardBypassController.getBypassEnabled()
-                            && mNotificationStackScrollLayoutController.isPulseExpanding());
         }
     }
 
@@ -2565,6 +2571,15 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
+    }
+
+    /**
+     * Notify the panel that the pulse expansion has finished and that we're going to the full
+     * shade
+     */
+    public void onPulseExpansionFinished() {
+        animateNextNotificationBounds(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE, 0);
+        mIsPulseExpansionResetAnimator = true;
     }
 
     /**
@@ -2860,10 +2875,6 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         int maxQsHeight = mQsMaxExpansionHeight;
 
-        if (mKeyguardShowing) {
-            maxQsHeight += mQsNotificationTopPadding;
-        }
-
         // If an animation is changing the size of the QS panel, take the animated value.
         if (mQsSizeChangeAnimator != null) {
             maxQsHeight = (int) mQsSizeChangeAnimator.getAnimatedValue();
@@ -2928,19 +2939,7 @@ public class NotificationPanelViewController extends PanelViewController {
             startHeight = -mQsExpansionHeight * QS_PARALLAX_AMOUNT;
         }
         if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()) {
-            if (mNotificationStackScrollLayoutController.isPulseExpanding()) {
-                if (!mPulseExpansionHandler.isExpanding()
-                        && !mPulseExpansionHandler.getLeavingLockscreen()) {
-                    // If we aborted the expansion we need to make sure the header doesn't reappear
-                    // again after the header has animated away
-                    appearAmount = 0;
-                } else {
-                    appearAmount = mNotificationStackScrollLayoutController
-                            .calculateAppearFractionBypass();
-                }
-            } else {
-                appearAmount = 0.0f;
-            }
+            appearAmount = mNotificationStackScrollLayoutController.calculateAppearFractionBypass();
             startHeight = -mQs.getQsMinExpansionHeight();
         }
         float translation = MathUtils.lerp(startHeight, 0, Math.min(1.0f, appearAmount));
@@ -3543,7 +3542,6 @@ public class NotificationPanelViewController extends PanelViewController {
             mQs.setPanelView(mHeightListener);
             mQs.setExpandClickListener(mOnClickListener);
             mQs.setHeaderClickable(isQsExpansionEnabled());
-            updateQSPulseExpansion();
             mQs.setOverscrolling(mStackScrollerOverscrolling);
             mQs.setTranslateWhileExpanding(mShouldUseSplitNotificationShade);
 
@@ -4304,8 +4302,7 @@ public class NotificationPanelViewController extends PanelViewController {
             if (mAccessibilityManager.isEnabled()) {
                 mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
             }
-            mNotificationStackScrollLayoutController.setMaxTopPadding(
-                    mQsMaxExpansionHeight + mQsNotificationTopPadding);
+            mNotificationStackScrollLayoutController.setMaxTopPadding(mQsMaxExpansionHeight);
         }
     }
 
@@ -4423,7 +4420,6 @@ public class NotificationPanelViewController extends PanelViewController {
             updateMaxDisplayedNotifications(false);
             // The update needs to happen after the headerSlide in above, otherwise the translation
             // would reset
-            updateQSPulseExpansion();
             maybeAnimateBottomAreaAlpha();
             resetHorizontalPanelPosition();
             updateQsState();
@@ -4458,7 +4454,9 @@ public class NotificationPanelViewController extends PanelViewController {
      * Sets the overstretch amount in raw pixels when dragging down.
      */
     public void setOverStrechAmount(float amount) {
-        mOverStretchAmount = amount;
+        float progress = amount / mView.getHeight();
+        float overstretch = Interpolators.getOvershootInterpolation(progress);
+        mOverStretchAmount = overstretch * mMaxOverscrollAmountForPulse;
         positionClockAndNotifications(true /* forceUpdate */);
     }
 
@@ -4512,8 +4510,7 @@ public class NotificationPanelViewController extends PanelViewController {
             if (mQs != null) {
                 updateQSMinHeight();
                 mQsMaxExpansionHeight = mQs.getDesiredHeight();
-                mNotificationStackScrollLayoutController.setMaxTopPadding(
-                        mQsMaxExpansionHeight + mQsNotificationTopPadding);
+                mNotificationStackScrollLayoutController.setMaxTopPadding(mQsMaxExpansionHeight);
             }
             positionClockAndNotifications();
             if (mQsExpanded && mQsFullyExpanded) {

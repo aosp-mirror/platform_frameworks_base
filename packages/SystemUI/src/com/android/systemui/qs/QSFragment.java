@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.InjectionInflationController;
@@ -69,6 +70,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final Rect mQsBounds = new Rect();
     private final StatusBarStateController mStatusBarStateController;
     private final FalsingManager mFalsingManager;
+    private final KeyguardBypassController mBypassController;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
     private boolean mStackScrollerOverscrolling;
@@ -135,6 +137,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
             QSDetailDisplayer qsDetailDisplayer, @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
+            KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory, FeatureFlags featureFlags,
             FalsingManager falsingManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
@@ -148,6 +151,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mHost = qsTileHost;
         mFeatureFlags = featureFlags;
         mFalsingManager = falsingManager;
+        mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
     }
 
@@ -380,16 +384,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         return mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
     }
 
-    @Override
-    public void setPulseExpanding(boolean pulseExpanding) {
-        if (pulseExpanding != mPulseExpanding) {
-            mPulseExpanding = pulseExpanding;
-            updateShowCollapsedOnKeyguard();
-        }
-    }
-
     private void updateShowCollapsedOnKeyguard() {
-        boolean showCollapsed = mPulseExpanding || mTransitioningToFullShade;
+        boolean showCollapsed = mBypassController.getBypassEnabled() || mTransitioningToFullShade;
         if (showCollapsed != mShowCollapsedOnKeyguard) {
             mShowCollapsedOnKeyguard = showCollapsed;
             updateQsState();
@@ -719,5 +715,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void onStateChanged(int newState) {
         mState = newState;
         setKeyguardShowing(newState == StatusBarState.KEYGUARD);
+        updateShowCollapsedOnKeyguard();
     }
 }
