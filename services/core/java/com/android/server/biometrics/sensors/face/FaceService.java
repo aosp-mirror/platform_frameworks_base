@@ -252,7 +252,8 @@ public class FaceService extends SystemService {
 
         @Override // Binder call
         public void authenticate(final IBinder token, final long operationId, int userId,
-                final IFaceServiceReceiver receiver, final String opPackageName) {
+                final IFaceServiceReceiver receiver, final String opPackageName,
+                boolean isKeyguardBypassEnabled) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             // TODO(b/152413782): If the sensor supports face detect and the device is encrypted or
@@ -276,7 +277,7 @@ public class FaceService extends SystemService {
             provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
                     0 /* cookie */,
                     new ClientMonitorCallbackConverter(receiver), opPackageName, restricted,
-                    statsClient, isKeyguard);
+                    statsClient, isKeyguard, isKeyguardBypassEnabled);
         }
 
         @Override // Binder call
@@ -319,10 +320,12 @@ public class FaceService extends SystemService {
                 return;
             }
 
+            final boolean isKeyguardBypassEnabled = false; // only valid for keyguard clients
             final boolean restricted = true; // BiometricPrompt is always restricted
             provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication);
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication,
+                    isKeyguardBypassEnabled);
         }
 
         @Override // Binder call

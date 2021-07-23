@@ -2348,8 +2348,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             if (isEncryptedOrLockdown(userId) && supportsFaceDetection) {
                 mFaceManager.detectFace(mFaceCancelSignal, mFaceDetectionCallback, userId);
             } else {
+                final boolean isBypassEnabled = mKeyguardBypassController != null
+                        && mKeyguardBypassController.isBypassEnabled();
                 mFaceManager.authenticate(null /* crypto */, mFaceCancelSignal,
-                        mFaceAuthenticationCallback, null /* handler */, userId);
+                        mFaceAuthenticationCallback, null /* handler */, userId, isBypassEnabled);
             }
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }

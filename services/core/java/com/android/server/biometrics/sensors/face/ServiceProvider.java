@@ -110,7 +110,7 @@ public interface ServiceProvider {
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication);
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
 
     void cancelAuthentication(int sensorId, @NonNull IBinder token);
 

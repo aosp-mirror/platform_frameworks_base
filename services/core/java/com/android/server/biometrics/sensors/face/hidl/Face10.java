@@ -620,7 +620,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication) {
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -628,7 +628,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, receiver, userId, operationId, restricted, opPackageName,
                     cookie, false /* requireConfirmation */, mSensorId, isStrongBiometric,
-                    statsClient, mLockoutTracker, mUsageStats, allowBackgroundAuthentication);
+                    statsClient, mLockoutTracker, mUsageStats, allowBackgroundAuthentication,
+                    isKeyguardBypassEnabled);
             mScheduler.scheduleClientMonitor(client);
         });
     }
