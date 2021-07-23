@@ -92,7 +92,6 @@ public final class JobStatus {
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1 << 25; // Implicit constraint
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
-    static final int CONSTRAINT_WITHIN_EXPEDITED_QUOTA = 1 << 23;    // Implicit constraint
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
 
     // The following set of dynamic constraints are for specific use cases (as explained in their
@@ -148,8 +147,7 @@ public final class JobStatus {
             | CONSTRAINT_DEADLINE
             | CONSTRAINT_IDLE
             | CONSTRAINT_TIMING_DELAY
-            | CONSTRAINT_WITHIN_QUOTA
-            | CONSTRAINT_WITHIN_EXPEDITED_QUOTA;
+            | CONSTRAINT_WITHIN_QUOTA;
 
     // TODO(b/129954980)
     private static final boolean STATS_LOG_ENABLED = false;
@@ -393,6 +391,11 @@ public final class JobStatus {
     private long mTotalNetworkUploadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
     private long mMinimumNetworkChunkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
 
+    /**
+     * Whether or not this job is approved to be treated as expedited per quota policy.
+     */
+    private boolean mExpeditedQuotaApproved;
+
     /////// Booleans that track if a job is ready to run. They should be updated whenever dependent
     /////// states change.
 
@@ -417,9 +420,6 @@ public final class JobStatus {
 
     /** The job is within its quota based on its standby bucket. */
     private boolean mReadyWithinQuota;
-
-    /** The job is an expedited job with sufficient quota to run as an expedited job. */
-    private boolean mReadyWithinExpeditedQuota;
 
     /** The job's dynamic requirements have been satisfied. */
     private boolean mReadyDynamicSatisfied;
@@ -1132,7 +1132,7 @@ public final class JobStatus {
      * treated as an expedited job.
      */
     public boolean shouldTreatAsExpeditedJob() {
-        return mReadyWithinExpeditedQuota && isRequestedExpeditedJob();
+        return mExpeditedQuotaApproved && isRequestedExpeditedJob();
     }
 
     /**
@@ -1230,19 +1230,27 @@ public final class JobStatus {
         return false;
     }
 
-    /** @return true if the constraint was changed, false otherwise. */
-    boolean setExpeditedJobQuotaConstraintSatisfied(final long nowElapsed, boolean state) {
-        if (setConstraintSatisfied(CONSTRAINT_WITHIN_EXPEDITED_QUOTA, nowElapsed, state)) {
-            // The constraint was changed. Update the ready flag.
-            mReadyWithinExpeditedQuota = state;
-            // DeviceIdleJobsController currently only tracks jobs with the WILL_BE_FOREGROUND flag.
-            // Making it also track requested-expedited jobs would add unnecessary hops since the
-            // controller would then defer to canRunInDoze. Avoid the hops and just update
-            // mReadyNotDozing directly.
-            mReadyNotDozing = isConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING) || canRunInDoze();
-            return true;
+    /**
+     * Sets whether or not this job is approved to be treated as an expedited job based on quota
+     * policy.
+     *
+     * @return true if the approval bit was changed, false otherwise.
+     */
+    boolean setExpeditedJobQuotaApproved(final long nowElapsed, boolean state) {
+        if (mExpeditedQuotaApproved == state) {
+            return false;
         }
-        return false;
+        mExpeditedQuotaApproved = state;
+        updateExpeditedDependencies();
+        return true;
+    }
+
+    private void updateExpeditedDependencies() {
+        // DeviceIdleJobsController currently only tracks jobs with the WILL_BE_FOREGROUND flag.
+        // Making it also track requested-expedited jobs would add unnecessary hops since the
+        // controller would then defer to canRunInDoze. Avoid the hops and just update
+        // mReadyNotDozing directly.
+        mReadyNotDozing = isConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING) || canRunInDoze();
     }
 
     /** @return true if the state was changed, false otherwise. */
@@ -1346,7 +1354,6 @@ public final class JobStatus {
                 return JobParameters.STOP_REASON_DEVICE_STATE;
 
             case CONSTRAINT_WITHIN_QUOTA:
-            case CONSTRAINT_WITHIN_EXPEDITED_QUOTA:
                 return JobParameters.STOP_REASON_QUOTA;
 
             // These should never be stop reasons since they can never go from true to false.
@@ -1361,6 +1368,10 @@ public final class JobStatus {
 
     boolean isConstraintSatisfied(int constraint) {
         return (satisfiedConstraints&constraint) != 0;
+    }
+
+    boolean isExpeditedQuotaApproved() {
+        return mExpeditedQuotaApproved;
     }
 
     boolean clearTrackingController(int which) {
@@ -1465,10 +1476,6 @@ public final class JobStatus {
                 oldValue = mReadyWithinQuota;
                 mReadyWithinQuota = value;
                 break;
-            case CONSTRAINT_WITHIN_EXPEDITED_QUOTA:
-                oldValue = mReadyWithinExpeditedQuota;
-                mReadyWithinExpeditedQuota = value;
-                break;
             default:
                 if (value) {
                     satisfied |= constraint;
@@ -1495,9 +1502,6 @@ public final class JobStatus {
                 break;
             case CONSTRAINT_WITHIN_QUOTA:
                 mReadyWithinQuota = oldValue;
-                break;
-            case CONSTRAINT_WITHIN_EXPEDITED_QUOTA:
-                mReadyWithinExpeditedQuota = oldValue;
                 break;
             default:
                 mReadyDynamicSatisfied = mDynamicConstraints != 0
@@ -1726,9 +1730,6 @@ public final class JobStatus {
         if ((constraints & CONSTRAINT_WITHIN_QUOTA) != 0) {
             pw.print(" WITHIN_QUOTA");
         }
-        if ((constraints & CONSTRAINT_WITHIN_EXPEDITED_QUOTA) != 0) {
-            pw.print(" WITHIN_EXPEDITED_QUOTA");
-        }
         if (constraints != 0) {
             pw.print(" [0x");
             pw.print(Integer.toHexString(constraints));
@@ -1800,9 +1801,6 @@ public final class JobStatus {
         }
         if ((constraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
             proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_BACKGROUND_NOT_RESTRICTED);
-        }
-        if ((constraints & CONSTRAINT_WITHIN_EXPEDITED_QUOTA) != 0) {
-            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_WITHIN_EXPEDITED_JOB_QUOTA);
         }
     }
 
@@ -2050,8 +2048,8 @@ public final class JobStatus {
         pw.print("readyComponentEnabled: ");
         pw.println(serviceInfo != null);
         if ((getFlags() & JobInfo.FLAG_EXPEDITED) != 0) {
-            pw.print("readyWithinExpeditedQuota: ");
-            pw.print(mReadyWithinExpeditedQuota);
+            pw.print("expeditedQuotaApproved: ");
+            pw.print(mExpeditedQuotaApproved);
             pw.print(" (started as EJ: ");
             pw.print(startedAsExpeditedJob);
             pw.println(")");

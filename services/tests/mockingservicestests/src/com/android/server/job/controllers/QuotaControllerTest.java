@@ -5417,10 +5417,9 @@ public class QuotaControllerTest {
                 timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
                 .onControllerStateChanged(any());
         // Top should still be "in quota" since it started before the app ran on top out of quota.
-        assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertFalse(
-                jobUnstarted.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertFalse(jobBg.isExpeditedQuotaApproved());
+        assertTrue(jobTop.isExpeditedQuotaApproved());
+        assertFalse(jobUnstarted.isExpeditedQuotaApproved());
         synchronized (mQuotaController.mLock) {
             assertTrue(
                     0 >= mQuotaController
@@ -5445,18 +5444,18 @@ public class QuotaControllerTest {
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobTop2);
         }
-        assertTrue(jobTop2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobUnstarted.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertTrue(jobTop2.isExpeditedQuotaApproved());
+        assertTrue(jobFg.isExpeditedQuotaApproved());
+        assertTrue(jobBg.isExpeditedQuotaApproved());
+        assertTrue(jobUnstarted.isExpeditedQuotaApproved());
 
         // App still in foreground so everything should be in quota.
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
-        assertTrue(jobTop2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobUnstarted.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertTrue(jobTop2.isExpeditedQuotaApproved());
+        assertTrue(jobFg.isExpeditedQuotaApproved());
+        assertTrue(jobBg.isExpeditedQuotaApproved());
+        assertTrue(jobUnstarted.isExpeditedQuotaApproved());
 
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
@@ -5464,13 +5463,12 @@ public class QuotaControllerTest {
                 .onControllerStateChanged(any());
         // App is now in background and out of quota. Fg should now change to out of quota since it
         // wasn't started. Top should remain in quota since it started when the app was in TOP.
-        assertTrue(jobTop2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertFalse(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertTrue(jobTop2.isExpeditedQuotaApproved());
+        assertFalse(jobFg.isExpeditedQuotaApproved());
+        assertFalse(jobBg.isExpeditedQuotaApproved());
         trackJobs(jobBg2);
-        assertFalse(jobBg2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertFalse(
-                jobUnstarted.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertFalse(jobBg2.isExpeditedQuotaApproved());
+        assertFalse(jobUnstarted.isExpeditedQuotaApproved());
         synchronized (mQuotaController.mLock) {
             assertTrue(
                     0 >= mQuotaController
@@ -5602,7 +5600,7 @@ public class QuotaControllerTest {
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
                 .onControllerStateChanged(any());
-        assertTrue(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertTrue(jobStatus.isExpeditedQuotaApproved());
         // The job used up the remaining quota, but in that time, the same amount of time in the
         // old TimingSession also fell out of the quota window, so it should still have the same
         // amount of remaining time left its quota.
