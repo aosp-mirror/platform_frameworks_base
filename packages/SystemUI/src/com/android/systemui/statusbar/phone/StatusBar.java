@@ -187,6 +187,7 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CircleReveal;
@@ -245,6 +246,7 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -467,6 +469,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
+    private final UnfoldTransitionConfig mUnfoldTransitionConfig;
+    private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimation;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
@@ -801,6 +805,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
+            UnfoldTransitionConfig unfoldTransitionConfig,
+            Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -887,6 +893,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
         mChargingRippleAnimationController = chargingRippleAnimationController;
+        mUnfoldTransitionConfig = unfoldTransitionConfig;
+        mUnfoldLightRevealOverlayAnimation = unfoldLightRevealOverlayAnimation;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
@@ -1058,6 +1066,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mFalsingManager.addFalsingBeliefListener(mFalsingBeliefListener);
 
+        if (mUnfoldTransitionConfig.isEnabled()) {
+            mUnfoldLightRevealOverlayAnimation.get().init();
+        }
+
         mPluginManager.addPluginListener(
                 new PluginListener<OverlayPlugin>() {
                     private ArraySet<OverlayPlugin> mOverlays = new ArraySet<>();
@@ -1224,7 +1236,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             @Override
             public boolean shouldHideOnTouch() {
-                return !mRemoteInputManager.getController().isRemoteInputActive();
+                return !mRemoteInputManager.isRemoteInputActive();
             }
 
             @Override
@@ -1444,7 +1456,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationInterruptStateProvider);
 
         mNotificationShelfController.setOnActivatedListener(mPresenter);
-        mRemoteInputManager.getController().addCallback(mNotificationShadeWindowController);
+        mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
 
         mNotificationActivityStarter =
                 mStatusBarNotificationActivityStarterBuilder
@@ -1619,7 +1631,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
+        mRemoteInputManager.addControllerCallback(mStatusBarKeyguardViewManager);
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
@@ -3037,9 +3049,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 KeyboardShortcuts.dismiss();
-                if (mRemoteInputManager.getController() != null) {
-                    mRemoteInputManager.getController().closeRemoteInputs();
-                }
+                mRemoteInputManager.closeRemoteInputs();
                 if (mBubblesOptional.isPresent() && mBubblesOptional.get().isStackExpanded()) {
                     mBubblesOptional.get().collapseStack();
                 }

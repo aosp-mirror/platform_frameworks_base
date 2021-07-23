@@ -1042,7 +1042,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                         r.mOverrideTaskTransition);
                 mService.getTransitionController().setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, r.mOverrideTaskTransition));
+                                enterAnim, exitAnim, r.mOverrideTaskTransition),
+                        null /* startCallback */, null /* finishCallback */);
             }
         }
         Binder.restoreCallingIdentity(origId);

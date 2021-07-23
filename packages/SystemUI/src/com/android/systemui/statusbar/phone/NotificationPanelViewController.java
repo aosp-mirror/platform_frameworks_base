@@ -945,8 +945,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.notification_panel_min_side_margin);
         mIndicationBottomPadding = mResources.getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
-        mQsNotificationTopPadding = mResources.getDimensionPixelSize(
-                R.dimen.qs_notification_padding);
         mShelfHeight = mResources.getDimensionPixelSize(R.dimen.notification_shelf_height);
         mDarkIconSize = mResources.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
         int statusbarHeight = mResources.getDimensionPixelSize(
@@ -1385,8 +1383,7 @@ public class NotificationPanelViewController extends PanelViewController {
      * @return the padding of the stackscroller when unlocked
      */
     private int getUnlockedStackScrollerPadding() {
-        return (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight
-                + mQsNotificationTopPadding;
+        return (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight;
     }
 
     /**
@@ -1605,7 +1602,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private boolean isQsExpansionEnabled() {
         return mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient
-                && !mRemoteInputManager.getController().isRemoteInputActive();
+                && !mRemoteInputManager.isRemoteInputActive();
     }
 
     public void expandWithQs() {
@@ -2503,7 +2500,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // panel. We need to take the maximum and linearly interpolate with the panel expansion
             // for a nice motion.
             int maxNotificationPadding = getKeyguardNotificationStaticPadding();
-            int maxQsPadding = mQsMaxExpansionHeight + mQsNotificationTopPadding;
+            int maxQsPadding = mQsMaxExpansionHeight;
             int max = mBarState == KEYGUARD ? Math.max(
                     maxNotificationPadding, maxQsPadding) : maxQsPadding;
             return (int) MathUtils.lerp((float) mQsMinExpansionHeight, (float) max,
@@ -2516,10 +2513,10 @@ public class NotificationPanelViewController extends PanelViewController {
             // We can only do the smoother transition on Keyguard when we also are not collapsing
             // from a scrolled quick settings.
             return MathUtils.lerp((float) getKeyguardNotificationStaticPadding(),
-                    (float) (mQsMaxExpansionHeight + mQsNotificationTopPadding),
+                    (float) (mQsMaxExpansionHeight),
                     computeQsExpansionFraction());
         } else {
-            return mQsExpansionHeight + mQsNotificationTopPadding;
+            return mQsExpansionHeight;
         }
     }
 
@@ -2904,10 +2901,6 @@ public class NotificationPanelViewController extends PanelViewController {
             notificationHeight = mNotificationStackScrollLayoutController.getEmptyShadeViewHeight();
         }
         int maxQsHeight = mQsMaxExpansionHeight;
-
-        if (mKeyguardShowing) {
-            maxQsHeight += mQsNotificationTopPadding;
-        }
 
         // If an animation is changing the size of the QS panel, take the animated value.
         if (mQsSizeChangeAnimator != null) {
@@ -4351,8 +4344,7 @@ public class NotificationPanelViewController extends PanelViewController {
             if (mAccessibilityManager.isEnabled()) {
                 mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
             }
-            mNotificationStackScrollLayoutController.setMaxTopPadding(
-                    mQsMaxExpansionHeight + mQsNotificationTopPadding);
+            mNotificationStackScrollLayoutController.setMaxTopPadding(mQsMaxExpansionHeight);
         }
     }
 
@@ -4561,8 +4553,7 @@ public class NotificationPanelViewController extends PanelViewController {
             if (mQs != null) {
                 updateQSMinHeight();
                 mQsMaxExpansionHeight = mQs.getDesiredHeight();
-                mNotificationStackScrollLayoutController.setMaxTopPadding(
-                        mQsMaxExpansionHeight + mQsNotificationTopPadding);
+                mNotificationStackScrollLayoutController.setMaxTopPadding(mQsMaxExpansionHeight);
             }
             positionClockAndNotifications();
             if (mQsExpanded && mQsFullyExpanded) {

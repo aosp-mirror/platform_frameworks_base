@@ -9964,15 +9964,18 @@ public final class Settings {
 
         /**
          * Controls the accessibility button mode. System will force-set the value to {@link
-         * #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU} if {@link #NAVIGATION_MODE} is fully
-         * gestural.
+         * #ACCESSIBILITY_BUTTON_MODE_GESTURE} if {@link #NAVIGATION_MODE} is button; force-set the
+         * value to {@link ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} if {@link #NAVIGATION_MODE} is
+         * gestural; otherwise, remain the option.
          * <ul>
          *    <li> 0 = button in navigation bar </li>
          *    <li> 1 = button floating on the display </li>
+         *    <li> 2 = button using gesture to trigger </li>
          * </ul>
          *
          * @see #ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
          * @see #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU
+         * @see #ACCESSIBILITY_BUTTON_MODE_GESTURE
          * @hide
          */
         public static final String ACCESSIBILITY_BUTTON_MODE =
@@ -9993,6 +9996,14 @@ public final class Settings {
          * @hide
          */
         public static final int ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU = 0x1;
+
+        /**
+         * Accessibility button mode value that specifying the accessibility service or feature to
+         * be toggled via the gesture.
+         *
+         * @hide
+         */
+        public static final int ACCESSIBILITY_BUTTON_MODE_GESTURE = 0x2;
 
         /**
          * The size of the accessibility floating menu.

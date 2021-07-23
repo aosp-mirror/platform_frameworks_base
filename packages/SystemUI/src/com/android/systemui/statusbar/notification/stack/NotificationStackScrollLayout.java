@@ -81,10 +81,9 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.FakeShadowView;
@@ -440,7 +439,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Rect mTmpRect = new Rect();
     private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
-    private NotificationRemoteInputManager mRemoteInputManager;
     private ShadeController mShadeController;
     private Consumer<Boolean> mOnStackYChanged;
 
@@ -455,6 +453,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
     private int mGapHeight;
+    private boolean mIsRemoteInputActive;
 
     /**
      * The extra inset during the full shade transition
@@ -676,6 +675,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager.reinflateViews(LayoutInflater.from(mContext));
     }
 
+    public void setIsRemoteInputActive(boolean isActive) {
+        mIsRemoteInputActive = isActive;
+    }
+
     @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
@@ -685,11 +688,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // TODO: move this logic to controller, which will invoke updateFooterView directly
         boolean showDismissView = mClearAllEnabled &&
                 mController.hasActiveClearableNotifications(ROWS_ALL);
-        RemoteInputController remoteInputController = mRemoteInputManager.getController();
         boolean showFooterView = (showDismissView || getVisibleNotificationCount() > 0)
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
-                && (remoteInputController == null || !remoteInputController.isRemoteInputActive());
+                && !mIsRemoteInputActive;
         boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
 
@@ -5342,10 +5344,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void setFooterDismissListener(FooterDismissListener listener) {
         mFooterDismissListener = listener;
-    }
-
-    public void setRemoteInputManager(NotificationRemoteInputManager remoteInputManager) {
-        mRemoteInputManager = remoteInputManager;
     }
 
     void setShadeController(ShadeController shadeController) {
