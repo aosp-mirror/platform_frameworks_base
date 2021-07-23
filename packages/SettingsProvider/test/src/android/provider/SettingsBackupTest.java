@@ -592,6 +592,8 @@ public class SettingsBackupTest {
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                    Settings.Global.Wearable.BATTERY_SAVER_MODE,
+                    Settings.Global.Wearable.COMBINED_LOCATION_ENABLED,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,
                     Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
                     Settings.Global.Wearable.HOTWORD_DETECTION_ENABLED,
