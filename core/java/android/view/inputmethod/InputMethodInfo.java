@@ -418,8 +418,9 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
-     * Return a unique ID for this input method.  The ID is generated from
-     * the package and class name implementing the method.
+     * @return a unique ID for this input method, which is guaranteed to be the same as the result
+     *         of {@code getComponent().flattenToShortString()}.
+     * @see ComponentName#unflattenFromString(String)
      */
     public String getId() {
         return mId;
