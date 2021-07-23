@@ -5033,6 +5033,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void notifyAppStopped() {
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
+        // This is to fix the edge case that auto-enter-pip is finished in Launcher but app calls
+        // setAutoEnterEnabled(false) and transitions to STOPPED state, see b/191930787.
+        // Clear any surface transactions and content overlay in this case.
+        if (task != null && task.mLastRecentsAnimationTransaction != null) {
+            task.clearLastRecentsAnimationTransaction(true /* forceRemoveOverlay */);
+        }
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
