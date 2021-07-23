@@ -3527,7 +3527,9 @@ class Task extends TaskFragment {
     StartingWindowInfo getStartingWindowInfo(ActivityRecord activity) {
         final StartingWindowInfo info = new StartingWindowInfo();
         info.taskInfo = getTaskInfo();
-
+        info.targetActivityInfo = info.taskInfo.topActivityInfo != null
+                && activity.info != info.taskInfo.topActivityInfo
+                ? activity.info : null;
         info.isKeyguardOccluded =
             mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
 
