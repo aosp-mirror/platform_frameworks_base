@@ -179,8 +179,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         remoteInputManager.setUpWithCallback(
                 Dependency.get(NotificationRemoteInputManager.Callback.class),
                 mNotificationPanel.createRemoteInputDelegate());
-        remoteInputManager.getController().addCallback(
-                Dependency.get(NotificationShadeWindowController.class));
 
         initController.addPostInitTask(() -> {
             NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {

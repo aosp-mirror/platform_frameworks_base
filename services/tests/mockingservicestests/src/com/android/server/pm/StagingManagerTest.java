@@ -459,6 +459,66 @@ public class StagingManagerTest {
         assertThat(apkSession.getErrorMessage()).isEqualTo("Another apex session failed");
     }
 
+    @Test
+    public void getSessionIdByPackageName() throws Exception {
+        FakeStagedSession session = new FakeStagedSession(239);
+        session.setCommitted(true);
+        session.setSessionReady();
+        session.setPackageName("com.foo");
+
+        mStagingManager.createSession(session);
+        assertThat(mStagingManager.getSessionIdByPackageName("com.foo")).isEqualTo(239);
+    }
+
+    @Test
+    public void getSessionIdByPackageName_appliedSession_ignores() throws Exception {
+        FakeStagedSession session = new FakeStagedSession(37);
+        session.setCommitted(true);
+        session.setSessionApplied();
+        session.setPackageName("com.foo");
+
+        mStagingManager.createSession(session);
+        assertThat(mStagingManager.getSessionIdByPackageName("com.foo")).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionIdByPackageName_failedSession_ignores() throws Exception {
+        FakeStagedSession session = new FakeStagedSession(73);
+        session.setCommitted(true);
+        session.setSessionFailed(1, "whatevs");
+        session.setPackageName("com.foo");
+
+        mStagingManager.createSession(session);
+        assertThat(mStagingManager.getSessionIdByPackageName("com.foo")).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionIdByPackageName_destroyedSession_ignores() throws Exception {
+        FakeStagedSession session = new FakeStagedSession(23);
+        session.setCommitted(true);
+        session.setDestroyed(true);
+        session.setPackageName("com.foo");
+
+        mStagingManager.createSession(session);
+        assertThat(mStagingManager.getSessionIdByPackageName("com.foo")).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionIdByPackageName_noSessions() throws Exception {
+        assertThat(mStagingManager.getSessionIdByPackageName("com.foo")).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionIdByPackageName_noSessionHasThisPackage() throws Exception {
+        FakeStagedSession session = new FakeStagedSession(37);
+        session.setCommitted(true);
+        session.setSessionApplied();
+        session.setPackageName("com.foo");
+
+        mStagingManager.createSession(session);
+        assertThat(mStagingManager.getSessionIdByPackageName("com.bar")).isEqualTo(-1);
+    }
+
     private StagingManager.StagedSession createSession(int sessionId, String packageName,
             long committedMillis) {
         PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(

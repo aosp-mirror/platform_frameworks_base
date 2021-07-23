@@ -17,6 +17,9 @@
 package com.android.wm.shell.pip;
 
 import android.annotation.IntDef;
+import android.app.PictureInPictureParams;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,6 +36,15 @@ public class PipTransitionState {
     public static final int ENTERING_PIP = 3;
     public static final int ENTERED_PIP = 4;
     public static final int EXITING_PIP = 5;
+
+    /**
+     * If set to {@code true}, no entering PiP transition would be kicked off and most likely
+     * it's due to the fact that Launcher is handling the transition directly when swiping
+     * auto PiP-able Activity to home.
+     * See also {@link PipTaskOrganizer#startSwipePipToHome(ComponentName, ActivityInfo,
+     * PictureInPictureParams)}.
+     */
+    private boolean mInSwipePipToHomeTransition;
 
     // Not a complete set of states but serves what we want right now.
     @IntDef(prefix = { "TRANSITION_STATE_" }, value =  {
@@ -65,6 +77,13 @@ public class PipTransitionState {
                 && mState != EXITING_PIP;
     }
 
+    public void setInSwipePipToHomeTransition(boolean inSwipePipToHomeTransition) {
+        mInSwipePipToHomeTransition = inSwipePipToHomeTransition;
+    }
+
+    public boolean getInSwipePipToHomeTransition() {
+        return mInSwipePipToHomeTransition;
+    }
     /**
      * Resize request can be initiated in other component, ignore if we are no longer in PIP,
      * still waiting for animation or we're exiting from it.

@@ -41,6 +41,7 @@ import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
@@ -155,6 +156,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static DeviceStateManager provideDeviceStateManager(Context context) {
+        return context.getSystemService(DeviceStateManager.class);
     }
 
     @Provides

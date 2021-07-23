@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.window.TaskFragmentOrganizer.putExceptionInBundle;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.testing.Assert.assertThrows;
@@ -35,7 +33,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -198,9 +195,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testOnTaskFragmentError() throws RemoteException {
         final IBinder errorCallbackToken = new Binder();
         final Throwable exception = new IllegalArgumentException("Test exception");
-        final Bundle exceptionBundle = putExceptionInBundle(exception);
 
-        mIOrganizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
+        mController.registerOrganizer(mIOrganizer);
+        mController.onTaskFragmentError(mTaskFragment.getTaskFragmentOrganizer(),
+                errorCallbackToken, exception);
+        mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentError(eq(errorCallbackToken), eq(exception));
     }
