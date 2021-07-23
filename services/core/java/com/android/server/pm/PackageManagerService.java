@@ -7184,7 +7184,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager);
+        mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager, mPmInternal);
 
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(injector.getSystemPartitions());
@@ -28439,7 +28439,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Nullable
-    public PackageSetting getPackageSetting(String packageName) {
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    PackageSetting getPackageSetting(String packageName) {
         return mComputer.getPackageSetting(packageName);
     }
 
@@ -28474,16 +28475,6 @@ public class PackageManagerService extends IPackageManager.Stub
     boolean isHistoricalPackageUsageAvailable() {
         synchronized (mLock) {
             return mPackageUsage.isHistoricalPackageUsageAvailable();
-        }
-    }
-
-    /**
-     * Return a <b>copy</b> of the collection of packages known to the package manager.
-     * @return A copy of the values of mPackages.
-     */
-    Collection<AndroidPackage> getPackages() {
-        synchronized (mLock) {
-            return new ArrayList<>(mPackages.values());
         }
     }
 
