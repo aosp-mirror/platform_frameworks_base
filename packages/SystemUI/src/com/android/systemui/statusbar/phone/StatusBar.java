@@ -3979,7 +3979,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onUnlockHintStarted() {
         mFalsingCollector.onUnlockHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
+        mKeyguardIndicationController.showActionToUnlock();
     }
 
     public void onHintFinished() {
