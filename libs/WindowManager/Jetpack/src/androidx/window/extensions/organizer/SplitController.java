@@ -147,6 +147,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Checks if the activity start should be routed to a particular container. It can create a new
      * container for the activity and a new split container if necessary.
      */
+    // TODO(b/190433398): Break down into smaller functions.
     void onActivityCreated(@NonNull Activity launchedActivity) {
         final ComponentName componentName = launchedActivity.getComponentName();
 
@@ -198,6 +199,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         if (activityBelow == null) {
             return;
+        }
+
+        // Check if the split is already set.
+        final TaskFragmentContainer activityBelowContainer = getContainerWithActivity(
+                activityBelow.getActivityToken());
+        if (currentContainer != null && activityBelowContainer != null) {
+            final SplitContainer existingSplit = getActiveSplitForContainers(currentContainer,
+                    activityBelowContainer);
+            if (existingSplit != null) {
+                // There is already an active split with the activity below.
+                return;
+            }
         }
 
         final ExtensionSplitPairRule splitPairRule = getSplitRule(
@@ -337,7 +350,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Returns the top active split container that has the provided container.
+     * Returns the top active split container that has the provided container, if available.
      */
     @Nullable
     private SplitContainer getActiveSplitForContainer(@NonNull TaskFragmentContainer container) {
@@ -345,6 +358,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             SplitContainer splitContainer = mSplitContainers.get(i);
             if (container.equals(splitContainer.getSecondaryContainer())
                     || container.equals(splitContainer.getPrimaryContainer())) {
+                return splitContainer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the active split that has the provided containers as primary and secondary or as
+     * secondary and primary, if available.
+     */
+    @Nullable
+    private SplitContainer getActiveSplitForContainers(
+            @NonNull TaskFragmentContainer firstContainer,
+            @NonNull TaskFragmentContainer secondContainer) {
+        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
+            SplitContainer splitContainer = mSplitContainers.get(i);
+            final TaskFragmentContainer primary = splitContainer.getPrimaryContainer();
+            final TaskFragmentContainer secondary = splitContainer.getSecondaryContainer();
+            if ((firstContainer == secondary && secondContainer == primary)
+                    || (firstContainer == primary && secondContainer == secondary)) {
                 return splitContainer;
             }
         }
