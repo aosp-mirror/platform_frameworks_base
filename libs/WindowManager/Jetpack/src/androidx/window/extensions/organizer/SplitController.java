@@ -24,7 +24,6 @@ import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.app.Instrumentation;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -32,20 +31,24 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Pair;
 import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
-import androidx.window.extensions.ExtensionInterface.SplitOrganizerCallback;
-import androidx.window.extensions.ExtensionSplitActivityRule;
-import androidx.window.extensions.ExtensionSplitInfo;
-import androidx.window.extensions.ExtensionSplitPairRule;
-import androidx.window.extensions.ExtensionSplitRule;
-import androidx.window.extensions.ExtensionTaskFragment;
+import androidx.window.extensions.embedding.ActivityRule;
+import androidx.window.extensions.embedding.EmbeddingRule;
+import androidx.window.extensions.embedding.SplitInfo;
+import androidx.window.extensions.embedding.SplitPairRule;
+import androidx.window.extensions.embedding.SplitPlaceholderRule;
+import androidx.window.extensions.embedding.SplitRule;
+import androidx.window.extensions.embedding.TaskFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Main controller class that manages split states and presentation.
@@ -55,12 +58,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private final SplitPresenter mPresenter;
 
     // Currently applied split configuration.
-    private final List<ExtensionSplitRule> mSplitRules = new ArrayList<>();
+    private final List<EmbeddingRule> mSplitRules = new ArrayList<>();
     private final List<TaskFragmentContainer> mContainers = new ArrayList<>();
     private final List<SplitContainer> mSplitContainers = new ArrayList<>();
 
     // Callback to Jetpack to notify about changes to split states.
-    private SplitOrganizerCallback mSplitOrganizerCallback;
+    private @NonNull Consumer<List<SplitInfo>> mEmbeddingCallback;
 
     public SplitController() {
         mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
@@ -73,13 +76,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         instrumentation.addMonitor(new ActivityStartMonitor());
     }
 
-    public void setSplitRules(@NonNull List<ExtensionSplitRule> splitRules) {
+    /** Updates the embedding rules applied to future activity launches. */
+    public void setEmbeddingRules(@NonNull Set<EmbeddingRule> rules) {
         mSplitRules.clear();
-        mSplitRules.addAll(splitRules);
+        mSplitRules.addAll(rules);
     }
 
     @NonNull
-    public List<ExtensionSplitRule> getSplitRules() {
+    public List<EmbeddingRule> getSplitRules() {
         return mSplitRules;
     }
 
@@ -87,22 +91,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Starts an activity to side of the launchingActivity with the provided split config.
      */
     public void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent intent,
-            @Nullable Bundle options, @NonNull ExtensionSplitPairRule splitPairRule,
-            int startRequestId) {
+            @Nullable Bundle options, @NonNull SplitRule sideRule,
+            @NonNull Consumer<Exception> failureCallback) {
         try {
-            mPresenter.startActivityToSide(launchingActivity, intent, options, splitPairRule);
+            mPresenter.startActivityToSide(launchingActivity, intent, options, sideRule);
         } catch (Exception e) {
-            if (mSplitOrganizerCallback != null && startRequestId != -1) {
-                mSplitOrganizerCallback.onActivityFailedToStartInContainer(startRequestId, e);
-            }
+            failureCallback.accept(e);
         }
     }
 
     /**
      * Registers the split organizer callback to notify about changes to active splits.
      */
-    public void setSplitOrganizerCallback(@NonNull SplitOrganizerCallback callback) {
-        mSplitOrganizerCallback = callback;
+    public void setEmbeddingCallback(@NonNull Consumer<List<SplitInfo>> callback) {
+        mEmbeddingCallback = callback;
         updateCallbackIfNecessary();
     }
 
@@ -160,14 +162,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     // TODO(b/190433398): Break down into smaller functions.
     void onActivityCreated(@NonNull Activity launchedActivity) {
-        final ComponentName componentName = launchedActivity.getComponentName();
-
-        final List<ExtensionSplitRule> splitRules = getSplitRules();
+        final List<EmbeddingRule> splitRules = getSplitRules();
         final TaskFragmentContainer currentContainer = getContainerWithActivity(
                 launchedActivity.getActivityToken(), launchedActivity);
 
         // Check if the activity is configured to always be expanded.
-        if (shouldExpand(componentName, splitRules)) {
+        if (shouldExpand(launchedActivity, splitRules)) {
             if (shouldContainerBeExpanded(currentContainer)) {
                 // Make sure that the existing container is expanded
                 mPresenter.expandTaskFragment(currentContainer.getTaskFragmentToken());
@@ -224,8 +224,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
 
-        final ExtensionSplitPairRule splitPairRule = getSplitRule(
-                activityBelow.getComponentName(), componentName, splitRules);
+        final SplitPairRule splitPairRule = getSplitRule(activityBelow, launchedActivity,
+                splitRules);
         if (splitPairRule == null) {
             return;
         }
@@ -302,11 +302,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     void registerSplit(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer primaryContainer, @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
-            @NonNull ExtensionSplitPairRule splitPairRule) {
-        removeExistingSecondaryContainers(wct, primaryContainer);
-
+            @NonNull SplitRule splitRule) {
+        if (splitRule instanceof SplitPairRule && ((SplitPairRule) splitRule).shouldClearTop()) {
+            removeExistingSecondaryContainers(wct, primaryContainer);
+        }
         SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
-                secondaryContainer, splitPairRule);
+                secondaryContainer, splitRule);
         mSplitContainers.add(splitContainer);
     }
 
@@ -456,22 +457,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         // Check if there is enough space for launch
-        final ExtensionSplitPairRule placeholderRule = getPlaceholderRule(
-                activity.getComponentName());
+        final SplitPlaceholderRule placeholderRule = getPlaceholderRule(activity);
         if (placeholderRule == null || !mPresenter.shouldShowSideBySide(
                 mPresenter.getParentContainerBounds(activity), placeholderRule)) {
             return false;
         }
 
-        Intent placeholderIntent = new Intent();
-        placeholderIntent.setComponent(placeholderRule.secondaryActivityName);
         // TODO(b/190433398): Handle failed request
-        startActivityToSide(activity, placeholderIntent, null, placeholderRule, -1);
+        startActivityToSide(activity, placeholderRule.getPlaceholderIntent(), null,
+                placeholderRule, null);
         return true;
     }
 
     private boolean dismissPlaceholderIfNecessary(@NonNull SplitContainer splitContainer) {
-        if (!splitContainer.getSplitPairRule().useAsPlaceholder) {
+        if (!splitContainer.isPlaceholderContainer()) {
             return false;
         }
 
@@ -488,15 +487,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns the rule to launch a placeholder for the activity with the provided component name
      * if it is configured in the split config.
      */
-    private ExtensionSplitPairRule getPlaceholderRule(@NonNull ComponentName componentName) {
-        for (ExtensionSplitRule rule : mSplitRules) {
-            if (!(rule instanceof ExtensionSplitPairRule)) {
+    private SplitPlaceholderRule getPlaceholderRule(@NonNull Activity activity) {
+        for (EmbeddingRule rule : mSplitRules) {
+            if (!(rule instanceof SplitPlaceholderRule)) {
                 continue;
             }
-            ExtensionSplitPairRule pairRule = (ExtensionSplitPairRule) rule;
-            if (componentName.equals(pairRule.primaryActivityName)
-                    && pairRule.useAsPlaceholder) {
-                return pairRule;
+            SplitPlaceholderRule placeholderRule = (SplitPlaceholderRule) rule;
+            if (placeholderRule.getActivityPredicate().test(activity)) {
+                return placeholderRule;
             }
         }
         return null;
@@ -506,27 +504,27 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Notifies listeners about changes to split states if necessary.
      */
     private void updateCallbackIfNecessary() {
-        if (mSplitOrganizerCallback == null) {
+        if (mEmbeddingCallback == null) {
             return;
         }
         // TODO(b/190433398): Check if something actually changed
-        mSplitOrganizerCallback.onSplitInfoChanged(getActiveSplitStates());
+        mEmbeddingCallback.accept(getActiveSplitStates());
     }
 
     /**
      * Returns a list of descriptors for currently active split states.
      */
-    private List<ExtensionSplitInfo> getActiveSplitStates() {
-        List<ExtensionSplitInfo> splitStates = new ArrayList<>();
+    private List<SplitInfo> getActiveSplitStates() {
+        List<SplitInfo> splitStates = new ArrayList<>();
         for (SplitContainer container : mSplitContainers) {
-            ExtensionTaskFragment primaryContainer =
-                    new ExtensionTaskFragment(
+            TaskFragment primaryContainer =
+                    new TaskFragment(
                             container.getPrimaryContainer().collectActivities());
-            ExtensionTaskFragment secondaryContainer =
-                    new ExtensionTaskFragment(
+            TaskFragment secondaryContainer =
+                    new TaskFragment(
                             container.getSecondaryContainer().collectActivities());
-            ExtensionSplitInfo splitState = new ExtensionSplitInfo(primaryContainer,
-                    secondaryContainer, container.getSplitPairRule().splitRatio);
+            SplitInfo splitState = new SplitInfo(primaryContainer,
+                    secondaryContainer, container.getSplitRule().getSplitRatio());
             splitStates.add(splitState);
         }
         return splitStates;
@@ -550,23 +548,41 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Returns a split rule for the provided pair of component names if available.
+     * Returns a split rule for the provided pair of primary activity and secondary activity intent
+     * if available.
      */
     @Nullable
-    private static ExtensionSplitPairRule getSplitRule(@NonNull ComponentName primaryActivityName,
-            @NonNull ComponentName secondaryActivityName,
-            @NonNull List<ExtensionSplitRule> splitRules) {
-        if (splitRules == null || primaryActivityName == null || secondaryActivityName == null) {
-            return null;
-        }
-
-        for (ExtensionSplitRule rule : splitRules) {
-            if (!(rule instanceof ExtensionSplitPairRule)) {
+    private static SplitPairRule getSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Intent secondaryActivityIntent, @NonNull List<EmbeddingRule> splitRules) {
+        for (EmbeddingRule rule : splitRules) {
+            if (!(rule instanceof SplitPairRule)) {
                 continue;
             }
-            ExtensionSplitPairRule pairRule = (ExtensionSplitPairRule) rule;
-            if (match(secondaryActivityName, pairRule.secondaryActivityName)
-                    && match(primaryActivityName, pairRule.primaryActivityName)) {
+            SplitPairRule pairRule = (SplitPairRule) rule;
+            if (pairRule.getActivityIntentPredicate().test(
+                    new Pair(primaryActivity, secondaryActivityIntent))) {
+                return pairRule;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a split rule for the provided pair of primary and secondary activities if available.
+     */
+    @Nullable
+    private static SplitPairRule getSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity, @NonNull List<EmbeddingRule> splitRules) {
+        for (EmbeddingRule rule : splitRules) {
+            if (!(rule instanceof SplitPairRule)) {
+                continue;
+            }
+            SplitPairRule pairRule = (SplitPairRule) rule;
+            final Intent intent = secondaryActivity.getIntent();
+            if (pairRule.getActivityPairPredicate().test(
+                    new Pair(primaryActivity, secondaryActivity))
+                    && (intent == null || pairRule.getActivityIntentPredicate().test(
+                            new Pair(primaryActivity, intent)))) {
                 return pairRule;
             }
         }
@@ -587,53 +603,24 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns {@code true} if an Activity with the provided component name should always be
      * expanded to occupy full task bounds. Such activity must not be put in a split.
      */
-    private static boolean shouldExpand(@NonNull ComponentName componentName,
-            List<ExtensionSplitRule> splitRules) {
+    private static boolean shouldExpand(@NonNull Activity activity,
+            List<EmbeddingRule> splitRules) {
         if (splitRules == null) {
             return false;
         }
-        for (ExtensionSplitRule rule : splitRules) {
-            if (!(rule instanceof ExtensionSplitActivityRule)) {
+        for (EmbeddingRule rule : splitRules) {
+            if (!(rule instanceof ActivityRule)) {
                 continue;
             }
-            ExtensionSplitActivityRule activityRule = (ExtensionSplitActivityRule) rule;
-            if (match(componentName, activityRule.activityName)
-                    && activityRule.alwaysExpand) {
+            ActivityRule activityRule = (ActivityRule) rule;
+            if (!activityRule.shouldAlwaysExpand()) {
+                continue;
+            }
+            if (activityRule.getActivityPredicate().test(activity)) {
                 return true;
             }
         }
         return false;
-    }
-
-    /** Match check allowing wildcards for activity class name but not package name. */
-    private static boolean match(@NonNull ComponentName activityComponent,
-            @NonNull ComponentName ruleComponent) {
-        if (activityComponent.toString().contains("*")) {
-            throw new IllegalArgumentException("Wildcard can only be part of the rule.");
-        }
-        final boolean packagesMatch =
-                activityComponent.getPackageName().equals(ruleComponent.getPackageName());
-        final boolean classesMatch =
-                activityComponent.getClassName().equals(ruleComponent.getClassName());
-        return packagesMatch && (classesMatch
-                || wildcardMatch(activityComponent.getClassName(), ruleComponent.getClassName()));
-    }
-
-    /**
-     * Checks if the provided name matches the pattern.
-     */
-    private static boolean wildcardMatch(@NonNull String name, @NonNull String pattern) {
-        if (!pattern.contains("*")) {
-            return false;
-        }
-        if (pattern.equals("*")) {
-            return true;
-        }
-        if (pattern.indexOf("*") != pattern.lastIndexOf("*") || !pattern.endsWith("*")) {
-            throw new IllegalArgumentException(
-                    "Name pattern with a wildcard must only contain a single * in the end");
-        }
-        return name.startsWith(pattern.substring(0, pattern.length() - 1));
     }
 
     private final class LifecycleCallbacks implements ActivityLifecycleCallbacks {
@@ -698,8 +685,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private class ActivityStartMonitor extends Instrumentation.ActivityMonitor {
 
         @Override
-        public Instrumentation.ActivityResult onStartActivity(Context who, Intent intent,
-                Bundle options) {
+        public Instrumentation.ActivityResult onStartActivity(@NonNull Context who,
+                @NonNull Intent intent, @NonNull Bundle options) {
             // TODO(b/190433398): Check if the activity is configured to always be expanded.
 
             // Check if activity should be put in a split with the activity that launched it.
@@ -722,8 +709,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
          */
         private boolean setLaunchingToSideContainer(Activity launchingActivity, Intent intent,
                 Bundle options) {
-            final ExtensionSplitPairRule splitPairRule = getSplitRule(
-                    launchingActivity.getComponentName(), intent.getComponent(), getSplitRules());
+            final SplitPairRule splitPairRule = getSplitRule(launchingActivity, intent,
+                    getSplitRules());
             if (splitPairRule == null) {
                 return false;
             }
@@ -770,8 +757,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return;
             }
 
-            final ExtensionSplitPairRule splitPairRule = getSplitRule(
-                    primaryActivity.getComponentName(), intent.getComponent(), getSplitRules());
+            final SplitPairRule splitPairRule = getSplitRule(primaryActivity, intent,
+                    getSplitRules());
             if (splitPairRule == null) {
                 return;
             }

@@ -24,13 +24,16 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.window.extensions.ExtensionSplitPairRule;
+import androidx.window.extensions.embedding.SplitPairRule;
+import androidx.window.extensions.embedding.SplitRule;
 
 import java.util.concurrent.Executor;
 
@@ -89,7 +92,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @return The newly created secondary container.
      */
     TaskFragmentContainer createNewSplitWithEmptySideContainer(@NonNull Activity primaryActivity,
-            @NonNull ExtensionSplitPairRule rule) {
+            @NonNull SplitPairRule rule) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
@@ -128,7 +131,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @param rule The split rule to be applied to the container.
      */
     void createNewSplitContainer(@NonNull Activity primaryActivity,
-            @NonNull Activity secondaryActivity, @NonNull ExtensionSplitPairRule rule) {
+            @NonNull Activity secondaryActivity, @NonNull SplitPairRule rule) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
@@ -192,7 +195,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @param rule The split rule to be applied to the container.
      */
     void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent activityIntent,
-            @Nullable Bundle activityOptions, @NonNull ExtensionSplitPairRule rule) {
+            @Nullable Bundle activityOptions, @NonNull SplitRule rule) {
         final Rect parentBounds = getParentContainerBounds(launchingActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
@@ -227,7 +230,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull WindowContainerTransaction wct) {
         // Getting the parent bounds using the updated container - it will have the recent value.
         final Rect parentBounds = getParentContainerBounds(updatedContainer);
-        final ExtensionSplitPairRule rule = splitContainer.getSplitPairRule();
+        final SplitRule rule = splitContainer.getSplitRule();
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
 
@@ -273,24 +276,24 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     boolean shouldShowSideBySide(@NonNull SplitContainer splitContainer) {
         final Rect parentBounds = getParentContainerBounds(splitContainer.getPrimaryContainer());
-        return shouldShowSideBySide(parentBounds, splitContainer.getSplitPairRule());
+        return shouldShowSideBySide(parentBounds, splitContainer.getSplitRule());
     }
 
-    boolean shouldShowSideBySide(@Nullable Rect parentBounds,
-            @NonNull ExtensionSplitPairRule rule) {
-        return parentBounds != null && parentBounds.width() >= rule.minWidth
-                // TODO(b/190433398): Consider proper smallest width computation.
-                && Math.min(parentBounds.width(), parentBounds.height()) >= rule.minSmallestWidth;
+    boolean shouldShowSideBySide(@Nullable Rect parentBounds, @NonNull SplitRule rule) {
+        // TODO(b/190433398): Supply correct insets.
+        final WindowMetrics parentMetrics = new WindowMetrics(parentBounds,
+                new WindowInsets(new Rect()));
+        return rule.getParentWindowMetricsPredicate().test(parentMetrics);
     }
 
     @NonNull
     private Rect getBoundsForPosition(@Position int position, @NonNull Rect parentBounds,
-            @NonNull ExtensionSplitPairRule rule) {
+            @NonNull SplitRule rule) {
         if (!shouldShowSideBySide(parentBounds, rule)) {
             return new Rect();
         }
 
-        float splitRatio = rule.splitRatio;
+        float splitRatio = rule.getSplitRatio();
         switch (position) {
             case POSITION_LEFT:
                 return new Rect(
