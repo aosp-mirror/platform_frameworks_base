@@ -285,6 +285,23 @@ aidl_interface {
     },
 }
 
+aidl_interface {
+    name: "android.debug_aidl",
+    unstable: true,
+    srcs: [
+        "android/debug/AdbTransportType.aidl",
+        "android/debug/FingerprintAndPairDevice.aidl",
+        "android/debug/IAdbCallback.aidl",
+        "android/debug/IAdbManager.aidl",
+        "android/debug/PairDevice.aidl",
+    ],
+    backend: {
+        cpp: {
+            enabled: true,
+        },
+    },
+}
+
 // Avoid including Parcelable classes as we don't want to have two copies of
 // Parcelable cross the libraries. This is used by telephony-common (frameworks/opt/telephony)
 // and TeleService app (packages/services/Telephony).
