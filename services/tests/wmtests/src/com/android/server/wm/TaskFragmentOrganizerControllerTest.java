@@ -319,7 +319,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
         mTransaction.createTaskFragment(mock(TaskFragmentCreationParams.class));
         mTransaction.startActivityInTaskFragment(
-                mFragmentToken, new Intent(), null /* activityOptions */);
+                mFragmentToken, null /* callerToken */, new Intent(), null /* activityOptions */);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
 
         // It is expected to fail for the mock TaskFragmentCreationParams. It is ok as we are
