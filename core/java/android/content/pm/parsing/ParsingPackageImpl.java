@@ -716,7 +716,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
         // Continue populating legacy data structures to avoid performance
         // issues until all that code can be migrated
-        this.requestedPermissions = CollectionUtils.add(this.requestedPermissions, permission.name);
+        this.requestedPermissions = CollectionUtils.add(this.requestedPermissions,
+                permission.getName());
 
         return this;
     }

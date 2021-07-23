@@ -490,9 +490,16 @@ public class ActivityStartController {
         return START_SUCCESS;
     }
 
-    void startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
+    /**
+     * Starts an activity in the TaskFragment.
+     * @param taskFragment TaskFragment {@link TaskFragment} to start the activity in.
+     * @param activityIntent intent to start the activity.
+     * @param activityOptions ActivityOptions to start the activity with.
+     * @return the start result.
+     */
+    int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
             @NonNull Intent activityIntent, @Nullable Bundle activityOptions) {
-        obtainStarter(activityIntent, "startActivityInTaskFragment")
+        return obtainStarter(activityIntent, "startActivityInTaskFragment")
                 .setActivityOptions(activityOptions)
                 .setInTaskFragment(taskFragment)
                 .setCallingUid(Binder.getCallingUid())

@@ -51,11 +51,11 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -241,7 +241,7 @@ public class ScanTests {
                 .setPackageName("static.lib.pkg.123")
                 .setVersionCodeMajor(1)
                 .setVersionCode(234)
-                .setBaseCodePath("/some/path.apk")
+                .setBaseApkPath("/some/path.apk")
                 .setSplitCodePaths(new String[] {"/some/other/path.apk"});
 
         final PackageManagerService.ScanRequest scanRequest = new ScanRequestBuilder(pkg)
@@ -273,7 +273,7 @@ public class ScanTests {
                 .hideAsParsed())
                 .setVersionCodeMajor(1)
                 .setVersionCode(234)
-                .setBaseCodePath("/some/path.apk")
+                .setBaseApkPath("/some/path.apk")
                 .setSplitCodePaths(new String[] {"/some/other/path.apk"});
 
         final PackageManagerService.ScanRequest scanRequest =

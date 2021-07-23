@@ -122,16 +122,6 @@ public abstract class WindowManagerInternal {
          */
         void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
-
-        /**
-         * Called when the display is reparented and becomes an embedded
-         * display. The {@link WindowsForAccessibilityCallback} with the given embedded
-         * display will be replaced by the {@link WindowsForAccessibilityCallback}
-         * associated with its parent display at the same time.
-         *
-         * @param embeddedDisplayId The embedded display Id.
-         */
-        void onDisplayReparented(int embeddedDisplayId);
     }
 
     /**
@@ -375,9 +365,8 @@ public abstract class WindowManagerInternal {
      *
      * @param displayId The logical display id.
      * @param callback The callback.
-     * @return {@code false} if display id is not valid.
      */
-    public abstract boolean setWindowsForAccessibilityCallback(int displayId,
+    public abstract void setWindowsForAccessibilityCallback(int displayId,
             WindowsForAccessibilityCallback callback);
 
     /**

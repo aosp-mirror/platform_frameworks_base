@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"এটার জন্য ক্যামেরার অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"এটার জন্য ক্যামেরা অথবা মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা অথবা মাইক্রোফোন ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ডিভাইস"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"অন্য অ্যাপে যেতে উপরের দিকে সোয়াইপ করুন"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"একটি অ্যাপ ছেড়ে দ্রুত অন্য অ্যাপে যেতে ডান দিকে টেনে আনুন"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"\'এক নজরে\' বৈশিষ্ট্যটি চালু বা বন্ধ করুন"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"চার্জ হয়েছে"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"চার্জ হচ্ছে"</string>

@@ -35,10 +35,11 @@ import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
 import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -663,13 +664,16 @@ public class ApkChecksums {
     private static Map<Integer, ApkChecksum> extractHashFromV2V3Signature(
             String split, String filePath, int types) {
         Map<Integer, byte[]> contentDigests = null;
-        try {
-            contentDigests = ApkSignatureVerifier.verifySignaturesInternal(filePath,
-                    SignatureSchemeVersion.SIGNING_BLOCK_V2, /* verifyFull */ false).contentDigests;
-        } catch (PackageParser.PackageParserException e) {
-            if (!(e.getCause() instanceof SignatureNotFoundException)) {
-                Slog.e(TAG, "Signature verification error", e);
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<ApkSignatureVerifier.SigningDetailsWithDigests> result =
+                ApkSignatureVerifier.verifySignaturesInternal(input, filePath,
+                        SignatureSchemeVersion.SIGNING_BLOCK_V2, false /*verifyFull*/);
+        if (result.isError()) {
+            if (!(result.getException() instanceof SignatureNotFoundException)) {
+                Slog.e(TAG, "Signature verification error", result.getException());
             }
+        } else {
+            contentDigests = result.getResult().contentDigests;
         }
 
         if (contentDigests == null) {

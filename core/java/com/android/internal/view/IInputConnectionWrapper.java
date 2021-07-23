@@ -16,15 +16,14 @@
 
 package com.android.internal.view;
 
+import android.annotation.AnyThread;
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -43,14 +42,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.ICharSequenceResultCallback;
-import com.android.internal.inputmethod.IExtractedTextResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
-import com.android.internal.inputmethod.ISurroundingTextResultCallback;
+import com.android.internal.inputmethod.CallbackUtils;
 import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.InputConnectionCommand;
+import com.android.internal.inputmethod.InputConnectionCommandType;
 import com.android.internal.inputmethod.InputConnectionProtoDumper;
-import com.android.internal.os.SomeArgs;
+import com.android.internal.inputmethod.InputMethodDebug;
 
 import java.lang.ref.WeakReference;
 
@@ -58,34 +55,8 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     private static final String TAG = "IInputConnectionWrapper";
     private static final boolean DEBUG = false;
 
-    private static final int DO_GET_TEXT_AFTER_CURSOR = 10;
-    private static final int DO_GET_TEXT_BEFORE_CURSOR = 20;
-    private static final int DO_GET_SELECTED_TEXT = 25;
-    private static final int DO_GET_CURSOR_CAPS_MODE = 30;
-    private static final int DO_GET_EXTRACTED_TEXT = 40;
-    private static final int DO_COMMIT_TEXT = 50;
-    private static final int DO_COMMIT_COMPLETION = 55;
-    private static final int DO_COMMIT_CORRECTION = 56;
-    private static final int DO_SET_SELECTION = 57;
-    private static final int DO_PERFORM_EDITOR_ACTION = 58;
-    private static final int DO_PERFORM_CONTEXT_MENU_ACTION = 59;
-    private static final int DO_SET_COMPOSING_TEXT = 60;
-    private static final int DO_SET_COMPOSING_REGION = 63;
-    private static final int DO_FINISH_COMPOSING_TEXT = 65;
-    private static final int DO_SEND_KEY_EVENT = 70;
-    private static final int DO_DELETE_SURROUNDING_TEXT = 80;
-    private static final int DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS = 81;
-    private static final int DO_BEGIN_BATCH_EDIT = 90;
-    private static final int DO_END_BATCH_EDIT = 95;
-    private static final int DO_PERFORM_SPELL_CHECK = 110;
-    private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
-    private static final int DO_CLEAR_META_KEY_STATES = 130;
-    private static final int DO_REQUEST_CURSOR_UPDATES = 140;
-    private static final int DO_CLOSE_CONNECTION = 150;
-    private static final int DO_COMMIT_CONTENT = 160;
-    private static final int DO_GET_SURROUNDING_TEXT = 41;
-    private static final int DO_SET_IME_CONSUMES_INPUT = 170;
-
+    private static final int DO_EDIT = 10;
+    private static final int DO_CLOSE_CONNECTION = 20;
 
     @GuardedBy("mLock")
     @Nullable
@@ -93,7 +64,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
 
     private Looper mMainLooper;
     private Handler mH;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private boolean mFinished = false;
@@ -149,7 +120,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
             // reportFinish() will take effect.
             return;
         }
-        closeConnection();
+        dispatchMessage(mH.obtainMessage(DO_CLOSE_CONNECTION));
 
         // Notify the app that the InputConnection was closed.
         final View servedView = mServedView.get();
@@ -194,146 +165,33 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         }
     }
 
-    public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
-        dispatchMessage(mH.obtainMessage(DO_GET_TEXT_AFTER_CURSOR, length, flags, callback));
-    }
-
-    public void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback) {
-        dispatchMessage(mH.obtainMessage(DO_GET_TEXT_BEFORE_CURSOR, length, flags, callback));
-    }
-
-    public void getSelectedText(int flags, ICharSequenceResultCallback callback) {
-        dispatchMessage(mH.obtainMessage(DO_GET_SELECTED_TEXT, flags, 0 /* unused */, callback));
+    @BinderThread
+    @Override
+    public void doEdit(@Nullable InputConnectionCommand command) {
+        if (command == null) {
+            // As long as everything is working as expected, we should never see any null object
+            // here.  If we are seeing null object, it means that either the sender or
+            // InputConnectionCommand.CREATOR#createFromParcel() returned null for whatever
+            // unexpected reasons.  Note that InputConnectionCommand.CREATOR#createFromParcel() does
+            // some data verifications.  Hence failing to pass the verification is one of the
+            // reasons to see null here.
+            Log.w(TAG, "Ignoring invalid InputConnectionCommand.");
+            return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "incoming: " + InputMethodDebug.dumpInputConnectionCommand(command));
+        }
+        dispatchMessage(mH.obtainMessage(DO_EDIT, command));
     }
 
     /**
-     * Dispatches the request for retrieving surrounding text.
-     *
-     * <p>See {@link InputConnection#getSurroundingText(int, int, int)}.
+     * Exposed for {@link InputMethodManager} to trigger
+     * {@link InputConnection#finishComposingText()}.
      */
-    public void getSurroundingText(int beforeLength, int afterLength, int flags,
-            ISurroundingTextResultCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = beforeLength;
-        args.arg2 = afterLength;
-        args.arg3 = flags;
-        args.arg4 = callback;
-        dispatchMessage(mH.obtainMessage(DO_GET_SURROUNDING_TEXT, flags, 0 /* unused */, args));
-    }
-
-    public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
-        dispatchMessage(
-                mH.obtainMessage(DO_GET_CURSOR_CAPS_MODE, reqModes, 0 /* unused */, callback));
-    }
-
-    public void getExtractedText(ExtractedTextRequest request, int flags,
-            IExtractedTextResultCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = request;
-        args.arg2 = callback;
-        dispatchMessage(mH.obtainMessage(DO_GET_EXTRACTED_TEXT, flags, 0 /* unused */, args));
-    }
-
-    public void commitText(CharSequence text, int newCursorPosition) {
-        dispatchMessage(obtainMessageIO(DO_COMMIT_TEXT, newCursorPosition, text));
-    }
-
-    public void commitCompletion(CompletionInfo text) {
-        dispatchMessage(obtainMessageO(DO_COMMIT_COMPLETION, text));
-    }
-
-    public void commitCorrection(CorrectionInfo info) {
-        dispatchMessage(obtainMessageO(DO_COMMIT_CORRECTION, info));
-    }
-
-    public void setSelection(int start, int end) {
-        dispatchMessage(obtainMessageII(DO_SET_SELECTION, start, end));
-    }
-
-    public void performEditorAction(int id) {
-        dispatchMessage(obtainMessageII(DO_PERFORM_EDITOR_ACTION, id, 0));
-    }
-    
-    public void performContextMenuAction(int id) {
-        dispatchMessage(obtainMessageII(DO_PERFORM_CONTEXT_MENU_ACTION, id, 0));
-    }
-    
-    public void setComposingRegion(int start, int end) {
-        dispatchMessage(obtainMessageII(DO_SET_COMPOSING_REGION, start, end));
-    }
-
-    public void setComposingText(CharSequence text, int newCursorPosition) {
-        dispatchMessage(obtainMessageIO(DO_SET_COMPOSING_TEXT, newCursorPosition, text));
-    }
-
+    @AnyThread
     public void finishComposingText() {
-        dispatchMessage(obtainMessage(DO_FINISH_COMPOSING_TEXT));
-    }
-
-    public void sendKeyEvent(KeyEvent event) {
-        dispatchMessage(obtainMessageO(DO_SEND_KEY_EVENT, event));
-    }
-
-    public void clearMetaKeyStates(int states) {
-        dispatchMessage(obtainMessageII(DO_CLEAR_META_KEY_STATES, states, 0));
-    }
-
-    public void deleteSurroundingText(int beforeLength, int afterLength) {
-        dispatchMessage(obtainMessageII(DO_DELETE_SURROUNDING_TEXT,
-                beforeLength, afterLength));
-    }
-
-    public void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
-        dispatchMessage(obtainMessageII(DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS,
-                beforeLength, afterLength));
-    }
-
-    public void beginBatchEdit() {
-        dispatchMessage(obtainMessage(DO_BEGIN_BATCH_EDIT));
-    }
-
-    public void endBatchEdit() {
-        dispatchMessage(obtainMessage(DO_END_BATCH_EDIT));
-    }
-
-    /**
-     * Dispatches the request for performing spell check.
-     *
-     * @see InputConnection#performSpellCheck()
-     */
-    public void performSpellCheck() {
-        dispatchMessage(obtainMessage(DO_PERFORM_SPELL_CHECK));
-    }
-
-    public void performPrivateCommand(String action, Bundle data) {
-        dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
-    }
-
-    public void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback) {
-        dispatchMessage(mH.obtainMessage(DO_REQUEST_CURSOR_UPDATES, cursorUpdateMode,
-                0 /* unused */, callback));
-    }
-
-    public void closeConnection() {
-        dispatchMessage(obtainMessage(DO_CLOSE_CONNECTION));
-    }
-
-    public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
-            IBooleanResultCallback callback) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = inputContentInfo;
-        args.arg2 = opts;
-        args.arg3 = callback;
-        dispatchMessage(mH.obtainMessage(DO_COMMIT_CONTENT, flags, 0 /* unused */, args));
-    }
-
-    /**
-     * Dispatches the request for setting ime consumes input.
-     *
-     * <p>See {@link InputConnection#setImeConsumesInput(boolean)}.
-     */
-    public void setImeConsumesInput(boolean imeConsumesInput) {
-        dispatchMessage(obtainMessageB(DO_SET_IME_CONSUMES_INPUT, imeConsumesInput));
+        dispatchMessage(mH.obtainMessage(DO_EDIT, InputConnectionCommand.create(
+                InputConnectionCommandType.FINISH_COMPOSING_TEXT)));
     }
 
     void dispatchMessage(Message msg) {
@@ -349,108 +207,131 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         mH.sendMessage(msg);
     }
 
-    void executeMessage(Message msg) {
-        byte[] icProto;
+    private void executeMessage(Message msg) {
         switch (msg.what) {
-            case DO_GET_TEXT_AFTER_CURSOR: {
+            case DO_EDIT:
+                doEditMain((InputConnectionCommand) msg.obj);
+                break;
+            case DO_CLOSE_CONNECTION:
+                // Note that we do not need to worry about race condition here, because 1) mFinished
+                // is updated only inside this block, and 2) the code here is running on a Handler
+                // hence we assume multiple DO_CLOSE_CONNECTION messages will not be handled at the
+                // same time.
+                if (isFinished()) {
+                    return;
+                }
+                Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#closeConnection");
+                try {
+                    InputConnection ic = getInputConnection();
+                    // Note we do NOT check isActive() here, because this is safe
+                    // for an IME to call at any time, and we need to allow it
+                    // through to clean up our state after the IME has switched to
+                    // another client.
+                    if (ic == null) {
+                        return;
+                    }
+                    @MissingMethodFlags final int missingMethods =
+                            InputConnectionInspector.getMissingMethodFlags(ic);
+                    if ((missingMethods & MissingMethodFlags.CLOSE_CONNECTION) == 0) {
+                        ic.closeConnection();
+                    }
+                } finally {
+                    synchronized (mLock) {
+                        mInputConnection = null;
+                        mFinished = true;
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+                }
+                break;
+        }
+    }
+
+    private void doEditMain(@NonNull InputConnectionCommand command) {
+        if (DEBUG) {
+            Log.d(TAG, "handling: " + InputMethodDebug.dumpInputConnectionCommand(command));
+        }
+        byte[] icProto;
+        switch (command.mCommandType) {
+            case InputConnectionCommandType.GET_TEXT_AFTER_CURSOR: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextAfterCursor");
                 try {
-                    final ICharSequenceResultCallback callback =
-                            (ICharSequenceResultCallback) msg.obj;
+                    final int n = command.mIntArg0;
+                    final int flags = command.mFlags;
                     final InputConnection ic = getInputConnection();
                     final CharSequence result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
                         result = null;
                     } else {
-                        result = ic.getTextAfterCursor(msg.arg1, msg.arg2);
+                        result = ic.getTextAfterCursor(n, flags);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(msg.arg1,
-                                msg.arg2, result);
+                        icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(n, flags,
+                                result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getTextAfterCursor", mParentInputMethodManager, icProto);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to getTextAfterCursor()."
-                            + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_GET_TEXT_BEFORE_CURSOR: {
+            case InputConnectionCommandType.GET_TEXT_BEFORE_CURSOR: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextBeforeCursor");
                 try {
-                    final ICharSequenceResultCallback callback =
-                            (ICharSequenceResultCallback) msg.obj;
+                    final int n = command.mIntArg0;
+                    final int flags = command.mFlags;
                     final InputConnection ic = getInputConnection();
                     final CharSequence result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
                         result = null;
                     } else {
-                        result = ic.getTextBeforeCursor(msg.arg1, msg.arg2);
+                        result = ic.getTextBeforeCursor(n, flags);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(msg.arg1,
-                                msg.arg2, result);
+                        icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(n, flags,
+                                result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getTextBeforeCursor", mParentInputMethodManager, icProto);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to getTextBeforeCursor()."
-                            + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_GET_SELECTED_TEXT: {
+            case InputConnectionCommandType.GET_SELECTED_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getSelectedText");
                 try {
-                    final ICharSequenceResultCallback callback =
-                            (ICharSequenceResultCallback) msg.obj;
+                    final int flags = command.mFlags;
                     final InputConnection ic = getInputConnection();
                     final CharSequence result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getSelectedText on inactive InputConnection");
                         result = null;
                     } else {
-                        result = ic.getSelectedText(msg.arg1);
+                        result = ic.getSelectedText(flags);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(msg.arg1,
+                        icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(flags,
                                 result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getSelectedText", mParentInputMethodManager, icProto);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to getSelectedText()."
-                                + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_GET_SURROUNDING_TEXT: {
-                final SomeArgs args = (SomeArgs) msg.obj;
+            case InputConnectionCommandType.GET_SURROUNDING_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getSurroundingText");
                 try {
-                    int beforeLength = (int) args.arg1;
-                    int afterLength  = (int) args.arg2;
-                    int flags = (int) args.arg3;
-                    final ISurroundingTextResultCallback callback =
-                            (ISurroundingTextResultCallback) args.arg4;
+                    final int beforeLength = command.mIntArg0;
+                    final int afterLength  = command.mIntArg1;
+                    final int flags = command.mFlags;
                     final InputConnection ic = getInputConnection();
                     final SurroundingText result;
                     if (ic == null || !isActive()) {
@@ -465,193 +346,186 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getSurroundingText", mParentInputMethodManager, icProto);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to getSurroundingText()."
-                                + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
-                    args.recycle();
                 }
                 return;
             }
-            case DO_GET_CURSOR_CAPS_MODE: {
+            case InputConnectionCommandType.GET_CURSOR_CAPS_MODE: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getCursorCapsMode");
                 try {
-                    final IIntResultCallback callback = (IIntResultCallback) msg.obj;
+                    final int reqModes = command.mIntArg0;
                     final InputConnection ic = getInputConnection();
                     final int result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
                         result = 0;
                     } else {
-                        result = ic.getCursorCapsMode(msg.arg1);
+                        result = ic.getCursorCapsMode(reqModes);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
-                        icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(msg.arg1,
+                        icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(reqModes,
                                 result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getCursorCapsMode", mParentInputMethodManager, icProto);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to getCursorCapsMode()."
-                            + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_GET_EXTRACTED_TEXT: {
-                final SomeArgs args = (SomeArgs) msg.obj;
+            case InputConnectionCommandType.GET_EXTRACTED_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getExtractedText");
                 try {
-                    final ExtractedTextRequest request = (ExtractedTextRequest) args.arg1;
-                    final IExtractedTextResultCallback callback =
-                            (IExtractedTextResultCallback) args.arg2;
+                    final ExtractedTextRequest request = (ExtractedTextRequest) command.mParcelable;
+                    final int flags = command.mFlags;
                     final InputConnection ic = getInputConnection();
                     final ExtractedText result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getExtractedText on inactive InputConnection");
                         result = null;
                     } else {
-                        result = ic.getExtractedText(request, msg.arg1);
+                        result = ic.getExtractedText(request, flags);
                     }
                     if (ImeTracing.getInstance().isEnabled()) {
                         icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(request,
-                                msg.arg1, result);
+                                flags, result);
                         ImeTracing.getInstance().triggerClientDump(
                                 TAG + "#getExtractedText", mParentInputMethodManager, icProto);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to getExtractedText()."
-                                + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
-                    args.recycle();
                 }
                 return;
             }
-            case DO_COMMIT_TEXT: {
+            case InputConnectionCommandType.COMMIT_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitText");
                 try {
+                    final CharSequence text = command.mCharSequence;
+                    final int newCursorPosition = command.mIntArg0;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "commitText on inactive InputConnection");
                         return;
                     }
-                    ic.commitText((CharSequence) msg.obj, msg.arg1);
+                    ic.commitText(text, newCursorPosition);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_SET_SELECTION: {
+            case InputConnectionCommandType.SET_SELECTION: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setSelection");
                 try {
+                    final int start = command.mIntArg0;
+                    final int end = command.mIntArg1;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "setSelection on inactive InputConnection");
                         return;
                     }
-                    ic.setSelection(msg.arg1, msg.arg2);
+                    ic.setSelection(start, end);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_PERFORM_EDITOR_ACTION: {
+            case InputConnectionCommandType.PERFORM_EDITOR_ACTION: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performEditorAction");
                 try {
+                    final int editorAction = command.mIntArg0;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "performEditorAction on inactive InputConnection");
                         return;
                     }
-                    ic.performEditorAction(msg.arg1);
+                    ic.performEditorAction(editorAction);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_PERFORM_CONTEXT_MENU_ACTION: {
+            case InputConnectionCommandType.PERFORM_CONTEXT_MENU_ACTION: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performContextMenuAction");
                 try {
+                    final int id = command.mIntArg0;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "performContextMenuAction on inactive InputConnection");
                         return;
                     }
-                    ic.performContextMenuAction(msg.arg1);
+                    ic.performContextMenuAction(id);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_COMMIT_COMPLETION: {
+            case InputConnectionCommandType.COMMIT_COMPLETION: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitCompletion");
                 try {
+                    final CompletionInfo text = (CompletionInfo) command.mParcelable;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "commitCompletion on inactive InputConnection");
                         return;
                     }
-                    ic.commitCompletion((CompletionInfo) msg.obj);
+                    ic.commitCompletion(text);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_COMMIT_CORRECTION: {
+            case InputConnectionCommandType.COMMIT_CORRECTION: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitCorrection");
                 try {
+                    final CorrectionInfo correctionInfo = (CorrectionInfo) command.mParcelable;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "commitCorrection on inactive InputConnection");
                         return;
                     }
-                    ic.commitCorrection((CorrectionInfo) msg.obj);
+                    ic.commitCorrection(correctionInfo);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_SET_COMPOSING_TEXT: {
+            case InputConnectionCommandType.SET_COMPOSING_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setComposingText");
                 try {
+                    final CharSequence text = command.mCharSequence;
+                    final int newCursorPosition = command.mIntArg0;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "setComposingText on inactive InputConnection");
                         return;
                     }
-                    ic.setComposingText((CharSequence) msg.obj, msg.arg1);
+                    ic.setComposingText(text, newCursorPosition);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_SET_COMPOSING_REGION: {
+            case InputConnectionCommandType.SET_COMPOSING_REGION: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setComposingRegion");
                 try {
+                    final int start = command.mIntArg0;
+                    final int end = command.mIntArg1;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "setComposingRegion on inactive InputConnection");
                         return;
                     }
-                    ic.setComposingRegion(msg.arg1, msg.arg2);
+                    ic.setComposingRegion(start, end);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_FINISH_COMPOSING_TEXT: {
+            case InputConnectionCommandType.FINISH_COMPOSING_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#finishComposingText");
                 try {
                     if (isFinished()) {
@@ -677,64 +551,70 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_SEND_KEY_EVENT: {
+            case InputConnectionCommandType.SEND_KEY_EVENT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#sendKeyEvent");
                 try {
+                    final KeyEvent event = (KeyEvent) command.mParcelable;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "sendKeyEvent on inactive InputConnection");
                         return;
                     }
-                    ic.sendKeyEvent((KeyEvent) msg.obj);
+                    ic.sendKeyEvent(event);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_CLEAR_META_KEY_STATES: {
+            case InputConnectionCommandType.CLEAR_META_KEY_STATES: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#clearMetaKeyStates");
                 try {
+                    final int states = command.mIntArg0;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "clearMetaKeyStates on inactive InputConnection");
                         return;
                     }
-                    ic.clearMetaKeyStates(msg.arg1);
+                    ic.clearMetaKeyStates(states);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_DELETE_SURROUNDING_TEXT: {
+            case InputConnectionCommandType.DELETE_SURROUNDING_TEXT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#deleteSurroundingText");
                 try {
+                    final int beforeLength = command.mIntArg0;
+                    final int afterLength = command.mIntArg1;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "deleteSurroundingText on inactive InputConnection");
                         return;
                     }
-                    ic.deleteSurroundingText(msg.arg1, msg.arg2);
+                    ic.deleteSurroundingText(beforeLength, afterLength);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS: {
+            case InputConnectionCommandType.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT,
                         "InputConnection#deleteSurroundingTextInCodePoints");
                 try {
+                    final int beforeLength = command.mIntArg0;
+                    final int afterLength = command.mIntArg1;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "deleteSurroundingTextInCodePoints on inactive InputConnection");
                         return;
                     }
-                    ic.deleteSurroundingTextInCodePoints(msg.arg1, msg.arg2);
+                    ic.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_BEGIN_BATCH_EDIT: {
+            case InputConnectionCommandType.BEGIN_BATCH_EDIT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#beginBatchEdit");
                 try {
                     InputConnection ic = getInputConnection();
@@ -748,7 +628,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_END_BATCH_EDIT: {
+            case InputConnectionCommandType.END_BATCH_EDIT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#endBatchEdit");
                 try {
                     InputConnection ic = getInputConnection();
@@ -762,7 +642,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_PERFORM_SPELL_CHECK: {
+            case InputConnectionCommandType.PERFORM_SPELL_CHECK: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performSpellCheck");
                 try {
                     InputConnection ic = getInputConnection();
@@ -776,12 +656,11 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_PERFORM_PRIVATE_COMMAND: {
-                final SomeArgs args = (SomeArgs) msg.obj;
+            case InputConnectionCommandType.PERFORM_PRIVATE_COMMAND: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performPrivateCommand");
                 try {
-                    final String action = (String) args.arg1;
-                    final Bundle data = (Bundle) args.arg2;
+                    final String action = command.mString;
+                    final Bundle data = command.mBundle;
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "performPrivateCommand on inactive InputConnection");
@@ -790,142 +669,71 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                     ic.performPrivateCommand(action, data);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
-                    args.recycle();
                 }
                 return;
             }
-            case DO_REQUEST_CURSOR_UPDATES: {
+            case InputConnectionCommandType.REQUEST_CURSOR_UPDATES: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#requestCursorUpdates");
                 try {
-                    final IBooleanResultCallback callback = (IBooleanResultCallback) msg.obj;
+                    final int cursorUpdateMode = command.mIntArg0;
                     final InputConnection ic = getInputConnection();
                     final boolean result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
                         result = false;
                     } else {
-                        result = ic.requestCursorUpdates(msg.arg1);
+                        result = ic.requestCursorUpdates(cursorUpdateMode);
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to requestCursorUpdates()."
-                                + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
-            case DO_CLOSE_CONNECTION: {
-                // Note that we do not need to worry about race condition here, because 1) mFinished
-                // is updated only inside this block, and 2) the code here is running on a Handler
-                // hence we assume multiple DO_CLOSE_CONNECTION messages will not be handled at the
-                // same time.
-                if (isFinished()) {
-                    return;
-                }
-                Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#closeConnection");
-                try {
-                    InputConnection ic = getInputConnection();
-                    // Note we do NOT check isActive() here, because this is safe
-                    // for an IME to call at any time, and we need to allow it
-                    // through to clean up our state after the IME has switched to
-                    // another client.
-                    if (ic == null) {
-                        return;
-                    }
-                    @MissingMethodFlags
-                    final int missingMethods = InputConnectionInspector.getMissingMethodFlags(ic);
-                    if ((missingMethods & MissingMethodFlags.CLOSE_CONNECTION) == 0) {
-                        ic.closeConnection();
-                    }
-                } finally {
-                    synchronized (mLock) {
-                        mInputConnection = null;
-                        mFinished = true;
-                    }
-                    Trace.traceEnd(Trace.TRACE_TAG_INPUT);
-                }
-                return;
-            }
-            case DO_COMMIT_CONTENT: {
-                final int flags = msg.arg1;
-                SomeArgs args = (SomeArgs) msg.obj;
+            case InputConnectionCommandType.COMMIT_CONTENT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitContent");
                 try {
-                    final IBooleanResultCallback callback = (IBooleanResultCallback) args.arg3;
+                    final InputContentInfo inputContentInfo =
+                            (InputContentInfo) command.mParcelable;
+                    final int flags = command.mFlags;
+                    final Bundle opts = command.mBundle;
                     final InputConnection ic = getInputConnection();
                     final boolean result;
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "commitContent on inactive InputConnection");
                         result = false;
                     } else {
-                        final InputContentInfo inputContentInfo = (InputContentInfo) args.arg1;
                         if (inputContentInfo == null || !inputContentInfo.validate()) {
                             Log.w(TAG, "commitContent with invalid inputContentInfo="
                                     + inputContentInfo);
                             result = false;
                         } else {
-                            result = ic.commitContent(inputContentInfo, flags, (Bundle) args.arg2);
+                            result = ic.commitContent(inputContentInfo, flags, opts);
                         }
                     }
-                    try {
-                        callback.onResult(result);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to return the result to commitContent()."
-                                + " result=" + result, e);
-                    }
+                    CallbackUtils.onResult(command, result, TAG);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
-                    args.recycle();
                 }
                 return;
             }
-            case DO_SET_IME_CONSUMES_INPUT: {
+            case InputConnectionCommandType.SET_IME_CONSUMES_INPUT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT,
                         "InputConnection#setImeConsumesInput");
                 try {
+                    final boolean imeConsumesInput = (command.mIntArg0 != 0);
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG,
                                 "setImeConsumesInput on inactive InputConnection");
                         return;
                     }
-                    ic.setImeConsumesInput(msg.arg1 == 1);
+                    ic.setImeConsumesInput(imeConsumesInput);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
                 return;
             }
         }
-        Log.w(TAG, "Unhandled message code: " + msg.what);
-    }
-
-    Message obtainMessage(int what) {
-        return mH.obtainMessage(what);
-    }
-
-    Message obtainMessageII(int what, int arg1, int arg2) {
-        return mH.obtainMessage(what, arg1, arg2);
-    }
-
-    Message obtainMessageO(int what, Object arg1) {
-        return mH.obtainMessage(what, 0, 0, arg1);
-    }
-
-    Message obtainMessageIO(int what, int arg1, Object arg2) {
-        return mH.obtainMessage(what, arg1, 0, arg2);
-    }
-
-    Message obtainMessageOO(int what, Object arg1, Object arg2) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = arg1;
-        args.arg2 = arg2;
-        return mH.obtainMessage(what, 0, 0, args);
-    }
-
-    Message obtainMessageB(int what, boolean arg1) {
-        return mH.obtainMessage(what, arg1 ? 1 : 0, 0);
     }
 }

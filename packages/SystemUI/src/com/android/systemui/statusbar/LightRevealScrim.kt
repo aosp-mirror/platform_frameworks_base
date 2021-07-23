@@ -83,6 +83,35 @@ object LiftReveal : LightRevealEffect {
     }
 }
 
+class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
+
+    private val INTERPOLATOR = Interpolators.FAST_OUT_SLOW_IN_REVERSE
+
+    override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
+        val interpolatedAmount = INTERPOLATOR.getInterpolation(amount)
+
+        // TODO(b/193801466): add alpha reveal in the beginning as well
+        scrim.revealGradientEndColorAlpha =
+            1f - LightRevealEffect.getPercentPastThreshold(interpolatedAmount, threshold = 0.6f)
+
+        if (isVertical) {
+            scrim.setRevealGradientBounds(
+                left = scrim.width / 2 - (scrim.width / 2) * interpolatedAmount,
+                top = 0f,
+                right = scrim.width / 2 + (scrim.width / 2) * interpolatedAmount,
+                bottom = scrim.height.toFloat()
+            )
+        } else {
+            scrim.setRevealGradientBounds(
+                left = 0f,
+                top = scrim.height / 2 - (scrim.height / 2) * interpolatedAmount,
+                right = scrim.width.toFloat(),
+                bottom = scrim.height / 2 + (scrim.height / 2) * interpolatedAmount
+            )
+        }
+    }
+}
+
 class CircleReveal(
     /** X-value of the circle center of the reveal. */
     val centerX: Float,

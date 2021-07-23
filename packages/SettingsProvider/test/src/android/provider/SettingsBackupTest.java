@@ -102,7 +102,8 @@ public class SettingsBackupTest {
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT,
-                    Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                    Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
+                    Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED
                     );
 
     private static final Set<String> BACKUP_DENY_LIST_GLOBAL_SETTINGS =

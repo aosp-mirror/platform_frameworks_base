@@ -273,16 +273,16 @@ public class PackageInfoWithoutStateUtils {
                 pi.requestedPermissionsFlags = new int[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedUsesPermission usesPermission = usesPermissions.get(i);
-                    pi.requestedPermissions[i] = usesPermission.name;
+                    pi.requestedPermissions[i] = usesPermission.getName();
                     // The notion of required permissions is deprecated but for compatibility.
                     pi.requestedPermissionsFlags[i] |=
                             PackageInfo.REQUESTED_PERMISSION_REQUIRED;
                     if (grantedPermissions != null
-                            && grantedPermissions.contains(usesPermission.name)) {
+                            && grantedPermissions.contains(usesPermission.getName())) {
                         pi.requestedPermissionsFlags[i] |=
                                 PackageInfo.REQUESTED_PERMISSION_GRANTED;
                     }
-                    if ((usesPermission.usesPermissionFlags
+                    if ((usesPermission.getUsesPermissionFlags()
                             & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0) {
                         pi.requestedPermissionsFlags[i] |=
                                 PackageInfo.REQUESTED_PERMISSION_NEVER_FOR_LOCATION;
@@ -750,7 +750,7 @@ public class PackageInfoWithoutStateUtils {
     @Nullable
     public static Attribution generateAttribution(ParsedAttribution pa) {
         if (pa == null) return null;
-        return new Attribution(pa.tag, pa.label);
+        return new Attribution(pa.getTag(), pa.getLabel());
     }
 
     private static boolean checkUseInstalledOrHidden(int flags, @NonNull PackageUserState state,

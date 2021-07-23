@@ -34,10 +34,11 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Bundle;
@@ -216,13 +217,15 @@ public class StagingManager {
         int minSignatureScheme = ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
                 newApexPkg.applicationInfo.targetSdkVersion);
 
-        final SigningDetails newSigningDetails;
-        try {
-            newSigningDetails = ApkSignatureVerifier.verify(apexPath, minSignatureScheme);
-        } catch (PackageParserException e) {
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<SigningDetails> newResult = ApkSignatureVerifier.verify(
+                input.reset(), apexPath, minSignatureScheme);
+        if (newResult.isError()) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + apexPath + " : " + e, e);
+                    "Failed to parse APEX package " + apexPath + " : "
+                            + newResult.getException(), newResult.getException());
         }
+        final SigningDetails newSigningDetails = newResult.getResult();
 
         // Get signing details of the existing package
         final PackageInfo existingApexPkg = mApexManager.getPackageInfo(packageName,
@@ -233,15 +236,15 @@ public class StagingManager {
             throw new IllegalStateException("Unknown apex package " + packageName);
         }
 
-        final SigningDetails existingSigningDetails;
-        try {
-            existingSigningDetails = ApkSignatureVerifier.verify(
-                    existingApexPkg.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
-        } catch (PackageParserException e) {
+        final ParseResult<SigningDetails> existingResult = ApkSignatureVerifier.verify(
+                input.reset(), existingApexPkg.applicationInfo.sourceDir,
+                SignatureSchemeVersion.JAR);
+        if (existingResult.isError()) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir
-                            + " : " + e, e);
+                            + " : " + existingResult.getException(), existingResult.getException());
         }
+        final SigningDetails existingSigningDetails = existingResult.getResult();
 
         // Verify signing details for upgrade
         if (newSigningDetails.checkCapability(existingSigningDetails,
@@ -297,7 +300,7 @@ public class StagingManager {
                             SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "Unable to generate package info: " + apexInfo.modulePath);
                 }
-            } catch (PackageParserException e) {
+            } catch (PackageManagerException e) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                         "Failed to parse APEX package " + apexInfo.modulePath + " : " + e, e);
             }
@@ -744,6 +747,26 @@ public class StagingManager {
                 }
             }
         }
+    }
+
+    /**
+     * Returns id of a committed and non-finalized stated session that contains same
+     * {@code packageName}, or {@code -1} if no sessions have this {@code packageName} staged.
+     */
+    int getSessionIdByPackageName(@NonNull String packageName) {
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                StagedSession stagedSession = mStagedSessions.valueAt(i);
+                if (!stagedSession.isCommitted() || stagedSession.isDestroyed()
+                        || stagedSession.isInTerminalState()) {
+                    continue;
+                }
+                if (stagedSession.getPackageName().equals(packageName)) {
+                    return stagedSession.sessionId();
+                }
+            }
+        }
+        return -1;
     }
 
     @VisibleForTesting

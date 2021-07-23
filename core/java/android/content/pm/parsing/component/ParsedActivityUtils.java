@@ -120,58 +120,58 @@ public class ParsedActivityUtils {
             // Multi-lining them to fit within the column restriction makes it hard to tell what
             // field is assigned where.
             // @formatter:off
-            activity.theme = sa.getResourceId(R.styleable.AndroidManifestActivity_theme, 0);
-            activity.uiOptions = sa.getInt(R.styleable.AndroidManifestActivity_uiOptions, pkg.getUiOptions());
+            activity.setTheme(sa.getResourceId(R.styleable.AndroidManifestActivity_theme, 0))
+                    .setUiOptions(sa.getInt(R.styleable.AndroidManifestActivity_uiOptions, pkg.getUiOptions()));
 
-            activity.flags |= flag(ActivityInfo.FLAG_ALLOW_TASK_REPARENTING, R.styleable.AndroidManifestActivity_allowTaskReparenting, pkg.isAllowTaskReparenting(), sa)
-                    | flag(ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE, R.styleable.AndroidManifestActivity_alwaysRetainTaskState, sa)
-                    | flag(ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH, R.styleable.AndroidManifestActivity_clearTaskOnLaunch, sa)
-                    | flag(ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS, R.styleable.AndroidManifestActivity_excludeFromRecents, sa)
-                    | flag(ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS, R.styleable.AndroidManifestActivity_finishOnCloseSystemDialogs, sa)
-                    | flag(ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH, R.styleable.AndroidManifestActivity_finishOnTaskLaunch, sa)
-                    | flag(ActivityInfo.FLAG_IMMERSIVE, R.styleable.AndroidManifestActivity_immersive, sa)
-                    | flag(ActivityInfo.FLAG_MULTIPROCESS, R.styleable.AndroidManifestActivity_multiprocess, sa)
-                    | flag(ActivityInfo.FLAG_NO_HISTORY, R.styleable.AndroidManifestActivity_noHistory, sa)
-                    | flag(ActivityInfo.FLAG_SHOW_FOR_ALL_USERS, R.styleable.AndroidManifestActivity_showForAllUsers, sa)
-                    | flag(ActivityInfo.FLAG_SHOW_FOR_ALL_USERS, R.styleable.AndroidManifestActivity_showOnLockScreen, sa)
-                    | flag(ActivityInfo.FLAG_STATE_NOT_NEEDED, R.styleable.AndroidManifestActivity_stateNotNeeded, sa)
-                    | flag(ActivityInfo.FLAG_SYSTEM_USER_ONLY, R.styleable.AndroidManifestActivity_systemUserOnly, sa);
+            activity.setFlags(activity.getFlags() | (flag(ActivityInfo.FLAG_ALLOW_TASK_REPARENTING, R.styleable.AndroidManifestActivity_allowTaskReparenting, pkg.isAllowTaskReparenting(), sa)
+                                | flag(ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE, R.styleable.AndroidManifestActivity_alwaysRetainTaskState, sa)
+                                | flag(ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH, R.styleable.AndroidManifestActivity_clearTaskOnLaunch, sa)
+                                | flag(ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS, R.styleable.AndroidManifestActivity_excludeFromRecents, sa)
+                                | flag(ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS, R.styleable.AndroidManifestActivity_finishOnCloseSystemDialogs, sa)
+                                | flag(ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH, R.styleable.AndroidManifestActivity_finishOnTaskLaunch, sa)
+                                | flag(ActivityInfo.FLAG_IMMERSIVE, R.styleable.AndroidManifestActivity_immersive, sa)
+                                | flag(ActivityInfo.FLAG_MULTIPROCESS, R.styleable.AndroidManifestActivity_multiprocess, sa)
+                                | flag(ActivityInfo.FLAG_NO_HISTORY, R.styleable.AndroidManifestActivity_noHistory, sa)
+                                | flag(ActivityInfo.FLAG_SHOW_FOR_ALL_USERS, R.styleable.AndroidManifestActivity_showForAllUsers, sa)
+                                | flag(ActivityInfo.FLAG_SHOW_FOR_ALL_USERS, R.styleable.AndroidManifestActivity_showOnLockScreen, sa)
+                                | flag(ActivityInfo.FLAG_STATE_NOT_NEEDED, R.styleable.AndroidManifestActivity_stateNotNeeded, sa)
+                                | flag(ActivityInfo.FLAG_SYSTEM_USER_ONLY, R.styleable.AndroidManifestActivity_systemUserOnly, sa)));
 
             if (!receiver) {
-                activity.flags |= flag(ActivityInfo.FLAG_HARDWARE_ACCELERATED, R.styleable.AndroidManifestActivity_hardwareAccelerated, pkg.isBaseHardwareAccelerated(), sa)
-                        | flag(ActivityInfo.FLAG_ALLOW_EMBEDDED, R.styleable.AndroidManifestActivity_allowEmbedded, sa)
-                        | flag(ActivityInfo.FLAG_ALWAYS_FOCUSABLE, R.styleable.AndroidManifestActivity_alwaysFocusable, sa)
-                        | flag(ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS, R.styleable.AndroidManifestActivity_autoRemoveFromRecents, sa)
-                        | flag(ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY, R.styleable.AndroidManifestActivity_relinquishTaskIdentity, sa)
-                        | flag(ActivityInfo.FLAG_RESUME_WHILE_PAUSING, R.styleable.AndroidManifestActivity_resumeWhilePausing, sa)
-                        | flag(ActivityInfo.FLAG_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_showWhenLocked, sa)
-                        | flag(ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE, R.styleable.AndroidManifestActivity_supportsPictureInPicture, sa)
-                        | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa)
-                        | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa);
+                activity.setFlags(activity.getFlags() | (flag(ActivityInfo.FLAG_HARDWARE_ACCELERATED, R.styleable.AndroidManifestActivity_hardwareAccelerated, pkg.isBaseHardwareAccelerated(), sa)
+                                        | flag(ActivityInfo.FLAG_ALLOW_EMBEDDED, R.styleable.AndroidManifestActivity_allowEmbedded, sa)
+                                        | flag(ActivityInfo.FLAG_ALWAYS_FOCUSABLE, R.styleable.AndroidManifestActivity_alwaysFocusable, sa)
+                                        | flag(ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS, R.styleable.AndroidManifestActivity_autoRemoveFromRecents, sa)
+                                        | flag(ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY, R.styleable.AndroidManifestActivity_relinquishTaskIdentity, sa)
+                                        | flag(ActivityInfo.FLAG_RESUME_WHILE_PAUSING, R.styleable.AndroidManifestActivity_resumeWhilePausing, sa)
+                                        | flag(ActivityInfo.FLAG_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_showWhenLocked, sa)
+                                        | flag(ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE, R.styleable.AndroidManifestActivity_supportsPictureInPicture, sa)
+                                        | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa)
+                                        | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa)));
 
-                activity.privateFlags |= flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED,
-                        R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa)
-                        | flag(ActivityInfo.PRIVATE_FLAG_HOME_TRANSITION_SOUND,
-                        R.styleable.AndroidManifestActivity_playHomeTransitionSound, true, sa);
+                activity.setPrivateFlags(activity.getPrivateFlags() | (flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED,
+                                        R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa)
+                                        | flag(ActivityInfo.PRIVATE_FLAG_HOME_TRANSITION_SOUND,
+                                        R.styleable.AndroidManifestActivity_playHomeTransitionSound, true, sa)));
 
-                activity.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode, ActivityInfo.COLOR_MODE_DEFAULT);
-                activity.documentLaunchMode = sa.getInt(R.styleable.AndroidManifestActivity_documentLaunchMode, ActivityInfo.DOCUMENT_LAUNCH_NONE);
-                activity.launchMode = sa.getInt(R.styleable.AndroidManifestActivity_launchMode, ActivityInfo.LAUNCH_MULTIPLE);
-                activity.lockTaskLaunchMode = sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
-                activity.maxRecents = sa.getInt(R.styleable.AndroidManifestActivity_maxRecents, ActivityTaskManager.getDefaultAppRecentsLimitStatic());
-                activity.persistableMode = sa.getInteger(R.styleable.AndroidManifestActivity_persistableMode, ActivityInfo.PERSIST_ROOT_ONLY);
-                activity.requestedVrComponent = sa.getString(R.styleable.AndroidManifestActivity_enableVrMode);
-                activity.rotationAnimation = sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED);
-                activity.softInputMode = sa.getInt(R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
-
-                activity.configChanges = getActivityConfigChanges(
-                        sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
-                        sa.getInt(R.styleable.AndroidManifestActivity_recreateOnConfigChanges, 0));
+                activity.setColorMode(sa.getInt(R.styleable.AndroidManifestActivity_colorMode, ActivityInfo.COLOR_MODE_DEFAULT))
+                        .setDocumentLaunchMode(sa.getInt(R.styleable.AndroidManifestActivity_documentLaunchMode, ActivityInfo.DOCUMENT_LAUNCH_NONE))
+                        .setLaunchMode(sa.getInt(R.styleable.AndroidManifestActivity_launchMode, ActivityInfo.LAUNCH_MULTIPLE))
+                        .setLockTaskLaunchMode(sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0))
+                        .setMaxRecents(sa.getInt(R.styleable.AndroidManifestActivity_maxRecents, ActivityTaskManager.getDefaultAppRecentsLimitStatic()))
+                        .setPersistableMode(sa.getInteger(R.styleable.AndroidManifestActivity_persistableMode, ActivityInfo.PERSIST_ROOT_ONLY))
+                        .setRequestedVrComponent(sa.getString(R.styleable.AndroidManifestActivity_enableVrMode))
+                        .setRotationAnimation(sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED))
+                        .setSoftInputMode(sa.getInt(R.styleable.AndroidManifestActivity_windowSoftInputMode, 0))
+                        .setConfigChanges(getActivityConfigChanges(
+                                sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
+                                sa.getInt(R.styleable.AndroidManifestActivity_recreateOnConfigChanges, 0))
+                        );
 
                 int screenOrientation = sa.getInt(R.styleable.AndroidManifestActivity_screenOrientation, SCREEN_ORIENTATION_UNSPECIFIED);
                 int resizeMode = getActivityResizeMode(pkg, sa, screenOrientation);
-                activity.screenOrientation = screenOrientation;
-                activity.resizeMode = resizeMode;
+                activity.setScreenOrientation(screenOrientation)
+                        .setResizeMode(resizeMode);
 
                 if (sa.hasValue(R.styleable.AndroidManifestActivity_maxAspectRatio)
                         && sa.getType(R.styleable.AndroidManifestActivity_maxAspectRatio)
@@ -189,9 +189,9 @@ public class ParsedActivityUtils {
                                     0 /*default*/));
                 }
             } else {
-                activity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-                activity.configChanges = 0;
-                activity.flags |= flag(ActivityInfo.FLAG_SINGLE_USER, R.styleable.AndroidManifestActivity_singleUser, sa);
+                activity.setLaunchMode(ActivityInfo.LAUNCH_MULTIPLE)
+                        .setConfigChanges(0)
+                        .setFlags(activity.getFlags()|flag(ActivityInfo.FLAG_SINGLE_USER, R.styleable.AndroidManifestActivity_singleUser, sa));
             }
             // @formatter:on
 
@@ -205,11 +205,11 @@ public class ParsedActivityUtils {
                 return input.error(affinityNameResult);
             }
 
-            activity.taskAffinity = affinityNameResult.getResult();
+            activity.setTaskAffinity(affinityNameResult.getResult());
 
             boolean visibleToEphemeral = sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToInstantApps, false);
             if (visibleToEphemeral) {
-                activity.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                activity.setFlags(activity.getFlags() | ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP);
                 pkg.setVisibleToInstantApps(true);
             }
 
@@ -320,7 +320,7 @@ public class ParsedActivityUtils {
                 Log.e(TAG, "Activity " + activity.getName()
                         + " specified invalid parentActivityName " + parentActivityName);
             } else {
-                activity.setParentActivity(parentClassName);
+                activity.setParentActivityName(parentClassName);
             }
         }
 
@@ -336,7 +336,7 @@ public class ParsedActivityUtils {
 
         final boolean setExported = array.hasValue(exportedAttr);
         if (setExported) {
-            activity.exported = array.getBoolean(exportedAttr, false);
+            activity.setExported(array.getBoolean(exportedAttr, false));
         }
 
         final int depth = parser.getDepth();
@@ -355,7 +355,7 @@ public class ParsedActivityUtils {
                 if (intentResult.isSuccess()) {
                     ParsedIntentInfo intent = intentResult.getResult();
                     if (intent != null) {
-                        activity.order = Math.max(intent.getOrder(), activity.order);
+                        activity.setOrder(Math.max(intent.getOrder(), activity.getOrder()));
                         activity.addIntent(intent);
                         if (LOG_UNSAFE_BROADCASTS && isReceiver
                                 && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.O) {
@@ -396,7 +396,7 @@ public class ParsedActivityUtils {
                 ParseResult<ActivityInfo.WindowLayout> layoutResult =
                         parseActivityWindowLayout(resources, parser, input);
                 if (layoutResult.isSuccess()) {
-                    activity.windowLayout = layoutResult.getResult();
+                    activity.setWindowLayout(layoutResult.getResult());
                 }
                 result = layoutResult;
             } else {
@@ -408,13 +408,13 @@ public class ParsedActivityUtils {
             }
         }
 
-        if (!isAlias && activity.launchMode != LAUNCH_SINGLE_INSTANCE_PER_TASK
-                && activity.metaData != null && activity.metaData.containsKey(
+        if (!isAlias && activity.getLaunchMode() != LAUNCH_SINGLE_INSTANCE_PER_TASK
+                && activity.getMetaData() != null && activity.getMetaData().containsKey(
                 ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE)) {
-            final String launchMode = activity.metaData.getString(
+            final String launchMode = activity.getMetaData().getString(
                     ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE);
             if (launchMode != null && launchMode.equals("singleInstancePerTask")) {
-                activity.launchMode = LAUNCH_SINGLE_INSTANCE_PER_TASK;
+                activity.setLaunchMode(LAUNCH_SINGLE_INSTANCE_PER_TASK);
             }
         }
 
@@ -423,7 +423,7 @@ public class ParsedActivityUtils {
         if (layoutResult.isError()) {
             return input.error(layoutResult);
         }
-        activity.windowLayout = layoutResult.getResult();
+        activity.setWindowLayout(layoutResult.getResult());
 
         if (!setExported) {
             boolean hasIntentFilters = activity.getIntents().size() > 0;
@@ -437,7 +437,7 @@ public class ParsedActivityUtils {
                     return input.error(exportedCheckResult);
                 }
             }
-            activity.exported = hasIntentFilters;
+            activity.setExported(hasIntentFilters);
         }
 
         return input.success(activity);
@@ -459,10 +459,11 @@ public class ParsedActivityUtils {
         ParsedIntentInfo intent = result.getResult();
         if (intent != null) {
             if (intent.isVisibleToInstantApp()) {
-                activity.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                activity.setFlags(activity.getFlags() | ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP);
             }
             if (intent.isImplicitlyVisibleToInstantApp()) {
-                activity.flags |= ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
+                activity.setFlags(
+                        activity.getFlags() | ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP);
             }
         }
 
@@ -553,19 +554,19 @@ public class ParsedActivityUtils {
     private static ParseResult<ActivityInfo.WindowLayout> resolveActivityWindowLayout(
             ParsedActivity activity, ParseInput input) {
         // There isn't a metadata for us to fall back. Whatever is in layout is correct.
-        if (activity.metaData == null || !activity.metaData.containsKey(
+        if (activity.getMetaData() == null || !activity.getMetaData().containsKey(
                 ParsingPackageUtils.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY)) {
-            return input.success(activity.windowLayout);
+            return input.success(activity.getWindowLayout());
         }
 
         // Layout already specifies a value. We should just use that one.
-        if (activity.windowLayout != null && activity.windowLayout.windowLayoutAffinity != null) {
-            return input.success(activity.windowLayout);
+        if (activity.getWindowLayout() != null && activity.getWindowLayout().windowLayoutAffinity != null) {
+            return input.success(activity.getWindowLayout());
         }
 
-        String windowLayoutAffinity = activity.metaData.getString(
+        String windowLayoutAffinity = activity.getMetaData().getString(
                 ParsingPackageUtils.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY);
-        ActivityInfo.WindowLayout layout = activity.windowLayout;
+        ActivityInfo.WindowLayout layout = activity.getWindowLayout();
         if (layout == null) {
             layout = new ActivityInfo.WindowLayout(-1 /* width */, -1 /* widthFraction */,
                     -1 /* height */, -1 /* heightFraction */, Gravity.NO_GRAVITY,

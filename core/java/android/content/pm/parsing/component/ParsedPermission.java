@@ -38,17 +38,17 @@ public class ParsedPermission extends ParsedComponent {
     private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
 
     @Nullable
-    String backgroundPermission;
+    private String backgroundPermission;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String group;
-    int requestRes;
-    int protectionLevel;
-    boolean tree;
+    private int requestRes;
+    private int protectionLevel;
+    private boolean tree;
     @Nullable
     private ParsedPermissionGroup parsedPermissionGroup;
     @Nullable
-    Set<String> knownCerts;
+    private Set<String> knownCerts;
 
     @VisibleForTesting
     public ParsedPermission() {
@@ -64,13 +64,13 @@ public class ParsedPermission extends ParsedComponent {
         this.parsedPermissionGroup = other.parsedPermissionGroup;
     }
 
-    public ParsedPermission setGroup(String group) {
-        this.group = TextUtils.safeIntern(group);
+    public ParsedPermission setBackgroundPermission(String backgroundPermission) {
+        this.backgroundPermission = backgroundPermission;
         return this;
     }
 
-    public ParsedPermission setFlags(int flags) {
-        this.flags = flags;
+    public ParsedPermission setGroup(String group) {
+        this.group = TextUtils.safeIntern(group);
         return this;
     }
 
@@ -114,6 +114,21 @@ public class ParsedPermission extends ParsedComponent {
             size += getNonLocalizedLabel().length();
         }
         return size;
+    }
+
+    public ParsedPermission setKnownCerts(Set<String> knownCerts) {
+        this.knownCerts = knownCerts;
+        return this;
+    }
+
+    public ParsedPermission setRequestRes(int requestRes) {
+        this.requestRes = requestRes;
+        return this;
+    }
+
+    public ParsedPermission setTree(boolean tree) {
+        this.tree = tree;
+        return this;
     }
 
     public String toString() {

@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.window.TaskFragmentOrganizer.putExceptionInBundle;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
@@ -23,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -190,6 +193,16 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 Slog.e(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
             }
         }
+
+        void onTaskFragmentError(ITaskFragmentOrganizer organizer, IBinder errorCallbackToken,
+                Throwable exception) {
+            final Bundle exceptionBundle = putExceptionInBundle(exception);
+            try {
+                organizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception sending onTaskFragmentError callback", e);
+            }
+        }
     }
 
     @Override
@@ -289,6 +302,14 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         state.removeTaskFragment(taskFragment);
     }
 
+    void onTaskFragmentError(ITaskFragmentOrganizer organizer, IBinder errorCallbackToken,
+            Throwable exception) {
+        validateAndGetState(organizer);
+        PendingTaskFragmentEvent pendingEvent = new PendingTaskFragmentEvent(organizer,
+                errorCallbackToken, exception, PendingTaskFragmentEvent.EVENT_ERROR);
+        mPendingTaskFragmentEvents.add(pendingEvent);
+    }
+
     private void removeOrganizer(ITaskFragmentOrganizer organizer) {
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         // remove all of the children of the organized TaskFragment
@@ -321,25 +342,45 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         static final int EVENT_VANISHED = 1;
         static final int EVENT_INFO_CHANGED = 2;
         static final int EVENT_PARENT_INFO_CHANGED = 3;
+        static final int EVENT_ERROR = 4;
 
         @IntDef(prefix = "EVENT_", value = {
                 EVENT_APPEARED,
                 EVENT_VANISHED,
                 EVENT_INFO_CHANGED,
-                EVENT_PARENT_INFO_CHANGED
+                EVENT_PARENT_INFO_CHANGED,
+                EVENT_ERROR
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EventType {}
 
         @EventType
-        final int mEventType;
-        final TaskFragment mTaskFragment;
-        final ITaskFragmentOrganizer mTaskFragmentOrg;
+        private final int mEventType;
+        private final ITaskFragmentOrganizer mTaskFragmentOrg;
+        private final TaskFragment mTaskFragment;
+        private final IBinder mErrorCallback;
+        private final Throwable mException;
 
-        PendingTaskFragmentEvent(TaskFragment taskFragment, ITaskFragmentOrganizer taskFragmentOrg,
+        private PendingTaskFragmentEvent(TaskFragment taskFragment,
+                ITaskFragmentOrganizer taskFragmentOrg, @EventType int eventType) {
+            this(taskFragment, taskFragmentOrg, null /* errorCallback */,
+                    null /* exception */, eventType);
+
+        }
+
+        private PendingTaskFragmentEvent(ITaskFragmentOrganizer taskFragmentOrg,
+                IBinder errorCallback, Throwable exception, @EventType int eventType) {
+            this(null /* taskFragment */, taskFragmentOrg, errorCallback, exception,
+                    eventType);
+        }
+
+        private PendingTaskFragmentEvent(TaskFragment taskFragment,
+                ITaskFragmentOrganizer taskFragmentOrg, IBinder errorCallback, Throwable exception,
                 @EventType int eventType) {
             mTaskFragment = taskFragment;
             mTaskFragmentOrg = taskFragmentOrg;
+            mErrorCallback = errorCallback;
+            mException = exception;
             mEventType = eventType;
         }
 
@@ -407,6 +448,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     break;
                 case PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED:
                     state.onTaskFragmentParentInfoChanged(taskFragmentOrg, taskFragment);
+                    break;
+                case PendingTaskFragmentEvent.EVENT_ERROR:
+                    state.onTaskFragmentError(taskFragmentOrg, event.mErrorCallback,
+                            event.mException);
             }
         }
         mPendingTaskFragmentEvents.clear();

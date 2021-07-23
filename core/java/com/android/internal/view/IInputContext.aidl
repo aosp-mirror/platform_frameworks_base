@@ -16,76 +16,13 @@
 
 package com.android.internal.view;
 
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.ExtractedTextRequest;
-import android.view.inputmethod.InputContentInfo;
-
-import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.ICharSequenceResultCallback;
-import com.android.internal.inputmethod.IExtractedTextResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
-import com.android.internal.inputmethod.ISurroundingTextResultCallback;
+import com.android.internal.inputmethod.InputConnectionCommand;
 
 /**
  * Interface from an input method to the application, allowing it to perform
  * edits on the current input field and other interactions with the application.
  * {@hide}
  */
- oneway interface IInputContext {
-    void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback);
-
-    void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback);
-
-    void getCursorCapsMode(int reqModes, IIntResultCallback callback);
-
-    void getExtractedText(in ExtractedTextRequest request, int flags,
-            IExtractedTextResultCallback callback);
-
-    void deleteSurroundingText(int beforeLength, int afterLength);
-    void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
-
-    void setComposingText(CharSequence text, int newCursorPosition);
-
-    void finishComposingText();
-    
-    void commitText(CharSequence text, int newCursorPosition);
-
-    void commitCompletion(in CompletionInfo completion);
-
-    void commitCorrection(in CorrectionInfo correction);
-
-    void setSelection(int start, int end);
-    
-    void performEditorAction(int actionCode);
-    
-    void performContextMenuAction(int id);
-    
-    void beginBatchEdit();
-    
-    void endBatchEdit();
-
-    void sendKeyEvent(in KeyEvent event);
-    
-    void clearMetaKeyStates(int states);
-    
-    void performSpellCheck();
-
-    void performPrivateCommand(String action, in Bundle data);
-
-    void setComposingRegion(int start, int end);
-
-    void getSelectedText(int flags, ICharSequenceResultCallback callback);
-
-    void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback);
-
-    void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
-            IBooleanResultCallback callback);
-
-    void getSurroundingText(int beforeLength, int afterLength, int flags,
-            ISurroundingTextResultCallback callback);
-
-    void setImeConsumesInput(boolean imeConsumesInput);
+oneway interface IInputContext {
+    void doEdit(in InputConnectionCommand command);
 }

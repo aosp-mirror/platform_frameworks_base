@@ -243,16 +243,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private @Surface.Rotation int mCurrentRotation;
 
     /**
-     * If set to {@code true}, no entering PiP transition would be kicked off and most likely
-     * it's due to the fact that Launcher is handling the transition directly when swiping
-     * auto PiP-able Activity to home.
-     * See also {@link #startSwipePipToHome(ComponentName, ActivityInfo, PictureInPictureParams)}.
-     */
-    private boolean mInSwipePipToHomeTransition;
-
-    /**
      * An optional overlay used to mask content changing between an app in/out of PiP, only set if
-     * {@link #mInSwipePipToHomeTransition} is true.
+     * {@link PipTransitionState#getInSwipePipToHomeTransition()} is true.
      */
     private SurfaceControl mSwipePipToHomeOverlay;
 
@@ -343,7 +335,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams) {
-        mInSwipePipToHomeTransition = true;
+        mPipTransitionState.setInSwipePipToHomeTransition(true);
         sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
@@ -356,7 +348,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
         // do nothing if there is no startSwipePipToHome being called before
-        if (mInSwipePipToHomeTransition) {
+        if (mPipTransitionState.getInSwipePipToHomeTransition()) {
             mPipBoundsState.setBounds(destinationBounds);
             mSwipePipToHomeOverlay = overlay;
         }
@@ -517,7 +509,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
 
-        if (mInSwipePipToHomeTransition) {
+        if (mPipTransitionState.getInSwipePipToHomeTransition()) {
             if (!mWaitForFixedRotation) {
                 onEndOfSwipePipToHomeTransition();
             } else {
@@ -626,7 +618,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mInSwipePipToHomeTransition = false;
+            mPipTransitionState.setInSwipePipToHomeTransition(false);
             mSwipePipToHomeOverlay = null;
             return;
         }
@@ -650,7 +642,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         null /* callback */, false /* withStartDelay */);
             }
         }, tx);
-        mInSwipePipToHomeTransition = false;
+        mPipTransitionState.setInSwipePipToHomeTransition(false);
         mSwipePipToHomeOverlay = null;
     }
 
@@ -718,7 +710,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         clearWaitForFixedRotation();
-        mInSwipePipToHomeTransition = false;
+        mPipTransitionState.setInSwipePipToHomeTransition(false);
         mPictureInPictureParams = null;
         mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
         // Re-set the PIP bounds to none.
@@ -793,7 +785,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         if (mPipTransitionState.getTransitionState() == PipTransitionState.TASK_APPEARED) {
-            if (mInSwipePipToHomeTransition) {
+            if (mPipTransitionState.getInSwipePipToHomeTransition()) {
                 onEndOfSwipePipToHomeTransition();
             } else {
                 // Schedule a regular animation to ensure all the callbacks are still being sent.
@@ -859,10 +851,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         // Skip this entirely if that's the case.
         final boolean waitForFixedRotationOnEnteringPip = mWaitForFixedRotation
                 && (mPipTransitionState.getTransitionState() != PipTransitionState.ENTERED_PIP);
-        if ((mInSwipePipToHomeTransition || waitForFixedRotationOnEnteringPip) && fromRotation) {
+        if ((mPipTransitionState.getInSwipePipToHomeTransition()
+                || waitForFixedRotationOnEnteringPip) && fromRotation) {
             if (DEBUG) {
                 Log.d(TAG, "Skip onMovementBoundsChanged on rotation change"
-                        + " mInSwipePipToHomeTransition=" + mInSwipePipToHomeTransition
+                        + " InSwipePipToHomeTransition="
+                        + mPipTransitionState.getInSwipePipToHomeTransition()
                         + " mWaitForFixedRotation=" + mWaitForFixedRotation
                         + " getTransitionState=" + mPipTransitionState.getTransitionState());
             }
@@ -1383,11 +1377,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
         animator.setDuration(mCrossFadeAnimationDuration);
         animator.addUpdateListener(animation -> {
-            final float alpha = (float) animation.getAnimatedValue();
-            final SurfaceControl.Transaction transaction =
-                    mSurfaceControlTransactionFactory.getTransaction();
-            transaction.setAlpha(surface, alpha);
-            transaction.apply();
+            if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+                // Could happen if onTaskVanished happens during the animation since we may have
+                // set a start delay on this animation.
+                Log.d(TAG, "Task vanished, skip fadeOutAndRemoveOverlay");
+                animation.removeAllListeners();
+                animation.removeAllUpdateListeners();
+                animation.cancel();
+            } else {
+                final float alpha = (float) animation.getAnimatedValue();
+                final SurfaceControl.Transaction transaction =
+                        mSurfaceControlTransactionFactory.getTransaction();
+                transaction.setAlpha(surface, alpha);
+                transaction.apply();
+            }
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1400,6 +1403,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void removeContentOverlay(SurfaceControl surface, Runnable callback) {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+            // Avoid double removal, which is fatal.
+            return;
+        }
         final SurfaceControl.Transaction tx =
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.remove(surface);

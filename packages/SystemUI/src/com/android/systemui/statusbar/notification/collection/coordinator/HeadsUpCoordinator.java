@@ -149,7 +149,7 @@ public class HeadsUpCoordinator implements Coordinator {
             final String entryKey = entry.getKey();
             if (mHeadsUpManager.isAlerting(entryKey)) {
                 boolean removeImmediatelyForRemoteInput =
-                        mRemoteInputManager.getController().isSpinning(entryKey)
+                        mRemoteInputManager.isSpinning(entryKey)
                                 && !FORCE_REMOTE_INPUT_HISTORY;
                 mHeadsUpManager.removeNotification(entry.getKey(), removeImmediatelyForRemoteInput);
             }

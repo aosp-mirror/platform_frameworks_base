@@ -107,7 +107,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -297,8 +296,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock
-    private RemoteInputController mRemoteInputController;
-    @Mock
     private RecordingController mRecordingController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -396,8 +393,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
                 .thenReturn(mKeyguardBottomArea);
-        when(mNotificationRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-        when(mRemoteInputController.isRemoteInputActive()).thenReturn(false);
+        when(mNotificationRemoteInputManager.isRemoteInputActive()).thenReturn(false);
 
         reset(mView);
 

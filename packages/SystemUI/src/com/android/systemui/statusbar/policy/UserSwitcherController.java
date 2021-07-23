@@ -562,6 +562,13 @@ public class UserSwitcherController implements Dumpable {
                     mSecondaryUser = userInfo.id;
                 }
                 unpauseRefreshUsers = true;
+                if (mGuestUserAutoCreated) {
+                    // Guest user must be scheduled for creation AFTER switching to the target user.
+                    // This avoids lock contention which will produce UX bugs on the keyguard
+                    // (b/193933686).
+                    // TODO(b/191067027): Move guest user recreation to system_server
+                    guaranteeGuestPresent();
+                }
             } else if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
                 forcePictureLoadForId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_NULL);
@@ -678,10 +685,6 @@ public class UserSwitcherController implements Dumpable {
                 switchToUserId(newGuestId);
                 mUserManager.removeUser(currentUser.id);
             } else {
-                if (mGuestUserAutoCreated) {
-                    // TODO(b/191067027): Move guest recreation to system_server
-                    scheduleGuestCreation();
-                }
                 switchToUserId(targetUserId);
                 mUserManager.removeUser(currentUser.id);
             }

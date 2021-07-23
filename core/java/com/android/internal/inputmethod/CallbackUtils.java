@@ -17,7 +17,11 @@
 package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.util.Log;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.SurroundingText;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
@@ -136,5 +140,144 @@ public final class CallbackUtils {
             }
             callback.onResult(result);
         } catch (RemoteException ignored) { }
+    }
+
+    /**
+     * A utility method to reply associated with {@link InputConnectionCommand}.
+     *
+     * @param command {@link InputConnectionCommand} to be replied.
+     * @param result a {@link String} value to be replied.
+     * @param tag tag name to be used for debug output when the invocation fails.
+     */
+    public static void onResult(@NonNull InputConnectionCommand command, boolean result,
+            @Nullable String tag) {
+        if (command.mResultCallbackType != InputConnectionCommand.ResultCallbackType.BOOLEAN) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result + " due to callback type mismatch."
+                        + " expected=String actual=" + command.mResultCallbackType);
+            }
+            return;
+        }
+        try {
+            IBooleanResultCallback.Stub.asInterface(command.mResultCallback).onResult(result);
+        } catch (Throwable e) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result, e);
+            }
+        }
+    }
+
+    /**
+     * A utility method to reply associated with {@link InputConnectionCommand}.
+     *
+     * @param command {@link InputConnectionCommand} to be replied.
+     * @param result an int result value to be replied.
+     * @param tag tag name to be used for debug output when the invocation fails.
+     */
+    public static void onResult(@NonNull InputConnectionCommand command, int result,
+            @Nullable String tag) {
+        if (command.mResultCallbackType != InputConnectionCommand.ResultCallbackType.INT) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result + " due to callback type mismatch."
+                        + " expected=int actual=" + command.mResultCallbackType);
+            }
+            return;
+        }
+        try {
+            IIntResultCallback.Stub.asInterface(command.mResultCallback).onResult(result);
+        } catch (Throwable e) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result, e);
+            }
+        }
+    }
+
+    /**
+     * A utility method to reply associated with {@link InputConnectionCommand}.
+     *
+     * @param command {@link InputConnectionCommand} to be replied.
+     * @param result a {@link CharSequence} result value to be replied.
+     * @param tag tag name to be used for debug output when the invocation fails.
+     */
+    public static void onResult(@NonNull InputConnectionCommand command,
+            @Nullable CharSequence result, @Nullable String tag) {
+        if (command.mResultCallbackType
+                != InputConnectionCommand.ResultCallbackType.CHAR_SEQUENCE) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result + " due to callback type mismatch."
+                        + " expected=CharSequence actual=" + command.mResultCallbackType);
+            }
+            return;
+        }
+        try {
+            ICharSequenceResultCallback.Stub.asInterface(command.mResultCallback).onResult(result);
+        } catch (Throwable e) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result, e);
+            }
+        }
+    }
+
+    /**
+     * A utility method to reply associated with {@link InputConnectionCommand}.
+     *
+     * @param command {@link InputConnectionCommand} to be replied.
+     * @param result a {@link ExtractedText} result value to be replied.
+     * @param tag tag name to be used for debug output when the invocation fails.
+     */
+    public static void onResult(@NonNull InputConnectionCommand command,
+            @Nullable ExtractedText result, @Nullable String tag) {
+        if (command.mResultCallbackType
+                != InputConnectionCommand.ResultCallbackType.EXTRACTED_TEXT) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result + " due to callback type mismatch."
+                        + " expected=ExtractedText actual=" + command.mResultCallbackType);
+            }
+            return;
+        }
+        try {
+            IExtractedTextResultCallback.Stub.asInterface(command.mResultCallback).onResult(result);
+        } catch (Throwable e) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result, e);
+            }
+        }
+    }
+
+    /**
+     * A utility method to reply associated with {@link InputConnectionCommand}.
+     *
+     * @param command {@link InputConnectionCommand} to be replied.
+     * @param result a {@link SurroundingText} result value to be replied.
+     * @param tag tag name to be used for debug output when the invocation fails.
+     */
+    public static void onResult(@NonNull InputConnectionCommand command,
+            @Nullable SurroundingText result, @Nullable String tag) {
+        if (command.mResultCallbackType
+                != InputConnectionCommand.ResultCallbackType.SURROUNDING_TEXT) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result + " due to callback type mismatch."
+                        + " expected=SurroundingText actual=" + command.mResultCallbackType);
+            }
+            return;
+        }
+        try {
+            ISurroundingTextResultCallback.Stub.asInterface(command.mResultCallback)
+                    .onResult(result);
+        } catch (Throwable e) {
+            if (tag != null) {
+                Log.e(tag, InputMethodDebug.inputConnectionCommandTypeToString(command.mCommandType)
+                        + ": Failed to return result=" + result, e);
+            }
+        }
     }
 }

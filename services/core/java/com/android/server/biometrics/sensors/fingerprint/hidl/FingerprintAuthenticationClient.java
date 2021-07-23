@@ -25,6 +25,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -52,6 +53,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
+    @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
+
     private boolean mIsPointerDown;
 
     FingerprintAuthenticationClient(@NonNull Context context,
@@ -62,13 +65,27 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutFrameworkImpl lockoutTracker,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            boolean allowBackgroundAuthentication) {
+            boolean allowBackgroundAuthentication,
+            @NonNull FingerprintSensorPropertiesInternal sensorProps) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutTracker, allowBackgroundAuthentication, true /* shouldVibrate */);
         mLockoutFrameworkImpl = lockoutTracker;
         mUdfpsOverlayController = udfpsOverlayController;
+        mSensorProps = sensorProps;
+    }
+
+    @Override
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
+
+        if (mSensorProps.isAnyUdfpsType()) {
+            // UDFPS requires user to touch before becoming "active"
+            mState = STATE_STARTED_PAUSED;
+        } else {
+            mState = STATE_STARTED;
+        }
     }
 
     @NonNull
@@ -88,10 +105,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         // Note that authentication doesn't end when Authenticated == false
 
         if (authenticated) {
+            mState = STATE_STOPPED;
             resetFailedAttempts(getTargetUserId());
             UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-            mCallback.onClientFinished(this, true /* success */);
         } else {
+            mState = STATE_STARTED_PAUSED;
             final @LockoutTracker.LockoutMode int lockoutMode =
                     mLockoutFrameworkImpl.getLockoutModeForUser(getTargetUserId());
             if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
@@ -122,6 +140,13 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     private void resetFailedAttempts(int userId) {
         mLockoutFrameworkImpl.resetFailedAttemptsForUser(true /* clearAttemptCounter */, userId);
+    }
+
+    @Override
+    protected void handleLifecycleAfterAuth(boolean authenticated) {
+        if (authenticated) {
+            mCallback.onClientFinished(this, true /* success */);
+        }
     }
 
     @Override
@@ -162,6 +187,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         mIsPointerDown = true;
+        mState = STATE_STARTED;
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
         if (getListener() != null) {
             try {
@@ -175,6 +201,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onPointerUp() {
         mIsPointerDown = false;
+        mState = STATE_STARTED_PAUSED;
         UdfpsHelper.onFingerUp(getFreshDaemon());
         if (getListener() != null) {
             try {

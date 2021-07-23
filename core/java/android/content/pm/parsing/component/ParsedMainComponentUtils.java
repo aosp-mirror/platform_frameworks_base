@@ -58,14 +58,14 @@ class ParsedMainComponentUtils {
         }
 
         if (directBootAwareAttr != null) {
-            component.directBootAware = array.getBoolean(directBootAwareAttr, false);
+            component.setDirectBootAware(array.getBoolean(directBootAwareAttr, false));
             if (component.isDirectBootAware()) {
                 pkg.setPartiallyDirectBootAware(true);
             }
         }
 
         if (enabledAttr != null) {
-            component.enabled = array.getBoolean(enabledAttr, true);
+            component.setEnabled(array.getBoolean(enabledAttr, true));
         }
 
         if (processAttr != null) {
@@ -92,13 +92,13 @@ class ParsedMainComponentUtils {
         }
 
         if (splitNameAttr != null) {
-            component.splitName = array.getNonConfigurationString(splitNameAttr, 0);
+            component.setSplitName(array.getNonConfigurationString(splitNameAttr, 0));
         }
 
         if (attributionTagsAttr != null) {
             final String attributionTags = array.getNonConfigurationString(attributionTagsAttr, 0);
             if (attributionTags != null) {
-                component.attributionTags = attributionTags.split("\\|");
+                component.setAttributionTags(attributionTags.split("\\|"));
             }
         }
 
