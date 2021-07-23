@@ -365,7 +365,7 @@ public final class InputMethodManager {
     final H mH;
 
     // Our generic input connection if the current target does not have its own.
-    private final IInputConnectionWrapper mIInputContext;
+    private final IInputConnectionWrapper mFallbackInputConnection;
 
     private final int mDisplayId;
 
@@ -920,7 +920,7 @@ public final class InputMethodManager {
                             mRestartOnNextWindowFocus = true;
                             // Note that finishComposingText() is allowed to run
                             // even when we are not active.
-                            mIInputContext.finishComposingText();
+                            mFallbackInputConnection.finishComposingText();
                         }
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.
@@ -1028,8 +1028,6 @@ public final class InputMethodManager {
         }
     };
 
-    final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
-
     /**
      * For layoutlib to clean up static objects inside {@link InputMethodManager}.
      */
@@ -1078,7 +1076,7 @@ public final class InputMethodManager {
         // 1) doing so has no effect for A and 2) doing so is sufficient for B.
         final long identity = Binder.clearCallingIdentity();
         try {
-            service.addClient(imm.mClient, imm.mIInputContext, displayId);
+            service.addClient(imm.mClient, imm.mFallbackInputConnection, displayId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         } finally {
@@ -1123,7 +1121,8 @@ public final class InputMethodManager {
         mMainLooper = looper;
         mH = new H(looper);
         mDisplayId = displayId;
-        mIInputContext = new IInputConnectionWrapper(looper, mDummyInputConnection, this, null);
+        mFallbackInputConnection = new IInputConnectionWrapper(looper,
+                new BaseInputConnection(this, false), this, null);
     }
 
     /**
@@ -3081,7 +3080,7 @@ public final class InputMethodManager {
 
         p.println("  mService=" + mService);
         p.println("  mMainLooper=" + mMainLooper);
-        p.println("  mIInputContext=" + mIInputContext);
+        p.println("  mFallbackInputConnection=" + mFallbackInputConnection);
         p.println("  mActive=" + mActive
                 + " mRestartOnNextWindowFocus=" + mRestartOnNextWindowFocus
                 + " mBindSequence=" + mBindSequence
