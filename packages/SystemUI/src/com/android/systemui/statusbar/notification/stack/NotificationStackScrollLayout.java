@@ -5138,12 +5138,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return the overflow how much the height is further than he lowest notification
      */
     public float setPulseHeight(float height) {
+        float overflow;
         mAmbientState.setPulseHeight(height);
         if (mKeyguardBypassEnabledProvider.getBypassEnabled()) {
             notifyAppearChangedListeners();
+            overflow = Math.max(0, height - getIntrinsicPadding());
+        } else {
+            overflow = Math.max(0, height
+                    - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
         }
         requestChildrenUpdate();
-        return Math.max(0, height - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
+        return overflow;
     }
 
     public float getPulseHeight() {
@@ -5203,12 +5208,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public float calculateAppearFractionBypass() {
         float pulseHeight = getPulseHeight();
-        float wakeUpHeight = getWakeUpHeight();
-        float dragDownAmount = pulseHeight - wakeUpHeight;
-
         // The total distance required to fully reveal the header
         float totalDistance = getIntrinsicPadding();
-        return MathUtils.smoothStep(0, totalDistance, dragDownAmount);
+        return MathUtils.smoothStep(0, totalDistance, pulseHeight);
     }
 
     public void setController(

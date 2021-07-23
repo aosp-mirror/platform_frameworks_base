@@ -372,16 +372,17 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         mKeyguardBypassController,
                         mDozeParameters,
                         mUnlockedScreenOffAnimationController);
+        mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
                 coordinator,
                 mKeyguardBypassController, mHeadsUpManager,
                 mock(NotificationRoundnessManager.class),
+                mConfigurationController,
                 mStatusBarStateController,
                 mFalsingManager,
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake());
-        mConfigurationController = new ConfigurationControllerImpl(mContext);
         when(mKeyguardStatusViewComponentFactory.build(any()))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
