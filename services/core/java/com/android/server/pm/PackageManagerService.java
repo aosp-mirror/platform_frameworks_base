@@ -11651,14 +11651,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
-        return resolveContentProviderInternal(name, flags, userId);
-    }
-
-    public ProviderInfo resolveContentProvider(String name, int flags, int userId, int callingUid) {
-        return resolveContentProviderInternal(name, flags, userId, callingUid);
-    }
-
-    private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         return resolveContentProviderInternal(name, flags, userId, Binder.getCallingUid());
     }
 
@@ -27830,12 +27822,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
-            return PackageManagerService.this.resolveContentProviderInternal(
-                    name, flags, userId);
-        }
-
-        @Override
         public ProviderInfo resolveContentProvider(String name, int flags, int userId,
                 int callingUid) {
             return PackageManagerService.this.resolveContentProviderInternal(
@@ -28616,8 +28602,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public void grantImplicitAccess(int recipientUid, String visibleAuthority) {
         // This API is exposed temporarily to only the contacts provider. (b/158688602)
         final int callingUid = Binder.getCallingUid();
-        ProviderInfo contactsProvider = resolveContentProviderInternal(
-                        ContactsContract.AUTHORITY, 0, UserHandle.getUserId(callingUid));
+        ProviderInfo contactsProvider = resolveContentProviderInternal(ContactsContract.AUTHORITY,
+                0, UserHandle.getUserId(callingUid), callingUid);
         if (contactsProvider == null || contactsProvider.applicationInfo == null
                 || !UserHandle.isSameApp(contactsProvider.applicationInfo.uid, callingUid)) {
             throw new SecurityException(callingUid + " is not allow to call grantImplicitAccess");

@@ -561,11 +561,6 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
            int flags, int userId, int callingUid);
 
-   /**
-    * Resolves a content provider intent.
-    */
-    public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId);
-
     /**
     * Resolves a content provider intent.
     */
