@@ -376,6 +376,8 @@ public final class UserTypeFactory {
                     setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
                 }
 
+                setIntAttribute(parser, "enabled", builder::setEnabled);
+
                 // Process child elements.
                 final int depth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, depth)) {
