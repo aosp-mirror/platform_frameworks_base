@@ -187,6 +187,13 @@ public class SystemUIFactory {
     }
 
     /**
+     * Returns the list of additional system UI components that should be started.
+     */
+    public String[] getAdditionalSystemUIServiceComponents(Resources resources) {
+        return resources.getStringArray(R.array.config_additionalSystemUIServiceComponents);
+    }
+
+    /**
      * Returns the list of system UI components that should be started per user.
      */
     public String[] getSystemUIServiceComponentsPerUser(Resources resources) {
