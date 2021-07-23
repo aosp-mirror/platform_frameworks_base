@@ -16,7 +16,7 @@
 
 package com.android.internal.os;
 
-public class MockClocks implements BatteryStatsImpl.Clocks {
+public class MockClock extends Clock {
     /** ElapsedRealtime in ms */
     public long realtime;
     /** Uptime in ms */

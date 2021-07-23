@@ -30,7 +30,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
     @SmallTest
     public void testSettingStalePreservesData() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         final BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks,
                 Mockito.mock(BatteryStatsImpl.TimeBase.class));
 
@@ -57,7 +57,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
     @SmallTest
     public void testEndSampleAndContinueWhenTimeOrCountDecreases() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);
         final BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks,
                 timeBase);
@@ -107,7 +107,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
     @SmallTest
     public void testFirstUpdateIsAbsorbed() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);
 
         BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
@@ -146,7 +146,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
     @SmallTest
     public void testSampleTimerSummaryParceling() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         clocks.realtime = 0;
         clocks.uptime = 0;
 

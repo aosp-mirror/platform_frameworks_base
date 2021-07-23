@@ -36,13 +36,13 @@ import java.util.concurrent.Future;
  * Mocks a BatteryStatsImpl object.
  */
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
-    public BatteryStatsImpl.Clocks clocks;
+    public Clock mClock;
     public boolean mForceOnBattery;
     private NetworkStats mNetworkStats;
 
-    MockBatteryStatsImpl(Clocks clocks) {
-        super(clocks);
-        this.clocks = mClocks;
+    MockBatteryStatsImpl(Clock clock) {
+        super(clock);
+        this.mClock = mClock;
         initTimersAndCounters();
 
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
@@ -54,7 +54,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     MockBatteryStatsImpl() {
-        this(new MockClocks());
+        this(new MockClock());
     }
 
     public void initMeasuredEnergyStats() {

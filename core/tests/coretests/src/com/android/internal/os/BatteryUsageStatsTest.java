@@ -228,7 +228,7 @@ public class BatteryUsageStatsTest {
     }
 
     private BatteryUsageStats.Builder buildBatteryUsageStats1(boolean includeUserBatteryConsumer) {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
 
         final BatteryUsageStats.Builder builder =
@@ -267,7 +267,7 @@ public class BatteryUsageStatsTest {
     }
 
     private BatteryUsageStats.Builder buildBatteryUsageStats2(String[] customPowerComponentNames) {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
 
         final BatteryUsageStats.Builder builder =

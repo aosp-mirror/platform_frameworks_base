@@ -60,7 +60,7 @@ public class BatteryStatsNoteTest extends TestCase {
      */
     @SmallTest
     public void testNoteBluetoothScanResultLocked() throws Exception {
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClocks());
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClock());
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
 
@@ -89,7 +89,7 @@ public class BatteryStatsNoteTest extends TestCase {
      */
     @SmallTest
     public void testNoteStartWakeLocked() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         int pid = 10;
@@ -120,7 +120,7 @@ public class BatteryStatsNoteTest extends TestCase {
      */
     @SmallTest
     public void testNoteUidProcessStateLocked() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         // map of ActivityManager process states and how long to simulate run time in each state
@@ -205,7 +205,7 @@ public class BatteryStatsNoteTest extends TestCase {
      */
     @SmallTest
     public void testUpdateTimeBasesLocked() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         bi.updateTimeBasesLocked(false, Display.STATE_OFF, 0, 0);
@@ -229,7 +229,7 @@ public class BatteryStatsNoteTest extends TestCase {
      */
     @SmallTest
     public void testNoteScreenStateLocked() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
@@ -258,7 +258,7 @@ public class BatteryStatsNoteTest extends TestCase {
      */
     @SmallTest
     public void testNoteScreenStateTimersLocked() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         clocks.realtime = clocks.uptime = 100;
@@ -297,7 +297,7 @@ public class BatteryStatsNoteTest extends TestCase {
     @SmallTest
     @SkipPresubmit("b/180015146")
     public void testAlarmStartAndFinishLocked() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -335,7 +335,7 @@ public class BatteryStatsNoteTest extends TestCase {
     @SmallTest
     @SkipPresubmit("b/180015146")
     public void testAlarmStartAndFinishLocked_workSource() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -379,7 +379,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testNoteWakupAlarmLocked() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -397,7 +397,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testNoteWakupAlarmLocked_workSource_uid() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -430,7 +430,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testNoteWakupAlarmLocked_workSource_workChain() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -456,7 +456,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testNoteGpsChanged() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -480,7 +480,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testNoteGpsChanged_workSource() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -504,7 +504,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testUpdateDisplayMeasuredEnergyStatsLocked() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.initMeasuredEnergyStats();
 
@@ -589,7 +589,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testUpdateCustomMeasuredEnergyStatsLocked_neverCalled() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.initMeasuredEnergyStats();
         bi.setOnBatteryInternal(true);
@@ -603,7 +603,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
     @SmallTest
     public void testUpdateCustomMeasuredEnergyStatsLocked() {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.initMeasuredEnergyStats();
 
