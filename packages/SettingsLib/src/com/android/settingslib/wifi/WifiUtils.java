@@ -21,6 +21,7 @@ import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.getMaxNe
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
@@ -292,6 +293,28 @@ public class WifiUtils {
             throw new IllegalArgumentException("No Wifi icon found for level: " + level);
         }
         return noInternet ? NO_INTERNET_WIFI_PIE[level] : WIFI_PIE[level];
+    }
+
+    /**
+     * Wrapper the {@link #getInternetIconResource} for testing compatibility.
+     */
+    public static class InternetIconInjector {
+
+        protected final Context mContext;
+
+        public InternetIconInjector(Context context) {
+            mContext = context;
+        }
+
+        /**
+         * Returns the Internet icon for a given RSSI level.
+         *
+         * @param noInternet True if a connected Wi-Fi network cannot access the Internet
+         * @param level The number of bars to show (0-4)
+         */
+        public Drawable getIcon(boolean noInternet, int level) {
+            return mContext.getDrawable(WifiUtils.getInternetIconResource(level, noInternet));
+        }
     }
 
     public static boolean isMeteredOverridden(WifiConfiguration config) {

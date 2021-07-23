@@ -47,6 +47,7 @@ android_library {
 
     static_libs: [
         "PluginCoreLib",
+        "androidx.dynamicanimation_dynamicanimation",
     ],
     java_version: "1.8",
     min_sdk_version: "26",
