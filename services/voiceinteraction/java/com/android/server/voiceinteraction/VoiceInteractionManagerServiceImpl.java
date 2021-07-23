@@ -581,6 +581,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mHotwordDetectionConnection.forceRestart();
     }
 
+    void setDebugHotwordLoggingLocked(boolean logging) {
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "Failed to set temporary debug logging: no hotword detection active");
+            return;
+        }
+        mHotwordDetectionConnection.setDebugHotwordLoggingLocked(logging);
+    }
+
     void resetHotwordDetectionConnectionLocked() {
         if (DEBUG) {
             Slog.d(TAG, "resetHotwordDetectionConnectionLocked");
