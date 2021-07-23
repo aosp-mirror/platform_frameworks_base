@@ -6410,8 +6410,15 @@ public final class Settings {
         public static final String DATA_ROAMING = Global.DATA_ROAMING;
 
         /**
-         * Setting to record the input method used by default, holding the ID
-         * of the desired method.
+         * Stores {@link android.view.inputmethod.InputMethodInfo#getId()} of the input method
+         * service that is currently selected.
+         *
+         * <p>Although the name {@link #DEFAULT_INPUT_METHOD} implies that there is a concept of
+         * <i>default</i> input method, in reality this setting is no more or less than the
+         * <strong>currently selected</strong> input method. This setting can be updated at any
+         * time as a result of user-initiated and system-initiated input method switching.</p>
+         *
+         * <p>Use {@link ComponentName#unflattenFromString(String)} to parse the stored value.</p>
          */
         @Readable
         public static final String DEFAULT_INPUT_METHOD = "default_input_method";
