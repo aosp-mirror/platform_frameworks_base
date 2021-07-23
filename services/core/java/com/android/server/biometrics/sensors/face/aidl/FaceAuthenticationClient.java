@@ -89,6 +89,12 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 R.array.config_face_acquire_vendor_keyguard_ignorelist);
     }
 
+    @Override
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
+        mState = STATE_STARTED;
+    }
+
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
@@ -128,10 +134,20 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     }
 
     @Override
+    protected void handleLifecycleAfterAuth(boolean authenticated) {
+        // For face, the authentication lifecycle ends either when
+        // 1) Authenticated == true
+        // 2) Error occurred
+        // 3) Authenticated == false
+        mCallback.onClientFinished(this, true /* success */);
+    }
+
+    @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         super.onAuthenticated(identifier, authenticated, token);
 
+        mState = STATE_STOPPED;
         mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
                 getStartTimeMs(),
                 System.currentTimeMillis() - getStartTimeMs() /* latency */,
@@ -139,12 +155,6 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 0 /* error */,
                 0 /* vendorError */,
                 getTargetUserId()));
-
-        // For face, the authentication lifecycle ends either when
-        // 1) Authenticated == true
-        // 2) Error occurred
-        // 3) Authenticated == false
-        mCallback.onClientFinished(this, true /* success */);
     }
 
     @Override

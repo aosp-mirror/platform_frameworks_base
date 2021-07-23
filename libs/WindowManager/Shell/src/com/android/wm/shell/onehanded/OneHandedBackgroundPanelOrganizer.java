@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.DisplayAreaAppearedInfo;
@@ -30,7 +29,6 @@ import android.window.DisplayAreaOrganizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.content.ContextCompat;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.wm.shell.R;
@@ -48,13 +46,16 @@ import java.util.concurrent.Executor;
 public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
         implements OneHandedTransitionCallback {
     private static final String TAG = "OneHandedBackgroundPanelOrganizer";
+    private static final int THEME_COLOR_OFFSET = 10;
 
+    private final Context mContext;
     private final Object mLock = new Object();
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
-    private final float[] mDefaultColor;
     private final Executor mMainExecutor;
     private final OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
+
+    private float[] mDefaultColor;
 
     /**
      * The background to distinguish the boundary of translated windows and empty region when
@@ -88,15 +89,14 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
     public OneHandedBackgroundPanelOrganizer(Context context, DisplayLayout displayLayout,
             Executor executor) {
         super(executor);
+        mContext = context;
         // Ensure the mBkgBounds is portrait, due to OHM only support on portrait
         if (displayLayout.height() > displayLayout.width()) {
             mBkgBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
         } else {
             mBkgBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
         }
-        final int defaultColor = ContextCompat.getColor(context, R.color.GM2_grey_800);
-        mDefaultColor = new float[]{Color.red(defaultColor) / 255.0f,
-                Color.green(defaultColor) / 255.0f, Color.blue(defaultColor) / 255.0f};
+        updateThemeColors();
         mMainExecutor = executor;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
     }
@@ -170,7 +170,6 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
             }
 
             if (getBackgroundSurface() == null) {
-                Log.w(TAG, "mBackgroundSurface is null !");
                 return;
             }
 
@@ -198,6 +197,30 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
             transaction.close();
             mBackgroundSurface = null;
             mIsShowing = false;
+        }
+    }
+
+    /**
+     * onConfigurationChanged events for updating tutorial text.
+     */
+    public void onConfigurationChanged() {
+        synchronized (mLock) {
+            if (mBackgroundSurface == null) {
+                getBackgroundSurface();
+            } else {
+                removeBackgroundPanelLayer();
+            }
+            updateThemeColors();
+            showBackgroundPanelLayer();
+        }
+    }
+
+    private void updateThemeColors() {
+        synchronized (mLock) {
+            final int themeColor = mContext.getColor(R.color.one_handed_tutorial_background_color);
+            mDefaultColor = new float[]{(Color.red(themeColor) - THEME_COLOR_OFFSET) / 255.0f,
+                    (Color.green(themeColor) - THEME_COLOR_OFFSET) / 255.0f,
+                    (Color.blue(themeColor) - THEME_COLOR_OFFSET) / 255.0f};
         }
     }
 
