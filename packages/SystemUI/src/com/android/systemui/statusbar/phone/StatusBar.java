@@ -3950,7 +3950,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || !wakingUp && mWakefulnessLifecycle.getLastSleepReason()
                 == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON) {
             mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
-        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+        } else if (!wakingUp || !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+            // If we're going to sleep, but it's not from the power button, use the default reveal.
+            // If we're waking up, only use the default reveal if the biometric controller didn't
+            // already set it to the circular reveal because we're waking up from a fingerprint/face
+            // auth.
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         }
     }
