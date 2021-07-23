@@ -443,6 +443,7 @@ public final class WindowContainerTransaction implements Parcelable {
      * Starts an activity in the TaskFragment.
      * @param fragmentToken client assigned unique token to create TaskFragment with specified in
      *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     * @param callerToken  the activity token that initialized the activity launch.
      * @param activityIntent    intent to start the activity.
      * @param activityOptions    ActivityOptions to start the activity with.
      * @see android.content.Context#startActivity(Intent, Bundle).
@@ -450,12 +451,13 @@ public final class WindowContainerTransaction implements Parcelable {
      */
     @NonNull
     public WindowContainerTransaction startActivityInTaskFragment(
-            @NonNull IBinder fragmentToken, @NonNull Intent activityIntent,
-            @Nullable Bundle activityOptions) {
+            @NonNull IBinder fragmentToken, @NonNull IBinder callerToken,
+            @NonNull Intent activityIntent, @Nullable Bundle activityOptions) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(
                         HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT)
                         .setContainer(fragmentToken)
+                        .setReparentContainer(callerToken)
                         .setActivityIntent(activityIntent)
                         .setLaunchOptions(activityOptions)
                         .build();
@@ -1057,6 +1059,11 @@ public final class WindowContainerTransaction implements Parcelable {
 
         @NonNull
         public IBinder getAdjacentRoot() {
+            return mReparent;
+        }
+
+        @NonNull
+        public IBinder getCallingActivity() {
             return mReparent;
         }
 
