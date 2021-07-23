@@ -620,21 +620,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mSyncQueue.runInSync(t -> {
-            final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
             final SurfaceControl sideStageLeash = mSideStage.mRootLeash;
             final SurfaceControl mainStageLeash = mMainStage.mRootLeash;
-
-            if (dividerLeash != null) {
-                if (mDividerVisible) {
-                    t.show(dividerLeash)
-                            .setLayer(dividerLeash, Integer.MAX_VALUE)
-                            .setPosition(dividerLeash,
-                                    mSplitLayout.getDividerBounds().left,
-                                    mSplitLayout.getDividerBounds().top);
-                } else {
-                    t.hide(dividerLeash);
-                }
-            }
 
             if (sideStageVisible) {
                 final Rect sideStageBounds = getSideStageBounds();
@@ -662,8 +649,29 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             } else {
                 t.hide(mainStageLeash);
             }
+
+            applyDividerVisibility(t);
         });
     }
+
+    private void applyDividerVisibility(SurfaceControl.Transaction t) {
+        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
+        if (dividerLeash == null) {
+            return;
+        }
+
+        if (mDividerVisible) {
+            t.show(dividerLeash)
+                    .setLayer(dividerLeash, Integer.MAX_VALUE)
+                    .setPosition(dividerLeash,
+                            mSplitLayout.getDividerBounds().left,
+                            mSplitLayout.getDividerBounds().top);
+        } else {
+            t.hide(dividerLeash);
+        }
+
+    }
+
 
     private void onStageHasChildrenChanged(StageListenerImpl stageListener) {
         final boolean hasChildren = stageListener.mHasChildren;
@@ -782,6 +790,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)
                 && mMainStage.isActive()) {
             onBoundsChanged(mSplitLayout);
+            mSyncQueue.runInSync(t -> applyDividerVisibility(t));
         }
     }
 
