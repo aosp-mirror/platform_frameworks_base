@@ -6045,7 +6045,10 @@ class Task extends TaskFragment {
         mLastRecentsAnimationOverlay = overlay;
     }
 
-    void clearLastRecentsAnimationTransaction() {
+    void clearLastRecentsAnimationTransaction(boolean forceRemoveOverlay) {
+        if (forceRemoveOverlay && mLastRecentsAnimationOverlay != null) {
+            getPendingTransaction().remove(mLastRecentsAnimationOverlay);
+        }
         mLastRecentsAnimationTransaction = null;
         mLastRecentsAnimationOverlay = null;
         // reset also the crop and transform introduced by mLastRecentsAnimationTransaction
