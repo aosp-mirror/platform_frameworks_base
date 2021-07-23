@@ -305,7 +305,7 @@ public final class PhantomProcessList {
             }
             // Somehow our record doesn't match, remove it anyway
             Slog.w(TAG, "Stale " + proc + ", removing");
-            mPhantomProcesses.removeAt(index);
+            onPhantomProcessKilledLocked(proc);
         } else {
             // Is this one of the zombie processes we've known?
             final int idx = mZombiePhantomProcesses.indexOfKey(pid);
