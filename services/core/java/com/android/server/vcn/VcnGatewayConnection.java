@@ -194,6 +194,7 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final int SAFEMODE_TIMEOUT_SECONDS = 30;
+    private static final int SAFEMODE_TIMEOUT_SECONDS_TEST_MODE = 10;
 
     private interface EventInfo {}
 
@@ -1076,7 +1077,9 @@ public class VcnGatewayConnection extends StateMachine {
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
-                        TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
+                        mVcnContext.isInTestMode()
+                                ? TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS_TEST_MODE)
+                                : TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
     }
 
     private void cancelSafeModeAlarm() {
