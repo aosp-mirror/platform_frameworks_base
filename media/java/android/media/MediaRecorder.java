@@ -1096,6 +1096,13 @@ public class MediaRecorder implements AudioRouting,
      * clipped internally to ensure the video recording can proceed smoothly based on
      * the capabilities of the platform.
      *
+     * <p>
+     * NB: the actual bitrate and other encoding characteristics may be affected by
+     * the minimum quality floor behavior introduced in
+     * {@link android.os.Build.VERSION_CODES#S}. More detail on how and where this
+     * impacts video encoding can be found in the
+     * {@link MediaCodec} page and looking for "quality floor" (near the top of the page).
+     *
      * @param bitRate the video encoding bit rate in bits per second.
      */
     public void setVideoEncodingBitRate(int bitRate) {
