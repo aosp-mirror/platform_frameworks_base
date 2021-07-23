@@ -669,4 +669,7 @@
 
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
+
+    <!-- Component name of communal source service -->
+    <string name="config_communalSourceComponent" translatable="false">@null</string>
 </resources>
