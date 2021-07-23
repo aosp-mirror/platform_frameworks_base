@@ -249,14 +249,17 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                         });
                         return;
                     }
-                }
-                for (int i = 0; i < apps.length; ++i) {
-                    if (apps[i].mode == MODE_OPENING) {
-                        t.show(apps[i].leash);
+                } else {
+                    for (int i = 0; i < apps.length; ++i) {
+                        if (apps[i].mode == MODE_OPENING) {
+                            t.show(apps[i].leash);
+                        }
                     }
                 }
                 RemoteAnimationTarget divider = mStageCoordinator.getDividerBarLegacyTarget();
-                t.show(divider.leash);
+                if (divider.leash != null) {
+                    t.show(divider.leash);
+                }
                 t.apply();
                 if (cancelled) return;
                 try {
