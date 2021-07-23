@@ -32,6 +32,7 @@ android_test_helper_app {
     test_suites: ["general-tests"],
     java_resources: [
         ":com.android.apex.apkrollback.test_v2",
+        ":StagedInstallTestApexV2",
         ":StagedInstallTestApexV2_WrongSha",
         ":test.rebootless_apex_v1",
         ":test.rebootless_apex_v2",

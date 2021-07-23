@@ -921,6 +921,7 @@
     <dimen name="keyguard_lock_padding">20dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
+    <dimen name="lock_icon_margin_bottom">98dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -1266,6 +1267,8 @@
     <!--  Three privacy items. This value must not be exceeded  -->
     <dimen name="ongoing_appops_chip_max_width">76dp</dimen>
     <dimen name="ongoing_appops_dot_diameter">6dp</dimen>
+    <!--  Total minimum padding to enforce to ensure that the dot can always show  -->
+    <dimen name="ongoing_appops_dot_min_padding">20dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
 

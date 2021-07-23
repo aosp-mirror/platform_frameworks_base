@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -30,6 +31,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.security.KeyStore;
 import android.util.EventLog;
 import android.util.Slog;
@@ -48,6 +50,18 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     private static final String TAG = "Biometrics/AuthenticationClient";
 
+    // New, has not started yet
+    public static final int STATE_NEW = 0;
+    // Framework/HAL have started this operation
+    public static final int STATE_STARTED = 1;
+    // Operation is started, but requires some user action (such as finger lift & re-touch)
+    public static final int STATE_STARTED_PAUSED = 2;
+    // Done, errored, canceled, etc. HAL/framework are not running this sensor anymore.
+    public static final int STATE_STOPPED = 3;
+
+    @IntDef({STATE_NEW, STATE_STARTED, STATE_STARTED_PAUSED, STATE_STOPPED})
+    @interface State {}
+
     private final boolean mIsStrongBiometric;
     private final boolean mRequireConfirmation;
     private final ActivityTaskManager mActivityTaskManager;
@@ -62,6 +76,20 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private long mStartTimeMs;
 
     protected boolean mAuthAttempted;
+
+    // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
+    //  the state. We should think of a way to improve this in the future.
+    protected @State int mState = STATE_NEW;
+
+    /**
+     * Handles lifecycle, e.g. {@link BiometricScheduler},
+     * {@link com.android.server.biometrics.sensors.BaseClientMonitor.Callback} after authentication
+     * results are known. Note that this happens asynchronously from (but shortly after)
+     * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
+     * {@link CoexCoordinator} a chance to invoke/delay this event.
+     * @param authenticated
+     */
+    protected abstract void handleLifecycleAfterAuth(boolean authenticated);
 
     public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
@@ -221,7 +249,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             }
 
             final CoexCoordinator coordinator = CoexCoordinator.getInstance();
-            coordinator.onAuthenticationSucceeded(this, new CoexCoordinator.Callback() {
+            coordinator.onAuthenticationSucceeded(SystemClock.uptimeMillis(), this,
+                    new CoexCoordinator.Callback() {
                 @Override
                 public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
                     if (addAuthTokenIfStrong && mIsStrongBiometric) {
@@ -262,6 +291,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         vibrateSuccess();
                     }
                 }
+
+                @Override
+                public void handleLifecycleAfterAuth() {
+                    AuthenticationClient.this.handleLifecycleAfterAuth(true /* authenticated */);
+                }
             });
         } else {
             // Allow system-defined limit of number of attempts before giving up
@@ -272,7 +306,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             }
 
             final CoexCoordinator coordinator = CoexCoordinator.getInstance();
-            coordinator.onAuthenticationRejected(this, lockoutMode,
+            coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
                     new CoexCoordinator.Callback() {
                 @Override
                 public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
@@ -291,6 +325,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         vibrateError();
                     }
                 }
+
+                @Override
+                public void handleLifecycleAfterAuth() {
+                    AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
+                }
             });
         }
     }
@@ -305,6 +344,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             PerformanceTracker pt = PerformanceTracker.getInstanceForSensorId(getSensorId());
             pt.incrementAcquireForUser(getTargetUserId(), isCryptoOperation());
         }
+    }
+
+    @Override
+    public void onError(int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+        mState = STATE_STOPPED;
     }
 
     /**
@@ -343,6 +388,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         if (mTaskStackListener != null) {
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }
+    }
+
+    public @State int getState() {
+        return mState;
     }
 
     @Override
