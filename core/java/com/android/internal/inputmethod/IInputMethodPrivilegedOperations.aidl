@@ -21,7 +21,7 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
-import com.android.internal.inputmethod.IIInputContentUriTokenResultCallback;
+import com.android.internal.inputmethod.IInputContentUriTokenResultCallback;
 import com.android.internal.inputmethod.IVoidResultCallback;
 
 /**
@@ -32,7 +32,7 @@ oneway interface IInputMethodPrivilegedOperations {
     void setImeWindowStatusAsync(int vis, int backDisposition);
     void reportStartInputAsync(in IBinder startInputToken);
     void createInputContentUriToken(in Uri contentUri, in String packageName,
-            in IIInputContentUriTokenResultCallback resultCallback);
+            in IInputContentUriTokenResultCallback resultCallback);
     void reportFullscreenModeAsync(boolean fullscreen);
     void setInputMethod(String id, in IVoidResultCallback resultCallback);
     void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype,

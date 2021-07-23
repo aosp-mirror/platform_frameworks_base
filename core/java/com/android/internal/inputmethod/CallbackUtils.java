@@ -116,13 +116,13 @@ public final class CallbackUtils {
     }
 
     /**
-     * A utility method using given {@link IIInputContentUriTokenResultCallback} to callback the
+     * A utility method using given {@link IInputContentUriTokenResultCallback} to callback the
      * result.
      *
-     * @param callback {@link IIInputContentUriTokenResultCallback} to be called back.
+     * @param callback {@link IInputContentUriTokenResultCallback} to be called back.
      * @param resultSupplier the supplier from which the result is provided.
      */
-    public static void onResult(@NonNull IIInputContentUriTokenResultCallback callback,
+    public static void onResult(@NonNull IInputContentUriTokenResultCallback callback,
             @NonNull Supplier<IInputContentUriToken> resultSupplier) {
         IInputContentUriToken result = null;
         Throwable exception = null;

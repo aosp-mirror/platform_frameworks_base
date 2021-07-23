@@ -142,7 +142,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String,
-     * IIInputContentUriTokenResultCallback)}.
+     * IInputContentUriTokenResultCallback)}.
      *
      * @param contentUri Content URI to which a temporary read permission should be granted
      * @param packageName Indicates what package needs to have a temporary read permission

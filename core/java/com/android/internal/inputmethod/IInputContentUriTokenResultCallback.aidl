@@ -19,7 +19,7 @@ package com.android.internal.inputmethod;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.ThrowableHolder;
 
-oneway interface IIInputContentUriTokenResultCallback {
+oneway interface IInputContentUriTokenResultCallback {
     void onResult(in IInputContentUriToken result);
     void onError(in ThrowableHolder exception);
 }

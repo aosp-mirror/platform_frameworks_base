@@ -154,8 +154,8 @@ import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.CallbackUtils;
 import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.IIInputContentUriTokenResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.IInputContentUriTokenResultCallback;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IVoidResultCallback;
 import com.android.internal.inputmethod.ImeTracing;
@@ -5831,7 +5831,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @BinderThread
         @Override
         public void createInputContentUriToken(Uri contentUri, String packageName,
-                IIInputContentUriTokenResultCallback resultCallback) {
+                IInputContentUriTokenResultCallback resultCallback) {
             CallbackUtils.onResult(resultCallback,
                     () -> mImms.createInputContentUriToken(mToken, contentUri, packageName));
         }
