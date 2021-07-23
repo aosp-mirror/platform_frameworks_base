@@ -95,7 +95,6 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
@@ -1211,19 +1210,6 @@ public final class InputMethodManager {
      */
     public IInputMethodClient getClient() {
         return mClient;
-    }
-
-    /**
-     * No longer used.  Do not use.
-     *
-     * TODO(b/192412909) Remove this method.
-     *
-     * @deprecated Was kept due to {@link UnsupportedAppUsage}.  Will be removed soon.
-     * @hide
-     */
-    @Deprecated
-    public IInputContext getInputContext() {
-        return mIInputContext;
     }
 
     /**
