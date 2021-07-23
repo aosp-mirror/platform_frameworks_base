@@ -374,10 +374,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
     }
 
-    fun getWakeUpHeight(): Float {
-        return mStackScrollerController.wakeUpHeight
-    }
-
     private fun updateHideAmount() {
         val linearAmount = min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
         val amount = min(1.0f - mVisibilityAmount, mDozeAmount)
@@ -393,16 +389,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
         if (isDozing) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
         }
-    }
-
-    /**
-     * Set the height how tall notifications are pulsing. This is only set whenever we are expanding
-     * from a pulse and determines how much the notifications are expanded.
-     */
-    fun setPulseHeight(height: Float): Float {
-        val overflow = mStackScrollerController.setPulseHeight(height)
-        //  no overflow for the bypass experience
-        return if (bypassController.bypassEnabled) 0.0f else overflow
     }
 
     override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
