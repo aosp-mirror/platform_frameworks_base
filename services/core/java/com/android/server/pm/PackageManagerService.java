@@ -7184,7 +7184,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager);
+        mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager, mPmInternal);
 
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(injector.getSystemPartitions());
@@ -10060,24 +10060,26 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int getUidForSharedUser(String sharedUserName) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return -1;
-        }
         if (sharedUserName == null) {
-            return -1;
+            return Process.INVALID_UID;
+        }
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
+            return Process.INVALID_UID;
         }
         // reader
         synchronized (mLock) {
-            SharedUserSetting suid;
             try {
-                suid = mSettings.getSharedUserLPw(sharedUserName, 0, 0, false);
-                if (suid != null) {
+                final SharedUserSetting suid = mSettings.getSharedUserLPw(sharedUserName,
+                        0 /* pkgFlags */, 0 /* pkgPrivateFlags */, false /* create */);
+                if (suid != null && !shouldFilterApplicationLocked(suid, callingUid,
+                        UserHandle.getUserId(callingUid))) {
                     return suid.userId;
                 }
             } catch (PackageManagerException ignore) {
                 // can't happen, but, still need to catch it
             }
-            return -1;
+            return Process.INVALID_UID;
         }
     }
 
@@ -28437,7 +28439,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Nullable
-    public PackageSetting getPackageSetting(String packageName) {
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    PackageSetting getPackageSetting(String packageName) {
         return mComputer.getPackageSetting(packageName);
     }
 
@@ -28472,16 +28475,6 @@ public class PackageManagerService extends IPackageManager.Stub
     boolean isHistoricalPackageUsageAvailable() {
         synchronized (mLock) {
             return mPackageUsage.isHistoricalPackageUsageAvailable();
-        }
-    }
-
-    /**
-     * Return a <b>copy</b> of the collection of packages known to the package manager.
-     * @return A copy of the values of mPackages.
-     */
-    Collection<AndroidPackage> getPackages() {
-        synchronized (mLock) {
-            return new ArrayList<>(mPackages.values());
         }
     }
 

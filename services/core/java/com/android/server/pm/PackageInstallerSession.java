@@ -2212,7 +2212,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void transfer(String packageName) {
         Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
-
         ApplicationInfo newOwnerAppInfo = mPm.getApplicationInfo(packageName, 0, userId);
         if (newOwnerAppInfo == null) {
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
@@ -2779,7 +2778,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private long getApksSize(String packageName) {
-        final PackageSetting ps = mPm.getPackageSetting(packageName);
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final PackageSetting ps = pmi.getPackageSetting(packageName);
         if (ps == null) {
             return 0;
         }

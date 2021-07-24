@@ -22,14 +22,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
-
-import java.util.List;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -40,10 +39,6 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private final DisappearAnimationUtils mDisappearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtilsLocked;
     private ViewGroup mContainer;
-    private ViewGroup mRow0;
-    private ViewGroup mRow1;
-    private ViewGroup mRow2;
-    private ViewGroup mRow3;
     private int mDisappearYTranslation;
     private View[][] mViews;
 
@@ -82,30 +77,38 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     private void updateMargins() {
+        // Re-apply everything to the keys...
         int bottomMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.num_pad_row_margin_bottom);
-
-        for (ViewGroup vg : List.of(mRow1, mRow2, mRow3)) {
-            ((LinearLayout.LayoutParams) vg.getLayoutParams()).setMargins(0, 0, 0, bottomMargin);
-        }
-
-        bottomMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.num_pad_entry_row_margin_bottom);
-        ((LinearLayout.LayoutParams) mRow0.getLayoutParams()).setMargins(0, 0, 0, bottomMargin);
+        int rightMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.num_pad_key_margin_end);
+        String ratio = mContext.getResources().getString(R.string.num_pad_key_ratio);
 
-        if (mEcaView != null) {
-            int ecaTopMargin = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_eca_top_margin);
-            int ecaBottomMargin = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_eca_bottom_margin);
-            ((LinearLayout.LayoutParams) mEcaView.getLayoutParams()).setMargins(0, ecaTopMargin,
-                    0, ecaBottomMargin);
+        // mView contains all Views that make up the PIN pad; row0 = the entry test field, then
+        // rows 1-4 contain the buttons. Iterate over all views that make up the buttons in the pad,
+        // and re-set all the margins.
+        for (int row = 1; row < 5; row++) {
+            for (int column = 0; column < 3; column++) {
+                View key = mViews[row][column];
+
+                ConstraintLayout.LayoutParams lp =
+                        (ConstraintLayout.LayoutParams) key.getLayoutParams();
+
+                lp.dimensionRatio = ratio;
+
+                // Don't set any margins on the last row of buttons.
+                if (row != 4) {
+                    lp.bottomMargin = bottomMargin;
+                }
+
+                // Don't set margins on the rightmost buttons.
+                if (column != 2) {
+                    lp.rightMargin = rightMargin;
+                }
+
+                key.setLayoutParams(lp);
+            }
         }
-
-        View entryView = findViewById(R.id.pinEntry);
-        ViewGroup.LayoutParams lp = entryView.getLayoutParams();
-        lp.height = mContext.getResources().getDimensionPixelSize(R.dimen.keyguard_password_height);
-        entryView.setLayoutParams(lp);
     }
 
     @Override
@@ -113,13 +116,9 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         super.onFinishInflate();
 
         mContainer = findViewById(R.id.pin_container);
-        mRow0 = findViewById(R.id.row0);
-        mRow1 = findViewById(R.id.row1);
-        mRow2 = findViewById(R.id.row2);
-        mRow3 = findViewById(R.id.row3);
         mViews = new View[][]{
                 new View[]{
-                        mRow0, null, null
+                        findViewById(R.id.row0), null, null
                 },
                 new View[]{
                         findViewById(R.id.key1), findViewById(R.id.key2),
@@ -188,9 +187,6 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private void enableClipping(boolean enable) {
         mContainer.setClipToPadding(enable);
         mContainer.setClipChildren(enable);
-        mRow1.setClipToPadding(enable);
-        mRow2.setClipToPadding(enable);
-        mRow3.setClipToPadding(enable);
         setClipChildren(enable);
     }
 

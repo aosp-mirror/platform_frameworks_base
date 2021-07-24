@@ -42,6 +42,8 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Application class for SystemUI.
@@ -159,8 +161,17 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startServicesIfNeeded() {
-        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponents(getResources());
-        startServicesIfNeeded(/* metricsPrefix= */ "StartServices", names);
+        final String[] names = SystemUIFactory.getInstance()
+                .getSystemUIServiceComponents(getResources());
+        final String[] additionalNames = SystemUIFactory.getInstance()
+                .getAdditionalSystemUIServiceComponents(getResources());
+
+        final ArrayList<String> serviceComponents = new ArrayList<>();
+        Collections.addAll(serviceComponents, names);
+        Collections.addAll(serviceComponents, additionalNames);
+
+        startServicesIfNeeded(/* metricsPrefix= */ "StartServices",
+                serviceComponents.toArray(new String[serviceComponents.size()]));
     }
 
     /**

@@ -656,6 +656,10 @@
         </service>
 
         <service
+            android:name=".communal.service.CommunalService"
+            android:exported="@bool/config_communalServiceEnabled"/>
+
+        <service
             android:name=".keyguard.KeyguardService"
             android:exported="true" />
 

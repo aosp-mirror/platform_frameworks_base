@@ -70,7 +70,7 @@ class PrivacyDotViewController @Inject constructor(
     private val configurationController: ConfigurationController,
     private val contentInsetsProvider: StatusBarContentInsetsProvider,
     private val animationScheduler: SystemStatusAnimationScheduler
-) : StatusBarContentInsetsChangedListener {
+) {
     private var sbHeightPortrait = 0
     private var sbHeightLandscape = 0
 
@@ -98,7 +98,13 @@ class PrivacyDotViewController @Inject constructor(
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
     init {
-        contentInsetsProvider.addCallback(this)
+        contentInsetsProvider.addCallback(object : StatusBarContentInsetsChangedListener {
+            override fun onStatusBarContentInsetsChanged() {
+                dlog("onStatusBarContentInsetsChanged: ")
+                setNewLayoutRects()
+            }
+        })
+
         configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
             override fun onLayoutDirectionChanged(isRtl: Boolean) {
                 synchronized(this) {
@@ -531,11 +537,6 @@ class PrivacyDotViewController @Inject constructor(
             return cornerForView(this)
         }
         return -1
-    }
-
-    override fun onStatusBarContentInsetsChanged() {
-        Log.d(TAG, "onStatusBarContentInsetsChanged: ")
-        setNewLayoutRects()
     }
 
     // Returns [left, top, right, bottom] aka [seascape, none, landscape, upside-down]

@@ -61,7 +61,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
@@ -126,11 +125,9 @@ import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.autofill.AutofillClientController;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
-import android.view.autofill.AutofillPopupWindow;
-import android.view.autofill.IAutofillWindowPresenter;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
@@ -159,7 +156,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -740,7 +736,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback,
-        AutofillManager.AutofillClient, ContentCaptureManager.ContentCaptureClient {
+        ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -766,9 +762,7 @@ public class Activity extends ContextThemeWrapper
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final String FRAGMENTS_TAG = "android:fragments";
-    private static final String LAST_AUTOFILL_ID = "android:lastAutofillId";
 
-    private static final String AUTOFILL_RESET_NEEDED = "@android:autofillResetNeeded";
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
@@ -778,7 +772,6 @@ public class Activity extends ContextThemeWrapper
             "android:hasCurrentPermissionsRequest";
 
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
-    private static final String AUTO_FILL_AUTH_WHO_PREFIX = "@android:autoFillAuth:";
     private static final String KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME = "com.android.systemui";
 
     private static final int LOG_AM_ON_CREATE_CALLED = 30057;
@@ -850,9 +843,6 @@ public class Activity extends ContextThemeWrapper
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
-
-    /** The autofill manager. Always access via {@link #getAutofillManager()}. */
-    @Nullable private AutofillManager mAutofillManager;
 
     /** The content capture manager. Access via {@link #getContentCaptureManager()}. */
     @Nullable private ContentCaptureManager mContentCaptureManager;
@@ -953,13 +943,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mHasCurrentPermissionsRequest;
 
-    private boolean mAutoFillResetNeeded;
-    private boolean mAutoFillIgnoreFirstResumePause;
-
-    /** The last autofill id that was returned from {@link #getNextAutofillId()} */
-    private int mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
-
-    private AutofillPopupWindow mAutofillPopupWindow;
+    /** The autofill client controller. Always access via {@link #getAutofillClientController()}. */
+    private AutofillClientController mAutofillClientController;
 
     /** @hide */
     boolean mEnterAnimationComplete;
@@ -1140,19 +1125,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * (Creates, sets and) returns the autofill manager
-     *
-     * @return The autofill manager
-     */
-    @NonNull private AutofillManager getAutofillManager() {
-        if (mAutofillManager == null) {
-            mAutofillManager = getSystemService(AutofillManager.class);
-        }
-
-        return mAutofillManager;
-    }
-
-    /**
      * (Creates, sets, and ) returns the content capture manager
      *
      * @return The content capture manager
@@ -1250,7 +1222,7 @@ public class Activity extends ContextThemeWrapper
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
         if (newBase != null) {
-            newBase.setAutofillClient(this);
+            newBase.setAutofillClient(getAutofillClient());
             newBase.setContentCaptureOptions(getContentCaptureOptions());
         }
     }
@@ -1258,7 +1230,14 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     @Override
     public final AutofillClient getAutofillClient() {
-        return this;
+        return getAutofillClientController();
+    }
+
+    private AutofillClientController getAutofillClientController() {
+        if (mAutofillClientController == null) {
+            mAutofillClientController = new AutofillClientController(this);
+        }
+        return mAutofillClientController;
     }
 
     /** @hide */
@@ -1590,14 +1569,9 @@ public class Activity extends ContextThemeWrapper
                 mActionBar.setDefaultDisplayHomeAsUpEnabled(true);
             }
         }
-        if (savedInstanceState != null) {
-            mAutoFillResetNeeded = savedInstanceState.getBoolean(AUTOFILL_RESET_NEEDED, false);
-            mLastAutofillId = savedInstanceState.getInt(LAST_AUTOFILL_ID,
-                    View.LAST_APP_AUTOFILL_ID);
 
-            if (mAutoFillResetNeeded) {
-                getAutofillManager().onCreate(savedInstanceState);
-            }
+        if (savedInstanceState != null) {
+            getAutofillClientController().onActivityCreated(savedInstanceState);
 
             Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
             mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
@@ -1877,9 +1851,7 @@ public class Activity extends ContextThemeWrapper
 
         dispatchActivityStarted();
 
-        if (mAutoFillResetNeeded) {
-            getAutofillManager().onVisibleForAutofill();
-        }
+        getAutofillClientController().onActivityStarted();
     }
 
     /**
@@ -1949,22 +1921,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         dispatchActivityResumed();
         mActivityTransitionState.onResume(this);
-        enableAutofillCompatibilityIfNeeded();
-        if (mAutoFillResetNeeded) {
-            if (!mAutoFillIgnoreFirstResumePause) {
-                View focus = getCurrentFocus();
-                if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
-                    // TODO(b/148815880): Bring up keyboard if resumed from inline authentication.
-                    // TODO: in Activity killed/recreated case, i.e. SessionLifecycleTest#
-                    // testDatasetVisibleWhileAutofilledAppIsLifecycled: the View's initial
-                    // window visibility after recreation is INVISIBLE in onResume() and next frame
-                    // ViewRootImpl.performTraversals() changes window visibility to VISIBLE.
-                    // So we cannot call View.notifyEnterOrExited() which will do nothing
-                    // when View.isVisibleToUser() is false.
-                    getAutofillManager().notifyViewEntered(focus);
-                }
-            }
-        }
+        getAutofillClientController().onActivityResumed();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_RESUME);
 
@@ -2045,32 +2002,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Gets the next autofill ID.
+     * Returns the next autofill ID that is unique in the activity
      *
      * <p>All IDs will be bigger than {@link View#LAST_APP_AUTOFILL_ID}. All IDs returned
      * will be unique.
-     *
-     * @return A ID that is unique in the activity
      *
      * {@hide}
      */
     @Override
     public int getNextAutofillId() {
-        if (mLastAutofillId == Integer.MAX_VALUE - 1) {
-            mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
-        }
-
-        mLastAutofillId++;
-
-        return mLastAutofillId;
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public AutofillId autofillClientGetNextAutofillId() {
-        return new AutofillId(getNextAutofillId());
+        return getAutofillClientController().getNextAutofillId();
     }
 
     /**
@@ -2273,15 +2214,11 @@ public class Activity extends ContextThemeWrapper
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putBundle(WINDOW_HIERARCHY_TAG, mWindow.saveHierarchyState());
 
-        outState.putInt(LAST_AUTOFILL_ID, mLastAutofillId);
         Parcelable p = mFragments.saveAllState();
         if (p != null) {
             outState.putParcelable(FRAGMENTS_TAG, p);
         }
-        if (mAutoFillResetNeeded) {
-            outState.putBoolean(AUTOFILL_RESET_NEEDED, true);
-            getAutofillManager().onSaveInstanceState(outState);
-        }
+        getAutofillClientController().onSaveInstanceState(outState);
         dispatchActivitySaveInstanceState(outState);
     }
 
@@ -2380,19 +2317,7 @@ public class Activity extends ContextThemeWrapper
     protected void onPause() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onPause " + this);
         dispatchActivityPaused();
-        if (mAutoFillResetNeeded) {
-            if (!mAutoFillIgnoreFirstResumePause) {
-                if (DEBUG_LIFECYCLE) Slog.v(TAG, "autofill notifyViewExited " + this);
-                View focus = getCurrentFocus();
-                if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
-                    getAutofillManager().notifyViewExited(focus);
-                }
-            } else {
-                // reset after first pause()
-                if (DEBUG_LIFECYCLE) Slog.v(TAG, "autofill got first pause " + this);
-                mAutoFillIgnoreFirstResumePause = false;
-            }
-        }
+        getAutofillClientController().onActivityPaused();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_PAUSE);
         mCalled = true;
@@ -2623,14 +2548,7 @@ public class Activity extends ContextThemeWrapper
         mTranslucentCallback = null;
         mCalled = true;
 
-        if (mAutoFillResetNeeded) {
-            // If stopped without changing the configurations, the response should expire.
-            getAutofillManager().onInvisibleForAutofill(!mChangingConfigurations);
-        } else if (mIntent != null
-                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
-                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {
-            restoreAutofillSaveUi();
-        }
+        getAutofillClientController().onActivityStopped(mIntent, mChangingConfigurations);
         mEnterAnimationComplete = false;
     }
 
@@ -2667,9 +2585,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
         mCalled = true;
 
-        if (isFinishing() && mAutoFillResetNeeded) {
-            getAutofillManager().onActivityFinishing();
-        }
+        getAutofillClientController().onActivityDestroyed();
 
         // dismiss any dialogs we are managing.
         if (mManagedDialogs != null) {
@@ -3908,11 +3824,7 @@ public class Activity extends ContextThemeWrapper
         ActivityClient.getInstance().onBackPressedOnTaskRoot(mToken,
                 new RequestFinishCallback(new WeakReference<>(this)));
 
-        // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
-        // be restored now.
-        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-            restoreAutofillSaveUi();
-        }
+        getAutofillClientController().onActivityBackPressed(mIntent);
     }
 
     /**
@@ -5602,6 +5514,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Like {@link #startIntentSenderForResult} but taking {@code who} as an additional identifier.
+     *
+     * @hide
+     */
+    public void startIntentSenderForResult(IntentSender intent, String who, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues, Bundle options)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResultInner(intent, who, requestCode, fillInIntent, flagsMask,
+                flagsValues, options);
+    }
+
+    /**
      * Like {@link #startActivityForResult(Intent, int)}, but allowing you
      * to use a IntentSender to describe the activity to be started.  If
      * the IntentSender is for an activity, that activity will be started
@@ -5643,7 +5567,10 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    private void startIntentSenderForResultInner(IntentSender intent, String who, int requestCode,
+    /**
+     * @hide
+     */
+    public void startIntentSenderForResultInner(IntentSender intent, String who, int requestCode,
             Intent fillInIntent, int flagsMask, int flagsValues,
             @Nullable Bundle options)
             throws IntentSender.SendIntentException {
@@ -5725,21 +5652,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
-        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
-                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {
-            if (TextUtils.equals(getPackageName(),
-                    intent.resolveActivity(getPackageManager()).getPackageName())) {
-                // Apply Autofill restore mechanism on the started activity by startActivity()
-                final IBinder token =
-                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
-                // Remove restore ability from current activity
-                mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
-                mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY);
-                // Put restore token
-                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-                intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
-            }
-        }
+        getAutofillClientController().onStartActivity(intent, mIntent);
         if (options != null) {
             startActivityForResult(intent, -1, options);
         } else {
@@ -6471,24 +6384,7 @@ public class Activity extends ContextThemeWrapper
             mParent.finishFromChild(this);
         }
 
-        // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
-        // be restored now.
-        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-            restoreAutofillSaveUi();
-        }
-    }
-
-    /**
-     * Restores Autofill Save UI
-     */
-    private void restoreAutofillSaveUi() {
-        final IBinder token =
-                mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
-        // Make only restore Autofill once
-        mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
-        mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY);
-        getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
-                token);
+        getAutofillClientController().onActivityFinish(mIntent);
     }
 
     /**
@@ -6801,12 +6697,6 @@ public class Activity extends ContextThemeWrapper
      */
     public ComponentName getComponentName() {
         return mComponent;
-    }
-
-    /** @hide */
-    @Override
-    public final ComponentName autofillClientGetComponentName() {
-        return getComponentName();
     }
 
     /** @hide */
@@ -7134,12 +7024,6 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    /** @hide */
-    @Override
-    public final void autofillClientRunOnUiThread(Runnable action) {
-        runOnUiThread(action);
-    }
-
     /**
      * Standard implementation of
      * {@link android.view.LayoutInflater.Factory#onCreateView} used when
@@ -7198,7 +7082,7 @@ public class Activity extends ContextThemeWrapper
             // Handle special cases
             switch (args[0]) {
                 case "--autofill":
-                    dumpAutofillManager(prefix, writer);
+                    getAutofillClientController().dumpAutofillManager(prefix, writer);
                     return;
                 case "--contentcapture":
                     dumpContentCaptureManager(prefix, writer);
@@ -7244,22 +7128,11 @@ public class Activity extends ContextThemeWrapper
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
-        dumpAutofillManager(prefix, writer);
+        getAutofillClientController().dumpAutofillManager(prefix, writer);
         dumpContentCaptureManager(prefix, writer);
         dumpUiTranslation(prefix, writer);
 
         ResourcesManager.getInstance().dump(prefix, writer);
-    }
-
-    void dumpAutofillManager(String prefix, PrintWriter writer) {
-        final AutofillManager afm = getAutofillManager();
-        if (afm != null) {
-            afm.dump(prefix, writer);
-            writer.print(prefix); writer.print("Autofill Compat Mode: ");
-            writer.println(isAutofillCompatibilityEnabled());
-        } else {
-            writer.print(prefix); writer.println("No AutofillManager");
-        }
     }
 
     void dumpContentCaptureManager(String prefix, PrintWriter writer) {
@@ -7992,17 +7865,8 @@ public class Activity extends ContextThemeWrapper
         mWindow.setPreferMinimalPostProcessing(
                 (info.flags & ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING) != 0);
 
-        setAutofillOptions(application.getAutofillOptions());
+        getAutofillClientController().onActivityAttached(application);
         setContentCaptureOptions(application.getContentCaptureOptions());
-    }
-
-    private void enableAutofillCompatibilityIfNeeded() {
-        if (isAutofillCompatibilityEnabled()) {
-            final AutofillManager afm = getSystemService(AutofillManager.class);
-            if (afm != null) {
-                afm.enableCompatibilityMode();
-            }
-        }
     }
 
     /** @hide */
@@ -8176,15 +8040,7 @@ public class Activity extends ContextThemeWrapper
 
         mLastNonConfigurationInstances = null;
 
-        if (mAutoFillResetNeeded) {
-            // When Activity is destroyed in paused state, and relaunch activity, there will be
-            // extra onResume and onPause event,  ignore the first onResume and onPause.
-            // see ActivityThread.handleRelaunchActivity()
-            mAutoFillIgnoreFirstResumePause = followedByPause;
-            if (mAutoFillIgnoreFirstResumePause && DEBUG_LIFECYCLE) {
-                Slog.v(TAG, "autofill will ignore first pause when relaunching " + this);
-            }
-        }
+        getAutofillClientController().onActivityPerformResume(followedByPause);
 
         mCalled = false;
         // mResumed is set by the instrumentation
@@ -8196,7 +8052,7 @@ public class Activity extends ContextThemeWrapper
                 " did not call through to super.onResume()");
         }
 
-        // invisible activities must be finished before onResume() completes
+        // invisible activities must be finished before onResume) completes
         if (!mVisibleFromClient && !mFinished) {
             Log.w(TAG, "An activity without a UI must call finish() before onResume() completes");
             if (getApplicationInfo().targetSdkVersion
@@ -8400,9 +8256,8 @@ public class Activity extends ContextThemeWrapper
                     return;
                 }
             }
-        } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
-            Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
-            getAutofillManager().onAuthenticationResult(requestCode, resultData, getCurrentFocus());
+        } else if (who.startsWith(AutofillClientController.AUTO_FILL_AUTH_WHO_PREFIX)) {
+            getAutofillClientController().onDispatchActivityResult(requestCode, resultCode, data);
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {
@@ -8539,184 +8394,11 @@ public class Activity extends ContextThemeWrapper
         fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /** @hide */
-    @Override
-    public final void autofillClientAuthenticate(int authenticationId, IntentSender intent,
-            Intent fillInIntent, boolean authenticateInline) {
-        try {
-            startIntentSenderForResultInner(intent, AUTO_FILL_AUTH_WHO_PREFIX,
-                    authenticationId, fillInIntent, 0, 0, null);
-        } catch (IntentSender.SendIntentException e) {
-            Log.e(TAG, "authenticate() failed for intent:" + intent, e);
-        }
-    }
-
-    /** @hide */
-    @Override
-    public final void autofillClientResetableStateAvailable() {
-        mAutoFillResetNeeded = true;
-    }
-
-    /** @hide */
-    @Override
-    public final boolean autofillClientRequestShowFillUi(@NonNull View anchor, int width,
-            int height, @Nullable Rect anchorBounds, IAutofillWindowPresenter presenter) {
-        final boolean wasShowing;
-
-        if (mAutofillPopupWindow == null) {
-            wasShowing = false;
-            mAutofillPopupWindow = new AutofillPopupWindow(presenter);
-        } else {
-            wasShowing = mAutofillPopupWindow.isShowing();
-        }
-        mAutofillPopupWindow.update(anchor, 0, 0, width, height, anchorBounds);
-
-        return !wasShowing && mAutofillPopupWindow.isShowing();
-    }
-
-    /** @hide */
-    @Override
-    public final void autofillClientDispatchUnhandledKey(@NonNull View anchor,
-            @NonNull KeyEvent keyEvent) {
-        ViewRootImpl rootImpl = anchor.getViewRootImpl();
-        if (rootImpl != null) {
-            // dont care if anchorView is current focus, for example a custom view may only receive
-            // touchEvent, not focusable but can still trigger autofill window. The Key handling
-            // might be inside parent of the custom view.
-            rootImpl.dispatchKeyFromAutofill(keyEvent);
-        }
-    }
-
-    /** @hide */
-    @Override
-    public final boolean autofillClientRequestHideFillUi() {
-        if (mAutofillPopupWindow == null) {
-            return false;
-        }
-        mAutofillPopupWindow.dismiss();
-        mAutofillPopupWindow = null;
-        return true;
-    }
-
-    /** @hide */
-    @Override
-    public final boolean autofillClientIsFillUiShowing() {
-        return mAutofillPopupWindow != null && mAutofillPopupWindow.isShowing();
-    }
-
-    /** @hide */
-    @Override
-    @NonNull
-    public final View[] autofillClientFindViewsByAutofillIdTraversal(
-            @NonNull AutofillId[] autofillId) {
-        final View[] views = new View[autofillId.length];
-        final ArrayList<ViewRootImpl> roots =
-                WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
-
-        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
-            final View rootView = roots.get(rootNum).getView();
-
-            if (rootView != null) {
-                final int viewCount = autofillId.length;
-                for (int viewNum = 0; viewNum < viewCount; viewNum++) {
-                    if (views[viewNum] == null) {
-                        views[viewNum] = rootView.findViewByAutofillIdTraversal(
-                                autofillId[viewNum].getViewId());
-                    }
-                }
-            }
-        }
-
-        return views;
-    }
-
-    /** @hide */
-    @Nullable
-    public View findViewByAutofillIdTraversal(@NonNull AutofillId autofillId) {
-        final ArrayList<ViewRootImpl> roots =
-                WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
-        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
-            final View rootView = roots.get(rootNum).getView();
-
-            if (rootView != null) {
-                final View view = rootView.findViewByAutofillIdTraversal(autofillId.getViewId());
-                if (view != null) {
-                    return view;
-                }
-            }
-        }
-        return null;
-    }
-
-    /** @hide */
-    @Override
-    @Nullable
-    public final View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
-        return findViewByAutofillIdTraversal(autofillId);
-    }
-
-    /** @hide */
-    @Override
-    public final @NonNull boolean[] autofillClientGetViewVisibility(
-            @NonNull AutofillId[] autofillIds) {
-        final int autofillIdCount = autofillIds.length;
-        final boolean[] visible = new boolean[autofillIdCount];
-        for (int i = 0; i < autofillIdCount; i++) {
-            final AutofillId autofillId = autofillIds[i];
-            final View view = autofillClientFindViewByAutofillIdTraversal(autofillId);
-            if (view != null) {
-                if (!autofillId.isVirtualInt()) {
-                    visible[i] = view.isVisibleToUser();
-                } else {
-                    visible[i] = view.isVisibleToUserForAutofill(autofillId.getVirtualChildIntId());
-                }
-            }
-        }
-        if (android.view.autofill.Helper.sVerbose) {
-            Log.v(TAG, "autofillClientGetViewVisibility(): " + Arrays.toString(visible));
-        }
-        return visible;
-    }
-
-    /** @hide */
-    public final @Nullable View autofillClientFindViewByAccessibilityIdTraversal(int viewId,
-            int windowId) {
-        final ArrayList<ViewRootImpl> roots = WindowManagerGlobal.getInstance()
-                .getRootViews(getActivityToken());
-        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
-            final View rootView = roots.get(rootNum).getView();
-            if (rootView != null && rootView.getAccessibilityWindowId() == windowId) {
-                final View view = rootView.findViewByAccessibilityIdTraversal(viewId);
-                if (view != null) {
-                    return view;
-                }
-            }
-        }
-        return null;
-    }
-
-    /** @hide */
-    @Override
-    public final @Nullable IBinder autofillClientGetActivityToken() {
-        return getActivityToken();
-    }
-
-    /** @hide */
-    @Override
-    public final boolean autofillClientIsVisibleForAutofill() {
-        return !mStopped;
-    }
-
-    /** @hide */
-    @Override
-    public final boolean autofillClientIsCompatibilityModeEnabled() {
-        return isAutofillCompatibilityEnabled();
-    }
-
-    /** @hide */
-    @Override
-    public final boolean isDisablingEnterExitEventForAutofill() {
-        return mAutoFillIgnoreFirstResumePause || !mResumed;
+    /**
+     * @hide
+     */
+    public final boolean isStopped() {
+        return mStopped;
     }
 
     /**

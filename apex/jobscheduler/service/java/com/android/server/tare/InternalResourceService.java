@@ -22,6 +22,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.app.tare.IEconomyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManagerInternal;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,14 +39,19 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,8 +79,9 @@ public class InternalResourceService extends SystemService {
     private final BatteryManagerInternal mBatteryManagerInternal;
     private final PackageManager mPackageManager;
 
-    private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final Agent mAgent;
+    private final CompleteEconomicPolicy mCompleteEconomicPolicy;
+    private final EconomyManagerStub mEconomyManagerStub;
 
     @NonNull
     @GuardedBy("mLock")
@@ -173,6 +181,7 @@ public class InternalResourceService extends SystemService {
         mHandler = new IrsHandler(TareHandlerThread.get().getLooper());
         mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
         mPackageManager = context.getPackageManager();
+        mEconomyManagerStub = new EconomyManagerStub();
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
         mAgent = new Agent(this, mCompleteEconomicPolicy);
 
@@ -194,7 +203,7 @@ public class InternalResourceService extends SystemService {
 
     @Override
     public void onStart() {
-
+        publishBinderService(Context.RESOURCE_ECONOMY_SERVICE, mEconomyManagerStub);
     }
 
     @Override
@@ -428,6 +437,37 @@ public class InternalResourceService extends SystemService {
         }
     }
 
+    /**
+     * Binder stub trampoline implementation
+     */
+    final class EconomyManagerStub extends IEconomyManager.Stub {
+        /**
+         * "dumpsys" infrastructure
+         */
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
+
+            if (!ArrayUtils.isEmpty(args)) {
+                String arg = args[0];
+                if ("-h".equals(arg) || "--help".equals(arg)) {
+                    dumpHelp(pw);
+                    return;
+                } else if (arg.length() > 0 && arg.charAt(0) == '-') {
+                    pw.println("Unknown option: " + arg);
+                    return;
+                }
+            }
+
+            final long identityToken = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(new IndentingPrintWriter(pw, "  "));
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
+        }
+    }
+
     private final class LocalService implements EconomyManagerInternal {
         @Override
         public void registerAffordabilityChangeListener(int userId, @NonNull String pkgName,
@@ -488,6 +528,25 @@ public class InternalResourceService extends SystemService {
             synchronized (mLock) {
                 mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
             }
+        }
+    }
+
+    private static void dumpHelp(PrintWriter pw) {
+        pw.println("Resource Economy (economy) dump options:");
+        pw.println("  [-h|--help] [package] ...");
+        pw.println("    -h | --help: print this help");
+        pw.println("  [package] is an optional package name to limit the output to.");
+    }
+
+    private void dumpInternal(final IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            pw.print("Current battery level: ");
+            pw.println(mCurrentBatteryLevel);
+
+            mCompleteEconomicPolicy.dump(pw);
+            pw.println();
+
+            mAgent.dumpLocked(pw);
         }
     }
 }

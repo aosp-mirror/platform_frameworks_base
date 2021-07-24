@@ -613,7 +613,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 if (android.view.autofill.Helper.sVerbose) {
                     Log.v(TAG, "getAutofillClient(): found activity for " + this + ": " + activity);
                 }
-                return activity;
+                return activity.getAutofillClient();
             }
         }
         if (android.view.autofill.Helper.sVerbose) {

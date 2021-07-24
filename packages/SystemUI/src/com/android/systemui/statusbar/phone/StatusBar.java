@@ -3629,6 +3629,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
+        int previousState = mStatusBarStateController.getState();
         if (!(mStatusBarStateController.setState(StatusBarState.SHADE, force))) {
             //TODO: StatusBarStateController should probably know about hiding the keyguard and
             // notify listeners.
@@ -3641,7 +3642,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
-            mLockscreenShadeTransitionController.onHideKeyguard(delay);
+            mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);
 
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
@@ -3992,7 +3993,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onUnlockHintStarted() {
         mFalsingCollector.onUnlockHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
+        mKeyguardIndicationController.showActionToUnlock();
     }
 
     public void onHintFinished() {

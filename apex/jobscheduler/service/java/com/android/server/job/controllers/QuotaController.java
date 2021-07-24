@@ -634,11 +634,12 @@ public final class QuotaController extends StateController {
         jobs.add(jobStatus);
         jobStatus.setTrackingController(JobStatus.TRACKING_QUOTA);
         final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
-        setConstraintSatisfied(jobStatus, nowElapsed, isWithinQuota);
+        final boolean isWithinEJQuota =
+                jobStatus.isRequestedExpeditedJob() && isWithinEJQuotaLocked(jobStatus);
+        setConstraintSatisfied(jobStatus, nowElapsed, isWithinQuota || isWithinEJQuota);
         final boolean outOfEJQuota;
         if (jobStatus.isRequestedExpeditedJob()) {
-            final boolean isWithinEJQuota = isWithinEJQuotaLocked(jobStatus);
-            setExpeditedConstraintSatisfied(jobStatus, nowElapsed, isWithinEJQuota);
+            setExpeditedQuotaApproved(jobStatus, nowElapsed, isWithinEJQuota);
             outOfEJQuota = !isWithinEJQuota;
         } else {
             outOfEJQuota = false;
@@ -1614,6 +1615,8 @@ public final class QuotaController extends StateController {
         boolean changed = false;
         for (int i = jobs.size() - 1; i >= 0; --i) {
             final JobStatus js = jobs.valueAt(i);
+            final boolean isWithinEJQuota =
+                    js.isRequestedExpeditedJob() && isWithinEJQuotaLocked(js);
             if (isTopStartedJobLocked(js)) {
                 // Job was started while the app was in the TOP state so we should allow it to
                 // finish.
@@ -1623,15 +1626,15 @@ public final class QuotaController extends StateController {
                 // An app in the ACTIVE bucket may be out of quota while the job could be in quota
                 // for some reason. Therefore, avoid setting the real value here and check each job
                 // individually.
-                changed |= setConstraintSatisfied(js, nowElapsed, realInQuota);
+                changed |= setConstraintSatisfied(js, nowElapsed, isWithinEJQuota || realInQuota);
             } else {
                 // This job is somehow exempted. Need to determine its own quota status.
-                changed |= setConstraintSatisfied(js, nowElapsed, isWithinQuotaLocked(js));
+                changed |= setConstraintSatisfied(js, nowElapsed,
+                        isWithinEJQuota || isWithinQuotaLocked(js));
             }
 
             if (js.isRequestedExpeditedJob()) {
-                boolean isWithinEJQuota = isWithinEJQuotaLocked(js);
-                changed |= setExpeditedConstraintSatisfied(js, nowElapsed, isWithinEJQuota);
+                changed |= setExpeditedQuotaApproved(js, nowElapsed, isWithinEJQuota);
                 outOfEJQuota |= !isWithinEJQuota;
             }
         }
@@ -1659,26 +1662,24 @@ public final class QuotaController extends StateController {
 
         @Override
         public void accept(JobStatus jobStatus) {
-            if (setConstraintSatisfied(
-                    jobStatus, mUpdateTimeElapsed, isWithinQuotaLocked(jobStatus))) {
+            final boolean isWithinEJQuota;
+            if (jobStatus.isRequestedExpeditedJob()) {
+                isWithinEJQuota = isWithinEJQuotaLocked(jobStatus);
+            } else {
+                isWithinEJQuota = false;
+            }
+            if (setConstraintSatisfied(jobStatus, mUpdateTimeElapsed,
+                    isWithinEJQuota || isWithinQuotaLocked(jobStatus))) {
                 changedJobs.add(jobStatus);
             }
-            final boolean outOfEJQuota;
-            if (jobStatus.isRequestedExpeditedJob()) {
-                final boolean isWithinEJQuota = isWithinEJQuotaLocked(jobStatus);
-                if (setExpeditedConstraintSatisfied(
-                        jobStatus, mUpdateTimeElapsed, isWithinEJQuota)) {
-                    changedJobs.add(jobStatus);
-                }
-                outOfEJQuota = !isWithinEJQuota;
-            } else {
-                outOfEJQuota = false;
+            if (setExpeditedQuotaApproved(jobStatus, mUpdateTimeElapsed, isWithinEJQuota)) {
+                changedJobs.add(jobStatus);
             }
 
             final int userId = jobStatus.getSourceUserId();
             final String packageName = jobStatus.getSourcePackageName();
             final int realStandbyBucket = jobStatus.getStandbyBucket();
-            if (isWithinQuotaLocked(userId, packageName, realStandbyBucket) && !outOfEJQuota) {
+            if (isWithinQuotaLocked(userId, packageName, realStandbyBucket) && isWithinEJQuota) {
                 // TODO(141645789): we probably shouldn't cancel the alarm until we've verified
                 // that all jobs for the userId-package are within quota.
                 mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
@@ -1827,9 +1828,9 @@ public final class QuotaController extends StateController {
      * If the satisfaction changes, this will tell connectivity & background jobs controller to
      * also re-evaluate their state.
      */
-    private boolean setExpeditedConstraintSatisfied(@NonNull JobStatus jobStatus, long nowElapsed,
+    private boolean setExpeditedQuotaApproved(@NonNull JobStatus jobStatus, long nowElapsed,
             boolean isWithinQuota) {
-        if (jobStatus.setExpeditedJobQuotaConstraintSatisfied(nowElapsed, isWithinQuota)) {
+        if (jobStatus.setExpeditedJobQuotaApproved(nowElapsed, isWithinQuota)) {
             mBackgroundJobsController.evaluateStateLocked(jobStatus);
             mConnectivityController.evaluateStateLocked(jobStatus);
             if (isWithinQuota && jobStatus.isReady()) {
@@ -4330,7 +4331,7 @@ public final class QuotaController extends StateController {
                         js.isRequestedExpeditedJob());
                 proto.write(
                         StateControllerProto.QuotaController.TrackedJob.IS_WITHIN_FG_JOB_QUOTA,
-                        js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+                        js.isExpeditedQuotaApproved());
                 proto.end(jsToken);
             }
         });

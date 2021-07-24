@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InsetsState;
@@ -76,6 +77,14 @@ public final class StartingWindowInfo implements Parcelable {
      */
     @NonNull
     public ActivityManager.RunningTaskInfo taskInfo;
+
+    /**
+     * The {@link ActivityInfo} of the target activity which to create the starting window.
+     * It can be null if the info is the same as the top in task info.
+     * @hide
+     */
+    @Nullable
+    public ActivityInfo targetActivityInfo;
 
     /**
      * InsetsState of TopFullscreenOpaqueWindow
@@ -174,6 +183,7 @@ public final class StartingWindowInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(taskInfo, flags);
+        dest.writeTypedObject(targetActivityInfo, flags);
         dest.writeInt(startingWindowTypeParameter);
         dest.writeTypedObject(topOpaqueWindowInsetsState, flags);
         dest.writeTypedObject(topOpaqueWindowLayoutParams, flags);
@@ -185,6 +195,7 @@ public final class StartingWindowInfo implements Parcelable {
 
     void readFromParcel(@NonNull Parcel source) {
         taskInfo = source.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+        targetActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         startingWindowTypeParameter = source.readInt();
         topOpaqueWindowInsetsState = source.readTypedObject(InsetsState.CREATOR);
         topOpaqueWindowLayoutParams = source.readTypedObject(
@@ -198,6 +209,7 @@ public final class StartingWindowInfo implements Parcelable {
     @Override
     public String toString() {
         return "StartingWindowInfo{taskId=" + taskInfo.taskId
+                + " targetActivityInfo=" + targetActivityInfo
                 + " displayId=" + taskInfo.displayId
                 + " topActivityType=" + taskInfo.topActivityType
                 + " preferredStartingWindowType="

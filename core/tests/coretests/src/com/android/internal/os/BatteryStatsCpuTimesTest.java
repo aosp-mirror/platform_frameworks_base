@@ -96,7 +96,7 @@ public class BatteryStatsCpuTimesTest {
     @Mock
     PowerProfile mPowerProfile;
 
-    private MockClocks mClocks;
+    private MockClock mClocks;
     private MockBatteryStatsImpl mBatteryStatsImpl;
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
 
@@ -104,7 +104,7 @@ public class BatteryStatsCpuTimesTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mClocks = new MockClocks();
+        mClocks = new MockClock();
         mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks)
                 .setKernelCpuUidUserSysTimeReader(mCpuUidUserSysTimeReader)
                 .setKernelCpuUidFreqTimeReader(mCpuUidFreqTimeReader)

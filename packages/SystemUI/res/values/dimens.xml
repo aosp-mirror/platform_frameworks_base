@@ -1465,7 +1465,7 @@
     <dimen name="lockscreen_shade_notification_movement">24dp</dimen>
 
     <!-- Maximum overshoot for the pulse expansion -->
-    <dimen name="pulse_expansion_max_top_overshoot">16dp</dimen>
+    <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>

@@ -140,6 +140,7 @@ public class UserSwitcherController implements Dumpable {
     public final DetailAdapter mUserDetailAdapter;
     private final Executor mUiBgExecutor;
     private final boolean mGuestUserAutoCreated;
+    private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
     private FalsingManager mFalsingManager;
 
@@ -174,6 +175,7 @@ public class UserSwitcherController implements Dumpable {
         }
         mGuestUserAutoCreated = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_guestUserAutoCreated);
+        mGuestIsResetting = new AtomicBoolean();
         mGuestCreationScheduled = new AtomicBoolean();
         mKeyguardStateController = keyguardStateController;
         mHandler = handler;
@@ -323,7 +325,20 @@ public class UserSwitcherController implements Dumpable {
                 boolean createIsRestricted = !addUsersWhenLocked;
 
                 if (guestRecord == null) {
-                    if (canCreateGuest) {
+                    if (mGuestUserAutoCreated) {
+                        // If mGuestIsResetting=true, the switch should be disabled since
+                        // we will just use it as an indicator for "Resetting guest...".
+                        // Otherwise, default to canSwitchUsers.
+                        boolean isSwitchToGuestEnabled =
+                                !mGuestIsResetting.get() && canSwitchUsers;
+                        guestRecord = new UserRecord(null /* info */, null /* picture */,
+                                true /* isGuest */, false /* isCurrent */,
+                                false /* isAddUser */, false /* isRestricted */,
+                                isSwitchToGuestEnabled);
+                        // Don't call checkIfAddUserDisallowedByAdminOnly if
+                        // config_guestUserAutoCreated=true.
+                        records.add(guestRecord);
+                    } else if (canCreateGuest) {
                         guestRecord = new UserRecord(null /* info */, null /* picture */,
                                 true /* isGuest */, false /* isCurrent */,
                                 false /* isAddUser */, createIsRestricted, canSwitchUsers);
@@ -685,6 +700,9 @@ public class UserSwitcherController implements Dumpable {
                 switchToUserId(newGuestId);
                 mUserManager.removeUser(currentUser.id);
             } else {
+                if (mGuestUserAutoCreated) {
+                    mGuestIsResetting.set(true);
+                }
                 switchToUserId(targetUserId);
                 mUserManager.removeUser(currentUser.id);
             }
@@ -701,10 +719,14 @@ public class UserSwitcherController implements Dumpable {
 
         mUiBgExecutor.execute(() -> {
             int newGuestId = createGuest();
+            mGuestCreationScheduled.set(false);
+            mGuestIsResetting.set(false);
             if (newGuestId == UserHandle.USER_NULL) {
                 Log.w(TAG, "Could not create new guest while exiting existing guest");
+                // Refresh users so that we still display "Guest" if
+                // config_guestUserAutoCreated=true
+                refreshUsers(UserHandle.USER_NULL);
             }
-            mGuestCreationScheduled.set(false);
         });
 
     }
@@ -807,12 +829,25 @@ public class UserSwitcherController implements Dumpable {
                             ? com.android.settingslib.R.string.guest_reset_guest
                             : com.android.settingslib.R.string.guest_exit_guest);
                 } else {
-                    // If config_guestUserAutoCreated, always show guest nickname instead of "Add
-                    // guest" to make it seem as though the device always has a guest ready for use
-                    return context.getString(
-                            item.info == null && !mController.mGuestUserAutoCreated
-                                    ? com.android.settingslib.R.string.guest_new_guest
-                                    : com.android.settingslib.R.string.guest_nickname);
+                    if (item.info != null) {
+                        return context.getString(com.android.settingslib.R.string.guest_nickname);
+                    } else {
+                        if (mController.mGuestUserAutoCreated) {
+                            // If mGuestIsResetting=true, we expect the guest user to be created
+                            // shortly, so display a "Resetting guest..." as an indicator that we
+                            // are busy. Otherwise, if mGuestIsResetting=false, we probably failed
+                            // to create a guest at some point. In this case, always show guest
+                            // nickname instead of "Add guest" to make it seem as though the device
+                            // always has a guest ready for use.
+                            return context.getString(
+                                    mController.mGuestIsResetting.get()
+                                            ? com.android.settingslib.R.string.guest_resetting
+                                            : com.android.settingslib.R.string.guest_nickname);
+                        } else {
+                            return context.getString(
+                                    com.android.settingslib.R.string.guest_new_guest);
+                        }
+                    }
                 }
             } else if (item.isAddUser) {
                 return context.getString(R.string.user_add_user);

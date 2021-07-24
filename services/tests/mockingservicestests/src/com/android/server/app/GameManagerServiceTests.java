@@ -207,7 +207,7 @@ public class GameManagerServiceTests {
     }
 
     private void mockDeviceConfigInvalid() {
-        String configString = "mode=2,downscaleFactor=0.55";
+        String configString = "";
         when(DeviceConfig.getProperty(anyString(), anyString()))
                 .thenReturn(configString);
     }
@@ -373,11 +373,12 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testSetGameModePermissionDenied() {
+        mockModifyGameModeGranted();
+        mockDeviceConfigAll();
         GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
 
         // Update the game mode so we can read back something valid.
-        mockModifyGameModeGranted();
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));

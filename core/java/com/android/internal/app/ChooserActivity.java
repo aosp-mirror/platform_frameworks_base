@@ -1269,7 +1269,8 @@ public class ChooserActivity extends ResolverActivity implements
                             SELECTION_TYPE_NEARBY,
                             "",
                             -1);
-                    safelyStartActivity(ti);
+                    // Action bar is user-independent, always start as primary
+                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
                 }
         );
@@ -1290,7 +1291,8 @@ public class ChooserActivity extends ResolverActivity implements
                             SELECTION_TYPE_EDIT,
                             "",
                             -1);
-                    safelyStartActivity(ti);
+                    // Action bar is user-independent, always start as primary
+                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
                 }
         );
