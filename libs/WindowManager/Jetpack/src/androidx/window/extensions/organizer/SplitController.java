@@ -213,6 +213,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         updateCallbackIfNecessary();
     }
 
+    private void onActivityConfigurationChanged(@NonNull Activity activity) {
+        final TaskFragmentContainer currentContainer = getContainerWithActivity(
+                activity.getActivityToken());
+
+        if (currentContainer != null) {
+            // Changes to activities in controllers are handled in
+            // onTaskFragmentParentInfoChanged
+            return;
+        }
+
+        // Check if activity requires a placeholder
+        launchPlaceholderIfNecessary(activity);
+    }
+
     /**
      * Returns a container that this activity is registered with. An activity can only belong to one
      * container, or no container at all.
@@ -546,6 +560,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        }
+
+        @Override
+        public void onActivityPostCreated(Activity activity, Bundle savedInstanceState) {
             // Calling after Activity#onCreate is complete to allow the app launch something
             // first. In case of a configured placeholder activity we want to make sure
             // that we don't launch it if an activity itself already requested something to be
@@ -575,6 +593,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+        }
+
+        @Override
+        public void onActivityConfigurationChanged(Activity activity) {
+            SplitController.this.onActivityConfigurationChanged(activity);
         }
     }
 }
