@@ -48,33 +48,33 @@ public abstract class ParsedComponent implements Parcelable {
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
-    private String name;
-    int icon;
-    int labelRes;
+    protected String name;
+    protected int icon;
+    protected int labelRes;
     @Nullable
-    CharSequence nonLocalizedLabel;
-    int logo;
-    int banner;
-    int descriptionRes;
+    protected CharSequence nonLocalizedLabel;
+    protected int logo;
+    protected int banner;
+    protected int descriptionRes;
 
     // TODO(b/135203078): Replace flags with individual booleans, scoped by subclass
-    int flags;
+    protected int flags;
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
-    private String packageName;
+    protected String packageName;
 
     @Nullable
     @DataClass.PluralOf("intent")
     @DataClass.ParcelWith(ParsedIntentInfo.ListParceler.class)
-    private List<ParsedIntentInfo> intents;
+    protected List<ParsedIntentInfo> intents;
 
-    private ComponentName componentName;
+    protected ComponentName componentName;
 
     @Nullable
     protected Bundle metaData;
 
-    private Map<String, Property> mProperties = emptyMap();
+    protected Map<String, Property> mProperties = emptyMap();
 
     ParsedComponent() {
 
@@ -112,8 +112,48 @@ public abstract class ParsedComponent implements Parcelable {
         return intents != null ? intents : Collections.emptyList();
     }
 
+    public ParsedComponent setBanner(int banner) {
+        this.banner = banner;
+        return this;
+    }
+
+    public ParsedComponent setDescriptionRes(int descriptionRes) {
+        this.descriptionRes = descriptionRes;
+        return this;
+    }
+
+    public ParsedComponent setFlags(int flags) {
+        this.flags = flags;
+        return this;
+    }
+
+    public ParsedComponent setIcon(int icon) {
+        this.icon = icon;
+        return this;
+    }
+
+    public ParsedComponent setLabelRes(int labelRes) {
+        this.labelRes = labelRes;
+        return this;
+    }
+
+    public ParsedComponent setLogo(int logo) {
+        this.logo = logo;
+        return this;
+    }
+
+    public ParsedComponent setMetaData(Bundle metaData) {
+        this.metaData = metaData;
+        return this;
+    }
+
     public ParsedComponent setName(String name) {
         this.name = TextUtils.safeIntern(name);
+        return this;
+    }
+
+    public ParsedComponent setNonLocalizedLabel(CharSequence nonLocalizedLabel) {
+        this.nonLocalizedLabel = nonLocalizedLabel;
         return this;
     }
 

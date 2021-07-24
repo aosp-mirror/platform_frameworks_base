@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.internal.os;
+package com.android.internal.inputmethod;
 
-public class MockClocks implements BatteryStatsImpl.Clocks {
-    /** ElapsedRealtime in ms */
-    public long realtime;
-    /** Uptime in ms */
-    public long uptime;
-    /** Current time in ms */
-    public long currentTime;
+import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.ThrowableHolder;
 
-    @Override
-    public long elapsedRealtime() {
-        return realtime;
-    }
-
-    @Override
-    public long uptimeMillis() {
-        return uptime;
-    }
-
-    @Override
-    public long currentTimeMillis() {
-        return currentTime;
-    }
+oneway interface IInputContentUriTokenResultCallback {
+    void onResult(in IInputContentUriToken result);
+    void onError(in ThrowableHolder exception);
 }

@@ -1245,7 +1245,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             @Override
             public boolean shouldHideOnTouch() {
-                return !mRemoteInputManager.getController().isRemoteInputActive();
+                return !mRemoteInputManager.isRemoteInputActive();
             }
 
             @Override
@@ -1465,7 +1465,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationInterruptStateProvider);
 
         mNotificationShelfController.setOnActivatedListener(mPresenter);
-        mRemoteInputManager.getController().addCallback(mNotificationShadeWindowController);
+        mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
 
         mNotificationActivityStarter =
                 mStatusBarNotificationActivityStarterBuilder
@@ -1640,7 +1640,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
+        mRemoteInputManager.addControllerCallback(mStatusBarKeyguardViewManager);
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
@@ -2762,6 +2762,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.dump(fd, pw, args);
         }
 
+        if (mLightRevealScrim != null) {
+            pw.println(
+                    "mLightRevealScrim.getRevealAmount(): " + mLightRevealScrim.getRevealAmount());
+        }
+
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.dump(pw);
         }
@@ -3058,9 +3063,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 KeyboardShortcuts.dismiss();
-                if (mRemoteInputManager.getController() != null) {
-                    mRemoteInputManager.getController().closeRemoteInputs();
-                }
+                mRemoteInputManager.closeRemoteInputs();
                 if (mBubblesOptional.isPresent() && mBubblesOptional.get().isStackExpanded()) {
                     mBubblesOptional.get().collapseStack();
                 }
@@ -3626,6 +3629,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
+        int previousState = mStatusBarStateController.getState();
         if (!(mStatusBarStateController.setState(StatusBarState.SHADE, force))) {
             //TODO: StatusBarStateController should probably know about hiding the keyguard and
             // notify listeners.
@@ -3638,7 +3642,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
-            mLockscreenShadeTransitionController.onHideKeyguard(delay);
+            mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);
 
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
@@ -3989,7 +3993,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onUnlockHintStarted() {
         mFalsingCollector.onUnlockHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
+        mKeyguardIndicationController.showActionToUnlock();
     }
 
     public void onHintFinished() {

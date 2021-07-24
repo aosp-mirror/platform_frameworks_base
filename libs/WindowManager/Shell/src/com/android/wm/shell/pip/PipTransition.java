@@ -18,6 +18,7 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.util.RotationUtils.deltaRotation;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
@@ -151,7 +152,8 @@ public class PipTransition extends PipTransitionController {
         mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
         mFinishCallback = finishCallback;
         return startEnterAnimation(enterPip.getTaskInfo(), enterPip.getLeash(),
-                startTransaction, finishTransaction);
+                startTransaction, finishTransaction, enterPip.getStartRotation(),
+                enterPip.getEndRotation());
     }
 
     @Nullable
@@ -208,7 +210,8 @@ public class PipTransition extends PipTransitionController {
 
     private boolean startEnterAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
             final SurfaceControl.Transaction startTransaction,
-            final SurfaceControl.Transaction finishTransaction) {
+            final SurfaceControl.Transaction finishTransaction,
+            final int startRotation, final int endRotation) {
         setBoundsStateForEntry(taskInfo.topActivity, taskInfo.pictureInPictureParams,
                 taskInfo.topActivityInfo);
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
@@ -216,7 +219,8 @@ public class PipTransition extends PipTransitionController {
         PipAnimationController.PipTransitionAnimator animator;
         finishTransaction.setPosition(leash, destinationBounds.left, destinationBounds.top);
         if (taskInfo.pictureInPictureParams != null
-                && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
+                && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
+                && mPipTransitionState.getInSwipePipToHomeTransition()) {
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
 
             // PiP menu is attached late in the process here to avoid any artifacts on the leash
@@ -234,13 +238,21 @@ public class PipTransition extends PipTransitionController {
             mFinishCallback = null;
             return true;
         }
+
+        int rotationDelta = deltaRotation(endRotation, startRotation);
+        if (rotationDelta != Surface.ROTATION_0) {
+            Matrix tmpTransform = new Matrix();
+            tmpTransform.postRotate(rotationDelta == Surface.ROTATION_90
+                    ? Surface.ROTATION_270 : Surface.ROTATION_90);
+            startTransaction.setMatrix(leash, tmpTransform, new float[9]);
+        }
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             final Rect sourceHintRect =
                     PipBoundsAlgorithm.getValidSourceHintRect(
                             taskInfo.pictureInPictureParams, currentBounds);
             animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
                     currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
-                    0 /* startingAngle */, Surface.ROTATION_0);
+                    0 /* startingAngle */, rotationDelta);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
             // PiP menu is attached late in the process here to avoid any artifacts on the leash
@@ -258,6 +270,7 @@ public class PipTransition extends PipTransitionController {
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
+
         return true;
     }
 

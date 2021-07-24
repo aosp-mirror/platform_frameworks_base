@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"カメラの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"カメラやマイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"デバイス"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"アプリを切り替えるには上にスワイプ"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"右にドラッグするとアプリを素早く切り替えることができます"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"充電が完了しました"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"充電しています"</string>

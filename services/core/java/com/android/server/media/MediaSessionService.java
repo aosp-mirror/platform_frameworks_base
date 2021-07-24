@@ -1302,6 +1302,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void addSessionsListener(IActiveSessionsListener listener,
                 ComponentName componentName, int userId) throws RemoteException {
+            if (listener == null) {
+                Log.w(TAG, "addSessionsListener: listener is null, ignoring");
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1348,6 +1352,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void addSession2TokensListener(ISession2TokensListener listener,
                 int userId) {
+            if (listener == null) {
+                Log.w(TAG, "addSession2TokensListener: listener is null, ignoring");
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1358,7 +1366,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 synchronized (mLock) {
                     int index = findIndexOfSession2TokensListenerLocked(listener);
                     if (index >= 0) {
-                        Log.w(TAG, "addSession2TokensListener is already added, ignoring");
+                        Log.w(TAG, "addSession2TokensListener: "
+                                + "listener is already added, ignoring");
                         return;
                     }
                     mSession2TokensListenerRecords.add(
@@ -1515,6 +1524,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void addOnMediaKeyEventDispatchedListener(
                 final IOnMediaKeyEventDispatchedListener listener) {
+            if (listener == null) {
+                Log.w(TAG, "addOnMediaKeyEventDispatchedListener: listener is null, ignoring");
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
@@ -1543,6 +1556,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void removeOnMediaKeyEventDispatchedListener(
                 final IOnMediaKeyEventDispatchedListener listener) {
+            if (listener == null) {
+                Log.w(TAG, "removeOnMediaKeyEventDispatchedListener: listener is null, ignoring");
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
@@ -1571,6 +1588,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void addOnMediaKeyEventSessionChangedListener(
                 final IOnMediaKeyEventSessionChangedListener listener) {
+            if (listener == null) {
+                Log.w(TAG, "addOnMediaKeyEventSessionChangedListener: lister is null, ignoring");
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
@@ -1599,6 +1620,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void removeOnMediaKeyEventSessionChangedListener(
                 final IOnMediaKeyEventSessionChangedListener listener) {
+            if (listener == null) {
+                Log.w(TAG, "removeOnMediaKeyEventSessionChangedListener: lister is null, ignoring");
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();

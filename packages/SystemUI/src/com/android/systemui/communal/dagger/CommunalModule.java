@@ -21,6 +21,8 @@ import dagger.Module;
 /**
  * Dagger Module providing Communal-related functionality.
  */
-@Module
+@Module(subcomponents = {
+        CommunalViewComponent.class,
+})
 public class CommunalModule {
 }

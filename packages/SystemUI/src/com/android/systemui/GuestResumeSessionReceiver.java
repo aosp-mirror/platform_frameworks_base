@@ -93,7 +93,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
                     SETTING_GUEST_HAS_LOGGED_IN, 0, userId);
             if (notFirstLogin != 0) {
                 mNewSessionDialog = new ResetSessionDialog(context, mUserSwitcherController,
-                        mUserTracker, mUiEventLogger, userId);
+                        mUiEventLogger, userId);
                 mNewSessionDialog.show();
             } else {
                 mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, 1, userId);
@@ -126,7 +126,6 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
         ResetSessionDialog(Context context,
                 UserSwitcherController userSwitcherController,
-                UserTracker userTracker,
                 UiEventLogger uiEventLogger,
                 int userId) {
             super(context);

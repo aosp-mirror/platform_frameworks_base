@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre appareil photo."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Cette action débloque l\'accès pour tous les services et applis autorisés à utiliser votre appareil photo ou votre micro."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Appareil"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Balayer l\'écran vers le haut pour changer d\'application"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Déplacer vers la droite pour changer rapidement d\'application"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'aperçu"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Chargé"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"En charge"</string>

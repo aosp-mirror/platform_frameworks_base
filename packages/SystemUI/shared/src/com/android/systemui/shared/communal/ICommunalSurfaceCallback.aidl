@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package com.android.systemui.shared.communal;
 
-import com.android.internal.inputmethod.IInputContentUriToken;
-import com.android.internal.inputmethod.ThrowableHolder;
+import android.view.SurfaceControlViewHost;
 
-oneway interface IIInputContentUriTokenResultCallback {
-    void onResult(in IInputContentUriToken result);
-    void onError(in ThrowableHolder exception);
+/**
+* An interface for receiving the result of a surface request. ICommunalSurfaceCallback is
+* implemented by the CommunalHost (SystemUI) to process the results of a new communal surface.
+*/
+interface ICommunalSurfaceCallback {
+ /**
+  * Invoked when the CommunalSurface has generated the SurfacePackage to be displayed.
+  */
+ void onSurface(in SurfaceControlViewHost.SurfacePackage surfacePackage) = 1;
 }

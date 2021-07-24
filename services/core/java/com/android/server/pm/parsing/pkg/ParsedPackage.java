@@ -43,9 +43,9 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage clearProtectedBroadcasts();
 
-    ParsedPackage setBaseCodePath(String baseCodePath);
+    ParsedPackage setBaseApkPath(String baseApkPath);
 
-    ParsedPackage setCodePath(String codePath);
+    ParsedPackage setPath(String path);
 
     ParsedPackage setNativeLibraryDir(String nativeLibraryDir);
 

@@ -85,10 +85,10 @@ public class ParsedProviderUtils {
             // For compatibility, applications targeting API level 16 or lower
             // should have their content providers exported by default, unless they
             // specify otherwise.
-            provider.exported = sa.getBoolean(R.styleable.AndroidManifestProvider_exported,
-                    targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1);
-
-            provider.syncable = sa.getBoolean(R.styleable.AndroidManifestProvider_syncable, false);
+            provider.setSyncable(sa.getBoolean(
+                    R.styleable.AndroidManifestProvider_syncable, false))
+                    .setExported(sa.getBoolean(R.styleable.AndroidManifestProvider_exported,
+                            targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1));
 
             String permission = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestProvider_permission, 0);
@@ -113,16 +113,21 @@ public class ParsedProviderUtils {
                 provider.setWritePermission(writePermission);
             }
 
-            provider.grantUriPermissions = sa.getBoolean(R.styleable.AndroidManifestProvider_grantUriPermissions, false);
-            provider.forceUriPermissions = sa.getBoolean(R.styleable.AndroidManifestProvider_forceUriPermissions, false);
-            provider.multiProcess = sa.getBoolean(R.styleable.AndroidManifestProvider_multiprocess, false);
-            provider.initOrder = sa.getInt(R.styleable.AndroidManifestProvider_initOrder, 0);
+            provider.setGrantUriPermissions(
+                    sa.getBoolean(R.styleable.AndroidManifestProvider_grantUriPermissions, false))
+                    .setForceUriPermissions(
+                            sa.getBoolean(R.styleable.AndroidManifestProvider_forceUriPermissions,
+                                    false))
+                    .setMultiProcess(
+                            sa.getBoolean(R.styleable.AndroidManifestProvider_multiprocess, false))
+                    .setInitOrder(sa.getInt(R.styleable.AndroidManifestProvider_initOrder, 0))
+                    .setFlags(provider.getFlags() | flag(ProviderInfo.FLAG_SINGLE_USER,
+                            R.styleable.AndroidManifestProvider_singleUser, sa));
 
-            provider.flags |= flag(ProviderInfo.FLAG_SINGLE_USER, R.styleable.AndroidManifestProvider_singleUser, sa);
-
-            visibleToEphemeral = sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToInstantApps, false);
+            visibleToEphemeral = sa.getBoolean(
+                    R.styleable.AndroidManifestProvider_visibleToInstantApps, false);
             if (visibleToEphemeral) {
-                provider.flags |= ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                provider.setFlags(provider.getFlags() | ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP);
                 pkg.setVisibleToInstantApps(true);
             }
         } finally {
@@ -174,7 +179,7 @@ public class ParsedProviderUtils {
                     result = intentResult;
                     if (intentResult.isSuccess()) {
                         ParsedIntentInfo intent = intentResult.getResult();
-                        provider.order = Math.max(intent.getOrder(), provider.order);
+                        provider.setOrder(Math.max(intent.getOrder(), provider.getOrder()));
                         provider.addIntent(intent);
                     }
                     break;
@@ -245,17 +250,17 @@ public class ParsedProviderUtils {
             }
 
             if (pa != null) {
-                if (provider.uriPermissionPatterns == null) {
-                    provider.uriPermissionPatterns = new PatternMatcher[1];
-                    provider.uriPermissionPatterns[0] = pa;
+                if (provider.getUriPermissionPatterns() == null) {
+                    provider.setUriPermissionPatterns(new PatternMatcher[1]);
+                    provider.getUriPermissionPatterns()[0] = pa;
                 } else {
-                    final int N = provider.uriPermissionPatterns.length;
+                    final int N = provider.getUriPermissionPatterns().length;
                     PatternMatcher[] newp = new PatternMatcher[N + 1];
-                    System.arraycopy(provider.uriPermissionPatterns, 0, newp, 0, N);
+                    System.arraycopy(provider.getUriPermissionPatterns(), 0, newp, 0, N);
                     newp[N] = pa;
-                    provider.uriPermissionPatterns = newp;
+                    provider.setUriPermissionPatterns(newp);
                 }
-                provider.grantUriPermissions = true;
+                provider.setGrantUriPermissions(true);
             } else {
                 if (PackageParser.RIGID_PARSER) {
                     return input.error("No path, pathPrefix, or pathPattern for <path-permission>");
@@ -349,15 +354,15 @@ public class ParsedProviderUtils {
             }
 
             if (pa != null) {
-                if (provider.pathPermissions == null) {
-                    provider.pathPermissions = new PathPermission[1];
-                    provider.pathPermissions[0] = pa;
+                if (provider.getPathPermissions() == null) {
+                    provider.setPathPermissions(new PathPermission[1]);
+                    provider.getPathPermissions()[0] = pa;
                 } else {
-                    final int N = provider.pathPermissions.length;
+                    final int N = provider.getPathPermissions().length;
                     PathPermission[] newp = new PathPermission[N + 1];
-                    System.arraycopy(provider.pathPermissions, 0, newp, 0, N);
+                    System.arraycopy(provider.getPathPermissions(), 0, newp, 0, N);
                     newp[N] = pa;
-                    provider.pathPermissions = newp;
+                    provider.setPathPermissions(newp);
                 }
             } else {
                 if (PackageParser.RIGID_PARSER) {

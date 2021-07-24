@@ -92,7 +92,6 @@ public class HighBrightnessModeControllerTest {
 
     @Mock IThermalService mThermalServiceMock;
     @Mock Injector mInjectorMock;
-    @Mock BrightnessSetting mBrightnessSetting;
 
     @Captor ArgumentCaptor<IThermalEventListener> mThermalEventListenerCaptor;
 
@@ -123,7 +122,7 @@ public class HighBrightnessModeControllerTest {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN,
-                DEFAULT_MAX, null, () -> {}, mContextSpy, mBrightnessSetting);
+                DEFAULT_MAX, null, () -> {}, mContextSpy);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
     }
 
@@ -132,7 +131,7 @@ public class HighBrightnessModeControllerTest {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN,
-                DEFAULT_MAX, null, () -> {}, mContextSpy, mBrightnessSetting);
+                DEFAULT_MAX, null, () -> {}, mContextSpy);
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
@@ -464,7 +463,7 @@ public class HighBrightnessModeControllerTest {
         initHandler(clock);
         return new HighBrightnessModeController(mInjectorMock, mHandler, DISPLAY_WIDTH,
                 DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, DEFAULT_HBM_DATA, () -> {},
-                mContextSpy, mBrightnessSetting);
+                mContextSpy);
     }
 
     private void initHandler(OffsettableClock clock) {

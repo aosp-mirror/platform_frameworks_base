@@ -683,7 +683,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final Bundle activityOptions = hop.getLaunchOptions();
                 final TaskFragment tf = mLaunchTaskFragments.get(fragmentToken);
                 final int result = mService.getActivityStartController()
-                        .startActivityInTaskFragment(tf, activityIntent, activityOptions);
+                        .startActivityInTaskFragment(tf, activityIntent, activityOptions,
+                                hop.getCallingActivity());
                 if (!isStartResultSuccessful(result)) {
                     final Throwable exception =
                             new ActivityNotFoundException("start activity in taskFragment failed");

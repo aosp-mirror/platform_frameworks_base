@@ -223,20 +223,20 @@ public final class ResultCallbacks {
     }
 
     /**
-     * Creates {@link IIInputContentUriTokenResultCallback.Stub} that is to set
+     * Creates {@link IInputContentUriTokenResultCallback.Stub} that is to set
      * {@link Completable.IInputContentUriToken} when receiving the result.
      *
      * @param value {@link Completable.IInputContentUriToken} to be set when receiving the result.
-     * @return {@link IIInputContentUriTokenResultCallback.Stub} that can be passed as a binder IPC
+     * @return {@link IInputContentUriTokenResultCallback.Stub} that can be passed as a binder IPC
      * parameter.
      */
     @AnyThread
-    public static IIInputContentUriTokenResultCallback.Stub of(
+    public static IInputContentUriTokenResultCallback.Stub of(
             @NonNull Completable.IInputContentUriToken value) {
         final AtomicReference<Completable.IInputContentUriToken>
                 atomicRef = new AtomicReference<>(value);
 
-        return new IIInputContentUriTokenResultCallback.Stub() {
+        return new IInputContentUriTokenResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(IInputContentUriToken result) {

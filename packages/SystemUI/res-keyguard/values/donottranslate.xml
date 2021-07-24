@@ -29,4 +29,6 @@
 
     <!-- Skeleton string format for displaying the time in 24-hour format. -->
     <string name="clock_24hr_format">Hm</string>
+
+    <string name="num_pad_key_ratio">1</string>
 </resources>

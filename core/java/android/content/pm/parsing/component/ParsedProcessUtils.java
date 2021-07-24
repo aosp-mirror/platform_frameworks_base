@@ -85,31 +85,26 @@ public class ParsedProcessUtils {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProcess);
         try {
             if (perms != null) {
-                proc.deniedPermissions = new ArraySet<>(perms);
+                proc.setDeniedPermissions(new ArraySet<>(perms));
             }
 
-            proc.name = sa.getNonConfigurationString(
+            String processName = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestProcess_process, 0);
             ParseResult<String> processNameResult = ComponentParseUtils.buildProcessName(
-                    pkg.getPackageName(), pkg.getPackageName(), proc.name, flags, separateProcesses,
+                    pkg.getPackageName(), pkg.getPackageName(), processName, flags, separateProcesses,
                     input);
             if (processNameResult.isError()) {
                 return input.error(processNameResult);
             }
 
-            proc.name = processNameResult.getResult();
-
-            if (proc.name == null || proc.name.length() <= 0) {
-                return input.error("<process> does not specify android:process");
-            }
-
-            proc.gwpAsanMode = sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1);
-            proc.memtagMode = sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1);
+            proc.setName(processNameResult.getResult());
+            proc.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1));
+            proc.setMemtagMode(sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1));
             if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized)) {
                 Boolean v = sa.getBoolean(
                         R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized, false);
-                proc.nativeHeapZeroInitialized =
-                        v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED;
+                proc.setNativeHeapZeroInitialized(
+                        v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED);
             }
         } finally {
             sa.recycle();
@@ -129,18 +124,18 @@ public class ParsedProcessUtils {
             switch (tagName) {
                 case "deny-permission":
                     ParseResult<Set<String>> denyResult = parseDenyPermission(
-                            proc.deniedPermissions, res, parser, input);
+                            proc.getDeniedPermissions(), res, parser, input);
                     result = denyResult;
                     if (denyResult.isSuccess()) {
-                        proc.deniedPermissions = denyResult.getResult();
+                        proc.setDeniedPermissions(denyResult.getResult());
                     }
                     break;
                 case "allow-permission":
                     ParseResult<Set<String>> allowResult = parseAllowPermission(
-                            proc.deniedPermissions, res, parser, input);
+                            proc.getDeniedPermissions(), res, parser, input);
                     result = allowResult;
                     if (allowResult.isSuccess()) {
-                        proc.deniedPermissions = allowResult.getResult();
+                        proc.setDeniedPermissions(allowResult.getResult());
                     }
                     break;
                 default:
@@ -198,9 +193,9 @@ public class ParsedProcessUtils {
                     result = processResult;
                     if (processResult.isSuccess()) {
                         ParsedProcess process = processResult.getResult();
-                        if (processes.put(process.name, process) != null) {
+                        if (processes.put(process.getName(), process) != null) {
                             result = input.error(
-                                    "<process> specified existing name '" + process.name + "'");
+                                    "<process> specified existing name '" + process.getName() + "'");
                         }
                     }
                     break;

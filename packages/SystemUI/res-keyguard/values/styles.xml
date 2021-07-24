@@ -37,6 +37,10 @@
       <item name="android:colorControlNormal">@null</item>
       <item name="android:colorControlHighlight">?android:attr/colorAccent</item>
       <item name="android:background">@drawable/num_pad_key_background</item>
+
+      <!-- Default values for NumPadKey used in a ConstraintLayout. -->
+      <item name="layout_constraintDimensionRatio">@string/num_pad_key_ratio</item>
+      <item name="layout_constraintWidth_max">@dimen/num_pad_key_width</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Digit"
            parent="@android:style/Widget.DeviceDefault.TextView">

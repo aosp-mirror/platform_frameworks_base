@@ -4000,6 +4000,16 @@ public final class Settings {
         public static final int ADVANCED_SETTINGS_DEFAULT = 0;
 
         /**
+         * If the triple press gesture for toggling accessibility is enabled.
+         * Set to 1 for true and 0 for false.
+         *
+         * This setting is used only internally.
+         * @hide
+         */
+        public static final String WEAR_ACCESSIBILITY_GESTURE_ENABLED
+                = "wear_accessibility_gesture_enabled";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#AIRPLANE_MODE_ON} instead
          */
         @Deprecated
@@ -5261,6 +5271,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(WIFI_USE_STATIC_IP);
             PRIVATE_SETTINGS.add(END_BUTTON_BEHAVIOR);
             PRIVATE_SETTINGS.add(ADVANCED_SETTINGS);
+            PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED);
             PRIVATE_SETTINGS.add(SCREEN_AUTO_BRIGHTNESS_ADJ);
             PRIVATE_SETTINGS.add(VIBRATE_INPUT_DEVICES);
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
@@ -6399,8 +6410,15 @@ public final class Settings {
         public static final String DATA_ROAMING = Global.DATA_ROAMING;
 
         /**
-         * Setting to record the input method used by default, holding the ID
-         * of the desired method.
+         * Stores {@link android.view.inputmethod.InputMethodInfo#getId()} of the input method
+         * service that is currently selected.
+         *
+         * <p>Although the name {@link #DEFAULT_INPUT_METHOD} implies that there is a concept of
+         * <i>default</i> input method, in reality this setting is no more or less than the
+         * <strong>currently selected</strong> input method. This setting can be updated at any
+         * time as a result of user-initiated and system-initiated input method switching.</p>
+         *
+         * <p>Use {@link ComponentName#unflattenFromString(String)} to parse the stored value.</p>
          */
         @Readable
         public static final String DEFAULT_INPUT_METHOD = "default_input_method";
@@ -9985,15 +10003,18 @@ public final class Settings {
 
         /**
          * Controls the accessibility button mode. System will force-set the value to {@link
-         * #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU} if {@link #NAVIGATION_MODE} is fully
-         * gestural.
+         * #ACCESSIBILITY_BUTTON_MODE_GESTURE} if {@link #NAVIGATION_MODE} is button; force-set the
+         * value to {@link ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} if {@link #NAVIGATION_MODE} is
+         * gestural; otherwise, remain the option.
          * <ul>
          *    <li> 0 = button in navigation bar </li>
          *    <li> 1 = button floating on the display </li>
+         *    <li> 2 = button using gesture to trigger </li>
          * </ul>
          *
          * @see #ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
          * @see #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU
+         * @see #ACCESSIBILITY_BUTTON_MODE_GESTURE
          * @hide
          */
         public static final String ACCESSIBILITY_BUTTON_MODE =
@@ -10014,6 +10035,14 @@ public final class Settings {
          * @hide
          */
         public static final int ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU = 0x1;
+
+        /**
+         * Accessibility button mode value that specifying the accessibility service or feature to
+         * be toggled via the gesture.
+         *
+         * @hide
+         */
+        public static final int ACCESSIBILITY_BUTTON_MODE_GESTURE = 0x2;
 
         /**
          * The size of the accessibility floating menu.
