@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -247,8 +248,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, mContext.getUserId(), mContext.getMainExecutor(),
-                listener);
+        addSensorPrivacyListener(sensor, mContext.getMainExecutor(), listener);
     }
 
     /**
@@ -283,7 +283,25 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor, @NonNull Executor executor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, mContext.getUserId(), executor, listener);
+        Pair<OnSensorPrivacyChangedListener, Integer> key = new Pair<>(listener, sensor);
+        synchronized (mIndividualListeners) {
+            ISensorPrivacyListener iListener = mIndividualListeners.get(key);
+            if (iListener == null) {
+                iListener = new ISensorPrivacyListener.Stub() {
+                    @Override
+                    public void onSensorPrivacyChanged(boolean enabled) {
+                        executor.execute(() -> listener.onSensorPrivacyChanged(sensor, enabled));
+                    }
+                };
+                mIndividualListeners.put(key, iListener);
+            }
+
+            try {
+                mService.addUserGlobalIndividualSensorPrivacyListener(sensor, iListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -361,7 +379,7 @@ public final class SensorPrivacyManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
-        return isSensorPrivacyEnabled(sensor, mContext.getUserId());
+        return isSensorPrivacyEnabled(sensor, getCurrentUserId());
     }
 
     /**
@@ -392,7 +410,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable) {
-        setSensorPrivacy(source, sensor, enable, mContext.getUserId());
+        setSensorPrivacy(source, sensor, enable, getCurrentUserId());
     }
 
     /**
@@ -428,7 +446,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacyForProfileGroup(source , sensor, enable, mContext.getUserId());
+        setSensorPrivacyForProfileGroup(source , sensor, enable, getCurrentUserId());
     }
 
     /**
@@ -463,7 +481,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(sensor, suppress, mContext.getUserId());
+        suppressSensorPrivacyReminders(sensor, suppress, getCurrentUserId());
     }
 
     /**
@@ -589,5 +607,14 @@ public final class SensorPrivacyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private int getCurrentUserId() {
+        try {
+            return ActivityManager.getService().getCurrentUserId();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return 0;
     }
 }
