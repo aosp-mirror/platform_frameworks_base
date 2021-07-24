@@ -1183,7 +1183,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             final Intent baseActivityIntent;
             final boolean launchedFromHome;
-
+            final boolean isLastRunningActivity;
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
@@ -1195,7 +1195,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                     return;
                 }
 
-                final Intent baseIntent = r.getTask().getBaseIntent();
+                final Task task = r.getTask();
+                isLastRunningActivity = task.topRunningActivity() == r;
+                final Intent baseIntent = task.getBaseIntent();
                 final boolean activityIsBaseActivity = baseIntent != null
                         && r.mActivityComponent.equals(baseIntent.getComponent());
                 baseActivityIntent = activityIsBaseActivity ? r.intent : null;
@@ -1205,12 +1207,13 @@ class ActivityClientController extends IActivityClientController.Stub {
             // If the activity is one of the main entry points for the application, then we should
             // refrain from finishing the activity and instead move it to the back to keep it in
             // memory. The requirements for this are:
-            //   1. The current activity is the base activity for the task.
-            //   2. a. If the activity was launched by the home process, we trust that its intent
+            //   1. The activity is the last running activity in the task.
+            //   2. The current activity is the base activity for the task.
+            //   3. a. If the activity was launched by the home process, we trust that its intent
             //         was resolved, so we check if the it is a main intent for the application.
             //      b. Otherwise, we query Package Manager to verify whether the activity is a
             //         launcher activity for the application.
-            if (baseActivityIntent != null
+            if (baseActivityIntent != null && isLastRunningActivity
                     && ((launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent))
                         || isLauncherActivity(baseActivityIntent.getComponent()))) {
                 moveActivityTaskToBack(token, false /* nonRoot */);
