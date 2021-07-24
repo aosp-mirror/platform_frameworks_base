@@ -2151,7 +2151,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     rootTask.setLastRecentsAnimationTransaction(
                             task.mLastRecentsAnimationTransaction,
                             task.mLastRecentsAnimationOverlay);
-                    task.clearLastRecentsAnimationTransaction();
+                    task.clearLastRecentsAnimationTransaction(false /* forceRemoveOverlay */);
                 }
 
                 // There are multiple activities in the task and moving the top activity should
@@ -2206,16 +2206,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         ensureActivitiesVisible(null, 0, false /* preserveWindows */);
         resumeFocusedTasksTopActivities();
 
-        notifyActivityPipModeChanged(r);
+        notifyActivityPipModeChanged(r.getTask(), r);
     }
 
     /**
      * Notifies when an activity enters or leaves PIP mode.
      *
+     * @param task the task of {@param r}
      * @param r indicates the activity currently in PIP, can be null to indicate no activity is
      *          currently in PIP mode.
      */
-    void notifyActivityPipModeChanged(@Nullable ActivityRecord r) {
+    void notifyActivityPipModeChanged(@NonNull Task task, @Nullable ActivityRecord r) {
         final boolean inPip = r != null;
         if (inPip) {
             mService.getTaskChangeNotificationController().notifyActivityPinned(r);
@@ -2223,6 +2224,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
         mWindowManager.mPolicy.setPipVisibilityLw(inPip);
+        mWmService.mTransactionFactory.get()
+                .setTrustedOverlay(task.getSurfaceControl(), inPip)
+                .apply();
     }
 
     void executeAppTransitionForAllDisplay() {

@@ -18,6 +18,8 @@ package com.android.settingslib.widget;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -129,5 +131,28 @@ public class IllustrationPreferenceTest {
         mPreference.onBindViewHolder(mViewHolder);
 
         verify(drawable).start();
+    }
+
+    @Test
+    public void playLottieAnimationWithUri_verifyFailureListener() {
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setImageUri(mImageUri);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(mAnimationView).setFailureListener(any());
+    }
+
+    @Test
+    public void playLottieAnimationWithResource_verifyFailureListener() {
+        // fake the valid lottie image
+        final int fakeValidResId = 111;
+        doNothing().when(mAnimationView).setImageResource(fakeValidResId);
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setLottieAnimationResId(fakeValidResId);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(mAnimationView).setFailureListener(any());
     }
 }

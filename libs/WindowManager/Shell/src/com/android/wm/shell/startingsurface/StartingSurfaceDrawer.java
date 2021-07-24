@@ -168,16 +168,14 @@ public class StartingSurfaceDrawer {
     void addSplashScreenStartingWindow(StartingWindowInfo windowInfo, IBinder appToken,
             @StartingWindowType int suggestType) {
         final RunningTaskInfo taskInfo = windowInfo.taskInfo;
-        final ActivityInfo activityInfo = taskInfo.topActivityInfo;
-        if (activityInfo == null) {
+        final ActivityInfo activityInfo = windowInfo.targetActivityInfo != null
+                ? windowInfo.targetActivityInfo
+                : taskInfo.topActivityInfo;
+        if (activityInfo == null || activityInfo.packageName == null) {
             return;
         }
 
         final int displayId = taskInfo.displayId;
-        if (activityInfo.packageName == null) {
-            return;
-        }
-
         final int taskId = taskInfo.taskId;
         Context context = mContext;
         // replace with the default theme if the application didn't set
