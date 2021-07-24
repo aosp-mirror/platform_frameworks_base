@@ -102,7 +102,7 @@
     <item msgid="4061931020926489228">"உறுவப்படம்"</item>
     <item msgid="3199660090246166812">"நிலத்தோற்றம்"</item>
   </string-array>
-    <string name="print_write_error_message" msgid="5787642615179572543">"கோப்பில் எழுத முடியவில்லை"</string>
+    <string name="print_write_error_message" msgid="5787642615179572543">"ஃபைலில் எழுத முடியவில்லை"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"செயல்படவில்லை. மீண்டும் முயலவும்."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"மீண்டும் முயலவும்"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"இப்போது பிரிண்டர் இல்லை."</string>

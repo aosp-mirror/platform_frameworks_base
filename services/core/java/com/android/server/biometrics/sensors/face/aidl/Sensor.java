@@ -494,7 +494,8 @@ public class Sensor {
         mToken = new Binder();
         mHandler = handler;
         mSensorProperties = sensorProperties;
-        mScheduler = new UserAwareBiometricScheduler(tag, null /* gestureAvailabilityDispatcher */,
+        mScheduler = new UserAwareBiometricScheduler(tag,
+                BiometricScheduler.SENSOR_TYPE_FACE, null /* gestureAvailabilityDispatcher */,
                 () -> mCurrentSession != null ? mCurrentSession.mUserId : UserHandle.USER_NULL,
                 new UserAwareBiometricScheduler.UserSwitchCallback() {
                     @NonNull

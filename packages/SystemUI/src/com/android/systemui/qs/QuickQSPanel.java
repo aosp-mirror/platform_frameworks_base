@@ -73,6 +73,11 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
+    protected boolean mediaNeedsTopMargin() {
+        return true;
+    }
+
+    @Override
     protected void updatePadding() {
         // QS Panel is setting a top padding by default, which we don't need.
     }
@@ -180,7 +185,6 @@ public class QuickQSPanel extends QSPanel {
                     LayoutParams.WRAP_CONTENT);
             setLayoutParams(lp);
             setMaxColumns(4);
-            mLastRowPadding = true;
         }
 
         @Override

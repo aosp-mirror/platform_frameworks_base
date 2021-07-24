@@ -36,6 +36,7 @@ import android.util.Slog;
 import com.android.server.FgThread;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -161,13 +162,25 @@ class IdmapDaemon {
         }
     }
 
-    List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
+    synchronized List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
+        final ArrayList<FabricatedOverlayInfo> allInfos = new ArrayList<>();
         try (Connection c = connect()) {
-            return mService.getFabricatedOverlayInfos();
+            mService.acquireFabricatedOverlayIterator();
+            List<FabricatedOverlayInfo> infos;
+            while (!(infos = mService.nextFabricatedOverlayInfos()).isEmpty()) {
+                allInfos.addAll(infos);
+            }
+            return allInfos;
         } catch (Exception e) {
-            Slog.wtf(TAG, "failed to get fabricated overlays", e);
-            return null;
+            Slog.wtf(TAG, "failed to get all fabricated overlays", e);
+        } finally {
+            try {
+                mService.releaseFabricatedOverlayIterator();
+            } catch (RemoteException e) {
+                // ignore
+            }
         }
+        return allInfos;
     }
 
     String dumpIdmap(@NonNull String overlayPath) {

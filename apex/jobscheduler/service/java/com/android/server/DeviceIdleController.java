@@ -3944,8 +3944,8 @@ public class DeviceIdleController extends SystemService
         } else {
             if (mConstants.USE_WINDOW_ALARMS) {
                 mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        mConstants.FLEX_TIME_SHORT,
-                        mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
+                        mNextAlarmTime, mConstants.FLEX_TIME_SHORT,
+                        "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
             } else {
                 mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);

@@ -74,7 +74,7 @@
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Disable eSIM to use device without mobile service."</string>
     <string name="kg_pin_instructions" msgid="822353548385014361">"Enter PIN"</string>
     <string name="kg_password_instructions" msgid="324455062831719903">"Enter Password"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM is now disabled. Enter PUK code to continue. Contact carrier for details."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM is now disabled. Enter PUK code to continue. Contact operator for details."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" is now disabled. Enter PUK code to continue. Contact operator for details."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Enter desired PIN code"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Confirm desired PIN code"</string>

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.ACTIVITY_EMBEDDING;
+import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
@@ -88,6 +89,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal;
 import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
@@ -108,6 +110,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManagerInternal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -141,6 +145,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
@@ -1221,6 +1226,24 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         if (getAppOpsManager().noteOpNoThrow(opCode, callingUid,
                 callingPackage, callingFeatureId, "") != AppOpsManager.MODE_ALLOWED) {
+            if (CAMERA.equals(permission)) {
+                SensorPrivacyManagerInternal spmi =
+                        LocalServices.getService(SensorPrivacyManagerInternal.class);
+
+                final UserHandle user = UserHandle.getUserHandleForUid(callingUid);
+                final boolean cameraPrivacyEnabled = spmi.isSensorPrivacyEnabled(
+                        user.getIdentifier(), SensorPrivacyManager.Sensors.CAMERA);
+                if (cameraPrivacyEnabled) {
+                    AppOpsManagerInternal aomi = LocalServices.getService(
+                            AppOpsManagerInternal.class);
+                    int numCameraRestrictions = aomi.getOpRestrictionCount(
+                            AppOpsManager.OP_CAMERA, user, callingPackage, null);
+                    if (numCameraRestrictions == 1) {
+                        // Only restricted by the toggles, do not restrict
+                        return ACTIVITY_RESTRICTION_NONE;
+                    }
+                }
+            }
             return ACTIVITY_RESTRICTION_APPOP;
         }
 

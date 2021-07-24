@@ -75,8 +75,9 @@ public class BiometricSchedulerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mToken = new Binder();
-        mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */,
-                mBiometricService, LOG_NUM_RECENT_OPERATIONS);
+        mScheduler = new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_UNKNOWN,
+                null /* gestureAvailabilityTracker */, mBiometricService, LOG_NUM_RECENT_OPERATIONS,
+                CoexCoordinator.getInstance());
     }
 
     @Test
@@ -371,6 +372,11 @@ public class BiometricSchedulerTest {
         protected void startHalOperation() {
 
         }
+
+        @Override
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
+
+        }
     }
 
     private static class TestAuthenticationClient extends AuthenticationClient<Object> {
@@ -392,6 +398,11 @@ public class BiometricSchedulerTest {
 
         @Override
         protected void startHalOperation() {
+
+        }
+
+        @Override
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
 
         }
     }

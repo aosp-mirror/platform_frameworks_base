@@ -154,15 +154,21 @@ public class StackScrollAlgorithm {
 
         shelf.updateState(algorithmState, ambientState);
 
-        // After the shelf has updated its yTranslation,
-        // explicitly hide views below the shelf to skip rendering them in the hardware layer.
+        // After the shelf has updated its yTranslation, explicitly set alpha=0 for view below shelf
+        // to skip rendering them in the hardware layer. We do not set them invisible because that
+        // runs invalidate & onDraw when these views return onscreen, which is more expensive.
         final float shelfTop = shelf.getViewState().yTranslation;
 
         for (ExpandableView view : algorithmState.visibleChildren) {
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                if (row.isHeadsUp() || row.isHeadsUpAnimatingAway()) {
+                    continue;
+                }
+            }
             final float viewTop = view.getViewState().yTranslation;
-
             if (viewTop >= shelfTop) {
-                view.getViewState().hidden = true;
+                view.getViewState().alpha = 0;
             }
         }
     }
@@ -268,7 +274,9 @@ public class StackScrollAlgorithm {
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -ambientState.getScrollY();
-        if (!ambientState.isOnKeyguard()) {
+        if (!ambientState.isOnKeyguard()
+                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
+            // add top padding at the start as long as we're not on the lock screen
             currentY += mNotificationScrimPadding;
         }
         state.firstViewInShelf = null;
@@ -318,7 +326,8 @@ public class StackScrollAlgorithm {
      */
     private void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        if (!ambientState.isOnKeyguard()) {
+        if (!ambientState.isOnKeyguard()
+                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
             algorithmState.mCurrentYPosition += mNotificationScrimPadding;
             algorithmState.mCurrentExpandedYPosition += mNotificationScrimPadding;
         }
@@ -349,7 +358,9 @@ public class StackScrollAlgorithm {
                 && algorithmState.firstViewInShelf != null;
 
         final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
-        final float scrimPadding = ambientState.isOnKeyguard() ? 0 : mNotificationScrimPadding;
+        final float scrimPadding = ambientState.isOnKeyguard()
+                && (!ambientState.isBypassEnabled() || !ambientState.isPulseExpanding())
+                ? 0 : mNotificationScrimPadding;
 
         final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
@@ -388,7 +399,8 @@ public class StackScrollAlgorithm {
                     ambientState.getExpansionFraction(), true /* notification */);
         }
 
-        if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
+        if (ambientState.isShadeExpanded() && view.mustStayOnScreen()
+                && viewState.yTranslation >= 0) {
             // Even if we're not scrolled away we're in view and we're also not in the
             // shelf. We can relax the constraints and let us scroll off the top!
             float end = viewState.yTranslation + viewState.height + ambientState.getStackY();

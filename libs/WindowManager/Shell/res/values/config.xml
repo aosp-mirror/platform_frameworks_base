@@ -36,6 +36,9 @@
     <!-- Allow PIP to resize via dragging the corner of PiP. -->
     <bool name="config_pipEnableDragCornerResize">false</bool>
 
+    <!-- PiP minimum size, which is a % based off the shorter side of display width and height -->
+    <fraction name="config_pipShortestEdgePercent">40%</fraction>
+
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 

@@ -37,7 +37,6 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.LinearLayout;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -76,9 +75,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public static final int FADE_IN_DURATION = 320;
     public static final int FADE_IN_DELAY = 50;
     private PhoneStatusBarView mStatusBar;
-    private StatusBarStateController mStatusBarStateController;
-    private KeyguardStateController mKeyguardStateController;
-    private NetworkController mNetworkController;
+    private final StatusBarStateController mStatusBarStateController;
+    private final KeyguardStateController mKeyguardStateController;
+    private final NetworkController mNetworkController;
     private LinearLayout mSystemIconArea;
     private View mClockView;
     private View mOngoingCallChip;
@@ -86,15 +85,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mCenteredIconArea;
     private int mDisabled1;
     private int mDisabled2;
-    private StatusBar mStatusBarComponent;
+    private final StatusBar mStatusBarComponent;
     private DarkIconManager mDarkIconManager;
     private View mOperatorNameFrame;
-    private CommandQueue mCommandQueue;
-    private OngoingCallController mOngoingCallController;
+    private final CommandQueue mCommandQueue;
+    private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
-    private NotificationIconAreaController mNotificationIconAreaController;
     private final FeatureFlags mFeatureFlags;
+    private final NotificationIconAreaController mNotificationIconAreaController;
+    private final StatusBarIconController mStatusBarIconController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -118,23 +118,25 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            StatusBarIconController statusBarIconController,
+            KeyguardStateController keyguardStateController,
+            NetworkController networkController,
+            StatusBarStateController statusBarStateController,
+            StatusBar statusBarComponent,
+            CommandQueue commandQueue
     ) {
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mLocationPublisher = locationPublisher;
         mNotificationIconAreaController = notificationIconAreaController;
         mFeatureFlags = featureFlags;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
-        mNetworkController = Dependency.get(NetworkController.class);
-        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
-        mStatusBarComponent = Dependency.get(StatusBar.class);
-        mCommandQueue = Dependency.get(CommandQueue.class);
+        mStatusBarIconController = statusBarIconController;
+        mKeyguardStateController = keyguardStateController;
+        mNetworkController = networkController;
+        mStatusBarStateController = statusBarStateController;
+        mStatusBarComponent = statusBarComponent;
+        mCommandQueue = commandQueue;
     }
 
     @Override
@@ -160,7 +162,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_alarm_clock));
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_call_strength));
         mDarkIconManager.setBlockList(mBlockedIcons);
-        Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
+        mStatusBarIconController.addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
@@ -199,7 +201,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Dependency.get(StatusBarIconController.class).removeIconGroup(mDarkIconManager);
+        mStatusBarIconController.removeIconGroup(mDarkIconManager);
+        mAnimationScheduler.removeCallback(this);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);
         }

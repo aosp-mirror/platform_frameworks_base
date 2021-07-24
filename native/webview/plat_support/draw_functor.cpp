@@ -116,8 +116,14 @@ void draw_gl(int functor, void* data,
   }
   COMPILE_ASSERT(sizeof(params.color_space_toXYZD50) == sizeof(skcms_Matrix3x3),
                  gamut_transform_size_mismatch);
-  draw_gl_params.color_space_ptr->toXYZD50(
-      reinterpret_cast<skcms_Matrix3x3*>(&params.color_space_toXYZD50));
+  if (draw_gl_params.color_space_ptr) {
+      draw_gl_params.color_space_ptr->toXYZD50(
+              reinterpret_cast<skcms_Matrix3x3*>(&params.color_space_toXYZD50));
+  } else {
+      // Assume sRGB.
+      memcpy(&params.color_space_toXYZD50, &SkNamedGamut::kSRGB,
+             sizeof(params.color_space_toXYZD50));
+  }
 
   SupportData* support = static_cast<SupportData*>(data);
   support->callbacks.draw_gl(functor, support->data, &params);
@@ -196,8 +202,14 @@ void drawVk(int functor, void* data,
   };
   COMPILE_ASSERT(sizeof(params.color_space_toXYZD50) == sizeof(skcms_Matrix3x3),
                  gamut_transform_size_mismatch);
-  draw_vk_params.color_space_ptr->toXYZD50(
-      reinterpret_cast<skcms_Matrix3x3*>(&params.color_space_toXYZD50));
+  if (draw_vk_params.color_space_ptr) {
+      draw_vk_params.color_space_ptr->toXYZD50(
+              reinterpret_cast<skcms_Matrix3x3*>(&params.color_space_toXYZD50));
+  } else {
+      // Assume sRGB.
+      memcpy(&params.color_space_toXYZD50, &SkNamedGamut::kSRGB,
+             sizeof(params.color_space_toXYZD50));
+  }
   COMPILE_ASSERT(NELEM(params.transform) == NELEM(draw_vk_params.transform),
                  mismatched_transform_matrix_sizes);
   for (int i = 0; i < NELEM(params.transform); ++i) {

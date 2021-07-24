@@ -17,7 +17,10 @@
 package com.android.systemui.biometrics
 
 import android.content.Context
+import android.hardware.display.DisplayManager
+import android.os.Handler
 import android.view.OrientationEventListener
+import android.view.Surface
 
 /**
  * An [OrientationEventListener] that invokes the [onOrientationChanged] callback whenever
@@ -26,20 +29,16 @@ import android.view.OrientationEventListener
  */
 class BiometricOrientationEventListener(
     private val context: Context,
-    private val onOrientationChanged: () -> Unit
-) : OrientationEventListener(context) {
+    private val onOrientationChanged: () -> Unit,
+    private val displayManager: DisplayManager,
+    private val handler: Handler
+) : DisplayManager.DisplayListener {
 
-    /** If actively listening (not available in base class). */
-    var enabled: Boolean = false
-        private set
+    private var lastRotation = context.display?.rotation ?: Surface.ROTATION_0
 
-    private var lastRotation = context.display?.rotation ?: ORIENTATION_UNKNOWN
-
-    override fun onOrientationChanged(orientation: Int) {
-        if (orientation == ORIENTATION_UNKNOWN) {
-            return
-        }
-
+    override fun onDisplayAdded(displayId: Int) {}
+    override fun onDisplayRemoved(displayId: Int) {}
+    override fun onDisplayChanged(displayId: Int) {
         val rotation = context.display?.rotation ?: return
         if (lastRotation != rotation) {
             lastRotation = rotation
@@ -48,13 +47,11 @@ class BiometricOrientationEventListener(
         }
     }
 
-    override fun enable() {
-        enabled = true
-        super.enable()
+    fun enable() {
+        displayManager.registerDisplayListener(this, handler)
     }
 
-    override fun disable() {
-        enabled = false
-        super.disable()
+    fun disable() {
+        displayManager.unregisterDisplayListener(this)
     }
 }

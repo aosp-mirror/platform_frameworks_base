@@ -416,20 +416,14 @@ android_mtp_MtpDevice_set_device_property_init_version(JNIEnv *env, jobject thiz
         return -1;
     }
 
-    MtpProperty* property = new MtpProperty(MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO,
-                                            MTP_TYPE_STR, true);
-    if (!property) {
-        env->ThrowNew(clazz_io_exception, "Failed to obtain property.");
-        return -1;
-    }
-
-    if (property->getDataType() != MTP_TYPE_STR) {
+    MtpProperty property(MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO, MTP_TYPE_STR, true);
+    if (property.getDataType() != MTP_TYPE_STR) {
         env->ThrowNew(clazz_io_exception, "Unexpected property data type.");
         return -1;
     }
 
-    property->setCurrentValue(propertyStr);
-    if (!device->setDevicePropValueStr(property)) {
+    property.setCurrentValue(propertyStr);
+    if (!device->setDevicePropValueStr(&property)) {
         env->ThrowNew(clazz_io_exception, "Failed to obtain property value.");
         return -1;
     }
