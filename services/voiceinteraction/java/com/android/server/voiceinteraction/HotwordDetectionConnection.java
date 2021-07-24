@@ -87,14 +87,14 @@ import java.util.function.Function;
  */
 final class HotwordDetectionConnection {
     private static final String TAG = "HotwordDetectionConnection";
-    // TODO (b/177502877): Set the Debug flag to false before shipping.
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     // TODO: These constants need to be refined.
     private static final long VALIDATION_TIMEOUT_MILLIS = 3000;
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 6000;
     private static final Duration MAX_UPDATE_TIMEOUT_DURATION =
             Duration.ofMillis(MAX_UPDATE_TIMEOUT_MILLIS);
+    private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
 
     private final Executor mAudioCopyExecutor = Executors.newCachedThreadPool();
     // TODO: This may need to be a Handler(looper)
@@ -115,6 +115,7 @@ final class HotwordDetectionConnection {
     private Instant mLastRestartInstant;
 
     private ScheduledFuture<?> mCancellationTaskFuture;
+    private ScheduledFuture<?> mDebugHotwordLoggingTimeoutFuture = null;
 
     /** Identity used for attributing app ops when delivering data to the Interactor. */
     @GuardedBy("mLock")
@@ -128,6 +129,7 @@ final class HotwordDetectionConnection {
     private boolean mPerformingSoftwareHotwordDetection;
     private @NonNull ServiceConnection mRemoteHotwordDetectionService;
     private IBinder mAudioFlinger;
+    private boolean mDebugHotwordLogging = false;
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
@@ -159,10 +161,7 @@ final class HotwordDetectionConnection {
         // TODO(volnov): we need to be smarter here, e.g. schedule it a bit more often, but wait
         // until the current session is closed.
         mCancellationTaskFuture = mScheduledExecutorService.scheduleAtFixedRate(() -> {
-            if (DEBUG) {
-                Slog.i(TAG, "Time to restart the process, TTL has passed");
-            }
-
+            Slog.v(TAG, "Time to restart the process, TTL has passed");
             synchronized (mLock) {
                 restartProcessLocked();
             }
@@ -268,9 +267,9 @@ final class HotwordDetectionConnection {
     }
 
     void cancelLocked() {
-        if (DEBUG) {
-            Slog.d(TAG, "cancelLocked");
-        }
+        Slog.v(TAG, "cancelLocked");
+        clearDebugHotwordLoggingTimeoutLocked();
+        mDebugHotwordLogging = false;
         if (mRemoteHotwordDetectionService.isBound()) {
             mRemoteHotwordDetectionService.unbind();
             LocalServices.getService(PermissionManagerServiceInternal.class)
@@ -288,6 +287,7 @@ final class HotwordDetectionConnection {
         // TODO(b/191742511): this logic needs a test
         if (!mUpdateStateAfterStartFinished.get()
                 && Instant.now().minus(MAX_UPDATE_TIMEOUT_DURATION).isBefore(mLastRestartInstant)) {
+            Slog.v(TAG, "call updateStateAfterProcessStart");
             updateStateAfterProcessStart(options, sharedMemory);
         } else {
             mRemoteHotwordDetectionService.run(
@@ -330,6 +330,9 @@ final class HotwordDetectionConnection {
                         if (result != null) {
                             Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
                                     + " bits from hotword trusted process");
+                            if (mDebugHotwordLogging) {
+                                Slog.i(TAG, "Egressed detected result: " + result);
+                            }
                         }
                     } else {
                         Slog.i(TAG, "Hotword detection has already completed");
@@ -407,15 +410,11 @@ final class HotwordDetectionConnection {
 
     private void detectFromDspSourceForTest(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
             IHotwordRecognitionStatusCallback externalCallback) {
-        if (DEBUG) {
-            Slog.d(TAG, "detectFromDspSourceForTest");
-        }
+        Slog.v(TAG, "detectFromDspSourceForTest");
         IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
             @Override
             public void onDetected(HotwordDetectedResult result) throws RemoteException {
-                if (DEBUG) {
-                    Slog.d(TAG, "onDetected");
-                }
+                Slog.v(TAG, "onDetected");
                 synchronized (mLock) {
                     if (mValidatingDspTrigger) {
                         mValidatingDspTrigger = false;
@@ -424,6 +423,9 @@ final class HotwordDetectionConnection {
                         if (result != null) {
                             Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
                                     + " bits from hotword trusted process");
+                            if (mDebugHotwordLogging) {
+                                Slog.i(TAG, "Egressed detected result: " + result);
+                            }
                         }
                     } else {
                         Slog.i(TAG, "Ignored hotword detected since trigger has been handled");
@@ -433,13 +435,14 @@ final class HotwordDetectionConnection {
 
             @Override
             public void onRejected(HotwordRejectedResult result) throws RemoteException {
-                if (DEBUG) {
-                    Slog.d(TAG, "onRejected");
-                }
+                Slog.v(TAG, "onRejected");
                 synchronized (mLock) {
                     if (mValidatingDspTrigger) {
                         mValidatingDspTrigger = false;
                         externalCallback.onRejected(result);
+                        if (mDebugHotwordLogging && result != null) {
+                            Slog.i(TAG, "Egressed rejected result: " + result);
+                        }
                     } else {
                         Slog.i(TAG, "Ignored hotword rejected since trigger has been handled");
                     }
@@ -482,6 +485,9 @@ final class HotwordDetectionConnection {
                     if (result != null) {
                         Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
                                 + " bits from hotword trusted process");
+                        if (mDebugHotwordLogging) {
+                            Slog.i(TAG, "Egressed detected result: " + result);
+                        }
                     }
                 }
             }
@@ -498,6 +504,9 @@ final class HotwordDetectionConnection {
                     }
                     mValidatingDspTrigger = false;
                     externalCallback.onRejected(result);
+                    if (mDebugHotwordLogging && result != null) {
+                        Slog.i(TAG, "Egressed rejected result: " + result);
+                    }
                 }
             }
         };
@@ -514,19 +523,37 @@ final class HotwordDetectionConnection {
     }
 
     void forceRestart() {
-        if (DEBUG) {
-            Slog.i(TAG, "Requested to restart the service internally. Performing the restart");
-        }
+        Slog.v(TAG, "Requested to restart the service internally. Performing the restart");
         synchronized (mLock) {
             restartProcessLocked();
         }
     }
 
-    private void restartProcessLocked() {
-        if (DEBUG) {
-            Slog.i(TAG, "Restarting hotword detection process");
-        }
+    void setDebugHotwordLoggingLocked(boolean logging) {
+        Slog.v(TAG, "setDebugHotwordLoggingLocked: " + logging);
+        clearDebugHotwordLoggingTimeoutLocked();
+        mDebugHotwordLogging = logging;
 
+        if (logging) {
+            // Reset mDebugHotwordLogging to false after one hour
+            mDebugHotwordLoggingTimeoutFuture = mScheduledExecutorService.schedule(() -> {
+                Slog.v(TAG, "Timeout to reset mDebugHotwordLogging to false");
+                synchronized (mLock) {
+                    mDebugHotwordLogging = false;
+                }
+            }, RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void clearDebugHotwordLoggingTimeoutLocked() {
+        if (mDebugHotwordLoggingTimeoutFuture != null) {
+            mDebugHotwordLoggingTimeoutFuture.cancel(/* mayInterruptIfRunning= */true);
+            mDebugHotwordLoggingTimeoutFuture = null;
+        }
+    }
+
+    private void restartProcessLocked() {
+        Slog.v(TAG, "Restarting hotword detection process");
         ServiceConnection oldConnection = mRemoteHotwordDetectionService;
 
         // TODO(volnov): this can be done after connect() has been successful.
@@ -547,9 +574,7 @@ final class HotwordDetectionConnection {
         // Recreate connection to reset the cache.
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
 
-        if (DEBUG) {
-            Slog.i(TAG, "Started the new process, issuing #onProcessRestarted");
-        }
+        Slog.v(TAG, "Started the new process, issuing #onProcessRestarted");
         try {
             mCallback.onProcessRestarted();
         } catch (RemoteException e) {
@@ -700,6 +725,9 @@ final class HotwordDetectionConnection {
                                 bestEffortClose(serviceAudioSource);
                                 bestEffortClose(audioSource);
 
+                                if (mDebugHotwordLogging && result != null) {
+                                    Slog.i(TAG, "Egressed rejected result: " + result);
+                                }
                                 // TODO: Propagate the HotwordRejectedResult.
                             }
 
@@ -714,6 +742,9 @@ final class HotwordDetectionConnection {
                                 if (triggerResult != null) {
                                     Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(
                                             triggerResult) + " bits from hotword trusted process");
+                                    if (mDebugHotwordLogging) {
+                                        Slog.i(TAG, "Egressed detected result: " + triggerResult);
+                                    }
                                 }
                                 // TODO: Add a delay before closing.
                                 bestEffortClose(audioSource);
@@ -773,9 +804,7 @@ final class HotwordDetectionConnection {
             }
             synchronized (mLock) {
                 if (!mRespectServiceConnectionStatusChanged) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Ignored onServiceConnectionStatusChanged event");
-                    }
+                    Slog.v(TAG, "Ignored onServiceConnectionStatusChanged event");
                     return;
                 }
                 mIsBound = connected;
@@ -792,9 +821,7 @@ final class HotwordDetectionConnection {
             super.binderDied();
             synchronized (mLock) {
                 if (!mRespectServiceConnectionStatusChanged) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Ignored #binderDied event");
-                    }
+                    Slog.v(TAG, "Ignored #binderDied event");
                     return;
                 }
 
