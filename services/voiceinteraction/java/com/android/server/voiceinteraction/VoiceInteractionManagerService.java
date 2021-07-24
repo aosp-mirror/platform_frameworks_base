@@ -832,6 +832,17 @@ public class VoiceInteractionManagerService extends SystemService {
             mImpl.forceRestartHotwordDetector();
         }
 
+        // Called by Shell command
+        void setDebugHotwordLogging(boolean logging) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setTemporaryLogging without running voice interaction service");
+                    return;
+                }
+                mImpl.setDebugHotwordLoggingLocked(logging);
+            }
+        }
+
         @Override
         public void showSession(Bundle args, int flags) {
             synchronized (this) {
