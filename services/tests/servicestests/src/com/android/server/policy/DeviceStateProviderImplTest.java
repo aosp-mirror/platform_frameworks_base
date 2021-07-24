@@ -150,8 +150,9 @@ public final class DeviceStateProviderImplTest {
         provider.setListener(listener);
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
-        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, ""),
-                new DeviceState(2, "") };
+        final DeviceState[] expectedStates = new DeviceState[]{
+                new DeviceState(1, "", 0 /* flags */),
+                new DeviceState(2, "", 0 /* flags */) };
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
@@ -187,8 +188,9 @@ public final class DeviceStateProviderImplTest {
         provider.setListener(listener);
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
-        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, ""),
-                new DeviceState(2, "CLOSED") };
+        final DeviceState[] expectedStates = new DeviceState[]{
+                new DeviceState(1, "", 0 /* flags */),
+                new DeviceState(2, "CLOSED", 0 /* flags */) };
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         // onStateChanged() should not be called because the provider has not yet been notified of
@@ -264,8 +266,11 @@ public final class DeviceStateProviderImplTest {
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         assertArrayEquals(
-                new DeviceState[]{ new DeviceState(1, "CLOSED"), new DeviceState(2, "HALF_OPENED"),
-                        new DeviceState(3, "OPENED") }, mDeviceStateArrayCaptor.getValue());
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */) },
+                mDeviceStateArrayCaptor.getValue());
         // onStateChanged() should not be called because the provider has not yet been notified of
         // the initial sensor state.
         verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
@@ -350,8 +355,10 @@ public final class DeviceStateProviderImplTest {
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         assertArrayEquals(
-                new DeviceState[]{ new DeviceState(1, "CLOSED"), new DeviceState(2, "HALF_OPENED"),
-                        }, mDeviceStateArrayCaptor.getValue());
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */)
+                }, mDeviceStateArrayCaptor.getValue());
         // onStateChanged() should be called because the provider could not find the sensor.
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());

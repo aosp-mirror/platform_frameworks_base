@@ -165,6 +165,32 @@ public final class OverrideRequestControllerTest {
     }
 
     @Test
+    public void handleProcessDied_stickyRequests() {
+        mController.setStickyRequestsAllowed(true);
+
+        OverrideRequest firstRequest = new OverrideRequest(new Binder(), 0 /* pid */,
+                0 /* requestedState */, 0 /* flags */);
+        OverrideRequest secondRequest = new OverrideRequest(new Binder(), 1 /* pid */,
+                0 /* requestedState */, 0 /* flags */);
+
+        mController.addRequest(firstRequest);
+        mController.addRequest(secondRequest);
+
+        assertEquals(mStatusListener.getLastStatus(secondRequest).intValue(), STATUS_ACTIVE);
+        assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_SUSPENDED);
+
+        mController.handleProcessDied(1);
+
+        assertEquals(mStatusListener.getLastStatus(secondRequest).intValue(), STATUS_ACTIVE);
+        assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_SUSPENDED);
+
+        mController.cancelStickyRequests();
+
+        assertEquals(mStatusListener.getLastStatus(secondRequest).intValue(), STATUS_CANCELED);
+        assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_ACTIVE);
+    }
+
+    @Test
     public void handleNewSupportedStates() {
         OverrideRequest firstRequest = new OverrideRequest(new Binder(), 0 /* pid */,
                 1 /* requestedState */, 0 /* flags */);

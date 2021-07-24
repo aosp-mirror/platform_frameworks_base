@@ -55,10 +55,13 @@ import javax.annotation.Nullable;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public final class DeviceStateManagerServiceTest {
-    private static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(0, "DEFAULT");
-    private static final DeviceState OTHER_DEVICE_STATE = new DeviceState(1, "OTHER");
+    private static final DeviceState DEFAULT_DEVICE_STATE =
+            new DeviceState(0, "DEFAULT", 0 /* flags */);
+    private static final DeviceState OTHER_DEVICE_STATE =
+            new DeviceState(1, "OTHER", 0 /* flags */);
     // A device state that is not reported as being supported for the default test provider.
-    private static final DeviceState UNSUPPORTED_DEVICE_STATE = new DeviceState(255, "UNSUPPORTED");
+    private static final DeviceState UNSUPPORTED_DEVICE_STATE =
+            new DeviceState(255, "UNSUPPORTED", 0 /* flags */);
 
     private TestDeviceStatePolicy mPolicy;
     private TestDeviceStateProvider mProvider;

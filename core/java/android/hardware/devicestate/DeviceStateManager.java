@@ -75,13 +75,13 @@ public final class DeviceStateManager {
     /**
      * Submits a {@link DeviceStateRequest request} to modify the device state.
      * <p>
-     * By default, the request is kept active until a call to
-     * {@link #cancelRequest(DeviceStateRequest)} or until one of the following occurs:
+     * By default, the request is kept active until one of the following occurs:
      * <ul>
+     *     <li>The system deems the request can no longer be honored, for example if the requested
+     *     state becomes unsupported.
+     *     <li>A call to {@link #cancelRequest(DeviceStateRequest)}.
      *     <li>Another processes submits a request succeeding this request in which case the request
      *     will be suspended until the interrupting request is canceled.
-     *     <li>The requested state has become unsupported.
-     *     <li>The process submitting the request dies.
      * </ul>
      * However, this behavior can be changed by setting flags on the {@link DeviceStateRequest}.
      *
