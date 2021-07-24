@@ -350,8 +350,10 @@ public class MidiService extends IMidiManager.Stub {
             }
 
             if (mDeviceConnections != null) {
-                for (DeviceConnection connection : mDeviceConnections) {
-                    connection.notifyClient(server);
+                synchronized (mDeviceConnections) {
+                    for (DeviceConnection connection : mDeviceConnections) {
+                        connection.notifyClient(server);
+                    }
                 }
             }
         }

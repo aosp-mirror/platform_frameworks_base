@@ -24,7 +24,7 @@
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Počakajte ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Poročilo o napakah bo kmalu prikazano v telefonu"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Izberite za pošiljanje poročila o napakah"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dotaknite se, če želite poročilo o napaki dati v skupno rabo"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dotaknite se, če želite deliti poročilo o napaki"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Izberite za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Dotaknite se za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Dotaknite se za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>

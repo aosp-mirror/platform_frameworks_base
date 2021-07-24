@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -566,6 +567,30 @@ public class DisplayAreaTest extends WindowTestsBase {
         assertNull(displayArea.mOrganizer);
         verify(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController)
                 .onDisplayAreaVanished(mockDisplayAreaOrganizer, displayArea);
+    }
+
+    @Test
+    public void testRegisterSameFeatureOrganizer_expectThrowsException() {
+        final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(true).when(binder).isBinderAlive();
+        doReturn(binder).when(mockDisplayAreaOrganizer).asBinder();
+        final DisplayAreaOrganizerController controller =
+                mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
+        controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST);
+        assertThrows(IllegalStateException.class,
+                () -> controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST));
+    }
+
+    @Test
+    public void testRegisterUnregisterOrganizer() {
+        final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
+        doReturn(mock(IBinder.class)).when(mockDisplayAreaOrganizer).asBinder();
+        final DisplayAreaOrganizerController controller =
+                mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
+        controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST);
+        controller.unregisterOrganizer(mockDisplayAreaOrganizer);
+        controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST);
     }
 
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {

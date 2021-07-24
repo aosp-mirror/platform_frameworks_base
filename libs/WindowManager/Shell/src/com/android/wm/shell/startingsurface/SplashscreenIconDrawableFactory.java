@@ -64,11 +64,10 @@ public class SplashscreenIconDrawableFactory {
         }
     }
 
-    static Drawable makeLegacyIconDrawable(@ColorInt int backgroundColor,
-            @NonNull Drawable foregroundDrawable, int srcIconSize, int iconSize,
-            Handler splashscreenWorkerHandler) {
-        return new ImmobileIconDrawable(new LegacyIconDrawable(backgroundColor,
-                foregroundDrawable), srcIconSize, iconSize, splashscreenWorkerHandler);
+    static Drawable makeLegacyIconDrawable(@NonNull Drawable iconDrawable, int srcIconSize,
+            int iconSize, Handler splashscreenWorkerHandler) {
+        return new ImmobileIconDrawable(iconDrawable, srcIconSize, iconSize,
+                splashscreenWorkerHandler);
     }
 
     private static class ImmobileIconDrawable extends Drawable {
@@ -179,65 +178,6 @@ public class SplashscreenIconDrawableFactory {
         }
     }
 
-    private static class LegacyIconDrawable extends MaskBackgroundDrawable {
-        // reference FixedScaleDrawable
-        // iconBounds = 0.7 * X * outerBounds, X is the scale of diagonal
-        private static final float LEGACY_ICON_SCALE = .7f * .8f;
-        private final Drawable mForegroundDrawable;
-        private float mScaleX, mScaleY, mTransX, mTransY;
-
-        LegacyIconDrawable(@ColorInt int backgroundColor, Drawable foregroundDrawable) {
-            super(backgroundColor);
-            mForegroundDrawable = foregroundDrawable;
-            mScaleX = LEGACY_ICON_SCALE;
-            mScaleY = LEGACY_ICON_SCALE;
-        }
-
-        @Override
-        protected void updateLayerBounds(Rect bounds) {
-            super.updateLayerBounds(bounds);
-
-            if (mForegroundDrawable == null) {
-                return;
-            }
-            float outerBoundsWidth = bounds.width();
-            float outerBoundsHeight = bounds.height();
-            float h = mForegroundDrawable.getIntrinsicHeight();
-            float w = mForegroundDrawable.getIntrinsicWidth();
-            mScaleX = LEGACY_ICON_SCALE;
-            mScaleY = LEGACY_ICON_SCALE;
-            if (h > w && w > 0) {
-                mScaleX *= w / h;
-            } else if (w > h && h > 0) {
-                mScaleY *= h / w;
-            }
-            int innerBoundsWidth = (int) (0.5 + outerBoundsWidth * mScaleX);
-            int innerBoundsHeight = (int) (0.5 + outerBoundsHeight * mScaleY);
-            final Rect rect = new Rect(0, 0, innerBoundsWidth, innerBoundsHeight);
-            mForegroundDrawable.setBounds(rect);
-            mTransX = (outerBoundsWidth - innerBoundsWidth) / 2;
-            mTransY = (outerBoundsHeight - innerBoundsHeight) / 2;
-            invalidateSelf();
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            super.draw(canvas);
-            int saveCount = canvas.save();
-            canvas.translate(mTransX, mTransY);
-            if (mForegroundDrawable != null) {
-                mForegroundDrawable.draw(canvas);
-            }
-            canvas.restoreToCount(saveCount);
-        }
-
-        @Override
-        public void setColorFilter(ColorFilter colorFilter) {
-            if (mForegroundDrawable != null) {
-                mForegroundDrawable.setColorFilter(colorFilter);
-            }
-        }
-    }
     /**
      * A lightweight AdaptiveIconDrawable which support foreground to be Animatable, and keep this
      * drawable masked by config_icon_mask.

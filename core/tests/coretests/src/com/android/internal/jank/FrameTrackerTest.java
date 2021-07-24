@@ -257,23 +257,36 @@ public class FrameTrackerTest {
     }
 
     @Test
-    public void testRemoveObserversWhenCancelledInEnd() {
+    public void testCancelIfEndVsyncIdEqualsToBeginVsyncId() {
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         mTracker.begin();
         verify(mRenderer, only()).addObserver(any());
 
-        // send first frame - not janky
-        sendFrame(4, JANK_NONE, 100L);
-
-        // send another frame - should be considered janky
-        sendFrame(40, JANK_APP_DEADLINE_MISSED, 101L);
-
         // end the trace session
         when(mChoreographer.getVsyncId()).thenReturn(101L);
         mTracker.end(FrameTracker.REASON_END_NORMAL);
-        sendFrame(4, JANK_NONE, 102L);
 
         // Since the begin vsync id (101) equals to the end vsync id (101), will be treat as cancel.
+        verify(mTracker).cancel(FrameTracker.REASON_CANCEL_SAME_VSYNC);
+
+        // Observers should be removed in this case, or FrameTracker object will be leaked.
+        verify(mTracker).removeObservers();
+
+        // Should never trigger Perfetto since it is a cancel.
+        verify(mTracker, never()).triggerPerfetto();
+    }
+
+    @Test
+    public void testCancelIfEndVsyncIdLessThanBeginVsyncId() {
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
+        mTracker.begin();
+        verify(mRenderer, only()).addObserver(any());
+
+        // end the trace session at the same vsync id, end vsync id will less than the begin one.
+        // Because the begin vsync id is supposed to the next frame,
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
+
+        // The begin vsync id (101) is larger than the end one (100), will be treat as cancel.
         verify(mTracker).cancel(FrameTracker.REASON_CANCEL_SAME_VSYNC);
 
         // Observers should be removed in this case, or FrameTracker object will be leaked.

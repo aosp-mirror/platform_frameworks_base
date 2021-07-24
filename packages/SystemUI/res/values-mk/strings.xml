@@ -433,8 +433,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на камерата."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на камерата или микрофонот."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Уред"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Повлечете нагоре за да се префрлите од една на друга апликација"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Повлечете надесно за брзо префрлање меѓу апликациите"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Вклучи/исклучи преглед"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Наполнета"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Се полни"</string>
@@ -1149,8 +1147,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> испрати порака: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> испрати слика"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> има ажурирање на статусот: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"Достапен"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем при читањето на мерачот на батеријата"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Допрете за повеќе информации"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Не е поставен аларм"</string>

@@ -1269,7 +1269,8 @@ public class ChooserActivity extends ResolverActivity implements
                             SELECTION_TYPE_NEARBY,
                             "",
                             -1);
-                    safelyStartActivity(ti);
+                    // Action bar is user-independent, always start as primary
+                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
                 }
         );
@@ -1290,7 +1291,8 @@ public class ChooserActivity extends ResolverActivity implements
                             SELECTION_TYPE_EDIT,
                             "",
                             -1);
-                    safelyStartActivity(ti);
+                    // Action bar is user-independent, always start as primary
+                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
                 }
         );
@@ -3452,8 +3454,6 @@ public class ChooserActivity extends ResolverActivity implements
 
         private View createProfileView(ViewGroup parent) {
             View profileRow = mLayoutInflater.inflate(R.layout.chooser_profile_row, parent, false);
-            profileRow.setBackground(
-                    getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             mProfileView = profileRow.findViewById(R.id.profile_button);
             mProfileView.setOnClickListener(ChooserActivity.this::onProfileClick);
             updateProfileViewButton();
@@ -3599,10 +3599,6 @@ public class ChooserActivity extends ResolverActivity implements
             final ViewGroup viewGroup = (ViewGroup) holder.itemView;
             int start = getListPosition(position);
             int startType = getRowType(start);
-            if (viewGroup.getForeground() == null && position > 0) {
-                viewGroup.setForeground(
-                        getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
-            }
 
             int columnCount = holder.getColumnCount();
             int end = start + columnCount - 1;

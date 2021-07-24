@@ -26,9 +26,9 @@ import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
-import android.os.NativeHandle;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
@@ -40,15 +40,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Face-specific enroll client supporting the {@link android.hardware.biometrics.face.V1_0}
- * HIDL interface.
+ * Face-specific enroll client supporting the {@link android.hardware.biometrics.face.V1_0} HIDL
+ * interface.
  */
 public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
 
     private static final String TAG = "FaceEnrollClient";
 
     @NonNull private final int[] mDisabledFeatures;
-    @Nullable private final NativeHandle mSurfaceHandle;
     @NonNull private final int[] mEnrollIgnoreList;
     @NonNull private final int[] mEnrollIgnoreListVendor;
 
@@ -56,12 +55,11 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
-            @Nullable NativeHandle surfaceHandle, int sensorId) {
+            @Nullable Surface previewSurface, int sensorId) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
                 false /* shouldVibrate */);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
-        mSurfaceHandle = surfaceHandle;
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()
@@ -71,7 +69,7 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override

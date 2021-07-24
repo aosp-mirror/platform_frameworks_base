@@ -658,12 +658,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     private void onConfigChanged(Configuration newConfig) {
-        if (mTutorialHandler == null) {
+        if (mTutorialHandler == null || mBackgroundPanelOrganizer == null) {
             return;
         }
         if (!mIsOneHandedEnabled || newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             return;
         }
+        mBackgroundPanelOrganizer.onConfigurationChanged();
         mTutorialHandler.onConfigurationChanged();
     }
 

@@ -23,5 +23,6 @@ data class KeyguardFaceListenModel(
     val isLockIconPressed: Boolean,
     val isScanningAllowedByStrongAuth: Boolean,
     val isPrimaryUser: Boolean,
-    val isSecureCameraLaunched: Boolean
+    val isSecureCameraLaunched: Boolean,
+    val isFaceAuthenticated: Boolean
 )

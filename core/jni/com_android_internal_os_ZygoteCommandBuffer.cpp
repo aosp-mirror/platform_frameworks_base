@@ -426,7 +426,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
       tmp_pid >>= 8;
     }
     pid_buf[4] = 0;  // Process is not wrapped.
-    int res = write(session_socket, pid_buf, 5);
+    int res = TEMP_FAILURE_RETRY(write(session_socket, pid_buf, 5));
     if (res != 5) {
       if (res == -1) {
         (first_time ? fail_fn_1 : fail_fn_n)
@@ -451,18 +451,18 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
       }
       // We've now seen either a disconnect or connect request.
       close(session_socket);
-      int new_fd = accept(zygote_socket_fd, nullptr, nullptr);
+      int new_fd = TEMP_FAILURE_RETRY(accept(zygote_socket_fd, nullptr, nullptr));
       if (new_fd == -1) {
         fail_fn_z(CREATE_ERROR("Accept(%d) failed: %s", zygote_socket_fd, strerror(errno)));
       }
       if (new_fd != session_socket) {
           // Move new_fd back to the old value, so that we don't have to change Java-level data
           // structures to reflect a change. This implicitly closes the old one.
-          if (dup2(new_fd, session_socket) != session_socket) {
+          if (TEMP_FAILURE_RETRY(dup2(new_fd, session_socket)) != session_socket) {
             fail_fn_z(CREATE_ERROR("Failed to move fd %d to %d: %s",
                                    new_fd, session_socket, strerror(errno)));
           }
-          close(new_fd);
+          close(new_fd);  //  On Linux, fd is closed even if EINTR is returned.
       }
       // If we ever return, we effectively reuse the old Java ZygoteConnection.
       // None of its state needs to change.
