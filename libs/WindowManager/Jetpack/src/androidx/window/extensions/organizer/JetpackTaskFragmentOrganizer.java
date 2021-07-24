@@ -175,7 +175,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         final TaskFragmentCreationParams fragmentOptions =
                 createFragmentOptions(fragmentToken, ownerToken, bounds, windowingMode);
         wct.createTaskFragment(fragmentOptions)
-                .startActivityInTaskFragment(fragmentToken, activityIntent, activityOptions);
+                .startActivityInTaskFragment(fragmentToken, ownerToken, activityIntent,
+                        activityOptions);
     }
 
     TaskFragmentCreationParams createFragmentOptions(IBinder fragmentToken, IBinder ownerToken,

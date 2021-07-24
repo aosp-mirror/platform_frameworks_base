@@ -3615,6 +3615,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
+        int previousState = mStatusBarStateController.getState();
         if (!(mStatusBarStateController.setState(StatusBarState.SHADE, force))) {
             //TODO: StatusBarStateController should probably know about hiding the keyguard and
             // notify listeners.
@@ -3627,7 +3628,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
-            mLockscreenShadeTransitionController.onHideKeyguard(delay);
+            mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);
 
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
@@ -3949,11 +3950,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || !wakingUp && mWakefulnessLifecycle.getLastSleepReason()
                 == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON) {
             mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
-        } else if (!wakingUp || !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
-            // If we're going to sleep, but it's not from the power button, use the default reveal.
-            // If we're waking up, only use the default reveal if the biometric controller didn't
-            // already set it to the circular reveal because we're waking up from a fingerprint/face
-            // auth.
+        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         }
     }
