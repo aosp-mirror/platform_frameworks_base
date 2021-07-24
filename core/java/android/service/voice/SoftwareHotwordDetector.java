@@ -47,7 +47,7 @@ import java.io.PrintWriter;
  **/
 class SoftwareHotwordDetector extends AbstractHotwordDetector {
     private static final String TAG = SoftwareHotwordDetector.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final IVoiceInteractionManagerService mManagerService;
     private final HotwordDetector.Callback mCallback;
