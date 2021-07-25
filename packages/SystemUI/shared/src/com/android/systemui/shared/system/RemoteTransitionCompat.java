@@ -131,12 +131,13 @@ public class RemoteTransitionCompat implements Parcelable {
                         t.setLayer(leashMap.get(change.getLeash()),
                                 info.getChanges().size() * 3 - i);
                         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                        if (taskInfo != null) {
-                            pausingTask = change.getTaskInfo().token;
+                        if (taskInfo == null) {
+                            continue;
                         }
+                        pausingTask = taskInfo.token;
                         if (taskInfo.pictureInPictureParams != null
                                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
-                            pipTask = change.getTaskInfo().token;
+                            pipTask = taskInfo.token;
                         }
                     }
                 }

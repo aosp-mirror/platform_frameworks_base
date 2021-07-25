@@ -321,6 +321,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mTransaction.startActivityInTaskFragment(
                 mFragmentToken, null /* callerToken */, new Intent(), null /* activityOptions */);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
+        mTransaction.setAdjacentTaskFragments(mFragmentToken, mock(IBinder.class));
 
         // It is expected to fail for the mock TaskFragmentCreationParams. It is ok as we are
         // testing the security check here.
