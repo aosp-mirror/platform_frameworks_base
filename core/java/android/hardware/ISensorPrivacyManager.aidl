@@ -48,4 +48,8 @@ interface ISensorPrivacyManager {
 
     void suppressIndividualSensorPrivacyReminders(int userId, int sensor, IBinder token,
             boolean suppress);
+
+    void addUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+
+    void removeUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
 }
