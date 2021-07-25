@@ -19,7 +19,7 @@ package com.android.systemui.statusbar;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
-import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -161,7 +161,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
      * Set the system bar attributes
      */
     void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsState requestedState, String packageName);
+            InsetsVisibilities requestedVisibilities, String packageName);
 
     /**
      * Set pulsing

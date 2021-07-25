@@ -73,6 +73,7 @@ import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.MotionEvent;
 import android.view.PixelCopy;
 import android.view.Surface;
@@ -224,10 +225,9 @@ public abstract class WallpaperService extends Service {
         final ClientWindowFrames mWinFrames = new ClientWindowFrames();
         final Rect mDispatchedContentInsets = new Rect();
         final Rect mDispatchedStableInsets = new Rect();
-        final Rect mFinalSystemInsets = new Rect();
-        final Rect mFinalStableInsets = new Rect();
         DisplayCutout mDispatchedDisplayCutout = DisplayCutout.NO_CUTOUT;
         final InsetsState mInsetsState = new InsetsState();
+        final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
         private final Point mSurfaceSize = new Point();
@@ -995,8 +995,8 @@ public abstract class WallpaperService extends Service {
                         InputChannel inputChannel = new InputChannel();
 
                         if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
-                                mDisplay.getDisplayId(), mInsetsState, inputChannel, mInsetsState,
-                                mTempControls) < 0) {
+                                mDisplay.getDisplayId(), mRequestedVisibilities, inputChannel,
+                                mInsetsState, mTempControls) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
