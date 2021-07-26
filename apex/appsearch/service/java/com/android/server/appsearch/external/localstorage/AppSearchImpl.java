@@ -146,6 +146,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class AppSearchImpl implements Closeable {
     private static final String TAG = "AppSearchImpl";
 
+    /** A value 0 means that there're no more pages in the search results. */
+    private static final long EMPTY_PAGE_TOKEN = 0;
+
     @VisibleForTesting static final int CHECK_OPTIMIZE_INTERVAL = 100;
 
     private final ReadWriteLock mReadWriteLock = new ReentrantReadWriteLock();
@@ -1139,6 +1142,16 @@ public final class AppSearchImpl implements Closeable {
                     searchResultProto.getResultsCount(),
                     searchResultProto);
             checkSuccess(searchResultProto.getStatus());
+            if (nextPageToken != EMPTY_PAGE_TOKEN
+                    && searchResultProto.getNextPageToken() == EMPTY_PAGE_TOKEN) {
+                // At this point, we're guaranteed that this nextPageToken exists for this package,
+                // otherwise checkNextPageToken would've thrown an exception.
+                // Since the new token is 0, this is the last page. We should remove the old token
+                // from our cache since it no longer refers to this query.
+                synchronized (mNextPageTokensLocked) {
+                    mNextPageTokensLocked.get(packageName).remove(nextPageToken);
+                }
+            }
             return rewriteSearchResultProto(searchResultProto, mSchemaMapLocked);
         } finally {
             mReadWriteLock.readLock().unlock();
@@ -2059,6 +2072,10 @@ public final class AppSearchImpl implements Closeable {
     }
 
     private void addNextPageToken(String packageName, long nextPageToken) {
+        if (nextPageToken == EMPTY_PAGE_TOKEN) {
+            // There is no more pages. No need to add it.
+            return;
+        }
         synchronized (mNextPageTokensLocked) {
             Set<Long> tokens = mNextPageTokensLocked.get(packageName);
             if (tokens == null) {
@@ -2071,6 +2088,11 @@ public final class AppSearchImpl implements Closeable {
 
     private void checkNextPageToken(String packageName, long nextPageToken)
             throws AppSearchException {
+        if (nextPageToken == EMPTY_PAGE_TOKEN) {
+            // Swallow the check for empty page token, token = 0 means there is no more page and it
+            // won't return anything from Icing.
+            return;
+        }
         synchronized (mNextPageTokensLocked) {
             Set<Long> nextPageTokens = mNextPageTokensLocked.get(packageName);
             if (nextPageTokens == null || !nextPageTokens.contains(nextPageToken)) {
