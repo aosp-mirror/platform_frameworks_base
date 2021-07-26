@@ -16,7 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
+
+import android.animation.ValueAnimator;
+
+import androidx.annotation.NonNull;
+
 import com.android.keyguard.CarrierTextController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
@@ -26,6 +35,7 @@ import javax.inject.Inject;
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
     private final CarrierTextController mCarrierTextController;
     private final ConfigurationController mConfigurationController;
+    private final SystemStatusAnimationScheduler mAnimationScheduler;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -46,14 +56,36 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 }
             };
 
+    private final SystemStatusAnimationCallback mAnimationCallback =
+            new SystemStatusAnimationCallback() {
+                @Override
+                public void onSystemChromeAnimationStart() {
+                    mView.onSystemChromeAnimationStart(
+                            mAnimationScheduler.getAnimationState() == ANIMATING_OUT);
+                }
+
+                @Override
+                public void onSystemChromeAnimationEnd() {
+                    mView.onSystemChromeAnimationEnd(
+                            mAnimationScheduler.getAnimationState() == ANIMATING_IN);
+                }
+
+                @Override
+                public void onSystemChromeAnimationUpdate(@NonNull ValueAnimator anim) {
+                    mView.onSystemChromeAnimationUpdate((float) anim.getAnimatedValue());
+                }
+            };
+
     @Inject
     public KeyguardStatusBarViewController(
             KeyguardStatusBarView view,
             CarrierTextController carrierTextController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            SystemStatusAnimationScheduler animationScheduler) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
+        mAnimationScheduler = animationScheduler;
     }
 
     @Override
@@ -65,12 +97,14 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     @Override
     protected void onViewAttached() {
         mConfigurationController.addCallback(mConfigurationListener);
+        mAnimationScheduler.addCallback(mAnimationCallback);
         onThemeChanged();
     }
 
     @Override
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
+        mAnimationScheduler.removeCallback(mAnimationCallback);
     }
 
     /** Should be called when the theme changes. */
