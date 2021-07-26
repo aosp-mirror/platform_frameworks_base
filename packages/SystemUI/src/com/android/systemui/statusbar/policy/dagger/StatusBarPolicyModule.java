@@ -28,6 +28,8 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl;
+import com.android.systemui.statusbar.policy.DevicePostureController;
+import com.android.systemui.statusbar.policy.DevicePostureControllerImpl;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -128,6 +130,11 @@ public interface StatusBarPolicyModule {
     @Binds
     NetworkController.AccessPointController provideAccessPointController(
             AccessPointControllerImpl accessPointControllerImpl);
+
+    /** */
+    @Binds
+    DevicePostureController provideDevicePostureController(
+            DevicePostureControllerImpl devicePostureControllerImpl);
 
     /** */
     @SysUISingleton
