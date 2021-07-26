@@ -25,3 +25,6 @@ svetoslavganov@google.com
 toddke@google.com
 tsuji@google.com
 yamasani@google.com
+
+# Multiuser
+per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
