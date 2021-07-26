@@ -693,6 +693,9 @@ public class Environment {
      * <p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * monitor_storage}
+     * <p>
+     * Note that alternatives such as {@link Context#getExternalFilesDir(String)} or
+     * {@link MediaStore} offer better performance.
      *
      * @see #getExternalStorageState()
      * @see #isExternalStorageRemovable()
@@ -993,6 +996,9 @@ public class Environment {
      * </p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * public_picture}
+     * <p>
+     * Note that alternatives such as {@link Context#getExternalFilesDir(String)} or
+     * {@link MediaStore} offer better performance.
      *
      * @param type The type of storage directory to return. Should be one of
      *            {@link #DIRECTORY_MUSIC}, {@link #DIRECTORY_PODCASTS},
