@@ -1,0 +1,79 @@
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="50dp"
+    android:alignmentMode="alignBounds"
+    android:columnCount="5"
+    android:padding="0dp"
+    android:rowCount="1"
+    android:rowOrderPreserved="false">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill"
+        android:layout_margin="2dp"
+        android:background="@drawable/roundrect"
+        android:backgroundTint="@android:color/system_neutral1_500"
+        android:fontFamily="?android:attr/textAppearanceLarge"
+        android:gravity="center"
+        android:text="N1-500"
+        android:textColor="?android:attr/textColorPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill"
+        android:layout_margin="2dp"
+        android:background="@drawable/roundrect"
+        android:backgroundTint="@android:color/system_neutral2_500"
+        android:fontFamily="?android:attr/textAppearanceLarge"
+        android:gravity="center"
+        android:text="N2-500"
+        android:textColor="?android:attr/textColorPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill"
+        android:layout_margin="2dp"
+        android:background="@drawable/roundrect"
+        android:backgroundTint="@android:color/system_accent1_500"
+        android:fontFamily="?android:attr/textAppearanceLarge"
+        android:gravity="center"
+        android:text="A1-500"
+        android:textColor="?android:attr/textColorPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill"
+        android:layout_margin="2dp"
+        android:background="@drawable/roundrect"
+        android:backgroundTint="@android:color/system_accent2_500"
+        android:fontFamily="?android:attr/textAppearanceLarge"
+        android:gravity="center"
+        android:text="A2-500"
+        android:textColor="?android:attr/textColorPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill"
+        android:layout_margin="2dp"
+        android:background="@drawable/roundrect"
+        android:backgroundTint="@android:color/system_accent3_500"
+        android:fontFamily="?android:attr/textAppearanceLarge"
+        android:gravity="center"
+        android:text="A3-500"
+        android:textColor="?android:attr/textColorPrimary" />
+</GridLayout>
