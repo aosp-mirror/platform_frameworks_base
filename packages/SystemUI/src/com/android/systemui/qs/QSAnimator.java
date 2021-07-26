@@ -423,6 +423,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             if (mQsPanelController.shouldUseHorizontalLayout()
                     && mQsPanelController.mMediaHost.hostView != null) {
                 builder.addFloat(mQsPanelController.mMediaHost.hostView, "alpha", 0, 1);
+            } else {
+                // In portrait, media view should always be visible
+                mQsPanelController.mMediaHost.hostView.setAlpha(1.0f);
             }
             mAllPagesDelayedAnimator = builder.build();
             mAllViews.add(mSecurityFooter.getView());
