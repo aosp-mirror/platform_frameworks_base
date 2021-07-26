@@ -1203,7 +1203,7 @@ class Task extends TaskFragment {
                     && (newParent == null || !newParent.inPinnedWindowingMode())) {
                 // Notify if a task from the root pinned task is being removed
                 // (or moved depending on the mode).
-                mRootWindowContainer.notifyActivityPipModeChanged(null);
+                mRootWindowContainer.notifyActivityPipModeChanged(this, null);
             }
         }
 
@@ -4576,7 +4576,7 @@ class Task extends TaskFragment {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
-            mRootWindowContainer.notifyActivityPipModeChanged(null);
+            mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
             // In the case that we've disabled affecting the SysUI flags as a part of seamlessly

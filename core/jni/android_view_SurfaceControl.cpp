@@ -825,6 +825,14 @@ static void nativeSetShadowRadius(JNIEnv* env, jclass clazz, jlong transactionOb
     transaction->setShadowRadius(ctrl, shadowRadius);
 }
 
+static void nativeSetTrustedOverlay(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                    jlong nativeObject, jboolean isTrustedOverlay) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    transaction->setTrustedOverlay(ctrl, isTrustedOverlay);
+}
+
 static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
                                jfloat frameRate, jint compatibility, jint changeFrameRateStrategy) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -1999,6 +2007,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetTransformHint },
     {"nativeGetTransformHint", "(J)I",
             (void*)nativeGetTransformHint },
+    {"nativeSetTrustedOverlay", "(JJZ)V",
+            (void*)nativeSetTrustedOverlay },
         // clang-format on
 };
 
