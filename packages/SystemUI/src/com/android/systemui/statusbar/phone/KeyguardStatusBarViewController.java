@@ -26,8 +26,12 @@ import androidx.annotation.NonNull;
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
@@ -36,6 +40,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final CarrierTextController mCarrierTextController;
     private final ConfigurationController mConfigurationController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
+    private final BatteryController mBatteryController;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -76,16 +81,28 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 }
             };
 
+    private final BatteryController.BatteryStateChangeCallback mBatteryStateChangeCallback =
+            new BatteryController.BatteryStateChangeCallback() {
+                @Override
+                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                    mView.onBatteryLevelChanged(charging);
+                }
+            };
+
+    private boolean mBatteryListening;
+
     @Inject
     public KeyguardStatusBarViewController(
             KeyguardStatusBarView view,
             CarrierTextController carrierTextController,
             ConfigurationController configurationController,
-            SystemStatusAnimationScheduler animationScheduler) {
+            SystemStatusAnimationScheduler animationScheduler,
+            BatteryController batteryController) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
         mAnimationScheduler = animationScheduler;
+        mBatteryController = batteryController;
     }
 
     @Override
@@ -110,5 +127,25 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     /** Should be called when the theme changes. */
     public void onThemeChanged() {
         mView.onThemeChanged();
+    }
+
+    /** Sets whether this controller should listen to battery updates. */
+    public void setBatteryListening(boolean listening) {
+        if (listening == mBatteryListening) {
+            return;
+        }
+        mBatteryListening = listening;
+        if (mBatteryListening) {
+            mBatteryController.addCallback(mBatteryStateChangeCallback);
+        } else {
+            mBatteryController.removeCallback(mBatteryStateChangeCallback);
+        }
+    }
+
+    /** */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardStatusBarView:");
+        pw.println("  mBatteryListening: " + mBatteryListening);
+        mView.dump(fd, pw, args);
     }
 }
