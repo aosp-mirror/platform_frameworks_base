@@ -33,7 +33,7 @@ import java.util.function.Function;
 class OrdinalGenerator<T> {
     private final ArraySet<T> mKnownIds = new ArraySet<>();
 
-    private final @NonNull Function<T, T> mCanonicalizationFunction;
+    @NonNull private final Function<T, T> mCanonicalizationFunction;
 
     OrdinalGenerator(@NonNull Function<T, T> canonicalizationFunction) {
         mCanonicalizationFunction = Objects.requireNonNull(canonicalizationFunction);

@@ -26,6 +26,10 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -44,14 +48,13 @@ public final class MetricsTimeZoneDetectorState {
 
     @IntDef(prefix = "DETECTION_MODE_",
             value = { DETECTION_MODE_MANUAL, DETECTION_MODE_GEO, DETECTION_MODE_TELEPHONY})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     @interface DetectionMode {};
 
-    @DetectionMode
-    public static final int DETECTION_MODE_MANUAL = 0;
-    @DetectionMode
-    public static final int DETECTION_MODE_GEO = 1;
-    @DetectionMode
-    public static final int DETECTION_MODE_TELEPHONY = 2;
+    public static final @DetectionMode int DETECTION_MODE_MANUAL = 0;
+    public static final @DetectionMode int DETECTION_MODE_GEO = 1;
+    public static final @DetectionMode int DETECTION_MODE_TELEPHONY = 2;
 
     @NonNull
     private final ConfigurationInternal mConfigurationInternal;
@@ -132,8 +135,7 @@ public final class MetricsTimeZoneDetectorState {
      * Returns the detection mode the device is currently using, which can be influenced by various
      * things besides the user's setting.
      */
-    @DetectionMode
-    public int getDetectionMode() {
+    public @DetectionMode int getDetectionMode() {
         if (!mConfigurationInternal.getAutoDetectionEnabledBehavior()) {
             return DETECTION_MODE_MANUAL;
         } else if (mConfigurationInternal.getGeoDetectionEnabledBehavior()) {
