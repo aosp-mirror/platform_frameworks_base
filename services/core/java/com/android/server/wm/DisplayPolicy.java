@@ -156,6 +156,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.function.TriConsumer;
@@ -1330,6 +1331,11 @@ public class DisplayPolicy {
         return Math.max(statusBarHeight, displayFrames.mDisplayCutoutSafe.top);
     }
 
+    @VisibleForTesting
+    int getStatusBarHeightForRotation(@Surface.Rotation int rotation) {
+        return SystemBarUtils.getStatusBarHeightForRotation(mUiContext, rotation);
+    }
+
     WindowState getStatusBar() {
         return mStatusBar != null ? mStatusBar : mStatusBarAlt;
     }
@@ -1599,8 +1605,6 @@ public class DisplayPolicy {
         // For layout, the status bar is always at the top with our fixed height.
         int statusBarBottom = displayFrames.mUnrestricted.top
                 + mStatusBarHeightForRotation[displayFrames.mRotation];
-        // Make sure the status bar covers the entire cutout height
-        statusBarBottom = Math.max(statusBarBottom, displayFrames.mDisplayCutoutSafe.top);
 
         if (displayFrames.mDisplayCutoutSafe.top > displayFrames.mUnrestricted.top) {
             // Make sure that the zone we're avoiding for the cutout is at least as tall as the
@@ -2133,10 +2137,11 @@ public class DisplayPolicy {
         if (hasStatusBar()) {
             mStatusBarHeightForRotation[portraitRotation] =
                     mStatusBarHeightForRotation[upsideDownRotation] =
-                            res.getDimensionPixelSize(R.dimen.status_bar_height_portrait);
+                            getStatusBarHeightForRotation(portraitRotation);
             mStatusBarHeightForRotation[landscapeRotation] =
-                    mStatusBarHeightForRotation[seascapeRotation] =
-                            res.getDimensionPixelSize(R.dimen.status_bar_height_landscape);
+                    getStatusBarHeightForRotation(landscapeRotation);
+            mStatusBarHeightForRotation[seascapeRotation] =
+                    getStatusBarHeightForRotation(seascapeRotation);
             mDisplayCutoutTouchableRegionSize = res.getDimensionPixelSize(
                     R.dimen.display_cutout_touchable_region_size);
         } else {

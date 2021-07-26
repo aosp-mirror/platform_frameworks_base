@@ -83,6 +83,8 @@ import android.view.WindowManager;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.internal.policy.SystemBarUtils;
+
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -2126,8 +2128,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
         token.addWindow(statusBar);
         statusBar.setRequestedSize(displayContent.mBaseDisplayWidth,
-                displayContent.getDisplayUiContext().getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height));
+                SystemBarUtils.getStatusBarHeight(displayContent.getDisplayUiContext()));
 
         displayPolicy.addWindowLw(statusBar, attrs);
         displayPolicy.layoutWindowLw(statusBar, null, displayContent.mDisplayFrames);

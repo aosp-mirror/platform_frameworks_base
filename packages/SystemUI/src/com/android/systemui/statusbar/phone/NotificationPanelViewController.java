@@ -94,6 +94,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
@@ -890,10 +891,8 @@ public class NotificationPanelViewController extends PanelViewController {
         super.loadDimens();
         mFlingAnimationUtils = mFlingAnimationUtilsBuilder.get()
                 .setMaxLengthSeconds(0.4f).build();
-        mStatusBarMinHeight = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
-        mStatusBarHeaderHeightKeyguard = mResources.getDimensionPixelSize(
-                R.dimen.status_bar_header_height_keyguard);
+        mStatusBarMinHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());
+        mStatusBarHeaderHeightKeyguard = Utils.getStatusBarHeaderHeightKeyguard(mView.getContext());
         mQsPeekHeight = mResources.getDimensionPixelSize(R.dimen.qs_peek_height);
         mClockPositionAlgorithm.loadDimens(mResources);
         mQsFalsingThreshold = mResources.getDimensionPixelSize(R.dimen.qs_falsing_threshold);
@@ -903,8 +902,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.keyguard_indication_bottom_padding);
         mShelfHeight = mResources.getDimensionPixelSize(R.dimen.notification_shelf_height);
         mDarkIconSize = mResources.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
-        int statusbarHeight = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
+        int statusbarHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());
         mHeadsUpInset = statusbarHeight + mResources.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
         mDistanceForQSFullShadeTransition = mResources.getDimensionPixelSize(
@@ -973,10 +971,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void updateResources() {
-        mQuickQsOffsetHeight = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
-        mSplitShadeStatusBarHeight =
-                mResources.getDimensionPixelSize(R.dimen.split_shade_header_height);
+        mQuickQsOffsetHeight = SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
+        mSplitShadeStatusBarHeight = Utils.getSplitShadeStatusBarHeight(mView.getContext());
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         mShouldUseSplitNotificationShade =
@@ -1002,6 +998,7 @@ public class NotificationPanelViewController extends PanelViewController {
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
                     R.id.qs_edge_guideline, START);
+            constraintSet.constrainHeight(R.id.split_shade_status_bar, mSplitShadeStatusBarHeight);
         } else {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);

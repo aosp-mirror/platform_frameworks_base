@@ -30,6 +30,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -114,7 +115,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private void initDimens() {
         Resources res = getResources();
-        mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();

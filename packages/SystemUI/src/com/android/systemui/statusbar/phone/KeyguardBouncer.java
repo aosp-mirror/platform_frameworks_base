@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.KeyguardHostViewController;
 import com.android.keyguard.KeyguardRootViewController;
 import com.android.keyguard.KeyguardSecurityModel;
@@ -467,8 +468,7 @@ public class KeyguardBouncer {
         mKeyguardViewController.init();
 
         mContainer.addView(mRoot, mContainer.getChildCount());
-        mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
-                com.android.systemui.R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         setVisibility(View.INVISIBLE);
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
