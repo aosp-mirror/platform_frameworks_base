@@ -515,8 +515,11 @@ public class HdmiCecLocalDeviceTvTest {
         HdmiCecFeatureAction systemAudioAutoInitiationAction =
                 new SystemAudioAutoInitiationAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM);
         mHdmiCecLocalDeviceTv.addAndStartAction(systemAudioAutoInitiationAction);
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, true);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
 
         mTestLooper.dispatchAll();
@@ -548,8 +551,11 @@ public class HdmiCecLocalDeviceTvTest {
                 new SystemAudioAutoInitiationAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM);
         mHdmiCecLocalDeviceTv.addAndStartAction(systemAudioAutoInitiationAction);
 
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, true);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
 
         HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(

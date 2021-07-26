@@ -735,9 +735,11 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
-                Constants.ADDR_TV,
-                mHdmiControlServiceSpy.playback().mAddress, HdmiControlManager.POWER_STATUS_ON);
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_ON);
         mNativeWrapper.onCecMessage(reportPowerStatus);
         mTestLooper.dispatchAll();
 
@@ -756,10 +758,11 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
-                Constants.ADDR_TV,
-                mHdmiControlServiceSpy.playback().mAddress,
-                HdmiControlManager.POWER_STATUS_STANDBY);
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_STANDBY);
         mNativeWrapper.onCecMessage(reportPowerStatus);
         mTestLooper.dispatchAll();
 
