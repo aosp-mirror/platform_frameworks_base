@@ -49,9 +49,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
-import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
-import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -61,8 +58,7 @@ import java.util.List;
 /**
  * The header group on Keyguard.
  */
-public class KeyguardStatusBarView extends RelativeLayout implements
-        OnUserInfoChangedListener {
+public class KeyguardStatusBarView extends RelativeLayout {
 
     private static final int LAYOUT_NONE = 0;
     private static final int LAYOUT_CUTOUT = 1;
@@ -334,9 +330,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
-        userInfoController.addCallback(this);
-        userInfoController.reloadUserInfo();
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons), mFeatureFlags);
         mIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
@@ -345,12 +338,11 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(UserInfoController.class).removeCallback(this);
         Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
     }
 
-    @Override
-    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    void onUserInfoChanged(Drawable picture) {
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
@@ -432,9 +424,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     void onThemeChanged() {
         mBatteryView.setColorsFromContext(mContext);
         updateIconsAndTextColors();
-        // Reload user avatar
-        ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
-                .onDensityOrFontScaleChanged();
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
