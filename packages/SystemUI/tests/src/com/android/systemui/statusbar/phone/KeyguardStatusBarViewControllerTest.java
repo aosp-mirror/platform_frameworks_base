@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
@@ -42,6 +43,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private ConfigurationController mConfigurationController;
     @Mock
     private SystemStatusAnimationScheduler mAnimationScheduler;
+    @Mock
+    private BatteryController mBatteryController;
 
     private KeyguardStatusBarViewController mController;
 
@@ -53,7 +56,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardStatusBarView,
                 mCarrierTextController,
                 mConfigurationController,
-                mAnimationScheduler
+                mAnimationScheduler,
+                mBatteryController
         );
     }
 
@@ -71,5 +75,30 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mConfigurationController).removeCallback(any());
         verify(mAnimationScheduler).removeCallback(any());
+    }
+
+    @Test
+    public void setBatteryListening_true_callbackAdded() {
+        mController.setBatteryListening(true);
+
+        verify(mBatteryController).addCallback(any());
+    }
+
+    @Test
+    public void setBatteryListening_false_callbackRemoved() {
+        // First set to true so that we know setting to false is a change in state.
+        mController.setBatteryListening(true);
+
+        mController.setBatteryListening(false);
+
+        verify(mBatteryController).removeCallback(any());
+    }
+
+    @Test
+    public void setBatteryListening_trueThenTrue_callbackAddedOnce() {
+        mController.setBatteryListening(true);
+        mController.setBatteryListening(true);
+
+        verify(mBatteryController).addCallback(any());
     }
 }
