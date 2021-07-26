@@ -200,6 +200,7 @@ public class UserSwitcherController implements Dumpable {
                 PERMISSION_SELF, null /* scheduler */);
 
         mSettingsObserver = new ContentObserver(mHandler) {
+            @Override
             public void onChange(boolean selfChange) {
                 mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
                 mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
