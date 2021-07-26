@@ -98,6 +98,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -351,6 +352,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Nullable
     private ClientSuggestionsSession mClientSuggestionsSession;
 
+    private final AccessibilityManager mAccessibilityManager;
+
     void onSwitchInputMethodLocked() {
         // One caveat is that for the case where the focus is on a field for which regular autofill
         // returns null, and augmented autofill is triggered,  and then the user switches the input
@@ -472,7 +475,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                if (mPendingInlineSuggestionsRequest.isServiceSupported()) {
+                // If a11y touch exploration is enabled, then we do not send an inline fill request
+                // to the regular af service, because dropdown UI is easier to use.
+                if (mPendingInlineSuggestionsRequest.isServiceSupported()
+                        && !mAccessibilityManager.isTouchExplorationEnabled()) {
                     mPendingFillRequest = new FillRequest(mPendingFillRequest.getId(),
                             mPendingFillRequest.getFillContexts(),
                             mPendingFillRequest.getClientState(),
@@ -941,6 +947,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mRemoteFillService = serviceComponentName == null ? null
                 : new RemoteFillService(context, serviceComponentName, userId, this,
                         bindInstantServiceAllowed);
+        mAccessibilityManager = AccessibilityManager.getInstance(context);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
