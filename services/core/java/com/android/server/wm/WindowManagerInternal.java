@@ -288,6 +288,16 @@ public abstract class WindowManagerInternal {
          * Called when drag operation was cancelled.
          */
         default void postCancelDragAndDrop() {}
+
+        /**
+         * Called when it has entered a View that is willing to accept the drop.
+         */
+        default void dragRecipientEntered(IWindow window) {}
+
+        /**
+         * Called when it has exited a View that is willing to accept the drop.
+         */
+        default void dragRecipientExited(IWindow window) {}
     }
 
     /**
