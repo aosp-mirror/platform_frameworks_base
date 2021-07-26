@@ -24,6 +24,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
@@ -39,6 +40,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private CarrierTextController mCarrierTextController;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private SystemStatusAnimationScheduler mAnimationScheduler;
 
     private KeyguardStatusBarViewController mController;
 
@@ -49,7 +52,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController = new KeyguardStatusBarViewController(
                 mKeyguardStatusBarView,
                 mCarrierTextController,
-                mConfigurationController
+                mConfigurationController,
+                mAnimationScheduler
         );
     }
 
@@ -58,6 +62,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
 
         verify(mConfigurationController).addCallback(any());
+        verify(mAnimationScheduler).addCallback(any());
     }
 
     @Test
@@ -65,5 +70,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewDetached();
 
         verify(mConfigurationController).removeCallback(any());
+        verify(mAnimationScheduler).removeCallback(any());
     }
 }
