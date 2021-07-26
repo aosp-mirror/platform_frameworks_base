@@ -29,6 +29,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
@@ -715,6 +716,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 reparentTaskFragment(oldParent, newParent, errorCallbackToken);
                 break;
+            case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
+                fragmentToken = hop.getContainer();
+                final IBinder adjacentFragmentToken = hop.getAdjacentRoot();
+                final TaskFragment tf1 = mLaunchTaskFragments.get(fragmentToken);
+                final TaskFragment tf2 = mLaunchTaskFragments.get(adjacentFragmentToken);
+                if (tf1 == null || tf2 == null) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "Not allowed to set adjacent on invalid fragment tokens");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+                tf1.setAdjacentTaskFragment(tf2);
+                break;
         }
         return effects;
     }
@@ -1047,9 +1061,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // valid.
                 case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
                     // We are allowing organizer to start/reparent activity to a TaskFragment it
-                    // created. Nothing to check here because the TaskFragment may not be created
-                    // yet, but will be created in the same transaction.
+                    // created, or set two TaskFragments adjacent to each other. Nothing to check
+                    // here because the TaskFragment may not be created yet, but will be created in
+                    // the same transaction.
                     break;
                 case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
                     enforceTaskFragmentOrganized(func,

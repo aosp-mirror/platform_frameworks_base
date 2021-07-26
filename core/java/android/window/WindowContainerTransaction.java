@@ -442,7 +442,7 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Starts an activity in the TaskFragment.
      * @param fragmentToken client assigned unique token to create TaskFragment with specified in
-     *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     *                      {@link TaskFragmentCreationParams#getFragmentToken()}.
      * @param callerToken  the activity token that initialized the activity launch.
      * @param activityIntent    intent to start the activity.
      * @param activityOptions    ActivityOptions to start the activity with.
@@ -468,7 +468,7 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Moves an activity into the TaskFragment.
      * @param fragmentToken client assigned unique token to create TaskFragment with specified in
-     *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     *                      {@link TaskFragmentCreationParams#getFragmentToken()}.
      * @param activityToken activity to be reparented.
      * @hide
      */
@@ -500,6 +500,30 @@ public final class WindowContainerTransaction implements Parcelable {
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN)
                         .setContainer(oldParent.asBinder())
                         .setReparentContainer(newParent != null ? newParent.asBinder() : null)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Sets to TaskFragments adjacent to each other. Containers below two visible adjacent
+     * TaskFragments will be made invisible. This is similar to
+     * {@link #setAdjacentRoots(WindowContainerToken, WindowContainerToken)}, but can be used with
+     * fragmentTokens when that TaskFragments haven't been created (but will be created in the same
+     * {@link WindowContainerTransaction}).
+     * @param fragmentToken1    client assigned unique token to create TaskFragment with specified
+     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
+     * @param fragmentToken2    client assigned unique token to create TaskFragment with specified
+     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setAdjacentTaskFragments(
+            @NonNull IBinder fragmentToken1, @NonNull IBinder fragmentToken2) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS)
+                        .setContainer(fragmentToken1)
+                        .setReparentContainer(fragmentToken2)
                         .build();
         mHierarchyOps.add(hierarchyOp);
         return this;
@@ -908,6 +932,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT = 10;
         public static final int HIERARCHY_OP_TYPE_REPARENT_CHILDREN = 11;
         public static final int HIERARCHY_OP_TYPE_PENDING_INTENT = 12;
+        public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS = 13;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1136,6 +1161,9 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
                     return "{ReparentChildren: oldParent=" + mContainer + " newParent=" + mReparent
                             + "}";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
+                    return "{SetAdjacentTaskFragments: container=" + mContainer
+                            + " adjacentContainer=" + mReparent + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
