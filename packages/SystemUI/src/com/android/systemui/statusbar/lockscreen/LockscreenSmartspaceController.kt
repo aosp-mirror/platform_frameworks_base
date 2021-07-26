@@ -31,6 +31,8 @@ import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import com.android.settingslib.Utils
 import com.android.systemui.R
@@ -44,13 +46,20 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.AnimatableProperty
+import com.android.systemui.statusbar.notification.PropertyAnimator
+import com.android.systemui.statusbar.notification.stack.AnimationProperties
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
-import java.lang.RuntimeException
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
+
+private val ANIMATION_PROPERTIES = AnimationProperties()
+        .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD.toLong())
 
 /**
  * Controller for managing the smartspace view on the lockscreen
@@ -72,10 +81,15 @@ class LockscreenSmartspaceController @Inject constructor(
     @Main private val handler: Handler,
     optionalPlugin: Optional<BcSmartspaceDataPlugin>
 ) {
+
+    var splitShadeContainer: ViewGroup? = null
+    private var singlePaneContainer: ViewGroup? = null
+
     private var session: SmartspaceSession? = null
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
     private lateinit var smartspaceView: SmartspaceView
 
+    // smartspace casted to View
     lateinit var view: View
         private set
 
@@ -83,10 +97,58 @@ class LockscreenSmartspaceController @Inject constructor(
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
 
-    fun isEnabled(): Boolean {
+    private var isAod = false
+    private var isSplitShade = false
+
+    fun isSmartspaceEnabled(): Boolean {
         execution.assertIsMainThread()
 
         return featureFlags.isSmartspaceEnabled && plugin != null
+    }
+
+    fun setKeyguardStatusContainer(container: ViewGroup) {
+        singlePaneContainer = container
+        // reattach smartspace if necessary as this might be a new container
+        updateSmartSpaceContainer()
+    }
+
+    fun onSplitShadeChanged(splitShade: Boolean) {
+        isSplitShade = splitShade
+        updateSmartSpaceContainer()
+    }
+
+    private fun updateSmartSpaceContainer() {
+        if (!isSmartspaceEnabled()) return
+        // in AOD we always want to show smartspace on the left i.e. in singlePaneContainer
+        if (isSplitShade && !isAod) {
+            switchContainerVisibility(
+                    newParent = splitShadeContainer,
+                    oldParent = singlePaneContainer)
+        } else {
+            switchContainerVisibility(
+                    newParent = singlePaneContainer,
+                    oldParent = splitShadeContainer)
+        }
+        requestSmartspaceUpdate()
+    }
+
+    private fun switchContainerVisibility(newParent: ViewGroup?, oldParent: ViewGroup?) {
+        // it might be the case that smartspace was already attached and we just needed to update
+        // visibility, e.g. going from lockscreen -> unlocked -> lockscreen
+        if (newParent?.childCount == 0) {
+            oldParent?.removeAllViews()
+            newParent.addView(buildAndConnectView(newParent))
+        }
+        oldParent?.visibility = GONE
+        newParent?.visibility = VISIBLE
+    }
+
+    fun setSplitShadeSmartspaceAlpha(alpha: Float) {
+        // the other container's alpha is modified as a part of keyguard status view, so we don't
+        // have to do that here
+        if (splitShadeContainer?.visibility == VISIBLE) {
+            splitShadeContainer?.alpha = alpha
+        }
     }
 
     /**
@@ -96,7 +158,7 @@ class LockscreenSmartspaceController @Inject constructor(
     fun buildAndConnectView(parent: ViewGroup): View {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isSmartspaceEnabled()) {
             throw RuntimeException("Cannot build view when not enabled")
         }
 
@@ -182,7 +244,6 @@ class LockscreenSmartspaceController @Inject constructor(
         userTracker.removeCallback(userTrackerCallback)
         contentResolver.unregisterContentObserver(settingsObserver)
         configurationController.removeCallback(configChangeListener)
-        statusBarStateController.removeCallback(statusBarStateListener)
         session = null
 
         plugin?.onTargetsAvailable(emptyList())
@@ -196,6 +257,13 @@ class LockscreenSmartspaceController @Inject constructor(
     fun removeListener(listener: SmartspaceTargetListener) {
         execution.assertIsMainThread()
         plugin?.unregisterListener(listener)
+    }
+
+    fun shiftSplitShadeSmartspace(y: Int, animate: Boolean) {
+        if (splitShadeContainer?.visibility == VISIBLE) {
+            PropertyAnimator.setProperty(splitShadeContainer, AnimatableProperty.Y, y.toFloat(),
+                    ANIMATION_PROPERTIES, animate)
+        }
     }
 
     private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
@@ -232,6 +300,23 @@ class LockscreenSmartspaceController @Inject constructor(
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
             execution.assertIsMainThread()
             smartspaceView.setDozeAmount(eased)
+        }
+
+        override fun onDozingChanged(isDozing: Boolean) {
+            isAod = isDozing
+            updateSmartSpaceContainer()
+        }
+
+        override fun onStateChanged(newState: Int) {
+            if (newState == StatusBarState.KEYGUARD) {
+                if (isSmartspaceEnabled()) {
+                    updateSmartSpaceContainer()
+                }
+            } else {
+                splitShadeContainer?.visibility = GONE
+                singlePaneContainer?.visibility = GONE
+                disconnect()
+            }
         }
     }
 

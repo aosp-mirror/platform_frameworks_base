@@ -389,7 +389,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(userTracker).removeCallback(userListener)
         verify(contentResolver).unregisterContentObserver(settingsObserver)
         verify(configurationController).removeCallback(configChangeListener)
-        verify(statusBarStateController).removeCallback(statusBarStateListener)
     }
 
     @Test
