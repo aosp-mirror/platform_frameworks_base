@@ -180,7 +180,6 @@ import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.RemoteAnimationAdapter;
-import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -3029,18 +3028,6 @@ class Task extends TaskFragment {
     /** Checking if self or its child tasks are animated by recents animation. */
     boolean isAnimatingByRecents() {
         return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS);
-    }
-
-    @Override
-    RemoteAnimationTarget createRemoteAnimationTarget(
-            RemoteAnimationController.RemoteAnimationRecord record) {
-        final ActivityRecord activity = getTopMostActivity();
-        return activity != null ? activity.createRemoteAnimationTarget(record) : null;
-    }
-
-    @Override
-    boolean canCreateRemoteAnimationTarget() {
-        return true;
     }
 
     WindowState getTopVisibleAppMainWindow() {
