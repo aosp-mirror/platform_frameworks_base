@@ -373,8 +373,6 @@ interface IDevicePolicyManager {
     CharSequence getShortSupportMessageForUser(in ComponentName admin, int userHandle);
     CharSequence getLongSupportMessageForUser(in ComponentName admin, int userHandle);
 
-    boolean isSeparateProfileChallengeAllowed(int userHandle);
-
     void setOrganizationColor(in ComponentName admin, in int color);
     void setOrganizationColorForUser(in int color, in int userId);
     int getOrganizationColor(in ComponentName admin);
