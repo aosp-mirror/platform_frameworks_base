@@ -2326,6 +2326,9 @@ public class NotificationPanelViewController extends PanelViewController {
             final int startTop = mKeyguardStatusAreaClipBounds.top;
             final int startRight = mKeyguardStatusAreaClipBounds.right;
             final int startBottom = mKeyguardStatusAreaClipBounds.bottom;
+            if (mQsClippingAnimation != null) {
+                mQsClippingAnimation.cancel();
+            }
             mQsClippingAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
             mQsClippingAnimation.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
             mQsClippingAnimation.setDuration(mNotificationBoundsAnimationDuration);
