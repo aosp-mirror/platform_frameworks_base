@@ -132,7 +132,7 @@ private:
     } mLooper;
 };
 
-class RealIncFs : public IncFsWrapper {
+class RealIncFs final : public IncFsWrapper {
 public:
     RealIncFs() = default;
     ~RealIncFs() final = default;
@@ -185,7 +185,7 @@ public:
 
 static JNIEnv* getOrAttachJniEnv(JavaVM* jvm);
 
-class RealTimedQueueWrapper : public TimedQueueWrapper {
+class RealTimedQueueWrapper final : public TimedQueueWrapper {
 public:
     RealTimedQueueWrapper(JavaVM* jvm) {
         mThread = std::thread([this, jvm]() {
