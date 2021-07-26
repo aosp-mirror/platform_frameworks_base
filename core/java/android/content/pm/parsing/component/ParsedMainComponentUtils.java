@@ -19,6 +19,7 @@ package android.content.pm.parsing.component;
 import static android.content.pm.parsing.ParsingUtils.NOT_SET;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingUtils;
@@ -44,12 +45,12 @@ class ParsedMainComponentUtils {
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    static <Component extends ParsedMainComponent> ParseResult<Component> parseMainComponent(
+    static <Component extends ParsedMainComponentImpl> ParseResult<Component> parseMainComponent(
             Component component, String tag, String[] separateProcesses, ParsingPackage pkg,
-            TypedArray array, int flags, boolean useRoundIcon, ParseInput input, int bannerAttr,
-            int descriptionAttr, int directBootAwareAttr, int enabledAttr, int iconAttr,
-            int labelAttr, int logoAttr, int nameAttr, int processAttr, int roundIconAttr,
-            int splitNameAttr, int attributionTagsAttr) {
+            TypedArray array, int flags, boolean useRoundIcon,  @Nullable String defaultSplitName,
+            @NonNull ParseInput input, int bannerAttr, int descriptionAttr, int directBootAwareAttr,
+            int enabledAttr, int iconAttr, int labelAttr, int logoAttr, int nameAttr,
+            int processAttr, int roundIconAttr, int splitNameAttr, int attributionTagsAttr) {
         ParseResult<Component> result = ParsedComponentUtils.parseComponent(component, tag, pkg,
                 array, useRoundIcon, input, bannerAttr, descriptionAttr, iconAttr, labelAttr,
                 logoAttr, nameAttr, roundIconAttr);
@@ -93,6 +94,10 @@ class ParsedMainComponentUtils {
 
         if (splitNameAttr != NOT_SET) {
             component.setSplitName(array.getNonConfigurationString(splitNameAttr, 0));
+        }
+
+        if (defaultSplitName != null && component.getSplitName() == null) {
+            component.setSplitName(defaultSplitName);
         }
 
         if (attributionTagsAttr != NOT_SET) {

@@ -267,27 +267,27 @@ public class ParsingPackageUtils {
             boolean collectCertificates) {
         ParseResult<ParsingPackage> result;
 
-        ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, splitPermissions,
-                new Callback() {
-                    @Override
-                    public boolean hasFeature(String feature) {
-                        // Assume the device doesn't support anything. This will affect permission
-                        // parsing and will force <uses-permission/> declarations to include all
-                        // requiredNotFeature permissions and exclude all requiredFeature
-                        // permissions. This mirrors the old behavior.
-                        return false;
-                    }
+        ParsingPackageUtils parser = new ParsingPackageUtils(false, null /*separateProcesses*/,
+                null /*displayMetrics*/, splitPermissions, new Callback() {
+            @Override
+            public boolean hasFeature(String feature) {
+                // Assume the device doesn't support anything. This will affect permission
+                // parsing and will force <uses-permission/> declarations to include all
+                // requiredNotFeature permissions and exclude all requiredFeature
+                // permissions. This mirrors the old behavior.
+                return false;
+            }
 
-                    @Override
-                    public ParsingPackage startParsingPackage(
-                            @NonNull String packageName,
-                            @NonNull String baseApkPath,
-                            @NonNull String path,
-                            @NonNull TypedArray manifestArray, boolean isCoreApp) {
-                        return new ParsingPackageImpl(packageName, baseApkPath, path,
-                                manifestArray);
-                    }
-                });
+            @Override
+            public ParsingPackage startParsingPackage(
+                    @NonNull String packageName,
+                    @NonNull String baseApkPath,
+                    @NonNull String path,
+                    @NonNull TypedArray manifestArray, boolean isCoreApp) {
+                return new ParsingPackageImpl(packageName, baseApkPath, path,
+                        manifestArray);
+            }
+        });
         result = parser.parsePackage(input, file, parseFlags);
         if (result.isError()) {
             return input.error(result);
@@ -625,8 +625,8 @@ public class ParsingPackageUtils {
 
         final TypedArray manifestArray = res.obtainAttributes(parser, R.styleable.AndroidManifest);
         try {
-            final boolean isCoreApp =
-                    parser.getAttributeBooleanValue(null, "coreApp", false);
+            final boolean isCoreApp = parser.getAttributeBooleanValue(null /*namespace*/,
+                    "coreApp",false);
             final ParsingPackage pkg = mCallback.startParsingPackage(
                     pkgName, apkPath, codePath, manifestArray, isCoreApp);
             final ParseResult<ParsingPackage> result =
@@ -732,6 +732,13 @@ public class ParsingPackageUtils {
         } finally {
             sa.recycle();
         }
+
+        // If the loaded component did not specify a split, inherit the split name
+        // based on the split it is defined in.
+        // This is used to later load the correct split when starting this
+        // component.
+        String defaultSplitName = pkg.getSplitNames()[splitIndex];
+
         final int depth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -753,8 +760,7 @@ public class ParsingPackageUtils {
                 case "receiver":
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
-                                    res,
-                                    parser, flags, sUseRoundIcon, input);
+                                    res, parser, flags, sUseRoundIcon, defaultSplitName, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         if (isActivity) {
@@ -768,8 +774,8 @@ public class ParsingPackageUtils {
                     break;
                 case "service":
                     ParseResult<ParsedService> serviceResult = ParsedServiceUtils.parseService(
-                            mSeparateProcesses, pkg, res, parser, flags,
-                            sUseRoundIcon, input);
+                            mSeparateProcesses, pkg, res, parser, flags, sUseRoundIcon,
+                            defaultSplitName, input);
                     if (serviceResult.isSuccess()) {
                         ParsedService service = serviceResult.getResult();
                         pkg.addService(service);
@@ -780,7 +786,7 @@ public class ParsingPackageUtils {
                 case "provider":
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
-                                    flags, sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, defaultSplitName, input);
                     if (providerResult.isSuccess()) {
                         ParsedProvider provider = providerResult.getResult();
                         pkg.addProvider(provider);
@@ -790,7 +796,7 @@ public class ParsingPackageUtils {
                     break;
                 case "activity-alias":
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res, parser,
-                            sUseRoundIcon, input);
+                            sUseRoundIcon, defaultSplitName, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         pkg.addActivity(activity);
@@ -806,14 +812,6 @@ public class ParsingPackageUtils {
 
             if (result.isError()) {
                 return input.error(result);
-            }
-
-            if (mainComponent != null && mainComponent.getSplitName() == null) {
-                // If the loaded component did not specify a split, inherit the split name
-                // based on the split it is defined in.
-                // This is used to later load the correct split when starting this
-                // component.
-                mainComponent.setSplitName(pkg.getSplitNames()[splitIndex]);
             }
         }
 
@@ -832,15 +830,15 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                ParseResult<Property> metaDataResult = parseMetaData(pkg, null, res,
-                        parser, "<meta-data>", input);
+                ParseResult<Property> metaDataResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<meta-data>", input);
                 if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
                     pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
             case "property":
-                ParseResult<Property> propertyResult = parseMetaData(pkg, null, res,
-                        parser, "<property>", input);
+                ParseResult<Property> propertyResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<property>", input);
                 if (propertyResult.isSuccess()) {
                     pkg.addProperty(propertyResult.getResult());
                 }
@@ -1807,8 +1805,9 @@ public class ParsingPackageUtils {
                 continue;
             }
             if (parser.getName().equals("intent")) {
-                ParseResult<ParsedIntentInfo> result = ParsedIntentInfoUtils.parseIntentInfo(null,
-                        pkg, res, parser, true /*allowGlobs*/, true /*allowAutoVerify*/, input);
+                ParseResult<ParsedIntentInfo> result = ParsedIntentInfoUtils.parseIntentInfo(
+                        null /*className*/, pkg, res, parser, true /*allowGlobs*/,
+                        true /*allowAutoVerify*/, input);
                 if (result.isError()) {
                     return input.error(result);
                 }
@@ -2077,7 +2076,7 @@ public class ParsingPackageUtils {
                         R.styleable.AndroidManifestApplication_process);
             }
             ParseResult<String> processNameResult = ComponentParseUtils.buildProcessName(
-                    pkgName, null, pname, flags, mSeparateProcesses, input);
+                    pkgName, null /*defProc*/, pname, flags, mSeparateProcesses, input);
             if (processNameResult.isError()) {
                 return input.error(processNameResult);
             }
@@ -2146,7 +2145,8 @@ public class ParsingPackageUtils {
                 case "receiver":
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
-                                    res, parser, flags, sUseRoundIcon, input);
+                                    res, parser, flags, sUseRoundIcon, null /*defaultSplitName*/,
+                                    input);
 
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
@@ -2164,7 +2164,8 @@ public class ParsingPackageUtils {
                 case "service":
                     ParseResult<ParsedService> serviceResult =
                             ParsedServiceUtils.parseService(mSeparateProcesses, pkg, res, parser,
-                                    flags, sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, null /*defaultSplitName*/,
+                                    input);
                     if (serviceResult.isSuccess()) {
                         ParsedService service = serviceResult.getResult();
                         hasServiceOrder |= (service.getOrder() != 0);
@@ -2176,7 +2177,8 @@ public class ParsingPackageUtils {
                 case "provider":
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
-                                    flags, sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, null /*defaultSplitName*/,
+                                    input);
                     if (providerResult.isSuccess()) {
                         pkg.addProvider(providerResult.getResult());
                     }
@@ -2185,7 +2187,8 @@ public class ParsingPackageUtils {
                     break;
                 case "activity-alias":
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res,
-                            parser, sUseRoundIcon, input);
+                            parser, sUseRoundIcon, null /*defaultSplitName*/,
+                            input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         hasActivityOrder |= (activity.getOrder() != 0);
@@ -2327,15 +2330,15 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                final ParseResult<Property> metaDataResult = parseMetaData(pkg, null, res,
-                        parser, "<meta-data>", input);
+                final ParseResult<Property> metaDataResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<meta-data>", input);
                 if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
                     pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
             case "property":
-                final ParseResult<Property> propertyResult = parseMetaData(pkg, null, res,
-                        parser, "<property>", input);
+                final ParseResult<Property> propertyResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<property>", input);
                 if (propertyResult.isSuccess()) {
                     pkg.addProperty(propertyResult.getResult());
                 }

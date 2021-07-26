@@ -22,6 +22,7 @@ import static android.content.pm.parsing.ParsingUtils.NOT_SET;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -79,7 +80,7 @@ public class ParsedActivityUtils {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static ParseResult<ParsedActivity> parseActivityOrReceiver(String[] separateProcesses,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
-            boolean useRoundIcon, ParseInput input)
+            boolean useRoundIcon, @Nullable String defaultSplitName, ParseInput input)
             throws XmlPullParserException, IOException {
         final String packageName = pkg.getPackageName();
         final ParsedActivity
@@ -90,21 +91,20 @@ public class ParsedActivityUtils {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivity);
         try {
             ParseResult<ParsedActivity> result =
-                    ParsedMainComponentUtils.parseMainComponent(
-                    activity, tag, separateProcesses,
-                    pkg, sa, flags, useRoundIcon, input,
-                    R.styleable.AndroidManifestActivity_banner,
-                    R.styleable.AndroidManifestActivity_description,
-                    R.styleable.AndroidManifestActivity_directBootAware,
-                    R.styleable.AndroidManifestActivity_enabled,
-                    R.styleable.AndroidManifestActivity_icon,
-                    R.styleable.AndroidManifestActivity_label,
-                    R.styleable.AndroidManifestActivity_logo,
-                    R.styleable.AndroidManifestActivity_name,
-                    R.styleable.AndroidManifestActivity_process,
-                    R.styleable.AndroidManifestActivity_roundIcon,
-                    R.styleable.AndroidManifestActivity_splitName,
-                    R.styleable.AndroidManifestActivity_attributionTags);
+                    ParsedMainComponentUtils.parseMainComponent(activity, tag, separateProcesses,
+                            pkg, sa, flags, useRoundIcon, defaultSplitName, input,
+                            R.styleable.AndroidManifestActivity_banner,
+                            R.styleable.AndroidManifestActivity_description,
+                            R.styleable.AndroidManifestActivity_directBootAware,
+                            R.styleable.AndroidManifestActivity_enabled,
+                            R.styleable.AndroidManifestActivity_icon,
+                            R.styleable.AndroidManifestActivity_label,
+                            R.styleable.AndroidManifestActivity_logo,
+                            R.styleable.AndroidManifestActivity_name,
+                            R.styleable.AndroidManifestActivity_process,
+                            R.styleable.AndroidManifestActivity_roundIcon,
+                            R.styleable.AndroidManifestActivity_splitName,
+                            R.styleable.AndroidManifestActivity_attributionTags);
             if (result.isError()) {
                 return result;
             }
@@ -227,8 +227,8 @@ public class ParsedActivityUtils {
 
     @NonNull
     public static ParseResult<ParsedActivity> parseActivityAlias(ParsingPackage pkg, Resources res,
-            XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
-            throws XmlPullParserException, IOException {
+            XmlResourceParser parser, boolean useRoundIcon, @Nullable String defaultSplitName,
+            @NonNull ParseInput input) throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivityAlias);
         try {
             String targetActivity = sa.getNonConfigurationString(
@@ -267,7 +267,7 @@ public class ParsedActivityUtils {
             String tag = "<" + parser.getName() + ">";
 
             ParseResult<ParsedActivity> result = ParsedMainComponentUtils.parseMainComponent(
-                    activity, tag, null, pkg, sa, 0, useRoundIcon, input,
+                    activity, tag, null, pkg, sa, 0, useRoundIcon, defaultSplitName, input,
                     R.styleable.AndroidManifestActivityAlias_banner,
                     R.styleable.AndroidManifestActivityAlias_description,
                     NOT_SET /*directBootAwareAttr*/,

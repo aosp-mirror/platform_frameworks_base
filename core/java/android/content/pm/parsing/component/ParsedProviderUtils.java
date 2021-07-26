@@ -20,6 +20,7 @@ import static android.content.pm.parsing.ParsingPackageUtils.RIGID_PARSER;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -49,7 +50,7 @@ public class ParsedProviderUtils {
     @NonNull
     public static ParseResult<ParsedProvider> parseProvider(String[] separateProcesses,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
-            boolean useRoundIcon, ParseInput input)
+            boolean useRoundIcon, @Nullable String defaultSplitName, @NonNull ParseInput input)
             throws IOException, XmlPullParserException {
         String authority;
         boolean visibleToEphemeral;
@@ -63,19 +64,19 @@ public class ParsedProviderUtils {
         try {
             ParseResult<ParsedProvider> result =
                     ParsedMainComponentUtils.parseMainComponent(provider, tag, separateProcesses,
-                    pkg, sa, flags, useRoundIcon, input,
-                    R.styleable.AndroidManifestProvider_banner,
-                    R.styleable.AndroidManifestProvider_description,
-                    R.styleable.AndroidManifestProvider_directBootAware,
-                    R.styleable.AndroidManifestProvider_enabled,
-                    R.styleable.AndroidManifestProvider_icon,
-                    R.styleable.AndroidManifestProvider_label,
-                    R.styleable.AndroidManifestProvider_logo,
-                    R.styleable.AndroidManifestProvider_name,
-                    R.styleable.AndroidManifestProvider_process,
-                    R.styleable.AndroidManifestProvider_roundIcon,
-                    R.styleable.AndroidManifestProvider_splitName,
-                    R.styleable.AndroidManifestProvider_attributionTags);
+                            pkg, sa, flags, useRoundIcon, defaultSplitName, input,
+                            R.styleable.AndroidManifestProvider_banner,
+                            R.styleable.AndroidManifestProvider_description,
+                            R.styleable.AndroidManifestProvider_directBootAware,
+                            R.styleable.AndroidManifestProvider_enabled,
+                            R.styleable.AndroidManifestProvider_icon,
+                            R.styleable.AndroidManifestProvider_label,
+                            R.styleable.AndroidManifestProvider_logo,
+                            R.styleable.AndroidManifestProvider_name,
+                            R.styleable.AndroidManifestProvider_process,
+                            R.styleable.AndroidManifestProvider_roundIcon,
+                            R.styleable.AndroidManifestProvider_splitName,
+                            R.styleable.AndroidManifestProvider_attributionTags);
             if (result.isError()) {
                 return result;
             }

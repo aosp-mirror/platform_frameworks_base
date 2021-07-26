@@ -17,6 +17,7 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedMainComponent
+import android.content.pm.parsing.component.ParsedMainComponentImpl
 import android.content.pm.parsing.component.ParsedService
 import android.os.Parcelable
 import java.util.Arrays
@@ -42,8 +43,8 @@ abstract class ParsedMainComponentTest(kClass: KClass<out Parcelable>) :
 
     final override fun subclassExtraParams() = mainComponentSubclassExtraParams() + listOf(
         getSetByValue(
-            ParsedService::getAttributionTags,
-            ParsedService::setAttributionTags,
+            ParsedMainComponent::getAttributionTags,
+            ParsedMainComponentImpl::setAttributionTags,
             arrayOf("testAttributionTag"),
             compare = Arrays::equals
         ),

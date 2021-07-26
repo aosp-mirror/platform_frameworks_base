@@ -19,6 +19,7 @@ package android.content.pm.parsing.component;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -45,7 +46,7 @@ public class ParsedServiceUtils {
     @NonNull
     public static ParseResult<ParsedService> parseService(String[] separateProcesses,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
-            boolean useRoundIcon, ParseInput input)
+            boolean useRoundIcon, @Nullable String defaultSplitName, @NonNull ParseInput input)
             throws XmlPullParserException, IOException {
         boolean visibleToEphemeral;
         boolean setExported;
@@ -57,7 +58,8 @@ public class ParsedServiceUtils {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestService);
         try {
             ParseResult<ParsedService> result = ParsedMainComponentUtils.parseMainComponent(
-                    service, tag, separateProcesses, pkg, sa, flags, useRoundIcon, input,
+                    service, tag, separateProcesses, pkg, sa, flags, useRoundIcon, defaultSplitName,
+                    input,
                     R.styleable.AndroidManifestService_banner,
                     R.styleable.AndroidManifestService_description,
                     R.styleable.AndroidManifestService_directBootAware,

@@ -27,8 +27,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
 @ExperimentalContracts
-abstract class ParsedComponentTest(kClass: KClass<out Parcelable>) :
-    ParcelableComponentTest(kClass) {
+abstract class ParsedComponentTest(getterType: KClass<*>, setterType: KClass<out Parcelable>) :
+    ParcelableComponentTest(getterType, setterType) {
+
+    constructor(getterAndSetterType: KClass<out Parcelable>) :
+            this(getterAndSetterType, getterAndSetterType)
 
     final override val excludedMethods
         get() = subclassExcludedMethods + listOf(

@@ -29,7 +29,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide **/
-public class ParsedService extends ParsedMainComponent {
+public class ParsedService extends ParsedMainComponentImpl {
 
     private int foregroundServiceType;
     @Nullable

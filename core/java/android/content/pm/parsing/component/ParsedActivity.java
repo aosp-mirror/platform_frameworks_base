@@ -38,7 +38,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide **/
-public class ParsedActivity extends ParsedMainComponent {
+public class ParsedActivity extends ParsedMainComponentImpl {
 
     private int theme;
     private int uiOptions;
@@ -117,7 +117,7 @@ public class ParsedActivity extends ParsedMainComponent {
         ParsedActivity activity = new ParsedActivity();
         activity.setPackageName(packageName);
         activity.theme = android.R.style.Theme_NoDisplay;
-        activity.exported = true;
+        activity.setExported(true);
         activity.setName(PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);
         activity.setProcessName(processName);
         activity.uiOptions = uiOptions;
@@ -169,7 +169,7 @@ public class ParsedActivity extends ParsedMainComponent {
         alias.minAspectRatio = target.minAspectRatio;
         alias.supportsSizeChanges = target.supportsSizeChanges;
         alias.requestedVrComponent = target.requestedVrComponent;
-        alias.directBootAware = target.directBootAware;
+        alias.setDirectBootAware(target.isDirectBootAware());
         alias.setProcessName(target.getProcessName());
         return alias;
 
