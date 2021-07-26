@@ -895,7 +895,7 @@ public class RingtoneManager {
             throw new IOException("External storage is not mounted. Unable to install ringtones.");
         }
 
-        // Sanity-check: are we actually being asked to install an audio file?
+        // Consistency-check: are we actually being asked to install an audio file?
         final String mimeType = mContext.getContentResolver().getType(fileUri);
         if(mimeType == null ||
                 !(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
