@@ -19,11 +19,16 @@ package com.android.systemui.statusbar.phone;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextController;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -39,6 +44,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusBarView mKeyguardStatusBarView;
     @Mock
+    private ViewGroup mViewGroup;
+    @Mock
     private CarrierTextController mCarrierTextController;
     @Mock
     private ConfigurationController mConfigurationController;
@@ -48,6 +55,10 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private BatteryController mBatteryController;
     @Mock
     private UserInfoController mUserInfoController;
+    @Mock
+    private StatusBarIconController mStatusBarIconController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     private KeyguardStatusBarViewController mController;
 
@@ -55,13 +66,19 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        when(mKeyguardStatusBarView.getResources()).thenReturn(mContext.getResources());
+        when(mKeyguardStatusBarView.findViewById(R.id.statusIcons)).thenReturn(mViewGroup);
+        when(mViewGroup.getContext()).thenReturn(mContext);
+
         mController = new KeyguardStatusBarViewController(
                 mKeyguardStatusBarView,
                 mCarrierTextController,
                 mConfigurationController,
                 mAnimationScheduler,
                 mBatteryController,
-                mUserInfoController
+                mUserInfoController,
+                mStatusBarIconController,
+                new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags)
         );
     }
 
@@ -72,15 +89,20 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         verify(mConfigurationController).addCallback(any());
         verify(mAnimationScheduler).addCallback(any());
         verify(mUserInfoController).addCallback(any());
+        verify(mStatusBarIconController).addIconGroup(any());
     }
 
     @Test
     public void onViewDetached_callbacksUnregistered() {
+        // Set everything up first.
+        mController.onViewAttached();
+
         mController.onViewDetached();
 
         verify(mConfigurationController).removeCallback(any());
         verify(mAnimationScheduler).removeCallback(any());
         verify(mUserInfoController).removeCallback(any());
+        verify(mStatusBarIconController).removeIconGroup(any());
     }
 
     @Test

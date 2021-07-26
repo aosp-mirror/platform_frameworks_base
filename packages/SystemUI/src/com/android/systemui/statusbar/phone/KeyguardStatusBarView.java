@@ -43,17 +43,12 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The header group on Keyguard.
@@ -80,14 +75,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private int mSystemIconsSwitcherHiddenExpandedMargin;
     private int mSystemIconsBaseMargin;
     private View mSystemIconsContainer;
-    private TintedIconManager mIconManager;
-    private List<String> mBlockedIcons = new ArrayList<>();
 
     private View mCutoutSpace;
     private ViewGroup mStatusIconArea;
     private int mLayoutState = LAYOUT_NONE;
-
-    private FeatureFlags mFeatureFlags;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -122,8 +113,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mStatusIconContainer = findViewById(R.id.statusIcons);
 
         loadDimens();
-        loadBlockList();
-        mFeatureFlags = Dependency.get(FeatureFlags.class);
     }
 
     @Override
@@ -181,14 +170,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
         mRoundedCornerPadding = res.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
-    }
-
-    // Set hidden status bar items
-    private void loadBlockList() {
-        Resources r = getResources();
-        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_volume));
-        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_alarm_clock));
-        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_call_strength));
     }
 
     private void updateVisibilities() {
@@ -327,20 +308,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
         return true;
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons), mFeatureFlags);
-        mIconManager.setBlockList(mBlockedIcons);
-        Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
-    }
-
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
     void onUserInfoChanged(Drawable picture) {
         mMultiUserAvatar.setImageDrawable(picture);
@@ -421,9 +388,9 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void onThemeChanged() {
+    void onThemeChanged(StatusBarIconController.TintedIconManager iconManager) {
         mBatteryView.setColorsFromContext(mContext);
-        updateIconsAndTextColors();
+        updateIconsAndTextColors(iconManager);
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
@@ -433,7 +400,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mBatteryView.updatePercentView();
     }
 
-    private void updateIconsAndTextColors() {
+    private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
@@ -441,8 +408,8 @@ public class KeyguardStatusBarView extends RelativeLayout {
                 R.color.light_mode_icon_color_single_tone);
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
-        if (mIconManager != null) {
-            mIconManager.setTint(iconColor);
+        if (iconManager != null) {
+            iconManager.setTint(iconColor);
         }
 
         applyDarkness(R.id.battery, mEmptyRect, intensity, iconColor);
