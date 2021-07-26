@@ -441,19 +441,16 @@ public class StackScrollAlgorithm {
                     // to shelf start, thereby hiding all notifications (except the first one, which
                     // we later unhide in updatePulsingState)
                     // TODO(b/192348384): merge InnerHeight with StackHeight
-                    final int stackBottom;
-                    if (ambientState.isBypassEnabled()) {
-                        // We want to use the stackHeight when pulse expanding, since the animation
-                        // isn't currently optimized if the pulseHeight is continuously changing
-                        // Let's improve this when we're merging the heights above
-                        stackBottom = ambientState.isPulseExpanding()
-                                ? (int) ambientState.getStackHeight()
-                                : ambientState.getInnerHeight();
-                    } else {
-                        stackBottom = !ambientState.isShadeExpanded() || ambientState.isDozing()
-                                        ? ambientState.getInnerHeight()
-                                        : (int) ambientState.getPulseStackHeight();
-                    }
+                    // Note: Bypass pulse looks different, but when it is not expanding, we need
+                    //  to use the innerHeight which doesn't update continuously, otherwise we show
+                    //  more notifications than we should during this special transitional states.
+                    boolean bypassPulseNotExpanding = ambientState.isBypassEnabled()
+                            && ambientState.isOnKeyguard() && !ambientState.isPulseExpanding();
+                    final int stackBottom =
+                            !ambientState.isShadeExpanded() || ambientState.isDozing()
+                                    || bypassPulseNotExpanding
+                                    ? ambientState.getInnerHeight()
+                                    : (int) ambientState.getStackHeight();
                     final int shelfStart =
                             stackBottom - ambientState.getShelf().getIntrinsicHeight();
                     viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);

@@ -154,15 +154,6 @@ public class AmbientState {
         return mStackHeight;
     }
 
-    /**
-     * @return Height of notifications panel, with the animation from pulseHeight accounted for.
-     */
-    // TODO(b/192348384): move this logic to getStackHeight, and remove this and getInnerHeight
-    public float getPulseStackHeight() {
-        float pulseHeight = Math.min(mPulseHeight, mStackHeight);
-        return MathUtils.lerp(mStackHeight, pulseHeight, mDozeAmount);
-    }
-
     /** Tracks the state from AlertingNotificationManager#hasNotifications() */
     private boolean mHasAlertEntries;
 
