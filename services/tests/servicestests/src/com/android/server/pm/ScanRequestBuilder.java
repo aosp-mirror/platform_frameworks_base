@@ -108,8 +108,8 @@ class ScanRequestBuilder {
         return this;
     }
 
-    PackageManagerService.ScanRequest build() {
-        return new PackageManagerService.ScanRequest(
+    ScanRequest build() {
+        return new ScanRequest(
                 mPkg, mSharedUserSetting, mOldPkg, mPkgSetting, mDisabledPkgSetting,
                 mOriginalPkgSetting, mRealPkgName, mParseFlags, mScanFlags, mIsPlatformPackage,
                 mUser, mCpuAbiOverride);
