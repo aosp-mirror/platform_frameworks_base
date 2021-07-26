@@ -1587,19 +1587,25 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public void addOnMediaKeyEventSessionChangedListener(
-                final IOnMediaKeyEventSessionChangedListener listener) {
+                final IOnMediaKeyEventSessionChangedListener listener,
+                final ComponentName notificationListener) {
             if (listener == null) {
-                Log.w(TAG, "addOnMediaKeyEventSessionChangedListener: lister is null, ignoring");
+                Log.w(TAG, "addOnMediaKeyEventSessionChangedListener: listener is null, ignoring");
                 return;
             }
+
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+            final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission is required to"
-                            + "  add MediaKeyEventSessionChangedListener");
+                if (!hasMediaControlPermission(pid, uid)
+                        && !isEnabledNotificationListener(
+                                notificationListener, userHandle, userId)) {
+                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission or an enabled"
+                            + " notification listener is required to"
+                            + " add MediaKeyEventSessionChangedListener.");
                 }
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(userId);
@@ -1621,18 +1627,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         public void removeOnMediaKeyEventSessionChangedListener(
                 final IOnMediaKeyEventSessionChangedListener listener) {
             if (listener == null) {
-                Log.w(TAG, "removeOnMediaKeyEventSessionChangedListener: lister is null, ignoring");
+                Log.w(TAG, "removeOnMediaKeyEventSessionChangedListener: listener is null,"
+                        + " ignoring");
                 return;
             }
+
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission is required to"
-                            + "  remove MediaKeyEventSessionChangedListener");
-                }
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(userId);
                     if (user == null || user.mFullUserId != userId) {

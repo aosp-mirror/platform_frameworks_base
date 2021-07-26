@@ -66,7 +66,8 @@ interface ISessionManager {
     void addOnMediaKeyEventDispatchedListener(in IOnMediaKeyEventDispatchedListener listener);
     void removeOnMediaKeyEventDispatchedListener(in IOnMediaKeyEventDispatchedListener listener);
     void addOnMediaKeyEventSessionChangedListener(
-            in IOnMediaKeyEventSessionChangedListener listener);
+            in IOnMediaKeyEventSessionChangedListener listener,
+            in ComponentName notificationListener);
     void removeOnMediaKeyEventSessionChangedListener(
             in IOnMediaKeyEventSessionChangedListener listener);
     void setOnVolumeKeyLongPressListener(in IOnVolumeKeyLongPressListener listener);
