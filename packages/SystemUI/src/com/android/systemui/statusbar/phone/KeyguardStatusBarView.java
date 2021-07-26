@@ -18,10 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 
-import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -51,8 +48,6 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
-import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -70,8 +65,7 @@ import java.util.List;
  */
 public class KeyguardStatusBarView extends RelativeLayout implements
         BatteryStateChangeCallback,
-        OnUserInfoChangedListener,
-        SystemStatusAnimationCallback {
+        OnUserInfoChangedListener {
 
     private static final int LAYOUT_NONE = 0;
     private static final int LAYOUT_CUTOUT = 1;
@@ -102,7 +96,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     private ViewGroup mStatusIconArea;
     private int mLayoutState = LAYOUT_NONE;
 
-    private SystemStatusAnimationScheduler mAnimationScheduler;
     private FeatureFlags mFeatureFlags;
 
     /**
@@ -140,7 +133,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         loadDimens();
         loadBlockList();
         mBatteryController = Dependency.get(BatteryController.class);
-        mAnimationScheduler = Dependency.get(SystemStatusAnimationScheduler.class);
         mFeatureFlags = Dependency.get(FeatureFlags.class);
     }
 
@@ -366,7 +358,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons), mFeatureFlags);
         mIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
-        mAnimationScheduler.addCallback(this);
     }
 
     @Override
@@ -374,7 +365,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         super.onDetachedFromWindow();
         Dependency.get(UserInfoController.class).removeCallback(this);
         Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
-        mAnimationScheduler.removeCallback(this);
     }
 
     @Override
@@ -522,19 +512,16 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         }
     }
 
-    /** SystemStatusAnimationCallback */
-    @Override
-    public void onSystemChromeAnimationStart() {
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_OUT) {
+    void onSystemChromeAnimationStart(boolean isAnimatingOut) {
+        if (isAnimatingOut) {
             mSystemIconsContainer.setVisibility(View.VISIBLE);
             mSystemIconsContainer.setAlpha(0f);
         }
     }
 
-    @Override
-    public void onSystemChromeAnimationEnd() {
+    void onSystemChromeAnimationEnd(boolean isAnimatingIn) {
         // Make sure the system icons are out of the way
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_IN) {
+        if (isAnimatingIn) {
             mSystemIconsContainer.setVisibility(View.INVISIBLE);
             mSystemIconsContainer.setAlpha(0f);
         } else {
@@ -543,9 +530,8 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         }
     }
 
-    @Override
-    public void onSystemChromeAnimationUpdate(ValueAnimator anim) {
-        mSystemIconsContainer.setAlpha((float) anim.getAnimatedValue());
+    void onSystemChromeAnimationUpdate(float animatedValue) {
+        mSystemIconsContainer.setAlpha(animatedValue);
     }
 
     @Override
