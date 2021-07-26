@@ -148,6 +148,8 @@ public final class SurfaceControl implements Parcelable {
             float width, float height, float vecX, float vecY,
             float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
+    private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
+            boolean isTrustedOverlay);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -3410,6 +3412,17 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
             checkPreconditions(sc);
             nativeSetColorSpace(mNativeObject, sc.mNativeObject, colorSpace.getId());
+            return this;
+        }
+
+        /**
+         * Sets the trusted overlay state on this SurfaceControl and it is inherited to all the
+         * children. The caller must hold the ACCESS_SURFACE_FLINGER permission.
+         * @hide
+         */
+        public Transaction setTrustedOverlay(SurfaceControl sc, boolean isTrustedOverlay) {
+            checkPreconditions(sc);
+            nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, isTrustedOverlay);
             return this;
         }
 
