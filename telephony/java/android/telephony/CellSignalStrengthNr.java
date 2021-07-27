@@ -178,7 +178,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
         mCsiCqiTableIndex = inRangeOrUnavailable(csiCqiTableIndex, 1, 3);
         mCsiCqiReport = csiCqiReport.stream()
-                .map(cqi -> new Integer(inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 1, 3)))
+                .map(cqi -> new Integer(inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 0, 15)))
                 .collect(Collectors.toList());
         mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
         mSsRsrq = inRangeOrUnavailable(ssRsrq, -43, 20);
