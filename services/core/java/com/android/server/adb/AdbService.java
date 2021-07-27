@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.debug.AdbManager;
 import android.debug.AdbManagerInternal;
 import android.debug.AdbTransportType;
+import android.debug.FingerprintAndPairDevice;
 import android.debug.IAdbManager;
 import android.debug.IAdbTransport;
 import android.debug.PairDevice;
@@ -348,12 +349,21 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     @Override
-    public Map<String, PairDevice> getPairedDevices() {
+    public FingerprintAndPairDevice[] getPairedDevices() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            return mDebuggingManager.getPairedDevices();
+        if (mDebuggingManager == null) {
+            return null;
         }
-        return null;
+        Map<String, PairDevice> map = mDebuggingManager.getPairedDevices();
+        FingerprintAndPairDevice[] ret = new FingerprintAndPairDevice[map.size()];
+        int i = 0;
+        for (Map.Entry<String, PairDevice> entry : map.entrySet()) {
+            ret[i] = new FingerprintAndPairDevice();
+            ret[i].keyFingerprint = entry.getKey();
+            ret[i].device = entry.getValue();
+            i++;
+        }
+        return ret;
     }
 
     @Override
