@@ -18,10 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 
-import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -46,35 +43,17 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
-import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
-import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
-import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The header group on Keyguard.
  */
-public class KeyguardStatusBarView extends RelativeLayout implements
-        BatteryStateChangeCallback,
-        OnUserInfoChangedListener,
-        ConfigurationListener,
-        SystemStatusAnimationCallback {
+public class KeyguardStatusBarView extends RelativeLayout {
 
     private static final int LAYOUT_NONE = 0;
     private static final int LAYOUT_CUTOUT = 1;
@@ -84,29 +63,22 @@ public class KeyguardStatusBarView extends RelativeLayout implements
 
     private boolean mShowPercentAvailable;
     private boolean mBatteryCharging;
-    private boolean mBatteryListening;
 
     private TextView mCarrierLabel;
     private ImageView mMultiUserAvatar;
     private BatteryMeterView mBatteryView;
     private StatusIconContainer mStatusIconContainer;
 
-    private BatteryController mBatteryController;
     private boolean mKeyguardUserSwitcherEnabled;
     private final UserManager mUserManager;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
     private int mSystemIconsBaseMargin;
     private View mSystemIconsContainer;
-    private TintedIconManager mIconManager;
-    private List<String> mBlockedIcons = new ArrayList<>();
 
     private View mCutoutSpace;
     private ViewGroup mStatusIconArea;
     private int mLayoutState = LAYOUT_NONE;
-
-    private SystemStatusAnimationScheduler mAnimationScheduler;
-    private FeatureFlags mFeatureFlags;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -141,10 +113,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         mStatusIconContainer = findViewById(R.id.statusIcons);
 
         loadDimens();
-        loadBlockList();
-        mBatteryController = Dependency.get(BatteryController.class);
-        mAnimationScheduler = Dependency.get(SystemStatusAnimationScheduler.class);
-        mFeatureFlags = Dependency.get(FeatureFlags.class);
     }
 
     @Override
@@ -190,7 +158,7 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         setLayoutParams(lp);
     }
 
-    private void loadDimens() {
+    void loadDimens() {
         Resources res = getResources();
         mSystemIconsSwitcherHiddenExpandedMargin = res.getDimensionPixelSize(
                 R.dimen.system_icons_switcher_hidden_expanded_margin);
@@ -202,14 +170,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
         mRoundedCornerPadding = res.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
-    }
-
-    // Set hidden status bar items
-    private void loadBlockList() {
-        Resources r = getResources();
-        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_volume));
-        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_alarm_clock));
-        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_call_strength));
     }
 
     private void updateVisibilities() {
@@ -348,57 +308,17 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         return true;
     }
 
-    public void setListening(boolean listening) {
-        if (listening == mBatteryListening) {
-            return;
-        }
-        mBatteryListening = listening;
-        if (mBatteryListening) {
-            mBatteryController.addCallback(this);
-        } else {
-            mBatteryController.removeCallback(this);
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
-        userInfoController.addCallback(this);
-        userInfoController.reloadUserInfo();
-        Dependency.get(ConfigurationController.class).addCallback(this);
-        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons), mFeatureFlags);
-        mIconManager.setBlockList(mBlockedIcons);
-        Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
-        mAnimationScheduler.addCallback(this);
-        onThemeChanged();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        Dependency.get(UserInfoController.class).removeCallback(this);
-        Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
-        Dependency.get(ConfigurationController.class).removeCallback(this);
-        mAnimationScheduler.removeCallback(this);
-    }
-
-    @Override
-    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    void onUserInfoChanged(Drawable picture) {
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    void onBatteryLevelChanged(boolean charging) {
         if (mBatteryCharging != charging) {
             mBatteryCharging = charging;
             updateVisibilities();
         }
-    }
-
-    @Override
-    public void onPowerSaveChanged(boolean isPowerSave) {
-        // could not care less
     }
 
     public void setKeyguardUserSwitcherEnabled(boolean enabled) {
@@ -467,28 +387,20 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         return false;
     }
 
-    public void onThemeChanged() {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    void onThemeChanged(StatusBarIconController.TintedIconManager iconManager) {
         mBatteryView.setColorsFromContext(mContext);
-        updateIconsAndTextColors();
-        // Reload user avatar
-        ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
-                .onDensityOrFontScaleChanged();
+        updateIconsAndTextColors(iconManager);
     }
 
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        loadDimens();
-    }
-
-    @Override
-    public void onOverlayChanged() {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    void onOverlayChanged() {
         mCarrierLabel.setTextAppearance(
                 Utils.getThemeAttr(mContext, com.android.internal.R.attr.textAppearanceSmall));
-        onThemeChanged();
         mBatteryView.updatePercentView();
     }
 
-    private void updateIconsAndTextColors() {
+    private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
@@ -496,8 +408,8 @@ public class KeyguardStatusBarView extends RelativeLayout implements
                 R.color.light_mode_icon_color_single_tone);
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
-        if (mIconManager != null) {
-            mIconManager.setTint(iconColor);
+        if (iconManager != null) {
+            iconManager.setTint(iconColor);
         }
 
         applyDarkness(R.id.battery, mEmptyRect, intensity, iconColor);
@@ -522,10 +434,10 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryCharging: " + mBatteryCharging);
-        pw.println("  mBatteryListening: " + mBatteryListening);
         pw.println("  mLayoutState: " + mLayoutState);
         pw.println("  mKeyguardUserSwitcherEnabled: " + mKeyguardUserSwitcherEnabled);
         if (mBatteryView != null) {
@@ -533,19 +445,16 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         }
     }
 
-    /** SystemStatusAnimationCallback */
-    @Override
-    public void onSystemChromeAnimationStart() {
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_OUT) {
+    void onSystemChromeAnimationStart(boolean isAnimatingOut) {
+        if (isAnimatingOut) {
             mSystemIconsContainer.setVisibility(View.VISIBLE);
             mSystemIconsContainer.setAlpha(0f);
         }
     }
 
-    @Override
-    public void onSystemChromeAnimationEnd() {
+    void onSystemChromeAnimationEnd(boolean isAnimatingIn) {
         // Make sure the system icons are out of the way
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_IN) {
+        if (isAnimatingIn) {
             mSystemIconsContainer.setVisibility(View.INVISIBLE);
             mSystemIconsContainer.setAlpha(0f);
         } else {
@@ -554,9 +463,8 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         }
     }
 
-    @Override
-    public void onSystemChromeAnimationUpdate(ValueAnimator anim) {
-        mSystemIconsContainer.setAlpha((float) anim.getAnimatedValue());
+    void onSystemChromeAnimationUpdate(float animatedValue) {
+        mSystemIconsContainer.setAlpha(animatedValue);
     }
 
     @Override
