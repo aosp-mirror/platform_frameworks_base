@@ -86,6 +86,7 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentOrganizerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -285,8 +286,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         taskFragment.mAdjacentTaskFragment = this;
     }
 
-    void setTaskFragmentOrganizer(ITaskFragmentOrganizer organizer, int pid) {
-        mTaskFragmentOrganizer = organizer;
+    void setTaskFragmentOrganizer(TaskFragmentOrganizerToken organizer, int pid) {
+        mTaskFragmentOrganizer = ITaskFragmentOrganizer.Stub.asInterface(organizer.asBinder());
         mTaskFragmentOrganizerPid = pid;
     }
 
