@@ -116,6 +116,9 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 secondaryFragmentBounds, WINDOWING_MODE_MULTI_WINDOW, activityIntent,
                 activityOptions);
 
+        // Set adjacent to each other so that the containers below will be invisible.
+        wct.setAdjacentTaskFragments(launchingFragmentToken, secondaryFragmentToken);
+
         applyTransaction(wct);
     }
 
@@ -126,6 +129,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      */
     void expandTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {
         resizeTaskFragment(wct, fragmentToken, new Rect());
+        wct.setAdjacentTaskFragments(fragmentToken, null);
     }
 
     /**
