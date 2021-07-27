@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.window.TaskFragmentInfo;
@@ -58,6 +59,11 @@ class TaskFragmentContainer {
 
     /** Indicates whether the container was cleaned up after the last activity was removed. */
     private boolean mIsFinished;
+
+    /**
+     * Bounds that were requested last via {@link android.window.WindowContainerTransaction}.
+     */
+    private final Rect mLastRequestedBounds = new Rect();
 
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
@@ -198,5 +204,24 @@ class TaskFragmentContainer {
 
     boolean isFinished() {
         return mIsFinished;
+    }
+
+    /**
+     * Checks if last requested bounds are equal to the provided value.
+     */
+    boolean areLastRequestedBoundsEqual(@Nullable Rect bounds) {
+        return (bounds == null && mLastRequestedBounds.isEmpty())
+                || mLastRequestedBounds.equals(bounds);
+    }
+
+    /**
+     * Updates the last requested bounds.
+     */
+    void setLastRequestedBounds(@Nullable Rect bounds) {
+        if (bounds == null) {
+            mLastRequestedBounds.setEmpty();
+        } else {
+            mLastRequestedBounds.set(bounds);
+        }
     }
 }
