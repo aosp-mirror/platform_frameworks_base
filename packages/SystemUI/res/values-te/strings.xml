@@ -452,6 +452,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="tap_again" msgid="1315420114387908655">"మళ్లీ ట్యాప్ చేయండి"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"తెరవడానికి నొక్కండి"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -957,7 +958,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"కుడి"</string>
     <string name="tuner_menu" msgid="363690665924769420">"మెనూ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> అనురవర్తనం"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"హెచ్చరికలు"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"అలర్ట్‌లు"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"బ్యాటరీ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"స్క్రీన్‌షాట్‌లు"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"సాధారణ సందేశాలు"</string>
