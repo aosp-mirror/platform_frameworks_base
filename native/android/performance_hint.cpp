@@ -111,8 +111,7 @@ APerformanceHintManager* APerformanceHintManager::create(sp<IHintManager> manage
         return nullptr;
     }
     if (preferredRateNanos <= 0) {
-        ALOGE("%s: PerformanceHint invalid preferred rate.", __FUNCTION__);
-        return nullptr;
+        preferredRateNanos = -1L;
     }
     return new APerformanceHintManager(std::move(manager), preferredRateNanos);
 }
