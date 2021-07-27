@@ -65,6 +65,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProcess;
@@ -1797,7 +1798,7 @@ final class ScanPackageHelper {
             final ParsedActivity component = pkg.getActivities().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
 
@@ -1805,7 +1806,7 @@ final class ScanPackageHelper {
             final ParsedActivity component = pkg.getReceivers().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
 
@@ -1813,7 +1814,7 @@ final class ScanPackageHelper {
             final ParsedProvider component = pkg.getProviders().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
 
@@ -1821,7 +1822,7 @@ final class ScanPackageHelper {
             final ParsedService component = pkg.getServices().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
     }

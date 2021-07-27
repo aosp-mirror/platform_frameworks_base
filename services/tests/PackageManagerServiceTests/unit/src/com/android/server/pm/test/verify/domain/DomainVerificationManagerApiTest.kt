@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
+import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
@@ -520,7 +521,7 @@ class DomainVerificationManagerApiTest {
             whenever(isEnabled) { true }
 
             val activityList = listOf(
-                ParsedActivity().apply {
+                ParsedActivityImpl().apply {
                     domains.forEach {
                         addIntent(
                             ParsedIntentInfo().apply {

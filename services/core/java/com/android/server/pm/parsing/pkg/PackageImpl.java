@@ -26,6 +26,7 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageImpl;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
@@ -324,12 +325,12 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(activities.get(index), this.packageName);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(receivers.get(index), this.packageName);
         }
 
         int providersSize = providers.size();
@@ -354,12 +355,14 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     public PackageImpl setAllComponentsDirectBootAware(boolean allComponentsDirectBootAware) {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(activities.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(receivers.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int providersSize = providers.size();
@@ -446,7 +449,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         for (int index = 0; index < receiversSize; index++) {
             ParsedActivity receiver = receivers.get(index);
             if ((receiver.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                receiver.setExported(false);
+                ComponentMutateUtils.setExported(receiver, false);
             }
         }
 

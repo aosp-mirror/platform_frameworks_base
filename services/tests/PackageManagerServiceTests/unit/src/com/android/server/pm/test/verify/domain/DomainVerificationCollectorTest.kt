@@ -19,6 +19,7 @@ package com.android.server.pm.test.verify.domain
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.parsing.component.ParsedActivity
+import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.os.Build
 import android.os.PatternMatcher
@@ -92,40 +93,40 @@ class DomainVerificationCollectorTest {
             whenever(targetSdkVersion) { Build.VERSION_CODES.R }
 
             val activityList = listOf(
-                    ParsedActivity().apply {
-                        addIntent(
-                                ParsedIntentInfo().apply {
-                                    addAction(Intent.ACTION_VIEW)
-                                    addCategory(Intent.CATEGORY_BROWSABLE)
-                                    addCategory(Intent.CATEGORY_DEFAULT)
-                                    addDataScheme("http")
-                                    addDataScheme("https")
-                                    addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                                    addDataAuthority("example1.com", null)
-                                    addDataAuthority("invalid1", null)
-                                }
-                        )
-                    },
-                    ParsedActivity().apply {
-                        addIntent(
-                                ParsedIntentInfo().apply {
-                                    setAutoVerify(true)
-                                    addAction(Intent.ACTION_VIEW)
-                                    addCategory(Intent.CATEGORY_BROWSABLE)
-                                    addCategory(Intent.CATEGORY_DEFAULT)
-                                    addDataScheme("http")
-                                    addDataScheme("https")
+                ParsedActivityImpl().apply {
+                    addIntent(
+                            ParsedIntentInfo().apply {
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataScheme("https")
+                                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority("example1.com", null)
+                                addDataAuthority("invalid1", null)
+                            }
+                    )
+                },
+                ParsedActivityImpl().apply {
+                    addIntent(
+                            ParsedIntentInfo().apply {
+                                setAutoVerify(true)
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataScheme("https")
 
-                                    // The presence of a non-web-scheme as the only autoVerify
-                                    // intent-filter, when non-forced, means that v1 will not pick
-                                    // up the package for verification.
-                                    addDataScheme("nonWebScheme")
-                                    addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                                    addDataAuthority("example2.com", null)
-                                    addDataAuthority("invalid2", null)
-                                }
-                        )
-                    },
+                                // The presence of a non-web-scheme as the only autoVerify
+                                // intent-filter, when non-forced, means that v1 will not pick
+                                // up the package for verification.
+                                addDataScheme("nonWebScheme")
+                                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority("example2.com", null)
+                                addDataAuthority("invalid2", null)
+                            }
+                    )
+                },
             )
 
             whenever(activities) { activityList }
@@ -264,7 +265,7 @@ class DomainVerificationCollectorTest {
 
             // The intents are split into separate Activities to test that multiple are collected
             val activityList = listOf(
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
                                 ParsedIntentInfo().apply {
                                     setAutoVerify(autoVerify)
@@ -290,7 +291,7 @@ class DomainVerificationCollectorTest {
                                 }
                         )
                     },
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
                                 ParsedIntentInfo().apply {
                                     setAutoVerify(autoVerify)
@@ -304,7 +305,7 @@ class DomainVerificationCollectorTest {
                                 }
                         )
                     },
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
                                 ParsedIntentInfo().apply {
                                     setAutoVerify(autoVerify)

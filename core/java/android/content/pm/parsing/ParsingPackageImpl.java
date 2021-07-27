@@ -34,6 +34,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -1283,8 +1284,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.keySetMapping = ParsingPackageUtils.readKeySetMapping(in);
         this.protectedBroadcasts = sForInternedStringList.unparcel(in);
 
-        this.activities = in.createTypedArrayList(ParsedActivity.CREATOR);
-        this.receivers = in.createTypedArrayList(ParsedActivity.CREATOR);
+        this.activities = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
+        this.receivers = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
         this.services = in.createTypedArrayList(ParsedService.CREATOR);
         this.providers = in.createTypedArrayList(ParsedProvider.CREATOR);
         this.attributions = in.createTypedArrayList(ParsedAttribution.CREATOR);

@@ -148,6 +148,7 @@ import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;

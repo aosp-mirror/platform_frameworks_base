@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.XmlResourceParser;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Slog;
 
 import com.android.internal.util.XmlUtils;
@@ -30,6 +32,8 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /** @hide **/
 public class ParsingUtils {
@@ -73,5 +77,23 @@ public class ParsingUtils {
                 + parser.getPositionDescription());
         XmlUtils.skipCurrentTag(parser);
         return input.success(null); // Type doesn't matter
+    }
+
+    /**
+     * @see Parcel#createTypedArrayList(Parcelable.Creator)
+     */
+    @NonNull
+    static <Interface, Impl extends Interface> List<Interface> createTypedInterfaceList(
+            @NonNull Parcel parcel, @NonNull Parcelable.Creator<Impl> creator) {
+        int size = parcel.readInt();
+        if (size < 0) {
+            return new ArrayList<>();
+        }
+        ArrayList<Interface> list = new ArrayList<Interface>(size);
+        while (size > 0) {
+            list.add(parcel.readTypedObject(creator));
+            size--;
+        }
+        return list;
     }
 }

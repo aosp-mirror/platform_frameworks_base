@@ -45,6 +45,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -913,8 +914,8 @@ public class PackageParserTest {
                 .setVolumeUuid("d52ef59a-7def-4541-bf21-4c28ed4b65a0")
                 .addPermission(permission)
                 .addPermissionGroup(new ParsedPermissionGroup())
-                .addActivity(new ParsedActivity())
-                .addReceiver(new ParsedActivity())
+                .addActivity(new ParsedActivityImpl())
+                .addReceiver(new ParsedActivityImpl())
                 .addProvider(new ParsedProvider())
                 .addService(new ParsedService())
                 .addInstrumentation(new ParsedInstrumentation())

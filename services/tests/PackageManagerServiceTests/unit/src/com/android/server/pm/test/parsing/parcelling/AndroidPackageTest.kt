@@ -25,6 +25,7 @@ import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
 import android.content.pm.parsing.ParsingPackage
 import android.content.pm.parsing.component.ParsedActivity
+import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedAttribution
 import android.content.pm.parsing.component.ParsedComponent
 import android.content.pm.parsing.component.ParsedComponentImpl
@@ -357,14 +358,14 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addActivity,
             "TestActivityName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedActivity().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedActivityImpl().apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getReceivers,
             PackageImpl::addReceiver,
             "TestReceiverName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedActivity().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedActivityImpl().apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getServices,

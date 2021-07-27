@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
+import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.pkg.PackageUserState
 import android.content.pm.pkg.PackageUserStateInternal
@@ -297,7 +298,7 @@ class DomainVerificationEnforcerTest {
             whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
                             ParsedIntentInfo().apply {
                                 autoVerify = true

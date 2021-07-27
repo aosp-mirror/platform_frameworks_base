@@ -20,7 +20,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.content.pm.SigningDetails
-import android.content.pm.parsing.component.ParsedActivity
+import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
@@ -813,22 +813,22 @@ class DomainVerificationPackageTest {
             whenever(isEnabled) { true }
 
             val activityList = listOf(
-                    ParsedActivity().apply {
-                        domains.forEach {
-                            addIntent(
-                                    ParsedIntentInfo().apply {
-                                        autoVerify = true
-                                        addAction(Intent.ACTION_VIEW)
-                                        addCategory(Intent.CATEGORY_BROWSABLE)
-                                        addCategory(Intent.CATEGORY_DEFAULT)
-                                        addDataScheme("http")
-                                        addDataScheme("https")
-                                        addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                                        addDataAuthority(it, null)
-                                    }
-                            )
-                        }
-                    },
+                ParsedActivityImpl().apply {
+                    domains.forEach {
+                        addIntent(
+                            ParsedIntentInfo().apply {
+                                autoVerify = true
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataScheme("https")
+                                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority(it, null)
+                            }
+                        )
+                    }
+                },
             )
 
             whenever(activities) { activityList }

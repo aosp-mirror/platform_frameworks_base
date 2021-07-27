@@ -49,8 +49,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedActivityUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionUtils;
@@ -2700,7 +2702,8 @@ public class ParsingPackageUtils {
                     ? activity.getMetaData().getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio)
                     : maxAspectRatio;
 
-            activity.setMaxAspectRatio(activity.getResizeMode(), activityAspectRatio);
+            ComponentMutateUtils.setMaxAspectRatio(activity, activity.getResizeMode(),
+                    activityAspectRatio);
         }
     }
 
@@ -2717,7 +2720,8 @@ public class ParsingPackageUtils {
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
             if (activity.getMinAspectRatio() == ASPECT_RATIO_NOT_SET) {
-                activity.setMinAspectRatio(activity.getResizeMode(), minAspectRatio);
+                ComponentMutateUtils.setMinAspectRatio(activity, activity.getResizeMode(),
+                        minAspectRatio);
             }
         }
     }
@@ -2734,7 +2738,7 @@ public class ParsingPackageUtils {
             if (supportsSizeChanges || (activity.getMetaData() != null
                     && activity.getMetaData().getBoolean(
                             METADATA_SUPPORTS_SIZE_CHANGES, false))) {
-                activity.setSupportsSizeChanges(true);
+                ComponentMutateUtils.setSupportsSizeChanges(activity, true);
             }
         }
     }
@@ -2913,8 +2917,9 @@ public class ParsingPackageUtils {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
-            activity.setResizeMode(RESIZE_MODE_UNRESIZEABLE)
-                    .setFlags(activity.getFlags() & ~FLAG_SUPPORTS_PICTURE_IN_PICTURE);
+            ComponentMutateUtils.setResizeMode(activity, RESIZE_MODE_UNRESIZEABLE);
+            ComponentMutateUtils.setExactFlags(activity,
+                    activity.getFlags() & ~FLAG_SUPPORTS_PICTURE_IN_PICTURE);
         }
     }
 

@@ -26,8 +26,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
 @ExperimentalContracts
-abstract class ParsedMainComponentTest(kClass: KClass<out Parcelable>) :
-    ParsedComponentTest(kClass) {
+abstract class ParsedMainComponentTest(getterType: KClass<*>, setterType: KClass<out Parcelable>) :
+    ParsedComponentTest(getterType, setterType) {
+
+    constructor(getterAndSetterType: KClass<out Parcelable>) :
+            this(getterAndSetterType, getterAndSetterType)
 
     final override val subclassBaseParams
         get() = mainComponentSubclassBaseParams + listOf(

@@ -83,14 +83,13 @@ public class ParsedActivityUtils {
             boolean useRoundIcon, @Nullable String defaultSplitName, ParseInput input)
             throws XmlPullParserException, IOException {
         final String packageName = pkg.getPackageName();
-        final ParsedActivity
-                activity = new ParsedActivity();
+        final ParsedActivityImpl activity = new ParsedActivityImpl();
 
         boolean receiver = "receiver".equals(parser.getName());
         String tag = "<" + parser.getName() + ">";
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivity);
         try {
-            ParseResult<ParsedActivity> result =
+            ParseResult<ParsedActivityImpl> result =
                     ParsedMainComponentUtils.parseMainComponent(activity, tag, separateProcesses,
                             pkg, sa, flags, useRoundIcon, defaultSplitName, input,
                             R.styleable.AndroidManifestActivity_banner,
@@ -106,7 +105,7 @@ public class ParsedActivityUtils {
                             R.styleable.AndroidManifestActivity_splitName,
                             R.styleable.AndroidManifestActivity_attributionTags);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             if (receiver && pkg.isCantSaveState()) {
@@ -263,10 +262,10 @@ public class ParsedActivityUtils {
                         + ", parsedActivities = " + activities);
             }
 
-            ParsedActivity activity = ParsedActivity.makeAlias(targetActivity, target);
+            ParsedActivityImpl activity = ParsedActivityImpl.makeAlias(targetActivity, target);
             String tag = "<" + parser.getName() + ">";
 
-            ParseResult<ParsedActivity> result = ParsedMainComponentUtils.parseMainComponent(
+            ParseResult<ParsedActivityImpl> result = ParsedMainComponentUtils.parseMainComponent(
                     activity, tag, null, pkg, sa, 0, useRoundIcon, defaultSplitName, input,
                     R.styleable.AndroidManifestActivityAlias_banner,
                     R.styleable.AndroidManifestActivityAlias_description,
@@ -281,7 +280,7 @@ public class ParsedActivityUtils {
                     NOT_SET /*splitNameAttr*/,
                     R.styleable.AndroidManifestActivityAlias_attributionTags);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             // TODO add visibleToInstantApps attribute to activity alias
@@ -308,7 +307,7 @@ public class ParsedActivityUtils {
      * type of logic.
      */
     @NonNull
-    private static ParseResult<ParsedActivity> parseActivityOrAlias(ParsedActivity activity,
+    private static ParseResult<ParsedActivity> parseActivityOrAlias(ParsedActivityImpl activity,
             ParsingPackage pkg, String tag, XmlResourceParser parser, Resources resources,
             TypedArray array, boolean isReceiver, boolean isAlias, boolean visibleToEphemeral,
             ParseInput input, int parentActivityNameAttr, int permissionAttr,
@@ -446,7 +445,7 @@ public class ParsedActivityUtils {
 
     @NonNull
     private static ParseResult<ParsedIntentInfo> parseIntentFilter(ParsingPackage pkg,
-            ParsedActivity activity, boolean allowImplicitEphemeralVisibility,
+            ParsedActivityImpl activity, boolean allowImplicitEphemeralVisibility,
             boolean visibleToEphemeral, Resources resources, XmlResourceParser parser,
             ParseInput input) throws IOException, XmlPullParserException {
         ParseResult<ParsedIntentInfo> result = ParsedMainComponentUtils.parseIntentFilter(activity,

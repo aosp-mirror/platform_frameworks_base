@@ -35,6 +35,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedProvider;
@@ -146,7 +147,7 @@ public class AppsFilterTest {
     }
 
     private static ParsedActivity createActivity(String packageName, IntentFilter[] filters) {
-        ParsedActivity activity = new ParsedActivity();
+        ParsedActivityImpl activity = new ParsedActivityImpl();
         activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
             final ParsedIntentInfo info = new ParsedIntentInfo();
