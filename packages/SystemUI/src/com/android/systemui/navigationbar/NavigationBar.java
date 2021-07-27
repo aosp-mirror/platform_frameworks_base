@@ -597,6 +597,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     public void destroyView() {
+        setAutoHideController(/* autoHideController */ null);
         mCommandQueue.removeCallback(this);
         mContext.getSystemService(WindowManager.class).removeViewImmediate(
                 mNavigationBarView.getRootView());
@@ -919,6 +920,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
+        // The CommandQueue callbacks are added when the view is created to ensure we track other
+        // states, but until the view is attached (at the next traversal), the view's display is
+        // not valid.  Just ignore the rotation in this case.
+        if (!mNavigationBarView.isAttachedToWindow()) return;
+
         final int winRotation = mNavigationBarView.getDisplay().getRotation();
         final boolean rotateSuggestionsDisabled = RotationButtonController
                 .hasDisable2RotateSuggestionFlag(mDisabledFlags2);
@@ -1484,7 +1490,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     /** Sets {@link AutoHideController} to the navigation bar. */
-    public void setAutoHideController(AutoHideController autoHideController) {
+    private void setAutoHideController(AutoHideController autoHideController) {
         mAutoHideController = autoHideController;
         if (mAutoHideController != null) {
             mAutoHideController.setNavigationBar(mAutoHideUiElement);
