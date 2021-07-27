@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Wireless display certification"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Enable Wi‑Fi verbose logging"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi scan throttling"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi non‑persistent MAC randomisation"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobile data always active"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering hardware acceleration"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Show Bluetooth devices without names"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Show options for wireless display certification"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Increase Wi‑Fi logging level, show per SSID RSSI in Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduces battery drain and improves network performance"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"When this mode is enabled, this device’s MAC address may change each time that it connects to a network that has MAC randomisation enabled."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Metered"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Unmetered"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger buffer sizes"</string>
