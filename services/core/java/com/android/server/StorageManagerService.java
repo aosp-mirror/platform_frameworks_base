@@ -1032,7 +1032,7 @@ class StorageManagerService extends IStorageManager.Stub
                 final ProviderInfo provider = mPmInternal.resolveContentProvider(
                         MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.id);
+                        user.id, Process.SYSTEM_UID);
                 if (provider != null) {
                     final IActivityManager am = ActivityManager.getService();
                     try {
@@ -2021,7 +2021,7 @@ class StorageManagerService extends IStorageManager.Stub
         return mPmInternal.resolveContentProvider(
                 authority, PackageManager.MATCH_DIRECT_BOOT_AWARE
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.getUserId(UserHandle.USER_SYSTEM));
+                UserHandle.getUserId(UserHandle.USER_SYSTEM), Process.SYSTEM_UID);
     }
 
     private void updateLegacyStorageApps(String packageName, int uid, boolean hasLegacy) {
