@@ -25,6 +25,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyDialogController
@@ -32,7 +33,6 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
@@ -47,9 +47,9 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest

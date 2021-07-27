@@ -25,7 +25,6 @@ import androidx.annotation.Nullable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.wrapper.BuildInfo;
 
 import javax.inject.Inject;

@@ -67,7 +67,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
