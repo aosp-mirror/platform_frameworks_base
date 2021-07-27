@@ -22,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.IBinder;
@@ -35,6 +36,7 @@ import java.util.List;
  * Stores information about a particular TaskFragment.
  * @hide
  */
+@TestApi
 public final class TaskFragmentInfo implements Parcelable {
 
     /**
@@ -63,11 +65,13 @@ public final class TaskFragmentInfo implements Parcelable {
      * List of Activity tokens that are children of this TaskFragment. It only contains Activities
      * that belong to the organizer process for security.
      */
+    @NonNull
     private final List<IBinder> mActivities = new ArrayList<>();
 
     /** Relative position of the fragment's top left corner in the parent container. */
     private final Point mPositionInParent;
 
+    /** @hide */
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
             @NonNull Configuration configuration, boolean isEmpty, boolean hasRunningActivity,
@@ -82,14 +86,17 @@ public final class TaskFragmentInfo implements Parcelable {
         mPositionInParent = requireNonNull(positionInParent);
     }
 
+    @NonNull
     public IBinder getFragmentToken() {
         return mFragmentToken;
     }
 
+    @NonNull
     public WindowContainerToken getToken() {
         return mToken;
     }
 
+    @NonNull
     public Configuration getConfiguration() {
         return mConfiguration;
     }
@@ -106,6 +113,7 @@ public final class TaskFragmentInfo implements Parcelable {
         return mIsVisible;
     }
 
+    @NonNull
     public List<IBinder> getActivities() {
         return mActivities;
     }
@@ -151,6 +159,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mPositionInParent = requireNonNull(in.readTypedObject(Point.CREATOR));
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mFragmentToken);
@@ -189,6 +198,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + "}";
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;

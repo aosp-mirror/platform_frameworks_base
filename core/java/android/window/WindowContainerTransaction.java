@@ -410,7 +410,6 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Creates a new TaskFragment with the given options.
      * @param taskFragmentOptions the options used to create the TaskFragment.
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction createTaskFragment(
@@ -426,7 +425,6 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Deletes an existing TaskFragment. Any remaining activities below it will be destroyed.
      * @param taskFragment  the TaskFragment to be removed.
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction deleteTaskFragment(
@@ -447,7 +445,6 @@ public final class WindowContainerTransaction implements Parcelable {
      * @param activityIntent    intent to start the activity.
      * @param activityOptions    ActivityOptions to start the activity with.
      * @see android.content.Context#startActivity(Intent, Bundle).
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction startActivityInTaskFragment(
@@ -470,7 +467,6 @@ public final class WindowContainerTransaction implements Parcelable {
      * @param fragmentToken client assigned unique token to create TaskFragment with specified in
      *                      {@link TaskFragmentCreationParams#getFragmentToken()}.
      * @param activityToken activity to be reparented.
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction reparentActivityToTaskFragment(
@@ -490,7 +486,6 @@ public final class WindowContainerTransaction implements Parcelable {
      * @param oldParent children of this TaskFragment will be reparented.
      * @param newParent the new parent TaskFragment to move the children to. If {@code null}, the
      *                  children will be moved to the leaf Task.
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction reparentChildren(
@@ -535,7 +530,6 @@ public final class WindowContainerTransaction implements Parcelable {
      * @param errorCallbackToken    client provided token that will be passed back as parameter in
      *                              the callback if there is an error on the server side.
      * @see ITaskFragmentOrganizer#onTaskFragmentError
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction setErrorCallbackToken(@NonNull IBinder errorCallbackToken) {
