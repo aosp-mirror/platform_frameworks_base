@@ -37,8 +37,8 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.util.CarrierConfigTracker;

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.hardware.display.ColorDisplayManager;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Named;
