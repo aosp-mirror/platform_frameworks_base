@@ -22,7 +22,10 @@ import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -54,17 +57,17 @@ public class OneHandedBackgroundPanelOrganizerTest extends OneHandedTestCase {
     private OneHandedBackgroundPanelOrganizer mSpiedBackgroundPanelOrganizer;
     private WindowContainerToken mToken;
     private SurfaceControl mLeash;
-    private TestableLooper mTestableLooper;
 
     @Mock
     IWindowContainerToken mMockRealToken;
     @Mock
     DisplayController mMockDisplayController;
+    @Mock
+    OneHandedSettingsUtil mMockSettingsUtil;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTestableLooper = TestableLooper.get(this);
         mToken = new WindowContainerToken(mMockRealToken);
         mLeash = new SurfaceControl();
         mDisplay = mContext.getDisplay();
@@ -74,32 +77,36 @@ public class OneHandedBackgroundPanelOrganizerTest extends OneHandedTestCase {
                 FEATURE_ONE_HANDED_BACKGROUND_PANEL);
 
         mSpiedBackgroundPanelOrganizer = spy(
-                new OneHandedBackgroundPanelOrganizer(mContext, mDisplayLayout, Runnable::run));
+                new OneHandedBackgroundPanelOrganizer(mContext, mDisplayLayout, mMockSettingsUtil,
+                        Runnable::run));
+        mSpiedBackgroundPanelOrganizer.onDisplayChanged(mDisplayLayout);
     }
 
     @Test
     public void testOnDisplayAreaAppeared() {
         mSpiedBackgroundPanelOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mTestableLooper.processAllMessages();
 
-        assertThat(mSpiedBackgroundPanelOrganizer.getBackgroundSurface()).isNotNull();
+        assertThat(mSpiedBackgroundPanelOrganizer.isRegistered()).isTrue();
+        verify(mSpiedBackgroundPanelOrganizer, never()).showBackgroundPanelLayer();
     }
 
     @Test
     public void testShowBackgroundLayer() {
-        mSpiedBackgroundPanelOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mSpiedBackgroundPanelOrganizer.showBackgroundPanelLayer();
-        mTestableLooper.processAllMessages();
+        mSpiedBackgroundPanelOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, null);
+        mSpiedBackgroundPanelOrganizer.onStart();
 
-        assertThat(mSpiedBackgroundPanelOrganizer.mIsShowing).isTrue();
+        verify(mSpiedBackgroundPanelOrganizer).showBackgroundPanelLayer();
     }
 
     @Test
     public void testRemoveBackgroundLayer() {
         mSpiedBackgroundPanelOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mSpiedBackgroundPanelOrganizer.removeBackgroundPanelLayer();
-        mTestableLooper.processAllMessages();
 
-        assertThat(mSpiedBackgroundPanelOrganizer.mIsShowing).isFalse();
+        assertThat(mSpiedBackgroundPanelOrganizer.isRegistered()).isNotNull();
+
+        reset(mSpiedBackgroundPanelOrganizer);
+        mSpiedBackgroundPanelOrganizer.removeBackgroundPanelLayer();
+
+        assertThat(mSpiedBackgroundPanelOrganizer.mBackgroundSurface).isNull();
     }
 }
