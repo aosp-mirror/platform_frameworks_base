@@ -87,7 +87,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ప్రాధాన్య నెట్‌వర్క్‌ను మార్చుకోవడానికి ప్రయత్నించండి. మార్చడానికి నొక్కండి."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi-Fiతో అత్యవసర కాల్‌లు చేయలేరు"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"హెచ్చరికలు"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"మొబైల్ డేటా స్థితి"</string>
@@ -280,7 +280,7 @@
     <string name="notification_channel_network_available" msgid="6083697929214165169">"నెట్‌వర్క్ అందుబాటులో ఉంది"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN స్థితి"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"మీ IT నిర్వాహకుల నుండి వచ్చే హెచ్చరికలు"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"హెచ్చరికలు"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"అలర్ట్‌లు"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"రిటైల్ డెమో"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB కనెక్షన్"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"యాప్ అమలవుతోంది"</string>
