@@ -68,7 +68,6 @@ abstract class HdmiCecLocalDevice {
 
     protected final HdmiControlService mService;
     protected final int mDeviceType;
-    protected int mAddress;
     protected int mPreferredAddress;
     @GuardedBy("mLock")
     protected HdmiDeviceInfo mDeviceInfo;
@@ -187,7 +186,6 @@ abstract class HdmiCecLocalDevice {
     protected HdmiCecLocalDevice(HdmiControlService service, int deviceType) {
         mService = service;
         mDeviceType = deviceType;
-        mAddress = Constants.ADDR_UNREGISTERED;
         mLock = service.getServiceLock();
     }
 
@@ -254,7 +252,7 @@ abstract class HdmiCecLocalDevice {
     protected int dispatchMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int dest = message.getDestination();
-        if (dest != mAddress && dest != Constants.ADDR_BROADCAST) {
+        if (dest != mDeviceInfo.getLogicalAddress() && dest != Constants.ADDR_BROADCAST) {
             return Constants.NOT_HANDLED;
         }
         // Cache incoming message if it is included in the list of cacheable opcodes.
@@ -388,7 +386,7 @@ abstract class HdmiCecLocalDevice {
         } else {
             HdmiCecMessage cecMessage =
                     HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                            mAddress, physicalAddress, mDeviceType);
+                            mDeviceInfo.getLogicalAddress(), physicalAddress, mDeviceType);
             mService.sendCecCommand(cecMessage);
         }
         return Constants.HANDLED;
@@ -403,7 +401,8 @@ abstract class HdmiCecLocalDevice {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNABLE_TO_DETERMINE);
         } else {
             HdmiCecMessage cecMessage =
-                    HdmiCecMessageBuilder.buildDeviceVendorIdCommand(mAddress, vendorId);
+                    HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
+                            mDeviceInfo.getLogicalAddress(), vendorId);
             mService.sendCecCommand(cecMessage);
         }
         return Constants.HANDLED;
@@ -476,8 +475,8 @@ abstract class HdmiCecLocalDevice {
 
     protected void buildAndSendSetOsdName(int dest) {
         HdmiCecMessage cecMessage =
-            HdmiCecMessageBuilder.buildSetOsdNameCommand(
-                mAddress, dest, mDeviceInfo.getDisplayName());
+                HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                        mDeviceInfo.getLogicalAddress(), dest, mDeviceInfo.getDisplayName());
         if (cecMessage != null) {
             mService.sendCecCommand(cecMessage, new SendMessageCallback() {
                 @Override
@@ -525,7 +524,8 @@ abstract class HdmiCecLocalDevice {
         if (cecDeviceInfo != null && cecDeviceInfo.getDisplayName().equals(
                 HdmiUtils.getDefaultDeviceName(address))) {
             mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildGiveOsdNameCommand(mAddress, address));
+                    HdmiCecMessageBuilder.buildGiveOsdNameCommand(
+                            mDeviceInfo.getLogicalAddress(), address));
         }
 
         return Constants.HANDLED;
@@ -630,8 +630,13 @@ abstract class HdmiCecLocalDevice {
         List<Integer> deviceFeatures = getDeviceFeatures();
 
         mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildReportFeatures(mAddress, mService.getCecVersion(),
-                        localDeviceTypes, rcProfile, rcFeatures, deviceFeatures));
+                HdmiCecMessageBuilder.buildReportFeatures(
+                        mDeviceInfo.getLogicalAddress(),
+                        mService.getCecVersion(),
+                        localDeviceTypes,
+                        rcProfile,
+                        rcFeatures,
+                        deviceFeatures));
     }
 
     @ServiceThreadOnly
@@ -793,7 +798,9 @@ abstract class HdmiCecLocalDevice {
     protected int handleGiveDevicePowerStatus(HdmiCecMessage message) {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportPowerStatus(
-                        mAddress, message.getSource(), mService.getPowerStatus()));
+                        mDeviceInfo.getLogicalAddress(),
+                        message.getSource(),
+                        mService.getPowerStatus()));
         return Constants.HANDLED;
     }
 
@@ -802,7 +809,9 @@ abstract class HdmiCecLocalDevice {
         // Always report menu active to receive Remote Control.
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportMenuStatus(
-                        mAddress, message.getSource(), Constants.MENU_STATE_ACTIVATED));
+                        mDeviceInfo.getLogicalAddress(),
+                        message.getSource(),
+                        Constants.MENU_STATE_ACTIVATED));
         return Constants.HANDLED;
     }
 
@@ -884,7 +893,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     final void handleAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
-        mAddress = mPreferredAddress = logicalAddress;
+        mPreferredAddress = logicalAddress;
         if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
             reportFeatures();
         }
@@ -914,14 +923,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     boolean isAddressOf(int addr) {
         assertRunOnServiceThread();
-        return addr == mAddress;
-    }
-
-    // Resets the logical address to unregistered(15), meaning the logical device is invalid.
-    @ServiceThreadOnly
-    void clearAddress() {
-        assertRunOnServiceThread();
-        mAddress = Constants.ADDR_UNREGISTERED;
+        return addr == mDeviceInfo.getLogicalAddress();
     }
 
     @ServiceThreadOnly
@@ -1184,7 +1186,8 @@ abstract class HdmiCecLocalDevice {
         }
         List<SendKeyAction> action = getActions(SendKeyAction.class);
         int logicalAddress = findKeyReceiverAddress();
-        if (logicalAddress == Constants.ADDR_INVALID || logicalAddress == mAddress) {
+        if (logicalAddress == Constants.ADDR_INVALID
+                || logicalAddress == mDeviceInfo.getLogicalAddress()) {
             // Don't send key event to invalid device or itself.
             Slog.w(
                     TAG,
@@ -1222,7 +1225,8 @@ abstract class HdmiCecLocalDevice {
         }
         List<SendKeyAction> action = getActions(SendKeyAction.class);
         int logicalAddress = findAudioReceiverAddress();
-        if (logicalAddress == Constants.ADDR_INVALID || logicalAddress == mAddress) {
+        if (logicalAddress == Constants.ADDR_INVALID
+                || logicalAddress == mDeviceInfo.getLogicalAddress()) {
             // Don't send key event to invalid device or itself.
             Slog.w(
                 TAG,
@@ -1276,9 +1280,11 @@ abstract class HdmiCecLocalDevice {
 
     void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {
         mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildUserControlPressed(mAddress, targetAddress, cecKeycode));
+                HdmiCecMessageBuilder.buildUserControlPressed(
+                        mDeviceInfo.getLogicalAddress(), targetAddress, cecKeycode));
         mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildUserControlReleased(mAddress, targetAddress));
+                HdmiCecMessageBuilder.buildUserControlReleased(
+                        mDeviceInfo.getLogicalAddress(), targetAddress));
     }
 
     void addActiveSourceHistoryItem(ActiveSource activeSource, boolean isActiveSource,
@@ -1298,7 +1304,6 @@ abstract class HdmiCecLocalDevice {
     /** Dump internal status of HdmiCecLocalDevice object. */
     protected void dump(final IndentingPrintWriter pw) {
         pw.println("mDeviceType: " + mDeviceType);
-        pw.println("mAddress: " + mAddress);
         pw.println("mPreferredAddress: " + mPreferredAddress);
         pw.println("mDeviceInfo: " + mDeviceInfo);
         pw.println("mActiveSource: " + getActiveSource());

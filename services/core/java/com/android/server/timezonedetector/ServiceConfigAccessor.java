@@ -48,7 +48,7 @@ public final class ServiceConfigAccessor {
     @StringDef(prefix = "PROVIDER_MODE_",
             value = { PROVIDER_MODE_SIMULATED, PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED})
     @Retention(RetentionPolicy.SOURCE)
-    @Target(ElementType.TYPE_USE)
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     @interface ProviderMode {}
 
     /**

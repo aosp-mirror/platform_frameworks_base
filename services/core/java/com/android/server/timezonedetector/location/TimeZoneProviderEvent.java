@@ -22,6 +22,10 @@ import android.annotation.Nullable;
 import android.service.timezone.TimeZoneProviderService;
 import android.service.timezone.TimeZoneProviderSuggestion;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Objects;
 
 /**
@@ -31,31 +35,32 @@ final class TimeZoneProviderEvent {
 
     @IntDef(prefix = "EVENT_TYPE_",
             value = { EVENT_TYPE_PERMANENT_FAILURE, EVENT_TYPE_SUGGESTION, EVENT_TYPE_UNCERTAIN })
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     public @interface EventType {}
 
     /**
      * The provider failed permanently. See {@link
      * TimeZoneProviderService#reportPermanentFailure(Throwable)}
      */
-    public static final int EVENT_TYPE_PERMANENT_FAILURE = 1;
+    public static final @EventType int EVENT_TYPE_PERMANENT_FAILURE = 1;
 
     /**
      * The provider made a suggestion. See {@link
      * TimeZoneProviderService#reportSuggestion(TimeZoneProviderSuggestion)}
      */
-    public static final int EVENT_TYPE_SUGGESTION = 2;
+    public static final @EventType int EVENT_TYPE_SUGGESTION = 2;
 
     /**
      * The provider was uncertain about the time zone. See {@link
      * TimeZoneProviderService#reportUncertain()}
      */
-    public static final int EVENT_TYPE_UNCERTAIN = 3;
+    public static final @EventType int EVENT_TYPE_UNCERTAIN = 3;
 
     private static final TimeZoneProviderEvent UNCERTAIN_EVENT =
             new TimeZoneProviderEvent(EVENT_TYPE_UNCERTAIN, null, null);
 
-    @EventType
-    private final int mType;
+    private final @EventType int mType;
 
     @Nullable
     private final TimeZoneProviderSuggestion mSuggestion;

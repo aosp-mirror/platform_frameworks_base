@@ -139,10 +139,14 @@ public class ActiveSourceActionTest {
         playbackDevice.addAndStartAction(action);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
-                playbackDevice.mAddress, mPhysicalAddress);
-        HdmiCecMessage menuStatus = HdmiCecMessageBuilder.buildReportMenuStatus(
-                playbackDevice.mAddress, ADDR_TV, Constants.MENU_STATE_ACTIVATED);
+        HdmiCecMessage activeSource =
+                HdmiCecMessageBuilder.buildActiveSource(
+                        playbackDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
+        HdmiCecMessage menuStatus =
+                HdmiCecMessageBuilder.buildReportMenuStatus(
+                        playbackDevice.getDeviceInfo().getLogicalAddress(),
+                        ADDR_TV,
+                        Constants.MENU_STATE_ACTIVATED);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).contains(menuStatus);
@@ -162,8 +166,8 @@ public class ActiveSourceActionTest {
         playbackDevice.addAndStartAction(action);
         mTestLooper.dispatchAll();
 
-        assertThat(playbackDevice.getActiveSource().logicalAddress).isEqualTo(
-                playbackDevice.mAddress);
+        assertThat(playbackDevice.getActiveSource().logicalAddress)
+                .isEqualTo(playbackDevice.getDeviceInfo().getLogicalAddress());
         assertThat(playbackDevice.getActiveSource().physicalAddress).isEqualTo(mPhysicalAddress);
         assertThat(playbackDevice.isActiveSource()).isTrue();
     }
@@ -182,10 +186,14 @@ public class ActiveSourceActionTest {
         audioDevice.addAndStartAction(action);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(audioDevice.mAddress,
-                mPhysicalAddress);
-        HdmiCecMessage menuStatus = HdmiCecMessageBuilder.buildReportMenuStatus(
-                audioDevice.mAddress, ADDR_TV, Constants.MENU_STATE_ACTIVATED);
+        HdmiCecMessage activeSource =
+                HdmiCecMessageBuilder.buildActiveSource(
+                        audioDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
+        HdmiCecMessage menuStatus =
+                HdmiCecMessageBuilder.buildReportMenuStatus(
+                        audioDevice.getDeviceInfo().getLogicalAddress(),
+                        ADDR_TV,
+                        Constants.MENU_STATE_ACTIVATED);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(menuStatus);

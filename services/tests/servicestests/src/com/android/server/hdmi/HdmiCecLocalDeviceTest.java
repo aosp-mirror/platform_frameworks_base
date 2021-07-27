@@ -386,9 +386,13 @@ public class HdmiCecLocalDeviceTest {
 
     @Test
     public void handleCecVersion_isHandled() {
-        @Constants.HandleMessageResult int result = mHdmiLocalDevice.onMessage(
-                HdmiCecMessageBuilder.buildCecVersion(ADDR_PLAYBACK_1, mHdmiLocalDevice.mAddress,
-                        HdmiControlManager.HDMI_CEC_VERSION_1_4_B));
+        @Constants.HandleMessageResult
+        int result =
+                mHdmiLocalDevice.onMessage(
+                        HdmiCecMessageBuilder.buildCecVersion(
+                                ADDR_PLAYBACK_1,
+                                mHdmiLocalDevice.getDeviceInfo().getLogicalAddress(),
+                                HdmiControlManager.HDMI_CEC_VERSION_1_4_B));
 
         assertEquals(Constants.HANDLED, result);
     }

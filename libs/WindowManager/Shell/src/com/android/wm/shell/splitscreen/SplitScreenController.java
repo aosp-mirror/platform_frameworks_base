@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationAdapter;
@@ -64,6 +65,7 @@ import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * Class manages split-screen multitasking mode and implements the main interface
@@ -293,6 +295,38 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @ExternalThread
     private class SplitScreenImpl implements SplitScreen {
         private ISplitScreenImpl mISplitScreen;
+        private final ArrayMap<SplitScreenListener, Executor> mExecutors = new ArrayMap<>();
+        private final SplitScreen.SplitScreenListener mListener = new SplitScreenListener() {
+            @Override
+            public void onStagePositionChanged(int stage, int position) {
+                for (int i = 0; i < mExecutors.size(); i++) {
+                    final int index = i;
+                    mExecutors.valueAt(index).execute(() -> {
+                        mExecutors.keyAt(index).onStagePositionChanged(stage, position);
+                    });
+                }
+            }
+
+            @Override
+            public void onTaskStageChanged(int taskId, int stage, boolean visible) {
+                for (int i = 0; i < mExecutors.size(); i++) {
+                    final int index = i;
+                    mExecutors.valueAt(index).execute(() -> {
+                        mExecutors.keyAt(index).onTaskStageChanged(taskId, stage, visible);
+                    });
+                }
+            }
+
+            @Override
+            public void onSplitVisibilityChanged(boolean visible) {
+                for (int i = 0; i < mExecutors.size(); i++) {
+                    final int index = i;
+                    mExecutors.valueAt(index).execute(() -> {
+                        mExecutors.keyAt(index).onSplitVisibilityChanged(visible);
+                    });
+                }
+            }
+        };
 
         @Override
         public ISplitScreen createExternalInterface() {
@@ -307,6 +341,34 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void onKeyguardOccludedChanged(boolean occluded) {
             mMainExecutor.execute(() -> {
                 SplitScreenController.this.onKeyguardOccludedChanged(occluded);
+            });
+        }
+
+        @Override
+        public void registerSplitScreenListener(SplitScreenListener listener, Executor executor) {
+            if (mExecutors.containsKey(listener)) return;
+
+            mMainExecutor.execute(() -> {
+                if (mExecutors.size() == 0) {
+                    SplitScreenController.this.registerSplitScreenListener(mListener);
+                }
+
+                mExecutors.put(listener, executor);
+            });
+
+            executor.execute(() -> {
+                mStageCoordinator.sendStatusToListener(listener);
+            });
+        }
+
+        @Override
+        public void unregisterSplitScreenListener(SplitScreenListener listener) {
+            mMainExecutor.execute(() -> {
+                mExecutors.remove(listener);
+
+                if (mExecutors.size() == 0) {
+                    SplitScreenController.this.unregisterSplitScreenListener(mListener);
+                }
             });
         }
     }

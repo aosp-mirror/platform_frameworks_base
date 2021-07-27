@@ -1239,13 +1239,11 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
+        // initPortInfo at hotplug event.
+        mHdmiCecNetwork.initPortInfo();
 
         if (connected && !isTvDevice()
                 && getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
-            if (isSwitchDevice()) {
-                mHdmiCecNetwork.initPortInfo();
-                HdmiLogger.debug("initPortInfo for switch device when onHotplug from tx.");
-            }
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : mLocalDevices) {
                 HdmiCecLocalDevice localDevice = mHdmiCecNetwork.getLocalDevice(type);
@@ -1395,8 +1393,9 @@ public class HdmiControlService extends SystemService {
                     deviceInfo.getLogicalAddress(), deviceInfo.getPhysicalAddress(),
                     deviceInfo.getPortId(), deviceInfo.getDeviceType(), deviceInfo.getVendorId(),
                     newDisplayName, deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
-            sendCecCommand(HdmiCecMessageBuilder.buildSetOsdNameCommand(
-                    device.mAddress, Constants.ADDR_TV, newDisplayName));
+            sendCecCommand(
+                    HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                            deviceInfo.getLogicalAddress(), Constants.ADDR_TV, newDisplayName));
         }
     }
 
@@ -2294,7 +2293,9 @@ public class HdmiControlService extends SystemService {
                     }
                     sendCecCommand(
                             HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                                    audioSystem().mAddress, Constants.ADDR_BROADCAST, true));
+                                    audioSystem().getDeviceInfo().getLogicalAddress(),
+                                    Constants.ADDR_BROADCAST,
+                                    true));
                 }
             });
         }
@@ -3200,7 +3201,6 @@ public class HdmiControlService extends SystemService {
             return;
         }
         mCecController.clearLogicalAddress();
-        mHdmiCecNetwork.clearLogicalAddress();
         mHdmiCecNetwork.clearLocalDevices();
     }
 
