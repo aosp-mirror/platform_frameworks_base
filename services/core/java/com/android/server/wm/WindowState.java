@@ -1170,7 +1170,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (WindowManager.LayoutParams.isSystemAlertWindowType(mAttrs.type)) {
             return TouchOcclusionMode.USE_OPACITY;
         }
-        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL)) {
+        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL)
+                || mWmService.mAtmService.getTransitionController().inTransition(this)) {
             return TouchOcclusionMode.USE_OPACITY;
         }
         return TouchOcclusionMode.BLOCK_UNTRUSTED;
