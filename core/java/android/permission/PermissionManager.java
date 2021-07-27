@@ -1177,7 +1177,7 @@ public final class PermissionManager {
         // enforcement we need to replace the binder with a unique one.
         final AttributionSource registeredSource = source.withToken(new Binder());
         try {
-            mPermissionManager.registerAttributionSource(registeredSource);
+            mPermissionManager.registerAttributionSource(registeredSource.asState());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -1196,7 +1196,7 @@ public final class PermissionManager {
      */
     public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
         try {
-            return mPermissionManager.isRegisteredAttributionSource(source);
+            return mPermissionManager.isRegisteredAttributionSource(source.asState());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
