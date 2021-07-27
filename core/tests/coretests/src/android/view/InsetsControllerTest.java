@@ -698,15 +698,15 @@ public class InsetsControllerTest {
     @Test
     public void testRequestedState() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            final InsetsState state = mTestHost.getRequestedState();
+            final InsetsVisibilities request = mTestHost.getRequestedVisibilities();
 
             mController.hide(statusBars() | navigationBars());
-            assertFalse(state.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR));
-            assertFalse(state.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
+            assertFalse(request.getVisibility(ITYPE_STATUS_BAR));
+            assertFalse(request.getVisibility(ITYPE_NAVIGATION_BAR));
 
             mController.show(statusBars() | navigationBars());
-            assertTrue(state.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR));
-            assertTrue(state.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
+            assertTrue(request.getVisibility(ITYPE_STATUS_BAR));
+            assertTrue(request.getVisibility(ITYPE_NAVIGATION_BAR));
         });
     }
 
@@ -837,20 +837,20 @@ public class InsetsControllerTest {
 
     public static class TestHost extends ViewRootInsetsControllerHost {
 
-        private final InsetsState mRequestedState = new InsetsState();
+        private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
         TestHost(ViewRootImpl viewRoot) {
             super(viewRoot);
         }
 
         @Override
-        public void onInsetsModified(InsetsState insetsState) {
-            mRequestedState.set(insetsState, true);
-            super.onInsetsModified(insetsState);
+        public void updateRequestedVisibilities(InsetsVisibilities visibilities) {
+            mRequestedVisibilities.set(visibilities);
+            super.updateRequestedVisibilities(visibilities);
         }
 
-        public InsetsState getRequestedState() {
-            return mRequestedState;
+        public InsetsVisibilities getRequestedVisibilities() {
+            return mRequestedVisibilities;
         }
     }
 }

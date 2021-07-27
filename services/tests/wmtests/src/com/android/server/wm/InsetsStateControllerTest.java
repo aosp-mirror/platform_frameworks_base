@@ -48,6 +48,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
@@ -174,10 +175,10 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mImeWindow.setHasSurface(true);
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
         getController().onImeControlTargetChanged(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_IME).setVisible(true);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_IME, true);
         mDisplayContent.getImeTarget(IME_TARGET_INPUT).getWindow()
-                .updateRequestedVisibility(requestedState);
+                .setRequestedVisibilities(requestedVisibilities);
         getController().onInsetsModified(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
 
         // Send our spy window (app) into the system so that we can detect the invocation.

@@ -33,6 +33,7 @@ import android.view.IWindowManager;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
@@ -198,6 +199,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public class PerDisplay {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
+        final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         protected final DisplayWindowInsetsControllerImpl mInsetsControllerImpl =
                 new DisplayWindowInsetsControllerImpl();
         InsetsSourceControl mImeSourceControl = null;
@@ -327,8 +329,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         private void setVisibleDirectly(boolean visible) {
             mInsetsState.getSource(InsetsState.ITYPE_IME).setVisible(visible);
+            mRequestedVisibilities.setVisibility(InsetsState.ITYPE_IME, visible);
             try {
-                mWmService.modifyDisplayWindowInsets(mDisplayId, mInsetsState);
+                mWmService.updateDisplayWindowRequestedVisibilities(mDisplayId,
+                        mRequestedVisibilities);
             } catch (RemoteException e) {
             }
         }

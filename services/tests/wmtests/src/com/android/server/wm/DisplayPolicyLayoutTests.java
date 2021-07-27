@@ -65,6 +65,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 import android.view.WindowInsets.Side;
@@ -478,9 +479,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mDisplayContent.getInsetsStateController().getRawInsetsState()
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mWindow.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        mWindow.setRequestedVisibilities(requestedVisibilities);
         addWindowWithRawInsetsState(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
@@ -498,9 +499,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mDisplayContent.getInsetsStateController().getRawInsetsState()
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mWindow.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        mWindow.setRequestedVisibilities(requestedVisibilities);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
