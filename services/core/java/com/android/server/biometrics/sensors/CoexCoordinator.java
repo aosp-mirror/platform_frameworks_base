@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.sensors.BiometricScheduler.SensorType;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
@@ -239,6 +238,11 @@ public class CoexCoordinator {
 
                     removeAndFinishAllFaceFromQueue();
 
+                    callback.sendHapticFeedback();
+                    callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
+                    callback.handleLifecycleAfterAuth();
+                } else {
+                    // Capacitive fingerprint sensor (or other)
                     callback.sendHapticFeedback();
                     callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
                     callback.handleLifecycleAfterAuth();

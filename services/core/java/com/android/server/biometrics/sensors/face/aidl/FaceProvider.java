@@ -378,7 +378,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication) {
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(
@@ -386,7 +386,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     operationId, restricted, opPackageName, cookie,
                     false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                     mUsageStats, mSensors.get(sensorId).getLockoutCache(),
-                    allowBackgroundAuthentication);
+                    allowBackgroundAuthentication, isKeyguardBypassEnabled);
             scheduleForSensor(sensorId, client);
         });
     }
