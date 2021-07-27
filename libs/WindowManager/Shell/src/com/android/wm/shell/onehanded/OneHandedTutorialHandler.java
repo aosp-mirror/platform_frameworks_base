@@ -32,9 +32,9 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -58,66 +58,54 @@ import java.io.PrintWriter;
  * detach TargetViewContainer from window after exiting one handed mode.
  */
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
-        OneHandedState.OnStateChangedListener {
+        OneHandedState.OnStateChangedListener, OneHandedAnimationCallback {
     private static final String TAG = "OneHandedTutorialHandler";
-    private static final String OFFSET_PERCENTAGE = "persist.debug.one_handed_offset_percentage";
-    private static final String TRANSLATE_ANIMATION_DURATION =
-            "persist.debug.one_handed_translate_animation_duration";
-    private static final float START_TRANSITION_FRACTION = 0.7f;
+    private static final float START_TRANSITION_FRACTION = 0.6f;
 
     private final float mTutorialHeightRatio;
     private final WindowManager mWindowManager;
-    private final OneHandedAnimationCallback mAnimationCallback;
 
     private @OneHandedState.State int mCurrentState;
     private int mTutorialAreaHeight;
 
     private Context mContext;
     private Rect mDisplayBounds;
+    private ValueAnimator mAlphaAnimator;
     private @Nullable View mTutorialView;
     private @Nullable ViewGroup mTargetViewContainer;
 
     private float mAlphaTransitionStart;
-    private ValueAnimator mAlphaAnimator;
     private int mAlphaAnimationDurationMs;
 
-    public OneHandedTutorialHandler(Context context, WindowManager windowManager) {
+    public OneHandedTutorialHandler(Context context, OneHandedSettingsUtil settingsUtil,
+            WindowManager windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-        final float offsetPercentageConfig = context.getResources().getFraction(
-                R.fraction.config_one_handed_offset, 1, 1);
-        final int sysPropPercentageConfig = SystemProperties.getInt(
-                OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
-        mTutorialHeightRatio = sysPropPercentageConfig / 100.0f;
-        final int animationDuration = context.getResources().getInteger(
-                R.integer.config_one_handed_translate_animation_duration);
-        mAlphaAnimationDurationMs = SystemProperties.getInt(TRANSLATE_ANIMATION_DURATION,
-                animationDuration);
-        mAnimationCallback = new OneHandedAnimationCallback() {
-            @Override
-            public void onOneHandedAnimationCancel(
-                    OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                if (mAlphaAnimator != null) {
-                    mAlphaAnimator.cancel();
-                }
-            }
+        mTutorialHeightRatio = settingsUtil.getTranslationFraction(context);
+        mAlphaAnimationDurationMs = settingsUtil.getTransitionDuration(context);
+    }
 
-            @Override
-            public void onAnimationUpdate(float xPos, float yPos) {
-                if (!isAttached()) {
-                    return;
-                }
-                if (yPos < mAlphaTransitionStart) {
-                    checkTransitionEnd();
-                    return;
-                }
-                if (mAlphaAnimator == null || mAlphaAnimator.isStarted()
-                        || mAlphaAnimator.isRunning()) {
-                    return;
-                }
-                mAlphaAnimator.start();
-            }
-        };
+    @Override
+    public void onOneHandedAnimationCancel(
+            OneHandedAnimationController.OneHandedTransitionAnimator animator) {
+        if (mAlphaAnimator != null) {
+            mAlphaAnimator.cancel();
+        }
+    }
+
+    @Override
+    public void onAnimationUpdate(SurfaceControl.Transaction tx, float xPos, float yPos) {
+        if (!isAttached()) {
+            return;
+        }
+        if (yPos < mAlphaTransitionStart) {
+            checkTransitionEnd();
+            return;
+        }
+        if (mAlphaAnimator == null || mAlphaAnimator.isStarted() || mAlphaAnimator.isRunning()) {
+            return;
+        }
+        mAlphaAnimator.start();
     }
 
     @Override
@@ -145,6 +133,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
 
     /**
      * Called when onDisplayAdded() or onDisplayRemoved() callback.
+     *
      * @param displayLayout The latest {@link DisplayLayout} representing current displayId
      */
     public void onDisplayChanged(DisplayLayout displayLayout) {
@@ -194,10 +183,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         mTargetViewContainer.setLayerType(LAYER_TYPE_NONE, null);
         mWindowManager.removeViewImmediate(mTargetViewContainer);
         mTargetViewContainer = null;
-    }
-
-    @Nullable OneHandedAnimationCallback getAnimationCallback() {
-        return mAnimationCallback;
     }
 
     /**
@@ -264,15 +249,17 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     private void setupAlphaTransition(boolean isEntering) {
         final float start = isEntering ? 0.0f : 1.0f;
         final float end = isEntering ? 1.0f : 0.0f;
+        final int duration = isEntering ? mAlphaAnimationDurationMs : Math.round(
+                mAlphaAnimationDurationMs * (1.0f - mTutorialHeightRatio));
         mAlphaAnimator = ValueAnimator.ofFloat(start, end);
         mAlphaAnimator.setInterpolator(new LinearInterpolator());
-        mAlphaAnimator.setDuration(mAlphaAnimationDurationMs);
+        mAlphaAnimator.setDuration(duration);
         mAlphaAnimator.addUpdateListener(
                 animator -> mTargetViewContainer.setAlpha((float) animator.getAnimatedValue()));
     }
 
     private void checkTransitionEnd() {
-        if (mAlphaAnimator != null && mAlphaAnimator.isRunning()) {
+        if (mAlphaAnimator != null && (mAlphaAnimator.isRunning() || mAlphaAnimator.isStarted())) {
             mAlphaAnimator.end();
             mAlphaAnimator.removeAllUpdateListeners();
             mAlphaAnimator = null;
