@@ -7237,6 +7237,13 @@ public final class Settings {
             "touch_exploration_granted_accessibility_services";
 
         /**
+         * Is talkback service enabled or not. 0 == no, 1 == yes
+         *
+         * @hide
+         */
+        public static final String WEAR_TALKBACK_ENABLED = "wear_talkback_enabled";
+
+        /**
          * Whether the Global Actions Panel is enabled.
          * @hide
          */
