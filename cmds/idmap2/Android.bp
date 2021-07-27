@@ -56,9 +56,6 @@ cc_defaults {
         "-readability-redundant-access-specifiers",
         "-readability-uppercase-literal-suffix",
     ],
-    tidy_flags: [
-        "-system-headers",
-    ],
 }
 
 cc_library {
