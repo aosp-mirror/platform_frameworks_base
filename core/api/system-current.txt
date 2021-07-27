@@ -7273,8 +7273,10 @@ package android.os {
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
     method @WorkerThread public int cleanupAppliedPayload();
+    method public void resetShouldSwitchSlotOnReboot();
     method public void resetStatus();
     method public void resume();
+    method public void setShouldSwitchSlotOnReboot(@NonNull String);
     method public void suspend();
     method public boolean unbind();
     method public boolean verifyPayloadMetadata(String);
