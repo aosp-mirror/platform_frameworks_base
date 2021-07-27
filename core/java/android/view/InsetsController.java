@@ -107,9 +107,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 boolean hasControl);
 
         /**
-         * Called when insets have been modified by the client and should be reported back to WM.
+         * Called when the requested visibilities of insets have been modified by the client.
+         * The visibilities should be reported back to WM.
+         *
+         * @param visibilities A collection of the requested visibilities.
          */
-        void onInsetsModified(InsetsState insetsState);
+        void updateRequestedVisibilities(InsetsVisibilities visibilities);
 
         /**
          * @return Whether the host has any callbacks it wants to synchronize the animations with.
@@ -536,10 +539,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** The state dispatched from server */
     private final InsetsState mLastDispatchedState = new InsetsState();
 
-    // TODO: Use other class to represent the requested visibility of each type, because the
-    //       display frame and the frame in each source are not used.
     /** The requested visibilities sent to server */
-    private final InsetsState mRequestedState = new InsetsState();
+    private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
     private final Rect mFrame = new Rect();
     private final BiFunction<InsetsController, Integer, InsetsSourceConsumer> mConsumerCreator;
@@ -801,7 +802,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
-        boolean requestedStateStale = false;
+        boolean requestedVisibilityStale = false;
         final int[] showTypes = new int[1];
         final int[] hideTypes = new int[1];
 
@@ -822,20 +823,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             final InsetsSourceConsumer consumer = getSourceConsumer(type);
             consumer.setControl(control, showTypes, hideTypes);
 
-            if (!requestedStateStale) {
+            if (!requestedVisibilityStale) {
                 final boolean requestedVisible = consumer.isRequestedVisible();
 
                 // We might have changed our requested visibilities while we don't have the control,
                 // so we need to update our requested state once we have control. Otherwise, our
                 // requested state at the server side might be incorrect.
                 final boolean requestedVisibilityChanged =
-                        requestedVisible != mRequestedState.getSourceOrDefaultVisibility(type);
+                        requestedVisible != mRequestedVisibilities.getVisibility(type);
 
                 // The IME client visibility will be reset by insets source provider while updating
                 // control, so if IME is requested visible, we need to send the request to server.
                 final boolean imeRequestedVisible = type == ITYPE_IME && requestedVisible;
 
-                requestedStateStale = requestedVisibilityChanged || imeRequestedVisible;
+                requestedVisibilityStale = requestedVisibilityChanged || imeRequestedVisible;
             }
         }
 
@@ -861,7 +862,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         // InsetsSourceConsumer#setControl might change the requested visibility.
-        updateRequestedVisibility();
+        updateRequestedVisibilities();
     }
 
     @Override
@@ -1015,7 +1016,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled(null);
-            updateRequestedVisibility();
+            updateRequestedVisibilities();
             if (DEBUG) Log.d(TAG, "no types to animate in controlAnimationUnchecked");
             return;
         }
@@ -1051,7 +1052,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     }
                 });
             }
-            updateRequestedVisibility();
+            updateRequestedVisibilities();
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
             return;
         }
@@ -1059,7 +1060,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (typesReady == 0) {
             if (DEBUG) Log.d(TAG, "No types ready. onCancelled()");
             listener.onCancelled(null);
-            updateRequestedVisibility();
+            updateRequestedVisibilities();
             return;
         }
 
@@ -1091,7 +1092,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         } else {
             hideDirectly(types, false /* animationFinished */, animationType, fromIme);
         }
-        updateRequestedVisibility();
+        updateRequestedVisibilities();
     }
 
     /**
@@ -1348,7 +1349,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /**
      * Sends the requested visibilities to window manager if any of them is changed.
      */
-    private void updateRequestedVisibility() {
+    private void updateRequestedVisibilities() {
         boolean changed = false;
         for (int i = mRequestedVisibilityChanged.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mRequestedVisibilityChanged.valueAt(i);
@@ -1357,8 +1358,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 continue;
             }
             final boolean requestedVisible = consumer.isRequestedVisible();
-            if (requestedVisible != mRequestedState.getSourceOrDefaultVisibility(type)) {
-                mRequestedState.getSource(type).setVisible(requestedVisible);
+            if (mRequestedVisibilities.getVisibility(type) != requestedVisible) {
+                mRequestedVisibilities.setVisibility(type, requestedVisible);
                 changed = true;
             }
         }
@@ -1366,11 +1367,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (!changed) {
             return;
         }
-        mHost.onInsetsModified(mRequestedState);
+        mHost.updateRequestedVisibilities(mRequestedVisibilities);
     }
 
-    InsetsState getRequestedVisibility() {
-        return mRequestedState;
+    InsetsVisibilities getRequestedVisibilities() {
+        return mRequestedVisibilities;
     }
 
     @VisibleForTesting
@@ -1425,7 +1426,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).hide(animationFinished, animationType);
         }
-        updateRequestedVisibility();
+        updateRequestedVisibilities();
 
         if (fromIme) {
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromIme", 0);
@@ -1441,7 +1442,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).show(false /* fromIme */);
         }
-        updateRequestedVisibility();
+        updateRequestedVisibilities();
 
         if (fromIme) {
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromIme", 0);

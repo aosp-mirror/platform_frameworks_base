@@ -121,6 +121,7 @@ import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -1218,10 +1219,10 @@ public class DisplayContentTests extends WindowTestsBase {
         win.getAttrs().layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         win.getAttrs().privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         win.getAttrs().insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        win.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_NAVIGATION_BAR, false);
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        win.setRequestedVisibilities(requestedVisibilities);
         win.mActivityRecord.mTargetSdk = P;
 
         performLayout(dc);
