@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"የWi‑Fi ተጨማሪ ቃላት ምዝግብ ማስታወሻ መያዝ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi scan throttling"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"የWi-Fi ወጥ ያልሆነ ማክ የዘፈቀደ ማድረግ"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"የተንቀሳቃሽ ስልክ ውሂብ ሁልጊዜ ገቢር ነው"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"የሃርድዌር ማቀላጠፊያን በማስተሳሰር ላይ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"የብሉቱዝ መሣሪያዎችን ያለ ስሞች አሳይ"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ አማራጮችን አሳይ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"የWi‑Fi ምዝግብ ማስታወሻ አያያዝ ደረጃ ጨምር፣ በWi‑Fi መምረጫ ውስጥ በአንድ SSID RSSI አሳይ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"የባትሪ መላሸቅን ይቀንሳል እንዲሁም የአውታረ መረብ አፈጻጸም ብቃትን ያሻሽላል"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ይህ ሁነታ ስራ ሲጀምር ይህ መሣሪያ የዘፈቀደ የማክ አድራሻ ስራ ከነቃለት አውታረ መረብ ጋር በተገናኘ እያንዳንዱ ጊዜ የመሣሪያው የማክ አድራሻ ሊቀየር ይችላል።"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"የሚለካ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ያልተለካ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"የምዝግብ ማስታወሻ ያዥ መጠኖች"</string>

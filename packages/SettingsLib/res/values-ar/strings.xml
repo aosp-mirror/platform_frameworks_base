@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏تقييد البحث عن شبكات Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"‏التوزيع العشوائي لعناوين MAC غير الثابتة لشبكة Wi‑Fi."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"عرض أجهزة البلوتوث بدون أسماء"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استهلاك البطارية وتحسين أداء الشبكة"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏عند تفعيل هذا الوضع، قد يتم تغيير عنوان MAC لهذا الجهاز في كل مرة تتصل فيها بشبكة تم تفعيل التوزيع العشوائي لعناوين MAC عليها."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>

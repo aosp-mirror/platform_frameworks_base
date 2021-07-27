@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikacija bežičnog prikaza"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući detaljni zapisnik za WiFi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje skeniranja WiFi-ja"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Nasumičan odabir MAC adrese prema WiFi mreži s prekidima"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Prijenos podataka na mobilnoj mreži uvijek aktivan"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzavanje za povezivanje putem mobitela"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećani nivo zapisnika za WiFi. Prikaz po SSID RSSI-ju u Biraču WiFi-ja"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava performanse mreže"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kada je omogućen ovaj način rada, MAC adresa ovog uređaja se može promijeniti svaki put kada se poveže na mrežu koja ima omogućen nasumični odabir MAC adresa."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"S naplatom"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mreža bez naplate"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine međumemorije zapisnika"</string>
