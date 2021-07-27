@@ -501,14 +501,19 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         if (mListeners.contains(listener)) return;
         mListeners.add(listener);
-        listener.onStagePositionChanged(STAGE_TYPE_MAIN, getMainStagePosition());
-        listener.onStagePositionChanged(STAGE_TYPE_SIDE, getSideStagePosition());
-        mSideStage.onSplitScreenListenerRegistered(listener, STAGE_TYPE_SIDE);
-        mMainStage.onSplitScreenListenerRegistered(listener, STAGE_TYPE_MAIN);
+        sendStatusToListener(listener);
     }
 
     void unregisterSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         mListeners.remove(listener);
+    }
+
+    void sendStatusToListener(SplitScreen.SplitScreenListener listener) {
+        listener.onStagePositionChanged(STAGE_TYPE_MAIN, getMainStagePosition());
+        listener.onStagePositionChanged(STAGE_TYPE_SIDE, getSideStagePosition());
+        listener.onSplitVisibilityChanged(isSplitScreenVisible());
+        mSideStage.onSplitScreenListenerRegistered(listener, STAGE_TYPE_SIDE);
+        mMainStage.onSplitScreenListenerRegistered(listener, STAGE_TYPE_MAIN);
     }
 
     private void sendOnStagePositionChanged() {
@@ -532,6 +537,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onTaskStageChanged(taskId, stage, visible);
+        }
+    }
+
+    private void sendSplitVisibilityChanged() {
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            final SplitScreen.SplitScreenListener l = mListeners.get(i);
+            l.onSplitVisibilityChanged(mDividerVisible);
         }
     }
 
@@ -574,6 +586,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             mSplitLayout.release();
         }
+        sendSplitVisibilityChanged();
     }
 
     private void onStageVisibilityChanged(StageListenerImpl stageListener) {

@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -88,6 +89,13 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     /** */
     @Override
     public void addIconGroup(IconManager group) {
+        for (IconManager existingIconManager : mIconGroups) {
+            if (existingIconManager.mGroup == group.mGroup) {
+                Log.e(TAG, "Adding new IconManager for the same ViewGroup. This could cause "
+                        + "unexpected results.");
+            }
+        }
+
         mIconGroups.add(group);
         List<Slot> allSlots = getSlots();
         for (int i = 0; i < allSlots.size(); i++) {
