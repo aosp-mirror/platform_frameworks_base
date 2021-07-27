@@ -304,7 +304,7 @@ public final class ViewRootImpl implements ViewParent,
      * {@hide}
      */
     public static final boolean INSETS_LAYOUT_GENERALIZATION =
-            SystemProperties.getBoolean(USE_FLEXIBLE_INSETS, false);
+            SystemProperties.getBoolean(USE_FLEXIBLE_INSETS, true);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
