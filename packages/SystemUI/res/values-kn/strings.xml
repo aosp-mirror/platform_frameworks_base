@@ -452,6 +452,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ಪುನಃ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ತೆರೆಯಲು ಒತ್ತಿ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
