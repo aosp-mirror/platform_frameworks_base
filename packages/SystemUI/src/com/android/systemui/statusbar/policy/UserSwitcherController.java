@@ -65,8 +65,8 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -138,7 +138,7 @@ public class UserSwitcherController implements Dumpable {
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
     public final DetailAdapter mUserDetailAdapter;
-    private final Executor mUiBgExecutor;
+    private final Executor mBgExecutor;
     private final boolean mGuestUserAutoCreated;
     private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
@@ -158,7 +158,7 @@ public class UserSwitcherController implements Dumpable {
             IActivityTaskManager activityTaskManager,
             UserDetailAdapter userDetailAdapter,
             SecureSettings secureSettings,
-            @UiBackground Executor uiBgExecutor) {
+            @Background Executor bgExecutor) {
         mContext = context;
         mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -169,7 +169,7 @@ public class UserSwitcherController implements Dumpable {
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
                 this, mUserTracker, mUiEventLogger, secureSettings);
         mUserDetailAdapter = userDetailAdapter;
-        mUiBgExecutor = uiBgExecutor;
+        mBgExecutor = bgExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
@@ -718,7 +718,7 @@ public class UserSwitcherController implements Dumpable {
             return;
         }
 
-        mUiBgExecutor.execute(() -> {
+        mBgExecutor.execute(() -> {
             int newGuestId = createGuest();
             mGuestCreationScheduled.set(false);
             mGuestIsResetting.set(false);
