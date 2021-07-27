@@ -37,10 +37,10 @@ android_test {
         "vts",
     ],
     data: [
-        ":NotoColorEmoji.ttf",
         ":NotoSerif-Regular.ttf",
         ":NotoSerif-Bold.ttf",
         ":UpdatableSystemFontTestCertDer",
+        ":UpdatableSystemFontTest_NotoColorEmoji.ttf",
         ":UpdatableSystemFontTest_NotoColorEmoji.sig",
         ":UpdatableSystemFontTest_NotoColorEmojiV0.ttf",
         ":UpdatableSystemFontTest_NotoColorEmojiV0.sig",
