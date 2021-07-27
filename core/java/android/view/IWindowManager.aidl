@@ -53,6 +53,7 @@ import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
@@ -720,14 +721,15 @@ interface IWindowManager
             int displayId, in IDisplayWindowInsetsController displayWindowInsetsController);
 
     /**
-     * Called when a remote process modifies insets on a display window container.
+     * Called when a remote process updates the requested visibilities of insets on a display window
+     * container.
      */
-    void modifyDisplayWindowInsets(int displayId, in InsetsState state);
+    void updateDisplayWindowRequestedVisibilities(int displayId, in InsetsVisibilities vis);
 
     /**
      * Called to get the expected window insets.
      *
-     * @return {@code true} if system bars are always comsumed.
+     * @return {@code true} if system bars are always consumed.
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out InsetsState outInsetsState);

@@ -35,6 +35,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
@@ -276,7 +277,9 @@ public class WindowFrameTests extends WindowTestsBase {
         imeFrame.top = 400;
         imeSource.setFrame(imeFrame);
         imeSource.setVisible(true);
-        w.updateRequestedVisibility(state);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_IME, true);
+        w.setRequestedVisibilities(requestedVisibilities);
         w.mAboveInsetsState.addSource(imeSource);
 
         // With no insets or system decor all the frames incoming from PhoneWindowManager

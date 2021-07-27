@@ -878,16 +878,5 @@ public class InsetsState implements Parcelable {
                 + ", mSources= { " + joiner
                 + " }";
     }
-
-    public @NonNull String toSourceVisibilityString() {
-        StringJoiner joiner = new StringJoiner(", ");
-        for (int i = 0; i < SIZE; i++) {
-            InsetsSource source = mSources[i];
-            if (source != null) {
-                joiner.add(typeToString(i) + ": " + (source.isVisible() ? "visible" : "invisible"));
-            }
-        }
-        return joiner.toString();
-    }
 }
 

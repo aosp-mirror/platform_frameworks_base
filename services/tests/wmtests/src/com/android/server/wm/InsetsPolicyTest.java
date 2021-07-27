@@ -49,6 +49,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
@@ -181,9 +182,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         // Add a fullscreen (MATCH_PARENT x MATCH_PARENT) app window which hides status bar.
         final WindowState fullscreenApp = addWindow(TYPE_APPLICATION, "fullscreenApp");
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        fullscreenApp.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        fullscreenApp.setRequestedVisibilities(requestedVisibilities);
 
         // Add a non-fullscreen dialog window.
         final WindowState dialog = addWindow(TYPE_APPLICATION, "dialog");
@@ -216,9 +217,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         // Assume mFocusedWindow is updated but mTopFullscreenOpaqueWindowState hasn't.
         final WindowState newFocusedFullscreenApp = addWindow(TYPE_APPLICATION, "newFullscreenApp");
-        final InsetsState newRequestedState = new InsetsState();
-        newRequestedState.getSource(ITYPE_STATUS_BAR).setVisible(true);
-        newFocusedFullscreenApp.updateRequestedVisibility(newRequestedState);
+        final InsetsVisibilities newRequestedVisibilities = new InsetsVisibilities();
+        newRequestedVisibilities.setVisibility(ITYPE_STATUS_BAR, true);
+        newFocusedFullscreenApp.setRequestedVisibilities(newRequestedVisibilities);
         // Make sure status bar is hidden by previous insets state.
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(fullscreenApp);
 
@@ -279,10 +280,10 @@ public class InsetsPolicyTest extends WindowTestsBase {
         doNothing().when(policy).startAnimation(anyBoolean(), any());
 
         // Make both system bars invisible.
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        requestedState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
-        mAppWindow.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        requestedVisibilities.setVisibility(ITYPE_NAVIGATION_BAR, false);
+        mAppWindow.setRequestedVisibilities(requestedVisibilities);
         policy.updateBarControlTarget(mAppWindow);
         waitUntilWindowAnimatorIdle();
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
@@ -373,7 +374,10 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertTrue(state.getSource(ITYPE_STATUS_BAR).isVisible());
         assertTrue(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
 
-        mAppWindow.updateRequestedVisibility(state);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, true);
+        requestedVisibilities.setVisibility(ITYPE_NAVIGATION_BAR, true);
+        mAppWindow.setRequestedVisibilities(requestedVisibilities);
         policy.onInsetsModified(mAppWindow);
         waitUntilWindowAnimatorIdle();
 

@@ -59,8 +59,8 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -527,13 +527,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsState requestedState, String packageName) {
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) {
             getUiState(displayId).setBarAttributes(appearance, appearanceRegions,
-                    navbarColorManagedByIme, behavior, requestedState, packageName);
+                    navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
             if (mBar != null) {
                 try {
                     mBar.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                            navbarColorManagedByIme, behavior, requestedState, packageName);
+                            navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
                 } catch (RemoteException ex) { }
             }
         }
@@ -1110,7 +1111,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private final ArraySet<Integer> mTransientBarTypes = new ArraySet<>();
         private boolean mNavbarColorManagedByIme = false;
         private @Behavior int mBehavior;
-        private InsetsState mRequestedState = new InsetsState();
+        private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         private String mPackageName = "none";
         private int mDisabled1 = 0;
         private int mDisabled2 = 0;
@@ -1121,12 +1122,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         private void setBarAttributes(@Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsState requestedState, String packageName) {
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) {
             mAppearance = appearance;
             mAppearanceRegions = appearanceRegions;
             mNavbarColorManagedByIme = navbarColorManagedByIme;
             mBehavior = behavior;
-            mRequestedState = requestedState;
+            mRequestedVisibilities = requestedVisibilities;
             mPackageName = packageName;
         }
 
@@ -1247,7 +1249,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                     state.mAppearance, state.mAppearanceRegions, state.mImeWindowVis,
                     state.mImeBackDisposition, state.mShowImeSwitcher,
                     gatherDisableActionsLocked(mCurrentUserId, 2), state.mImeToken,
-                    state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedState,
+                    state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibilities,
                     state.mPackageName, transientBarTypes);
         }
     }
