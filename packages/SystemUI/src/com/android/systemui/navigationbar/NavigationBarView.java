@@ -98,6 +98,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public class NavigationBarView extends FrameLayout implements
@@ -354,6 +355,7 @@ public class NavigationBarView extends FrameLayout implements
         mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
                 .create(mContext);
         mEdgeBackGestureHandler.setStateChangeCallback(this::updateStates);
+        Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
@@ -376,7 +378,7 @@ public class NavigationBarView extends FrameLayout implements
                     public boolean isSamplingEnabled() {
                         return isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode);
                     }
-                });
+                }, backgroundExecutor);
 
         mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
         if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
