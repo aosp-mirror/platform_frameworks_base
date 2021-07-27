@@ -220,8 +220,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public CallSession callStarted(Binder binder, int code, int workSourceUid) {
         noteNativeThreadId();
 
+        boolean collectCpu = canCollect();
         // We always want to collect data for latency if it's enabled, regardless of device state.
-        if (!mCollectLatencyData && !canCollect()) {
+        if (!mCollectLatencyData && !collectCpu) {
             return null;
         }
 
@@ -233,7 +234,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         s.timeStarted = -1;
         s.recordedCall = shouldRecordDetailedData();
 
-        if (mRecordingAllTransactionsForUid || s.recordedCall) {
+        if (collectCpu && (mRecordingAllTransactionsForUid || s.recordedCall)) {
             s.cpuTimeStarted = getThreadTimeMicro();
             s.timeStarted = getElapsedRealtimeMicro();
         } else if (mCollectLatencyData) {
