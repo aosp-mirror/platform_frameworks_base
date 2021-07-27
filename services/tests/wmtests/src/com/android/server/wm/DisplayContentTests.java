@@ -871,19 +871,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
     }
 
-    @UseTestDisplay
-    @Test
-    public void testClearLastFocusWhenReparentingFocusedWindow() {
-        final DisplayContent defaultDisplay = mWm.getDefaultDisplayContentLocked();
-        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                defaultDisplay, "window");
-        defaultDisplay.mLastFocus = window;
-        mDisplayContent.mCurrentFocus = window;
-        mDisplayContent.reParentWindowToken(window.mToken);
-
-        assertNull(defaultDisplay.mLastFocus);
-    }
-
     @Test
     public void testGetPreferredOptionsPanelGravityFromDifferentDisplays() {
         final DisplayContent portraitDisplay = createNewDisplay();
