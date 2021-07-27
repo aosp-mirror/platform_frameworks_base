@@ -408,9 +408,4 @@ cc_library_headers {
     export_header_lib_headers: [
         "jni_headers",
     ],
-    apex_available: [
-        "//apex_available:platform",
-        "com.android.media",
-        "com.android.media.swcodec",
-    ],
 }

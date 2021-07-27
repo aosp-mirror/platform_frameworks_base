@@ -356,7 +356,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     private KeyguardStatusBarView mKeyguardStatusBar;
-    private KeyguardStatusBarViewController mKeyguarStatusBarViewController;
+    private KeyguardStatusBarViewController mKeyguardStatusBarViewController;
     private ViewGroup mBigClockContainer;
     @VisibleForTesting QS mQs;
     private FrameLayout mQsFrame;
@@ -1012,9 +1012,13 @@ public class NotificationPanelViewController extends PanelViewController {
 
         KeyguardStatusBarViewComponent statusBarViewComponent =
                 mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
-        mKeyguarStatusBarViewController =
+        if (mKeyguardStatusBarViewController != null) {
+            // TODO(b/194181195): This shouldn't be necessary.
+            mKeyguardStatusBarViewController.onViewDetached();
+        }
+        mKeyguardStatusBarViewController =
                 statusBarViewComponent.getKeyguardStatusBarViewController();
-        mKeyguarStatusBarViewController.init();
+        mKeyguardStatusBarViewController.init();
 
         if (communalView != null) {
             CommunalViewComponent communalViewComponent =
@@ -1198,10 +1202,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
         mStatusBarStateListener.onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
                 mStatusBarStateController.getInterpolatedDozeAmount());
-
-        if (mKeyguardStatusBar != null) {
-            mKeyguardStatusBar.onThemeChanged();
-        }
 
         mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
                 mBarState,
@@ -3211,7 +3211,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void setListening(boolean listening) {
-        mKeyguardStatusBar.setListening(listening);
+        mKeyguardStatusBarViewController.setBatteryListening(listening);
         if (mQs == null) return;
         mQs.setListening(listening);
     }
@@ -3855,8 +3855,8 @@ public class NotificationPanelViewController extends PanelViewController {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
         pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect());
-        if (mKeyguardStatusBar != null) {
-            mKeyguardStatusBar.dump(fd, pw, args);
+        if (mKeyguardStatusBarViewController != null) {
+            mKeyguardStatusBarViewController.dump(fd, pw, args);
         }
     }
 
