@@ -83,6 +83,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentInfo;
@@ -1485,6 +1486,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void executeAppTransition(ActivityOptions options) {
         // No app transition applied to the task fragment.
+    }
+
+    @Override
+    RemoteAnimationTarget createRemoteAnimationTarget(
+            RemoteAnimationController.RemoteAnimationRecord record) {
+        final ActivityRecord activity = getTopMostActivity();
+        return activity != null ? activity.createRemoteAnimationTarget(record) : null;
+    }
+
+    @Override
+    boolean canCreateRemoteAnimationTarget() {
+        return true;
     }
 
     boolean shouldSleepActivities() {
