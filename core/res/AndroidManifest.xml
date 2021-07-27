@@ -618,7 +618,11 @@
 
     <protected-broadcast android:name="com.android.server.fingerprint.ACTION_LOCKOUT_RESET" />
     <protected-broadcast android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" />
+
     <protected-broadcast android:name="com.android.server.notification.CountdownConditionProvider" />
+    <protected-broadcast android:name="android.server.notification.action.ENABLE_NAS" />
+    <protected-broadcast android:name="android.server.notification.action.DISABLE_NAS" />
+    <protected-broadcast android:name="android.server.notification.action.LEARNMORE_NAS" />
 
     <protected-broadcast android:name="com.android.internal.location.ALARM_WAKEUP" />
     <protected-broadcast android:name="com.android.internal.location.ALARM_TIMEOUT" />
