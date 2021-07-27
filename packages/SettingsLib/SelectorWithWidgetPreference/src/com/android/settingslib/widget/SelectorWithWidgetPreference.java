@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,25 +26,19 @@ import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;
 
 /**
- * DEPRECATED. Please use SelectorWithWidgetPreference instead.
+ * Selector preference (checkbox or radio button) with an optional additional widget.
  *
- * This file has been moved there and will be removed once all callers are updated.
- *
- * Check box preference with check box replaced by radio button.
- *
- * Functionally speaking, it's actually a CheckBoxPreference. We only modified
- * the widget to RadioButton to make it "look like" a RadioButtonPreference.
+ * Functionally speaking, it's a CheckBoxPreference. When styled like a radio button,
+ * it only "looks like" a RadioButtonPreference.
  *
  * In other words, there's no "RadioButtonPreferenceGroup" in this
- * implementation. When you check one RadioButtonPreference, if you want to
+ * implementation. When you check one preference, if you want to
  * uncheck all the other preferences, you should do that by code yourself.
  *
- * RadioButtonPreference can assign a extraWidgetListener to show a gear icon
+ * SelectorWithWidgetPreference can assign a extraWidgetListener to show a gear icon
  * on the right side that can open another page.
- *
- * @Deprecated
  */
-public class RadioButtonPreference extends CheckBoxPreference {
+public class SelectorWithWidgetPreference extends CheckBoxPreference {
 
     /**
      * Interface definition for a callback to be invoked when the preference is clicked.
@@ -55,7 +49,7 @@ public class RadioButtonPreference extends CheckBoxPreference {
          *
          * @param emiter The clicked preference
          */
-        void onRadioButtonClicked(RadioButtonPreference emiter);
+        void onRadioButtonClicked(SelectorWithWidgetPreference emiter);
     }
 
     private OnClickListener mListener = null;
@@ -64,6 +58,7 @@ public class RadioButtonPreference extends CheckBoxPreference {
 
     private View mExtraWidgetContainer;
     private ImageView mExtraWidget;
+    private boolean mIsCheckBox = false;  // whether to display this button as a checkbox
 
     private View.OnClickListener mExtraWidgetOnClickListener;
 
@@ -77,7 +72,7 @@ public class RadioButtonPreference extends CheckBoxPreference {
      *                 resource that supplies default values for the view. Can be 0 to not
      *                 look for defaults.
      */
-    public RadioButtonPreference(Context context, AttributeSet attrs, int defStyle) {
+    public SelectorWithWidgetPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
     }
@@ -89,8 +84,20 @@ public class RadioButtonPreference extends CheckBoxPreference {
      *                access the current theme, resources, {@link SharedPreferences}, etc.
      * @param attrs   The attributes of the XML tag that is inflating the preference
      */
-    public RadioButtonPreference(Context context, AttributeSet attrs) {
+    public SelectorWithWidgetPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
+    }
+
+    /**
+     * Constructor to create a preference, which will display with a checkbox style.
+     *
+     * @param context    The {@link Context} this is associated with.
+     * @param isCheckbox Whether this preference should display as a checkbox.
+     */
+    public SelectorWithWidgetPreference(Context context, boolean isCheckbox) {
+        super(context, null);
+        mIsCheckBox = isCheckbox;
         init();
     }
 
@@ -99,7 +106,7 @@ public class RadioButtonPreference extends CheckBoxPreference {
      *
      * @param context The Context this is associated with.
      */
-    public RadioButtonPreference(Context context) {
+    public SelectorWithWidgetPreference(Context context) {
         this(context, null);
     }
 
@@ -148,8 +155,8 @@ public class RadioButtonPreference extends CheckBoxPreference {
             }
         }
 
-        mExtraWidget = (ImageView) holder.findViewById(R.id.radio_extra_widget);
-        mExtraWidgetContainer = holder.findViewById(R.id.radio_extra_widget_container);
+        mExtraWidget = (ImageView) holder.findViewById(R.id.selector_extra_widget);
+        mExtraWidgetContainer = holder.findViewById(R.id.selector_extra_widget_container);
 
         setExtraWidgetOnClickListener(mExtraWidgetOnClickListener);
     }
@@ -185,8 +192,12 @@ public class RadioButtonPreference extends CheckBoxPreference {
     }
 
     private void init() {
-        setWidgetLayoutResource(R.layout.preference_widget_radiobutton);
-        setLayoutResource(R.layout.preference_radio);
+        if (mIsCheckBox) {
+            setWidgetLayoutResource(R.layout.preference_widget_checkbox);
+        } else {
+            setWidgetLayoutResource(R.layout.preference_widget_radiobutton);
+        }
+        setLayoutResource(R.layout.preference_selector_with_widget);
         setIconSpaceReserved(false);
     }
 }

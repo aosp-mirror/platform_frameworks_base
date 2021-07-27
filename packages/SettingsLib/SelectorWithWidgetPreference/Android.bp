@@ -8,15 +8,14 @@ package {
 }
 
 android_library {
-    name: "SettingsLibRadioButtonPreference",
+    name: "SettingsLibSelectorWithWidgetPreference",
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
 
     static_libs: [
-          "androidx.preference_preference",
-          "SettingsLibSelectorWithWidgetPreference",
-          "SettingsLibSettingsTheme",
+        "androidx.preference_preference",
+        "SettingsLibSettingsTheme",
     ],
 
     sdk_version: "system_current",
