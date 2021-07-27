@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors;
 
 import static com.android.server.biometrics.sensors.BiometricScheduler.SENSOR_TYPE_FACE;
+import static com.android.server.biometrics.sensors.BiometricScheduler.SENSOR_TYPE_FP_OTHER;
 import static com.android.server.biometrics.sensors.BiometricScheduler.SENSOR_TYPE_UDFPS;
 
 import static junit.framework.Assert.assertEquals;
@@ -324,6 +325,49 @@ public class CoexCoordinatorTest {
         verify(faceCallback).sendHapticFeedback();
         verify(faceCallback).sendAuthenticationResult(eq(false) /* addAuthTokenIfStrong */);
         verify(mCallback, never()).sendHapticFeedback();
+    }
+
+    @Test
+    public void testKeyguard_capacitiveAccepted_whenFaceScanning() {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
+        when(faceClient.isKeyguard()).thenReturn(true);
+        when(faceClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+
+        AuthenticationClient<?> fpClient = mock(AuthenticationClient.class);
+        when(fpClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+        when(fpClient.isKeyguard()).thenReturn(true);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FP_OTHER, fpClient);
+
+        mCoexCoordinator.onAuthenticationSucceeded(0 /* currentTimeMillis */, fpClient, mCallback);
+        verify(mCallback).sendHapticFeedback();
+        verify(mCallback).sendAuthenticationResult(eq(true) /* addAuthTokenIfStrong */);
+        verify(mCallback).handleLifecycleAfterAuth();
+    }
+
+    @Test
+    public void testKeyguard_capacitiveRejected_whenFaceScanning() {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
+        when(faceClient.isKeyguard()).thenReturn(true);
+        when(faceClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+
+        AuthenticationClient<?> fpClient = mock(AuthenticationClient.class);
+        when(fpClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+        when(fpClient.isKeyguard()).thenReturn(true);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FP_OTHER, fpClient);
+
+        mCoexCoordinator.onAuthenticationRejected(0 /* currentTimeMillis */, fpClient,
+                LockoutTracker.LOCKOUT_NONE, mCallback);
+        verify(mCallback).sendHapticFeedback();
+        verify(mCallback).sendAuthenticationResult(eq(false) /* addAuthTokenIfStrong */);
+        verify(mCallback).handleLifecycleAfterAuth();
     }
 
     @Test
