@@ -99,39 +99,38 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void onTaskFragmentAppeared(@NonNull TaskFragmentAppearedInfo taskFragmentAppearedInfo) {
-        for (TaskFragmentContainer container : mContainers) {
-            if (container.getTaskFragmentToken().equals(
-                    taskFragmentAppearedInfo.getTaskFragmentInfo().getFragmentToken())) {
-                container.setInfo(taskFragmentAppearedInfo.getTaskFragmentInfo());
-                return;
-            }
+        TaskFragmentContainer container = getContainer(
+                taskFragmentAppearedInfo.getTaskFragmentInfo().getFragmentToken());
+        if (container == null) {
+            return;
         }
+
+        container.setInfo(taskFragmentAppearedInfo.getTaskFragmentInfo());
     }
 
     @Override
     public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {
-        for (TaskFragmentContainer container : mContainers) {
-            if (container.getTaskFragmentToken().equals(taskFragmentInfo.getFragmentToken())) {
-                container.setInfo(taskFragmentInfo);
+        TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
+        if (container == null) {
+            return;
+        }
 
-                if (taskFragmentInfo.isEmpty()) {
-                    cleanupContainer(container, true /* shouldFinishDependent */);
-                    updateCallbackIfNecessary();
-                }
-                return;
-            }
+        container.setInfo(taskFragmentInfo);
+        if (taskFragmentInfo.isEmpty()) {
+            cleanupContainer(container, true /* shouldFinishDependent */);
+            updateCallbackIfNecessary();
         }
     }
 
     @Override
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
-        for (TaskFragmentContainer container : mContainers) {
-            if (container.getTaskFragmentToken().equals(taskFragmentInfo.getFragmentToken())) {
-                cleanupContainer(container, true /* shouldFinishDependent */);
-                updateCallbackIfNecessary();
-                return;
-            }
+        TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
+        if (container == null) {
+            return;
         }
+
+        cleanupContainer(container, true /* shouldFinishDependent */);
+        updateCallbackIfNecessary();
     }
 
     @Override
@@ -480,7 +479,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Nullable
-    private TaskFragmentContainer getContainer(@NonNull IBinder fragmentToken) {
+    TaskFragmentContainer getContainer(@NonNull IBinder fragmentToken) {
         for (TaskFragmentContainer container : mContainers) {
             if (container.getTaskFragmentToken().equals(fragmentToken)) {
                 return container;
