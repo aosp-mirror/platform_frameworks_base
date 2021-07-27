@@ -26,7 +26,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
@@ -40,6 +42,7 @@ import androidx.window.extensions.ExtensionTaskFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Main controller class that manages split states and presentation.
@@ -57,8 +60,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private SplitOrganizerCallback mSplitOrganizerCallback;
 
     public SplitController() {
-        mPresenter = new SplitPresenter(ActivityThread.currentActivityThread().getExecutor(),
-                this);
+        mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
         // Register a callback to be notified about activities being created.
         ActivityThread.currentActivityThread().getApplication().registerActivityLifecycleCallbacks(
                 new LifecycleCallbacks());
@@ -575,6 +577,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+        }
+    }
+
+    /** Executor that posts on the main application thread. */
+    private static class MainThreadExecutor implements Executor {
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        @Override
+        public void execute(Runnable r) {
+            handler.post(r);
         }
     }
 }
