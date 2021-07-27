@@ -111,6 +111,7 @@ import com.android.systemui.communal.CommunalHostViewController;
 import com.android.systemui.communal.CommunalSource;
 import com.android.systemui.communal.CommunalSourceMonitor;
 import com.android.systemui.communal.dagger.CommunalViewComponent;
+import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -336,6 +337,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
     private final QuickAccessWalletController mQuickAccessWalletController;
+    private final ControlsComponent mControlsComponent;
     private final NotificationRemoteInputManager mRemoteInputManager;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
@@ -766,7 +768,8 @@ public class NotificationPanelViewController extends PanelViewController {
             SecureSettings secureSettings,
             SplitShadeHeaderController splitShadeHeaderController,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            NotificationRemoteInputManager remoteInputManager) {
+            NotificationRemoteInputManager remoteInputManager,
+            ControlsComponent controlsComponent) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -776,6 +779,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardMediaController = keyguardMediaController;
         mPrivacyDotViewController = privacyDotViewController;
         mQuickAccessWalletController = quickAccessWalletController;
+        mControlsComponent = controlsComponent;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -1237,6 +1241,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
         mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
+        mKeyguardBottomArea.initControls(mControlsComponent);
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {
