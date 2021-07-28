@@ -150,7 +150,6 @@ public class TouchExplorerTest {
         when(mMockAms.getTraceManager()).thenReturn(mMockTraceManager);
         mContext = InstrumentationRegistry.getContext();
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-        AccessibilityManagerService ams = new AccessibilityManagerService(mContext);
         mCaptor = new EventCaptor();
         mHandler = new TestHandler();
         mTouchExplorer = new TouchExplorer(mContext, mMockAms, null, mHandler);
