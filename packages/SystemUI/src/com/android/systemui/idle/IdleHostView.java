@@ -14,34 +14,29 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.dagger;
+package com.android.systemui.idle;
 
 import android.content.Context;
-import android.view.View;
+import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import com.android.systemui.idle.dagger.IdleViewComponent;
-
-import javax.inject.Named;
-
-import dagger.Module;
-import dagger.Provides;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
- * Dagger Module providing Communal-related functionality.
+ * {@link IdleHostView} houses a surface to be displayed when the device idle.
  */
-@Module(subcomponents = {
-        CommunalViewComponent.class,
-        IdleViewComponent.class,
-})
-public interface CommunalModule {
-    String IDLE_VIEW = "idle_view";
+public class IdleHostView extends FrameLayout {
+    public IdleHostView(@NonNull Context context) {
+        this(context, null);
+    }
 
-    /** */
-    @Provides
-    @Named(IDLE_VIEW)
-    static View provideIdleView(Context context) {
-        FrameLayout view = new FrameLayout(context);
-        return view;
+    public IdleHostView(@NonNull Context context,
+            @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public IdleHostView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 }

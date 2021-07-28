@@ -117,6 +117,9 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.idle.IdleHostView;
+import com.android.systemui.idle.IdleHostViewController;
+import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -332,6 +335,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
     private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
+    private final IdleViewComponent.Factory mIdleViewComponentFactory;
     private final QSDetailDisplayer mQSDetailDisplayer;
     private final FragmentService mFragmentService;
     private final ScrimController mScrimController;
@@ -365,6 +369,8 @@ public class NotificationPanelViewController extends PanelViewController {
     @Nullable
     private CommunalHostViewController mCommunalViewController;
     private KeyguardStatusViewController mKeyguardStatusViewController;
+    @Nullable
+    private IdleHostViewController mIdleHostViewController;
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
@@ -745,6 +751,7 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardUserSwitcherComponent.Factory keyguardUserSwitcherComponentFactory,
             KeyguardStatusBarViewComponent.Factory keyguardStatusBarViewComponentFactory,
             CommunalViewComponent.Factory communalViewComponentFactory,
+            IdleViewComponent.Factory idleViewComponentFactory,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             QSDetailDisplayer qsDetailDisplayer,
             NotificationGroupManagerLegacy groupManager,
@@ -792,6 +799,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mCommunalViewComponentFactory = communalViewComponentFactory;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mKeyguardStatusBarViewComponentFactory = keyguardStatusBarViewComponentFactory;
+        mIdleViewComponentFactory = idleViewComponentFactory;
         mDepthController = notificationShadeDepthController;
         mContentResolver = contentResolver;
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
@@ -914,7 +922,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 userAvatarView,
                 mKeyguardStatusBar,
                 keyguardUserSwitcherView,
-                mCommunalView);
+                mCommunalView,
+                mView.findViewById(R.id.idle_host_view));
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
                 R.id.notification_stack_scroller);
@@ -1007,12 +1016,17 @@ public class NotificationPanelViewController extends PanelViewController {
             UserAvatarView userAvatarView,
             KeyguardStatusBarView keyguardStatusBarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView,
-            CommunalHostView communalView) {
+            CommunalHostView communalView,
+            IdleHostView idleHostView) {
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
+
+        IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(idleHostView);
+        mIdleHostViewController = idleViewComponent.getIdleHostViewController();
+        mIdleHostViewController.init();
 
         KeyguardStatusBarViewComponent statusBarViewComponent =
                 mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
@@ -1191,7 +1205,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                mKeyguardStatusBar, keyguardUserSwitcherView, mCommunalView);
+                mKeyguardStatusBar, keyguardUserSwitcherView, mCommunalView,
+                mView.findViewById(R.id.idle_host_view));
 
         // Update keyguard bottom area
         int index = mView.indexOfChild(mKeyguardBottomArea);

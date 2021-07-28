@@ -97,6 +97,8 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.idle.IdleHostViewController;
+import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -244,6 +246,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
     @Mock
     private KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
+    @Mock
+    private IdleViewComponent.Factory mIdleViewComponentFactory;
+    @Mock
+    private IdleViewComponent mIdleViewComponent;
+    @Mock
+    private IdleHostViewController mIdleHostViewController;
     @Mock
     private QSDetailDisplayer mQSDetailDisplayer;
     @Mock
@@ -416,6 +424,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mCommunalViewComponent);
         when(mCommunalViewComponent.getCommunalHostViewController())
                 .thenReturn(mCommunalHostViewController);
+        when(mIdleViewComponentFactory.build(any()))
+                .thenReturn(mIdleViewComponent);
+        when(mIdleViewComponent.getIdleHostViewController())
+                .thenReturn(mIdleHostViewController);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_status_view), any(), anyBoolean()))
                 .thenReturn(mKeyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
@@ -444,6 +456,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
                 mCommunalViewComponentFactory,
+                mIdleViewComponentFactory,
                 mLockscreenShadeTransitionController,
                 mQSDetailDisplayer,
                 mGroupManager,
