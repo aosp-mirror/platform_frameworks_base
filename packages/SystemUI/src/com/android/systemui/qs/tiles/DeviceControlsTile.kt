@@ -69,7 +69,7 @@ class DeviceControlsTile @Inject constructor(
 
     private var hasControlsApps = AtomicBoolean(false)
 
-    private val icon = ResourceIcon.get(R.drawable.ic_device_light)
+    private val icon = ResourceIcon.get(R.drawable.controls_icon)
 
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
         override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
