@@ -267,26 +267,22 @@ public class IllustrationPreference extends Preference {
 
     private static void startLottieAnimationWith(LottieAnimationView illustrationView,
             Uri imageUri) {
-        try {
-            final InputStream inputStream =
-                    getInputStreamFromUri(illustrationView.getContext(), imageUri);
-            illustrationView.setAnimation(inputStream, /* cacheKey= */ null);
-            illustrationView.setRepeatCount(LottieDrawable.INFINITE);
-            illustrationView.playAnimation();
-        } catch (IllegalStateException e) {
-            Log.w(TAG, "Invalid illustration image uri: " + imageUri, e);
-        }
+        final InputStream inputStream =
+                getInputStreamFromUri(illustrationView.getContext(), imageUri);
+        illustrationView.setFailureListener(
+                result -> Log.w(TAG, "Invalid illustration image uri: " + imageUri, result));
+        illustrationView.setAnimation(inputStream, /* cacheKey= */ null);
+        illustrationView.setRepeatCount(LottieDrawable.INFINITE);
+        illustrationView.playAnimation();
     }
 
     private static void startLottieAnimationWith(LottieAnimationView illustrationView,
             @RawRes int rawRes) {
-        try {
-            illustrationView.setAnimation(rawRes);
-            illustrationView.setRepeatCount(LottieDrawable.INFINITE);
-            illustrationView.playAnimation();
-        } catch (IllegalStateException e) {
-            Log.w(TAG, "Invalid illustration resource id: " + rawRes, e);
-        }
+        illustrationView.setFailureListener(
+                result -> Log.w(TAG, "Invalid illustration resource id: " + rawRes, result));
+        illustrationView.setAnimation(rawRes);
+        illustrationView.setRepeatCount(LottieDrawable.INFINITE);
+        illustrationView.playAnimation();
     }
 
     private static void resetAnimations(LottieAnimationView illustrationView) {
