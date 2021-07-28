@@ -23,8 +23,6 @@ import android.view.ViewGroup;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.AnimatableProperty;
-import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -191,15 +189,5 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     public void show(WeakReference<CommunalSource> source) {
         mLastSource = source;
         showSource();
-    }
-
-    /**
-     * Sets the Y position of the {@link CommunalHostView}
-     *
-     * @param y       Offset from parent top.
-     * @param animate Whether the change should be animated.
-     */
-    public void updatePositionY(int y, boolean animate) {
-        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, ANIMATION_PROPERTIES, animate);
     }
 }

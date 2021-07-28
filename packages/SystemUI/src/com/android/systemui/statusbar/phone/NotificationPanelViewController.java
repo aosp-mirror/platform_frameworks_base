@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.View.GONE;
 
-import static androidx.constraintlayout.widget.ConstraintSet.BOTTOM;
 import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
@@ -1397,10 +1396,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewController.updatePosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY,
                 mClockPositionResult.clockScale, animateClock);
-        // CommunalView's height is constrained to KeyguardStatusView. Match Y offset as well.
-        if (mCommunalViewController != null) {
-            mCommunalViewController.updatePositionY(mClockPositionResult.clockY, animateClock);
-        }
         if (mKeyguardQsUserSwitchController != null) {
             mKeyguardQsUserSwitchController.updatePosition(
                     mClockPositionResult.clockX,
@@ -1435,20 +1430,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                 TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
             }
-
-            // By default, the CommunalView is not shown. We set parameters as if it is shown, which
-            // are based on it being aligned with the start of the qs edge guide, like the
-            // notification stack scroller. These constraints cannot be expressed in the layout as
-            // they reference a peer rather than the parent.
-            constraintSet.connect(
-                    R.id.communal_host, START,
-                    R.id.qs_edge_guideline, START);
-            constraintSet.connect(
-                    R.id.communal_host, TOP,
-                    R.id.keyguard_status_view, TOP);
-            constraintSet.connect(
-                    R.id.communal_host, BOTTOM,
-                    R.id.keyguard_status_view, BOTTOM);
 
             constraintSet.applyTo(mNotificationContainerParent);
         }

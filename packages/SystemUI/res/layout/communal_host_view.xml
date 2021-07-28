@@ -22,5 +22,9 @@
     android:id="@+id/communal_host"
     android:orientation="vertical"
     systemui:layout_constraintEnd_toEndOf="parent"
+    systemui:layout_constraintStart_toStartOf="parent"
+    systemui:layout_constraintTop_toTopOf="parent"
+    systemui:layout_constraintBottom_toBottomOf="parent"
+    systemui:layout_constraintHeight_percent="@dimen/communal_source_height_percentage"
     android:layout_width="0dp"
     android:layout_height="0dp"/>
