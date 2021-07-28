@@ -21,6 +21,7 @@ import android.view.View;
 
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -68,6 +69,13 @@ public abstract class StatusBarViewModule {
     public static View getSlitShadeStatusBarView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.split_shade_status_bar);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    static BatteryMeterView getBatteryMeterView(@Named(SPLIT_SHADE_HEADER) View view) {
+        return view.findViewById(R.id.batteryRemainingIcon);
     }
 
     /** */
