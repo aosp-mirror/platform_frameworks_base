@@ -304,7 +304,7 @@ public final class ViewRootImpl implements ViewParent,
      * {@hide}
      */
     public static final boolean INSETS_LAYOUT_GENERALIZATION =
-            SystemProperties.getBoolean(USE_FLEXIBLE_INSETS, false);
+            SystemProperties.getBoolean(USE_FLEXIBLE_INSETS, true);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
@@ -1135,7 +1135,7 @@ public final class ViewRootImpl implements ViewParent,
                     controlInsetsForCompatibility(mWindowAttributes);
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
-                            mInsetsController.getRequestedVisibility(), inputChannel, mTempInsets,
+                            mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
                             mTempControls);
                     if (mTranslator != null) {
                         mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);

@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"უსადენო ეკრანის სერტიფიცირება"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi-ს დაწვრილებითი აღრიცხვის ჩართვა"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi სკანირების რეგულირება"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi-ს MAC მისამართების არამუდმივი რანდომიზაცია"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"მობილური ინტერნეტის ყოველთვის გააქტიურება"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ტეტერინგის აპარატურული აჩქარება"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-მოწყობილობების ჩვენება სახელების გარეშე"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ამცირებს ბატარეის ხარჯვას და აუმჯობესებს ქსელის მუშაობას"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"როდესაც ეს რეჟიმი ჩართულია, მოწყობილობის MAC მისამართი შეიძლება შეიცვალოს ისეთ ქსელთან ყოველ დაკავშირებაზე, რომელსაც ჩართული აქვს MAC მისამართის შემთხვევითობა."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ლიმიტირებული"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"არალიმიტირებული"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ჟურნალიზაციის ბუფერის ზომები"</string>

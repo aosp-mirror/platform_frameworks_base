@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Dayakan Pengelogan Berjela-jela Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pendikitan pengimbasan Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Perawakan MAC tidak berterusan Wi‑Fi"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Data mudah alih sentiasa aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Pecutan perkakasan penambatan"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tunjukkan peranti Bluetooth tanpa nama"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tunjukkan pilihan untuk pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan tahap pengelogan Wi-Fi, tunjuk setiap SSID RSSI dalam Pemilih Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Mengurangkan penyusutan bateri &amp; meningkatkan prestasi rangkaian"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Apabila mod ini didayakan, alamat MAC peranti ini mungkin berubah setiap kali peranti bersambung kepada rangkaian yang telah mendayakan perawakan MAC."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Bermeter"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Tidak bermeter"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Saiz penimbal pengelog"</string>

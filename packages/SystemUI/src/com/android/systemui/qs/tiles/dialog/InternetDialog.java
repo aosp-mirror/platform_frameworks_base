@@ -79,11 +79,11 @@ public class InternetDialog extends SystemUIDialog implements
         InternetDialogController.InternetDialogCallback, Window.Callback {
     private static final String TAG = "InternetDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    static final long PROGRESS_DELAY_MS = 2000L;
+
     private final Handler mHandler;
     private final LinearLayoutManager mLayoutManager;
-    private final Runnable mHideProgressBarRunnable = () -> {
-        setProgressBarVisible(false);
-    };
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
@@ -125,8 +125,18 @@ public class InternetDialog extends SystemUIDialog implements
     private WifiEntry mConnectedWifiEntry;
     private int mListMaxHeight;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-    private boolean mIsProgressBarVisible;
     private boolean mCanConfigMobileData;
+
+    // Wi-Fi scanning progress bar
+    protected boolean mIsProgressBarVisible;
+    protected boolean mIsSearchingHidden;
+    protected final Runnable mHideProgressBarRunnable = () -> {
+        setProgressBarVisible(false);
+    };
+    protected Runnable mHideSearchingRunnable = () -> {
+        mIsSearchingHidden = true;
+        mInternetDialogSubTitle.setText(getSubtitleText());
+    };
 
     private final ViewTreeObserver.OnGlobalLayoutListener mInternetListLayoutListener = () -> {
         // Set max height for list
@@ -243,6 +253,7 @@ public class InternetDialog extends SystemUIDialog implements
             Log.d(TAG, "onStop");
         }
         mHandler.removeCallbacks(mHideProgressBarRunnable);
+        mHandler.removeCallbacks(mHideSearchingRunnable);
         mMobileNetworkLayout.setOnClickListener(null);
         mMobileDataToggle.setOnCheckedChangeListener(null);
         mConnectedWifListLayout.setOnClickListener(null);
@@ -374,7 +385,8 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     CharSequence getSubtitleText() {
-        return mInternetDialogController.getSubtitleText(mIsProgressBarVisible);
+        return mInternetDialogController.getSubtitleText(
+                mIsProgressBarVisible && !mIsSearchingHidden);
     }
 
     private Drawable getConnectedWifiDrawable() {
@@ -406,7 +418,7 @@ public class InternetDialog extends SystemUIDialog implements
         return mInternetDialogController.getConnectedWifiSummary();
     }
 
-    private void showProgressBar() {
+    protected void showProgressBar() {
         if (mWifiManager == null || !mWifiManager.isWifiEnabled()) {
             setProgressBarVisible(false);
             return;
@@ -414,8 +426,9 @@ public class InternetDialog extends SystemUIDialog implements
         setProgressBarVisible(true);
         List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
         if (wifiScanResults != null && wifiScanResults.size() > 0) {
-            mContext.getMainThreadHandler().postDelayed(mHideProgressBarRunnable,
-                    2000 /* delay millis */);
+            mHandler.postDelayed(mHideProgressBarRunnable, PROGRESS_DELAY_MS);
+        } else if (!mIsSearchingHidden) {
+            mHandler.postDelayed(mHideSearchingRunnable, PROGRESS_DELAY_MS);
         }
     }
 

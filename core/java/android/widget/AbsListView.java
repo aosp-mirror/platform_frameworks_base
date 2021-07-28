@@ -5938,36 +5938,37 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean handled = false;
         boolean okToSend = true;
         switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_UP:
-        case KeyEvent.KEYCODE_DPAD_DOWN:
-        case KeyEvent.KEYCODE_DPAD_LEFT:
-        case KeyEvent.KEYCODE_DPAD_RIGHT:
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-        case KeyEvent.KEYCODE_ENTER:
-        case KeyEvent.KEYCODE_NUMPAD_ENTER:
-            okToSend = false;
-            break;
-        case KeyEvent.KEYCODE_BACK:
-            if (mFiltered && mPopup != null && mPopup.isShowing()) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN
-                        && event.getRepeatCount() == 0) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.startTracking(event, this);
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
+                okToSend = false;
+                break;
+            case KeyEvent.KEYCODE_BACK:
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (mFiltered && mPopup != null && mPopup.isShowing()) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN
+                            && event.getRepeatCount() == 0) {
+                        KeyEvent.DispatcherState state = getKeyDispatcherState();
+                        if (state != null) {
+                            state.startTracking(event, this);
+                        }
+                        handled = true;
+                    } else if (event.getAction() == KeyEvent.ACTION_UP
+                            && event.isTracking() && !event.isCanceled()) {
+                        handled = true;
+                        mTextFilter.setText("");
                     }
-                    handled = true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && event.isTracking() && !event.isCanceled()) {
-                    handled = true;
-                    mTextFilter.setText("");
                 }
-            }
-            okToSend = false;
-            break;
-        case KeyEvent.KEYCODE_SPACE:
-            // Only send spaces once we are filtered
-            okToSend = mFiltered;
-            break;
+                okToSend = false;
+                break;
+            case KeyEvent.KEYCODE_SPACE:
+                // Only send spaces once we are filtered
+                okToSend = mFiltered;
+                break;
         }
 
         if (okToSend) {

@@ -239,6 +239,7 @@ import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -749,7 +750,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mIsDimming = false;
 
     private @Nullable InsetsSourceProvider mControllableInsetProvider;
-    private final InsetsState mRequestedInsetsState = new InsetsState();
+    private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
     /**
      * Freeze the insets state in some cases that not necessarily keeps up-to-date to the client.
@@ -872,27 +873,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     @Override
     public boolean getRequestedVisibility(@InternalInsetsType int type) {
-        return mRequestedInsetsState.getSourceOrDefaultVisibility(type);
+        return mRequestedVisibilities.getVisibility(type);
     }
 
     /**
      * Returns all the requested visibilities.
      *
-     * @return an {@link InsetsState} as the requested visibilities.
+     * @return an {@link InsetsVisibilities} as the requested visibilities.
      */
-    InsetsState getRequestedState() {
-        return mRequestedInsetsState;
+    InsetsVisibilities getRequestedVisibilities() {
+        return mRequestedVisibilities;
     }
 
     /**
      * @see #getRequestedVisibility(int)
      */
-    void updateRequestedVisibility(InsetsState state) {
-        for (int i = 0; i < InsetsState.SIZE; i++) {
-            final InsetsSource source = state.peekSource(i);
-            if (source == null) continue;
-            mRequestedInsetsState.addSource(source);
-        }
+    void setRequestedVisibilities(InsetsVisibilities visibilities) {
+        mRequestedVisibilities.set(visibilities);
     }
 
     /**
@@ -1173,7 +1170,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (WindowManager.LayoutParams.isSystemAlertWindowType(mAttrs.type)) {
             return TouchOcclusionMode.USE_OPACITY;
         }
-        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL)) {
+        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL)
+                || mWmService.mAtmService.getTransitionController().inTransition(this)) {
             return TouchOcclusionMode.USE_OPACITY;
         }
         return TouchOcclusionMode.BLOCK_UNTRUSTED;
@@ -4405,9 +4403,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
         }
         if (dumpAll) {
-            final String visibilityString = mRequestedInsetsState.toSourceVisibilityString();
+            final String visibilityString = mRequestedVisibilities.toString();
             if (!visibilityString.isEmpty()) {
-                pw.println(prefix + "Requested visibility: " + visibilityString);
+                pw.println(prefix + "Requested visibilities: " + visibilityString);
             }
         }
     }

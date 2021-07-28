@@ -2369,7 +2369,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         final boolean wasShowing = mShowing;
         onKeyguardExitFinished();
 
-        if (mKeyguardStateController.isDismissingFromSwipe() || !wasShowing) {
+        if (mKeyguardStateController.isDismissingFromSwipe() || wasShowing) {
             mKeyguardUnlockAnimationControllerLazy.get().hideKeyguardViewAfterRemoteAnimation();
         }
 

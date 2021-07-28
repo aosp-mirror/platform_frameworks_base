@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
@@ -98,8 +99,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
-        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
-
         TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
                 primaryActivity.getActivityToken());
         if (primaryContainer == null) {
@@ -115,10 +114,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
             wct.reparentActivityToTaskFragment(primaryContainer.getTaskFragmentToken(),
                     primaryActivity.getActivityToken());
+
+            primaryContainer.setLastRequestedBounds(primaryRectBounds);
         } else {
             resizeTaskFragmentIfRegistered(wct, primaryContainer, primaryRectBounds);
         }
 
+        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
         TaskFragmentContainer secondaryContainer = mController.getContainerWithActivity(
                 secondaryActivity.getActivityToken());
         if (secondaryContainer == null || secondaryContainer == primaryContainer) {
@@ -134,6 +136,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
             wct.reparentActivityToTaskFragment(secondaryContainer.getTaskFragmentToken(),
                     secondaryActivity.getActivityToken());
+
+            secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
         } else {
             resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
         }
@@ -177,6 +181,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 activityIntent,
                 activityOptions);
 
+        primaryContainer.setLastRequestedBounds(primaryRectBounds);
+        secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
+
         // TODO(b/190433398): The primary container and the secondary container should also be set
         // as adjacent (WCT#setAdjacentRoots) to make activities behind invisible.
 
@@ -199,7 +206,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
 
-        // TODO(b/190433398): Check if the bounds actually changed.
         // If the task fragments are not registered yet, the positions will be updated after they
         // are created again.
         resizeTaskFragmentIfRegistered(wct, splitContainer.getPrimaryContainer(),
@@ -219,8 +225,25 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (container.getInfo() == null) {
             return;
         }
-        // TODO(b/190433398): Check if the bounds actually changed.
         resizeTaskFragment(wct, container.getTaskFragmentToken(), bounds);
+    }
+
+    @Override
+    void resizeTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
+            @Nullable Rect bounds) {
+        TaskFragmentContainer container = mController.getContainer(fragmentToken);
+        if (container == null) {
+            throw new IllegalStateException(
+                    "Resizing a task fragment that is not registered with controller.");
+        }
+
+        if (container.areLastRequestedBoundsEqual(bounds)) {
+            // Return early if the provided bounds were already requested
+            return;
+        }
+
+        container.setLastRequestedBounds(bounds);
+        super.resizeTaskFragment(wct, fragmentToken, bounds);
     }
 
     boolean shouldShowSideBySide(@NonNull SplitContainer splitContainer) {

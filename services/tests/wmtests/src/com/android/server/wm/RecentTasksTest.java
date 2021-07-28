@@ -859,6 +859,40 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testFreezeTaskListOrder_replaceTask() {
+        // Create two tasks with the same affinity
+        Task affinityTask1 = createTaskBuilder(".AffinityTask1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .build();
+        Task affinityTask2 = createTaskBuilder(".AffinityTask2")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .build();
+        affinityTask2.affinity = affinityTask1.affinity = "affinity";
+
+        // Add some tasks
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(affinityTask1);
+        mRecentTasks.add(mTasks.get(1));
+        mCallbacksRecorder.clear();
+
+        // Freeze the list
+        mRecentTasks.setFreezeTaskListReordering();
+        assertTrue(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Add the affinity task
+        mRecentTasks.add(affinityTask2);
+
+        assertRecentTasksOrder(mTasks.get(1),
+                affinityTask2,
+                mTasks.get(0));
+
+        assertThat(mCallbacksRecorder.mAdded).hasSize(1);
+        assertThat(mCallbacksRecorder.mAdded).contains(affinityTask2);
+        assertThat(mCallbacksRecorder.mRemoved).hasSize(1);
+        assertThat(mCallbacksRecorder.mRemoved).contains(affinityTask1);
+    }
+
+    @Test
     public void testFreezeTaskListOrder_timeout() {
         // Add some tasks
         mRecentTasks.add(mTasks.get(0));

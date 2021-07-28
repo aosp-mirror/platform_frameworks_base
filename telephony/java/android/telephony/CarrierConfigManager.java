@@ -490,6 +490,12 @@ public class CarrierConfigManager {
     /** Used in Cellular Network Settings for preferred network type. */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
+    /**
+     * Used in Cellular Network Settings for preferred network type to show 4G only mode.
+     * @hide
+     */
+    public static final String KEY_4G_ONLY_BOOL = "4g_only_bool";
+
     /** Show cdma network mode choices 1x, 3G, global etc. */
     public static final String KEY_SHOW_CDMA_CHOICES_BOOL = "show_cdma_choices_bool";
 
@@ -5257,6 +5263,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
+        sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
         sDefaults.putBoolean(KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL, false);
