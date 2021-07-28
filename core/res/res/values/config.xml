@@ -5123,4 +5123,10 @@
         <item>@array/config_mainBuiltInDisplayWaterfallCutout</item>
         <item>@array/config_secondaryBuiltInDisplayWaterfallCutout</item>
     </array>
+
+    <!-- Whether the airplane mode should be reset when device boots in non-safemode after exiting
+         from safemode.
+         This flag should be enabled only when the product does not have any UI to toggle airplane
+         mode like automotive devices.-->
+    <bool name="config_autoResetAirplaneMode">false</bool>
 </resources>
