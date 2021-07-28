@@ -2615,11 +2615,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 @Override
                 public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                         Bundle extras) {
-                    if (returnCode == INSTALL_SUCCEEDED) {
-                        onVerificationComplete();
-                    } else {
-                        onSessionVerificationFailure(returnCode, msg);
-                    }
+                    mHandler.post(() -> {
+                        if (returnCode == INSTALL_SUCCEEDED) {
+                            onVerificationComplete();
+                        } else {
+                            onSessionVerificationFailure(returnCode, msg);
+                        }
+                    });
                 }
             };
         } else {
@@ -2639,6 +2641,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mInstallSource, mInstallerUid, mSigningDetails, sessionId, mPackageLite, mPm);
     }
 
+    @WorkerThread
     private void onVerificationComplete() {
         // APK verification is done. Continue the installation depending on whether it is a
         // staged session or not. For a staged session, we will hand it over to the staging
