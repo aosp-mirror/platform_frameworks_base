@@ -42,6 +42,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
+import android.media.AudioSystem;
 import android.media.IRemoteSessionCallback;
 import android.media.MediaCommunicationManager;
 import android.media.Session2Token;
@@ -2147,7 +2148,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             boolean preferSuggestedStream = false;
             if (isValidLocalStreamType(suggestedStream)
-                    && MediaServerUtils.isStreamActive(mAudioManager, suggestedStream)) {
+                    && AudioSystem.isStreamActive(suggestedStream, 0)) {
                 preferSuggestedStream = true;
             }
             if (session == null || preferSuggestedStream) {
@@ -2156,8 +2157,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + ". flags=" + flags + ", preferSuggestedStream="
                             + preferSuggestedStream + ", session=" + session);
                 }
-                if (musicOnly && !MediaServerUtils.isStreamActive(mAudioManager,
-                        AudioManager.STREAM_MUSIC)) {
+                if (musicOnly && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
                     if (DEBUG_KEY_EVENT) {
                         Log.d(TAG, "Nothing is playing on the music stream. Skipping volume event,"
                                 + " flags=" + flags);
