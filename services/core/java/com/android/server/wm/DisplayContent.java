@@ -502,11 +502,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     WindowState mCurrentFocus = null;
 
     /**
-     * The last focused window that we've notified the client that the focus is changed.
-     */
-    WindowState mLastFocus = null;
-
-    /**
      * The foreground app of this display. Windows below this app cannot be the focused window. If
      * the user taps on the area outside of the task of the focused app, we will notify AM about the
      * new task the user wants to interact with.
@@ -1245,12 +1240,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // Removed the token from the map, but made sure it's not an app token before
                 // removing from parent.
                 token.getParent().removeChild(token);
-            }
-            if (token.hasChild(prevDc.mLastFocus)) {
-                // If the reparent window token contains previous display's last focus window, means
-                // it will end up to gain window focus on the target display, so it should not be
-                // notified that it lost focus from the previous display.
-                prevDc.mLastFocus = null;
             }
         }
 
@@ -3206,9 +3195,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         pw.print(prefix); pw.print("mLayoutSeq="); pw.println(mLayoutSeq);
 
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
-        if (mLastFocus != mCurrentFocus) {
-            pw.print("  mLastFocus="); pw.println(mLastFocus);
-        }
         pw.print("  mFocusedApp="); pw.println(mFocusedApp);
         if (mFixedRotationLaunchingApp != null) {
             pw.println("  mFixedRotationLaunchingApp=" + mFixedRotationLaunchingApp);
@@ -3439,8 +3425,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        onWindowFocusChanged(oldFocus, newFocus);
-
         int focusChanged = getDisplayPolicy().focusChangedLw(oldFocus, newFocus);
 
         if (imWindowChanged && oldFocus != mInputMethodWindow) {
@@ -3491,26 +3475,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mWmService.mAccessibilityController));
         }
 
-        mLastFocus = mCurrentFocus;
         return true;
     }
 
     void updateAccessibilityOnWindowFocusChanged(AccessibilityController accessibilityController) {
         accessibilityController.onWindowFocusChangedNot(getDisplayId());
-    }
-
-    private static void onWindowFocusChanged(WindowState oldFocus, WindowState newFocus) {
-        final Task focusedTask = newFocus != null ? newFocus.getTask() : null;
-        final Task unfocusedTask = oldFocus != null ? oldFocus.getTask() : null;
-        if (focusedTask == unfocusedTask) {
-            return;
-        }
-        if (focusedTask != null) {
-            focusedTask.onWindowFocusChanged(true /* hasFocus */);
-        }
-        if (unfocusedTask != null) {
-            unfocusedTask.onWindowFocusChanged(false /* hasFocus */);
-        }
     }
 
     /**
@@ -3536,7 +3505,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "setFocusedApp %s displayId=%d Callers=%s",
                 newFocus, getDisplayId(), Debug.getCallers(4));
+        final Task oldTask = mFocusedApp != null ? mFocusedApp.getTask() : null;
+        final Task newTask = newFocus != null ? newFocus.getTask() : null;
         mFocusedApp = newFocus;
+        if (oldTask != newTask) {
+            if (oldTask != null) oldTask.onAppFocusChanged(false);
+            if (newTask != null) newTask.onAppFocusChanged(true);
+        }
+
         getInputMonitor().setFocusedAppLw(newFocus);
         updateTouchExcludeRegion();
         return true;
@@ -4234,7 +4210,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (DEBUG_INPUT_METHOD) {
             Slog.i(TAG_WM, "Desired input method target: " + imFocus);
             Slog.i(TAG_WM, "Current focus: " + mCurrentFocus + " displayId=" + mDisplayId);
-            Slog.i(TAG_WM, "Last focus: " + mLastFocus + " displayId=" + mDisplayId);
         }
 
         if (DEBUG_INPUT_METHOD) {
