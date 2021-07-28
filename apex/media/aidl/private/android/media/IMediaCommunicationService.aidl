@@ -18,12 +18,15 @@ package android.media;
 import android.media.Session2Token;
 import android.media.IMediaCommunicationServiceCallback;
 import android.media.MediaParceledListSlice;
+import android.view.KeyEvent;
 
 /** {@hide} */
 interface IMediaCommunicationService {
     void notifySession2Created(in Session2Token sessionToken);
     boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid);
     MediaParceledListSlice getSession2Tokens(int userId);
+
+   void dispatchMediaKeyEvent(String packageName, in KeyEvent keyEvent, boolean asSystemService);
 
     void registerCallback(IMediaCommunicationServiceCallback callback, String packageName);
     void unregisterCallback(IMediaCommunicationServiceCallback callback);
