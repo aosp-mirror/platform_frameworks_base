@@ -1329,6 +1329,11 @@
              dictionary-based word suggestions.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_NO_SUGGESTIONS}. -->
         <flag name="textNoSuggestions" value="0x00080001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             indicate that if there is extra information, the IME should provide
+             {@link android.view.inputmethod.TextAttribute}.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_ENABLE_TEXT_CONVERSION_SUGGESTIONS}. -->
+        <flag name="textEnableTextConversionSuggestions" value="0x00100001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
