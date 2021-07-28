@@ -114,7 +114,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
             mState = STATE_STOPPED;
             UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         } else {
-            mState = STATE_STARTED_PAUSED;
+            mState = STATE_STARTED_PAUSED_ATTEMPTED;
         }
     }
 
@@ -188,7 +188,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     public void onPointerUp() {
         try {
             mIsPointerDown = false;
-            mState = STATE_STARTED_PAUSED;
+            mState = STATE_STARTED_PAUSED_ATTEMPTED;
             mALSProbeCallback.getProbe().disable();
             getFreshDaemon().onPointerUp(0 /* pointerId */);
 

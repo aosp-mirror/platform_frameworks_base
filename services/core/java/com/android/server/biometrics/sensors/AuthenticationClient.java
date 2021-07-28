@@ -54,12 +54,18 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     public static final int STATE_NEW = 0;
     // Framework/HAL have started this operation
     public static final int STATE_STARTED = 1;
-    // Operation is started, but requires some user action (such as finger lift & re-touch)
+    // Operation is started, but requires some user action to start (such as finger lift & re-touch)
     public static final int STATE_STARTED_PAUSED = 2;
+    // Same as above, except auth was attempted (rejected, timed out, etc).
+    public static final int STATE_STARTED_PAUSED_ATTEMPTED = 3;
     // Done, errored, canceled, etc. HAL/framework are not running this sensor anymore.
-    public static final int STATE_STOPPED = 3;
+    public static final int STATE_STOPPED = 4;
 
-    @IntDef({STATE_NEW, STATE_STARTED, STATE_STARTED_PAUSED, STATE_STOPPED})
+    @IntDef({STATE_NEW,
+            STATE_STARTED,
+            STATE_STARTED_PAUSED,
+            STATE_STARTED_PAUSED_ATTEMPTED,
+            STATE_STOPPED})
     @interface State {}
 
     private final boolean mIsStrongBiometric;
