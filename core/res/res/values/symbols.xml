@@ -4426,4 +4426,21 @@
   <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 
   <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
+
+  <java-symbol type="string" name="config_secondaryBuiltInDisplayCutout" />
+  <java-symbol type="string" name="config_secondaryBuiltInDisplayCutoutRectApproximation" />
+  <java-symbol type="bool" name="config_fillSecondaryBuiltInDisplayCutout" />
+  <java-symbol type="bool" name="config_maskSecondaryBuiltInDisplayCutout" />
+  <java-symbol type="array" name="config_displayUniqueIdArray" />
+  <java-symbol type="array" name="config_displayCutoutPathArray" />
+  <java-symbol type="array" name="config_displayCutoutApproximationRectArray" />
+  <java-symbol type="array" name="config_fillBuiltInDisplayCutoutArray" />
+  <java-symbol type="array" name="config_maskBuiltInDisplayCutoutArray" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_left_edge_size" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_top_edge_size" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_right_edge_size" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_bottom_edge_size" />
+  <java-symbol type="array" name="config_mainBuiltInDisplayWaterfallCutout" />
+  <java-symbol type="array" name="config_secondaryBuiltInDisplayWaterfallCutout" />
+  <java-symbol type="array" name="config_waterfallCutoutArray" />
 </resources>
