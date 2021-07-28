@@ -175,7 +175,6 @@ public final class InputBindResult implements Parcelable {
     /**
      * The input method service.
      */
-    @UnsupportedAppUsage
     public final IInputMethodSession method;
 
     /**
