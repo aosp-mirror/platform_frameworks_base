@@ -776,8 +776,10 @@ public abstract class WallpaperService extends Service {
                 WallpaperColors color = colors.get(i);
                 RectF area = regions.get(i);
                 if (color == null || area == null) {
-                    Log.wtf(TAG, "notifyLocalColorsChanged null values. color: "
-                            + color + " area " + area);
+                    if (DEBUG) {
+                        Log.e(TAG, "notifyLocalColorsChanged null values. color: "
+                                + color + " area " + area);
+                    }
                     continue;
                 }
                 try {
