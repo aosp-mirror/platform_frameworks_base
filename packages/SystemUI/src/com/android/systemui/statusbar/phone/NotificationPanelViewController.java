@@ -3688,8 +3688,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
         if (mAmbientIndicationBottomPadding != ambientIndicationBottomPadding) {
             mAmbientIndicationBottomPadding = ambientIndicationBottomPadding;
-            mLockIconViewController.setAmbientIndicationBottomPadding(
-                    mAmbientIndicationBottomPadding);
             updateMaxDisplayedNotifications(true);
         }
     }
