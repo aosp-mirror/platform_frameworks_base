@@ -1704,6 +1704,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * @param displayId The logical display id.
      */
     private void ensureWindowsAvailableTimedLocked(int displayId) {
+        if (displayId == Display.INVALID_DISPLAY) {
+            return;
+        }
+
         if (mA11yWindowManager.getWindowListLocked(displayId) != null) {
             return;
         }
