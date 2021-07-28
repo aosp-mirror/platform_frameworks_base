@@ -2384,8 +2384,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void verifyNonStaged()
             throws PackageManagerException {
-        final PackageManagerService.VerificationParams verifyingSession =
-                prepareForVerification();
+        final VerificationParams verifyingSession = prepareForVerification();
         if (isMultiPackage()) {
             final List<PackageInstallerSession> childSessions = getChildSessions();
             // Spot check to reject a non-staged multi package install of APEXes and APKs.
@@ -2395,14 +2394,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     PackageManager.INSTALL_FAILED_SESSION_INVALID,
                     "Non-staged multi package install of APEX and APK packages is not supported");
             }
-            List<PackageManagerService.VerificationParams> verifyingChildSessions =
+            List<VerificationParams> verifyingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.VerificationParams verifyingChildSession =
+                    final VerificationParams verifyingChildSession =
                             session.prepareForVerification();
                     verifyingChildSessions.add(verifyingChildSession);
                 } catch (PackageManagerException e) {
@@ -2416,9 +2415,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
-            mPm.verifyStage(verifyingSession, verifyingChildSessions);
+            verifyingSession.verifyStage(verifyingChildSessions);
         } else {
-            mPm.verifyStage(verifyingSession);
+            verifyingSession.verifyStage();
         }
     }
 
@@ -2433,21 +2432,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void installNonStaged()
             throws PackageManagerException {
-        final PackageManagerService.InstallParams installingSession = makeInstallParams();
+        final InstallParams installingSession = makeInstallParams();
         if (installingSession == null) {
             throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                     "Session should contain at least one apk session for installation");
         }
         if (isMultiPackage()) {
             final List<PackageInstallerSession> childSessions = getChildSessions();
-            List<PackageManagerService.InstallParams> installingChildSessions =
-                    new ArrayList<>(childSessions.size());
+            List<InstallParams> installingChildSessions = new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.InstallParams installingChildSession =
+                    final InstallParams installingChildSession =
                             session.makeInstallParams();
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
@@ -2463,20 +2461,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
-            mPm.installStage(installingSession, installingChildSessions);
+            installingSession.installStage(installingChildSessions);
         } else {
-            mPm.installStage(installingSession);
+            installingSession.installStage();
         }
     }
 
     /**
      * Stages this session for verification and returns a
-     * {@link PackageManagerService.VerificationParams} representing this new staged state or null
+     * {@link VerificationParams} representing this new staged state or null
      * in case permissions need to be requested before verification can proceed.
      */
     @NonNull
-    private PackageManagerService.VerificationParams prepareForVerification()
-            throws PackageManagerException {
+    private VerificationParams prepareForVerification() throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
         synchronized (mLock) {
@@ -2603,9 +2600,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     @Nullable
     /**
-     * Returns a {@link com.android.server.pm.PackageManagerService.VerificationParams}
+     * Returns a {@link com.android.server.pm.VerificationParams}
      */
-    private PackageManagerService.VerificationParams makeVerificationParamsLocked() {
+    private VerificationParams makeVerificationParamsLocked() {
         final IPackageInstallObserver2 localObserver;
         if (!hasParentSessionId()) {
             // Avoid attaching this observer to child session since they won't use it.
@@ -2638,8 +2635,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mRelinquished = true;
 
-        return mPm.new VerificationParams(user, stageDir, localObserver, params,
-                mInstallSource, mInstallerUid, mSigningDetails, sessionId, mPackageLite);
+        return new VerificationParams(user, stageDir, localObserver, params,
+                mInstallSource, mInstallerUid, mSigningDetails, sessionId, mPackageLite, mPm);
     }
 
     private void onVerificationComplete() {
@@ -2656,10 +2653,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Stages this session for install and returns a
-     * {@link PackageManagerService.InstallParams} representing this new staged state.
+     * {@link InstallParams} representing this new staged state.
      */
     @Nullable
-    private PackageManagerService.InstallParams makeInstallParams()
+    private InstallParams makeInstallParams()
             throws PackageManagerException {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -2722,8 +2719,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return mPm.new InstallParams(stageDir, localObserver, params, mInstallSource, user,
-                    mSigningDetails, mInstallerUid, mPackageLite);
+            return new InstallParams(stageDir, localObserver, params, mInstallSource, user,
+                    mSigningDetails, mInstallerUid, mPackageLite, mPm);
         }
     }
 
