@@ -883,11 +883,15 @@ public class UdfpsController implements DozeReceiver {
 
     private void onFingerDown(int x, int y, float minor, float major) {
         mExecution.assertIsMainThread();
-        mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
+
+        if (mView.getAnimationViewController() instanceof UdfpsKeyguardViewController) {
+            mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
+        }
+
         if (!mOnFingerDown) {
             playStartHaptic();
 
