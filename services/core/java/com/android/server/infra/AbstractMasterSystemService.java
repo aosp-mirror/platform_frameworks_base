@@ -744,7 +744,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      *
      * @throws SecurityException when it's not...
      */
-    protected final void assertCalledByPackageOwner(@NonNull String packageName) {
+    protected void assertCalledByPackageOwner(@NonNull String packageName) {
         Objects.requireNonNull(packageName);
         final int uid = Binder.getCallingUid();
         final String[] packages = getContext().getPackageManager().getPackagesForUid(uid);

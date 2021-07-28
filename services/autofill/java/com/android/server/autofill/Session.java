@@ -440,6 +440,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (!mWaitForInlineRequest || mPendingInlineSuggestionsRequest != null) {
                         return;
                     }
+                    mWaitForInlineRequest = inlineSuggestionsRequest != null;
                     mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
                     maybeRequestFillLocked();
                     viewState.resetState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
