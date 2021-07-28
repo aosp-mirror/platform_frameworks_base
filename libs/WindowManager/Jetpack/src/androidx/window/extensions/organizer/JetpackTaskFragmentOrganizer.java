@@ -159,13 +159,22 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param ownerToken The token of the activity that creates this task fragment. It does not
      *                   have to be a child of this task fragment, but must belong to the same task.
      */
+    void createTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken,
+            IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode) {
+        final TaskFragmentCreationParams fragmentOptions =
+                createFragmentOptions(fragmentToken, ownerToken, bounds, windowingMode);
+        wct.createTaskFragment(fragmentOptions);
+    }
+
+    /**
+     * @param ownerToken The token of the activity that creates this task fragment. It does not
+     *                   have to be a child of this task fragment, but must belong to the same task.
+     */
     private void createTaskFragmentAndReparentActivity(
             WindowContainerTransaction wct, IBinder fragmentToken, IBinder ownerToken,
             @NonNull Rect bounds, @WindowingMode int windowingMode, Activity activity) {
-        final TaskFragmentCreationParams fragmentOptions =
-                createFragmentOptions(fragmentToken, ownerToken, bounds, windowingMode);
-        wct.createTaskFragment(fragmentOptions)
-                .reparentActivityToTaskFragment(fragmentToken, activity.getActivityToken());
+        createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
+        wct.reparentActivityToTaskFragment(fragmentToken, activity.getActivityToken());
     }
 
     /**
@@ -176,11 +185,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             WindowContainerTransaction wct, IBinder fragmentToken, IBinder ownerToken,
             @NonNull Rect bounds, @WindowingMode int windowingMode, Intent activityIntent,
             @Nullable Bundle activityOptions) {
-        final TaskFragmentCreationParams fragmentOptions =
-                createFragmentOptions(fragmentToken, ownerToken, bounds, windowingMode);
-        wct.createTaskFragment(fragmentOptions)
-                .startActivityInTaskFragment(fragmentToken, ownerToken, activityIntent,
-                        activityOptions);
+        createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
+        wct.startActivityInTaskFragment(fragmentToken, ownerToken, activityIntent, activityOptions);
     }
 
     TaskFragmentCreationParams createFragmentOptions(IBinder fragmentToken, IBinder ownerToken,
