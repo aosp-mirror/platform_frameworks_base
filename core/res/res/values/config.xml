@@ -5047,4 +5047,80 @@
 
     <!-- the number of the max cached processes in the system. -->
     <integer name="config_customizedMaxCachedProcesses">32</integer>
+
+    <!-- The display cutout configs for secondary built-in display. -->
+    <string name="config_secondaryBuiltInDisplayCutout" translatable="false"></string>
+    <string name="config_secondaryBuiltInDisplayCutoutRectApproximation" translatable="false">
+        @string/config_secondaryBuiltInDisplayCutout
+    </string>
+    <bool name="config_fillSecondaryBuiltInDisplayCutout">false</bool>
+    <bool name="config_maskSecondaryBuiltInDisplayCutout">false</bool>
+
+    <!-- An array contains unique ids of all built-in displays and the unique id of a display can be
+         obtained from {@link Display#getUniqueId}. This array should be set for multi-display
+         devices if there are different display related configs(e.g. display cutout, rounded corner)
+         between each built-in display.
+         It is used as an index for multi-display related configs:
+         First look up the index of the unique id of the given built-in display unique id in this
+         array and use this index to get the info in corresponding config arrays such as:
+           - config_displayCutoutPathArray
+           - config_displayCutoutApproximationRectArray
+           - config_fillBuiltInDisplayCutoutArray
+           - config_maskBuiltInDisplayCutoutArray
+           - config_waterfallCutoutArray
+
+         Leave this array empty for single display device and the system will load the default main
+         built-in related configs.
+         -->
+    <string-array name="config_displayUniqueIdArray" translatable="false">
+        <!-- Example:
+        <item>"local:1234567891"</item> // main built-in display
+        <item>"local:1234567892"</item> // secondary built-in display
+        -->
+    </string-array>
+
+    <!-- The display cutout path config for each display in a multi-display device. -->
+    <string-array name="config_displayCutoutPathArray" translatable="false">
+        <item>@string/config_mainBuiltInDisplayCutout</item>
+        <item>@string/config_secondaryBuiltInDisplayCutout</item>
+    </string-array>
+
+    <!-- The display cutout approximation rect config for each display in a multi-display device.
+         -->
+    <string-array name="config_displayCutoutApproximationRectArray" translatable="false">
+        <item>@string/config_mainBuiltInDisplayCutoutRectApproximation</item>
+        <item>@string/config_secondaryBuiltInDisplayCutoutRectApproximation</item>
+    </string-array>
+
+    <!-- The maskBuiltInDisplayCutout config for each display in a multi-display device. -->
+    <array name="config_maskBuiltInDisplayCutoutArray" translatable="false">
+        <item>@bool/config_maskMainBuiltInDisplayCutout</item>
+        <item>@bool/config_maskSecondaryBuiltInDisplayCutout</item>
+    </array>
+
+    <!-- The fillBuiltInDisplayCutout config for each display in a multi-display device. -->
+    <array name="config_fillBuiltInDisplayCutoutArray" translatable="false">
+        <item>@bool/config_fillMainBuiltInDisplayCutout</item>
+        <item>@bool/config_fillSecondaryBuiltInDisplayCutout</item>
+    </array>
+
+    <array name="config_mainBuiltInDisplayWaterfallCutout" translatable="false">
+        <item>@dimen/waterfall_display_left_edge_size</item>
+        <item>@dimen/waterfall_display_top_edge_size</item>
+        <item>@dimen/waterfall_display_right_edge_size</item>
+        <item>@dimen/waterfall_display_bottom_edge_size</item>
+    </array>
+
+    <array name="config_secondaryBuiltInDisplayWaterfallCutout" translatable="false">
+        <item>@dimen/secondary_waterfall_display_left_edge_size</item>
+        <item>@dimen/secondary_waterfall_display_top_edge_size</item>
+        <item>@dimen/secondary_waterfall_display_right_edge_size</item>
+        <item>@dimen/secondary_waterfall_display_bottom_edge_size</item>
+    </array>
+
+    <!-- The waterfall cutout config for each display in a multi-display device. -->
+    <array name="config_waterfallCutoutArray" translatable="false">
+        <item>@array/config_mainBuiltInDisplayWaterfallCutout</item>
+        <item>@array/config_secondaryBuiltInDisplayWaterfallCutout</item>
+    </array>
 </resources>
