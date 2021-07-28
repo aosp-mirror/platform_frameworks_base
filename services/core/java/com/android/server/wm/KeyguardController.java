@@ -49,6 +49,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.WindowManager;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -158,6 +159,7 @@ class KeyguardController {
         final boolean keyguardChanged = (keyguardShowing != mKeyguardShowing)
                 || (mKeyguardGoingAway && keyguardShowing && !aodChanged);
         if (!keyguardChanged && !aodChanged) {
+            setWakeTransitionReady();
             return;
         }
         EventLogTags.writeWmSetKeyguardShown(
@@ -203,6 +205,15 @@ class KeyguardController {
         updateKeyguardSleepToken();
         mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
+        setWakeTransitionReady();
+    }
+
+    private void setWakeTransitionReady() {
+        if (mWindowManager.mAtmService.getTransitionController().getCollectingTransitionType()
+                == WindowManager.TRANSIT_WAKE) {
+            mWindowManager.mAtmService.getTransitionController().setReady(
+                    mRootWindowContainer.getDefaultDisplay());
+        }
     }
 
     /**
@@ -334,6 +345,7 @@ class KeyguardController {
         for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
             final DisplayContent display = mRootWindowContainer.getChildAt(displayNdx);
+            if (display.isRemoving() || display.isRemoved()) continue;
             final KeyguardDisplayState state = getDisplayState(display.mDisplayId);
             state.updateVisibility(this, display);
             requestDismissKeyguard |= state.mRequestDismissKeyguard;
