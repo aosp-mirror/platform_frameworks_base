@@ -365,6 +365,9 @@ public final class PhantomProcessList {
     private int onPhantomProcessFdEvent(FileDescriptor fd, int events) {
         synchronized (mLock) {
             final PhantomProcessRecord proc = mPhantomProcessesPidFds.get(fd.getInt$());
+            if (proc == null) {
+                return 0;
+            }
             if ((events & EVENT_INPUT) != 0) {
                 proc.onProcDied(true);
             } else {
