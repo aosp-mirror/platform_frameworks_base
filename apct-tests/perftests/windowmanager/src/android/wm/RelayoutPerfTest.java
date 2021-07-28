@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
@@ -125,12 +124,6 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
     }
 
     private static class RelayoutRunner {
-        /**
-         * There may be some messages post to other threads with holding WM lock after relayout.
-         * Let it take a break to avoid lock contention that isn't the scope of this test.
-         */
-        private static final long INTERVAL_MS = 10;
-
         final ClientWindowFrames mOutFrames = new ClientWindowFrames();
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
@@ -165,9 +158,6 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrames,
                         mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
                         mOutSurfaceSize);
-                state.pauseTiming();
-                SystemClock.sleep(INTERVAL_MS);
-                state.resumeTiming();
             }
         }
     }
