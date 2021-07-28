@@ -1020,8 +1020,8 @@
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Бул колдонмодогу калкып чыкма билдирмелерди өчүрүү үчүн \"Башкарууну\" басыңыз"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Түшүндүм"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> жөндөөлөрү"</string>
-    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Тутум чабыттоосу жаңырды. Өзгөртүү үчүн, Жөндөөлөргө өтүңүз."</string>
-    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Тутум чабыттоосун жаңыртуу үчүн Жөндөөлөргө өтүңүз"</string>
+    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Тутум чабыттоосу жаңырды. Өзгөртүү үчүн, жөндөөлөргө өтүңүз."</string>
+    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Тутум чабыттоосун жаңыртуу үчүн жөндөөлөргө өтүңүз"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Көшүү режими"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Сүйлөшүү маанилүү болуп коюлду"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Маанилүү жазышуулардын төмөнкүдөй артыкчылыктары бар:"</string>
