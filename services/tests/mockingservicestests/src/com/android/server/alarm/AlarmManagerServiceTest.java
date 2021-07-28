@@ -3002,7 +3002,8 @@ public class AlarmManagerServiceTest {
             final PendingIntent pi = getNewMockPendingIntent();
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i, pi);
 
-            verify(() -> MetricsHelper.pushAlarmScheduled(argThat(a -> a.matches(pi, null))));
+            verify(() -> MetricsHelper.pushAlarmScheduled(argThat(a -> a.matches(pi, null)),
+                    anyInt()));
         }
     }
 
