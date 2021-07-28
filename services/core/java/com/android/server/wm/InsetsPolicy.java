@@ -138,12 +138,19 @@ class InsetsPolicy {
             abortTransient();
         }
         mFocusedWin = focusedWin;
-        InsetsControlTarget statusControlTarget = getStatusControlTarget(focusedWin);
-        InsetsControlTarget navControlTarget = getNavControlTarget(focusedWin);
-        mStateController.onBarControlTargetChanged(statusControlTarget,
-                getFakeControlTarget(focusedWin, statusControlTarget),
+        final InsetsControlTarget statusControlTarget =
+                getStatusControlTarget(focusedWin, false /* fake */);
+        final InsetsControlTarget navControlTarget =
+                getNavControlTarget(focusedWin, false /* fake */);
+        mStateController.onBarControlTargetChanged(
+                statusControlTarget,
+                statusControlTarget == mDummyControlTarget
+                        ? getStatusControlTarget(focusedWin, true /* fake */)
+                        : null,
                 navControlTarget,
-                getFakeControlTarget(focusedWin, navControlTarget));
+                navControlTarget == mDummyControlTarget
+                        ? getNavControlTarget(focusedWin, true /* fake */)
+                        : null);
         mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
         mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
     }
@@ -330,13 +337,9 @@ class InsetsPolicy {
         mShowingTransientTypes.clear();
     }
 
-    private @Nullable InsetsControlTarget getFakeControlTarget(@Nullable WindowState focused,
-            InsetsControlTarget realControlTarget) {
-        return realControlTarget == mDummyControlTarget ? focused : null;
-    }
-
-    private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin) {
-        if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
+    private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin,
+            boolean fake) {
+        if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1 && !fake) {
             return mDummyControlTarget;
         }
         final WindowState notificationShade = mPolicy.getNotificationShade();
@@ -354,7 +357,7 @@ class InsetsPolicy {
             // we will dispatch the real visibility of status bar to the client.
             return null;
         }
-        if (forceShowsStatusBarTransiently()) {
+        if (forceShowsStatusBarTransiently() && !fake) {
             // Status bar is forcibly shown transiently, and its new visibility won't be
             // dispatched to the client so that we can keep the layout stable. We will dispatch the
             // fake control to the client, so that it can re-show the bar during this scenario.
@@ -379,13 +382,14 @@ class InsetsPolicy {
                 && !win.inMultiWindowMode();
     }
 
-    private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin) {
+    private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,
+            boolean fake) {
         final WindowState imeWin = mDisplayContent.mInputMethodWindow;
         if (imeWin != null && imeWin.isVisible()) {
             // Force showing navigation bar while IME is visible.
             return null;
         }
-        if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
+        if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1 && !fake) {
             return mDummyControlTarget;
         }
         if (focusedWin == mPolicy.getNotificationShade()) {
@@ -402,7 +406,7 @@ class InsetsPolicy {
             // bar, and we will dispatch the real visibility of navigation bar to the client.
             return null;
         }
-        if (forceShowsNavigationBarTransiently()) {
+        if (forceShowsNavigationBarTransiently() && !fake) {
             // Navigation bar is forcibly shown transiently, and its new visibility won't be
             // dispatched to the client so that we can keep the layout stable. We will dispatch the
             // fake control to the client, so that it can re-show the bar during this scenario.
