@@ -107,9 +107,6 @@ public class BubbleStackView extends FrameLayout
      */
     private static final float FLYOUT_OVERSCROLL_ATTENUATION_FACTOR = 8f;
 
-    /** Duration of the flyout alpha animations. */
-    private static final int FLYOUT_ALPHA_ANIMATION_DURATION = 100;
-
     private static final int FADE_IN_DURATION = 320;
 
     /** Percent to darken the bubbles when they're in the dismiss target. */
@@ -122,6 +119,8 @@ public class BubbleStackView extends FrameLayout
     private static final float EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT = 0.1f;
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
+
+    private static final int MANAGE_MENU_SCRIM_ANIM_DURATION = 150;
 
     private static final float SCRIM_ALPHA = 0.6f;
 
@@ -199,6 +198,7 @@ public class BubbleStackView extends FrameLayout
     private ExpandedAnimationController mExpandedAnimationController;
 
     private View mScrim;
+    private View mManageMenuScrim;
     private FrameLayout mExpandedViewContainer;
 
     /** Matrix used to scale the expanded view container with a given pivot point. */
@@ -853,6 +853,14 @@ public class BubbleStackView extends FrameLayout
         addView(mScrim);
         mScrim.setAlpha(0f);
 
+        mManageMenuScrim = new View(getContext());
+        mManageMenuScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        mManageMenuScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
+        addView(mManageMenuScrim, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mManageMenuScrim.setAlpha(0f);
+        mManageMenuScrim.setVisibility(INVISIBLE);
+
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     mPositioner.update();
@@ -1210,6 +1218,8 @@ public class BubbleStackView extends FrameLayout
         updateUserEdu();
         updateExpandedViewTheme();
         mScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
+        mManageMenuScrim.setBackgroundDrawable(new ColorDrawable(
                 getResources().getColor(android.R.color.system_neutral1_1000)));
     }
 
@@ -2494,6 +2504,24 @@ public class BubbleStackView extends FrameLayout
             mManageMenu.setVisibility(View.INVISIBLE);
             return;
         }
+
+        if (show) {
+            mManageMenuScrim.setVisibility(VISIBLE);
+            mManageMenuScrim.setTranslationZ(mManageMenu.getElevation() - 1f);
+        }
+        Runnable endAction = () -> {
+            if (!show) {
+                mManageMenuScrim.setVisibility(INVISIBLE);
+                mManageMenuScrim.setTranslationZ(0f);
+            }
+        };
+
+        mManageMenuScrim.animate()
+                .setDuration(MANAGE_MENU_SCRIM_ANIM_DURATION)
+                .setInterpolator(show ? ALPHA_IN : ALPHA_OUT)
+                .alpha(show ? SCRIM_ALPHA : 0f)
+                .withEndAction(endAction)
+                .start();
 
         // If available, update the manage menu's settings option with the expanded bubble's app
         // name and icon.
