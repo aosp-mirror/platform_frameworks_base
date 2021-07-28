@@ -56,7 +56,6 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -98,7 +97,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -581,7 +579,7 @@ public class BubbleController {
 
     /**
      * BubbleStackView is lazily created by this method the first time a Bubble is added. This
-     * method initializes the stack view and adds it to the StatusBar just above the scrim.
+     * method initializes the stack view and adds it to window manager.
      */
     private void ensureStackViewCreated() {
         if (mStackView == null) {
@@ -629,7 +627,6 @@ public class BubbleController {
         try {
             mAddedToWindowManager = true;
             mBubbleData.getOverflow().initialize(this);
-            mStackView.addView(mBubbleScrim);
             mWindowManager.addView(mStackView, mWmLayoutParams);
             // Position info is dependent on us being attached to a window
             mBubblePositioner.update();
@@ -661,7 +658,6 @@ public class BubbleController {
             mAddedToWindowManager = false;
             if (mStackView != null) {
                 mWindowManager.removeView(mStackView);
-                mStackView.removeView(mBubbleScrim);
                 mBubbleData.getOverflow().cleanUpExpandedState();
             } else {
                 Log.w(TAG, "StackView added to WindowManager, but was null when removing!");
@@ -761,13 +757,6 @@ public class BubbleController {
                 mStackView.onLayoutDirectionChanged(mLayoutDirection);
             }
         }
-    }
-
-    private void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback) {
-        mBubbleScrim = view;
-        callback.accept(mMainExecutor, mMainExecutor.executeBlockingForResult(() -> {
-            return Looper.myLooper();
-        }, Looper.class));
     }
 
     private void setSysuiProxy(Bubbles.SysuiProxy proxy) {
@@ -1570,13 +1559,6 @@ public class BubbleController {
         public void setSysuiProxy(SysuiProxy proxy) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.setSysuiProxy(proxy);
-            });
-        }
-
-        @Override
-        public void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback) {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.setBubbleScrim(view, callback);
             });
         }
 

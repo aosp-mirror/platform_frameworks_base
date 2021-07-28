@@ -19,6 +19,8 @@ package com.android.wm.shell.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -33,11 +35,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -121,6 +123,8 @@ public class BubbleStackView extends FrameLayout
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
 
+    private static final float SCRIM_ALPHA = 0.6f;
+
     /**
      * How long to wait to animate the stack temporarily invisible after a drag/flyout hide
      * animation ends, if we are in fact temporarily invisible.
@@ -194,7 +198,7 @@ public class BubbleStackView extends FrameLayout
     private StackAnimationController mStackAnimationController;
     private ExpandedAnimationController mExpandedAnimationController;
 
-    private View mTaskbarScrim;
+    private View mScrim;
     private FrameLayout mExpandedViewContainer;
 
     /** Matrix used to scale the expanded view container with a given pivot point. */
@@ -842,11 +846,12 @@ public class BubbleStackView extends FrameLayout
             mBubbleData.setExpanded(true);
         });
 
-        mTaskbarScrim = new View(getContext());
-        mTaskbarScrim.setBackgroundColor(Color.BLACK);
-        addView(mTaskbarScrim);
-        mTaskbarScrim.setAlpha(0f);
-        mTaskbarScrim.setVisibility(GONE);
+        mScrim = new View(getContext());
+        mScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        mScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
+        addView(mScrim);
+        mScrim.setAlpha(0f);
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
@@ -1204,6 +1209,8 @@ public class BubbleStackView extends FrameLayout
         updateOverflow();
         updateUserEdu();
         updateExpandedViewTheme();
+        mScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
     }
 
     /**
@@ -1783,6 +1790,20 @@ public class BubbleStackView extends FrameLayout
         mExpandedViewAlphaAnimator.start();
     }
 
+    private void showScrim(boolean show) {
+        if (show) {
+            mScrim.animate()
+                    .setInterpolator(ALPHA_IN)
+                    .alpha(SCRIM_ALPHA)
+                    .start();
+        } else {
+            mScrim.animate()
+                    .alpha(0f)
+                    .setInterpolator(ALPHA_OUT)
+                    .start();
+        }
+    }
+
     private void animateExpansion() {
         cancelDelayedExpandCollapseSwitchAnimations();
         final boolean showVertically = mPositioner.showBubblesVertically();
@@ -1792,6 +1813,7 @@ public class BubbleStackView extends FrameLayout
         }
         beforeExpandedViewAnimation();
 
+        showScrim(true);
         updateZOrder();
         updateBadges(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
@@ -1803,16 +1825,6 @@ public class BubbleStackView extends FrameLayout
             }
         } /* after */);
 
-        if (mPositioner.showingInTaskbar()
-                // Don't need the scrim when the bar is at the bottom
-                && mPositioner.getTaskbarPosition() != BubblePositioner.TASKBAR_POSITION_BOTTOM) {
-            mTaskbarScrim.getLayoutParams().width = mPositioner.getTaskbarSize();
-            mTaskbarScrim.setTranslationX(mStackOnLeftOrWillBe
-                    ? 0f
-                    : mPositioner.getAvailableRect().right - mPositioner.getTaskbarSize());
-            mTaskbarScrim.setVisibility(VISIBLE);
-            mTaskbarScrim.animate().alpha(1f).start();
-        }
         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
                 getBubbleIndex(mExpandedBubble));
         mExpandedViewContainer.setTranslationX(0f);
@@ -1923,6 +1935,8 @@ public class BubbleStackView extends FrameLayout
         mIsExpanded = false;
         mIsExpansionAnimating = true;
 
+        showScrim(false);
+
         mBubbleContainer.cancelAllAnimations();
 
         // If we were in the middle of swapping, the animating-out surface would have been scaling
@@ -1939,10 +1953,6 @@ public class BubbleStackView extends FrameLayout
                 mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
                 /* collapseTo */,
                 () -> mBubbleContainer.setActiveController(mStackAnimationController));
-
-        if (mTaskbarScrim.getVisibility() == VISIBLE) {
-            mTaskbarScrim.animate().alpha(0f).start();
-        }
 
         int index;
         if (mExpandedBubble != null && BubbleOverflow.KEY.equals(mExpandedBubble.getKey())) {
@@ -2010,10 +2020,6 @@ public class BubbleStackView extends FrameLayout
                     afterExpandedViewAnimation();
                     if (previouslySelected != null) {
                         previouslySelected.setTaskViewVisibility(false);
-                    }
-
-                    if (mPositioner.showingInTaskbar()) {
-                        mTaskbarScrim.setVisibility(GONE);
                     }
                 })
                 .start();

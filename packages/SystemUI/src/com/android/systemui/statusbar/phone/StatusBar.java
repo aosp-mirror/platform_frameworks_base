@@ -187,7 +187,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CircleReveal;
@@ -249,6 +248,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
@@ -1254,13 +1254,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         ScrimView notificationsScrim = mNotificationShadeWindowView
                 .findViewById(R.id.scrim_notifications);
         ScrimView scrimInFront = mNotificationShadeWindowView.findViewById(R.id.scrim_in_front);
-        ScrimView scrimForBubble = mBubblesManagerOptional.isPresent()
-                ? mBubblesManagerOptional.get().getScrimForBubble() : null;
 
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);
         });
-        mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront, scrimForBubble);
+        mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
         mLightRevealScrim.setRevealAmountListener(
