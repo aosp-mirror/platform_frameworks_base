@@ -573,7 +573,7 @@
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Ermöglicht der App,  Gesichtsvorlagen hinzuzufügen oder zu entfernen."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"Hardware für Gesichtsentsperrung verwenden"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Ermöglicht der App, zur Authentifizierung Hardware für Gesichtsentsperrung zu verwenden"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Gesichtsentsperrung"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Entsperrung per Gesichtserkennung"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Gesicht neu scannen lassen"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Für bessere Erkennung Gesicht neu scannen lassen"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
@@ -1937,7 +1937,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Karten &amp; Navigation"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Effizienz"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Gerätespeicher"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-Fehlerbehebung"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-Debugging"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"Stunde"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"Minute"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Uhrzeit einstellen"</string>
