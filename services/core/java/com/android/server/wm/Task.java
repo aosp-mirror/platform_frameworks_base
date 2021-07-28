@@ -4314,10 +4314,10 @@ class Task extends TaskFragment {
      * @return true if the task is currently focused.
      */
     private boolean isFocused() {
-        if (mDisplayContent == null || mDisplayContent.mCurrentFocus == null) {
+        if (mDisplayContent == null || mDisplayContent.mFocusedApp == null) {
             return false;
         }
-        return mDisplayContent.mCurrentFocus.getTask() == this;
+        return mDisplayContent.mFocusedApp.getTask() == this;
     }
 
     /**
@@ -4374,10 +4374,9 @@ class Task extends TaskFragment {
      * Called on the task of a window which gained or lost focus.
      * @param hasFocus
      */
-    void onWindowFocusChanged(boolean hasFocus) {
+    void onAppFocusChanged(boolean hasFocus) {
         updateShadowsRadius(hasFocus, getSyncTransaction());
-        // TODO(b/180525887): Un-comment once there is resolution on the bug.
-        // dispatchTaskInfoChangedIfNeeded(false /* force */);
+        dispatchTaskInfoChangedIfNeeded(false /* force */);
     }
 
     void onPictureInPictureParamsChanged() {
