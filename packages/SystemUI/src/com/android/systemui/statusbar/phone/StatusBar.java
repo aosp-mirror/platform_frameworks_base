@@ -105,8 +105,8 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
-import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
@@ -997,7 +997,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             showTransientUnchecked();
         }
         onSystemBarAttributesChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
-                result.mNavbarColorManagedByIme, result.mBehavior, result.mRequestedState,
+                result.mNavbarColorManagedByIme, result.mBehavior, result.mRequestedVisibilities,
                 result.mPackageName);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
@@ -2506,7 +2506,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsState requestedState, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -2520,7 +2520,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         updateBubblesVisibility();
         mStatusBarStateController.setSystemBarAttributes(
-                appearance, behavior, requestedState, packageName);
+                appearance, behavior, requestedVisibilities, packageName);
     }
 
     @Override

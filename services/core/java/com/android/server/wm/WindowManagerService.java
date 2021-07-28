@@ -249,6 +249,7 @@ import android.view.InputEvent;
 import android.view.InputWindowHandle;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
@@ -1456,7 +1457,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
-            int displayId, int requestUserId, InsetsState requestedVisibility,
+            int displayId, int requestUserId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
@@ -1678,7 +1679,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs);
-            win.updateRequestedVisibility(requestedVisibility);
+            win.setRequestedVisibilities(requestedVisibilities);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
             if (res != ADD_OKAY) {
@@ -4158,7 +4159,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void modifyDisplayWindowInsets(int displayId, InsetsState state) {
+    public void updateDisplayWindowRequestedVisibilities(int displayId, InsetsVisibilities vis) {
         if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
@@ -4170,7 +4171,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
                     return;
                 }
-                dc.mRemoteInsetsControlTarget.updateRequestedVisibility(state);
+                dc.mRemoteInsetsControlTarget.setRequestedVisibilities(vis);
                 dc.getInsetsStateController().onInsetsModified(dc.mRemoteInsetsControlTarget);
             }
         } finally {

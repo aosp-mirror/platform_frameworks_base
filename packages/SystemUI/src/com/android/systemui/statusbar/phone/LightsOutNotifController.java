@@ -21,7 +21,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
-import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -150,7 +150,8 @@ public class LightsOutNotifController {
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsState requestedState, String packageName) {
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) {
             if (displayId != mDisplayId) {
                 return;
             }

@@ -17,6 +17,7 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.SurfaceControl;
@@ -25,6 +26,7 @@ import android.view.SurfaceControl;
  * Data object for the TaskFragment info provided when a TaskFragment is presented to an organizer.
  * @hide
  */
+@TestApi
 public final class TaskFragmentAppearedInfo implements Parcelable {
 
     @NonNull
@@ -33,16 +35,19 @@ public final class TaskFragmentAppearedInfo implements Parcelable {
     @NonNull
     private final SurfaceControl mLeash;
 
+    /** @hide */
     public TaskFragmentAppearedInfo(
             @NonNull TaskFragmentInfo taskFragmentInfo, @NonNull SurfaceControl leash) {
         mTaskFragmentInfo = taskFragmentInfo;
         mLeash = leash;
     }
 
+    @NonNull
     public TaskFragmentInfo getTaskFragmentInfo() {
         return mTaskFragmentInfo;
     }
 
+    @NonNull
     public SurfaceControl getLeash() {
         return mLeash;
     }
@@ -52,6 +57,7 @@ public final class TaskFragmentAppearedInfo implements Parcelable {
         mLeash = in.readTypedObject(SurfaceControl.CREATOR);
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mTaskFragmentInfo, flags);
@@ -79,6 +85,7 @@ public final class TaskFragmentAppearedInfo implements Parcelable {
                 + "}";
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;

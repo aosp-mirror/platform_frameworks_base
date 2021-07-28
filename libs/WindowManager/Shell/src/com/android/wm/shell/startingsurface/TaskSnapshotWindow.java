@@ -72,6 +72,7 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -205,7 +206,7 @@ public class TaskSnapshotWindow {
         final SurfaceControl surfaceControl = new SurfaceControl();
         final ClientWindowFrames tmpFrames = new ClientWindowFrames();
 
-        final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
+        final InsetsSourceControl[] tmpControls = new InsetsSourceControl[0];
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
 
         final TaskDescription taskDescription;
@@ -225,13 +226,14 @@ public class TaskSnapshotWindow {
                 delayRemovalTime, topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
-        final InsetsState mTmpInsetsState = new InsetsState();
+        final InsetsState tmpInsetsState = new InsetsState();
+        final InsetsVisibilities tmpRequestedVisibilities = new InsetsVisibilities();
         final InputChannel tmpInputChannel = new InputChannel();
 
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
             final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                    mTmpInsetsState, tmpInputChannel, mTmpInsetsState, mTempControls);
+                    tmpRequestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
@@ -244,8 +246,8 @@ public class TaskSnapshotWindow {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
-                    tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
-                    mTempControls, TMP_SURFACE_SIZE);
+                    tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
+                    tmpControls, TMP_SURFACE_SIZE);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();

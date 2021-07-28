@@ -102,7 +102,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedState */,
+                null /* requestedVisibilities */,
                 null /* packageName */);
         assertTrue(mLightsOutNotifController.areLightsOut());
     }
@@ -115,7 +115,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedState */,
+                null /* requestedVisibilities */,
                 null /* packageName */);
         assertFalse(mLightsOutNotifController.areLightsOut());
     }
@@ -146,7 +146,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedState */,
+                null /* requestedVisibilities */,
                 null /* packageName */);
 
         // THEN we should show dot
@@ -166,7 +166,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedState */,
+                null /* requestedVisibilities */,
                 null /* packageName */);
 
         // THEN we shouldn't show the dot
@@ -186,7 +186,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedState */,
+                null /* requestedVisibilities */,
                 null /* packageName */);
 
         // THEN we shouldn't show the dot

@@ -1109,11 +1109,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             @Nullable IBinder errorCallbackToken) {
         final ActivityRecord ownerActivity =
                 ActivityRecord.forTokenLocked(creationParams.getOwnerToken());
+        final ITaskFragmentOrganizer organizer = ITaskFragmentOrganizer.Stub.asInterface(
+                creationParams.getOrganizer().asBinder());
+
         if (ownerActivity == null || ownerActivity.getTask() == null) {
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with invalid ownerToken");
-            sendTaskFragmentOperationFailure(creationParams.getOrganizer(), errorCallbackToken,
-                    exception);
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }
         // The ownerActivity has to belong to the same app as the root Activity of the target Task.
@@ -1122,8 +1124,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with the ownerToken while "
                             + "the root activity of the target task belong to the different app");
-            sendTaskFragmentOperationFailure(creationParams.getOrganizer(), errorCallbackToken,
-                    exception);
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }
         final TaskFragment taskFragment = new TaskFragment(mService,
