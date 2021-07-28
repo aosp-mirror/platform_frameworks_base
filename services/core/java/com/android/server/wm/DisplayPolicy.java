@@ -140,6 +140,7 @@ import android.view.InsetsFlags;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
@@ -339,7 +340,7 @@ public class DisplayPolicy {
     private int mLastDisableFlags;
     private int mLastAppearance;
     private int mLastBehavior;
-    private final InsetsState mRequestedState = new InsetsState();
+    private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
     private AppearanceRegion[] mLastStatusBarAppearanceRegions;
 
     /** The union of checked bounds while fetching {@link #mStatusBarColorWindows}. */
@@ -2649,6 +2650,7 @@ public class DisplayPolicy {
         final WindowState win = winCandidate;
         mSystemUiControllingWindow = win;
 
+        final int displayId = getDisplayId();
         final int disableFlags = win.getDisableFlags();
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
         final WindowState navColorWin = chooseNavigationColorWindowLw(mNavBarColorWindowCandidate,
@@ -2658,9 +2660,9 @@ public class DisplayPolicy {
         final int appearance = updateLightNavigationBarLw(win.mAttrs.insetsFlags.appearance,
                 navColorWin) | opaqueAppearance;
         final int behavior = win.mAttrs.insetsFlags.behavior;
+        final String focusedApp = win.mAttrs.packageName;
         final boolean isFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR)
                 || !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
-
         final AppearanceRegion[] appearanceRegions =
                 new AppearanceRegion[mStatusBarColorWindows.size()];
         for (int i = mStatusBarColorWindows.size() - 1; i >= 0; i--) {
@@ -2669,12 +2671,16 @@ public class DisplayPolicy {
                     getStatusBarAppearance(windowState, windowState),
                     new Rect(windowState.getFrame()));
         }
-
-        if (mLastDisableFlags == disableFlags
-                && mLastAppearance == appearance
+        if (mLastDisableFlags != disableFlags) {
+            mLastDisableFlags = disableFlags;
+            final String cause = win.toString();
+            callStatusBarSafely(statusBar -> statusBar.setDisableFlags(displayId, disableFlags,
+                    cause));
+        }
+        if (mLastAppearance == appearance
                 && mLastBehavior == behavior
-                && mRequestedState.equals(win.getRequestedState())
-                && Objects.equals(mFocusedApp, win.mAttrs.packageName)
+                && mRequestedVisibilities.equals(win.getRequestedVisibilities())
+                && Objects.equals(mFocusedApp, focusedApp)
                 && mLastFocusIsFullscreen == isFullscreen
                 && Arrays.equals(mLastStatusBarAppearanceRegions, appearanceRegions)) {
             return false;
@@ -2684,24 +2690,17 @@ public class DisplayPolicy {
             mService.mInputManager.setSystemUiLightsOut(
                     isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
         }
-        mLastDisableFlags = disableFlags;
+        final InsetsVisibilities requestedVisibilities =
+                new InsetsVisibilities(win.getRequestedVisibilities());
         mLastAppearance = appearance;
         mLastBehavior = behavior;
-        mRequestedState.set(win.getRequestedState(), true /* copySources */);
-        mFocusedApp = win.mAttrs.packageName;
+        mRequestedVisibilities = requestedVisibilities;
+        mFocusedApp = focusedApp;
         mLastFocusIsFullscreen = isFullscreen;
         mLastStatusBarAppearanceRegions = appearanceRegions;
-        final String cause = win.toString();
-        mHandler.post(() -> {
-            StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
-            if (statusBar != null) {
-                final int displayId = getDisplayId();
-                statusBar.setDisableFlags(displayId, disableFlags, cause);
-                statusBar.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                        isNavbarColorManagedByIme, behavior, mRequestedState, mFocusedApp);
-
-            }
-        });
+        callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
+                appearance, appearanceRegions, isNavbarColorManagedByIme, behavior,
+                requestedVisibilities, focusedApp));
         return true;
     }
 
@@ -2711,6 +2710,15 @@ public class DisplayPolicy {
         return isLightBarAllowed(colorWin, ITYPE_STATUS_BAR) && (colorWin == opaque || onKeyguard)
                 ? (colorWin.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS)
                 : 0;
+    }
+
+    private void callStatusBarSafely(Consumer<StatusBarManagerInternal> consumer) {
+        mHandler.post(() -> {
+            StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+            if (statusBar != null) {
+                consumer.accept(statusBar);
+            }
+        });
     }
 
     @VisibleForTesting

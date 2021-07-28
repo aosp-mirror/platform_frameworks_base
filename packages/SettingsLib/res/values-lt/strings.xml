@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Belaidžio rodymo sertifikavimas"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Įgal. „Wi‑Fi“ daugiaž. įraš. į žurnalą"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"„Wi‑Fi“ nuskaitymo ribojimas"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"MAC atsitiktinis parinkimas esant nepastoviam „Wi‑Fi“"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiliojo ryšio duomenys visada suaktyvinti"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Įrenginio kaip modemo naudojimo aparatinės įrangos spartinimas"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Rodyti „Bluetooth“ įrenginius be pavadinimų"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Rodyti belaidžio rodymo sertifikavimo parinktis"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Padidinti „Wi‑Fi“ įrašymo į žurnalą lygį, rodyti SSID RSSI „Wi-Fi“ rinkiklyje"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sumažinamas akumuliatoriaus eikvojimas ir patobulinamas tinklo našumas"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kai įgalintas šis režimas, šio įrenginio MAC adresas gali keistis kas kartą prisijungus prie tinklo, kuriame įgalintas atsitiktinis MAC parinkimas."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Matuojamas"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neišmatuotas"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Registruotuvo buferio dydžiai"</string>

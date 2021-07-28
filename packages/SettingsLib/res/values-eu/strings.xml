@@ -252,7 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren muga"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wifi-konexioetan iraunkorrak ez diren MAC helbideak ausaz antolatzea"</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
+    <skip />
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
@@ -284,7 +285,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautatzailean."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Modu hau gaituta dagoenean, baliteke gailuaren MAC helbidea aldatzea MAC helbideak ausaz antolatzeko aukera gaituta daukan sare batera konektatzen den bakoitzean."</string>
+    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neurtu gabeko sarea"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Erregistroen buffer-tamainak"</string>

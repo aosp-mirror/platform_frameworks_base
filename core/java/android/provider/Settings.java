@@ -7237,6 +7237,13 @@ public final class Settings {
             "touch_exploration_granted_accessibility_services";
 
         /**
+         * Is talkback service enabled or not. 0 == no, 1 == yes
+         *
+         * @hide
+         */
+        public static final String WEAR_TALKBACK_ENABLED = "wear_talkback_enabled";
+
+        /**
          * Whether the Global Actions Panel is enabled.
          * @hide
          */
@@ -16701,6 +16708,18 @@ public final class Settings {
              * @hide
              */
             public static final String OEM_SETUP_VERSION = "oem_setup_version";
+
+            /**
+             * Controls the gestures feature.
+             * @hide
+             */
+            public static final String MASTER_GESTURES_ENABLED = "master_gestures_enabled";
+
+            /**
+             * Whether or not ungaze is enabled.
+             * @hide
+             */
+            public static final String UNGAZE_ENABLED = "ungaze_enabled";
         }
     }
 

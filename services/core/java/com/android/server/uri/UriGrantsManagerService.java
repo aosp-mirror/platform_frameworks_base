@@ -695,7 +695,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                         // Both direct boot aware and unaware packages are fine as we
                         // will do filtering at query time to avoid multiple parsing.
                         final ProviderInfo pi = getProviderInfo(uri.getAuthority(), sourceUserId,
-                                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
+                                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, SYSTEM_UID);
                         if (pi != null && sourcePkg.equals(pi.packageName)) {
                             int targetUid = mPmInternal.getPackageUid(
                                         targetPkg, MATCH_UNINSTALLED_PACKAGES, targetUserId);
@@ -759,9 +759,10 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (DEBUG) Slog.v(TAG,
                 "Granting " + targetPkg + "/" + targetUid + " permission to " + grantUri);
 
+        // Unchecked call, passing the system's uid as the calling uid to the getProviderInfo
         final String authority = grantUri.uri.getAuthority();
         final ProviderInfo pi = getProviderInfo(authority, grantUri.sourceUserId,
-                MATCH_DEBUG_TRIAGED_MISSING);
+                MATCH_DEBUG_TRIAGED_MISSING, SYSTEM_UID);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for grant: " + grantUri.toSafeString());
             return;
@@ -812,7 +813,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         final String authority = grantUri.uri.getAuthority();
         final ProviderInfo pi = getProviderInfo(authority, grantUri.sourceUserId,
-                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, callingUid);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission revoke: "
                     + grantUri.toSafeString());
@@ -1054,11 +1055,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (UserHandle.isIsolated(Binder.getCallingUid())) {
             throw new SecurityException("Isolated process not allowed to call " + caller);
         }
-    }
-
-    private ProviderInfo getProviderInfo(String authority, int userHandle, int pmFlags) {
-        return mPmInternal.resolveContentProvider(authority,
-                PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags, userHandle);
     }
 
     private ProviderInfo getProviderInfo(String authority, int userHandle, int pmFlags,

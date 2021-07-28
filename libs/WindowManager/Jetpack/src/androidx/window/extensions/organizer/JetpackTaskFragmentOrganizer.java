@@ -187,7 +187,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         }
 
         return new TaskFragmentCreationParams.Builder(
-                getIOrganizer(),
+                getOrganizerToken(),
                 fragmentToken,
                 ownerToken)
                 .setInitialBounds(bounds)

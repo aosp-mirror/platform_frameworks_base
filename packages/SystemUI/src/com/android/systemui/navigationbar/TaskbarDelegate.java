@@ -26,7 +26,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
-import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.model.SysUiState;
@@ -109,7 +109,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
     @Override
     public void onSystemBarAttributesChanged(int displayId, int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
-            InsetsState requestedState, String packageName) {
+            InsetsVisibilities requestedVisibilities, String packageName) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
     }
 }

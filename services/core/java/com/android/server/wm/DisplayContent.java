@@ -198,6 +198,7 @@ import android.view.InputDevice;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RemoteAnimationDefinition;
@@ -6012,7 +6013,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
-        private final InsetsState mRequestedInsetsState = new InsetsState();
+        private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
@@ -6074,15 +6075,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (type == ITYPE_IME) {
                 return getInsetsStateController().getImeSourceProvider().isImeShowing();
             }
-            return mRequestedInsetsState.getSourceOrDefaultVisibility(type);
+            return mRequestedVisibilities.getVisibility(type);
         }
 
-        void updateRequestedVisibility(InsetsState state) {
-            for (int i = 0; i < InsetsState.SIZE; i++) {
-                final InsetsSource source = state.peekSource(i);
-                if (source == null) continue;
-                mRequestedInsetsState.addSource(source);
-            }
+        void setRequestedVisibilities(InsetsVisibilities requestedVisibilities) {
+            mRequestedVisibilities.set(requestedVisibilities);
         }
     }
 

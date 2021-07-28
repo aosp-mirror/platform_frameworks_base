@@ -2,8 +2,12 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +15,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -34,10 +39,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -168,6 +176,59 @@ public class InternetDialogTest extends SysuiTestCase {
         seeAllLayout.performClick();
 
         verify(mInternetDialogController).launchNetworkSetting();
+    }
+
+    @Test
+    public void showProgressBar_wifiDisabled_hideProgressBar() {
+        when(mMockWifiManager.isWifiEnabled()).thenReturn(false);
+
+        mInternetDialog.showProgressBar();
+
+        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
+        verify(mHandler, never()).postDelayed(any(Runnable.class), anyLong());
+    }
+
+    @Test
+    public void showProgressBar_wifiEnabledWithWifiEntry_showProgressBarThenHide() {
+        when(mMockWifiManager.isWifiEnabled()).thenReturn(true);
+        List<ScanResult> wifiScanResults = mock(ArrayList.class);
+        when(wifiScanResults.size()).thenReturn(1);
+        when(mMockWifiManager.getScanResults()).thenReturn(wifiScanResults);
+
+        mInternetDialog.showProgressBar();
+
+        // Show progress bar
+        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
+
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mHandler).postDelayed(runnableCaptor.capture(),
+                eq(InternetDialog.PROGRESS_DELAY_MS));
+        runnableCaptor.getValue().run();
+
+        // Then hide progress bar
+        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
+    }
+
+    @Test
+    public void showProgressBar_wifiEnabledWithoutWifiScanResults_showProgressBarThenHideSearch() {
+        when(mMockWifiManager.isWifiEnabled()).thenReturn(true);
+        List<ScanResult> wifiScanResults = mock(ArrayList.class);
+        when(wifiScanResults.size()).thenReturn(0);
+        when(mMockWifiManager.getScanResults()).thenReturn(wifiScanResults);
+
+        mInternetDialog.showProgressBar();
+
+        // Show progress bar
+        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
+
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mHandler).postDelayed(runnableCaptor.capture(),
+                eq(InternetDialog.PROGRESS_DELAY_MS));
+        runnableCaptor.getValue().run();
+
+        // Then hide searching sub-title only
+        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
+        assertThat(mInternetDialog.mIsSearchingHidden).isTrue();
     }
 
     private class MockInternetDialog extends InternetDialog {
