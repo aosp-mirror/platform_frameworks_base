@@ -242,6 +242,11 @@ public final class WMShell extends SystemUI
     void initSplitScreen(SplitScreen splitScreen) {
         mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                splitScreen.onKeyguardVisibilityChanged(showing);
+            }
+
+            @Override
             public void onKeyguardOccludedChanged(boolean occluded) {
                 splitScreen.onKeyguardOccludedChanged(occluded);
             }
