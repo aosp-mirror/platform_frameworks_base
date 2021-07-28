@@ -1902,6 +1902,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
+    int getTaskFragmentOrganizerPid() {
+        return mTaskFragmentOrganizerPid;
+    }
+
     /**
      * Returns a {@link TaskFragmentInfo} with information from this TaskFragment. Should not be
      * called from {@link Task}.

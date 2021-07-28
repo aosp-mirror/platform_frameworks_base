@@ -155,7 +155,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         final List<ExtensionSplitRule> splitRules = getSplitRules();
         final TaskFragmentContainer currentContainer = getContainerWithActivity(
-                launchedActivity.getActivityToken());
+                launchedActivity.getActivityToken(), launchedActivity);
 
         // Check if the activity is configured to always be expanded.
         if (shouldExpand(componentName, splitRules)) {
@@ -247,8 +247,28 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Nullable
     TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
+        return getContainerWithActivity(activityToken, null /* activityToAdd */);
+    }
+
+    /**
+     * This method can only be called from {@link #onActivityCreated(Activity)}, use
+     * {@link #getContainerWithActivity(IBinder) } otherwise.
+     *
+     * Returns a container that this activity is registered with. The activity could be created
+     * before the container appeared, adding the activity to the container if so.
+     */
+    @Nullable
+    private TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken,
+            Activity activityToAdd) {
+        final IBinder taskFragmentToken = ActivityThread.currentActivityThread().getActivityClient(
+                activityToken).mTaskFragmentToken;
         for (TaskFragmentContainer container : mContainers) {
             if (container.hasActivity(activityToken)) {
+                return container;
+            } else if (container.getTaskFragmentToken().equals(taskFragmentToken)) {
+                if (activityToAdd != null) {
+                    container.addPendingAppearedActivity(activityToAdd);
+                }
                 return container;
             }
         }
