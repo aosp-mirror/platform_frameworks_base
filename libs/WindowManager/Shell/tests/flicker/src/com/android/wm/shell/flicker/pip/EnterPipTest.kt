@@ -44,30 +44,24 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true, stringExtras = emptyMap()) {
             transitions {
-                pipApp.clickEnterPipButton()
+                pipApp.clickEnterPipButton(wmHelper)
                 pipApp.expandPipWindow(wmHelper)
             }
         }
-
-    @FlakyTest
-    @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
 
     @Presubmit
     @Test
     fun pipAppWindowAlwaysVisible() {
         testSpec.assertWm {
-            this.showsAppWindow(pipApp.defaultWindowName)
+            this.isAppWindowVisible(pipApp.component)
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
-    fun pipLayerBecomesVisible() {
+    fun pipAppLayerAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(pipApp.windowName)
+            this.isVisible(pipApp.component)
         }
     }
 

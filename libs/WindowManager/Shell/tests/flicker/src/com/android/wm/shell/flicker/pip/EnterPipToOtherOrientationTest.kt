@@ -92,15 +92,13 @@ class EnterPipToOtherOrientationTest(
 
     @FlakyTest
     @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     @Presubmit
     @Test
     fun pipAppWindowIsAlwaysOnTop() {
         testSpec.assertWm {
-            showsAppWindowOnTop(pipApp.defaultWindowName)
+            isAppWindowOnTop(pipApp.component)
         }
     }
 
@@ -108,7 +106,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun pipAppHidesTestApp() {
         testSpec.assertWmStart {
-            isInvisible(testApp.defaultWindowName)
+            isInvisible(testApp.component)
         }
     }
 
@@ -116,7 +114,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(testApp.defaultWindowName)
+            isVisible(testApp.component)
         }
     }
 
@@ -124,8 +122,8 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun pipAppLayerHidesTestApp() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.defaultWindowName).coversExactly(startingBounds)
-            isInvisible(testApp.defaultWindowName)
+            visibleRegion(pipApp.component).coversExactly(startingBounds)
+            isInvisible(testApp.component)
         }
     }
 
@@ -133,7 +131,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            visibleRegion(testApp.defaultWindowName).coversExactly(endingBounds)
+            visibleRegion(testApp.component).coversExactly(endingBounds)
         }
     }
 

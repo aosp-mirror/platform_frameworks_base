@@ -62,7 +62,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         stringExtras: Map<String, String>
     ) {
         super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        wmHelper.waitFor { it.wmState.hasPipWindow() }
+        wmHelper.waitFor("hasPipWindow") { it.wmState.hasPipWindow() }
     }
 
     private fun focusOnObject(selector: BySelector): Boolean {
@@ -84,7 +84,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper?.waitFor { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
+        wmHelper?.waitFor("hasPipWindow") { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
     }
 
     fun clickStartMediaSessionButton() {
@@ -137,7 +137,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
 
         // Wait for animation to complete.
-        wmHelper.waitFor { !it.wmState.hasPipWindow() }
+        wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
         wmHelper.waitForHomeActivityVisible()
     }
 
@@ -167,7 +167,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         val windowRect = windowRegion.bounds
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
-        wmHelper.waitFor { !it.wmState.hasPipWindow() }
+        wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
         wmHelper.waitForAppTransitionIdle()
     }
 

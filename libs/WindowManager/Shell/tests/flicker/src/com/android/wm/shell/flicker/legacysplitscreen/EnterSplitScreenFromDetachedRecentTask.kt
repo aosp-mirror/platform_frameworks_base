@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -25,7 +26,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import com.android.wm.shell.flicker.dockedStackDividerIsVisible
+import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -61,23 +62,33 @@ class EnterSplitScreenFromDetachedRecentTask(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME,
-                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
-                splitScreenApp.defaultWindowName)
+    override val ignoredWindows: List<ComponentName>
+        get() = listOf(LAUNCHER_COMPONENT,
+                WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+                WindowManagerStateHelper.SNAPSHOT_COMPONENT,
+                splitScreenApp.component)
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
+    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
 
     @Presubmit
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.defaultWindowName)
+            isVisible(splitScreenApp.component)
         }
     }
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
