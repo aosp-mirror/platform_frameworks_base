@@ -136,7 +136,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Whether the device is supporting legacy split or not. */
     private boolean mUseLegacySplit;
 
-    @SplitScreen.StageType int mDismissTop = NO_DISMISS;
+    @SplitScreen.StageType private int mDismissTop = NO_DISMISS;
+
+    /** The target stage to dismiss to when unlock after folded. */
+    @SplitScreen.StageType private int mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
 
     private final Runnable mOnTransitionAnimationComplete = () -> {
         // If still playing, let it finish.
@@ -443,6 +446,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mKeyguardOccluded = occluded;
     }
 
+    void onKeyguardVisibilityChanged(boolean showing) {
+        if (!showing && mMainStage.isActive()
+                && mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
+            exitSplitScreen(mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage);
+        }
+    }
+
     void exitSplitScreen() {
         exitSplitScreen(null /* childrenToTop */);
     }
@@ -458,6 +468,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mTaskOrganizer.applyTransaction(wct);
         // Reset divider position.
         mSplitLayout.resetDividerPosition();
+        mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
     }
 
     /**
@@ -808,8 +819,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void onFoldedStateChanged(boolean folded) {
-        if (folded && mMainStage.isActive()) {
-            exitSplitScreen(mMainStage);
+        mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+        if (!folded) return;
+
+        if (mMainStage.isFocused()) {
+            mTopStageAfterFoldDismiss = STAGE_TYPE_MAIN;
+        } else if (mSideStage.isFocused()) {
+            mTopStageAfterFoldDismiss = STAGE_TYPE_SIDE;
         }
     }
 
