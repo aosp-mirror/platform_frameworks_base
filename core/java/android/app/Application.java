@@ -205,6 +205,13 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
          */
         default void onActivityPostDestroyed(@NonNull Activity activity) {
         }
+
+        /**
+         * Called when the Activity configuration was changed.
+         * @hide
+         */
+        default void onActivityConfigurationChanged(@NonNull Activity activity) {
+        }
     }
 
     /**
@@ -550,6 +557,16 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         if (callbacks != null) {
             for (int i = 0; i < callbacks.length; i++) {
                 ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostDestroyed(activity);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivityConfigurationChanged(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityConfigurationChanged(
+                        activity);
             }
         }
     }
