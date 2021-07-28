@@ -97,6 +97,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         return mChildrenTaskInfo.contains(taskId);
     }
 
+    /** @return {@code true} if this listener contains the currently focused task. */
+    boolean isFocused() {
+        if (mRootTaskInfo.isFocused) return true;
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            if (mChildrenTaskInfo.valueAt(i).isFocused) return true;
+        }
+        return false;
+    }
+
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
