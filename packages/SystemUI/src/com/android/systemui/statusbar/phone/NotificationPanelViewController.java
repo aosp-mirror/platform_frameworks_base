@@ -3242,7 +3242,10 @@ public class NotificationPanelViewController extends PanelViewController {
         switch (mBarState) {
             case KEYGUARD:
                 if (!mDozingOnDown) {
-                    if (mKeyguardBypassController.getBypassEnabled()) {
+                    if (mUpdateMonitor.isFaceEnrolled()
+                            && !mUpdateMonitor.isFaceDetectionRunning()
+                            && !mUpdateMonitor.getUserCanSkipBouncer(
+                                    KeyguardUpdateMonitor.getCurrentUser())) {
                         mUpdateMonitor.requestFaceAuth(true);
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
