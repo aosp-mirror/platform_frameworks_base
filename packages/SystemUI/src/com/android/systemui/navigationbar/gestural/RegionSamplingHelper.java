@@ -30,6 +30,7 @@ import android.view.ViewTreeObserver;
 import com.android.systemui.R;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * A helper class to sample regions on the screen and inspect its luminosity.
@@ -52,6 +53,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
      */
     private final Rect mRegisteredSamplingBounds = new Rect();
     private final SamplingCallback mCallback;
+    private final Executor mBackgroundExecutor;
     private boolean mSamplingEnabled = false;
     private boolean mSamplingListenerRegistered = false;
 
@@ -82,7 +84,9 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         }
     };
 
-    public RegionSamplingHelper(View sampledView, SamplingCallback samplingCallback) {
+    public RegionSamplingHelper(View sampledView, SamplingCallback samplingCallback,
+            Executor backgroundExecutor) {
+        mBackgroundExecutor = backgroundExecutor;
         mSamplingListener = new CompositionSamplingListener(
                 sampledView.getContext().getMainExecutor()) {
             @Override
@@ -183,10 +187,13 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
                 // We only want to reregister if something actually changed
                 unregisterSamplingListener();
                 mSamplingListenerRegistered = true;
-                CompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
-                        stopLayerControl, mSamplingRequestBounds);
+                SurfaceControl registeredStopLayer = stopLayerControl;
+                mBackgroundExecutor.execute(() -> {
+                    CompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
+                            registeredStopLayer, mSamplingRequestBounds);
+                });
                 mRegisteredSamplingBounds.set(mSamplingRequestBounds);
-                mRegisteredStopLayer = stopLayerControl;
+                mRegisteredStopLayer = registeredStopLayer;
             }
             mFirstSamplingAfterStart = false;
         } else {
@@ -199,7 +206,9 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
             mSamplingListenerRegistered = false;
             mRegisteredStopLayer = null;
             mRegisteredSamplingBounds.setEmpty();
-            CompositionSamplingListener.unregister(mSamplingListener);
+            mBackgroundExecutor.execute(() -> {
+                CompositionSamplingListener.unregister(mSamplingListener);
+            });
         }
     }
 

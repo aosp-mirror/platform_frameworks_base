@@ -25,7 +25,7 @@ import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
-import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
@@ -192,12 +192,12 @@ oneway interface IStatusBar
      *                         stacks.
      * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
      * @param behavior the behavior of the focused window.
-     * @param requestedState the collection of the requested visibilities of system insets.
+     * @param requestedVisibilities the collection of the requested visibilities of system insets.
      * @param packageName the package name of the focused app.
      */
     void onSystemBarAttributesChanged(int displayId, int appearance,
             in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            int behavior, in InsetsState requestedVisibilities, String packageName);
+            int behavior, in InsetsVisibilities requestedVisibilities, String packageName);
 
     /**
      * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status

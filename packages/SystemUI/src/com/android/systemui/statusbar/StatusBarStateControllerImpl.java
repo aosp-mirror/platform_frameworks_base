@@ -32,7 +32,7 @@ import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.view.InsetsFlags;
-import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowInsetsController.Appearance;
@@ -434,9 +434,9 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
     @Override
     public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsState requestedState, String packageName) {
-        boolean isFullscreen = !requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
-                || !requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR);
+            InsetsVisibilities requestedVisibilities, String packageName) {
+        boolean isFullscreen = !requestedVisibilities.getVisibility(ITYPE_STATUS_BAR)
+                || !requestedVisibilities.getVisibility(ITYPE_NAVIGATION_BAR);
         if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
             synchronized (mListeners) {
@@ -451,7 +451,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         if (DEBUG_IMMERSIVE_APPS) {
             boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
             String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
-            String requestedVisibilityString = requestedState.toSourceVisibilityString();
+            String requestedVisibilityString = requestedVisibilities.toString();
             if (requestedVisibilityString.isEmpty()) {
                 requestedVisibilityString = "none";
             }

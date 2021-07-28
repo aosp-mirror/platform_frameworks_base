@@ -50,8 +50,8 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -338,7 +338,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          */
         default void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsState requestedState, String packageName) { }
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) { }
 
         /**
          * @see IStatusBar#showTransient(int, int[]).
@@ -997,7 +998,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsState requestedState, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = displayId;
@@ -1005,7 +1006,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
             args.argi3 = navbarColorManagedByIme ? 1 : 0;
             args.arg1 = appearanceRegions;
             args.argi4 = behavior;
-            args.arg2 = requestedState;
+            args.arg2 = requestedVisibilities;
             args.arg3 = packageName;
             mHandler.obtainMessage(MSG_SYSTEM_BAR_CHANGED, args).sendToTarget();
         }
@@ -1389,7 +1390,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onSystemBarAttributesChanged(args.argi1, args.argi2,
                                 (AppearanceRegion[]) args.arg1, args.argi3 == 1, args.argi4,
-                                (InsetsState) args.arg2, (String) args.arg3);
+                                (InsetsVisibilities) args.arg2, (String) args.arg3);
                     }
                     args.recycle();
                     break;

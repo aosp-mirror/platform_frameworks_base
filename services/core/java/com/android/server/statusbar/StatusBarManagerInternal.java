@@ -22,8 +22,8 @@ import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -133,7 +133,7 @@ public interface StatusBarManagerInternal {
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsState requestedState, String packageName);
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
     void showTransient(int displayId, @InternalInsetsType int[] types);
