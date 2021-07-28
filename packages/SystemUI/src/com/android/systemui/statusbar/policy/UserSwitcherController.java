@@ -23,6 +23,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -71,9 +72,11 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -104,9 +107,12 @@ public class UserSwitcherController implements Dumpable {
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     protected final Context mContext;
+    protected final UserTracker mUserTracker;
     protected final UserManager mUserManager;
+    private final ContentObserver mSettingsObserver;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
-    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
+    @VisibleForTesting
+    final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
     private final KeyguardStateController mKeyguardStateController;
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
@@ -115,15 +121,18 @@ public class UserSwitcherController implements Dumpable {
     private final IActivityTaskManager mActivityTaskManager;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
-    private Dialog mExitGuestDialog;
-    private Dialog mAddUserDialog;
+    @VisibleForTesting
+    AlertDialog mExitGuestDialog;
+    @VisibleForTesting
+    Dialog mAddUserDialog;
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
     private boolean mResumeUserOnGuestLogout = true;
     private boolean mSimpleUserSwitcher;
     // When false, there won't be any visual affordance to add a new user from the keyguard even if
     // the user is unlocked
     private boolean mAddUsersFromLockScreen;
-    private boolean mPauseRefreshUsers;
+    @VisibleForTesting
+    boolean mPauseRefreshUsers;
     private int mSecondaryUser = UserHandle.USER_NULL;
     private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
@@ -137,6 +146,8 @@ public class UserSwitcherController implements Dumpable {
 
     @Inject
     public UserSwitcherController(Context context,
+            UserManager userManager,
+            UserTracker userTracker,
             KeyguardStateController keyguardStateController,
             @Main Handler handler,
             ActivityStarter activityStarter,
@@ -146,14 +157,17 @@ public class UserSwitcherController implements Dumpable {
             TelephonyListenerManager telephonyListenerManager,
             IActivityTaskManager activityTaskManager,
             UserDetailAdapter userDetailAdapter,
+            SecureSettings secureSettings,
             @UiBackground Executor uiBgExecutor) {
         mContext = context;
+        mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mTelephonyListenerManager = telephonyListenerManager;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
         mFalsingManager = falsingManager;
-        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(this, mUiEventLogger);
+        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
+                this, mUserTracker, mUiEventLogger, secureSettings);
         mUserDetailAdapter = userDetailAdapter;
         mUiBgExecutor = uiBgExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
@@ -166,7 +180,7 @@ public class UserSwitcherController implements Dumpable {
         mKeyguardStateController = keyguardStateController;
         mHandler = handler;
         mActivityStarter = activityStarter;
-        mUserManager = UserManager.get(context);
+        mUserManager = userManager;
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -185,6 +199,15 @@ public class UserSwitcherController implements Dumpable {
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
                 PERMISSION_SELF, null /* scheduler */);
 
+        mSettingsObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
+                mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
+                refreshUsers(UserHandle.USER_NULL);
+            };
+        };
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
                 mSettingsObserver);
@@ -246,11 +269,11 @@ public class UserSwitcherController implements Dumpable {
                     return null;
                 }
                 ArrayList<UserRecord> records = new ArrayList<>(infos.size());
-                int currentId = ActivityManager.getCurrentUser();
+                int currentId = mUserTracker.getUserId();
                 // Check user switchability of the foreground user since SystemUI is running in
                 // User 0
                 boolean canSwitchUsers = mUserManager.getUserSwitchability(
-                        UserHandle.of(ActivityManager.getCurrentUser())) == SWITCHABILITY_STATUS_OK;
+                        UserHandle.of(mUserTracker.getUserId())) == SWITCHABILITY_STATUS_OK;
                 UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
 
@@ -391,7 +414,7 @@ public class UserSwitcherController implements Dumpable {
     }
 
     public void logoutCurrentUser() {
-        int currentUser = ActivityManager.getCurrentUser();
+        int currentUser = mUserTracker.getUserId();
         if (currentUser != UserHandle.USER_SYSTEM) {
             pauseRefreshUsers();
             ActivityManager.logoutCurrentUser();
@@ -403,7 +426,7 @@ public class UserSwitcherController implements Dumpable {
             Log.w(TAG, "User " + userId + " could not removed.");
             return;
         }
-        if (ActivityManager.getCurrentUser() == userId) {
+        if (mUserTracker.getUserId() == userId) {
             switchToUserId(UserHandle.USER_SYSTEM);
         }
         if (mUserManager.removeUser(userId)) {
@@ -411,7 +434,8 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    private void onUserListItemClicked(UserRecord record) {
+    @VisibleForTesting
+    void onUserListItemClicked(UserRecord record) {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
@@ -429,7 +453,7 @@ public class UserSwitcherController implements Dumpable {
             id = record.info.id;
         }
 
-        int currUserId = ActivityManager.getCurrentUser();
+        int currUserId = mUserTracker.getUserId();
         if (currUserId == id) {
             if (record.isGuest) {
                 showExitGuestDialog(id);
@@ -587,15 +611,6 @@ public class UserSwitcherController implements Dumpable {
         }
     };
 
-    private final ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
-        public void onChange(boolean selfChange) {
-            mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
-            mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
-            refreshUsers(UserHandle.USER_NULL);
-        };
-    };
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("UserSwitcherController state:");
@@ -654,13 +669,7 @@ public class UserSwitcherController implements Dumpable {
      * UserHandle.USER_NULL}, then switch immediately to the newly created guest user.
      */
     public void removeGuestUser(@UserIdInt int guestUserId, @UserIdInt int targetUserId) {
-        UserInfo currentUser;
-        try {
-            currentUser = ActivityManager.getService().getCurrentUser();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't remove guest because ActivityManager is dead");
-            return;
-        }
+        UserInfo currentUser = mUserTracker.getUserInfo();
         if (currentUser.id != guestUserId) {
             Log.w(TAG, "User requesting to start a new session (" + guestUserId + ")"
                     + " is not current user (" + currentUser.id + ")");
@@ -874,9 +883,9 @@ public class UserSwitcherController implements Dumpable {
 
     private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
         EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
-                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser());
+                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId());
         if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
-                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser())) {
+                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId())) {
             record.isDisabledByAdmin = true;
             record.enforcedAdmin = admin;
         } else {
@@ -1088,7 +1097,8 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    private final class AddUserDialog extends SystemUIDialog implements
+    @VisibleForTesting
+    final class AddUserDialog extends SystemUIDialog implements
             DialogInterface.OnClickListener {
 
         public AddUserDialog(Context context) {
