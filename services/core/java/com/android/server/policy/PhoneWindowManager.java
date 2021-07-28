@@ -3029,7 +3029,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void onKeyguardOccludedChangedLw(boolean occluded) {
-        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
+        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()
+                && !WindowManagerService.sEnableShellTransitions) {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {
@@ -4259,6 +4260,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     pmWakeReason)) + ")");
         }
 
+        mActivityTaskManagerInternal.notifyWakingUp();
         mDefaultDisplayPolicy.setAwake(true);
 
         // Since goToSleep performs these functions synchronously, we must
