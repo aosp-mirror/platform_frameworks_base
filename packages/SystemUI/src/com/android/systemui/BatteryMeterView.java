@@ -195,6 +195,7 @@ public class BatteryMeterView extends LinearLayout implements
      * @param mode desired mode (none, on, off)
      */
     public void setPercentShowMode(@BatteryPercentMode int mode) {
+        if (mode == mShowPercentMode) return;
         mShowPercentMode = mode;
         updateShowPercent();
     }
@@ -330,7 +331,7 @@ public class BatteryMeterView extends LinearLayout implements
                     if (mBatteryPercentView == null) {
                         return;
                     }
-                    if (estimate != null) {
+                    if (estimate != null && mShowPercentMode == MODE_ESTIMATE) {
                         mBatteryPercentView.setText(estimate);
                         setContentDescription(getContext().getString(
                                 R.string.accessibility_battery_level_with_estimate,
@@ -485,6 +486,7 @@ public class BatteryMeterView extends LinearLayout implements
         pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
         pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);
         pw.println("    mLevel: " + mLevel);
+        pw.println("    mMode: " + mShowPercentMode);
     }
 
     private final class SettingObserver extends ContentObserver {

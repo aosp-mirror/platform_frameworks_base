@@ -539,6 +539,11 @@
         <item>@*android:string/status_bar_headset</item>
     </string-array>
 
+
+    <!-- Whether to show estimate in QS header. Default to false in case there's not enough
+     space -->
+    <bool name="config_showBatteryEstimateQSBH">false</bool>
+
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
       cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then
