@@ -218,17 +218,17 @@
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="4497393944195787240">"Bat ere ez"</item>
-    <item msgid="8461943978957133391">"480 p"</item>
-    <item msgid="6923083594932909205">"480 p (segurua)"</item>
-    <item msgid="1226941831391497335">"720 p"</item>
-    <item msgid="7051983425968643928">"720 p (segurua)"</item>
-    <item msgid="7765795608738980305">"1080 p"</item>
-    <item msgid="8084293856795803592">"1080 p (segurua)"</item>
+    <item msgid="8461943978957133391">"480p"</item>
+    <item msgid="6923083594932909205">"480p (segurua)"</item>
+    <item msgid="1226941831391497335">"720p"</item>
+    <item msgid="7051983425968643928">"720p (segurua)"</item>
+    <item msgid="7765795608738980305">"1080p"</item>
+    <item msgid="8084293856795803592">"1080p (segurua)"</item>
     <item msgid="938784192903353277">"4K"</item>
     <item msgid="8612549335720461635">"4K (segurua)"</item>
     <item msgid="7322156123728520872">"4K (hobetua)"</item>
     <item msgid="7735692090314849188">"4K (hobetua, segurua)"</item>
-    <item msgid="7346816300608639624">"720 p, 1080 p (bi pantaila)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (bi pantaila)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Bat ere ez"</item>
