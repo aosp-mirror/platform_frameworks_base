@@ -47,6 +47,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
@@ -66,6 +67,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -98,6 +100,15 @@ final class InputMonitor {
      * for the windows below it.
      */
     private final ArrayMap<String, InputConsumerImpl> mInputConsumers = new ArrayMap();
+
+    /**
+     * Set when recents (overview) is active as part of a shell transition. While set, any focus
+     * going to the recents activity will be redirected to the Recents input consumer. Since we
+     * draw the live-tile above the recents activity, we also need to provide that activity as a
+     * z-layering reference so that we can place the recents input consumer above it.
+     */
+    private WeakReference<ActivityRecord> mActiveRecentsActivity = null;
+    private WeakReference<ActivityRecord> mActiveRecentsLayerRef = null;
 
     /**
      * Representation of a input consumer that the policy has added to the window manager to consume
@@ -395,6 +406,21 @@ final class InputMonitor {
     }
 
     /**
+     * Inform InputMonitor when recents is active so it can enable the recents input consumer.
+     * @param activity The active recents activity. {@code null} means recents is not active.
+     * @param layer An activity whose Z-layer is used as a reference for how to sort the consumer.
+     */
+    void setActiveRecents(@Nullable ActivityRecord activity, @Nullable ActivityRecord layer) {
+        final boolean clear = activity == null;
+        mActiveRecentsActivity = clear ? null : new WeakReference<>(activity);
+        mActiveRecentsLayerRef = clear ? null : new WeakReference<>(layer);
+    }
+
+    private static <T> T getWeak(WeakReference<T> ref) {
+        return ref != null ? ref.get() : null;
+    }
+
+    /**
      * Called when the current input focus changes.
      */
     private void updateInputFocusRequest(InputConsumerImpl recentsAnimationInputConsumer) {
@@ -404,8 +430,10 @@ final class InputMonitor {
         if (recentsAnimationInputConsumer != null && focus != null) {
             final RecentsAnimationController recentsAnimationController =
                     mService.getRecentsAnimationController();
-            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord);
+            final boolean shouldApplyRecentsInputConsumer = (recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord))
+                    // Shell transitions doesn't use RecentsAnimationController
+                    || getWeak(mActiveRecentsActivity) != null;
             if (shouldApplyRecentsInputConsumer) {
                 requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
                         recentsAnimationInputConsumer.mName);
@@ -505,6 +533,14 @@ final class InputMonitor {
             mInDrag = inDrag;
 
             resetInputConsumers(mInputTransaction);
+            // Update recents input consumer layer if active
+            if (mAddRecentsAnimationInputConsumerHandle
+                    && getWeak(mActiveRecentsActivity) != null) {
+                final WindowContainer layer = getWeak(mActiveRecentsLayerRef);
+                mRecentsAnimationInputConsumer.show(mInputTransaction,
+                        layer != null ? layer : getWeak(mActiveRecentsActivity));
+                mAddRecentsAnimationInputConsumerHandle = false;
+            }
             mDisplayContent.forAllWindows(this, true /* traverseTopToBottom */);
             updateInputFocusRequest(mRecentsAnimationInputConsumer);
 
@@ -539,6 +575,7 @@ final class InputMonitor {
 
             final int privateFlags = w.mAttrs.privateFlags;
 
+            // This only works for legacy transitions.
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {

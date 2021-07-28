@@ -16,10 +16,13 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -149,7 +152,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     // TODO(b/188595497): remove when not needed.
     /** @see RecentsAnimationController#mNavigationBarAttachedToApp */
     private boolean mNavBarAttachedToApp = false;
-    private int mNavBarDisplayId = INVALID_DISPLAY;
+    private int mRecentsDisplayId = INVALID_DISPLAY;
 
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
@@ -167,6 +170,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     @VisibleForTesting
     int getSyncId() {
         return mSyncId;
+    }
+
+    @TransitionFlags
+    int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -390,6 +398,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         sendRemoteCallback(mClientAnimationFinishCallback);
 
         legacyRestoreNavigationBarFromApp();
+
+        if (mRecentsDisplayId != INVALID_DISPLAY) {
+            // Clean up input monitors (for recents)
+            final DisplayContent dc =
+                    mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
+            dc.getInputMonitor().setActiveRecents(null /* activity */, null /* layer */);
+        }
     }
 
     void abort() {
@@ -534,7 +549,43 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
-        if (dc == null || !dc.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
+        if (dc == null) return;
+        mRecentsDisplayId = displayId;
+
+        // Recents has an input-consumer to grab input from the "live tile" app. Set that up here
+        final InputConsumerImpl recentsAnimationInputConsumer =
+                dc.getInputMonitor().getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+        if (recentsAnimationInputConsumer != null) {
+            // find the top-most going-away activity and the recents activity. The top-most
+            // is used as layer reference while the recents is used for registering the consumer
+            // override.
+            ActivityRecord recentsActivity = null;
+            ActivityRecord topActivity = null;
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (change.getTaskInfo() == null) continue;
+                final Task task = Task.fromWindowContainerToken(
+                        info.getChanges().get(i).getTaskInfo().token);
+                if (task == null) continue;
+                final int activityType = change.getTaskInfo().topActivityType;
+                final boolean isRecents = activityType == ACTIVITY_TYPE_HOME
+                        || activityType == ACTIVITY_TYPE_RECENTS;
+                if (isRecents && recentsActivity == null) {
+                    recentsActivity = task.getTopVisibleActivity();
+                } else if (!isRecents && topActivity == null) {
+                    topActivity = task.getTopNonFinishingActivity();
+                }
+            }
+            if (recentsActivity != null && topActivity != null) {
+                recentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(
+                        topActivity.getBounds());
+                dc.getInputMonitor().setActiveRecents(recentsActivity, topActivity);
+            }
+        }
+
+        // The rest of this function handles nav-bar reparenting
+
+        if (!dc.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || dc.getFadeRotationAnimationController() != null) {
             return;
@@ -561,7 +612,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             return;
         }
         mNavBarAttachedToApp = true;
-        mNavBarDisplayId = displayId;
         navWindow.mToken.cancelAnimation();
         final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
         final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
@@ -585,12 +635,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (!mNavBarAttachedToApp) return;
         mNavBarAttachedToApp = false;
 
+        if (mRecentsDisplayId == INVALID_DISPLAY) {
+            Slog.e(TAG, "Reparented navigation bar without a valid display");
+            mRecentsDisplayId = DEFAULT_DISPLAY;
+        }
+
         if (mController.mStatusBar != null) {
-            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mNavBarDisplayId, true);
+            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, true);
         }
 
         final DisplayContent dc =
-                mController.mAtm.mRootWindowContainer.getDisplayContent(mNavBarDisplayId);
+                mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
         final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
         if (navWindow == null) return;
         navWindow.setSurfaceTranslationY(0);
