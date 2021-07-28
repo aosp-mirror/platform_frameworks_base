@@ -103,6 +103,7 @@ final class HotwordDetectionConnection {
     private final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
     private final @NonNull ServiceConnectionFactory mServiceConnectionFactory;
+    private final IHotwordRecognitionStatusCallback mCallback;
 
     final Object mLock;
     final int mVoiceInteractionServiceUid;
@@ -110,7 +111,6 @@ final class HotwordDetectionConnection {
     final int mUser;
     final Context mContext;
     volatile HotwordDetectionServiceIdentity mIdentity;
-    private IHotwordRecognitionStatusCallback mCallback;
     private IMicrophoneHotwordDetectionVoiceInteractionCallback mSoftwareCallback;
     private Instant mLastRestartInstant;
 
@@ -132,13 +132,19 @@ final class HotwordDetectionConnection {
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
             boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+            @Nullable SharedMemory sharedMemory,
+            @NonNull IHotwordRecognitionStatusCallback callback) {
+        if (callback == null) {
+            Slog.w(TAG, "Callback is null while creating connection");
+            throw new IllegalArgumentException("Callback is null while creating connection");
+        }
         mLock = lock;
         mContext = context;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
         mDetectionComponentName = serviceName;
         mUser = userId;
+        mCallback = callback;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
         intent.setComponent(mDetectionComponentName);
         initAudioFlingerLocked();
@@ -146,12 +152,6 @@ final class HotwordDetectionConnection {
         mServiceConnectionFactory = new ServiceConnectionFactory(intent, bindInstantServiceAllowed);
 
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
-
-        if (callback == null) {
-            updateStateLocked(options, sharedMemory);
-            return;
-        }
-        mCallback = callback;
 
         mLastRestartInstant = Instant.now();
         updateStateAfterProcessStart(options, sharedMemory);
