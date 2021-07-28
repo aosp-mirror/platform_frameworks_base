@@ -14,7 +14,7 @@ Copyright (C) 2018 The Android Open Source Project
     limitations under the License.
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <string name="app_name" translatable="false">Android R Easter Egg</string>
+    <string name="app_name" translatable="false">Android S Easter Egg</string>
 
     <!-- name of the Q easter egg, a nonogram-style icon puzzle -->
     <string name="q_egg_name" translatable="false">Icon Quiz</string>
@@ -23,4 +23,8 @@ Copyright (C) 2018 The Android Open Source Project
     <string name="p_egg_name" translatable="false">PAINT.APK</string>
 
     <string name="r_egg_name" translatable="false">Cat Controls</string>
+
+    <!-- name of the S easter egg, a widget that displays the system color palette
+         in a manner similar to a set of paint samples from a hardware store -->
+    <string name="s_egg_name" translatable="false">Paint Chips</string>
 </resources>
