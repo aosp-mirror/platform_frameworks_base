@@ -942,4 +942,13 @@
         <item name="android:switchMinWidth">@dimen/settingslib_min_switch_width</item>
     </style>
 
+    <style name="TrimmedHorizontalProgressBar"
+           parent="android:Widget.Material.ProgressBar.Horizontal">
+        <item name="android:indeterminateDrawable">
+            @drawable/progress_indeterminate_horizontal_material_trimmed
+        </item>
+        <item name="android:minHeight">4dp</item>
+        <item name="android:maxHeight">4dp</item>
+    </style>
+
 </resources>
