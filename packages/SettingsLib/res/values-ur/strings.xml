@@ -450,7 +450,7 @@
     <string name="battery_info_status_unknown" msgid="268625384868401114">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"چارج ہو رہا ہے"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"تیزی سے چارج ہو رہا ہے"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"آہستہ چارج ہو رہا ہے"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"آہستہ چارج ہو رہی ہے"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"پلگ ان ہے، ابھی چارج نہیں کر سکتے"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"مکمل"</string>
