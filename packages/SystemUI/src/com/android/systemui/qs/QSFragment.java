@@ -37,8 +37,10 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
@@ -133,6 +135,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      */
     private boolean mAnimateNextQsUpdate;
 
+    private DumpManager mDumpManager;
+
     /**
      * Progress of pull down from the center of the lock screen.
      * @see com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -147,7 +151,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager, DumpManager dumpManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
         mCommandQueue = commandQueue;
@@ -160,6 +164,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mFalsingManager = falsingManager;
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
+        mDumpManager = dumpManager;
     }
 
     @Override
@@ -205,6 +210,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
+        mDumpManager.registerDumpable(mContainer.getClass().getName(), mContainer);
 
         mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter, mFalsingManager);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
@@ -262,6 +268,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSCustomizerController.setQs(null);
         mQsDetailDisplayer.setQsPanelController(null);
         mScrollListener = null;
+        mDumpManager.unregisterDumpable(mContainer.getClass().getName());
     }
 
     @Override
