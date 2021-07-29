@@ -376,8 +376,11 @@ class InsetsSourceProvider {
             return;
         }
         mClientVisible = clientVisible;
-        mDisplayContent.mWmService.mH.obtainMessage(
-                LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED, mDisplayContent).sendToTarget();
+        if (!mDisplayContent.mLayoutAndAssignWindowLayersScheduled) {
+            mDisplayContent.mLayoutAndAssignWindowLayersScheduled = true;
+            mDisplayContent.mWmService.mH.obtainMessage(
+                    LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED, mDisplayContent).sendToTarget();
+        }
         updateVisibility();
     }
 
