@@ -1318,8 +1318,7 @@ public class StatusBar extends SystemUI implements
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
-                    mQSPanelController = ((QSFragment) qs).getQSPanelController();
-                    mQSPanelController.setBrightnessMirror(mBrightnessMirrorController);
+                    ((QSFragment) qs).setBrightnessMirrorController(mBrightnessMirrorController);
                 }
             });
         }
