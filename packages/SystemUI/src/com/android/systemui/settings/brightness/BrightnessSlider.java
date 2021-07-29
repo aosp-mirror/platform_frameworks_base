@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
@@ -138,15 +139,9 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
      * @param c
      */
     @Override
-    public void setMirrorControllerAndMirror(BrightnessMirrorController c) {
+    public void setMirrorControllerAndMirror(@NonNull BrightnessMirrorController c) {
         mMirrorController = c;
-        if (c != null) {
-            setMirror(c.getToggleSlider());
-        } else {
-            // If there's no mirror, we may be the ones dispatching, events but we should not mirror
-            // them
-            mView.setOnDispatchTouchEventListener(null);
-        }
+        setMirror(c.getToggleSlider());
     }
 
     @Override
