@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,8 @@
 #ifndef _ANDROID_MEDIA_TV_TUNER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_TUNER_CLIENT_H_
 
-#include <aidl/android/media/tv/tunerresourcemanager/ITunerResourceManager.h>
 #include <aidl/android/media/tv/tuner/ITunerService.h>
-#include <aidl/android/media/tv/tuner/TunerFrontendInfo.h>
 #include <android/binder_parcel_utils.h>
-#include <android/hardware/tv/tuner/1.1/ITuner.h>
-#include <android/hardware/tv/tuner/1.1/types.h>
 
 #include "DemuxClient.h"
 #include "ClientHelper.h"
@@ -32,32 +28,19 @@
 
 using Status = ::ndk::ScopedAStatus;
 
-using ::aidl::android::media::tv::tuner::TunerDemuxCapabilities;
+using ::aidl::android::hardware::tv::tuner::DemuxCapabilities;
+using ::aidl::android::hardware::tv::tuner::FrontendInfo;
+using ::aidl::android::hardware::tv::tuner::Result;
 using ::aidl::android::media::tv::tuner::ITunerService;
-using ::aidl::android::media::tv::tuner::TunerFrontendInfo;
-using ::aidl::android::media::tv::tunerresourcemanager::ITunerResourceManager;
-
-using ::android::hardware::tv::tuner::V1_0::DemuxCapabilities;
-using ::android::hardware::tv::tuner::V1_0::FrontendId;
-using ::android::hardware::tv::tuner::V1_0::ITuner;
-using ::android::hardware::tv::tuner::V1_0::LnbId;
-using ::android::hardware::tv::tuner::V1_0::Result;
-using ::android::hardware::tv::tuner::V1_1::FrontendDtmbCapabilities;
 
 using namespace std;
 
 namespace android {
 
-const static int TUNER_HAL_VERSION_UNKNOWN = 0;
-const static int TUNER_HAL_VERSION_1_0 = 1 << 16;
-const static int TUNER_HAL_VERSION_1_1 = (1 << 16) | 1;
-
-typedef enum {
-    FRONTEND,
-    LNB,
-    DEMUX,
-    DESCRAMBLER,
-} TunerResourceType;
+const static int32_t TUNER_HAL_VERSION_UNKNOWN = 0;
+const static int32_t TUNER_HAL_VERSION_1_0 = 1 << 16;
+const static int32_t TUNER_HAL_VERSION_1_1 = (1 << 16) | 1;
+const static int32_t TUNER_HAL_VERSION_2_0 = 2 << 16;
 
 struct TunerClient : public RefBase {
 
@@ -70,7 +53,7 @@ public:
      *
      * @return a list of the available frontend ids
      */
-    vector<FrontendId> getFrontendIds();
+    vector<int32_t> getFrontendIds();
 
     /**
      * Open a new interface of FrontendClient given a frontendHandle.
@@ -78,7 +61,7 @@ public:
      * @param frontendHandle the handle of the frontend granted by TRM.
      * @return a newly created FrontendClient interface.
      */
-    sp<FrontendClient> openFrontend(int frontendHandle);
+    sp<FrontendClient> openFrontend(int32_t frontendHandle);
 
     /**
      * Retrieve the granted frontend's information.
@@ -86,15 +69,7 @@ public:
      * @param id the id of the frontend granted by TRM.
      * @return the information for the frontend.
      */
-    shared_ptr<FrontendInfo> getFrontendInfo(int id);
-
-    /**
-     * Retrieve the DTMB frontend's capabilities.
-     *
-     * @param id the id of the DTMB frontend.
-     * @return the capabilities of the frontend.
-     */
-    shared_ptr<FrontendDtmbCapabilities> getFrontendDtmbCapabilities(int id);
+    shared_ptr<FrontendInfo> getFrontendInfo(int32_t id);
 
     /**
      * Open a new interface of DemuxClient given a demuxHandle.
@@ -102,7 +77,7 @@ public:
      * @param demuxHandle the handle of the demux granted by TRM.
      * @return a newly created DemuxClient interface.
      */
-    sp<DemuxClient> openDemux(int demuxHandle);
+    sp<DemuxClient> openDemux(int32_t demuxHandle);
 
     /**
      * Retrieve the Demux capabilities.
@@ -117,7 +92,7 @@ public:
      * @param descramblerHandle the handle of the descrambler granted by TRM.
      * @return a newly created DescramblerClient interface.
      */
-    sp<DescramblerClient> openDescrambler(int descramblerHandle);
+    sp<DescramblerClient> openDescrambler(int32_t descramblerHandle);
 
     /**
      * Open a new interface of LnbClient given an lnbHandle.
@@ -125,7 +100,7 @@ public:
      * @param lnbHandle the handle of the LNB granted by TRM.
      * @return a newly created LnbClient interface.
      */
-    sp<LnbClient> openLnb(int lnbHandle);
+    sp<LnbClient> openLnb(int32_t lnbHandle);
 
     /**
      * Open a new interface of LnbClient given a LNB name.
@@ -139,54 +114,18 @@ public:
      * Get the current Tuner HAL version. The high 16 bits are the major version number
      * while the low 16 bits are the minor version. Default value is unknown version 0.
      */
-    int getHalTunerVersion() { return mTunerVersion; }
+    int32_t getHalTunerVersion() { return mTunerVersion; }
 
 private:
-    sp<ITuner> getHidlTuner();
-    sp<IFrontend> openHidlFrontendById(int id);
-    sp<IDemux> openHidlDemux(int& demuxId);
-    Result getHidlFrontendInfo(int id, FrontendInfo& info);
-    sp<ILnb> openHidlLnbById(int id);
-    sp<ILnb> openHidlLnbByName(string name, LnbId& lnbId);
-    sp<IDescrambler> openHidlDescrambler();
-    vector<int> getLnbHandles();
-    DemuxCapabilities getHidlDemuxCaps(TunerDemuxCapabilities& aidlCaps);
-    FrontendInfo frontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo);
-    void updateTunerResources();
-    void updateFrontendResources();
-    void updateLnbResources();
-
-    int getResourceIdFromHandle(int handle, int resourceType);
-
-    int getResourceHandleFromId(int id, int resourceType);
-
     /**
      * An AIDL Tuner Service Singleton assigned at the first time the Tuner Client
      * connects with the Tuner Service. Default null when the service does not exist.
      */
     static shared_ptr<ITunerService> mTunerService;
 
-    /**
-     * A Tuner 1.0 HAL interface that is ready before connecting to the TunerService
-     * This is a temprary connection before the Tuner Framework fully migrates to the TunerService.
-     * Default null.
-     */
-    static sp<ITuner> mTuner;
-
-    /**
-     * A Tuner 1.1 HAL interface that is ready before connecting to the TunerService
-     * This is a temprary connection before the Tuner Framework fully migrates to the TunerService.
-     * Default null.
-     */
-    static sp<::android::hardware::tv::tuner::V1_1::ITuner> mTuner_1_1;
-
     // An integer that carries the Tuner version. The high 16 bits are the major version number
     // while the low 16 bits are the minor version. Default value is unknown version 0.
-    static int mTunerVersion;
-
-    shared_ptr<ITunerResourceManager> mTunerResourceManager;
-
-    int mResourceRequestCount = 0;
+    static int32_t mTunerVersion;
 };
 }  // namespace android
 

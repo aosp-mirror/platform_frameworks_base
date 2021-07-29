@@ -172,8 +172,7 @@ cc_library_shared {
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
-        "android.hardware.tv.tuner@1.0",
-        "android.hardware.tv.tuner@1.1",
+        "android.hardware.tv.tuner-V1-ndk",
         "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",
@@ -184,7 +183,6 @@ cc_library_shared {
         "libnativehelper",
         "libutils",
         "tv_tuner_aidl_interface-ndk",
-        "tv_tuner_resource_manager_aidl_interface-ndk",
     ],
 
     static_libs: [

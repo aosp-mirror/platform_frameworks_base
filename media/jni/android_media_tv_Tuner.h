@@ -17,18 +17,35 @@
 #ifndef _ANDROID_MEDIA_TV_TUNER_H_
 #define _ANDROID_MEDIA_TV_TUNER_H_
 
-#include <android/hardware/tv/tuner/1.1/types.h>
-
 #include <C2BlockInternal.h>
 #include <C2HandleIonInternal.h>
 #include <C2ParamDef.h>
-#include <fmq/MessageQueue.h>
-#include <fstream>
-#include <string>
-#include <unordered_map>
+#include <aidl/android/hardware/tv/tuner/DemuxFilterEvent.h>
+#include <aidl/android/hardware/tv/tuner/DemuxFilterMonitorEvent.h>
+#include <aidl/android/hardware/tv/tuner/DemuxFilterStatus.h>
+#include <aidl/android/hardware/tv/tuner/DemuxFilterType.h>
+#include <aidl/android/hardware/tv/tuner/DemuxPid.h>
+#include <aidl/android/hardware/tv/tuner/DvrType.h>
+#include <aidl/android/hardware/tv/tuner/FrontendCapabilities.h>
+#include <aidl/android/hardware/tv/tuner/FrontendEventType.h>
+#include <aidl/android/hardware/tv/tuner/FrontendInfo.h>
+#include <aidl/android/hardware/tv/tuner/FrontendScanMessage.h>
+#include <aidl/android/hardware/tv/tuner/FrontendScanMessageType.h>
+#include <aidl/android/hardware/tv/tuner/FrontendScanType.h>
+#include <aidl/android/hardware/tv/tuner/FrontendSettings.h>
+#include <aidl/android/hardware/tv/tuner/LnbEventType.h>
+#include <aidl/android/hardware/tv/tuner/PlaybackStatus.h>
+#include <aidl/android/hardware/tv/tuner/RecordStatus.h>
+#include <aidl/android/hardware/tv/tuner/Result.h>
+#include <fmq/AidlMessageQueue.h>
 #include <utils/Mutex.h>
 #include <utils/RefBase.h>
 
+#include <fstream>
+#include <string>
+#include <unordered_map>
+
+#include "jni.h"
 #include "tuner/DemuxClient.h"
 #include "tuner/DescramblerClient.h"
 #include "tuner/FilterClient.h"
@@ -39,48 +56,36 @@
 #include "tuner/LnbClientCallback.h"
 #include "tuner/TimeFilterClient.h"
 #include "tuner/TunerClient.h"
-#include "jni.h"
 
+using ::aidl::android::hardware::common::fmq::MQDescriptor;
+using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
+using ::aidl::android::hardware::tv::tuner::DemuxFilterEvent;
+using ::aidl::android::hardware::tv::tuner::DemuxFilterMonitorEvent;
+using ::aidl::android::hardware::tv::tuner::DemuxFilterStatus;
+using ::aidl::android::hardware::tv::tuner::DemuxFilterType;
+using ::aidl::android::hardware::tv::tuner::DemuxPid;
+using ::aidl::android::hardware::tv::tuner::DvrType;
+using ::aidl::android::hardware::tv::tuner::FrontendCapabilities;
+using ::aidl::android::hardware::tv::tuner::FrontendEventType;
+using ::aidl::android::hardware::tv::tuner::FrontendInfo;
+using ::aidl::android::hardware::tv::tuner::FrontendScanMessage;
+using ::aidl::android::hardware::tv::tuner::FrontendScanMessageType;
+using ::aidl::android::hardware::tv::tuner::FrontendScanType;
+using ::aidl::android::hardware::tv::tuner::FrontendSettings;
+using ::aidl::android::hardware::tv::tuner::LnbEventType;
+using ::aidl::android::hardware::tv::tuner::PlaybackStatus;
+using ::aidl::android::hardware::tv::tuner::RecordStatus;
+using ::aidl::android::hardware::tv::tuner::Result;
 using ::android::hardware::EventFlag;
-using ::android::hardware::MQDescriptorSync;
-using ::android::hardware::MessageQueue;
-using ::android::hardware::Return;
-using ::android::hardware::hidl_handle;
-using ::android::hardware::hidl_vec;
-using ::android::hardware::kSynchronizedReadWrite;
-using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
-using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
-using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
-using ::android::hardware::tv::tuner::V1_0::DemuxPid;
-using ::android::hardware::tv::tuner::V1_0::DvrType;
-using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
-using ::android::hardware::tv::tuner::V1_0::FrontendId;
-using ::android::hardware::tv::tuner::V1_0::FrontendInfo;
-using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
-using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
-using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
-using ::android::hardware::tv::tuner::V1_0::FrontendSettings;
-using ::android::hardware::tv::tuner::V1_1::FrontendSettingsExt1_1;
-using ::android::hardware::tv::tuner::V1_0::LnbEventType;
-using ::android::hardware::tv::tuner::V1_0::LnbId;
-using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
-using ::android::hardware::tv::tuner::V1_0::RecordStatus;
-using ::android::hardware::tv::tuner::V1_0::Result;
-using ::android::hardware::tv::tuner::V1_1::DemuxFilterEventExt;
-using ::android::hardware::tv::tuner::V1_1::DemuxFilterMonitorEvent;
-using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
-using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
 
-using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
-
-const static int TUNER_VERSION_1_1 = ((1 << 16) | 1);
+using MQ = MQDescriptor<int8_t, SynchronizedReadWrite>;
 
 namespace android {
 
 struct LnbClientCallbackImpl : public LnbClientCallback {
     ~LnbClientCallbackImpl();
     virtual void onEvent(LnbEventType lnbEventType);
-    virtual void onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
+    virtual void onDiseqcMessage(const vector<uint8_t>& diseqcMessage);
 
     void setLnb(jweak lnbObj);
 private:
@@ -98,8 +103,8 @@ private:
 };
 
 struct MediaEvent : public RefBase {
-    MediaEvent(sp<FilterClient> filterClient, hidl_handle avHandle, uint64_t dataId,
-        uint64_t dataSize, jobject obj);
+    MediaEvent(sp<FilterClient> filterClient, native_handle_t* avHandle, uint64_t dataId,
+               uint64_t dataSize, jobject obj);
     ~MediaEvent();
     jobject getLinearBlock();
     uint64_t getAudioHandle();
@@ -121,39 +126,24 @@ struct MediaEvent : public RefBase {
 
 struct FilterClientCallbackImpl : public FilterClientCallback {
     ~FilterClientCallbackImpl();
-    virtual void onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
-            const DemuxFilterEventExt& filterEventExt);
-    virtual void onFilterEvent(const DemuxFilterEvent& filterEvent);
+    virtual void onFilterEvent(const vector<DemuxFilterEvent>& events);
     virtual void onFilterStatus(const DemuxFilterStatus status);
 
     void setFilter(jweak filterObj, sp<FilterClient> filterClient);
 private:
     jweak mFilterObj;
     sp<FilterClient> mFilterClient;
-    jobjectArray getSectionEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
-    jobjectArray getMediaEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
-    jobjectArray getPesEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
-    jobjectArray getTsRecordEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>&events,
-                    const std::vector<DemuxFilterEventExt::Event>& eventsExt);
-    jobjectArray getMmtpRecordEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>&events,
-                    const std::vector<DemuxFilterEventExt::Event>& eventsExt);
-    jobjectArray getDownloadEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
-    jobjectArray getIpPayloadEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
-    jobjectArray getTemiEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
-    jobjectArray getScramblingStatusEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
-    jobjectArray getIpCidChangeEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
-    jobjectArray getRestartEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
+    void getSectionEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getMediaEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getPesEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getTsRecordEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getMmtpRecordEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getDownloadEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getIpPayloadEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getTemiEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getScramblingStatusEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getIpCidChangeEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getRestartEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
 };
 
 struct FrontendClientCallbackImpl : public FrontendClientCallback {
@@ -162,8 +152,6 @@ struct FrontendClientCallbackImpl : public FrontendClientCallback {
     virtual void onEvent(FrontendEventType frontendEventType);
     virtual void onScanMessage(
             FrontendScanMessageType type, const FrontendScanMessage& message);
-    virtual void onScanMessageExt1_1(
-            FrontendScanMessageTypeExt1_1 type, const FrontendScanMessageExt1_1& messageExt);
 
     jweak mObject;
 };
@@ -182,10 +170,9 @@ struct JTuner : public RefBase {
     int shareFrontend(int feId);
     jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
-    int tune(const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    int tune(const FrontendSettings& settings);
     int stopTune();
-    int scan(const FrontendSettings& settings, FrontendScanType scanType,
-            const FrontendSettingsExt1_1& settingsExt1_1);
+    int scan(const FrontendSettings& settings, FrontendScanType scanType);
     int stopScan();
     int setLnb(sp<LnbClient> lnbClient);
     int setLna(bool enable);
@@ -214,18 +201,16 @@ private:
     int mSharedFeId;
     sp<LnbClient> mLnbClient;
     sp<DemuxClient> mDemuxClient;
-    static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
-    static jobject getDtmbFrontendCaps(JNIEnv *env, int id);
-
-    bool isV1_1ExtendedStatusType(jint type);
+    static jobject getAnalogFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getAtsc3FrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getAtscFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getDvbcFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getDvbsFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getDvbtFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getIsdbs3FrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getIsdbsFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getIsdbtFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getDtmbFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
 };
 
 class C2DataIdInfo : public C2Param {
