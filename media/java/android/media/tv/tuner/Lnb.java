@@ -175,7 +175,13 @@ public class Lnb implements AutoCloseable {
     private void onEvent(int eventType) {
         synchronized (mCallbackLock) {
             if (mExecutor != null && mCallback != null) {
-                mExecutor.execute(() -> mCallback.onEvent(eventType));
+                mExecutor.execute(() -> {
+                    synchronized (mCallbackLock) {
+                        if (mCallback != null) {
+                            mCallback.onEvent(eventType);
+                        }
+                    }
+                });
             }
         }
     }
@@ -183,7 +189,13 @@ public class Lnb implements AutoCloseable {
     private void onDiseqcMessage(byte[] diseqcMessage) {
         synchronized (mCallbackLock) {
             if (mExecutor != null && mCallback != null) {
-                mExecutor.execute(() -> mCallback.onDiseqcMessage(diseqcMessage));
+                mExecutor.execute(() -> {
+                    synchronized (mCallbackLock) {
+                        if (mCallback != null) {
+                            mCallback.onDiseqcMessage(diseqcMessage);
+                        }
+                    }
+                });
             }
         }
     }
