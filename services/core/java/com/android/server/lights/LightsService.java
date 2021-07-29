@@ -293,7 +293,7 @@ public class LightsService extends SystemService {
                             + ": brightness=" + brightness);
                     return;
                 }
-                int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(brightness, null);
+                int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(brightness);
                 int color = brightnessInt & 0x000000ff;
                 color = 0xff000000 | (color << 16) | (color << 8) | color;
                 setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);

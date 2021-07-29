@@ -360,10 +360,9 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                 convertGammaToLinearFloat(value, minBacklight, maxBacklight),
                 maxBacklight);
         if (stopTracking) {
-            // Log brightness as a value between 0-1000 directly correlated to brightnesses 0-1.0
+            // TODO(brightnessfloat): change to use float value instead.
             MetricsLogger.action(mContext, metric,
-                    Math.round(MathUtils.constrainedMap(0, 1000, PowerManager.BRIGHTNESS_MIN,
-                        PowerManager.BRIGHTNESS_MAX, valFloat)));
+                    BrightnessSynchronizer.brightnessFloatToInt(valFloat));
 
         }
         setBrightness(valFloat);
