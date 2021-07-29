@@ -381,8 +381,11 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_CHANGE = 6;
     /**
      * The keyguard was visible and has been dismissed.
+     * @deprecated use {@link #TRANSIT_TO_BACK} + {@link #TRANSIT_FLAG_KEYGUARD_GOING_AWAY} for
+     *             keyguard going away with Shell transition.
      * @hide
      */
+    @Deprecated
     int TRANSIT_KEYGUARD_GOING_AWAY = 7;
     /**
      * A window is appearing above a locked keyguard.
@@ -487,6 +490,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_IS_RECENTS = 0x80;
 
     /**
+     * Transition flag: Indicates that keyguard should go away with this transition.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY = 0x100;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -497,7 +506,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
             TRANSIT_FLAG_KEYGUARD_LOCKED,
-            TRANSIT_FLAG_IS_RECENTS
+            TRANSIT_FLAG_IS_RECENTS,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

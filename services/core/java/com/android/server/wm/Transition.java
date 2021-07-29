@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECI
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -622,13 +623,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     private void handleNonAppWindowsInTransition(int displayId,
-            @TransitionType int transit, int flags) {
+            @TransitionType int transit, @TransitionFlags int flags) {
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
         if (dc == null) {
             return;
         }
-        if (transit == TRANSIT_KEYGUARD_GOING_AWAY
+        if ((transit == TRANSIT_KEYGUARD_GOING_AWAY
+                || (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0)
                 && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
