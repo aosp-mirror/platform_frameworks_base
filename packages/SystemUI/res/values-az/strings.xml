@@ -452,6 +452,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Açmaq üçün yenidən tıklayın"</string>
     <string name="tap_again" msgid="1315420114387908655">"Yenidən toxunun"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Açmaq üçün yuxarı sürüşdürün"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Açmaq üçün basın"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yenidən cəhd etmək üçün yuxarı sürüşdürün"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC istifadə etmək üçün kiliddən çıxarın"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu cihaz təşkilatınıza məxsusdur"</string>

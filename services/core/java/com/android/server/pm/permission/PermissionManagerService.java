@@ -3349,13 +3349,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void registerAttributionSource(@NonNull AttributionSource source) {
-        mAttributionSourceRegistry.registerAttributionSource(source);
+    public void registerAttributionSource(@NonNull AttributionSourceState source) {
+        mAttributionSourceRegistry
+                .registerAttributionSource(new AttributionSource(source));
     }
 
     @Override
-    public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
-        return mAttributionSourceRegistry.isRegisteredAttributionSource(source);
+    public boolean isRegisteredAttributionSource(@NonNull AttributionSourceState source) {
+        return mAttributionSourceRegistry
+                .isRegisteredAttributionSource(new AttributionSource(source));
     }
 
     @Override

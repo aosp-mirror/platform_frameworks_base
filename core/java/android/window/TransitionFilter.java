@@ -17,6 +17,7 @@
 package android.window;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.WindowManager.TransitionType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -52,7 +53,7 @@ public final class TransitionFilter implements Parcelable {
      * When non-null: this is a list of transition types that this filter applies to. This filter
      * will fail for transitions that aren't one of these types.
      */
-    @Nullable public int[] mTypeSet = null;
+    @Nullable public @TransitionType int[] mTypeSet = null;
 
     /**
      * A list of required changes. To pass, a transition must meet all requirements.

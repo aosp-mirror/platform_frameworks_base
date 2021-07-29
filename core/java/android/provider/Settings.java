@@ -16307,18 +16307,19 @@ public final class Settings {
             public static final int RETAIL_MODE_RETAIL = 1;
 
             /**
-             * The play store availability.
+             * The play store availability on companion phone.
              * @hide
              */
-            public static final String PLAY_STORE_AVAILABILITY = "play_store_availability";
+            public static final String PHONE_PLAY_STORE_AVAILABILITY =
+                    "phone_play_store_availability";
 
-            // Possible play store availability states
+            // Possible phone play store availability states
             /** @hide */
-            public static final int PLAY_STORE_AVAILABILITY_UNKNOWN = 0;
+            public static final int PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN = 0;
             /** @hide */
-            public static final int PLAY_STORE_AVAILABLE = 1;
+            public static final int PHONE_PLAY_STORE_AVAILABLE = 1;
             /** @hide */
-            public static final int PLAY_STORE_UNAVAILABLE = 2;
+            public static final int PHONE_PLAY_STORE_UNAVAILABLE = 2;
 
             /**
              * Whether the bug report is enabled.
@@ -16720,6 +16721,62 @@ public final class Settings {
              * @hide
              */
             public static final String UNGAZE_ENABLED = "ungaze_enabled";
+
+            /**
+             * The device's battery saver mode, which can be one of the following:
+             * -{@link BATTERY_SAVER_MODE_NONE}
+             * -{@link BATTERY_SAVER_MODE_LIGHT}
+             * -{@link BATTERY_SAVER_MODE_TRADITIONAL_WATCH}
+             * -{@link BATTERY_SAVER_MODE_TIME_ONLY}
+             * -{@link BATTERY_SAVER_MODE_CUSTOM}
+             * @hide
+             */
+            public static final String BATTERY_SAVER_MODE = "battery_saver_mode";
+
+            /**
+             * Not in Battery Saver Mode
+             * @hide
+             */
+            public static final int BATTERY_SAVER_MODE_NONE = 0;
+            /**
+             * In Lightweight Battery Saver Mode
+             * @hide
+             */
+            public static final int BATTERY_SAVER_MODE_LIGHT = 1;
+            /**
+             * In Traditional Watch Mode Battery Saver Mode
+             * @hide
+             */
+            public static final int BATTERY_SAVER_MODE_TRADITIONAL_WATCH = 2;
+            /**
+             * In Time-only Mode Battery Saver Mode
+             * @hide
+             */
+            public static final int BATTERY_SAVER_MODE_TIME_ONLY = 3;
+            /**
+             * Partner's Battery Saver implementation is being used
+             * @hide
+             */
+            public static final int BATTERY_SAVER_MODE_CUSTOM = 4;
+
+            /**
+             * The maximum ambient mode duration when an activity is allowed to auto resume.
+             * @hide
+             */
+            public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS =
+                    "wear_activity_auto_resume_timeout_ms";
+
+            /**
+             * If burn in protection is enabled.
+             * @hide
+             */
+            public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
+
+            /**
+             * Whether the device has combined location setting enabled.
+             * @hide
+             */
+            public static final String COMBINED_LOCATION_ENABLED = "combined_location_enable";
         }
     }
 

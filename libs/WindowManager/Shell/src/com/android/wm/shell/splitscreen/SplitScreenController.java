@@ -172,6 +172,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.onKeyguardOccludedChanged(occluded);
     }
 
+    public void onKeyguardVisibilityChanged(boolean showing) {
+        mStageCoordinator.onKeyguardVisibilityChanged(showing);
+    }
+
     public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
         mStageCoordinator.exitSplitScreenOnHide(exitSplitScreenOnHide);
     }
@@ -369,6 +373,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 if (mExecutors.size() == 0) {
                     SplitScreenController.this.unregisterSplitScreenListener(mListener);
                 }
+            });
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.onKeyguardVisibilityChanged(showing);
             });
         }
     }

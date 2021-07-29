@@ -29,6 +29,8 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.TransitionFlags;
+import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 
 import android.annotation.IntDef;
@@ -42,7 +44,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,8 +107,8 @@ public final class TransitionInfo implements Parcelable {
     })
     public @interface ChangeFlags {}
 
-    private final @WindowManager.TransitionOldType int mType;
-    private final @WindowManager.TransitionFlags int mFlags;
+    private final @TransitionType int mType;
+    private final @TransitionFlags int mFlags;
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
     private SurfaceControl mRootLeash;
@@ -116,8 +117,7 @@ public final class TransitionInfo implements Parcelable {
     private AnimationOptions mOptions;
 
     /** @hide */
-    public TransitionInfo(@WindowManager.TransitionOldType int type,
-            @WindowManager.TransitionFlags int flags) {
+    public TransitionInfo(@TransitionType int type, @TransitionFlags int flags) {
         mType = type;
         mFlags = flags;
     }
@@ -173,7 +173,7 @@ public final class TransitionInfo implements Parcelable {
         mOptions = options;
     }
 
-    public int getType() {
+    public @TransitionType int getType() {
         return mType;
     }
 

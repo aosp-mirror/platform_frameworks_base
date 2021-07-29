@@ -452,6 +452,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Trokit përsëri për ta hapur"</string>
     <string name="tap_again" msgid="1315420114387908655">"Trokit sërish"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Rrëshqit lart për ta hapur"</string>
+    <!-- no translation found for keyguard_unlock_press (8488350566398524740) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Rrëshqit lart për të provuar përsëri"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Shkyçe për të përdorur NFC-në"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Kjo pajisje i përket organizatës sate"</string>

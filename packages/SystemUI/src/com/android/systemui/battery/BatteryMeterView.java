@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui;
+package com.android.systemui.battery;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
@@ -50,6 +50,9 @@ import android.widget.TextView;
 import androidx.annotation.StyleRes;
 
 import com.android.settingslib.graph.ThemedBatteryDrawable;
+import com.android.systemui.Dependency;
+import com.android.systemui.DualToneHandler;
+import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -196,6 +199,7 @@ public class BatteryMeterView extends LinearLayout implements
      * @param mode desired mode (none, on, off)
      */
     public void setPercentShowMode(@BatteryPercentMode int mode) {
+        if (mode == mShowPercentMode) return;
         mShowPercentMode = mode;
         updateShowPercent();
     }
@@ -331,7 +335,7 @@ public class BatteryMeterView extends LinearLayout implements
                     if (mBatteryPercentView == null) {
                         return;
                     }
-                    if (estimate != null) {
+                    if (estimate != null && mShowPercentMode == MODE_ESTIMATE) {
                         mBatteryPercentView.setText(estimate);
                         setContentDescription(getContext().getString(
                                 R.string.accessibility_battery_level_with_estimate,
@@ -486,6 +490,7 @@ public class BatteryMeterView extends LinearLayout implements
         pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
         pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);
         pw.println("    mLevel: " + mLevel);
+        pw.println("    mMode: " + mShowPercentMode);
     }
 
     private final class SettingObserver extends ContentObserver {
