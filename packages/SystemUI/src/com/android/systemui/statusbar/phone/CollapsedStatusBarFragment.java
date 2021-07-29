@@ -202,6 +202,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onDestroyView() {
         super.onDestroyView();
         mStatusBarIconController.removeIconGroup(mDarkIconManager);
+        mAnimationScheduler.removeCallback(this);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);
         }

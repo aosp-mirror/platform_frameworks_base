@@ -567,6 +567,10 @@ public class AccessNetworkUtils {
      */
     public static int getFrequencyFromNrArfcn(int nrArfcn) {
 
+        if (nrArfcn == PhysicalChannelConfig.CHANNEL_NUMBER_UNKNOWN) {
+            return PhysicalChannelConfig.FREQUENCY_UNKNOWN;
+        }
+
         int globalKhz = 0;
         int rangeOffset = 0;
         int arfcnOffset = 0;
@@ -631,6 +635,10 @@ public class AccessNetworkUtils {
      * Get actual frequency from UTRA ARFCN.
      */
     public static int getFrequencyFromUarfcn(int band, int uarfcn, boolean isUplink) {
+
+        if (uarfcn == PhysicalChannelConfig.CHANNEL_NUMBER_UNKNOWN) {
+            return PhysicalChannelConfig.FREQUENCY_UNKNOWN;
+        }
 
         int offsetKhz = 0;
         for (UtranBandArfcnFrequency uarfcnFrequency : AccessNetworkConstants.
@@ -701,6 +709,10 @@ public class AccessNetworkUtils {
      * Get actual frequency from GERAN ARFCN.
      */
     public static int getFrequencyFromArfcn(int band, int arfcn, boolean isUplink) {
+
+        if (arfcn == PhysicalChannelConfig.CHANNEL_NUMBER_UNKNOWN) {
+            return PhysicalChannelConfig.FREQUENCY_UNKNOWN;
+        }
 
         int uplinkFrequencyFirst = 0;
         int arfcnOffset = 0;

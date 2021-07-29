@@ -24,24 +24,23 @@ import android.content.Context;
 import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
-import java.util.ArrayList;
 
 /** The PerformanceHintManager allows apps to send performance hint to system. */
 @SystemService(Context.PERFORMANCE_HINT_SERVICE)
 public final class PerformanceHintManager {
-    private static final String TAG = "PerformanceHintManager";
-    private final IHintManager mService;
-    // HAL preferred update rate
-    private final long mPreferredRate;
+    private final long mNativeManagerPtr;
 
     /** @hide */
-    public PerformanceHintManager(IHintManager service) {
-        mService = service;
-        try {
-            mPreferredRate = mService.getHintSessionPreferredRate();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+    public static PerformanceHintManager create() throws ServiceManager.ServiceNotFoundException {
+        long nativeManagerPtr = nativeAcquireManager();
+        if (nativeManagerPtr == 0) {
+            throw new ServiceManager.ServiceNotFoundException(Context.PERFORMANCE_HINT_SERVICE);
         }
+        return new PerformanceHintManager(nativeManagerPtr);
+    }
+
+    private PerformanceHintManager(long nativeManagerPtr) {
+        mNativeManagerPtr = nativeManagerPtr;
     }
 
     /**
@@ -57,16 +56,13 @@ public final class PerformanceHintManager {
      */
     @Nullable
     public Session createHintSession(@NonNull int[] tids, long initialTargetWorkDurationNanos) {
-        try {
-            IBinder token = new Binder();
-            IHintSession session = mService.createHintSession(token, tids,
-                    initialTargetWorkDurationNanos);
-            if (session == null) return null;
-            return new Session(session, sNanoClock, mPreferredRate,
-                    initialTargetWorkDurationNanos);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Preconditions.checkNotNull(tids, "tids cannot be null");
+        Preconditions.checkArgumentPositive(initialTargetWorkDurationNanos,
+                "the hint target duration should be positive.");
+        long nativeSessionPtr = nativeCreateSession(mNativeManagerPtr, tids,
+                initialTargetWorkDurationNanos);
+        if (nativeSessionPtr == 0) return null;
+        return new Session(nativeSessionPtr);
     }
 
     /**
@@ -75,7 +71,7 @@ public final class PerformanceHintManager {
      * @return the preferred update rate supported by device software.
      */
     public long getPreferredUpdateRateNanos() {
-        return mPreferredRate;
+        return nativeGetPreferredUpdateRateNanos(mNativeManagerPtr);
     }
 
     /**
@@ -101,28 +97,21 @@ public final class PerformanceHintManager {
      * <p>All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.</p>
      */
     public static class Session implements Closeable {
-        private final IHintSession mSession;
-        private final NanoClock mElapsedRealtimeClock;
-        // Target duration for choosing update rate
-        private long mTargetDurationInNanos;
-        // HAL preferred update rate
-        private long mPreferredRate;
-        // Last update timestamp
-        private long mLastUpdateTimeStamp = -1L;
-        // Cached samples
-        private final ArrayList<Long> mActualDurationNanos;
-        private final ArrayList<Long> mTimeStampNanos;
+        private long mNativeSessionPtr;
 
         /** @hide */
-        public Session(IHintSession session, NanoClock elapsedRealtimeClock, long preferredRate,
-                long durationNanos) {
-            mSession = session;
-            mElapsedRealtimeClock = elapsedRealtimeClock;
-            mTargetDurationInNanos = durationNanos;
-            mPreferredRate = preferredRate;
-            mActualDurationNanos = new ArrayList<Long>();
-            mTimeStampNanos = new ArrayList<Long>();
-            mLastUpdateTimeStamp = mElapsedRealtimeClock.nanos();
+        public Session(long nativeSessionPtr) {
+            mNativeSessionPtr = nativeSessionPtr;
+        }
+
+        /** @hide */
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                close();
+            } finally {
+                super.finalize();
+            }
         }
 
         /**
@@ -133,19 +122,7 @@ public final class PerformanceHintManager {
         public void updateTargetWorkDuration(long targetDurationNanos) {
             Preconditions.checkArgumentPositive(targetDurationNanos, "the hint target duration"
                     + " should be positive.");
-            try {
-                mSession.updateTargetWorkDuration(targetDurationNanos);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            mTargetDurationInNanos = targetDurationNanos;
-            /**
-             * Most of the workload is target_duration dependent, so now clear the cached samples
-             * as they are most likely obsolete.
-             */
-            mActualDurationNanos.clear();
-            mTimeStampNanos.clear();
-            mLastUpdateTimeStamp = mElapsedRealtimeClock.nanos();
+            nativeUpdateTargetWorkDuration(mNativeSessionPtr, targetDurationNanos);
         }
 
         /**
@@ -161,38 +138,7 @@ public final class PerformanceHintManager {
         public void reportActualWorkDuration(long actualDurationNanos) {
             Preconditions.checkArgumentPositive(actualDurationNanos, "the actual duration should"
                     + " be positive.");
-            final long now = mElapsedRealtimeClock.nanos();
-            mActualDurationNanos.add(actualDurationNanos);
-            mTimeStampNanos.add(now);
-
-            /**
-             * Use current sample to determine the rate limit. We can pick a shorter rate limit
-             * if any sample underperformed, however, it could be the lower level system is slow
-             * to react. So here we explicitly choose the rate limit with the latest sample.
-             */
-            long rateLimit =
-                    actualDurationNanos > mTargetDurationInNanos ? mPreferredRate
-                            : 10 * mPreferredRate;
-
-            if (now - mLastUpdateTimeStamp <= rateLimit) {
-                return;
-            }
-            Preconditions.checkState(mActualDurationNanos.size() == mTimeStampNanos.size());
-            final int size = mActualDurationNanos.size();
-            long[] actualDurationArray = new long[size];
-            long[] timeStampArray = new long[size];
-            for (int i = 0; i < size; i++) {
-                actualDurationArray[i] = mActualDurationNanos.get(i);
-                timeStampArray[i] = mTimeStampNanos.get(i);
-            }
-            try {
-                mSession.reportActualWorkDuration(actualDurationArray, timeStampArray);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            mActualDurationNanos.clear();
-            mTimeStampNanos.clear();
-            mLastUpdateTimeStamp = now;
+            nativeReportActualWorkDuration(mNativeSessionPtr, actualDurationNanos);
         }
 
         /**
@@ -201,26 +147,20 @@ public final class PerformanceHintManager {
          * <p>Once called, you should not call anything else on this object.</p>
          */
         public void close() {
-            try {
-                mSession.close();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            if (mNativeSessionPtr != 0) {
+                nativeCloseSession(mNativeSessionPtr);
+                mNativeSessionPtr = 0;
             }
         }
     }
 
-    /**
-     * The interface is to make the FakeClock for testing.
-     * @hide
-     */
-    public interface NanoClock {
-        /** Gets the current nanosecond instant of the clock. */
-        long nanos();
-    }
-
-    private static final NanoClock sNanoClock = new NanoClock() {
-        public long nanos() {
-            return SystemClock.elapsedRealtimeNanos();
-        }
-    };
+    private static native long nativeAcquireManager();
+    private static native long nativeGetPreferredUpdateRateNanos(long nativeManagerPtr);
+    private static native long nativeCreateSession(long nativeManagerPtr,
+            int[] tids, long initialTargetWorkDurationNanos);
+    private static native void nativeUpdateTargetWorkDuration(long nativeSessionPtr,
+            long targetDurationNanos);
+    private static native void nativeReportActualWorkDuration(long nativeSessionPtr,
+            long actualDurationNanos);
+    private static native void nativeCloseSession(long nativeSessionPtr);
 }

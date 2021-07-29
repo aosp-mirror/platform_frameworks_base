@@ -776,8 +776,10 @@ public abstract class WallpaperService extends Service {
                 WallpaperColors color = colors.get(i);
                 RectF area = regions.get(i);
                 if (color == null || area == null) {
-                    Log.wtf(TAG, "notifyLocalColorsChanged null values. color: "
-                            + color + " area " + area);
+                    if (DEBUG) {
+                        Log.e(TAG, "notifyLocalColorsChanged null values. color: "
+                                + color + " area " + area);
+                    }
                     continue;
                 }
                 try {
@@ -1033,6 +1035,9 @@ public abstract class WallpaperService extends Service {
                                     .build();
                             updateSurfaceDimming();
                         }
+                        // Propagate transform hint from WM so we can use the right hint for the
+                        // first frame.
+                        mBbqSurfaceControl.setTransformHint(mSurfaceControl.getTransformHint());
                         Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
                                 mSurfaceSize.y, mFormat);
                         // If blastSurface == null that means it hasn't changed since the last

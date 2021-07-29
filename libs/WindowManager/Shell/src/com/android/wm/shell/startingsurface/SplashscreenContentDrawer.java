@@ -23,7 +23,9 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLA
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
 import android.annotation.ColorInt;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -64,6 +66,7 @@ import com.android.wm.shell.common.TransactionPool;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -132,7 +135,6 @@ public class SplashscreenContentDrawer {
      * @param splashScreenViewConsumer Receiving the SplashScreenView object, which will also be
      *                                 executed on splash screen thread. Note that the view can be
      *                                 null if failed.
-     * @param bgColorConsumer Receiving the background color once it's estimated complete.
      */
     void createContentView(Context context, @StartingWindowType int suggestType, ActivityInfo info,
             int taskId, Consumer<SplashScreenView> splashScreenViewConsumer) {
@@ -209,9 +211,9 @@ public class SplashscreenContentDrawer {
     }
 
     private static int estimateWindowBGColor(Drawable themeBGDrawable) {
-        final DrawableColorTester themeBGTester =
-                new DrawableColorTester(themeBGDrawable, true /* filterTransparent */);
-        if (themeBGTester.nonTransparentRatio() == 0) {
+        final DrawableColorTester themeBGTester = new DrawableColorTester(
+                themeBGDrawable, DrawableColorTester.TRANSPARENT_FILTER /* filterType */);
+        if (themeBGTester.passFilterRatio() == 0) {
             // the window background is transparent, unable to draw
             Slog.w(TAG, "Window background is transparent, fill background with black color");
             return getSystemBGColor();
@@ -314,7 +316,7 @@ public class SplashscreenContentDrawer {
         private Drawable mOverlayDrawable;
         private int mSuggestType;
         private int mThemeColor;
-        private Drawable mFinalIconDrawable;
+        private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
@@ -346,12 +348,13 @@ public class SplashscreenContentDrawer {
                 animationDuration = 0;
                 mFinalIconSize = 0;
             } else if (mTmpAttrs.mSplashScreenIcon != null) {
-                // replaced icon, don't process
+                // Using the windowSplashScreenAnimatedIcon attribute
                 iconDrawable = mTmpAttrs.mSplashScreenIcon;
                 animationDuration = mTmpAttrs.mAnimationDuration;
 
                 // There is no background below the icon, so scale the icon up
-                if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT) {
+                if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT
+                        || mTmpAttrs.mIconBgColor == mThemeColor) {
                     mFinalIconSize *= NO_BACKGROUND_SCALE;
                 }
                 createIconDrawable(iconDrawable, false);
@@ -382,7 +385,7 @@ public class SplashscreenContentDrawer {
                 animationDuration = 0;
             }
 
-            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawable, animationDuration);
+            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawables, animationDuration);
         }
 
         private class ShapeIconFactory extends BaseIconFactory {
@@ -393,12 +396,11 @@ public class SplashscreenContentDrawer {
 
         private void createIconDrawable(Drawable iconDrawable, boolean legacy) {
             if (legacy) {
-                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
+                mFinalIconDrawables = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
                         iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
             } else {
-                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
-                        mTmpAttrs.mIconBgColor != Color.TRANSPARENT
-                                ? mTmpAttrs.mIconBgColor : mThemeColor,
+                mFinalIconDrawables = SplashscreenIconDrawableFactory.makeIconDrawable(
+                        mTmpAttrs.mIconBgColor, mThemeColor,
                         iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
             }
         }
@@ -414,7 +416,8 @@ public class SplashscreenContentDrawer {
             final ColorCache.IconColor iconColor = mColorCache.getIconColor(
                     mActivityInfo.packageName, mActivityInfo.getIconResource(),
                     mLastPackageContextConfigHash,
-                    () -> new DrawableColorTester(iconForeground, true /* filterTransparent */),
+                    () -> new DrawableColorTester(iconForeground,
+                            DrawableColorTester.TRANSLUCENT_FILTER /* filterType */),
                     () -> new DrawableColorTester(adaptiveIconDrawable.getBackground()));
 
             if (DEBUG) {
@@ -443,7 +446,7 @@ public class SplashscreenContentDrawer {
                 // Reference AdaptiveIcon description, outer is 108 and inner is 72, so we
                 // scale by 192/160 if we only draw adaptiveIcon's foreground.
                 final float noBgScale =
-                        iconColor.mFgNonTransparentRatio < ENLARGE_FOREGROUND_ICON_THRESHOLD
+                        iconColor.mFgNonTranslucentRatio < ENLARGE_FOREGROUND_ICON_THRESHOLD
                                 ? NO_BACKGROUND_SCALE : 1f;
                 // Using AdaptiveIconDrawable here can help keep the shape consistent with the
                 // current settings.
@@ -459,18 +462,24 @@ public class SplashscreenContentDrawer {
             return true;
         }
 
-        private SplashScreenView fillViewWithIcon(int iconSize, Drawable iconDrawable,
+        private SplashScreenView fillViewWithIcon(int iconSize, @Nullable Drawable[] iconDrawable,
                 int animationDuration) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
-            final SplashScreenView.Builder builder = new SplashScreenView.Builder(mContext);
-            builder.setBackgroundColor(mThemeColor);
-            builder.setOverlayDrawable(mOverlayDrawable);
+            Drawable foreground = null;
+            Drawable background = null;
             if (iconDrawable != null) {
-                builder.setIconSize(iconSize)
-                        .setIconBackground(mTmpAttrs.mIconBgColor)
-                        .setCenterViewDrawable(iconDrawable)
-                        .setAnimationDurationMillis(animationDuration);
+                foreground = iconDrawable.length > 0 ? iconDrawable[0] : null;
+                background = iconDrawable.length > 1 ? iconDrawable[1] : null;
             }
+
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
+            final SplashScreenView.Builder builder = new SplashScreenView.Builder(mContext)
+                    .setBackgroundColor(mThemeColor)
+                    .setOverlayDrawable(mOverlayDrawable)
+                    .setIconSize(iconSize)
+                    .setIconBackground(background)
+                    .setCenterViewDrawable(foreground)
+                    .setAnimationDurationMillis(animationDuration);
+
             if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     && mTmpAttrs.mBrandingImage != null) {
                 builder.setBrandingDrawable(mTmpAttrs.mBrandingImage, mBrandingImageWidth,
@@ -545,13 +554,26 @@ public class SplashscreenContentDrawer {
     }
 
     private static class DrawableColorTester {
+        private static final int NO_ALPHA_FILTER = 0;
+        // filter out completely invisible pixels
+        private static final int TRANSPARENT_FILTER = 1;
+        // filter out translucent and invisible pixels
+        private static final int TRANSLUCENT_FILTER = 2;
+
+        @IntDef(flag = true, value = {
+                NO_ALPHA_FILTER,
+                TRANSPARENT_FILTER,
+                TRANSLUCENT_FILTER
+        })
+        private @interface QuantizerFilterType {}
+
         private final ColorTester mColorChecker;
 
         DrawableColorTester(Drawable drawable) {
-            this(drawable, false /* filterTransparent */);
+            this(drawable, NO_ALPHA_FILTER /* filterType */);
         }
 
-        DrawableColorTester(Drawable drawable, boolean filterTransparent) {
+        DrawableColorTester(Drawable drawable, @QuantizerFilterType int filterType) {
             // Some applications use LayerDrawable for their windowBackground. To ensure that we
             // only get the real background, so that the color is not affected by the alpha of the
             // upper layer, try to get the lower layer here. This can also speed up the calculation.
@@ -570,12 +592,12 @@ public class SplashscreenContentDrawer {
             } else {
                 mColorChecker = drawable instanceof ColorDrawable
                         ? new SingleColorTester((ColorDrawable) drawable)
-                        : new ComplexDrawableTester(drawable, filterTransparent);
+                        : new ComplexDrawableTester(drawable, filterType);
             }
         }
 
-        public float nonTransparentRatio() {
-            return mColorChecker.nonTransparentRatio();
+        public float passFilterRatio() {
+            return mColorChecker.passFilterRatio();
         }
 
         public boolean isComplexColor() {
@@ -594,7 +616,7 @@ public class SplashscreenContentDrawer {
          * A help class to check the color information from a Drawable.
          */
         private interface ColorTester {
-            float nonTransparentRatio();
+            float passFilterRatio();
 
             boolean isComplexColor();
 
@@ -622,7 +644,7 @@ public class SplashscreenContentDrawer {
             }
 
             @Override
-            public float nonTransparentRatio() {
+            public float passFilterRatio() {
                 final int alpha = mColorDrawable.getAlpha();
                 return (float) (alpha / 255);
             }
@@ -651,15 +673,21 @@ public class SplashscreenContentDrawer {
             private static final int MAX_BITMAP_SIZE = 40;
             private final Palette mPalette;
             private final boolean mFilterTransparent;
-            private static final TransparentFilterQuantizer TRANSPARENT_FILTER_QUANTIZER =
-                    new TransparentFilterQuantizer();
+            private static final AlphaFilterQuantizer ALPHA_FILTER_QUANTIZER =
+                    new AlphaFilterQuantizer();
 
-            ComplexDrawableTester(Drawable drawable, boolean filterTransparent) {
+            /**
+             * @param drawable The test target.
+             * @param filterType Targeting to filter out transparent or translucent pixels,
+             *                   this would be needed if want to check
+             *                   {@link #passFilterRatio()}, also affecting the estimated result
+             *                   of the dominant color.
+             */
+            ComplexDrawableTester(Drawable drawable, @QuantizerFilterType int filterType) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "ComplexDrawableTester");
                 final Rect initialBounds = drawable.copyBounds();
                 int width = drawable.getIntrinsicWidth();
                 int height = drawable.getIntrinsicHeight();
-
                 // Some drawables do not have intrinsic dimensions
                 if (width <= 0 || height <= 0) {
                     width = MAX_BITMAP_SIZE;
@@ -680,9 +708,10 @@ public class SplashscreenContentDrawer {
                 // The Palette API will ignore Alpha, so it cannot handle transparent pixels, but
                 // sometimes we will need this information to know if this Drawable object is
                 // transparent.
-                mFilterTransparent = filterTransparent;
+                mFilterTransparent = filterType != NO_ALPHA_FILTER;
                 if (mFilterTransparent) {
-                    builder = new Palette.Builder(bitmap, TRANSPARENT_FILTER_QUANTIZER)
+                    ALPHA_FILTER_QUANTIZER.setFilter(filterType);
+                    builder = new Palette.Builder(bitmap, ALPHA_FILTER_QUANTIZER)
                             .maximumColorCount(5);
                 } else {
                     builder = new Palette.Builder(bitmap, null)
@@ -694,8 +723,8 @@ public class SplashscreenContentDrawer {
             }
 
             @Override
-            public float nonTransparentRatio() {
-                return mFilterTransparent ? TRANSPARENT_FILTER_QUANTIZER.mNonTransparentRatio : 1;
+            public float passFilterRatio() {
+                return mFilterTransparent ? ALPHA_FILTER_QUANTIZER.mPassFilterRatio : 1;
             }
 
             @Override
@@ -726,17 +755,34 @@ public class SplashscreenContentDrawer {
                 return true;
             }
 
-            private static class TransparentFilterQuantizer implements Quantizer {
+            private static class AlphaFilterQuantizer implements Quantizer {
                 private static final int NON_TRANSPARENT = 0xFF000000;
                 private final Quantizer mInnerQuantizer = new VariationalKMeansQuantizer();
-                private float mNonTransparentRatio;
+                private final IntPredicate mTransparentFilter = i -> (i & NON_TRANSPARENT) != 0;
+                private final IntPredicate mTranslucentFilter = i ->
+                        (i & NON_TRANSPARENT) == NON_TRANSPARENT;
+
+                private IntPredicate mFilter = mTransparentFilter;
+                private float mPassFilterRatio;
+
+                void setFilter(@QuantizerFilterType int filterType) {
+                    switch (filterType) {
+                        case TRANSLUCENT_FILTER:
+                            mFilter = mTranslucentFilter;
+                            break;
+                        case TRANSPARENT_FILTER:
+                        default:
+                            mFilter = mTransparentFilter;
+                            break;
+                    }
+                }
 
                 @Override
                 public void quantize(final int[] pixels, final int maxColors) {
-                    mNonTransparentRatio = 0;
+                    mPassFilterRatio = 0;
                     int realSize = 0;
                     for (int i = pixels.length - 1; i > 0; i--) {
-                        if ((pixels[i] & NON_TRANSPARENT) != 0) {
+                        if (mFilter.test(pixels[i])) {
                             realSize++;
                         }
                     }
@@ -747,11 +793,11 @@ public class SplashscreenContentDrawer {
                         mInnerQuantizer.quantize(pixels, maxColors);
                         return;
                     }
-                    mNonTransparentRatio = (float) realSize / pixels.length;
+                    mPassFilterRatio = (float) realSize / pixels.length;
                     final int[] samplePixels = new int[realSize];
                     int rowIndex = 0;
                     for (int i = pixels.length - 1; i > 0; i--) {
-                        if ((pixels[i] & NON_TRANSPARENT) == NON_TRANSPARENT) {
+                        if (mFilter.test(pixels[i])) {
                             samplePixels[rowIndex] = pixels[i];
                             rowIndex++;
                         }
@@ -810,16 +856,16 @@ public class SplashscreenContentDrawer {
             final int mBgColor;
             final boolean mIsBgComplex;
             final boolean mIsBgGrayscale;
-            final float mFgNonTransparentRatio;
+            final float mFgNonTranslucentRatio;
 
             IconColor(int hash, int fgColor, int bgColor, boolean isBgComplex,
-                    boolean isBgGrayscale, float fgNonTransparentRatio) {
+                    boolean isBgGrayscale, float fgNonTranslucnetRatio) {
                 super(hash);
                 mFgColor = fgColor;
                 mBgColor = bgColor;
                 mIsBgComplex = isBgComplex;
                 mIsBgGrayscale = isBgGrayscale;
-                mFgNonTransparentRatio = fgNonTransparentRatio;
+                mFgNonTranslucentRatio = fgNonTranslucnetRatio;
             }
         }
 
@@ -905,7 +951,7 @@ public class SplashscreenContentDrawer {
             final DrawableColorTester bgTester = bgColorTesterSupplier.get();
             final IconColor iconColor = new IconColor(hash, fgTester.getDominateColor(),
                     bgTester.getDominateColor(), bgTester.isComplexColor(), bgTester.isGrayscale(),
-                    fgTester.nonTransparentRatio());
+                    fgTester.passFilterRatio());
             colors.mIconColors[leastUsedIndex[0]] = iconColor;
             return iconColor;
         }

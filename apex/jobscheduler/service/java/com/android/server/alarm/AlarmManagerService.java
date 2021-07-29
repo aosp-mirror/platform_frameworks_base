@@ -2052,10 +2052,11 @@ public class AlarmManagerService extends SystemService {
                     + " -- package not allowed to start");
             return;
         }
+        final int callerProcState = mActivityManagerInternal.getUidProcessState(callingUid);
         removeLocked(operation, directReceiver, REMOVE_REASON_UNDEFINED);
         incrementAlarmCount(a.uid);
         setImplLocked(a);
-        MetricsHelper.pushAlarmScheduled(a);
+        MetricsHelper.pushAlarmScheduled(a, callerProcState);
     }
 
     /**
@@ -2602,7 +2603,7 @@ public class AlarmManagerService extends SystemService {
             final int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             if (callingUid != uid && !UserHandle.isCore(callingUid)) {
                 throw new SecurityException("Uid " + callingUid
-                        + " cannot query hasScheduleExactAlarm for uid " + uid);
+                        + " cannot query hasScheduleExactAlarm for package " + packageName);
             }
             return (uid > 0) ? hasScheduleExactAlarmInternal(packageName, uid) : false;
         }

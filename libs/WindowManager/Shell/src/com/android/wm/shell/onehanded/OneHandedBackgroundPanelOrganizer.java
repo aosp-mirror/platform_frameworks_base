@@ -16,13 +16,14 @@
 
 package com.android.wm.shell.onehanded;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.animation.LinearInterpolator;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
@@ -30,9 +31,8 @@ import android.window.DisplayAreaOrganizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.view.ContextThemeWrapper;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -46,169 +46,212 @@ import java.util.concurrent.Executor;
  * the screen has entered one handed mode.
  */
 public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
-        implements OneHandedTransitionCallback {
+        implements OneHandedAnimationCallback {
     private static final String TAG = "OneHandedBackgroundPanelOrganizer";
+    private static final int THEME_COLOR_OFFSET = 10;
+    private static final int ALPHA_ANIMATION_DURATION = 200;
 
-    private final Object mLock = new Object();
+    private final Context mContext;
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
-    private final float[] mDefaultColor;
-    private final Executor mMainExecutor;
     private final OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
-            mSurfaceControlTransactionFactory;
+            mTransactionFactory;
+
+    private ValueAnimator mAlphaAnimator;
+
+    private float mTranslationFraction;
+    private float[] mThemeColor;
 
     /**
      * The background to distinguish the boundary of translated windows and empty region when
      * one handed mode triggered.
      */
     private Rect mBkgBounds;
+    private Rect mStableInsets;
+
+    @Nullable
     @VisibleForTesting
-    @GuardedBy("mLock")
-    boolean mIsShowing;
+    SurfaceControl mBackgroundSurface;
     @Nullable
-    @GuardedBy("mLock")
-    private SurfaceControl mBackgroundSurface;
-    @Nullable
-    @GuardedBy("mLock")
     private SurfaceControl mParentLeash;
 
-    private final OneHandedAnimationCallback mOneHandedAnimationCallback =
-            new OneHandedAnimationCallback() {
-                @Override
-                public void onOneHandedAnimationStart(
-                        OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                    mMainExecutor.execute(() -> showBackgroundPanelLayer());
-                }
-            };
-
-    @Override
-    public void onStopFinished(Rect bounds) {
-        mMainExecutor.execute(() -> removeBackgroundPanelLayer());
-    }
-
     public OneHandedBackgroundPanelOrganizer(Context context, DisplayLayout displayLayout,
-            Executor executor) {
+            OneHandedSettingsUtil settingsUtil, Executor executor) {
         super(executor);
-        // Ensure the mBkgBounds is portrait, due to OHM only support on portrait
-        if (displayLayout.height() > displayLayout.width()) {
-            mBkgBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
-        } else {
-            mBkgBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
-        }
-        final int defaultColor = ContextCompat.getColor(context, R.color.GM2_grey_800);
-        mDefaultColor = new float[]{Color.red(defaultColor) / 255.0f,
-                Color.green(defaultColor) / 255.0f, Color.blue(defaultColor) / 255.0f};
-        mMainExecutor = executor;
-        mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
+        mContext = context;
+        mTranslationFraction = settingsUtil.getTranslationFraction(context);
+        mTransactionFactory = SurfaceControl.Transaction::new;
+        updateThemeColors();
     }
 
     @Override
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
             @NonNull SurfaceControl leash) {
-        synchronized (mLock) {
-            if (mParentLeash == null) {
-                mParentLeash = leash;
-            } else {
-                throw new RuntimeException("There should be only one DisplayArea for "
-                        + "the one-handed mode background panel");
-            }
-        }
-    }
-
-    OneHandedAnimationCallback getOneHandedAnimationCallback() {
-        return mOneHandedAnimationCallback;
+        mParentLeash = leash;
     }
 
     @Override
     public List<DisplayAreaAppearedInfo> registerOrganizer(int displayAreaFeature) {
-        synchronized (mLock) {
-            final List<DisplayAreaAppearedInfo> displayAreaInfos;
-            displayAreaInfos = super.registerOrganizer(displayAreaFeature);
-            for (int i = 0; i < displayAreaInfos.size(); i++) {
-                final DisplayAreaAppearedInfo info = displayAreaInfos.get(i);
-                onDisplayAreaAppeared(info.getDisplayAreaInfo(), info.getLeash());
-            }
-            return displayAreaInfos;
+        final List<DisplayAreaAppearedInfo> displayAreaInfos;
+        displayAreaInfos = super.registerOrganizer(displayAreaFeature);
+        for (int i = 0; i < displayAreaInfos.size(); i++) {
+            final DisplayAreaAppearedInfo info = displayAreaInfos.get(i);
+            onDisplayAreaAppeared(info.getDisplayAreaInfo(), info.getLeash());
         }
+        return displayAreaInfos;
     }
 
     @Override
     public void unregisterOrganizer() {
-        synchronized (mLock) {
-            super.unregisterOrganizer();
-            mParentLeash = null;
-        }
+        super.unregisterOrganizer();
+        removeBackgroundPanelLayer();
+        mParentLeash = null;
+    }
+
+    @Override
+    public void onAnimationUpdate(SurfaceControl.Transaction tx, float xPos, float yPos) {
+        final int yTopPos = (mStableInsets.top - mBkgBounds.height()) + Math.round(yPos);
+        tx.setPosition(mBackgroundSurface, 0, yTopPos);
     }
 
     @Nullable
     @VisibleForTesting
-    SurfaceControl getBackgroundSurface() {
-        synchronized (mLock) {
-            if (mParentLeash == null) {
-                return null;
-            }
+    boolean isRegistered() {
+        return mParentLeash != null;
+    }
 
-            if (mBackgroundSurface == null) {
-                mBackgroundSurface = new SurfaceControl.Builder(mSurfaceSession)
-                        .setParent(mParentLeash)
-                        .setBufferSize(mBkgBounds.width(), mBkgBounds.height())
-                        .setColorLayer()
-                        .setFormat(PixelFormat.RGB_888)
-                        .setOpaque(true)
-                        .setName("one-handed-background-panel")
-                        .setCallsite("OneHandedBackgroundPanelOrganizer")
-                        .build();
-            }
-            return mBackgroundSurface;
+    void createBackgroundSurface() {
+        mBackgroundSurface = new SurfaceControl.Builder(mSurfaceSession)
+                .setBufferSize(mBkgBounds.width(), mBkgBounds.height())
+                .setColorLayer()
+                .setFormat(PixelFormat.RGB_888)
+                .setOpaque(true)
+                .setName("one-handed-background-panel")
+                .setCallsite("OneHandedBackgroundPanelOrganizer")
+                .build();
+
+        // TODO(185890335) Avoid Dimming for mid-range luminance wallpapers flash.
+        mAlphaAnimator = ValueAnimator.ofFloat(1.0f, 0.0f);
+        mAlphaAnimator.setInterpolator(new LinearInterpolator());
+        mAlphaAnimator.setDuration(ALPHA_ANIMATION_DURATION);
+        mAlphaAnimator.addUpdateListener(
+                animator -> detachBackgroundFromParent(animator));
+    }
+
+    void detachBackgroundFromParent(ValueAnimator animator) {
+        if (mBackgroundSurface == null || mParentLeash == null) {
+            return;
         }
+        // TODO(185890335) Avoid Dimming for mid-range luminance wallpapers flash.
+        final float currentValue = (float) animator.getAnimatedValue();
+        final SurfaceControl.Transaction tx = mTransactionFactory.getTransaction();
+        if (currentValue == 0.0f) {
+            tx.reparent(mBackgroundSurface, null).apply();
+        } else {
+            tx.setAlpha(mBackgroundSurface, (float) animator.getAnimatedValue()).apply();
+        }
+    }
+
+    /**
+     * Called when onDisplayAdded() or onDisplayRemoved() callback.
+     *
+     * @param displayLayout The latest {@link DisplayLayout} representing current displayId
+     */
+    public void onDisplayChanged(DisplayLayout displayLayout) {
+        mStableInsets = displayLayout.stableInsets();
+        // Ensure the mBkgBounds is portrait, due to OHM only support on portrait
+        if (displayLayout.height() > displayLayout.width()) {
+            mBkgBounds = new Rect(0, 0, displayLayout.width(),
+                    Math.round(displayLayout.height() * mTranslationFraction) + mStableInsets.top);
+        } else {
+            mBkgBounds = new Rect(0, 0, displayLayout.height(),
+                    Math.round(displayLayout.width() * mTranslationFraction) + mStableInsets.top);
+        }
+    }
+
+    @VisibleForTesting
+    void onStart() {
+        if (mBackgroundSurface == null) {
+            createBackgroundSurface();
+        }
+        showBackgroundPanelLayer();
+    }
+
+    /**
+     * Called when transition finished.
+     */
+    public void onStopFinished() {
+        mAlphaAnimator.start();
     }
 
     @VisibleForTesting
     void showBackgroundPanelLayer() {
-        synchronized (mLock) {
-            if (mIsShowing) {
-                return;
-            }
-
-            if (getBackgroundSurface() == null) {
-                Log.w(TAG, "mBackgroundSurface is null !");
-                return;
-            }
-
-            SurfaceControl.Transaction transaction =
-                    mSurfaceControlTransactionFactory.getTransaction();
-            transaction.setLayer(mBackgroundSurface, -1 /* at bottom-most layer */)
-                    .setColor(mBackgroundSurface, mDefaultColor)
-                    .show(mBackgroundSurface)
-                    .apply();
-            transaction.close();
-            mIsShowing = true;
+        if (mParentLeash == null) {
+            return;
         }
+
+        if (mBackgroundSurface == null) {
+            createBackgroundSurface();
+        }
+
+        // TODO(185890335) Avoid Dimming for mid-range luminance wallpapers flash.
+        if (mAlphaAnimator.isRunning()) {
+            mAlphaAnimator.end();
+        }
+
+        mTransactionFactory.getTransaction()
+                .reparent(mBackgroundSurface, mParentLeash)
+                .setAlpha(mBackgroundSurface, 1.0f)
+                .setLayer(mBackgroundSurface, -1 /* at bottom-most layer */)
+                .setColor(mBackgroundSurface, mThemeColor)
+                .show(mBackgroundSurface)
+                .apply();
     }
 
     @VisibleForTesting
     void removeBackgroundPanelLayer() {
-        synchronized (mLock) {
-            if (mBackgroundSurface == null) {
-                return;
-            }
-
-            SurfaceControl.Transaction transaction =
-                    mSurfaceControlTransactionFactory.getTransaction();
-            transaction.remove(mBackgroundSurface).apply();
-            transaction.close();
-            mBackgroundSurface = null;
-            mIsShowing = false;
+        if (mBackgroundSurface == null) {
+            return;
         }
+
+        mTransactionFactory.getTransaction()
+                .remove(mBackgroundSurface)
+                .apply();
+        mBackgroundSurface = null;
+    }
+
+    /**
+     * onConfigurationChanged events for updating tutorial text.
+     */
+    public void onConfigurationChanged() {
+        updateThemeColors();
+        showBackgroundPanelLayer();
+    }
+
+    private void updateThemeColors() {
+        final Context themedContext = new ContextThemeWrapper(mContext,
+                com.android.internal.R.style.Theme_DeviceDefault_DayNight);
+        final int themeColor = themedContext.getColor(
+                R.color.one_handed_tutorial_background_color);
+        mThemeColor = new float[]{
+                adjustColor(Color.red(themeColor)),
+                adjustColor(Color.green(themeColor)),
+                adjustColor(Color.blue(themeColor))};
+    }
+
+    private float adjustColor(int origColor) {
+        return Math.max(origColor - THEME_COLOR_OFFSET, 0) / 255.0f;
     }
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG);
-        pw.print(innerPrefix + "mIsShowing=");
-        pw.println(mIsShowing);
+        pw.print(innerPrefix + "mBackgroundSurface=");
+        pw.println(mBackgroundSurface);
         pw.print(innerPrefix + "mBkgBounds=");
         pw.println(mBkgBounds);
-        pw.print(innerPrefix + "mDefaultColor=");
-        pw.println(mDefaultColor);
+        pw.print(innerPrefix + "mThemeColor=");
+        pw.println(mThemeColor);
+        pw.print(innerPrefix + "mTranslationFraction=");
+        pw.println(mTranslationFraction);
     }
 }

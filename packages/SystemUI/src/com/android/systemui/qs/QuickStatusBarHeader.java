@@ -95,6 +95,9 @@ public class QuickStatusBarHeader extends FrameLayout {
     private List<String> mRssiIgnoredSlots;
     private boolean mIsSingleCarrier;
 
+    private boolean mHasCenterCutout;
+    private boolean mConfigShowBatteryEstimate;
+
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -203,8 +206,18 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyContainer.setLayoutParams(lp);
     }
 
+    private void updateBatteryMode() {
+        if (mConfigShowBatteryEstimate && !mHasCenterCutout) {
+            mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+        } else {
+            mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+        }
+    }
+
     void updateResources() {
         Resources resources = mContext.getResources();
+
+        mConfigShowBatteryEstimate = resources.getBoolean(R.bool.config_showBatteryEstimateQSBH);
 
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
@@ -246,6 +259,7 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
         mHeaderQsPanel.setLayoutParams(qqsLP);
 
+        updateBatteryMode();
         updateHeadersPadding();
         updateAnimators();
     }
@@ -384,14 +398,14 @@ public class QuickStatusBarHeader extends FrameLayout {
                 mClockIconsSeparatorLayoutParams.width = 0;
                 setSeparatorVisibility(false);
                 mShowClockIconsSeparator = false;
-                mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+                mHasCenterCutout = false;
             } else {
                 datePrivacySeparatorLayoutParams.width = topCutout.width();
                 mDatePrivacySeparator.setVisibility(View.VISIBLE);
                 mClockIconsSeparatorLayoutParams.width = topCutout.width();
                 mShowClockIconsSeparator = true;
                 setSeparatorVisibility(mKeyguardExpansionFraction == 0f);
-                mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+                mHasCenterCutout = true;
             }
         }
         mDatePrivacySeparator.setLayoutParams(datePrivacySeparatorLayoutParams);
@@ -399,6 +413,8 @@ public class QuickStatusBarHeader extends FrameLayout {
         mCutOutPaddingLeft = padding.first;
         mCutOutPaddingRight = padding.second;
         mWaterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
+
+        updateBatteryMode();
         updateHeadersPadding();
         return super.onApplyWindowInsets(insets);
     }

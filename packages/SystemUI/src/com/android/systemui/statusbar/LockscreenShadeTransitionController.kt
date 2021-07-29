@@ -65,6 +65,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     configurationController: ConfigurationController,
     falsingManager: FalsingManager
 ) {
+    private var pulseHeight: Float = 0f
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var notificationPanelController: NotificationPanelViewController
@@ -88,6 +89,12 @@ class LockscreenShadeTransitionController @Inject constructor(
     internal var dragDownAnimator: ValueAnimator? = null
 
     /**
+     * The current pulse height animator if any
+     */
+    @VisibleForTesting
+    internal var pulseHeightAnimator: ValueAnimator? = null
+
+    /**
      * Distance that the full shade transition takes in order for scrim to fully transition to
      * the shade (in alpha)
      */
@@ -108,6 +115,12 @@ class LockscreenShadeTransitionController @Inject constructor(
      * A flag to suppress the default animation when unlocking in the locked down shade.
      */
     private var nextHideKeyguardNeedsNoAnimation = false
+
+    /**
+     * The distance until we're showing the notifications when pulsing
+     */
+    val distanceUntilShowingPulsingNotifications
+        get() = scrimTransitionDistance
 
     /**
      * The udfpsKeyguardViewController if it exists.
@@ -286,21 +299,25 @@ class LockscreenShadeTransitionController @Inject constructor(
                     nsslController.setTransitionToFullShadeAmount(field)
                     notificationPanelController.setTransitionToFullShadeAmount(field,
                             false /* animate */, 0 /* delay */)
-                    val scrimProgress = MathUtils.saturate(field / scrimTransitionDistance)
-                    scrimController.setTransitionToFullShadeProgress(scrimProgress)
                     // TODO: appear qs also in split shade
                     val qsAmount = if (useSplitShade) 0f else field
                     qS.setTransitionToFullShadeAmount(qsAmount, false /* animate */)
                     // TODO: appear media also in split shade
                     val mediaAmount = if (useSplitShade) 0f else field
                     mediaHierarchyManager.setTransitionToFullShadeAmount(mediaAmount)
-                    // Fade out all content only visible on the lockscreen
-                    notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
-                    depthController.transitionToFullShadeProgress = scrimProgress
-                    udfpsKeyguardViewController?.setTransitionToFullShadeProgress(scrimProgress)
+                    transitionToShadeAmountCommon(field)
                 }
             }
         }
+
+    private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
+        val scrimProgress = MathUtils.saturate(dragDownAmount / scrimTransitionDistance)
+        scrimController.setTransitionToFullShadeProgress(scrimProgress)
+        // Fade out all content only visible on the lockscreen
+        notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
+        depthController.transitionToFullShadeProgress = scrimProgress
+        udfpsKeyguardViewController?.setTransitionToFullShadeProgress(scrimProgress)
+    }
 
     private fun setDragDownAmountAnimated(
         target: Float,
@@ -453,15 +470,19 @@ class LockscreenShadeTransitionController @Inject constructor(
     /**
      * Notify this handler that the keyguard was just dismissed and that a animation to
      * the full shade should happen.
+     *
+     * @param delay the delay to do the animation with
+     * @param previousState which state were we in when we hid the keyguard?
      */
-    fun onHideKeyguard(delay: Long) {
+    fun onHideKeyguard(delay: Long, previousState: Int) {
         if (animationHandlerOnKeyguardDismiss != null) {
             animationHandlerOnKeyguardDismiss!!.invoke(delay)
             animationHandlerOnKeyguardDismiss = null
         } else {
             if (nextHideKeyguardNeedsNoAnimation) {
                 nextHideKeyguardNeedsNoAnimation = false
-            } else {
+            } else if (previousState != StatusBarState.SHADE_LOCKED) {
+                // No animation necessary if we already were in the shade locked!
                 performDefaultGoToFullShadeAnimation(delay)
             }
         }
@@ -478,6 +499,53 @@ class LockscreenShadeTransitionController @Inject constructor(
     private fun performDefaultGoToFullShadeAnimation(delay: Long) {
         notificationPanelController.animateToFullShade(delay)
         animateAppear(delay)
+    }
+
+    //
+    // PULSE EXPANSION
+    //
+
+    /**
+     * Set the height how tall notifications are pulsing. This is only set whenever we are expanding
+     * from a pulse and determines how much the notifications are expanded.
+     */
+    fun setPulseHeight(height: Float, animate: Boolean = false) {
+        if (animate) {
+            val pulseHeightAnimator = ValueAnimator.ofFloat(pulseHeight, height)
+            pulseHeightAnimator.interpolator = Interpolators.FAST_OUT_SLOW_IN
+            pulseHeightAnimator.duration = SPRING_BACK_ANIMATION_LENGTH_MS
+            pulseHeightAnimator.addUpdateListener { animation: ValueAnimator ->
+                setPulseHeight(animation.animatedValue as Float)
+            }
+            pulseHeightAnimator.start()
+            this.pulseHeightAnimator = pulseHeightAnimator
+        } else {
+            pulseHeight = height
+            val overflow = nsslController.setPulseHeight(height)
+            notificationPanelController.setOverStrechAmount(overflow)
+            val transitionHeight = if (keyguardBypassController.bypassEnabled) height else 0.0f
+            transitionToShadeAmountCommon(transitionHeight)
+        }
+    }
+
+    /**
+     * Finish the pulse animation when the touch interaction finishes
+     * @param cancelled was the interaction cancelled and this is a reset?
+     */
+    fun finishPulseAnimation(cancelled: Boolean) {
+        if (cancelled) {
+            setPulseHeight(0f, animate = true)
+        } else {
+            notificationPanelController.onPulseExpansionFinished()
+            setPulseHeight(0f, animate = false)
+        }
+    }
+
+    /**
+     * Notify this class that a pulse expansion is starting
+     */
+    fun onPulseExpansionStarted() {
+        pulseHeightAnimator?.cancel()
     }
 }
 

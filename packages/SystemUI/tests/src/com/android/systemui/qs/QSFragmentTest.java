@@ -55,6 +55,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
@@ -91,6 +92,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     private MediaHost mQSMediaHost;
     @Mock
     private MediaHost mQQSMediaHost;
+    @Mock
+    private KeyguardBypassController mBypassController;
     @Mock
     private FeatureFlags mFeatureFlags;
     @Mock
@@ -184,8 +187,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 new QSDetailDisplayer(),
                 mQSMediaHost,
                 mQQSMediaHost,
+                mBypassController,
                 mQsComponentFactory,
                 mFeatureFlags,
-                mFalsingManager);
+                mFalsingManager,
+                mock(DumpManager.class));
     }
 }
