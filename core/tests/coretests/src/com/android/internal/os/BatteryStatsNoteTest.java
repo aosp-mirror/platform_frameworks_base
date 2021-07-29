@@ -295,7 +295,6 @@ public class BatteryStatsNoteTest extends TestCase {
     }
 
     @SmallTest
-    @SkipPresubmit("b/180015146")
     public void testAlarmStartAndFinishLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -333,7 +332,6 @@ public class BatteryStatsNoteTest extends TestCase {
     }
 
     @SmallTest
-    @SkipPresubmit("b/180015146")
     public void testAlarmStartAndFinishLocked_workSource() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
