@@ -19,14 +19,21 @@ package com.android.systemui.idle;
 import static com.android.systemui.communal.dagger.CommunalModule.IDLE_VIEW;
 
 import android.annotation.IntDef;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.SystemClock;
+import android.service.dreams.Sandman;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.InputMonitorCompat;
@@ -48,6 +55,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     private static final String INPUT_MONITOR_IDENTIFIER = "IdleHostViewController";
     private static final String TAG = "IdleHostViewController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int TIMEOUT_TO_DOZE_MS = 10000;
 
     @Retention(RetentionPolicy.RUNTIME)
     @IntDef({STATE_IDLE_MODE_ENABLED, STATE_DOZING, STATE_KEYGUARD_SHOWING, STATE_IDLING})
@@ -77,6 +85,8 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     private int mState;
     private boolean mIdleModeActive;
 
+    private final Context mContext;
+
     // Timeout to idle in milliseconds.
     private final int mIdleTimeout;
 
@@ -85,6 +95,10 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
 
     // Delayable executor.
     private final DelayableExecutor mDelayableExecutor;
+
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
+    private final PowerManager mPowerManager;
 
     // Runnable for canceling enabling idle.
     private Runnable mCancelEnableIdling;
@@ -112,6 +126,20 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         setState(STATE_IDLING, true);
     };
 
+    // Delayed callback for enabling doze mode from idle.
+    private Runnable mIdleModeToDozeCallback = new Runnable() {
+        @Override
+        public void run() {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Start dozing from timeout");
+            }
+            mPowerManager.goToSleep(SystemClock.uptimeMillis(),
+                    PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0);
+        }
+    };
+
+    private Runnable mCancelIdleModeToDoze;
+
     private final KeyguardStateController.Callback mKeyguardCallback =
             new KeyguardStateController.Callback() {
                 @Override
@@ -128,10 +156,22 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
                 }
             };
 
+    private final BroadcastReceiver mDreamEndedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_DREAMING_STOPPED.equals(intent.getAction())) {
+                setState(STATE_IDLING, false);
+            }
+        }
+    };
+
     final Provider<View> mIdleViewProvider;
 
     @Inject
     protected IdleHostViewController(
+            Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            PowerManager powerManager,
             IdleHostView view, InputMonitorFactory factory,
             @Main DelayableExecutor delayableExecutor,
             @Main Resources resources,
@@ -141,11 +181,16 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController) {
         super(view);
+        mContext = context;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mPowerManager = powerManager;
         mIdleViewProvider = idleViewProvider;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mLooper = looper;
         mChoreographer = choreographer;
+
+        mState = STATE_KEYGUARD_SHOWING;
 
         final boolean enabled = resources.getBoolean(R.bool.config_enableIdleMode);
         if (enabled) {
@@ -248,19 +293,28 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         }
 
         mIdleModeActive = enable;
-        mDelayableExecutor.execute(() -> {
-            mView.setVisibility(mIdleModeActive ? View.VISIBLE : View.GONE);
 
-            if (mIdleModeActive) {
-                final View idleView = mIdleViewProvider.get();
-                idleView.setLayoutParams(
-                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT));
-                mView.addView(idleView);
-            } else {
-                mView.removeAllViews();
+        if (mIdleModeActive) {
+            mCancelIdleModeToDoze = mDelayableExecutor.executeDelayed(mIdleModeToDozeCallback,
+                    TIMEOUT_TO_DOZE_MS);
+
+            // Track when the dream ends to cancel any timeouts.
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_DREAMING_STOPPED);
+            mBroadcastDispatcher.registerReceiver(mDreamEndedReceiver, filter);
+
+            // Start dream.
+            Sandman.startDreamByUserRequest(mContext);
+        } else {
+            // Stop tracking dream end.
+            mBroadcastDispatcher.unregisterReceiver(mDreamEndedReceiver);
+
+            // Remove timeout.
+            if (mCancelIdleModeToDoze != null) {
+                mCancelIdleModeToDoze.run();
+                mCancelIdleModeToDoze = null;
             }
-        });
+        }
     }
 
     @Override
