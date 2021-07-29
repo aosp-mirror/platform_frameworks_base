@@ -1206,7 +1206,7 @@ public class StatusBar extends SystemUI implements
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
                     mPhoneStatusBarViewController =
-                            new PhoneStatusBarViewController(mStatusBarView);
+                            new PhoneStatusBarViewController(mStatusBarView, mCommandQueue);
                     mPhoneStatusBarViewController.init();
 
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
