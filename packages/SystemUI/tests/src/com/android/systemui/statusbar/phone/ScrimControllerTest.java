@@ -83,7 +83,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private ScrimView mScrimBehind;
     private ScrimView mNotificationsScrim;
     private ScrimView mScrimInFront;
-    private ScrimView mScrimForBubble;
     private ScrimState mScrimState;
     private float mScrimBehindAlpha;
     private GradientColors mScrimInFrontColor;
@@ -167,7 +166,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         endAnimation(mNotificationsScrim);
         endAnimation(mScrimBehind);
         endAnimation(mScrimInFront);
-        endAnimation(mScrimForBubble);
 
         assertEquals("Animators did not finish",
                 mAnimatorListener.getNumStarts(), mAnimatorListener.getNumEnds());
@@ -190,7 +188,6 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         mScrimBehind = spy(new ScrimView(getContext()));
         mScrimInFront = new ScrimView(getContext());
-        mScrimForBubble = new ScrimView(getContext());
         mNotificationsScrim = new ScrimView(getContext());
         mAlwaysOnEnabled = true;
         mLooper = TestableLooper.get(this);
@@ -226,8 +223,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mUnlockedScreenOffAnimationController);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
-        mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront,
-                mScrimForBubble);
+        mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
 
         mScrimController.setHasBackdrop(false);
@@ -257,8 +253,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, false));
+                mScrimBehind, true
+        ));
     }
 
     @Test
@@ -274,8 +270,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
     }
 
@@ -293,8 +288,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
     }
 
@@ -309,8 +303,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
 
         assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
@@ -329,8 +322,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
     }
 
@@ -369,8 +361,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
     }
 
@@ -389,8 +380,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
     }
 
@@ -510,8 +500,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
 
         // ... and when ambient goes dark, front scrim should be semi-transparent
@@ -549,8 +538,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
                 mScrimBehind, false,
-                mNotificationsScrim, false,
-                mScrimForBubble, false
+                mNotificationsScrim, false
         ));
     }
 
@@ -570,8 +558,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
                 mScrimBehind, true,
-                mNotificationsScrim, false,
-                mScrimForBubble, false
+                mNotificationsScrim, false
         ));
     }
 
@@ -627,8 +614,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind, TRANSPARENT));
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, false,
-                mScrimForBubble, false
+                mScrimBehind, false
         ));
     }
 
@@ -645,8 +631,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTinted(Map.of(
                 mNotificationsScrim, false,
                 mScrimInFront, false,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
 
         // Back scrim should be visible after start dragging
@@ -664,8 +649,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, false,
-                mScrimForBubble, true
+                mScrimBehind, false
         ));
 
         // Front scrim should be transparent
@@ -674,9 +658,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Back scrim should be visible
         assertEquals(ScrimController.BUSY_SCRIM_ALPHA,
                 mScrimBehind.getViewAlpha(), 0.0f);
-        // Bubble scrim should be visible
-        assertEquals(ScrimController.BUBBLE_SCRIM_ALPHA,
-                mScrimForBubble.getViewAlpha(), 0.0f);
     }
 
     @Test
@@ -787,8 +768,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Immediately tinted black after the transition starts
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
-                mScrimBehind, true,
-                mScrimForBubble, true
+                mScrimBehind, true
         ));
 
         finishAnimationsImmediately();
@@ -796,14 +776,12 @@ public class ScrimControllerTest extends SysuiTestCase {
         // All scrims should be transparent at the end of fade transition.
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT,
-                mScrimForBubble, TRANSPARENT));
+                mScrimBehind, TRANSPARENT));
 
         // Make sure at the very end of the animation, we're reset to transparent
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, true,
-                mScrimForBubble, false
+                mScrimBehind, true
         ));
     }
 
@@ -821,8 +799,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                                 + mScrimInFront.getViewAlpha(), mScrimInFront.getViewAlpha() > 0);
                         assertScrimTinted(Map.of(
                                 mScrimInFront, true,
-                                mScrimBehind, true,
-                                mScrimForBubble, true
+                                mScrimBehind, true
                         ));
                         Assert.assertSame("Scrim should be visible during transition.",
                                 mScrimVisibility, OPAQUE);
@@ -1075,8 +1052,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront.getDefaultFocusHighlightEnabled());
         Assert.assertFalse("Scrim shouldn't have focus highlight",
                 mScrimBehind.getDefaultFocusHighlightEnabled());
-        Assert.assertFalse("Scrim shouldn't have focus highlight",
-                mScrimForBubble.getDefaultFocusHighlightEnabled());
     }
 
     @Test
@@ -1239,21 +1214,16 @@ public class ScrimControllerTest extends SysuiTestCase {
             return "behind";
         } else if (scrim == mNotificationsScrim) {
             return "notifications";
-        } else if (scrim == mScrimForBubble) {
-            return "bubble";
         }
         return "unknown_scrim";
     }
 
     /**
-     * If {@link #mScrimForBubble} or {@link #mNotificationsScrim} is not passed in the map
+     * If {@link #mNotificationsScrim} is not passed in the map
      * we assume it must be transparent
      */
     private void assertScrimAlpha(Map<ScrimView, Integer> scrimToAlpha) {
         // Check single scrim visibility.
-        if (!scrimToAlpha.containsKey(mScrimForBubble)) {
-            assertScrimAlpha(mScrimForBubble, TRANSPARENT);
-        }
         if (!scrimToAlpha.containsKey(mNotificationsScrim)) {
             assertScrimAlpha(mNotificationsScrim, TRANSPARENT);
         }
