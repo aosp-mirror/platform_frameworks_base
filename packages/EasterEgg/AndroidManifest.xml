@@ -134,6 +134,7 @@
         <receiver
             android:name=".widget.PaintChipsWidget"
             android:label="@string/s_egg_name"
+            android:exported="true"
             android:enabled="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
