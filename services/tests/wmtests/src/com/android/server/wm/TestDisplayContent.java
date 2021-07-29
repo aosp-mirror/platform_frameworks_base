@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -153,6 +154,7 @@ class TestDisplayContent extends DisplayContent {
             if (mSystemDecorations) {
                 doReturn(true).when(newDisplay).supportsSystemDecorations();
                 doReturn(true).when(displayPolicy).hasNavigationBar();
+                doReturn(20).when(displayPolicy).getNavigationBarHeight(anyInt(), anyInt());
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
