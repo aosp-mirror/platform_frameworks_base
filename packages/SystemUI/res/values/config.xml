@@ -684,4 +684,11 @@
 
     <!-- Component name of communal source service -->
     <string name="config_communalSourceComponent" translatable="false">@null</string>
+
+    <!-- Whether idle mode should be enabled. When enabled, the lock screen will timeout to an idle
+         screen on inactivity. -->
+    <bool name="config_enableIdleMode">false</bool>
+
+    <!-- Timeout to idle mode duration in milliseconds. -->
+    <integer name="config_idleModeTimeout">10000</integer>
 </resources>
