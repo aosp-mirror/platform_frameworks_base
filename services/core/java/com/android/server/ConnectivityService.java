@@ -73,6 +73,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.CaptivePortal;
@@ -4607,6 +4608,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private int getAppUid(final String app, final int userId) {
+        final PackageManager pm = mContext.getPackageManager();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return pm.getPackageUidAsUser(app, userId);
+        } catch (NameNotFoundException e) {
+            return -1;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void verifyCallingUidAndPackage(String packageName, int callingUid) {
+        final int userId = UserHandle.getUserId(callingUid);
+        if (getAppUid(packageName, userId) != callingUid) {
+            throw new SecurityException(packageName + " does not belong to uid " + callingUid);
+        }
+    }
+
     /**
      * Starts the VPN based on the stored profile for the given package
      *
@@ -4618,7 +4638,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @Override
     public void startVpnProfile(@NonNull String packageName) {
-        final int user = UserHandle.getUserId(Binder.getCallingUid());
+        final int callingUid = Binder.getCallingUid();
+        verifyCallingUidAndPackage(packageName, callingUid);
+        final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             throwIfLockdownEnabled();
             mVpns.get(user).startVpnProfile(packageName, mKeyStore);
@@ -4635,7 +4657,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @Override
     public void stopVpnProfile(@NonNull String packageName) {
-        final int user = UserHandle.getUserId(Binder.getCallingUid());
+        final int callingUid = Binder.getCallingUid();
+        verifyCallingUidAndPackage(packageName, callingUid);
+        final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             mVpns.get(user).stopVpnProfile(packageName);
         }
