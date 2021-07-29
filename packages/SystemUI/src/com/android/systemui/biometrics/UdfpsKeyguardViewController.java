@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.annotation.NonNull;
+import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricSourceType;
 import android.util.MathUtils;
 import android.view.MotionEvent;
@@ -36,6 +37,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
@@ -58,6 +60,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final DelayableExecutor mExecutor;
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @NonNull private final LockscreenShadeTransitionController mLockScreenShadeTransitionController;
+    @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final UdfpsController mUdfpsController;
 
     @Nullable private Runnable mCancelDelayedHintRunnable;
@@ -88,6 +91,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull LockscreenShadeTransitionController transitionController,
+            @NonNull ConfigurationController configurationController,
             @NonNull UdfpsController udfpsController) {
         super(view, statusBarStateController, statusBarOptional, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
@@ -95,6 +99,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mExecutor = mainDelayableExecutor;
         mKeyguardViewMediator = keyguardViewMediator;
         mLockScreenShadeTransitionController = transitionController;
+        mConfigurationController = configurationController;
         mUdfpsController = udfpsController;
     }
 
@@ -121,6 +126,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
+        mConfigurationController.addCallback(mConfigurationListener);
         updateAlpha();
         updatePauseAuth();
 
@@ -137,6 +143,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarStateController.removeCallback(mStateListener);
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
+        mConfigurationController.removeCallback(mConfigurationListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
@@ -159,7 +166,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mAlpha=" + mView.getAlpha());
         pw.println("mUdfpsRequested=" + mUdfpsRequested);
         pw.println("mView.mUdfpsRequested=" + mView.mUdfpsRequested);
-        pw.println("mView.mUdfpsRequestedColor=" + mView.mUdfpsRequestedColor);
     }
 
     /**
@@ -174,12 +180,17 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mShowingUdfpsBouncer = show;
         updatePauseAuth();
         if (mShowingUdfpsBouncer) {
-            mView.animateUdfpsBouncer(() ->
-                    mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true));
+            if (mStatusBarState == StatusBarState.SHADE_LOCKED) {
+                mView.animateInUdfpsBouncer(null);
+            }
+
+            if (mKeyguardViewManager.isOccluded()) {
+                mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
+            }
+
             mView.announceForAccessibility(mView.getContext().getString(
                     R.string.accessibility_fingerprint_bouncer));
         } else {
-            mView.animateAwayUdfpsBouncer(null);
             mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         }
         return true;
@@ -367,7 +378,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public boolean isAnimating() {
-                    return mView.isAnimating();
+                    return false;
                 }
 
                 @Override
@@ -406,6 +417,29 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 @Override
                 public void dump(PrintWriter pw) {
                     pw.println(getTag());
+                }
+            };
+
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onUiModeChanged() {
+                    mView.updateColor();
+                }
+
+                @Override
+                public void onThemeChanged() {
+                    mView.updateColor();
+                }
+
+                @Override
+                public void onOverlayChanged() {
+                    mView.updateColor();
+                }
+
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    mView.updateColor();
                 }
             };
 }
