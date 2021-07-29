@@ -592,6 +592,8 @@ public class SettingsBackupTest {
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                    Settings.Global.Wearable.BATTERY_SAVER_MODE,
+                    Settings.Global.Wearable.COMBINED_LOCATION_ENABLED,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,
                     Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
                     Settings.Global.Wearable.HOTWORD_DETECTION_ENABLED,
@@ -599,7 +601,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.DEFAULT_VIBRATION,
                     Settings.Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
                     Settings.Global.Wearable.RETAIL_MODE,
-                    Settings.Global.Wearable.PLAY_STORE_AVAILABILITY,
+                    Settings.Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
                     Settings.Global.Wearable.BUG_REPORT,
                     Settings.Global.Wearable.SMART_ILLUMINATE_ENABLED,
                     Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
@@ -656,7 +658,9 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.SETUP_LOCALE,
                     Settings.Global.Wearable.OEM_SETUP_VERSION,
                     Settings.Global.Wearable.MASTER_GESTURES_ENABLED,
-                    Settings.Global.Wearable.UNGAZE_ENABLED);
+                    Settings.Global.Wearable.UNGAZE_ENABLED,
+                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
+                    Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

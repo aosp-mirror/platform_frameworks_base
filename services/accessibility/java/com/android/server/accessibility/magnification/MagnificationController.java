@@ -189,10 +189,10 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             if (animationCallback.mCurrentMode == targetMode) {
                 animationCallback.restoreToCurrentMagnificationMode();
                 return;
+            } else {
+                Slog.w(TAG, "discard duplicate request");
+                return;
             }
-            Slog.w(TAG, "request during transition, abandon current:"
-                    + animationCallback.mTargetMode);
-            animationCallback.setExpiredAndRemoveFromListLocked();
         }
 
         if (magnificationCenter == null) {
@@ -464,7 +464,9 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         private final TransitionCallBack mTransitionCallBack;
         private boolean mExpired = false;
         private final int mDisplayId;
+        // The mode the in-progress animation is going to.
         private final int mTargetMode;
+        // The mode the in-progress animation is going from.
         private final int mCurrentMode;
         private final float mCurrentScale;
         private final PointF mCurrentCenter = new PointF();

@@ -3029,7 +3029,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void onKeyguardOccludedChangedLw(boolean occluded) {
-        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
+        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()
+                && !WindowManagerService.sEnableShellTransitions) {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {
@@ -3853,9 +3854,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mCameraGestureTriggered = false;
         final MutableBoolean outLaunched = new MutableBoolean(false);
-        mGestureLauncherService.interceptPowerKeyDown(event, interactive, outLaunched);
+        final boolean intercept =
+                mGestureLauncherService.interceptPowerKeyDown(event, interactive, outLaunched);
         if (!outLaunched.value) {
-            return false;
+            // If GestureLauncherService intercepted the power key, but didn't launch camera app,
+            // we should still return the intercept result. This prevents the single key gesture
+            // detector from processing the power key later on.
+            return intercept;
         }
         mCameraGestureTriggered = true;
         if (mRequestedOrSleepingDefaultDisplay) {
@@ -4255,6 +4260,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     pmWakeReason)) + ")");
         }
 
+        mActivityTaskManagerInternal.notifyWakingUp();
         mDefaultDisplayPolicy.setAwake(true);
 
         // Since goToSleep performs these functions synchronously, we must

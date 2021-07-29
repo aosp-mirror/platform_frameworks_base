@@ -129,16 +129,16 @@ public class ScanTests {
 
     @Test
     public void newInstallSimpleAllNominal() throws Exception {
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .addScanFlag(PackageManagerService.SCAN_NEW_INSTALL)
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
                         .build();
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, false /*isInstant*/);
-        assertThat(scanResult.existingSettingCopied, is(false));
+        assertThat(scanResult.mExistingSettingCopied, is(false));
         assertPathsNotDerived(scanResult);
     }
 
@@ -147,38 +147,38 @@ public class ScanTests {
         final int[] userIds = {0, 10, 11};
         when(mMockUserManager.getUserIds()).thenReturn(userIds);
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setRealPkgName(null)
                         .addScanFlag(PackageManagerService.SCAN_NEW_INSTALL)
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
                         .build();
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
         for (int uid : userIds) {
-            assertThat(scanResult.pkgSetting.readUserState(uid).installed, is(true));
+            assertThat(scanResult.mPkgSetting.readUserState(uid).installed, is(true));
         }
     }
 
     @Test
     public void installRealPackageName() throws Exception {
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setRealPkgName("com.package.real")
                         .build();
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.pkgSetting.realName, is("com.package.real"));
+        assertThat(scanResult.mPkgSetting.realName, is("com.package.real"));
 
-        final PackageManagerService.ScanRequest scanRequestNoRealPkg =
+        final ScanRequest scanRequestNoRealPkg =
                 createBasicScanRequestBuilder(
                         createBasicPackage(DUMMY_PACKAGE_NAME)
                                 .setRealPackage("com.package.real"))
                         .build();
 
-        final PackageManagerService.ScanResult scanResultNoReal = executeScan(scanRequestNoRealPkg);
-        assertThat(scanResultNoReal.pkgSetting.realName, nullValue());
+        final ScanResult scanResultNoReal = executeScan(scanRequestNoRealPkg);
+        assertThat(scanResultNoReal.mPkgSetting.realName, nullValue());
     }
 
     @Test
@@ -189,25 +189,25 @@ public class ScanTests {
                 .setPrimaryCpuAbiString("primaryCpuAbi")
                 .setSecondaryCpuAbiString("secondaryCpuAbi")
                 .build();
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
                         .setPkgSetting(pkgSetting)
                         .build();
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.existingSettingCopied, is(true));
+        assertThat(scanResult.mExistingSettingCopied, is(true));
 
         // ensure we don't overwrite the existing pkgSetting, in case something post-scan fails
-        assertNotSame(pkgSetting, scanResult.pkgSetting);
+        assertNotSame(pkgSetting, scanResult.mPkgSetting);
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, false /*isInstant*/);
 
-        assertThat(scanResult.pkgSetting.primaryCpuAbiString, is("primaryCpuAbi"));
-        assertThat(scanResult.pkgSetting.secondaryCpuAbiString, is("secondaryCpuAbi"));
-        assertThat(scanResult.pkgSetting.cpuAbiOverrideString, nullValue());
+        assertThat(scanResult.mPkgSetting.primaryCpuAbiString, is("primaryCpuAbi"));
+        assertThat(scanResult.mPkgSetting.secondaryCpuAbiString, is("secondaryCpuAbi"));
+        assertThat(scanResult.mPkgSetting.cpuAbiOverrideString, nullValue());
 
         assertPathsNotDerived(scanResult);
     }
@@ -221,13 +221,13 @@ public class ScanTests {
                         .setInstantAppUserState(0, true)
                         .build();
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .build();
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, true /*isInstant*/);
     }
@@ -244,24 +244,24 @@ public class ScanTests {
                 .setBaseApkPath("/some/path.apk")
                 .setSplitCodePaths(new String[] {"/some/other/path.apk"});
 
-        final PackageManagerService.ScanRequest scanRequest = new ScanRequestBuilder(pkg)
+        final ScanRequest scanRequest = new ScanRequestBuilder(pkg)
                 .setUser(UserHandle.of(0)).build();
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.staticSharedLibraryInfo.getPackageName(), is("static.lib.pkg.123"));
-        assertThat(scanResult.staticSharedLibraryInfo.getName(), is("static.lib"));
-        assertThat(scanResult.staticSharedLibraryInfo.getLongVersion(), is(123L));
-        assertThat(scanResult.staticSharedLibraryInfo.getType(), is(TYPE_STATIC));
-        assertThat(scanResult.staticSharedLibraryInfo.getDeclaringPackage().getPackageName(),
+        assertThat(scanResult.mStaticSharedLibraryInfo.getPackageName(), is("static.lib.pkg.123"));
+        assertThat(scanResult.mStaticSharedLibraryInfo.getName(), is("static.lib"));
+        assertThat(scanResult.mStaticSharedLibraryInfo.getLongVersion(), is(123L));
+        assertThat(scanResult.mStaticSharedLibraryInfo.getType(), is(TYPE_STATIC));
+        assertThat(scanResult.mStaticSharedLibraryInfo.getDeclaringPackage().getPackageName(),
                 is("static.lib.pkg"));
-        assertThat(scanResult.staticSharedLibraryInfo.getDeclaringPackage().getLongVersionCode(),
+        assertThat(scanResult.mStaticSharedLibraryInfo.getDeclaringPackage().getLongVersionCode(),
                 is(pkg.getLongVersionCode()));
-        assertThat(scanResult.staticSharedLibraryInfo.getAllCodePaths(),
+        assertThat(scanResult.mStaticSharedLibraryInfo.getAllCodePaths(),
                 hasItems("/some/path.apk", "/some/other/path.apk"));
-        assertThat(scanResult.staticSharedLibraryInfo.getDependencies(), nullValue());
-        assertThat(scanResult.staticSharedLibraryInfo.getDependentPackages(), empty());
+        assertThat(scanResult.mStaticSharedLibraryInfo.getDependencies(), nullValue());
+        assertThat(scanResult.mStaticSharedLibraryInfo.getDependentPackages(), empty());
     }
 
     @Test
@@ -276,13 +276,13 @@ public class ScanTests {
                 .setBaseApkPath("/some/path.apk")
                 .setSplitCodePaths(new String[] {"/some/other/path.apk"});
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 new ScanRequestBuilder(pkg).setUser(UserHandle.of(0)).build();
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
-        final SharedLibraryInfo dynamicLib0 = scanResult.dynamicSharedLibraryInfos.get(0);
+        final SharedLibraryInfo dynamicLib0 = scanResult.mDynamicSharedLibraryInfos.get(0);
         assertThat(dynamicLib0.getPackageName(), is("dynamic.lib.pkg"));
         assertThat(dynamicLib0.getName(), is("liba"));
         assertThat(dynamicLib0.getLongVersion(), is((long) VERSION_UNDEFINED));
@@ -295,7 +295,7 @@ public class ScanTests {
         assertThat(dynamicLib0.getDependencies(), nullValue());
         assertThat(dynamicLib0.getDependentPackages(), empty());
 
-        final SharedLibraryInfo dynamicLib1 = scanResult.dynamicSharedLibraryInfos.get(1);
+        final SharedLibraryInfo dynamicLib1 = scanResult.mDynamicSharedLibraryInfos.get(1);
         assertThat(dynamicLib1.getPackageName(), is("dynamic.lib.pkg"));
         assertThat(dynamicLib1.getName(), is("libb"));
         assertThat(dynamicLib1.getLongVersion(), is((long) VERSION_UNDEFINED));
@@ -321,10 +321,10 @@ public class ScanTests {
                 .hideAsParsed());
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(
+        final ScanResult scanResult = executeScan(
                 new ScanRequestBuilder(basicPackage).setPkgSetting(pkgSetting).build());
 
-        assertThat(scanResult.pkgSetting.volumeUuid, is(UUID_TWO.toString()));
+        assertThat(scanResult.mPkgSetting.volumeUuid, is(UUID_TWO.toString()));
     }
 
     @Test
@@ -337,7 +337,7 @@ public class ScanTests {
                         .hideAsParsed());
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(new ScanRequestBuilder(
+        final ScanResult scanResult = executeScan(new ScanRequestBuilder(
                 basicPackage)
                 .setPkgSetting(pkgSetting)
                 .addScanFlag(SCAN_FIRST_BOOT_OR_UPGRADE)
@@ -356,12 +356,12 @@ public class ScanTests {
                         .hideAsParsed();
 
 
-        final PackageManagerService.ScanResult result =
+        final ScanResult result =
                 executeScan(new ScanRequestBuilder(basicPackage)
                         .setOriginalPkgSetting(originalPkgSetting)
                         .build());
 
-        assertThat(result.request.parsedPackage.getPackageName(), is("original.package"));
+        assertThat(result.mRequest.mParsedPackage.getPackageName(), is("original.package"));
     }
 
     @Test
@@ -373,14 +373,14 @@ public class ScanTests {
                         .setInstantAppUserState(0, true)
                         .build();
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .addScanFlag(SCAN_AS_FULL_APP)
                         .build();
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, false /*isInstant*/);
     }
@@ -394,14 +394,14 @@ public class ScanTests {
                         .setInstantAppUserState(0, false)
                         .build();
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .addScanFlag(SCAN_AS_INSTANT_APP)
                         .build();
 
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, true /*isInstant*/);
     }
@@ -413,17 +413,17 @@ public class ScanTests {
                         .setPkgFlags(ApplicationInfo.FLAG_SYSTEM)
                         .build();
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .setDisabledPkgSetting(existingPkgSetting)
                         .addScanFlag(SCAN_NEW_INSTALL)
                         .build();
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
-        int appInfoFlags = PackageInfoUtils.appInfoFlags(scanResult.request.parsedPackage,
-                scanResult.pkgSetting);
+        int appInfoFlags = PackageInfoUtils.appInfoFlags(scanResult.mRequest.mParsedPackage,
+                scanResult.mPkgSetting);
         assertThat(appInfoFlags, hasFlag(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP));
     }
 
@@ -432,14 +432,14 @@ public class ScanTests {
         final ParsingPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
                 .addUsesPermission(new ParsedUsesPermission(Manifest.permission.FACTORY_TEST, 0));
 
-        final PackageManagerService.ScanResult scanResult = PackageManagerService.scanPackageOnlyLI(
+        final ScanResult scanResult = PackageManagerService.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
                 mMockInjector,
                 true /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
 
-        int appInfoFlags = PackageInfoUtils.appInfoFlags(scanResult.request.parsedPackage,
-                scanResult.request.pkgSetting);
+        int appInfoFlags = PackageInfoUtils.appInfoFlags(scanResult.mRequest.mParsedPackage,
+                scanResult.mRequest.mPkgSetting);
         assertThat(appInfoFlags, hasFlag(ApplicationInfo.FLAG_FACTORY_TEST));
     }
 
@@ -449,13 +449,13 @@ public class ScanTests {
                 .hideAsParsed())
                 .setSystem(true);
 
-        final PackageManagerService.ScanRequest scanRequest =
+        final ScanRequest scanRequest =
                 createBasicScanRequestBuilder(pkg)
                         .build();
 
-        final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
+        final ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.pkgSetting.installSource.isOrphaned, is(true));
+        assertThat(scanResult.mPkgSetting.installSource.isOrphaned, is(true));
     }
 
     private static Matcher<Integer> hasFlag(final int flag) {
@@ -478,9 +478,9 @@ public class ScanTests {
         };
     }
 
-    private PackageManagerService.ScanResult executeScan(
-            PackageManagerService.ScanRequest scanRequest) throws PackageManagerException {
-        PackageManagerService.ScanResult result = PackageManagerService.scanPackageOnlyLI(
+    private ScanResult executeScan(
+            ScanRequest scanRequest) throws PackageManagerException {
+        ScanResult result = PackageManagerService.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,
@@ -488,7 +488,7 @@ public class ScanTests {
 
         // Need to call hideAsFinal to cache derived fields. This is normally done in PMS, but not
         // in this cut down flow used for the test.
-        ((ParsedPackage) result.pkgSetting.pkg).hideAsFinal();
+        ((ParsedPackage) result.mPkgSetting.pkg).hideAsFinal();
         return result;
     }
 
@@ -529,10 +529,10 @@ public class ScanTests {
     }
 
     private static void assertBasicPackageScanResult(
-            PackageManagerService.ScanResult scanResult, String packageName, boolean isInstant) {
-        assertThat(scanResult.success, is(true));
+            ScanResult scanResult, String packageName, boolean isInstant) {
+        assertThat(scanResult.mSuccess, is(true));
 
-        final PackageSetting pkgSetting = scanResult.pkgSetting;
+        final PackageSetting pkgSetting = scanResult.mPkgSetting;
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
@@ -540,35 +540,35 @@ public class ScanTests {
         assertBasicApplicationInfo(scanResult, applicationInfo);
     }
 
-    private static void assertBasicPackageSetting(PackageManagerService.ScanResult scanResult,
+    private static void assertBasicPackageSetting(ScanResult scanResult,
             String packageName, boolean isInstant, PackageSetting pkgSetting) {
         assertThat(pkgSetting.pkg.getPackageName(), is(packageName));
         assertThat(pkgSetting.getInstantApp(0), is(isInstant));
         assertThat(pkgSetting.usesStaticLibraries,
                 arrayContaining("some.static.library", "some.other.static.library"));
         assertThat(pkgSetting.usesStaticLibrariesVersions, is(new long[]{234L, 456L}));
-        assertThat(pkgSetting.pkg, is(scanResult.request.parsedPackage));
+        assertThat(pkgSetting.pkg, is(scanResult.mRequest.mParsedPackage));
         assertThat(pkgSetting.getPath(), is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.versionCode, is(PackageInfo.composeLongVersionCode(1, 2345)));
     }
 
-    private static void assertBasicApplicationInfo(PackageManagerService.ScanResult scanResult,
+    private static void assertBasicApplicationInfo(ScanResult scanResult,
             ApplicationInfo applicationInfo) {
         assertThat(applicationInfo.processName,
-                is(scanResult.request.parsedPackage.getPackageName()));
+                is(scanResult.mRequest.mParsedPackage.getPackageName()));
 
         final int uid = applicationInfo.uid;
         assertThat(UserHandle.getUserId(uid), is(UserHandle.USER_SYSTEM));
 
         final String calculatedCredentialId = Environment.getDataUserCePackageDirectory(
                 applicationInfo.volumeUuid, UserHandle.USER_SYSTEM,
-                scanResult.request.parsedPackage.getPackageName()).getAbsolutePath();
+                scanResult.mRequest.mParsedPackage.getPackageName()).getAbsolutePath();
         assertThat(applicationInfo.credentialProtectedDataDir, is(calculatedCredentialId));
         assertThat(applicationInfo.dataDir, is(applicationInfo.credentialProtectedDataDir));
     }
 
-    private static void assertAbiAndPathssDerived(PackageManagerService.ScanResult scanResult) {
-        PackageSetting pkgSetting = scanResult.pkgSetting;
+    private static void assertAbiAndPathssDerived(ScanResult scanResult) {
+        PackageSetting pkgSetting = scanResult.mPkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
                 pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0, pkgSetting);
         assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
@@ -581,8 +581,8 @@ public class ScanTests {
         assertThat(applicationInfo.secondaryNativeLibraryDir, is("derivedNativeDir2"));
     }
 
-    private static void assertPathsNotDerived(PackageManagerService.ScanResult scanResult) {
-        PackageSetting pkgSetting = scanResult.pkgSetting;
+    private static void assertPathsNotDerived(ScanResult scanResult) {
+        PackageSetting pkgSetting = scanResult.mPkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
                 pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0, pkgSetting);
         assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));

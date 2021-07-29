@@ -33,6 +33,8 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.TransitionFlags;
+import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
@@ -59,7 +61,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.window.IRemoteTransition;
 import android.window.TransitionInfo;
@@ -109,9 +110,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionState {}
 
-    final @WindowManager.TransitionType int mType;
+    final @TransitionType int mType;
     private int mSyncId;
-    private @WindowManager.TransitionFlags int mFlags;
+    private @TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
     private IRemoteTransition mRemoteTransition = null;
@@ -146,7 +147,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mNavBarDisplayId = INVALID_DISPLAY;
 
-    Transition(@WindowManager.TransitionType int type, @WindowManager.TransitionFlags int flags,
+    Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
         mFlags = flags;
@@ -617,7 +618,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     private void handleNonAppWindowsInTransition(int displayId,
-            @WindowManager.TransitionType int transit, int flags) {
+            @TransitionType int transit, int flags) {
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
         if (dc == null) {
@@ -968,7 +969,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     @VisibleForTesting
     @NonNull
-    static TransitionInfo calculateTransitionInfo(int type, int flags,
+    static TransitionInfo calculateTransitionInfo(@TransitionType int type, int flags,
             ArraySet<WindowContainer> targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
         final TransitionInfo out = new TransitionInfo(type, flags);
 

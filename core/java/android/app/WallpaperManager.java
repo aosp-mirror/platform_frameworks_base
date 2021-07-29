@@ -66,6 +66,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.service.wallpaper.WallpaperService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2316,22 +2317,24 @@ public class WallpaperManager {
          * A {@link android.app.WallpaperColors} object containing a simplified
          * color histogram will be given.
          *
-         * @param colors Wallpaper color info
+         * @param colors Wallpaper color info, {@code null} when not available.
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
+         * @see WallpaperService.Engine#onComputeColors()
          */
-        void onColorsChanged(WallpaperColors colors, int which);
+        void onColorsChanged(@Nullable WallpaperColors colors, int which);
 
         /**
          * Called when colors change.
          * A {@link android.app.WallpaperColors} object containing a simplified
          * color histogram will be given.
          *
-         * @param colors Wallpaper color info
+         * @param colors Wallpaper color info, {@code null} when not available.
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
          * @param userId Owner of the wallpaper
+         * @see WallpaperService.Engine#onComputeColors()
          * @hide
          */
-        default void onColorsChanged(WallpaperColors colors, int which, int userId) {
+        default void onColorsChanged(@Nullable WallpaperColors colors, int which, int userId) {
             onColorsChanged(colors, which);
         }
     }

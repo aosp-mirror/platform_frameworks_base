@@ -243,7 +243,7 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
-    <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Известувањето е отфрлено."</string>
+    <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Известувањето е отфрлено"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панел за известување"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брзи поставки."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучи екран."</string>
@@ -452,6 +452,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Допрете повторно за да се отвори"</string>
     <string name="tap_again" msgid="1315420114387908655">"Допрете повторно"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Притиснете за да отворите"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Повлечете нагоре за да се обидете повторно"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отклучете за да користите NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Уредов е во сопственост на организацијата"</string>

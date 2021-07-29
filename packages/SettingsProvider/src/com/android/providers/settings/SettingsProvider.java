@@ -5215,8 +5215,8 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.RETAIL_MODE, Global.Wearable.RETAIL_MODE_CONSUMER);
                         initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.PLAY_STORE_AVAILABILITY,
-                                Global.Wearable.PLAY_STORE_AVAILABILITY_UNKNOWN);
+                                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
+                                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN);
                         initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.BUG_REPORT,
                                 "user".equals(Build.TYPE) // is user build?
@@ -5380,6 +5380,20 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Settings.Global.Wearable.COMPANION_OS_VERSION,
                                 Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);
+                        final boolean defaultBurnInProtectionEnabled =
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(
+                                                com.android
+                                                        .internal
+                                                        .R
+                                                        .bool
+                                                        .config_enableBurnInProtection);
+                        final boolean forceBurnInProtection =
+                                SystemProperties.getBoolean("persist.debug.force_burn_in", false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
+                                defaultBurnInProtectionEnabled || forceBurnInProtection);
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;

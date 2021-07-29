@@ -41,4 +41,9 @@ public class ActivityOptions {
     public static final ComponentName SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".SimpleActivity");
+
+    public static final String NON_RESIZEABLE_ACTIVITY_LAUNCHER_NAME = "NonResizeableApp";
+    public static final ComponentName NON_RESIZEABLE_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".NonResizeableActivity");
 }

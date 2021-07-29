@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.SimpleClock;
@@ -286,7 +285,6 @@ public class AccessPointControllerImpl
         private final Context mContext;
         private final @Nullable WifiManager mWifiManager;
         private final ConnectivityManager mConnectivityManager;
-        private final NetworkScoreManager mNetworkScoreManager;
         private final Handler mMainHandler;
         private final Handler mWorkerHandler;
         private final Clock mClock = new SimpleClock(ZoneOffset.UTC) {
@@ -301,14 +299,12 @@ public class AccessPointControllerImpl
                 Context context,
                 @Nullable WifiManager wifiManager,
                 ConnectivityManager connectivityManager,
-                NetworkScoreManager networkScoreManager,
                 @Main Handler mainHandler,
                 @Background Handler workerHandler
         ) {
             mContext = context;
             mWifiManager = wifiManager;
             mConnectivityManager = connectivityManager;
-            mNetworkScoreManager = networkScoreManager;
             mMainHandler = mainHandler;
             mWorkerHandler = workerHandler;
         }
@@ -332,7 +328,6 @@ public class AccessPointControllerImpl
                     mContext,
                     mWifiManager,
                     mConnectivityManager,
-                    mNetworkScoreManager,
                     mMainHandler,
                     mWorkerHandler,
                     mClock,

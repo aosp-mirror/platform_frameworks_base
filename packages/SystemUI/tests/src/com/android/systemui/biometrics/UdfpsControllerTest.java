@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -150,6 +151,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsView mUdfpsView;
     @Mock
+    private UdfpsEnrollView mEnrollView;
+    @Mock
+    private UdfpsKeyguardView mKeyguardView;
+    @Mock
     private UdfpsKeyguardViewController mUdfpsKeyguardViewController;
     @Mock
     private TypedArray mBrightnessValues;
@@ -171,7 +176,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
         setUpResources();
         mExecution = new FakeExecution();
 
-        when(mLayoutInflater.inflate(R.layout.udfps_view, null, false)).thenReturn(mUdfpsView);
+        when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
+                .thenReturn(mUdfpsView);
+        when(mLayoutInflater.inflate(R.layout.udfps_enroll_view, null))
+                .thenReturn(mEnrollView); // for showOverlay REASON_ENROLL_ENROLLING
+        when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
+                .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
+        when(mEnrollView.getContext()).thenReturn(mContext);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
@@ -261,6 +272,51 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN notify keyguard authenticate to dismiss the keyguard
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
+    }
+
+    @Test
+    public void onActionMove_onKeyguard_setDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsKeyguardViewController
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN device entry intent is set to true
+        verify(mKeyguardBypassController).setUserHasDeviceEntryIntent(true);
+    }
+
+    @Test
+    public void onActionMove_onEnrollment_neverSetDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsEnrollViewController
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.getAnimationViewController()).thenReturn(
+                mock(UdfpsEnrollViewController.class));
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN device entry intent is never set
+        verify(mKeyguardBypassController, never()).setUserHasDeviceEntryIntent(anyBoolean());
     }
 
     @Test

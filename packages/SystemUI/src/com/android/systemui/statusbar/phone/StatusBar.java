@@ -151,6 +151,7 @@ import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenu
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
@@ -187,7 +188,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CircleReveal;
@@ -249,6 +249,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
@@ -716,6 +717,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
+    private BatteryMeterViewController mBatteryMeterViewController;
 
     /**
      * Public constructor for StatusBar.
@@ -1162,6 +1164,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
+
+                    mBatteryMeterViewController = new BatteryMeterViewController(
+                            mStatusBarView.findViewById(R.id.battery)
+                    );
+                    mBatteryMeterViewController.init();
 
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
                     // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.

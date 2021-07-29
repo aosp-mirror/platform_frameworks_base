@@ -16,11 +16,9 @@
 
 package com.android.internal.display;
 
-import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
@@ -63,10 +61,10 @@ public class BrightnessSynchronizer {
                     updateBrightnessFloatFromInt(msg.arg1);
                     break;
                 case MSG_UPDATE_INT:
-                    updateBrightnessIntFromFloat((BrightnessInfo) msg.obj);
+                    updateBrightnessIntFromFloat(Float.intBitsToFloat(msg.arg1));
                     break;
                 case MSG_UPDATE_BOTH:
-                    updateBoth((BrightnessInfo) msg.obj, Float.intBitsToFloat(msg.arg1));
+                    updateBoth(Float.intBitsToFloat(msg.arg1));
                     break;
                 default:
                     super.handleMessage(msg);
@@ -97,11 +95,11 @@ public class BrightnessSynchronizer {
         brightnessSyncObserver = new BrightnessSyncObserver();
         brightnessSyncObserver.startObserving();
 
-        final BrightnessInfo brightnessInfo = getBrightnessInfo();
+        final float currentFloatBrightness = getScreenBrightnessFloat();
         final int currentIntBrightness = getScreenBrightnessInt(mContext);
 
-        if (brightnessInfo != null && !Float.isNaN(brightnessInfo.brightness)) {
-            updateBrightnessIntFromFloat(brightnessInfo);
+        if (!Float.isNaN(currentFloatBrightness)) {
+            updateBrightnessIntFromFloat(currentFloatBrightness);
         } else if (currentIntBrightness != -1) {
             updateBrightnessFloatFromInt(currentIntBrightness);
         } else {
@@ -114,23 +112,15 @@ public class BrightnessSynchronizer {
 
     /**
      * Converts between the int brightness system and the float brightness system.
-     *
-     * @param brightnessInt The int brightness value to convert.
      */
     public static float brightnessIntToFloat(int brightnessInt) {
-        return brightnessIntToFloat(brightnessInt, null);
-    }
-
-    private static float brightnessIntToFloat(int brightnessInt, BrightnessInfo info) {
         if (brightnessInt == PowerManager.BRIGHTNESS_OFF) {
             return PowerManager.BRIGHTNESS_OFF_FLOAT;
         } else if (brightnessInt == PowerManager.BRIGHTNESS_INVALID) {
             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         } else {
-            final float minFloat = info != null
-                    ? info.brightnessMinimum : PowerManager.BRIGHTNESS_MIN;
-            final float maxFloat = info != null
-                    ? info.brightnessMaximum : PowerManager.BRIGHTNESS_MAX;
+            final float minFloat = PowerManager.BRIGHTNESS_MIN;
+            final float maxFloat = PowerManager.BRIGHTNESS_MAX;
             final float minInt = PowerManager.BRIGHTNESS_OFF + 1;
             final float maxInt = PowerManager.BRIGHTNESS_ON;
             return MathUtils.constrainedMap(minFloat, maxFloat, minInt, maxInt, brightnessInt);
@@ -138,28 +128,29 @@ public class BrightnessSynchronizer {
     }
 
     /**
+     * Converts between the float brightness system and the int brightness system.
+     */
+    public static int brightnessFloatToInt(float brightnessFloat) {
+        return Math.round(brightnessFloatToIntRange(brightnessFloat));
+    }
+
+    /**
      * Translates specified value from the float brightness system to the int brightness system,
      * given the min/max of each range. Accounts for special values such as OFF and invalid values.
      * Value returned as a float primitive (to preserve precision), but is a value within the
      * int-system range.
-     *
-     * @param brightnessFloat The float brightness value to convert.
-     * @param info Brightness information to use in the conversion.
      */
-    public static int brightnessFloatToInt(float brightnessFloat, BrightnessInfo info) {
+    public static float brightnessFloatToIntRange(float brightnessFloat) {
         if (floatEquals(brightnessFloat, PowerManager.BRIGHTNESS_OFF_FLOAT)) {
             return PowerManager.BRIGHTNESS_OFF;
         } else if (Float.isNaN(brightnessFloat)) {
             return PowerManager.BRIGHTNESS_INVALID;
         } else {
-            final float minFloat = info != null
-                    ? info.brightnessMinimum : PowerManager.BRIGHTNESS_MIN;
-            final float maxFloat = info != null
-                    ? info.brightnessMaximum : PowerManager.BRIGHTNESS_MAX;
+            final float minFloat = PowerManager.BRIGHTNESS_MIN;
+            final float maxFloat = PowerManager.BRIGHTNESS_MAX;
             final float minInt = PowerManager.BRIGHTNESS_OFF + 1;
             final float maxInt = PowerManager.BRIGHTNESS_ON;
-            return Math.round(MathUtils.constrainedMap(minInt, maxInt, minFloat, maxFloat,
-                    brightnessFloat));
+            return MathUtils.constrainedMap(minInt, maxInt, minFloat, maxFloat, brightnessFloat);
         }
     }
 
@@ -194,37 +185,35 @@ public class BrightnessSynchronizer {
      * @param value Brightness value as int to store in the float setting.
      */
     private void updateBrightnessFloatFromInt(int value) {
-        final BrightnessInfo info = getBrightnessInfo();
-        if (brightnessFloatToInt(mPreferredSettingValue, info) == value) {
+        if (brightnessFloatToInt(mPreferredSettingValue) == value) {
             return;
         }
 
-        mPreferredSettingValue = brightnessIntToFloat(value, info);
+        mPreferredSettingValue = brightnessIntToFloat(value);
         final int newBrightnessAsIntBits = Float.floatToIntBits(mPreferredSettingValue);
         mHandler.removeMessages(MSG_UPDATE_BOTH);
         mHandler.obtainMessage(MSG_UPDATE_BOTH, newBrightnessAsIntBits, 0).sendToTarget();
     }
 
     /**
-     * Updates the settings from the specified {@link BrightnessInfo}. This is called whenever the
-     * float brightness changed from DisplayManager. mPreferredSettingValue holds the most recently
-     * updated brightness value as a float that we would like the display to be set to.
+     * Updates the settings based on a passed in float value. This is called whenever the float
+     * setting changes. mPreferredSettingValue holds the most recently updated brightness value
+     * as a float that we would like the display to be set to.
      *
      * We then schedule an update to both the int and float settings, but, remove all the other
      * messages to update all, to prevent us getting stuck in a loop.
      *
-     * @param brightnessInfo Current brightness information
+     * @param value Brightness setting as float to store in int setting.
      */
-    private void updateBrightnessIntFromFloat(@NonNull BrightnessInfo brightnessInfo) {
-        final float value = brightnessInfo.brightness;
+    private void updateBrightnessIntFromFloat(float value) {
         if (floatEquals(mPreferredSettingValue, value)) {
             return;
         }
 
         mPreferredSettingValue = value;
+        final int newBrightnessAsIntBits = Float.floatToIntBits(mPreferredSettingValue);
         mHandler.removeMessages(MSG_UPDATE_BOTH);
-        mHandler.obtainMessage(MSG_UPDATE_BOTH, Float.floatToIntBits(value), 0, brightnessInfo)
-                .sendToTarget();
+        mHandler.obtainMessage(MSG_UPDATE_BOTH, newBrightnessAsIntBits, 0).sendToTarget();
     }
 
 
@@ -233,24 +222,16 @@ public class BrightnessSynchronizer {
      * mDisplayManager.setBrightness automatically checks for changes
      * Settings.System.putIntForUser needs to be checked, to prevent an extra callback to this class
      *
-     * @param brightnessInfo Brightness information, takes precedent over newBrightnessFloat
      * @param newBrightnessFloat Brightness setting as float to store in both settings
      */
-    private void updateBoth(BrightnessInfo brightnessInfo, float newBrightnessFloat) {
-        int newBrightnessInt = brightnessFloatToInt(newBrightnessFloat, brightnessInfo);
+    private void updateBoth(float newBrightnessFloat) {
+        int newBrightnessInt = brightnessFloatToInt(newBrightnessFloat);
         mDisplayManager.setBrightness(Display.DEFAULT_DISPLAY, newBrightnessFloat);
         if (getScreenBrightnessInt(mContext) != newBrightnessInt) {
             Settings.System.putIntForUser(mContext.getContentResolver(),
                     Settings.System.SCREEN_BRIGHTNESS, newBrightnessInt, UserHandle.USER_CURRENT);
         }
-    }
 
-    private BrightnessInfo getBrightnessInfo() {
-        final Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        if (display != null) {
-            return display.getBrightnessInfo();
-        }
-        return null;
     }
 
     /**
@@ -282,15 +263,10 @@ public class BrightnessSynchronizer {
 
             @Override
             public void onDisplayChanged(int displayId) {
-                if (displayId != Display.DEFAULT_DISPLAY) {
-                    return;
-                }
-
-                final BrightnessInfo info = getBrightnessInfo();
-                if (info != null) {
-                    mHandler.removeMessages(MSG_UPDATE_INT);
-                    mHandler.obtainMessage(MSG_UPDATE_INT, info).sendToTarget();
-                }
+                float currentFloat = getScreenBrightnessFloat();
+                int toSend = Float.floatToIntBits(currentFloat);
+                mHandler.removeMessages(MSG_UPDATE_INT);
+                mHandler.obtainMessage(MSG_UPDATE_INT, toSend, 0).sendToTarget();
             }
         };
 

@@ -6980,7 +6980,7 @@ package android.app {
   }
 
   public static interface WallpaperManager.OnColorsChangedListener {
-    method public void onColorsChanged(android.app.WallpaperColors, int);
+    method public void onColorsChanged(@Nullable android.app.WallpaperColors, int);
   }
 
   public interface ZygotePreload {

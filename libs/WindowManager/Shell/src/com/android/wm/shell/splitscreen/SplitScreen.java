@@ -81,6 +81,12 @@ public interface SplitScreen {
      */
     void onKeyguardOccludedChanged(boolean occluded);
 
+    /**
+     * Called when the visibility of the keyguard changes.
+     * @param showing Indicates if the keyguard is now visible.
+     */
+    void onKeyguardVisibilityChanged(boolean showing);
+
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {
         switch (stage) {

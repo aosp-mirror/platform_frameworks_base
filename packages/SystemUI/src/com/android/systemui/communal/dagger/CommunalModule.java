@@ -16,13 +16,32 @@
 
 package com.android.systemui.communal.dagger;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.FrameLayout;
+
+import com.android.systemui.idle.dagger.IdleViewComponent;
+
+import javax.inject.Named;
+
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * Dagger Module providing Communal-related functionality.
  */
 @Module(subcomponents = {
         CommunalViewComponent.class,
+        IdleViewComponent.class,
 })
-public class CommunalModule {
+public interface CommunalModule {
+    String IDLE_VIEW = "idle_view";
+
+    /** */
+    @Provides
+    @Named(IDLE_VIEW)
+    static View provideIdleView(Context context) {
+        FrameLayout view = new FrameLayout(context);
+        return view;
+    }
 }

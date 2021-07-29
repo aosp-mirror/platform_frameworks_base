@@ -2519,6 +2519,14 @@ public final class ViewRootImpl implements ViewParent,
                 || lp.type == TYPE_VOLUME_OVERLAY;
     }
 
+    private Rect getWindowBoundsInsetSystemBars() {
+        final Rect bounds = new Rect(
+                mContext.getResources().getConfiguration().windowConfiguration.getBounds());
+        bounds.inset(mInsetsController.getState().calculateInsets(
+                bounds, Type.systemBars(), false /* ignoreVisibility */));
+        return bounds;
+    }
+
     int dipToPx(int dip) {
         final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         return (int) (displayMetrics.density * dip + 0.5f);
@@ -2605,8 +2613,9 @@ public final class ViewRootImpl implements ViewParent,
                     || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                 // For wrap content, we have to remeasure later on anyways. Use size consistent with
                 // below so we get best use of the measure cache.
-                desiredWindowWidth = dipToPx(config.screenWidthDp);
-                desiredWindowHeight = dipToPx(config.screenHeightDp);
+                final Rect bounds = getWindowBoundsInsetSystemBars();
+                desiredWindowWidth = bounds.width();
+                desiredWindowHeight = bounds.height();
             } else {
                 // After addToDisplay, the frame contains the frameHint from window manager, which
                 // for most windows is going to be the same size as the result of relayoutWindow.
@@ -2683,9 +2692,9 @@ public final class ViewRootImpl implements ViewParent,
                         desiredWindowWidth = size.x;
                         desiredWindowHeight = size.y;
                     } else {
-                        Configuration config = res.getConfiguration();
-                        desiredWindowWidth = dipToPx(config.screenWidthDp);
-                        desiredWindowHeight = dipToPx(config.screenHeightDp);
+                        final Rect bounds = getWindowBoundsInsetSystemBars();
+                        desiredWindowWidth = bounds.width();
+                        desiredWindowHeight = bounds.height();
                     }
                 }
             }

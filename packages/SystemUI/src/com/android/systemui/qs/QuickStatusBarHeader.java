@@ -35,8 +35,8 @@ import android.widget.Space;
 import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
@@ -97,6 +97,9 @@ public class QuickStatusBarHeader extends FrameLayout {
     @NonNull
     private List<String> mRssiIgnoredSlots;
     private boolean mIsSingleCarrier;
+
+    private boolean mHasCenterCutout;
+    private boolean mConfigShowBatteryEstimate;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -208,6 +211,14 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyContainer.setLayoutParams(lp);
     }
 
+    private void updateBatteryMode() {
+        if (mConfigShowBatteryEstimate && !mHasCenterCutout) {
+            mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+        } else {
+            mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+        }
+    }
+
     void updateResources() {
         Resources resources = mContext.getResources();
         // status bar is already displayed out of QS in split shade
@@ -215,6 +226,8 @@ public class QuickStatusBarHeader extends FrameLayout {
                 resources.getBoolean(R.bool.config_use_split_notification_shade);
         mStatusIconsView.setVisibility(shouldUseSplitShade ? View.GONE : View.VISIBLE);
         mDatePrivacyView.setVisibility(shouldUseSplitShade ? View.GONE : View.VISIBLE);
+
+        mConfigShowBatteryEstimate = resources.getBoolean(R.bool.config_showBatteryEstimateQSBH);
 
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
@@ -256,6 +269,7 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
         mHeaderQsPanel.setLayoutParams(qqsLP);
 
+        updateBatteryMode();
         updateHeadersPadding();
         updateAnimators();
     }
@@ -400,14 +414,14 @@ public class QuickStatusBarHeader extends FrameLayout {
                 mClockIconsSeparatorLayoutParams.width = 0;
                 setSeparatorVisibility(false);
                 mShowClockIconsSeparator = false;
-                mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+                mHasCenterCutout = false;
             } else {
                 datePrivacySeparatorLayoutParams.width = topCutout.width();
                 mDatePrivacySeparator.setVisibility(View.VISIBLE);
                 mClockIconsSeparatorLayoutParams.width = topCutout.width();
                 mShowClockIconsSeparator = true;
                 setSeparatorVisibility(mKeyguardExpansionFraction == 0f);
-                mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+                mHasCenterCutout = true;
             }
         }
         mDatePrivacySeparator.setLayoutParams(datePrivacySeparatorLayoutParams);
@@ -415,6 +429,8 @@ public class QuickStatusBarHeader extends FrameLayout {
         mCutOutPaddingLeft = padding.first;
         mCutOutPaddingRight = padding.second;
         mWaterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
+
+        updateBatteryMode();
         updateHeadersPadding();
         return super.onApplyWindowInsets(insets);
     }

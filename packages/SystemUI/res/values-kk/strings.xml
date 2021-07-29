@@ -452,6 +452,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ашу үшін қайта түртіңіз"</string>
     <string name="tap_again" msgid="1315420114387908655">"Қайта түртіңіз."</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ашу үшін жоғары қарай сырғытыңыз."</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Ашу үшін басыңыз."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Әрекетті қайталау үшін жоғары сырғытыңыз."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC пайдалану үшін құлыпты ашыңыз."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Бұл құрылғы ұйымыңызға тиесілі."</string>

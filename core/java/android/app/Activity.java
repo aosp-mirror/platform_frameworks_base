@@ -1518,6 +1518,17 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityPostDestroyed(this);
     }
 
+    private void dispatchActivityConfigurationChanged() {
+        getApplication().dispatchActivityConfigurationChanged(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityConfigurationChanged(this);
+            }
+        }
+    }
+
     private Object[] collectActivityLifecycleCallbacks() {
         Object[] callbacks = null;
         synchronized (mActivityLifecycleCallbacks) {
@@ -2944,6 +2955,8 @@ public class Activity extends ContextThemeWrapper
             // view changes from above.
             mActionBar.onConfigurationChanged(newConfig);
         }
+
+        dispatchActivityConfigurationChanged();
     }
 
     /**

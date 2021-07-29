@@ -291,12 +291,14 @@ class DragDropController {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "Drag into new candidate view @ " + window.asBinder());
         }
+        mCallback.get().dragRecipientEntered(window);
     }
 
     void dragRecipientExited(IWindow window) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "Drag from old candidate view @ " + window.asBinder());
         }
+        mCallback.get().dragRecipientExited(window);
     }
 
     /**

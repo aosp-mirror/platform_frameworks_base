@@ -452,14 +452,14 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
-    public static final boolean sEnableRemoteKeyguardGoingAwayAnimation = !sEnableShellTransitions
-            && sEnableRemoteKeyguardAnimation >= 1;
+    public static final boolean sEnableRemoteKeyguardGoingAwayAnimation =
+            sEnableRemoteKeyguardAnimation >= 1;
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
-    public static final boolean sEnableRemoteKeyguardOccludeAnimation = !sEnableShellTransitions
-            && sEnableRemoteKeyguardAnimation >= 2;
+    public static final boolean sEnableRemoteKeyguardOccludeAnimation =
+            sEnableRemoteKeyguardAnimation >= 2;
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
