@@ -144,6 +144,7 @@ import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -2983,6 +2984,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
+        final ArraySet<String> stagedSplitTypes = new ArraySet<>();
+        final ArraySet<String> requiredSplitTypes = new ArraySet<>();
         final ArrayMap<String, ApkLite> splitApks = new ArrayMap<>();
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (File addedFile : addedFiles) {
@@ -3038,6 +3041,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             } else {
                 splitApks.put(apk.getSplitName(), apk);
             }
+
+            // Collect the requiredSplitTypes and staged splitTypes
+            CollectionUtils.addAll(requiredSplitTypes, apk.getRequiredSplitTypes());
+            CollectionUtils.addAll(stagedSplitTypes, apk.getSplitTypes());
         }
 
         if (removeSplitList.size() > 0) {
@@ -3092,7 +3099,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Full install must include a base package");
             }
-            if (baseApk.isSplitRequired() && stagedSplits.size() <= 1) {
+            if (baseApk.isSplitRequired() && (stagedSplits.size() <= 1
+                    || !stagedSplitTypes.containsAll(requiredSplitTypes))) {
                 throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
                         "Missing split for " + mPackageName);
             }
@@ -3130,6 +3138,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
                 inheritFileLocked(mResolvedBaseFile);
+                // Collect the requiredSplitTypes from base
+                CollectionUtils.addAll(requiredSplitTypes, existing.getBaseRequiredSplitTypes());
             }
 
             // Inherit splits if not overridden.
@@ -3140,6 +3150,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     if (!stagedSplits.contains(splitName) && !splitRemoved) {
                         inheritFileLocked(splitFile);
+                        // Collect the requiredSplitTypes and staged splitTypes from splits
+                        CollectionUtils.addAll(requiredSplitTypes,
+                                existing.getRequiredSplitTypes()[i]);
+                        CollectionUtils.addAll(stagedSplitTypes, existing.getSplitTypes()[i]);
                     }
                 }
             }
@@ -3221,7 +3235,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final boolean allSplitsRemoved = (existingSplits == removeSplitList.size());
                 final boolean onlyBaseFileStaged = (stagedSplits.size() == 1
                         && stagedSplits.contains(null));
-                if (allSplitsRemoved && (stagedSplits.isEmpty() || onlyBaseFileStaged)) {
+                if ((allSplitsRemoved && (stagedSplits.isEmpty() || onlyBaseFileStaged))
+                        || !stagedSplitTypes.containsAll(requiredSplitTypes)) {
                     throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
                             "Missing split for " + mPackageName);
                 }

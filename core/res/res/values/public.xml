@@ -3296,6 +3296,8 @@
 
   <staging-public-group type="attr" first-id="0x01df0000">
     <public name="sharedUserMaxSdkVersion" />
+    <public name="requiredSplitTypes" />
+    <public name="splitTypes" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

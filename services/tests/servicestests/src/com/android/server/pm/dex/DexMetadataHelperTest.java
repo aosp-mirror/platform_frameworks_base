@@ -416,8 +416,11 @@ public class DexMetadataHelperTest {
                         result.getErrorMessage(), result.getException());
             }
             final ApkLite baseApk = result.getResult();
-            final PackageLite pkgLite = new PackageLite(null, baseApk.getPath(), baseApk, null,
-                    null, null, null, null, null, baseApk.getTargetSdkVersion());
+            final PackageLite pkgLite = new PackageLite(null, baseApk.getPath(), baseApk,
+                    null /* splitNames */, null /* isFeatureSplits */, null /* usesSplitNames */,
+                    null /* configForSplit */, null /* splitApkPaths */,
+                    null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
+                    null /* requiredSplitTypes */, null /* splitTypes */);
             Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
         }
 
