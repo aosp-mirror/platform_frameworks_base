@@ -795,12 +795,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             mBacklightAdapter.setBacklight(sdrBacklight, sdrNits, backlight, nits);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
-                                    BrightnessSynchronizer.brightnessFloatToInt(
-                                            brightnessState, null));
+                                    BrightnessSynchronizer.brightnessFloatToInt(brightnessState));
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "SdrScreenBrightness",
                                     BrightnessSynchronizer.brightnessFloatToInt(
-                                            sdrBrightnessState, null));
+                                            sdrBrightnessState));
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }

@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -601,9 +602,14 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
         String messageWithStackTrace = message + '\n' + stackTrace;
         Throwable throwable;
         try {
-            Class<?> clazz = Class.forName(className);
-            Constructor<?> constructor = clazz.getConstructor(String.class);
-            throwable = (Throwable) constructor.newInstance(messageWithStackTrace);
+            Class<?> clazz = Class.forName(className, true, Parcelable.class.getClassLoader());
+            if (Throwable.class.isAssignableFrom(clazz)) {
+                Constructor<?> constructor = clazz.getConstructor(String.class);
+                throwable = (Throwable) constructor.newInstance(messageWithStackTrace);
+            } else {
+                android.util.EventLog.writeEvent(0x534e4554, "186530450", -1, "");
+                throwable = new RuntimeException(className + ": " + messageWithStackTrace);
+            }
         } catch (Throwable t) {
             throwable = new RuntimeException(className + ": " + messageWithStackTrace);
             throwable.addSuppressed(t);

@@ -2603,7 +2603,7 @@ public class AlarmManagerService extends SystemService {
             final int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             if (callingUid != uid && !UserHandle.isCore(callingUid)) {
                 throw new SecurityException("Uid " + callingUid
-                        + " cannot query hasScheduleExactAlarm for uid " + uid);
+                        + " cannot query hasScheduleExactAlarm for package " + packageName);
             }
             return (uid > 0) ? hasScheduleExactAlarmInternal(packageName, uid) : false;
         }

@@ -149,7 +149,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
     private static final boolean DEBUG_FACE = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_SPEW = false;
-    private static final int LOW_BATTERY_THRESHOLD = 20;
+    private static final int FINGERPRINT_LOCKOUT_RESET_DELAY_MS = 600;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
             = "com.android.facelock.FACE_UNLOCK_STARTED";
@@ -834,7 +834,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void handleFingerprintLockoutReset() {
         mFingerprintLockedOut = false;
         mFingerprintLockedOutPermanent = false;
-        updateFingerprintListeningState();
+
+        if (isUdfpsEnrolled()) {
+            // TODO(b/194825098): update the reset signal(s)
+            // A successful unlock will trigger a lockout reset, but there is no guarantee
+            // that the events will arrive in a particular order. Add a delay here in case
+            // an unlock is in progress. In this is a normal unlock the extra delay won't
+            // be noticeable.
+            mHandler.postDelayed(this::updateFingerprintListeningState,
+                    FINGERPRINT_LOCKOUT_RESET_DELAY_MS);
+        } else {
+            updateFingerprintListeningState();
+        }
     }
 
     private void setFingerprintRunningState(int fingerprintRunningState) {
