@@ -1053,26 +1053,37 @@ public abstract class PackageManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            RollbackDataPolicy.RESTORE,
-            RollbackDataPolicy.WIPE,
-            RollbackDataPolicy.RETAIN
+    @IntDef(prefix = { "ROLLBACK_DATA_POLICY_" }, value = {
+            ROLLBACK_DATA_POLICY_RESTORE,
+            ROLLBACK_DATA_POLICY_WIPE,
+            ROLLBACK_DATA_POLICY_RETAIN
     })
-    public @interface RollbackDataPolicy {
-        /**
-         * User data will be backed up during install and restored during rollback.
-         */
-        int RESTORE = 0;
-        /**
-         * User data won't be backed up during install but will be wiped out during rollback.
-         */
-        int WIPE = 1;
-        /**
-         * User data won't be backed up during install and won't be restored during rollback.
-         * TODO: Not implemented yet.
-         */
-        int RETAIN = 2;
-    }
+    public @interface RollbackDataPolicy {}
+
+    /**
+     * User data will be backed up during install and restored during rollback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ROLLBACK_DATA_POLICY_RESTORE = 0;
+
+    /**
+     * User data won't be backed up during install but will be wiped out during rollback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ROLLBACK_DATA_POLICY_WIPE = 1;
+
+    /**
+     * User data won't be backed up during install and won't be restored during rollback.
+     * TODO: Not implemented yet.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ROLLBACK_DATA_POLICY_RETAIN = 2;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "INSTALL_" }, value = {

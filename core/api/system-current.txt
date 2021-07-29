@@ -2831,6 +2831,9 @@ package android.content.pm {
     field public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 1; // 0x1
     field public static final int RESTRICTION_HIDE_NOTIFICATIONS = 2; // 0x2
     field public static final int RESTRICTION_NONE = 0; // 0x0
+    field public static final int ROLLBACK_DATA_POLICY_RESTORE = 0; // 0x0
+    field public static final int ROLLBACK_DATA_POLICY_RETAIN = 2; // 0x2
+    field public static final int ROLLBACK_DATA_POLICY_WIPE = 1; // 0x1
     field public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0; // 0x0
     field public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1; // 0x1
     field public static final int SYSTEM_APP_STATE_INSTALLED = 2; // 0x2
