@@ -2291,7 +2291,8 @@ public class DisplayPolicy {
         return width;
     }
 
-    private int getNavigationBarHeight(int rotation, int uiMode) {
+    @VisibleForTesting
+    int getNavigationBarHeight(int rotation, int uiMode) {
         if (INSETS_LAYOUT_GENERALIZATION) {
             if (mNavigationBar == null) {
                 return 0;
