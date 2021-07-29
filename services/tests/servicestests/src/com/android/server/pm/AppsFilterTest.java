@@ -37,6 +37,7 @@ import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
@@ -172,7 +173,7 @@ public class AppsFilterTest {
 
     private static ParsingPackage pkgWithInstrumentation(
             String packageName, String instrumentationTargetPackage) {
-        ParsedInstrumentation instrumentation = new ParsedInstrumentation();
+        ParsedInstrumentationImpl instrumentation = new ParsedInstrumentationImpl();
         instrumentation.setTargetPackage(instrumentationTargetPackage);
         return pkg(packageName).addInstrumentation(instrumentation);
     }

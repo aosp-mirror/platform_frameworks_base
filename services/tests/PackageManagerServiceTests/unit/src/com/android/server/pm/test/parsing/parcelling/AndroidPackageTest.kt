@@ -31,6 +31,7 @@ import android.content.pm.parsing.component.ParsedAttributionImpl
 import android.content.pm.parsing.component.ParsedComponent
 import android.content.pm.parsing.component.ParsedComponentImpl
 import android.content.pm.parsing.component.ParsedInstrumentation
+import android.content.pm.parsing.component.ParsedInstrumentationImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.parsing.component.ParsedPermission
 import android.content.pm.parsing.component.ParsedPermissionGroup
@@ -389,7 +390,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addInstrumentation,
             "TestInstrumentationName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedInstrumentation().apply { name = it } }
+            transformSet = { ParsedInstrumentationImpl().apply { name = it } }
         ),
         getSetByValue(
             AndroidPackage::getConfigPreferences,

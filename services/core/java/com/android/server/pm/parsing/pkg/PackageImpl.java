@@ -345,7 +345,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int instrumentationsSize = instrumentations.size();
         for (int index = 0; index < instrumentationsSize; index++) {
-            instrumentations.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(instrumentations.get(index), this.packageName);
         }
 
         return this;

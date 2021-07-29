@@ -16,114 +16,18 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
-
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
-
-import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide */
-public class ParsedInstrumentation extends ParsedComponentImpl {
+public interface ParsedInstrumentation extends ParsedComponent {
 
     @Nullable
-    @DataClass.ParcelWith(ForInternedString.class)
-    private String targetPackage;
-    @Nullable
-    @DataClass.ParcelWith(ForInternedString.class)
-    private String targetProcesses;
-    private boolean handleProfiling;
-    private boolean functionalTest;
-
-    public ParsedInstrumentation() {
-    }
-
-    public ParsedInstrumentation setFunctionalTest(boolean functionalTest) {
-        this.functionalTest = functionalTest;
-        return this;
-    }
-
-    public ParsedInstrumentation setHandleProfiling(boolean handleProfiling) {
-        this.handleProfiling = handleProfiling;
-        return this;
-    }
-
-    public ParsedInstrumentation setTargetPackage(@Nullable String targetPackage) {
-        this.targetPackage = TextUtils.safeIntern(targetPackage);
-        return this;
-    }
-
-    public ParsedInstrumentation setTargetProcesses(@Nullable String targetProcesses) {
-        this.targetProcesses = TextUtils.safeIntern(targetProcesses);
-        return this;
-    }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("Instrumentation{");
-        sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(' ');
-        ComponentName.appendShortString(sb, getPackageName(), getName());
-        sb.append('}');
-        return sb.toString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        sForInternedString.parcel(this.targetPackage, dest, flags);
-        sForInternedString.parcel(this.targetProcesses, dest, flags);
-        dest.writeBoolean(this.handleProfiling);
-        dest.writeBoolean(this.functionalTest);
-    }
-
-    protected ParsedInstrumentation(Parcel in) {
-        super(in);
-        this.targetPackage = sForInternedString.unparcel(in);
-        this.targetProcesses = sForInternedString.unparcel(in);
-        this.handleProfiling = in.readByte() != 0;
-        this.functionalTest = in.readByte() != 0;
-    }
-
-    @NonNull
-    public static final Parcelable.Creator<ParsedInstrumentation> CREATOR =
-            new Parcelable.Creator<ParsedInstrumentation>() {
-                @Override
-                public ParsedInstrumentation createFromParcel(Parcel source) {
-                    return new ParsedInstrumentation(source);
-                }
-
-                @Override
-                public ParsedInstrumentation[] newArray(int size) {
-                    return new ParsedInstrumentation[size];
-                }
-            };
+    String getTargetPackage();
 
     @Nullable
-    public String getTargetPackage() {
-        return targetPackage;
-    }
+    String getTargetProcesses();
 
-    @Nullable
-    public String getTargetProcesses() {
-        return targetProcesses;
-    }
+    boolean isFunctionalTest();
 
-    public boolean isHandleProfiling() {
-        return handleProfiling;
-    }
-
-    public boolean isFunctionalTest() {
-        return functionalTest;
-    }
+    boolean isHandleProfiling();
 }
