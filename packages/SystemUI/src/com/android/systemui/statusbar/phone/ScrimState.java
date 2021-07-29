@@ -250,23 +250,6 @@ public enum ScrimState {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
             }
         }
-    },
-
-    /**
-     * Unlocked with a bubble expanded.
-     */
-    BUBBLE_EXPANDED {
-        @Override
-        public void prepare(ScrimState previousState) {
-            mFrontTint = Color.TRANSPARENT;
-            mBehindTint = Color.TRANSPARENT;
-
-            mFrontAlpha = 0f;
-            mBehindAlpha = mDefaultScrimAlpha;
-
-            mAnimationDuration = ScrimController.ANIMATION_DURATION;
-            mBlankScreen = false;
-        }
     };
 
     boolean mBlankScreen = false;
