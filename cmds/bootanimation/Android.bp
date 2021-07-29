@@ -71,7 +71,7 @@ cc_library_shared {
         "libui",
         "libjnigraphics",
         "libEGL",
-        "libGLESv1_CM",
+        "libGLESv2",
         "libgui",
     ],
 }
