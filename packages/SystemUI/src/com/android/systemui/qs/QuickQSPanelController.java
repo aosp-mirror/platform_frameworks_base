@@ -29,6 +29,8 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     // brightness is visible only in split shade
     private final QuickQSBrightnessController mBrightnessController;
+    private final BrightnessMirrorHandler mBrightnessMirrorHandler;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
@@ -63,6 +66,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager);
         mBrightnessController = quickQSBrightnessController;
+        mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
     }
 
     @Override
@@ -78,12 +82,14 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     protected void onViewAttached() {
         super.onViewAttached();
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mBrightnessMirrorHandler.onQsPanelAttached();
     }
 
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mBrightnessMirrorHandler.onQsPanelDettached();
     }
 
     @Override
@@ -131,5 +137,9 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     public int getNumQuickTiles() {
         return mView.getNumQuickTiles();
+    }
+
+    public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
+        mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
 }

@@ -50,12 +50,13 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-public class BrightnessController implements ToggleSlider.Listener {
+public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
     private static final String TAG = "StatusBar.BrightnessController";
     private static final int SLIDER_ANIMATION_DURATION = 3000;
 
@@ -108,6 +109,11 @@ public class BrightnessController implements ToggleSlider.Listener {
     private float mBrightnessMax = PowerManager.BRIGHTNESS_MAX;
 
     private ValueAnimator mSliderAnimator;
+
+    @Override
+    public void setMirror(BrightnessMirrorController controller) {
+        mControl.setMirrorControllerAndMirror(controller);
+    }
 
     public interface BrightnessStateChangeCallback {
         /** Indicates that some of the brightness settings have changed */
