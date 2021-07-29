@@ -888,7 +888,8 @@ public class UdfpsController implements DozeReceiver {
             return;
         }
 
-        if (mView.getAnimationViewController() instanceof UdfpsKeyguardViewController) {
+        if (mView.getAnimationViewController() instanceof UdfpsKeyguardViewController
+                && !mStatusBarStateController.isDozing()) {
             mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
         }
 
