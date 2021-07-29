@@ -275,11 +275,35 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onActionMove_onKeyguard_setDeviceEntryIntent() throws RemoteException {
-        // GIVEN the current animation is UdfpsKeyguardViewController
+    public void onActionMove_dozing_setDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsKeyguardViewController and device IS dozing
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
         when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN device entry intent is never to true b/c device was dozing on touch
+        verify(mKeyguardBypassController, never()).setUserHasDeviceEntryIntent(true);
+    }
+
+    @Test
+    public void onActionMove_onKeyguard_setDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsKeyguardViewController and device isn't dozing
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
