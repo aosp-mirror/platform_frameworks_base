@@ -444,6 +444,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mStatusBarLocationPublisher;
+    private final StatusBarIconController mStatusBarIconController;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -810,6 +811,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
+            StatusBarIconController statusBarIconController,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -898,6 +900,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
+        mStatusBarIconController = statusBarIconController;
         mFeatureFlags = featureFlags;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
@@ -1205,7 +1208,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 mStatusBarLocationPublisher,
                                 mNotificationIconAreaController,
                                 mFeatureFlags,
-                                () -> Optional.of(this)),
+                                () -> Optional.of(this),
+                                mStatusBarIconController,
+                                mKeyguardStateController,
+                                mNetworkController,
+                                mStatusBarStateController,
+                                mCommandQueue
+                        ),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 
@@ -2753,6 +2762,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.dump(fd, pw, args);
         }
 
+        if (mLightRevealScrim != null) {
+            pw.println(
+                    "mLightRevealScrim.getRevealAmount(): " + mLightRevealScrim.getRevealAmount());
+        }
+
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.dump(pw);
         }
@@ -3950,7 +3964,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || !wakingUp && mWakefulnessLifecycle.getLastSleepReason()
                 == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON) {
             mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
-        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+        } else if (!wakingUp || !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+            // If we're going to sleep, but it's not from the power button, use the default reveal.
+            // If we're waking up, only use the default reveal if the biometric controller didn't
+            // already set it to the circular reveal because we're waking up from a fingerprint/face
+            // auth.
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         }
     }
@@ -3979,7 +3997,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onUnlockHintStarted() {
         mFalsingCollector.onUnlockHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
+        mKeyguardIndicationController.showActionToUnlock();
     }
 
     public void onHintFinished() {

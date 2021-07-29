@@ -109,7 +109,8 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(mPreviewHandleDeleterCallback, createALSCallback(), callback);
+        return new CompositeCallback(mPreviewHandleDeleterCallback,
+                createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override

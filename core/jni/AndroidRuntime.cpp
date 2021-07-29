@@ -143,6 +143,7 @@ extern int register_android_os_NativeHandle(JNIEnv *env);
 extern int register_android_os_ServiceManager(JNIEnv *env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
+extern int register_android_os_PerformanceHintManager(JNIEnv* env);
 extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_VintfObject(JNIEnv *env);
 extern int register_android_os_VintfRuntimeInfo(JNIEnv *env);
@@ -1518,6 +1519,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_SystemProperties),
         REG_JNI(register_android_os_Binder),
         REG_JNI(register_android_os_Parcel),
+        REG_JNI(register_android_os_PerformanceHintManager),
         REG_JNI(register_android_os_HidlMemory),
         REG_JNI(register_android_os_HidlSupport),
         REG_JNI(register_android_os_HwBinder),

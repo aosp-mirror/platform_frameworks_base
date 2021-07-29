@@ -64,6 +64,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -6505,6 +6506,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 String callingPackage) {
             return ActivityTaskManagerService.this.hasSystemAlertWindowPermission(callingUid,
                     callingPid, callingPackage);
+        }
+
+        @Override
+        public void notifyWakingUp() {
+            // Start a transition for waking. This is needed for showWhenLocked activities.
+            getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
+                    null /* trigger */, mRootWindowContainer.getDefaultDisplay());
         }
     }
 

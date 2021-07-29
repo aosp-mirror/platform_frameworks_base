@@ -920,7 +920,7 @@
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 
-    <!-- For Waterfall Display -->
+    <!-- For main built-in Waterfall Display -->
     <dimen name="waterfall_display_left_edge_size">0px</dimen>
     <dimen name="waterfall_display_top_edge_size">0px</dimen>
     <dimen name="waterfall_display_right_edge_size">0px</dimen>
@@ -943,4 +943,10 @@
     <dimen name="starting_surface_icon_size">160dp</dimen>
     <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
     <dimen name="starting_surface_default_icon_size">108dp</dimen>
+
+    <!-- For secondary built-in Waterfall Display -->
+    <dimen name="secondary_waterfall_display_left_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_top_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_right_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_bottom_edge_size">0px</dimen>
 </resources>

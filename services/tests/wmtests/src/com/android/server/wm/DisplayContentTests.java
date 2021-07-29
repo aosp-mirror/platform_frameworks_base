@@ -42,6 +42,7 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -869,19 +870,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(dc.mShouldOverrideDisplayConfiguration);
         verify(mWm.mDisplayManagerInternal, times(1))
                 .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
-    }
-
-    @UseTestDisplay
-    @Test
-    public void testClearLastFocusWhenReparentingFocusedWindow() {
-        final DisplayContent defaultDisplay = mWm.getDefaultDisplayContentLocked();
-        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                defaultDisplay, "window");
-        defaultDisplay.mLastFocus = window;
-        mDisplayContent.mCurrentFocus = window;
-        mDisplayContent.reParentWindowToken(window.mToken);
-
-        assertNull(defaultDisplay.mLastFocus);
     }
 
     @Test
@@ -1746,6 +1734,31 @@ public class DisplayContentTests extends WindowTestsBase {
         WindowState result = display.findScrollCaptureTargetWindow(null,
                 ActivityTaskManager.INVALID_TASK_ID);
         assertEquals(activityWindow, result);
+    }
+
+    @Test
+    public void testFindScrollCaptureTargetWindow_secure() {
+        DisplayContent display = createNewDisplay();
+        Task rootTask = createTask(display);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        WindowState secureWindow = createWindow(null, TYPE_APPLICATION, "Secure Window");
+        secureWindow.mAttrs.flags |= FLAG_SECURE;
+
+        WindowState result = display.findScrollCaptureTargetWindow(null,
+                ActivityTaskManager.INVALID_TASK_ID);
+        assertNull(result);
+    }
+
+    @Test
+    public void testFindScrollCaptureTargetWindow_secureTaskId() {
+        DisplayContent display = createNewDisplay();
+        Task rootTask = createTask(display);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        WindowState secureWindow = createWindow(null, TYPE_APPLICATION, "Secure Window");
+        secureWindow.mAttrs.flags |= FLAG_SECURE;
+
+        WindowState result = display.findScrollCaptureTargetWindow(null,  task.mTaskId);
+        assertNull(result);
     }
 
     @Test

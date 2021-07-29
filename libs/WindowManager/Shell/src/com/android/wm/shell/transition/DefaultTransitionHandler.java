@@ -59,6 +59,7 @@ import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -132,6 +133,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "start default transition animation, info = %s", info);
+
+        // Fallback for screen wake. This just immediately finishes since there is no
+        // animation for screen-wake.
+        if (info.getType() == WindowManager.TRANSIT_WAKE) {
+            startTransaction.apply();
+            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            return true;
+        }
+
         if (mAnimations.containsKey(transition)) {
             throw new IllegalStateException("Got a duplicate startAnimation call for "
                     + transition);

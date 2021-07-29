@@ -502,9 +502,9 @@ public final class PlaybackMetrics implements Parcelable {
         private long mMediaDurationMillis = -1;
         private int mStreamSource = STREAM_SOURCE_UNKNOWN;
         private int mStreamType = STREAM_TYPE_UNKNOWN;
-        private int mPlaybackType = PLAYBACK_TYPE_OTHER;
+        private int mPlaybackType = PLAYBACK_TYPE_UNKNOWN;
         private int mDrmType = DRM_TYPE_NONE;
-        private int mContentType = CONTENT_TYPE_OTHER;
+        private int mContentType = CONTENT_TYPE_UNKNOWN;
         private @Nullable String mPlayerName;
         private @Nullable String mPlayerVersion;
         private @NonNull List<Long> mExperimentIds = new ArrayList<>();
