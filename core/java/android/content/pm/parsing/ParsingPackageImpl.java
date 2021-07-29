@@ -36,6 +36,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedAttribution;
+import android.content.pm.parsing.component.ParsedAttributionImpl;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -1290,7 +1291,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.receivers = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
         this.services = ParsingUtils.createTypedInterfaceList(in, ParsedServiceImpl.CREATOR);
         this.providers = ParsingUtils.createTypedInterfaceList(in, ParsedProviderImpl.CREATOR);
-        this.attributions = in.createTypedArrayList(ParsedAttribution.CREATOR);
+        this.attributions = ParsingUtils.createTypedInterfaceList(in,
+                ParsedAttributionImpl.CREATOR);
         this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);
         this.permissionGroups = in.createTypedArrayList(ParsedPermissionGroup.CREATOR);
         this.instrumentations = in.createTypedArrayList(ParsedInstrumentation.CREATOR);

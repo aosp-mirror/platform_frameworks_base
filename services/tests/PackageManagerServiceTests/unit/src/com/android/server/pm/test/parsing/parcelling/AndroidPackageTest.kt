@@ -27,6 +27,7 @@ import android.content.pm.parsing.ParsingPackage
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedAttribution
+import android.content.pm.parsing.component.ParsedAttributionImpl
 import android.content.pm.parsing.component.ParsedComponent
 import android.content.pm.parsing.component.ParsedComponentImpl
 import android.content.pm.parsing.component.ParsedInstrumentation
@@ -289,7 +290,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addAttribution,
             Triple("testTag", 13, listOf("testInherit")),
             transformGet = { it.singleOrNull()?.let { Triple(it.tag, it.label, it.inheritFrom) } },
-            transformSet = { it?.let { ParsedAttribution(it.first, it.second, it.third) } }
+            transformSet = { it?.let { ParsedAttributionImpl(it.first, it.second, it.third) } }
         ),
         getSetByValue2(
             AndroidPackage::getKeySetMapping,

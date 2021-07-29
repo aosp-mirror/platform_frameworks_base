@@ -17,13 +17,15 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedAttribution
+import android.content.pm.parsing.component.ParsedAttributionImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedAttributionTest : ParcelableComponentTest(ParsedAttribution::class) {
+class ParsedAttributionTest : ParcelableComponentTest(ParsedAttribution::class,
+    ParsedAttributionImpl::class) {
 
-    override val defaultImpl = ParsedAttribution("", 0, emptyList())
-    override val creator = ParsedAttribution.CREATOR
+    override val defaultImpl = ParsedAttributionImpl("", 0, emptyList())
+    override val creator = ParsedAttributionImpl.CREATOR
 
     override val baseParams = listOf(
         ParsedAttribution::getTag,

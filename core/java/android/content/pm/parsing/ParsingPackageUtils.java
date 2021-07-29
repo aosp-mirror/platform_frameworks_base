@@ -919,7 +919,7 @@ public class ParsingPackageUtils {
             }
         }
 
-        if (!ParsedAttribution.isCombinationValid(pkg.getAttributions())) {
+        if (!ParsedAttributionUtils.isCombinationValid(pkg.getAttributions())) {
             return input.error(
                     INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Combination <attribution> tags are not valid"
