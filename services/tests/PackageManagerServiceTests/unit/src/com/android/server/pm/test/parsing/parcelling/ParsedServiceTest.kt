@@ -17,13 +17,14 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedService
+import android.content.pm.parsing.component.ParsedServiceImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedServiceTest : ParsedMainComponentTest(ParsedService::class) {
+class ParsedServiceTest : ParsedMainComponentTest(ParsedService::class, ParsedServiceImpl::class) {
 
-    override val defaultImpl = ParsedService()
-    override val creator = ParsedService.CREATOR
+    override val defaultImpl = ParsedServiceImpl()
+    override val creator = ParsedServiceImpl.CREATOR
 
     override val mainComponentSubclassBaseParams = listOf(
         ParsedService::getForegroundServiceType,

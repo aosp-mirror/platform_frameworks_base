@@ -52,12 +52,12 @@ public class ParsedServiceUtils {
         boolean setExported;
 
         final String packageName = pkg.getPackageName();
-        final ParsedService service = new ParsedService();
+        final ParsedServiceImpl service = new ParsedServiceImpl();
         String tag = parser.getName();
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestService);
         try {
-            ParseResult<ParsedService> result = ParsedMainComponentUtils.parseMainComponent(
+            ParseResult<ParsedServiceImpl> result = ParsedMainComponentUtils.parseMainComponent(
                     service, tag, separateProcesses, pkg, sa, flags, useRoundIcon, defaultSplitName,
                     input,
                     R.styleable.AndroidManifestService_banner,
@@ -75,7 +75,7 @@ public class ParsedServiceUtils {
             );
 
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             setExported = sa.hasValue(R.styleable.AndroidManifestService_exported);

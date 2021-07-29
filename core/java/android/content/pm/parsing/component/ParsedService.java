@@ -16,93 +16,13 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
-
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
-
-import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide **/
-public class ParsedService extends ParsedMainComponentImpl {
+public interface ParsedService extends ParsedMainComponent {
 
-    private int foregroundServiceType;
-    @Nullable
-    @DataClass.ParcelWith(ForInternedString.class)
-    private String permission;
-
-    public ParsedService(ParsedService other) {
-        super(other);
-        this.foregroundServiceType = other.foregroundServiceType;
-        this.permission = other.permission;
-    }
-
-    public ParsedService setForegroundServiceType(int foregroundServiceType) {
-        this.foregroundServiceType = foregroundServiceType;
-        return this;
-    }
-
-    public ParsedMainComponent setPermission(String permission) {
-        // Empty string must be converted to null
-        this.permission = TextUtils.isEmpty(permission) ? null : permission.intern();
-        return this;
-    }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("Service{");
-        sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(' ');
-        ComponentName.appendShortString(sb, getPackageName(), getName());
-        sb.append('}');
-        return sb.toString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(this.foregroundServiceType);
-        sForInternedString.parcel(this.permission, dest, flags);
-    }
-
-    public ParsedService() {
-    }
-
-    protected ParsedService(Parcel in) {
-        super(in);
-        this.foregroundServiceType = in.readInt();
-        this.permission = sForInternedString.unparcel(in);
-    }
-
-    @NonNull
-    public static final Parcelable.Creator<ParsedService> CREATOR = new Creator<ParsedService>() {
-        @Override
-        public ParsedService createFromParcel(Parcel source) {
-            return new ParsedService(source);
-        }
-
-        @Override
-        public ParsedService[] newArray(int size) {
-            return new ParsedService[size];
-        }
-    };
-
-    public int getForegroundServiceType() {
-        return foregroundServiceType;
-    }
+    int getForegroundServiceType();
 
     @Nullable
-    public String getPermission() {
-        return permission;
-    }
+    String getPermission();
 }

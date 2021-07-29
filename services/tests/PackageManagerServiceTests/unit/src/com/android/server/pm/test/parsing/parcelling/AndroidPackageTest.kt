@@ -37,6 +37,7 @@ import android.content.pm.parsing.component.ParsedProcess
 import android.content.pm.parsing.component.ParsedProvider
 import android.content.pm.parsing.component.ParsedProviderImpl
 import android.content.pm.parsing.component.ParsedService
+import android.content.pm.parsing.component.ParsedServiceImpl
 import android.content.pm.parsing.component.ParsedUsesPermission
 import android.net.Uri
 import android.os.Bundle
@@ -373,7 +374,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addService,
             "TestServiceName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedService().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedServiceImpl().apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getProviders,

@@ -46,6 +46,7 @@ import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedServiceImpl;
 import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -1287,7 +1288,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 
         this.activities = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
         this.receivers = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
-        this.services = in.createTypedArrayList(ParsedService.CREATOR);
+        this.services = ParsingUtils.createTypedInterfaceList(in, ParsedServiceImpl.CREATOR);
         this.providers = ParsingUtils.createTypedInterfaceList(in, ParsedProviderImpl.CREATOR);
         this.attributions = in.createTypedArrayList(ParsedAttribution.CREATOR);
         this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);

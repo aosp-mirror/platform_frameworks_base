@@ -340,7 +340,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(services.get(index), this.packageName);
         }
 
         int instrumentationsSize = instrumentations.size();
@@ -373,7 +373,8 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(services.get(index),
+                    allComponentsDirectBootAware);
         }
 
         return this;
@@ -459,7 +460,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         for (int index = 0; index < servicesSize; index++) {
             ParsedService service = services.get(index);
             if ((service.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                service.setExported(false);
+                ComponentMutateUtils.setExported(service, false);
             }
         }
 
