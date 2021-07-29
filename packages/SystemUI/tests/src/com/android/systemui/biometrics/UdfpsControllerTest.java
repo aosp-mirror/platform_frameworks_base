@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
@@ -144,6 +145,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private DisplayManager mDisplayManager;
     @Mock
     private Handler mHandler;
+    @Mock
+    private ConfigurationController mConfigurationController;
 
     private FakeExecutor mFgExecutor;
 
@@ -225,7 +228,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mDisplayManager,
-                mHandler);
+                mHandler,
+                mConfigurationController);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
