@@ -52,6 +52,8 @@ import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedPermissionImpl;
+import android.content.pm.parsing.component.ParsedPermissionUtils;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
@@ -774,7 +776,8 @@ public class PackageParserTest {
         // Verify basic flags in PermissionInfo to make sure they're consistent. We don't perform
         // a full structural equality here because the code that serializes them isn't parser
         // specific and is tested elsewhere.
-        assertEquals(a.getProtection(), b.getProtection());
+        assertEquals(ParsedPermissionUtils.getProtection(a),
+                ParsedPermissionUtils.getProtection(b));
         assertEquals(a.getGroup(), b.getGroup());
         assertEquals(a.getFlags(), b.getFlags());
 
@@ -899,7 +902,7 @@ public class PackageParserTest {
         Bundle bundle = new Bundle();
         bundle.putString("key", "value");
 
-        ParsedPermission permission = new ParsedPermission();
+        ParsedPermissionImpl permission = new ParsedPermissionImpl();
         permission.setParsedPermissionGroup(new ParsedPermissionGroup());
 
         ((ParsedPackage) pkg.setBaseRevisionCode(100)

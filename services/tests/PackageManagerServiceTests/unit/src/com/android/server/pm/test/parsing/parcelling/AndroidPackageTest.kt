@@ -35,6 +35,7 @@ import android.content.pm.parsing.component.ParsedInstrumentationImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.parsing.component.ParsedPermission
 import android.content.pm.parsing.component.ParsedPermissionGroup
+import android.content.pm.parsing.component.ParsedPermissionImpl
 import android.content.pm.parsing.component.ParsedProcess
 import android.content.pm.parsing.component.ParsedProvider
 import android.content.pm.parsing.component.ParsedProviderImpl
@@ -415,7 +416,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addPermission,
             "test.PERMISSION",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedPermission().apply { name = it } }
+            transformSet = { ParsedPermissionImpl().apply { name = it } }
         ),
         getSetByValue(
             AndroidPackage::getUsesPermissions,

@@ -34,6 +34,7 @@ import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
@@ -409,7 +410,7 @@ public class PackageParserLegacyCoreTest {
 
     private void assertPermission(String name, int protectionLevel, ParsedPermission permission) {
         assertEquals(name, permission.getName());
-        assertEquals(protectionLevel, permission.getProtection());
+        assertEquals(protectionLevel, ParsedPermissionUtils.getProtection(permission));
     }
 
     private void assertMetadata(Bundle b, String... keysAndValues) {

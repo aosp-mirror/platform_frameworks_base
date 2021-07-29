@@ -46,8 +46,8 @@ public class ComponentMutateUtils {
         ((ParsedActivityImpl) activity).setResizeMode(resizeMode);
     }
 
-    public static void setExactFlags(ParsedActivity activity, int exactFlags) {
-        ((ParsedActivityImpl) activity).setFlags(exactFlags);
+    public static void setExactFlags(ParsedComponent component, int exactFlags) {
+        ((ParsedComponentImpl) component).setFlags(exactFlags);
     }
 
     public static void setEnabled(@NonNull ParsedMainComponent component, boolean enabled) {
@@ -74,5 +74,15 @@ public class ComponentMutateUtils {
 
     public static void setSyncable(@NonNull ParsedProvider provider, boolean syncable) {
         ((ParsedProviderImpl) provider).setSyncable(syncable);
+    }
+
+    public static void setProtectionLevel(@NonNull ParsedPermission permission,
+            int protectionLevel) {
+        ((ParsedPermissionImpl) permission).setProtectionLevel(protectionLevel);
+    }
+
+    public static void setParsedPermissionGroup(@NonNull ParsedPermission permission,
+            @NonNull ParsedPermissionGroup permissionGroup) {
+        ((ParsedPermissionImpl) permission).setParsedPermissionGroup(permissionGroup);
     }
 }

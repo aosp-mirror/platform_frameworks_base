@@ -315,7 +315,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int permissionsSize = permissions.size();
         for (int index = 0; index < permissionsSize; index++) {
-            permissions.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(permissions.get(index), this.packageName);
         }
 
         int permissionGroupsSize = permissionGroups.size();

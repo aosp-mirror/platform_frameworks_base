@@ -44,6 +44,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedPermissionImpl;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
@@ -1294,7 +1295,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.providers = ParsingUtils.createTypedInterfaceList(in, ParsedProviderImpl.CREATOR);
         this.attributions = ParsingUtils.createTypedInterfaceList(in,
                 ParsedAttributionImpl.CREATOR);
-        this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);
+        this.permissions = ParsingUtils.createTypedInterfaceList(in, ParsedPermissionImpl.CREATOR);
         this.permissionGroups = in.createTypedArrayList(ParsedPermissionGroup.CREATOR);
         this.instrumentations = ParsingUtils.createTypedInterfaceList(in,
                 ParsedInstrumentationImpl.CREATOR);
