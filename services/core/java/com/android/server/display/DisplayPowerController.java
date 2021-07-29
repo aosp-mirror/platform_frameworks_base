@@ -2342,7 +2342,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             try {
                 // TODO(brightnessfloat): change BatteryStats to use float
                 mBatteryStats.noteScreenBrightness(BrightnessSynchronizer.brightnessFloatToInt(
-                        brightness, null));
+                        brightness));
             } catch (RemoteException e) {
                 // same process
             }
