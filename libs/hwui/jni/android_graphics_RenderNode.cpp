@@ -547,9 +547,12 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 // SurfaceView position callback
 // ----------------------------------------------------------------------------
 
-jmethodID gPositionListener_PositionChangedMethod;
-jmethodID gPositionListener_ApplyStretchMethod;
-jmethodID gPositionListener_PositionLostMethod;
+struct {
+    jclass clazz;
+    jmethodID callPositionChanged;
+    jmethodID callApplyStretch;
+    jmethodID callPositionLost;
+} gPositionListener;
 
 static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         jlong renderNodePtr, jobject listener) {
@@ -557,16 +560,16 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
     public:
         PositionListenerTrampoline(JNIEnv* env, jobject listener) {
             env->GetJavaVM(&mVm);
-            mWeakRef = env->NewWeakGlobalRef(listener);
+            mListener = env->NewGlobalRef(listener);
         }
 
         virtual ~PositionListenerTrampoline() {
-            jnienv()->DeleteWeakGlobalRef(mWeakRef);
-            mWeakRef = nullptr;
+            jnienv()->DeleteGlobalRef(mListener);
+            mListener = nullptr;
         }
 
         virtual void onPositionUpdated(RenderNode& node, const TreeInfo& info) override {
-            if (CC_UNLIKELY(!mWeakRef || !info.updateWindowPositions)) return;
+            if (CC_UNLIKELY(!mListener || !info.updateWindowPositions)) return;
 
             Matrix4 transform;
             info.damageAccumulator->computeCurrentTransform(&transform);
@@ -609,7 +612,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         }
 
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) override {
-            if (CC_UNLIKELY(!mWeakRef || (info && !info->updateWindowPositions))) return;
+            if (CC_UNLIKELY(!mListener || (info && !info->updateWindowPositions))) return;
 
             if (mPreviousPosition.isEmpty()) {
                 return;
@@ -618,18 +621,16 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             ATRACE_NAME("SurfaceView position lost");
             JNIEnv* env = jnienv();
-            jobject localref = env->NewLocalRef(mWeakRef);
-            if (CC_UNLIKELY(!localref)) {
-                env->DeleteWeakGlobalRef(mWeakRef);
-                mWeakRef = nullptr;
-                return;
-            }
 #ifdef __ANDROID__ // Layoutlib does not support CanvasContext
             // TODO: Remember why this is synchronous and then make a comment
-            env->CallVoidMethod(localref, gPositionListener_PositionLostMethod,
+            jboolean keepListening = env->CallStaticBooleanMethod(
+                    gPositionListener.clazz, gPositionListener.callPositionLost, mListener,
                     info ? info->canvasContext.getFrameNumber() : 0);
+            if (!keepListening) {
+                env->DeleteGlobalRef(mListener);
+                mListener = nullptr;
+            }
 #endif
-            env->DeleteLocalRef(localref);
         }
 
     private:
@@ -684,28 +685,20 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 StretchEffectBehavior::Shader) {
                 JNIEnv* env = jnienv();
 
-                jobject localref = env->NewLocalRef(mWeakRef);
-                if (CC_UNLIKELY(!localref)) {
-                    env->DeleteWeakGlobalRef(mWeakRef);
-                    mWeakRef = nullptr;
-                    return;
-                }
 #ifdef __ANDROID__  // Layoutlib does not support CanvasContext
                 SkVector stretchDirection = effect->getStretchDirection();
-                env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
-                                    info.canvasContext.getFrameNumber(),
-                                    result.width,
-                                    result.height,
-                                    stretchDirection.fX,
-                                    stretchDirection.fY,
-                                    effect->maxStretchAmountX,
-                                    effect->maxStretchAmountY,
-                                    childRelativeBounds.left(),
-                                    childRelativeBounds.top(),
-                                    childRelativeBounds.right(),
-                                    childRelativeBounds.bottom());
+                jboolean keepListening = env->CallStaticBooleanMethod(
+                        gPositionListener.clazz, gPositionListener.callApplyStretch, mListener,
+                        info.canvasContext.getFrameNumber(), result.width, result.height,
+                        stretchDirection.fX, stretchDirection.fY, effect->maxStretchAmountX,
+                        effect->maxStretchAmountY, childRelativeBounds.left(),
+                        childRelativeBounds.top(), childRelativeBounds.right(),
+                        childRelativeBounds.bottom());
+                if (!keepListening) {
+                    env->DeleteGlobalRef(mListener);
+                    mListener = nullptr;
+                }
 #endif
-                env->DeleteLocalRef(localref);
             }
         }
 
@@ -714,14 +707,12 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             ATRACE_NAME("Update SurfaceView position");
 
             JNIEnv* env = jnienv();
-            jobject localref = env->NewLocalRef(mWeakRef);
-            if (CC_UNLIKELY(!localref)) {
-                env->DeleteWeakGlobalRef(mWeakRef);
-                mWeakRef = nullptr;
-            } else {
-                env->CallVoidMethod(localref, gPositionListener_PositionChangedMethod,
-                        frameNumber, left, top, right, bottom);
-                env->DeleteLocalRef(localref);
+            jboolean keepListening = env->CallStaticBooleanMethod(
+                    gPositionListener.clazz, gPositionListener.callPositionChanged, mListener,
+                    frameNumber, left, top, right, bottom);
+            if (!keepListening) {
+                env->DeleteGlobalRef(mListener);
+                mListener = nullptr;
             }
 
             // We need to release ourselves here
@@ -729,7 +720,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         }
 
         JavaVM* mVm;
-        jobject mWeakRef;
+        jobject mListener;
         uirenderer::Rect mPreviousPosition;
     };
 
@@ -754,7 +745,7 @@ static const JNINativeMethod gMethods[] = {
         {"nGetAllocatedSize", "(J)I", (void*)android_view_RenderNode_getAllocatedSize},
         {"nAddAnimator", "(JJ)V", (void*)android_view_RenderNode_addAnimator},
         {"nEndAllAnimators", "(J)V", (void*)android_view_RenderNode_endAllAnimators},
-        {"nRequestPositionUpdates", "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V",
+        {"nRequestPositionUpdates", "(JLjava/lang/ref/WeakReference;)V",
          (void*)android_view_RenderNode_requestPositionUpdates},
 
         // ----------------------------------------------------------------------------
@@ -852,12 +843,13 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_view_RenderNode(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/graphics/RenderNode$PositionUpdateListener");
-    gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
-            "positionChanged", "(JIIII)V");
-    gPositionListener_ApplyStretchMethod =
-            GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
-    gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,
-            "positionLost", "(J)V");
+    gPositionListener.clazz = MakeGlobalRefOrDie(env, clazz);
+    gPositionListener.callPositionChanged = GetStaticMethodIDOrDie(
+            env, clazz, "callPositionChanged", "(Ljava/lang/ref/WeakReference;JIIII)Z");
+    gPositionListener.callApplyStretch = GetStaticMethodIDOrDie(
+            env, clazz, "callApplyStretch", "(Ljava/lang/ref/WeakReference;JFFFFFFFFFF)Z");
+    gPositionListener.callPositionLost = GetStaticMethodIDOrDie(
+            env, clazz, "callPositionLost", "(Ljava/lang/ref/WeakReference;J)Z");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
