@@ -3516,7 +3516,7 @@
          use by third party apps.
          @hide -->
     <permission android:name="android.permission.UPDATE_APP_OPS_STATS"
-        android:protectionLevel="signature|privileged|installer" />
+        android:protectionLevel="signature|privileged|installer|role" />
 
     <!-- @SystemApi Allows an application to update the user app op restrictions.
          Not for use by third party apps.
