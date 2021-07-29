@@ -2068,6 +2068,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * @return if udfps is available on this device. will return true even if the user hasn't
+     * enrolled udfps.
+     */
+    public boolean isUdfpsAvailable() {
+        return mAuthController.getUdfpsProps() != null
+                && !mAuthController.getUdfpsProps().isEmpty();
+    }
+
+    /**
      * @return true if there's at least one face enrolled
      */
     public boolean isFaceEnrolled() {
@@ -2398,8 +2407,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             if (isEncryptedOrLockdown(userId) && supportsFaceDetection) {
                 mFaceManager.detectFace(mFaceCancelSignal, mFaceDetectionCallback, userId);
             } else {
+                final boolean isBypassEnabled = mKeyguardBypassController != null
+                        && mKeyguardBypassController.isBypassEnabled();
                 mFaceManager.authenticate(null /* crypto */, mFaceCancelSignal,
-                        mFaceAuthenticationCallback, null /* handler */, userId);
+                        mFaceAuthenticationCallback, null /* handler */, userId, isBypassEnabled);
             }
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }

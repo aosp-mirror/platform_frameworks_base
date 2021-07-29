@@ -55,6 +55,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @NonNull private final LockoutCache mLockoutCache;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
+    @NonNull private final CallbackWithProbe<Probe> mALSProbeCallback;
 
     @Nullable private ICancellationSignal mCancellationSignal;
     private boolean mIsPointerDown;
@@ -71,10 +72,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted, owner,
                 cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */);
+                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
+                false /* isKeyguardBypassEnabled */);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
         mSensorProps = sensorProps;
+        mALSProbeCallback = createALSCallback(false /* startWithClient */);
     }
 
     @Override
@@ -92,7 +95,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(mALSProbeCallback, callback);
     }
 
     @Override
@@ -170,7 +173,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         try {
             mIsPointerDown = true;
             mState = STATE_STARTED;
+            mALSProbeCallback.getProbe().enable();
             getFreshDaemon().onPointerDown(0 /* pointerId */, x, y, minor, major);
+
             if (getListener() != null) {
                 getListener().onUdfpsPointerDown(getSensorId());
             }
@@ -184,7 +189,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         try {
             mIsPointerDown = false;
             mState = STATE_STARTED_PAUSED;
+            mALSProbeCallback.getProbe().disable();
             getFreshDaemon().onPointerUp(0 /* pointerId */);
+
             if (getListener() != null) {
                 getListener().onUdfpsPointerUp(getSensorId());
             }

@@ -84,7 +84,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override

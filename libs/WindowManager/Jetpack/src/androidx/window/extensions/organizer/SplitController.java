@@ -26,7 +26,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
@@ -40,6 +42,7 @@ import androidx.window.extensions.ExtensionTaskFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Main controller class that manages split states and presentation.
@@ -57,8 +60,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private SplitOrganizerCallback mSplitOrganizerCallback;
 
     public SplitController() {
-        mPresenter = new SplitPresenter(ActivityThread.currentActivityThread().getExecutor(),
-                this);
+        mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
         // Register a callback to be notified about activities being created.
         ActivityThread.currentActivityThread().getApplication().registerActivityLifecycleCallbacks(
                 new LifecycleCallbacks());
@@ -147,6 +149,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Checks if the activity start should be routed to a particular container. It can create a new
      * container for the activity and a new split container if necessary.
      */
+    // TODO(b/190433398): Break down into smaller functions.
     void onActivityCreated(@NonNull Activity launchedActivity) {
         final ComponentName componentName = launchedActivity.getComponentName();
 
@@ -200,6 +203,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
 
+        // Check if the split is already set.
+        final TaskFragmentContainer activityBelowContainer = getContainerWithActivity(
+                activityBelow.getActivityToken());
+        if (currentContainer != null && activityBelowContainer != null) {
+            final SplitContainer existingSplit = getActiveSplitForContainers(currentContainer,
+                    activityBelowContainer);
+            if (existingSplit != null) {
+                // There is already an active split with the activity below.
+                return;
+            }
+        }
+
         final ExtensionSplitPairRule splitPairRule = getSplitRule(
                 activityBelow.getComponentName(), componentName, splitRules);
         if (splitPairRule == null) {
@@ -210,6 +225,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 splitPairRule);
 
         updateCallbackIfNecessary();
+    }
+
+    private void onActivityConfigurationChanged(@NonNull Activity activity) {
+        final TaskFragmentContainer currentContainer = getContainerWithActivity(
+                activity.getActivityToken());
+
+        if (currentContainer != null) {
+            // Changes to activities in controllers are handled in
+            // onTaskFragmentParentInfoChanged
+            return;
+        }
+
+        // Check if activity requires a placeholder
+        launchPlaceholderIfNecessary(activity);
     }
 
     /**
@@ -323,7 +352,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Returns the top active split container that has the provided container.
+     * Returns the top active split container that has the provided container, if available.
      */
     @Nullable
     private SplitContainer getActiveSplitForContainer(@NonNull TaskFragmentContainer container) {
@@ -331,6 +360,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             SplitContainer splitContainer = mSplitContainers.get(i);
             if (container.equals(splitContainer.getSecondaryContainer())
                     || container.equals(splitContainer.getPrimaryContainer())) {
+                return splitContainer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the active split that has the provided containers as primary and secondary or as
+     * secondary and primary, if available.
+     */
+    @Nullable
+    private SplitContainer getActiveSplitForContainers(
+            @NonNull TaskFragmentContainer firstContainer,
+            @NonNull TaskFragmentContainer secondContainer) {
+        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
+            SplitContainer splitContainer = mSplitContainers.get(i);
+            final TaskFragmentContainer primary = splitContainer.getPrimaryContainer();
+            final TaskFragmentContainer secondary = splitContainer.getSecondaryContainer();
+            if ((firstContainer == secondary && secondContainer == primary)
+                    || (firstContainer == primary && secondContainer == secondary)) {
                 return splitContainer;
             }
         }
@@ -545,6 +594,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        }
+
+        @Override
+        public void onActivityPostCreated(Activity activity, Bundle savedInstanceState) {
             // Calling after Activity#onCreate is complete to allow the app launch something
             // first. In case of a configured placeholder activity we want to make sure
             // that we don't launch it if an activity itself already requested something to be
@@ -574,6 +627,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+        }
+
+        @Override
+        public void onActivityConfigurationChanged(Activity activity) {
+            SplitController.this.onActivityConfigurationChanged(activity);
+        }
+    }
+
+    /** Executor that posts on the main application thread. */
+    private static class MainThreadExecutor implements Executor {
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        @Override
+        public void execute(Runnable r) {
+            handler.post(r);
         }
     }
 }

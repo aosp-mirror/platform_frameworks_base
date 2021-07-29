@@ -151,10 +151,8 @@ public class DragAndDropPolicy {
                 final Rect rightHitRegion = new Rect();
                 final Rect rightDrawRegion = bottomOrRightBounds;
 
-                displayRegion.splitVertically(leftHitRegion, fullscreenHitRegion, rightHitRegion);
+                displayRegion.splitVertically(leftHitRegion, rightHitRegion);
 
-                mTargets.add(
-                        new Target(TYPE_FULLSCREEN, fullscreenHitRegion, fullscreenDrawRegion));
                 mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, leftDrawRegion));
                 mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, rightDrawRegion));
 
@@ -165,10 +163,8 @@ public class DragAndDropPolicy {
                 final Rect bottomDrawRegion = bottomOrRightBounds;
 
                 displayRegion.splitHorizontally(
-                        topHitRegion, fullscreenHitRegion, bottomHitRegion);
+                        topHitRegion, bottomHitRegion);
 
-                mTargets.add(
-                        new Target(TYPE_FULLSCREEN, fullscreenHitRegion, fullscreenDrawRegion));
                 mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topDrawRegion));
                 mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomDrawRegion));
             }
@@ -269,7 +265,6 @@ public class DragAndDropPolicy {
          * Updates the session data based on the current state of the system.
          */
         void update() {
-
             List<ActivityManager.RunningTaskInfo> tasks =
                     mActivityTaskManager.getTasks(1, false /* filterOnlyVisibleRecents */);
             if (!tasks.isEmpty()) {
