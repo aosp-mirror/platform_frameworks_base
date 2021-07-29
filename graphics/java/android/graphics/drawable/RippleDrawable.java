@@ -278,6 +278,15 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
+        endPatternedAnimations();
+    }
+
+    private void endPatternedAnimations() {
+        for (int i = 0; i < mRunningAnimations.size(); i++) {
+            RippleAnimationSession session = mRunningAnimations.get(i);
+            session.end();
+        }
+        mRunningAnimations.clear();
     }
 
     private void cancelExitingRipples() {
@@ -291,7 +300,6 @@ public class RippleDrawable extends LayerDrawable {
             Arrays.fill(ripples, 0, count, null);
         }
         mExitingRipplesCount = 0;
-        mExitingAnimation = true;
         // Always draw an additional "clean" frame after canceling animations.
         invalidateSelf(false);
     }
@@ -714,7 +722,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
-        exitPatternedAnimation();
+        endPatternedAnimations();
     }
 
     @Override
