@@ -365,8 +365,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return false;
             }
 
+            if (matchingCandidate(task)) {
+                return true;
+            }
+
+            // Looking for the embedded tasks (if any)
+            return !task.isLeafTaskFragment() && task.forAllLeafTaskFragments(
+                    this::matchingCandidate);
+        }
+
+        boolean matchingCandidate(TaskFragment taskFragment) {
+            final Task task = taskFragment.asTask();
+            if (task == null) {
+                return false;
+            }
+
             // Overlays should not be considered as the task's logical top activity.
-            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */);
+            // Activities of the tasks that embedded from this one should not be used.
+            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */,
+                    false /* includingEmbeddedTask */);
+
             if (r == null || r.finishing || r.mUserId != userId
                     || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping %s: mismatch root %s", task, r);
