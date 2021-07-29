@@ -34,7 +34,6 @@ import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
@@ -42,6 +41,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -357,8 +357,9 @@ public class PacProxyService extends IPacProxyManager.Stub {
                 }
             }
         };
-        mContext.bindService(intent, mConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE);
+        mContext.bindServiceAsUser(intent, mConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE,
+                UserHandle.SYSTEM);
 
         intent = new Intent();
         intent.setClassName(PROXY_PACKAGE, PROXY_SERVICE);
@@ -398,9 +399,9 @@ public class PacProxyService extends IPacProxyManager.Stub {
                 }
             }
         };
-        mContext.bindService(intent,
+        mContext.bindServiceAsUser(intent, mProxyConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE,
-                new HandlerExecutor(mNetThreadHandler), mProxyConnection);
+                mNetThreadHandler, UserHandle.SYSTEM);
     }
 
     private void unbind() {
