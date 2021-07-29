@@ -52,6 +52,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.pm.pkg.PackageUserState;
@@ -916,7 +917,7 @@ public class PackageParserTest {
                 .addPermissionGroup(new ParsedPermissionGroup())
                 .addActivity(new ParsedActivityImpl())
                 .addReceiver(new ParsedActivityImpl())
-                .addProvider(new ParsedProvider())
+                .addProvider(new ParsedProviderImpl())
                 .addService(new ParsedService())
                 .addInstrumentation(new ParsedInstrumentation())
                 .addUsesPermission(new ParsedUsesPermission("foo7", 0))

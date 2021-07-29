@@ -48,15 +48,15 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
     public ParsedMainComponentImpl() {
     }
 
-    public ParsedMainComponentImpl(ParsedMainComponentImpl other) {
+    public ParsedMainComponentImpl(ParsedMainComponent other) {
         super(other);
-        this.processName = other.processName;
-        this.directBootAware = other.directBootAware;
-        this.enabled = other.enabled;
-        this.exported = other.exported;
-        this.order = other.order;
-        this.splitName = other.splitName;
-        this.attributionTags = other.attributionTags;
+        this.processName = other.getProcessName();
+        this.directBootAware = other.isDirectBootAware();
+        this.enabled = other.isEnabled();
+        this.exported = other.isExported();
+        this.order = other.getOrder();
+        this.splitName = other.getSplitName();
+        this.attributionTags = other.getAttributionTags();
     }
 
     public ParsedMainComponentImpl setProcessName(String processName) {

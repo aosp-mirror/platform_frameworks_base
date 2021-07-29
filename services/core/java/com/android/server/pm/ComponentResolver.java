@@ -36,11 +36,13 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.pkg.PackageUserState;
 import android.os.UserHandle;
@@ -744,7 +746,7 @@ public class ComponentResolver
                 String[] names = p.getAuthority().split(";");
 
                 // TODO(b/135203078): Remove this mutation
-                p.setAuthority(null);
+                ComponentMutateUtils.setAuthority(p, null);
                 for (int j = 0; j < names.length; j++) {
                     if (j == 1 && p.isSyncable()) {
                         // We only want the first authority for a provider to possibly be
@@ -754,15 +756,15 @@ public class ComponentResolver
                         // to a provider that we don't want to change.
                         // Only do this for the second authority since the resulting provider
                         // object can be the same for all future authorities for this provider.
-                        p = new ParsedProvider(p);
-                        p.setSyncable(false);
+                        p = new ParsedProviderImpl(p);
+                        ComponentMutateUtils.setSyncable(p, false);
                     }
                     if (!mProvidersByAuthority.containsKey(names[j])) {
                         mProvidersByAuthority.put(names[j], p);
                         if (p.getAuthority() == null) {
-                            p.setAuthority(names[j]);
+                            ComponentMutateUtils.setAuthority(p, names[j]);
                         } else {
-                            p.setAuthority(p.getAuthority() + ";" + names[j]);
+                            ComponentMutateUtils.setAuthority(p, p.getAuthority() + ";" + names[j]);
                         }
                         if (DEBUG_PACKAGE_SCANNING && chatty) {
                             Log.d(TAG, "Registered content provider: " + names[j]

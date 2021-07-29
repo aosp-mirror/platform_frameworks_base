@@ -57,12 +57,12 @@ public class ParsedProviderUtils {
 
         final int targetSdkVersion = pkg.getTargetSdkVersion();
         final String packageName = pkg.getPackageName();
-        final ParsedProvider provider = new ParsedProvider();
+        final ParsedProviderImpl provider = new ParsedProviderImpl();
         final String tag = parser.getName();
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProvider);
         try {
-            ParseResult<ParsedProvider> result =
+            ParseResult<ParsedProviderImpl> result =
                     ParsedMainComponentUtils.parseMainComponent(provider, tag, separateProcesses,
                             pkg, sa, flags, useRoundIcon, defaultSplitName, input,
                             R.styleable.AndroidManifestProvider_banner,
@@ -78,7 +78,7 @@ public class ParsedProviderUtils {
                             R.styleable.AndroidManifestProvider_splitName,
                             R.styleable.AndroidManifestProvider_attributionTags);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             authority = sa.getNonConfigurationString(R.styleable.AndroidManifestProvider_authorities, 0);
@@ -157,7 +157,7 @@ public class ParsedProviderUtils {
     @NonNull
     private static ParseResult<ParsedProvider> parseProviderTags(ParsingPackage pkg, String tag,
             Resources res, XmlResourceParser parser, boolean visibleToEphemeral,
-            ParsedProvider provider, ParseInput input)
+            ParsedProviderImpl provider, ParseInput input)
             throws XmlPullParserException, IOException {
         final int depth = parser.getDepth();
         int type;
@@ -212,7 +212,7 @@ public class ParsedProviderUtils {
     }
 
     @NonNull
-    private static ParseResult<ParsedProvider> parseGrantUriPermission(ParsedProvider provider,
+    private static ParseResult<ParsedProvider> parseGrantUriPermission(ParsedProviderImpl provider,
             ParsingPackage pkg, Resources resources, XmlResourceParser parser, ParseInput input) {
         TypedArray sa = resources.obtainAttributes(parser,
                 R.styleable.AndroidManifestGrantUriPermission);
@@ -278,7 +278,7 @@ public class ParsedProviderUtils {
     }
 
     @NonNull
-    private static ParseResult<ParsedProvider> parsePathPermission(ParsedProvider provider,
+    private static ParseResult<ParsedProvider> parsePathPermission(ParsedProviderImpl provider,
             ParsingPackage pkg, Resources resources, XmlResourceParser parser, ParseInput input) {
         TypedArray sa = resources.obtainAttributes(parser,
                 R.styleable.AndroidManifestPathPermission);

@@ -39,6 +39,7 @@ import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
@@ -177,7 +178,7 @@ public class AppsFilterTest {
     }
 
     private static ParsingPackage pkgWithProvider(String packageName, String authority) {
-        ParsedProvider provider = new ParsedProvider();
+        ParsedProviderImpl provider = new ParsedProviderImpl();
         provider.setPackageName(packageName);
         provider.setExported(true);
         provider.setAuthority(authority);

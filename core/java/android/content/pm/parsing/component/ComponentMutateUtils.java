@@ -17,6 +17,7 @@
 package android.content.pm.parsing.component;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /**
  * Contains mutation methods so that code doesn't have to cast to the Impl. Meant to eventually
@@ -65,5 +66,13 @@ public class ComponentMutateUtils {
 
     public static void setExported(@NonNull ParsedMainComponent component, boolean exported) {
         ((ParsedMainComponentImpl) component).setExported(exported);
+    }
+
+    public static void setAuthority(@NonNull ParsedProvider provider, @Nullable String authority) {
+        ((ParsedProviderImpl) provider).setAuthority(authority);
+    }
+
+    public static void setSyncable(@NonNull ParsedProvider provider, boolean syncable) {
+        ((ParsedProviderImpl) provider).setSyncable(syncable);
     }
 }

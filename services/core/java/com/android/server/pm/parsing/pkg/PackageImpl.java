@@ -335,7 +335,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(providers.get(index), this.packageName);
         }
 
         int servicesSize = services.size();
@@ -367,7 +367,8 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(providers.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int servicesSize = services.size();
@@ -467,7 +468,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         for (int index = 0; index < providersSize; index++) {
             ParsedProvider provider = providers.get(index);
             if ((provider.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                provider.setExported(false);
+                ComponentMutateUtils.setExported(provider, false);
             }
         }
 

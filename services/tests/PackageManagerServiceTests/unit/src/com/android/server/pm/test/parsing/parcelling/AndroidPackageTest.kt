@@ -35,6 +35,7 @@ import android.content.pm.parsing.component.ParsedPermission
 import android.content.pm.parsing.component.ParsedPermissionGroup
 import android.content.pm.parsing.component.ParsedProcess
 import android.content.pm.parsing.component.ParsedProvider
+import android.content.pm.parsing.component.ParsedProviderImpl
 import android.content.pm.parsing.component.ParsedService
 import android.content.pm.parsing.component.ParsedUsesPermission
 import android.net.Uri
@@ -379,7 +380,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addProvider,
             "TestProviderName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedProvider().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedProviderImpl().apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getInstrumentations,

@@ -86,9 +86,9 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
 
     }
 
-    protected ParsedComponentImpl(ParsedComponentImpl other) {
-        this.metaData = other.metaData;
-        this.name = other.name;
+    protected ParsedComponentImpl(ParsedComponent other) {
+        this.metaData = other.getMetaData();
+        this.name = other.getName();
         this.icon = other.getIcon();
         this.labelRes = other.getLabelRes();
         this.nonLocalizedLabel = other.getNonLocalizedLabel();
@@ -96,11 +96,11 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
         this.banner = other.getBanner();
         this.descriptionRes = other.getDescriptionRes();
         this.flags = other.getFlags();
-        this.packageName = other.packageName;
-        this.componentName = other.componentName;
+        this.packageName = other.getPackageName();
+        this.componentName = other.getComponentName();
         this.intents = new ArrayList<>(other.getIntents());
         this.mProperties = new ArrayMap<>();
-        this.mProperties.putAll(other.mProperties);
+        this.mProperties.putAll(other.getProperties());
     }
 
     public void addIntent(ParsedIntentInfo intent) {
