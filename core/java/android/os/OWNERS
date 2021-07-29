@@ -66,3 +66,6 @@ per-file *Recovery* = file:/services/core/java/com/android/server/recoverysystem
 
 # Bugreporting
 per-file Bugreport* = file:/platform/frameworks/native:/cmds/dumpstate/OWNERS
+
+# UpdateEngine
+per-file *UpdateEngine* = file:/platform/system/update_engine:/OWNERS
