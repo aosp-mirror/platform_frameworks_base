@@ -237,7 +237,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -266,8 +265,8 @@ import dagger.Lazy;
 
 /** */
 public class StatusBar extends SystemUI implements
-        ActivityStarter, KeyguardStateController.Callback,
-        OnHeadsUpChangedListener, CommandQueue.Callbacks,
+        ActivityStarter,
+        CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener,
         LifecycleOwner, BatteryController.BatteryStateChangeCallback,
@@ -1039,7 +1038,13 @@ public class StatusBar extends SystemUI implements
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy.init();
 
-        mKeyguardStateController.addCallback(this);
+        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onUnlockedChanged() {
+                updateKeyguardState();
+                logStateToEventlog();
+            }
+        });
         startKeyguard();
 
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
@@ -1216,7 +1221,6 @@ public class StatusBar extends SystemUI implements
 
         mHeadsUpManager.setup(mVisualStabilityManager);
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
-        mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanelViewController.getOnHeadsUpChangedListener());
         mHeadsUpManager.addListener(mVisualStabilityManager);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
@@ -1597,6 +1601,8 @@ public class StatusBar extends SystemUI implements
         mAuthRippleController = statusBarComponent.getAuthRippleController();
         mAuthRippleController.init();
 
+        mHeadsUpManager.addListener(statusBarComponent.getStatusBarHeadsUpChangeListener());
+
         // Listen for demo mode changes
         mDemoModeController.addCallback(statusBarComponent.getStatusBarDemoMode());
     }
@@ -1917,70 +1923,6 @@ public class StatusBar extends SystemUI implements
      */
     public void onKeyguardViewManagerStatesUpdated() {
         logStateToEventlog();
-    }
-
-    @Override
-    public void onUnlockedChanged() {
-        updateKeyguardState();
-        logStateToEventlog();
-    }
-
-    @Override
-    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-        if (inPinnedMode) {
-            mNotificationShadeWindowController.setHeadsUpShowing(true);
-            mStatusBarWindowController.setForceStatusBarVisible(true);
-            if (mNotificationPanelViewController.isFullyCollapsed()) {
-                // We need to ensure that the touchable region is updated before the window will be
-                // resized, in order to not catch any touches. A layout will ensure that
-                // onComputeInternalInsets will be called and after that we can resize the layout. Let's
-                // make sure that the window stays small for one frame until the touchableRegion is set.
-                mNotificationPanelViewController.getView().requestLayout();
-                mNotificationShadeWindowController.setForceWindowCollapsed(true);
-                mNotificationPanelViewController.getView().post(() -> {
-                    mNotificationShadeWindowController.setForceWindowCollapsed(false);
-                });
-            }
-        } else {
-            boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
-                    && mState == StatusBarState.KEYGUARD;
-            if (!mNotificationPanelViewController.isFullyCollapsed()
-                    || mNotificationPanelViewController.isTracking() || bypassKeyguard) {
-                // We are currently tracking or is open and the shade doesn't need to be kept
-                // open artificially.
-                mNotificationShadeWindowController.setHeadsUpShowing(false);
-                if (bypassKeyguard) {
-                    mStatusBarWindowController.setForceStatusBarVisible(false);
-                }
-            } else {
-                // we need to keep the panel open artificially, let's wait until the animation
-                // is finished.
-                mHeadsUpManager.setHeadsUpGoingAway(true);
-                mNotificationPanelViewController.runAfterAnimationFinished(() -> {
-                    if (!mHeadsUpManager.hasPinnedHeadsUp()) {
-                        mNotificationShadeWindowController.setHeadsUpShowing(false);
-                        mHeadsUpManager.setHeadsUpGoingAway(false);
-                    }
-                    mRemoteInputManager.onPanelCollapsed();
-                });
-            }
-        }
-    }
-
-    @Override
-    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mNotificationsController.requestNotificationUpdate("onHeadsUpStateChanged");
-        if (mStatusBarStateController.isDozing() && isHeadsUp) {
-            entry.setPulseSuppressed(false);
-            mDozeServiceHost.fireNotificationPulse(entry);
-            if (mDozeServiceHost.isPulsing()) {
-                mDozeScrimController.cancelPendingPulseTimeout();
-            }
-        }
-        if (!isHeadsUp && !mHeadsUpManager.hasNotifications()) {
-            // There are no longer any notifications to show.  We should end the pulse now.
-            mDozeScrimController.pulseOutNow();
-        }
     }
 
     public void setPanelExpanded(boolean isExpanded) {

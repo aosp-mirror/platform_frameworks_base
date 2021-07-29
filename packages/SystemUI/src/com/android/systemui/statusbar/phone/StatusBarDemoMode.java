@@ -113,7 +113,6 @@ public class StatusBarDemoMode implements DemoMode {
         }
     }
 
-
     private void dispatchDemoModeStartedToView(int id) {
         View statusBarView = mStatusBar.getStatusBarView();
         if (statusBarView == null) return;
