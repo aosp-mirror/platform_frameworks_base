@@ -96,8 +96,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
     @NonNull private final Drawable mUnlockIcon;
-    @NonNull private final CharSequence mUnlockedLabel;
-    @NonNull private final CharSequence mLockedLabel;
+    @NonNull private CharSequence mUnlockedLabel;
+    @NonNull private CharSequence mLockedLabel;
     @Nullable private final Vibrator mVibrator;
 
     private boolean mIsDozing;
@@ -314,6 +314,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mHeightPixels = metrics.heightPixels;
         mBottomPadding = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.lock_icon_margin_bottom);
+
+        mUnlockedLabel = mView.getContext().getResources().getString(
+                R.string.accessibility_unlock_button);
+        mLockedLabel = mView.getContext()
+                .getResources().getString(R.string.accessibility_lock_icon);
+
         updateLockIconLocation();
     }
 
