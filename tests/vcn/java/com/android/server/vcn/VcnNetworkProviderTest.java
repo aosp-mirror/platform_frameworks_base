@@ -87,8 +87,8 @@ public class VcnNetworkProviderTest {
                         eq(mVcnNetworkProvider),
                         argThat(
                                 score ->
-                                        score.getLegacyInt()
-                                                == Vcn.getNetworkScore().getLegacyInt()),
+                                        score.getLegacyInt() == Vcn.getNetworkScore().getLegacyInt()
+                                                && score.isTransportPrimary()),
                         any(),
                         any(),
                         cbCaptor.capture());

@@ -72,7 +72,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted, owner,
                 cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */);
+                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
+                false /* isKeyguardBypassEnabled */);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
         mSensorProps = sensorProps;
