@@ -26,6 +26,7 @@
 #include "hwui/BlurDrawLooper.h"
 
 #include <SkCanvas.h>
+#include <SkDeque.h>
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "src/core/SkArenaAlloc.h"
 
