@@ -1269,13 +1269,11 @@ public class StatusBar extends SystemUI implements
         ScrimView notificationsScrim = mNotificationShadeWindowView
                 .findViewById(R.id.scrim_notifications);
         ScrimView scrimInFront = mNotificationShadeWindowView.findViewById(R.id.scrim_in_front);
-        ScrimView scrimForBubble = mBubblesManagerOptional.isPresent()
-                ? mBubblesManagerOptional.get().getScrimForBubble() : null;
 
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);
         });
-        mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront, scrimForBubble);
+        mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
         mLightRevealScrim.setRevealAmountListener(
