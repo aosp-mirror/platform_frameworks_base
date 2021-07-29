@@ -148,6 +148,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private final ArraySet<WindowToken> mVisibleAtTransitionEndTokens = new ArraySet<>();
 
+    /** Set of transient activities (lifecycle initially tied to this transition). */
+    private ArraySet<ActivityRecord> mTransientLaunches = null;
+
     /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
     private IRemoteCallback mClientAnimationStartCallback = null;
@@ -172,6 +175,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
     void addFlag(int flag) {
         mFlags |= flag;
+    }
+
+    /** Records an activity as transient-launch. This activity must be already collected. */
+    void setTransientLaunch(@NonNull ActivityRecord activity) {
+        if (mTransientLaunches == null) {
+            mTransientLaunches = new ArraySet<>();
+        }
+        mTransientLaunches.add(activity);
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
+                + "transient-launch", mSyncId, activity);
+    }
+
+    boolean isTransientLaunch(@NonNull ActivityRecord activity) {
+        return mTransientLaunches != null && mTransientLaunches.contains(activity);
     }
 
     @VisibleForTesting

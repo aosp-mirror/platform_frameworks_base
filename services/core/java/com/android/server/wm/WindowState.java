@@ -1980,7 +1980,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         return (mHasSurface || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && isVisibleByPolicy() && !isParentWindowHidden()
-                && (atoken == null || atoken.mVisibleRequested)
+                && (atoken == null || atoken.isVisible())
                 && !mAnimatingExit && !mDestroying;
     }
 
@@ -2704,6 +2704,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)) {
                 return false;
             }
+        }
+
+        // Don't allow transient-launch activities to take IME.
+        if (rootTask != null && mActivityRecord != null
+                && mWmService.mAtmService.getTransitionController().isTransientLaunch(
+                        mActivityRecord)) {
+            return false;
         }
 
         if (DEBUG_INPUT_METHOD) {

@@ -578,6 +578,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Specifies the count to determine whether to defer updating the IME target until ready.
      */
     private int mDeferUpdateImeTargetCount;
+    private boolean mUpdateImeRequestedWhileDeferred;
 
     private MagnificationSpec mMagnificationSpec;
 
@@ -3729,6 +3730,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final WindowState curTarget = mImeLayeringTarget;
         if (!canUpdateImeTarget()) {
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Defer updating IME target");
+            mUpdateImeRequestedWhileDeferred = true;
             return curTarget;
         }
 
@@ -4991,6 +4993,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Increment the deferral count to determine whether to update the IME target.
      */
     void deferUpdateImeTarget() {
+        if (mDeferUpdateImeTargetCount == 0) {
+            mUpdateImeRequestedWhileDeferred = false;
+        }
         mDeferUpdateImeTargetCount++;
     }
 
@@ -5004,7 +5009,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         mDeferUpdateImeTargetCount--;
-        if (mDeferUpdateImeTargetCount == 0) {
+        if (mDeferUpdateImeTargetCount == 0 && mUpdateImeRequestedWhileDeferred) {
             computeImeTarget(true /* updateImeTarget */);
         }
     }

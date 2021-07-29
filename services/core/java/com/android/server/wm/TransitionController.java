@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -185,6 +186,20 @@ class TransitionController {
         return false;
     }
 
+    /**
+     * @return {@code true} if {@param ar} is part of a transient-launch activity in an active
+     * transition.
+     */
+    boolean isTransientLaunch(@NonNull ActivityRecord ar) {
+        if (mCollectingTransition != null && mCollectingTransition.isTransientLaunch(ar)) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).isTransientLaunch(ar)) return true;
+        }
+        return false;
+    }
+
     @WindowManager.TransitionType
     int getCollectingTransitionType() {
         return mCollectingTransition != null ? mCollectingTransition.mType : TRANSIT_NONE;
@@ -331,13 +346,18 @@ class TransitionController {
     }
 
     /**
-     * Explicitly mark the collectingTransition as being part of recents gesture. Used for legacy
-     * behaviors.
-     * TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
+     * Record that the launch of {@param activity} is transient (meaning its lifecycle is currently
+     * tied to the transition).
      */
-    void setIsLegacyRecents() {
+    void setTransientLaunch(@NonNull ActivityRecord activity) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
+        mCollectingTransition.setTransientLaunch(activity);
+
+        // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
+        // Also interpret HOME transient launch as recents
+        if (activity.getActivityType() == ACTIVITY_TYPE_HOME) {
+            mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
+        }
     }
 
     void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
