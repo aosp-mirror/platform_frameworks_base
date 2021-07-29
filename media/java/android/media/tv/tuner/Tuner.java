@@ -629,8 +629,13 @@ public class Tuner implements AutoCloseable  {
                     synchronized (mOnResourceLostListenerLock) {
                         if (mOnResourceLostListener != null
                                 && mOnResourceLostListenerExecutor != null) {
-                            mOnResourceLostListenerExecutor.execute(
-                                    () -> mOnResourceLostListener.onResourceLost(Tuner.this));
+                            mOnResourceLostListenerExecutor.execute(() -> {
+                                synchronized (mOnResourceLostListenerLock) {
+                                    if (mOnResourceLostListener != null) {
+                                        mOnResourceLostListener.onResourceLost(Tuner.this);
+                                    }
+                                }
+                            });
                         }
                     }
                     break;
@@ -1068,7 +1073,13 @@ public class Tuner implements AutoCloseable  {
         Log.d(TAG, "Got event from tuning. Event type: " + eventType);
         synchronized (mOnTuneEventLock) {
             if (mOnTuneEventExecutor != null && mOnTuneEventListener != null) {
-                mOnTuneEventExecutor.execute(() -> mOnTuneEventListener.onTuneEvent(eventType));
+                mOnTuneEventExecutor.execute(() -> {
+                    synchronized (mOnTuneEventLock) {
+                        if (mOnTuneEventListener != null) {
+                            mOnTuneEventListener.onTuneEvent(eventType);
+                        }
+                    }
+                });
             }
         }
 
@@ -1096,7 +1107,13 @@ public class Tuner implements AutoCloseable  {
 
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onLocked());
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onLocked();
+                        }
+                    }
+                });
             }
         }
     }
@@ -1104,7 +1121,13 @@ public class Tuner implements AutoCloseable  {
     private void onScanStopped() {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onScanStopped());
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onScanStopped();
+                        }
+                    }
+                });
             }
         }
     }
@@ -1112,7 +1135,13 @@ public class Tuner implements AutoCloseable  {
     private void onProgress(int percent) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onProgress(percent));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onProgress(percent);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1120,7 +1149,13 @@ public class Tuner implements AutoCloseable  {
     private void onFrequenciesReport(int[] frequency) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReported(frequency));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onFrequenciesReported(frequency);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1128,7 +1163,13 @@ public class Tuner implements AutoCloseable  {
     private void onSymbolRates(int[] rate) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRatesReported(rate));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onSymbolRatesReported(rate);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1136,7 +1177,13 @@ public class Tuner implements AutoCloseable  {
     private void onHierarchy(int hierarchy) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchyReported(hierarchy));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onHierarchyReported(hierarchy);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1144,7 +1191,13 @@ public class Tuner implements AutoCloseable  {
     private void onSignalType(int signalType) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onSignalTypeReported(signalType));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onSignalTypeReported(signalType);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1152,7 +1205,13 @@ public class Tuner implements AutoCloseable  {
     private void onPlpIds(int[] plpIds) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIdsReported(plpIds));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onPlpIdsReported(plpIds);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1160,7 +1219,13 @@ public class Tuner implements AutoCloseable  {
     private void onGroupIds(int[] groupIds) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIdsReported(groupIds));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onGroupIdsReported(groupIds);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1168,8 +1233,13 @@ public class Tuner implements AutoCloseable  {
     private void onInputStreamIds(int[] inputStreamIds) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onInputStreamIdsReported(inputStreamIds));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onInputStreamIdsReported(inputStreamIds);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1177,8 +1247,13 @@ public class Tuner implements AutoCloseable  {
     private void onDvbsStandard(int dvbsStandandard) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onDvbsStandardReported(dvbsStandandard));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onDvbsStandardReported(dvbsStandandard);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1186,8 +1261,13 @@ public class Tuner implements AutoCloseable  {
     private void onDvbtStandard(int dvbtStandard) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onDvbtStandardReported(dvbtStandard));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onDvbtStandardReported(dvbtStandard);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1195,7 +1275,13 @@ public class Tuner implements AutoCloseable  {
     private void onAnalogSifStandard(int sif) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandardReported(sif));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onAnalogSifStandardReported(sif);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1203,8 +1289,13 @@ public class Tuner implements AutoCloseable  {
     private void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1212,8 +1303,13 @@ public class Tuner implements AutoCloseable  {
     private void onModulationReported(int modulation) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onModulationReported(modulation));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onModulationReported(modulation);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1221,8 +1317,13 @@ public class Tuner implements AutoCloseable  {
     private void onPriorityReported(boolean isHighPriority) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onPriorityReported(isHighPriority));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onPriorityReported(isHighPriority);
+                        }
+                    }
+                });
             }
         }
     }
@@ -1230,8 +1331,13 @@ public class Tuner implements AutoCloseable  {
     private void onDvbcAnnexReported(int dvbcAnnex) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
-                mScanCallbackExecutor.execute(
-                        () -> mScanCallback.onDvbcAnnexReported(dvbcAnnex));
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onDvbcAnnexReported(dvbcAnnex);
+                        }
+                    }
+                });
             }
         }
     }
