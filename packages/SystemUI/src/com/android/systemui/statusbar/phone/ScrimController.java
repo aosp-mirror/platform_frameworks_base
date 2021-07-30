@@ -480,8 +480,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
                     || mState == ScrimState.SHADE_LOCKED
-                    || mState == ScrimState.PULSING
-                    || mState == ScrimState.BUBBLE_EXPANDED);
+                    || mState == ScrimState.PULSING);
             if (!(relevantState && mExpansionAffectsAlpha)) {
                 return;
             }
@@ -548,8 +547,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             mQsBottomVisible = qsBottomVisible;
             boolean relevantState = (mState == ScrimState.SHADE_LOCKED
                     || mState == ScrimState.KEYGUARD
-                    || mState == ScrimState.PULSING
-                    || mState == ScrimState.BUBBLE_EXPANDED);
+                    || mState == ScrimState.PULSING);
             if (!(relevantState && mExpansionAffectsAlpha)) {
                 return;
             }
@@ -622,7 +620,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED || mState == ScrimState.BUBBLE_EXPANDED) {
+        if (mState == ScrimState.UNLOCKED) {
             // Darken scrim as you pull down the shade when unlocked, unless the shade is expanding
             // because we're doing the screen off animation.
             if (!mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
