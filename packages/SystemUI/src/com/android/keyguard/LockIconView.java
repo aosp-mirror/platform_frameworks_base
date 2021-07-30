@@ -22,6 +22,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -92,9 +93,12 @@ public class LockIconView extends FrameLayout implements Dumpable {
 
         setX(mSensorRect.left);
         setY(mSensorRect.top);
-        setLayoutParams(new FrameLayout.LayoutParams(
+
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 (int) (mSensorRect.right - mSensorRect.left),
-                (int) (mSensorRect.bottom - mSensorRect.top)));
+                (int) (mSensorRect.bottom - mSensorRect.top));
+        lp.gravity = Gravity.CENTER;
+        setLayoutParams(lp);
     }
 
     @Override
