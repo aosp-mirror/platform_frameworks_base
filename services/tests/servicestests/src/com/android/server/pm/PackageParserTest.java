@@ -52,6 +52,7 @@ import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedPermissionGroupImpl;
 import android.content.pm.parsing.component.ParsedPermissionImpl;
 import android.content.pm.parsing.component.ParsedPermissionUtils;
 import android.content.pm.parsing.component.ParsedProvider;
@@ -903,7 +904,7 @@ public class PackageParserTest {
         bundle.putString("key", "value");
 
         ParsedPermissionImpl permission = new ParsedPermissionImpl();
-        permission.setParsedPermissionGroup(new ParsedPermissionGroup());
+        permission.setParsedPermissionGroup(new ParsedPermissionGroupImpl());
 
         ((ParsedPackage) pkg.setBaseRevisionCode(100)
                 .setBaseHardwareAccelerated(true)
@@ -919,7 +920,7 @@ public class PackageParserTest {
                 .setUse32BitAbi(true)
                 .setVolumeUuid("d52ef59a-7def-4541-bf21-4c28ed4b65a0")
                 .addPermission(permission)
-                .addPermissionGroup(new ParsedPermissionGroup())
+                .addPermissionGroup(new ParsedPermissionGroupImpl())
                 .addActivity(new ParsedActivityImpl())
                 .addReceiver(new ParsedActivityImpl())
                 .addProvider(new ParsedProviderImpl())

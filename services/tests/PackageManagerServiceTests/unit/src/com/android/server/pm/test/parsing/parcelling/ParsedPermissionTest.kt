@@ -18,6 +18,7 @@ package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedPermission
 import android.content.pm.parsing.component.ParsedPermissionGroup
+import android.content.pm.parsing.component.ParsedPermissionGroupImpl
 import android.content.pm.parsing.component.ParsedPermissionImpl
 import kotlin.contracts.ExperimentalContracts
 
@@ -52,7 +53,7 @@ class ParsedPermissionTest : ParsedComponentTest(
         getSetByValue(
             ParsedPermission::getParsedPermissionGroup,
             ParsedPermissionImpl::setParsedPermissionGroup,
-            ParsedPermissionGroup().apply { name = "test.permission.group" },
+            ParsedPermissionGroupImpl().apply { name = "test.permission.group" },
             compare = { first, second -> equalBy(first, second, ParsedPermissionGroup::getName) }
         ),
     )

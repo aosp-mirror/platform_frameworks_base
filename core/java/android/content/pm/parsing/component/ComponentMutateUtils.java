@@ -85,4 +85,9 @@ public class ComponentMutateUtils {
             @NonNull ParsedPermissionGroup permissionGroup) {
         ((ParsedPermissionImpl) permission).setParsedPermissionGroup(permissionGroup);
     }
+
+    public static void setPriority(@NonNull ParsedPermissionGroup parsedPermissionGroup,
+            int priority) {
+        ((ParsedPermissionGroupImpl) parsedPermissionGroup).setPriority(priority);
+    }
 }

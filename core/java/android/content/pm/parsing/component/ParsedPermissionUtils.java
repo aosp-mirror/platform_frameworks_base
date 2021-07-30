@@ -206,13 +206,13 @@ public class ParsedPermissionUtils {
     public static ParseResult<ParsedPermissionGroup> parsePermissionGroup(ParsingPackage pkg,
             Resources res, XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
             throws IOException, XmlPullParserException {
-        ParsedPermissionGroup
-                permissionGroup = new ParsedPermissionGroup();
+        ParsedPermissionGroupImpl
+                permissionGroup = new ParsedPermissionGroupImpl();
         String tag = "<" + parser.getName() + ">";
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermissionGroup);
         try {
-            ParseResult<ParsedPermissionGroup> result = ParsedComponentUtils.parseComponent(
+            ParseResult<ParsedPermissionGroupImpl> result = ParsedComponentUtils.parseComponent(
                     permissionGroup, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermissionGroup_banner,
                     R.styleable.AndroidManifestPermissionGroup_description,
@@ -222,7 +222,7 @@ public class ParsedPermissionUtils {
                     R.styleable.AndroidManifestPermissionGroup_name,
                     R.styleable.AndroidManifestPermissionGroup_roundIcon);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             // @formatter:off
@@ -237,8 +237,13 @@ public class ParsedPermissionUtils {
             sa.recycle();
         }
 
-        return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permissionGroup,
-                input);
+        ParseResult<ParsedPermissionGroupImpl> result = ComponentParseUtils.parseAllMetaData(pkg,
+                res, parser, tag, permissionGroup, input);
+        if (result.isError()) {
+            return input.error(result);
+        }
+
+        return input.success(result.getResult());
     }
 
     public static boolean isRuntime(@NonNull ParsedPermission permission) {

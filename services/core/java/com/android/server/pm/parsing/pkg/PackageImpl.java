@@ -320,7 +320,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int permissionGroupsSize = permissionGroups.size();
         for (int index = 0; index < permissionGroupsSize; index++) {
-            permissionGroups.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(permissionGroups.get(index), this.packageName);
         }
 
         int activitiesSize = activities.size();
@@ -439,7 +439,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         int size = permissionGroups.size();
         for (int index = size - 1; index >= 0; --index) {
             // TODO(b/135203078): Builder/immutability
-            permissionGroups.get(index).setPriority(0);
+            ComponentMutateUtils.setPriority(permissionGroups.get(index), 0);
         }
         return this;
     }
