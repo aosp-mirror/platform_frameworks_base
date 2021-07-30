@@ -193,6 +193,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetManagerInternal;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -16597,6 +16598,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (updateFrameworkRes) {
             ParsingPackageUtils.readConfigUseRoundIcon(null);
         }
+
+        AppWidgetManagerInternal widgets = LocalServices.getService(AppWidgetManagerInternal.class);
+        if (widgets != null) {
+            widgets.applyResourceOverlaysToWidgets(new HashSet<>(packagesToUpdate), userId,
+                    updateFrameworkRes);
+        }
+
         mProcessList.updateApplicationInfoLOSP(packagesToUpdate, userId, updateFrameworkRes);
 
         if (updateFrameworkRes) {

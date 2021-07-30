@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.junit.Before;
@@ -76,6 +77,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
+    private ConfigurationController mConfigurationController;
+    @Mock
     private UdfpsController mUdfpsController;
 
     private UdfpsKeyguardViewController mController;
@@ -110,6 +113,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
                 mDumpManager,
                 mKeyguardViewMediator,
                 mLockscreenShadeTransitionController,
+                mConfigurationController,
                 mUdfpsController);
     }
 

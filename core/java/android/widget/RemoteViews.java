@@ -5824,6 +5824,25 @@ public class RemoteViews implements Parcelable, Filter {
         return false;
     }
 
+    /** @hide */
+    public void updateAppInfo(@NonNull ApplicationInfo info) {
+        if (mApplication != null && mApplication.sourceDir.equals(info.sourceDir)) {
+            // Overlay paths are generated against a particular version of an application.
+            // The overlays paths of a newly upgraded application are incompatible with the
+            // old version of the application.
+            mApplication = info;
+        }
+        if (hasSizedRemoteViews()) {
+            for (RemoteViews layout : mSizedRemoteViews) {
+                layout.updateAppInfo(info);
+            }
+        }
+        if (hasLandscapeAndPortraitLayouts()) {
+            mLandscape.updateAppInfo(info);
+            mPortrait.updateAppInfo(info);
+        }
+    }
+
     private Context getContextForResources(Context context) {
         if (mApplication != null) {
             if (context.getUserId() == UserHandle.getUserId(mApplication.uid)
