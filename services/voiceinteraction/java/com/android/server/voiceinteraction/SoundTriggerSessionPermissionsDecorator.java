@@ -29,7 +29,6 @@ import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceSpecificException;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -117,8 +116,8 @@ final class SoundTriggerSessionPermissionsDecorator implements
 
     /**
      * Throws a {@link SecurityException} if originator permanently doesn't have the given
-     * permission, or a {@link ServiceSpecificException} with a {@link
-     * #TEMPORARY_PERMISSION_DENIED} if caller originator doesn't have the given permission.
+     * permission.
+     * Soft (temporary) denials are considered OK for preflight purposes.
      *
      * @param context    A {@link Context}, used for permission checks.
      * @param identity   The identity to check.
@@ -130,13 +129,10 @@ final class SoundTriggerSessionPermissionsDecorator implements
                 permission);
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
                 return;
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
-                        TextUtils.formatSimple("Failed to obtain permission %s for identity %s",
-                                permission, toString(identity)));
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
-                throw new ServiceSpecificException(TEMPORARY_PERMISSION_DENIED,
                         TextUtils.formatSimple("Failed to obtain permission %s for identity %s",
                                 permission, toString(identity)));
             default:
