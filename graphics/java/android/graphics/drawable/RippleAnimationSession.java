@@ -53,6 +53,7 @@ public final class RippleAnimationSession {
     private long mStartTime;
     private boolean mForceSoftware;
     private Animator mLoopAnimation;
+    private Animator mCurrentAnimation;
 
     RippleAnimationSession(@NonNull AnimationProperties<Float, Paint> properties,
             boolean forceSoftware) {
@@ -72,6 +73,12 @@ public final class RippleAnimationSession {
             enterSoftware();
         }
         return this;
+    }
+
+    void end() {
+        if (mCurrentAnimation != null) {
+            mCurrentAnimation.end();
+        }
     }
 
     @NonNull RippleAnimationSession exit(Canvas canvas) {
@@ -114,10 +121,12 @@ public final class RippleAnimationSession {
                 if (mLoopAnimation != null) mLoopAnimation.cancel();
                 Consumer<RippleAnimationSession> onEnd = mOnSessionEnd;
                 if (onEnd != null) onEnd.accept(RippleAnimationSession.this);
+                if (mCurrentAnimation == expand) mCurrentAnimation = null;
             }
         });
         expand.setInterpolator(LINEAR_INTERPOLATOR);
         expand.start();
+        mCurrentAnimation = expand;
     }
 
     private long computeDelay() {
@@ -147,6 +156,7 @@ public final class RippleAnimationSession {
                 if (mLoopAnimation != null) mLoopAnimation.cancel();
                 Consumer<RippleAnimationSession> onEnd = mOnSessionEnd;
                 if (onEnd != null) onEnd.accept(RippleAnimationSession.this);
+                if (mCurrentAnimation == exit) mCurrentAnimation = null;
             }
         });
         exit.setTarget(canvas);
@@ -155,6 +165,7 @@ public final class RippleAnimationSession {
         long delay = computeDelay();
         exit.setStartDelay(delay);
         exit.start();
+        mCurrentAnimation = exit;
     }
 
     private void enterHardware(RecordingCanvas canvas) {
@@ -167,6 +178,7 @@ public final class RippleAnimationSession {
                 mStartTime + MAX_NOISE_PHASE);
         loop.setTarget(canvas);
         startAnimation(expand, loop);
+        mCurrentAnimation = expand;
     }
 
     private void startAnimation(Animator expand, Animator loop) {
@@ -200,6 +212,7 @@ public final class RippleAnimationSession {
             mProperties.getShader().setNoisePhase((float) loop.getAnimatedValue());
         });
         startAnimation(expand, loop);
+        mCurrentAnimation = expand;
     }
 
     void setRadius(float radius) {
