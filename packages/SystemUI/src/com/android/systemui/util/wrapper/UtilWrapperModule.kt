@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.dagger;
+package com.android.systemui.util.wrapper
 
-import com.android.systemui.util.RingerModeTracker;
-import com.android.systemui.util.RingerModeTrackerImpl;
-import com.android.systemui.util.wrapper.UtilWrapperModule;
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
 
-import dagger.Binds;
-import dagger.Module;
+@Module
+abstract class UtilWrapperModule {
 
-/** Dagger Module for code in the util package. */
-@Module(includes = {
-                UtilWrapperModule.class
-        })
-public interface UtilModule {
-    /** */
     @Binds
-    RingerModeTracker provideRingerModeTracker(RingerModeTrackerImpl ringerModeTrackerImpl);
+    @SysUISingleton
+    abstract fun bindRotationPolicyWrapper(impl: RotationPolicyWrapperImpl): RotationPolicyWrapper
 }
