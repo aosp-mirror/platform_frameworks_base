@@ -43,7 +43,7 @@ import java.util.Comparator;
 public class PackageItemInfo {
     private static final float MAX_LABEL_SIZE_PX = 500f;
     /** The maximum length of a safe label, in characters */
-    private static final int MAX_SAFE_LABEL_LENGTH = 50000;
+    private static final int MAX_SAFE_LABEL_LENGTH = 1000;
 
     /**
      * Public name of this item. From the "android:name" attribute.
@@ -131,6 +131,12 @@ public class PackageItemInfo {
      * item does not have a label, its name is returned.
      */
     public CharSequence loadLabel(PackageManager pm) {
+        // Trims the label string to the MAX_SAFE_LABEL_LENGTH. This is to prevent that the
+        // system is overwhelmed by an enormous string returned by the application.
+        return trimToSize(loadUnsafeLabel(pm), MAX_SAFE_LABEL_LENGTH);
+    }
+
+    private CharSequence loadUnsafeLabel(PackageManager pm) {
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel;
         }
@@ -144,6 +150,15 @@ public class PackageItemInfo {
             return name;
         }
         return packageName;
+    }
+
+    private CharSequence trimToSize(CharSequence label, int size) {
+        if (TextUtils.isEmpty(label) || label.length() <= size) return label;
+        if (Character.isHighSurrogate(label.charAt(size - 1))
+                && Character.isLowSurrogate(label.charAt(size))) {
+            size = size - 1;
+        }
+        return label.subSequence(0, size);
     }
 
     /**
