@@ -320,6 +320,11 @@ public class SizeCompatTests extends WindowTestsBase {
         assertScaled();
         // Activity is sandboxed due to size compat mode.
         assertActivityMaxBoundsSandboxed();
+
+        final WindowState appWindow = addWindowToActivity(mActivity);
+        assertTrue(mActivity.hasSizeCompatBounds());
+        assertEquals("App window must use size compat bounds for layout in screen space",
+                mActivity.getBounds(), appWindow.getBounds());
     }
 
     @Test
