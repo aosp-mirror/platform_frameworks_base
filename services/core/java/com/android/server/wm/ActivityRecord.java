@@ -3453,7 +3453,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (stopped) {
             abortAndClearOptionsAnimation();
         }
-        mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, this);
+        if (mAtmService.getTransitionController().isCollecting()) {
+            // We don't want the finishing to change the transition ready state since there will not
+            // be corresponding setReady for finishing.
+            mAtmService.getTransitionController().collectExistenceChange(this);
+        } else {
+            mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, this);
+        }
     }
 
     /**
