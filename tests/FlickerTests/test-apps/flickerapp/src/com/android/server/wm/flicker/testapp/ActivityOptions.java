@@ -46,4 +46,9 @@ public class ActivityOptions {
     public static final ComponentName NON_RESIZEABLE_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".NonResizeableActivity");
+
+    public static final String BUTTON_ACTIVITY_LAUNCHER_NAME = "ButtonApp";
+    public static final ComponentName BUTTON_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ButtonActivity");
 }
