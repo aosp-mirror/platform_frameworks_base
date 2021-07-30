@@ -40,7 +40,16 @@ class DeviceIdleModifier extends Modifier {
         mIrs = irs;
         mPowerManager = irs.getContext().getSystemService(PowerManager.class);
         mDeviceIdleTracker = new DeviceIdleTracker();
-        mDeviceIdleTracker.startTracking(irs.getContext());
+    }
+
+    @Override
+    public void setup() {
+        mDeviceIdleTracker.startTracking(mIrs.getContext());
+    }
+
+    @Override
+    public void tearDown() {
+        mDeviceIdleTracker.stopTracking(mIrs.getContext());
     }
 
     @Override
@@ -79,6 +88,10 @@ class DeviceIdleModifier extends Modifier {
             // Initialise tracker state.
             mDeviceIdle = mPowerManager.isDeviceIdleMode();
             mDeviceLightIdle = mPowerManager.isLightDeviceIdleMode();
+        }
+
+        void stopTracking(@NonNull Context context) {
+            context.unregisterReceiver(this);
         }
 
         @Override

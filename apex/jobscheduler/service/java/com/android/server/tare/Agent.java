@@ -196,7 +196,6 @@ class Agent {
             final int eventId, @Nullable String tag) {
         final long now = System.currentTimeMillis();
         final Ledger ledger = getLedgerLocked(userId, pkgName);
-        final boolean wasSolvent = getBalanceLocked(userId, pkgName) > 0;
 
         final int eventType = getEventType(eventId);
         switch (eventType) {
@@ -400,12 +399,16 @@ class Agent {
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents == null) {
-            Slog.wtf(TAG, "No ongoing transactions :/");
+            // This may occur if TARE goes from disabled to enabled while an event is already
+            // occurring.
+            Slog.w(TAG, "No ongoing transactions for <" + userId + ">" + pkgName);
             return;
         }
         final OngoingEvent ongoingEvent = ongoingEvents.get(eventId, tag);
         if (ongoingEvent == null) {
-            Slog.wtf(TAG, "Nonexistent ongoing transaction "
+            // This may occur if TARE goes from disabled to enabled while an event is already
+            // occurring.
+            Slog.w(TAG, "Nonexistent ongoing transaction "
                     + eventToString(eventId) + (tag == null ? "" : ":" + tag)
                     + " for <" + userId + ">" + pkgName + " ended");
             return;
@@ -768,6 +771,15 @@ class Agent {
                 SystemClock.elapsedRealtime() + timeToThresholdMs);
     }
 
+    @GuardedBy("mLock")
+    void tearDownLocked() {
+        mLedgers.clear();
+        mCurrentNarcsInCirculation = 0;
+        mCurrentOngoingEvents.clear();
+        mBalanceThresholdAlarmListener.dropAllAlarmsLocked();
+        mLedgerCleanupAlarmListener.dropAllAlarmsLocked();
+    }
+
     @VisibleForTesting
     static class OngoingEvent {
         public final long startTimeElapsed;
@@ -987,6 +999,12 @@ class Agent {
         }
 
         @GuardedBy("mLock")
+        void dropAllAlarmsLocked() {
+            mAlarmQueue.clear();
+            setNextAlarmLocked(0);
+        }
+
+        @GuardedBy("mLock")
         protected abstract void processExpiredAlarmLocked(int userId, @NonNull String packageName);
 
         @Override
@@ -1069,6 +1087,13 @@ class Agent {
         final ActionAffordabilityNote note =
                 new ActionAffordabilityNote(bill, listener, mCompleteEconomicPolicy);
         if (actionAffordabilityNotes.add(note)) {
+            if (!mIrs.isEnabled()) {
+                // When TARE isn't enabled, we always say something is affordable. We also don't
+                // want to silently drop affordability change listeners in case TARE becomes enabled
+                // because then clients will be in an ambiguous state.
+                note.setNewAffordability(true);
+                return;
+            }
             note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
             note.setNewAffordability(
                     getBalanceLocked(userId, pkgName) >= note.getCachedModifiedPrice());
