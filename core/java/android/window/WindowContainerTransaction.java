@@ -506,15 +506,17 @@ public final class WindowContainerTransaction implements Parcelable {
      * {@link #setAdjacentRoots(WindowContainerToken, WindowContainerToken)}, but can be used with
      * fragmentTokens when that TaskFragments haven't been created (but will be created in the same
      * {@link WindowContainerTransaction}).
+     * To reset it, pass {@code null} for {@code fragmentToken2}.
      * @param fragmentToken1    client assigned unique token to create TaskFragment with specified
      *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
      * @param fragmentToken2    client assigned unique token to create TaskFragment with specified
-     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
+     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}. If it is
+     *                          {@code null}, the transaction will reset the adjacent TaskFragment.
      * @hide
      */
     @NonNull
     public WindowContainerTransaction setAdjacentTaskFragments(
-            @NonNull IBinder fragmentToken1, @NonNull IBinder fragmentToken2) {
+            @NonNull IBinder fragmentToken1, @Nullable IBinder fragmentToken2) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS)
                         .setContainer(fragmentToken1)

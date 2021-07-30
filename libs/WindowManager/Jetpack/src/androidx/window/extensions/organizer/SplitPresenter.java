@@ -142,8 +142,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
         }
 
-        // TODO(b/190433398): The primary container and the secondary container should also be set
-        // as adjacent (WCT#setAdjacentRoots) to make activities behind invisible.
+        // Set adjacent to each other so that the containers below will be invisible.
+        wct.setAdjacentTaskFragments(
+                primaryContainer.getTaskFragmentToken(), secondaryContainer.getTaskFragmentToken());
         applyTransaction(wct);
 
         mController.registerSplit(primaryContainer, primaryActivity, secondaryContainer, rule);
@@ -183,9 +184,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         primaryContainer.setLastRequestedBounds(primaryRectBounds);
         secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
-
-        // TODO(b/190433398): The primary container and the secondary container should also be set
-        // as adjacent (WCT#setAdjacentRoots) to make activities behind invisible.
 
         mController.registerSplit(primaryContainer, launchingActivity, secondaryContainer,
                 rule);
