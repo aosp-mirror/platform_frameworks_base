@@ -152,6 +152,10 @@
     <dimen name="bubble_manage_button_height">56dp</dimen>
     <!-- Height of an item in the bubble manage menu. -->
     <dimen name="bubble_menu_item_height">60dp</dimen>
+    <!-- Padding applied to the bubble manage menu. -->
+    <dimen name="bubble_menu_padding">16dp</dimen>
+    <!-- Size of the icons in the manage menu. -->
+    <dimen name="bubble_menu_icon_size">24dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->
