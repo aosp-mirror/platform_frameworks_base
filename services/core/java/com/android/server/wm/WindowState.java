@@ -6045,8 +6045,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean hasWallpaper() {
-        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
-                || (mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox());
+        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0 || hasWallpaperForLetterboxBackground();
+    }
+
+    boolean hasWallpaperForLetterboxBackground() {
+        return mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox();
     }
 
     /**
