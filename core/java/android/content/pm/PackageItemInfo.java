@@ -49,7 +49,7 @@ import java.util.Comparator;
  */
 public class PackageItemInfo {
     /** The maximum length of a safe label, in characters */
-    private static final int MAX_SAFE_LABEL_LENGTH = 50000;
+    private static final int MAX_SAFE_LABEL_LENGTH = 1000;
 
     /** @hide */
     public static final float DEFAULT_MAX_LABEL_SIZE_PX = 500f;
@@ -198,7 +198,9 @@ public class PackageItemInfo {
             return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_STRING_FLAG_TRIM
                     | SAFE_STRING_FLAG_FIRST_LINE);
         } else {
-            return loadUnsafeLabel(pm);
+            // Trims the label string to the MAX_SAFE_LABEL_LENGTH. This is to prevent that the
+            // system is overwhelmed by an enormous string returned by the application.
+            return TextUtils.trimToSize(loadUnsafeLabel(pm), MAX_SAFE_LABEL_LENGTH);
         }
     }
 
