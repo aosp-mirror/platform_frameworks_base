@@ -446,10 +446,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        if (mHandlerThread != null) {
+            mHandlerThread.quitSafely();
+        }
+        super.finalize();
+    }
+
     public void release() {
         synchronized (mInterfaceLock) {
-            mHandlerThread.quitSafely();
-
             if (mSessionProcessor != null) {
                 try {
                     mSessionProcessor.deInitSession();

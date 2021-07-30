@@ -49,8 +49,6 @@ import android.media.ImageWriter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.annotation.NonNull;
@@ -265,13 +263,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } catch (ClassCastException e) {
                 throw new UnsupportedOperationException("Failed casting preview processor!");
             }
-            if (mClientRepeatingRequestSurface != null) {
-                mPreviewRequestUpdateProcessor.onOutputSurface(mClientRepeatingRequestSurface,
-                        nativeGetSurfaceFormat(mClientRepeatingRequestSurface));
-                mRepeatingRequestImageWriter = ImageWriter.newInstance(
-                        mClientRepeatingRequestSurface, PREVIEW_QUEUE_SIZE,
-                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
-            }
             mRepeatingRequestImageReader = ImageReader.newInstance(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight,
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT,
@@ -285,11 +276,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mPreviewRequestUpdateProcessor.onImageFormatUpdate(
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
         } else {
-            if (mClientRepeatingRequestSurface != null) {
-                mRepeatingRequestImageWriter = ImageWriter.newInstance(
-                        mClientRepeatingRequestSurface, PREVIEW_QUEUE_SIZE,
-                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
-            }
             mRepeatingRequestImageReader = ImageReader.newInstance(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight,
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT,
@@ -320,7 +306,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 mBurstCaptureImageReader = ImageReader.newInstance(surfaceInfo.mWidth,
                         surfaceInfo.mHeight, CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                         mImageExtender.getMaxCaptureStage());
-                mImageProcessor.onOutputSurface(mClientCaptureSurface, surfaceInfo.mFormat);
             } else {
                 // The client doesn't intend to trigger multi-frame capture, however the
                 // image extender still needs to get initialized and the camera still capture
@@ -364,6 +349,29 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         ImageFormat.JPEG, 1);
                 mCameraBurstSurface = mBurstCaptureImageReader.getSurface();
             }
+        }
+    }
+
+    private void finishPipelineInitialization() throws RemoteException {
+        if (mClientRepeatingRequestSurface != null) {
+            if (mPreviewProcessorType == IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY) {
+                mPreviewRequestUpdateProcessor.onOutputSurface(mClientRepeatingRequestSurface,
+                        nativeGetSurfaceFormat(mClientRepeatingRequestSurface));
+                mRepeatingRequestImageWriter = ImageWriter.newInstance(
+                        mClientRepeatingRequestSurface,
+                        PREVIEW_QUEUE_SIZE,
+                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
+            } else if (mPreviewProcessorType == IPreviewExtenderImpl.PROCESSOR_TYPE_NONE) {
+                mRepeatingRequestImageWriter = ImageWriter.newInstance(
+                        mClientRepeatingRequestSurface,
+                        PREVIEW_QUEUE_SIZE,
+                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
+            }
+        }
+        if ((mImageProcessor != null) && (mClientCaptureSurface != null)) {
+            CameraExtensionUtils.SurfaceInfo surfaceInfo = CameraExtensionUtils.querySurface(
+                    mClientCaptureSurface);
+            mImageProcessor.onOutputSurface(mClientCaptureSurface, surfaceInfo.mFormat);
         }
     }
 
@@ -622,11 +630,18 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 new CameraExtensionUtils.HandlerExecutor(mHandler), requestHandler);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        if (mHandlerThread != null) {
+            mHandlerThread.quitSafely();
+        }
+        super.finalize();
+    }
+
     /** @hide */
     public void release() {
         synchronized (mInterfaceLock) {
             mInternalRepeatingRequestEnabled = false;
-            mHandlerThread.quitSafely();
 
             try {
                 mPreviewExtender.onDeInit();
@@ -750,6 +765,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
                 try {
+                    finishPipelineInitialization();
                     CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to initialize session! Extension service does"
