@@ -3839,6 +3839,8 @@
   <java-symbol type="string" name="config_foldedArea" />
   <java-symbol type="bool" name="config_supportsConcurrentInternalDisplays" />
   <java-symbol type="bool" name="config_unfoldTransitionEnabled" />
+  <java-symbol type="array" name="config_perDeviceStateRotationLockDefaults" />
+
 
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />

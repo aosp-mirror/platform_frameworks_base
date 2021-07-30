@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.policy.dagger;
 
+import android.content.res.Resources;
 import android.os.UserManager;
 
+import com.android.internal.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
@@ -57,6 +59,8 @@ import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Named;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -65,6 +69,9 @@ import dagger.Provides;
 /** Dagger Module for code in the statusbar.policy package. */
 @Module
 public interface StatusBarPolicyModule {
+
+    String DEVICE_STATE_ROTATION_LOCK_DEFAULTS = "DEVICE_STATE_ROTATION_LOCK_DEFAULTS";
+
     /** */
     @Binds
     BluetoothController provideBluetoothController(BluetoothControllerImpl controllerImpl);
@@ -153,5 +160,15 @@ public interface StatusBarPolicyModule {
         );
         controller.init();
         return controller;
+    }
+
+    /**
+     * Default values for per-device state rotation lock settings.
+     */
+    @Provides
+    @Named(DEVICE_STATE_ROTATION_LOCK_DEFAULTS)
+    static String[] providesDeviceStateRotationLockDefaults(@Main Resources resources) {
+        return resources.getStringArray(
+                R.array.config_perDeviceStateRotationLockDefaults);
     }
 }

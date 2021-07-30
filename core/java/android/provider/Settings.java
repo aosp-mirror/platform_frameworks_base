@@ -10165,6 +10165,61 @@ public final class Settings {
         @Readable
         public static final String GAME_DASHBOARD_ALWAYS_ON = "game_dashboard_always_on";
 
+
+        /**
+         * For this device state, no specific auto-rotation lock setting should be applied.
+         * If the user toggles the auto-rotate lock in this state, the setting will apply to the
+         * previously valid device state.
+         * @hide
+         */
+        public static final int DEVICE_STATE_ROTATION_LOCK_IGNORED = 0;
+        /**
+         * For this device state, the setting for auto-rotation is locked.
+         * @hide
+         */
+        public static final int DEVICE_STATE_ROTATION_LOCK_LOCKED = 1;
+        /**
+         * For this device state, the setting for auto-rotation is unlocked.
+         * @hide
+         */
+        public static final int DEVICE_STATE_ROTATION_LOCK_UNLOCKED = 2;
+
+        /**
+         * The different settings that can be used as values with
+         * {@link #DEVICE_STATE_ROTATION_LOCK}.
+         * @hide
+         */
+        @IntDef(prefix = {"DEVICE_STATE_ROTATION_LOCK_"}, value = {
+                DEVICE_STATE_ROTATION_LOCK_IGNORED,
+                DEVICE_STATE_ROTATION_LOCK_LOCKED,
+                DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface DeviceStateRotationLockSetting {
+        }
+
+        /**
+         * Rotation lock setting keyed on device state.
+         *
+         * This holds a serialized map using int keys that represent Device States and value of
+         * {@link DeviceStateRotationLockSetting} representing the rotation lock setting for that
+         * device state.
+         *
+         * Serialized as key0:value0:key1:value1:...:keyN:valueN.
+         *
+         * Example: "0:1:1:2:2:1"
+         * This example represents a map of:
+         * <ul>
+         *     <li>0 -> DEVICE_STATE_ROTATION_LOCK_LOCKED</li>
+         *     <li>1 -> DEVICE_STATE_ROTATION_LOCK_UNLOCKED</li>
+         *     <li>2 -> DEVICE_STATE_ROTATION_LOCK_IGNORED</li>
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String DEVICE_STATE_ROTATION_LOCK =
+                "device_state_rotation_lock";
+
         /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
