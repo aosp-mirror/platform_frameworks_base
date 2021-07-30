@@ -1472,6 +1472,11 @@ public class NotificationStackScrollLayoutController {
         mView.setExtraTopInsetForFullShadeTransition(extraTopInset);
     }
 
+    /** */
+    public void setWillExpand(boolean willExpand) {
+        mView.setWillExpand(willExpand);
+    }
+
     /**
      * Set a listener to when scrolling changes.
      */
