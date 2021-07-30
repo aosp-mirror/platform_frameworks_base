@@ -70,6 +70,7 @@ public class CoexCoordinatorTest {
 
         mCoexCoordinator = CoexCoordinator.getInstance();
         mCoexCoordinator.setAdvancedLogicEnabled(true);
+        mCoexCoordinator.setFaceHapticDisabledWhenNonBypass(true);
     }
 
     @Test
@@ -151,8 +152,72 @@ public class CoexCoordinatorTest {
 
         mCoexCoordinator.onAuthenticationSucceeded(0 /* currentTimeMillis */, faceClient,
                 mCallback);
-        verify(mCallback).sendHapticFeedback();
+        // Haptics tested in #testKeyguard_bypass_haptics. Let's leave this commented out (instead
+        // of removed) to keep this context.
+        // verify(mCallback).sendHapticFeedback();
         verify(mCallback).sendAuthenticationResult(eq(true) /* addAuthTokenIfStrong */);
+        verify(mCallback).handleLifecycleAfterAuth();
+    }
+
+    @Test
+    public void testKeyguard_faceAuthSuccess_nonBypass_udfpsRunning_noHaptics() {
+        testKeyguard_bypass_haptics(false /* bypassEnabled */,
+                true /* faceAccepted */,
+                false /* shouldReceiveHaptics */);
+    }
+
+    @Test
+    public void testKeyguard_faceAuthReject_nonBypass_udfpsRunning_noHaptics() {
+        testKeyguard_bypass_haptics(false /* bypassEnabled */,
+                false /* faceAccepted */,
+                false /* shouldReceiveHaptics */);
+    }
+
+    @Test
+    public void testKeyguard_faceAuthSuccess_bypass_udfpsRunning_haptics() {
+        testKeyguard_bypass_haptics(true /* bypassEnabled */,
+                true /* faceAccepted */,
+                true /* shouldReceiveHaptics */);
+    }
+
+    @Test
+    public void testKeyguard_faceAuthReject_bypass_udfpsRunning_haptics() {
+        testKeyguard_bypass_haptics(true /* bypassEnabled */,
+                false /* faceAccepted */,
+                true /* shouldReceiveHaptics */);
+    }
+
+    private void testKeyguard_bypass_haptics(boolean bypassEnabled, boolean faceAccepted,
+            boolean shouldReceiveHaptics) {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
+        when(faceClient.isKeyguard()).thenReturn(true);
+        when(faceClient.isKeyguardBypassEnabled()).thenReturn(bypassEnabled);
+
+        AuthenticationClient<?> udfpsClient = mock(AuthenticationClient.class,
+                withSettings().extraInterfaces(Udfps.class));
+        when(udfpsClient.isKeyguard()).thenReturn(true);
+        when(((Udfps) udfpsClient).isPointerDown()).thenReturn(false);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_UDFPS, udfpsClient);
+
+        if (faceAccepted) {
+            mCoexCoordinator.onAuthenticationSucceeded(0 /* currentTimeMillis */, faceClient,
+                    mCallback);
+        } else {
+            mCoexCoordinator.onAuthenticationRejected(0 /* currentTimeMillis */, faceClient,
+                    LockoutTracker.LOCKOUT_NONE, mCallback);
+        }
+
+        if (shouldReceiveHaptics) {
+            verify(mCallback).sendHapticFeedback();
+        } else {
+            verify(mCallback, never()).sendHapticFeedback();
+        }
+
+        verify(mCallback).sendAuthenticationResult(eq(faceAccepted) /* addAuthTokenIfStrong */);
         verify(mCallback).handleLifecycleAfterAuth();
     }
 
@@ -294,12 +359,13 @@ public class CoexCoordinatorTest {
     }
 
     @Test
-    public void testKeyguard_udfpsRejected_thenFaceRejected() {
+    public void testKeyguard_udfpsRejected_thenFaceRejected_noKeyguardBypass() {
         mCoexCoordinator.reset();
 
         AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
         when(faceClient.isKeyguard()).thenReturn(true);
         when(faceClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED);
+        when(faceClient.isKeyguardBypassEnabled()).thenReturn(false); // TODO: also test "true" case
 
         AuthenticationClient<?> udfpsClient = mock(AuthenticationClient.class,
                 withSettings().extraInterfaces(Udfps.class));
@@ -312,8 +378,9 @@ public class CoexCoordinatorTest {
 
         mCoexCoordinator.onAuthenticationRejected(0 /* currentTimeMillis */, udfpsClient,
                 LockoutTracker.LOCKOUT_NONE, mCallback);
-        // Client becomes paused, but finger does not necessarily lift, since we suppress the haptic
-        when(udfpsClient.getState()).thenReturn(AuthenticationClient.STATE_STARTED_PAUSED);
+        // Auth was attempted
+        when(udfpsClient.getState())
+                .thenReturn(AuthenticationClient.STATE_STARTED_PAUSED_ATTEMPTED);
         verify(mCallback, never()).sendHapticFeedback();
         verify(mCallback).handleLifecycleAfterAuth();
 
