@@ -446,10 +446,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        if (mHandlerThread != null) {
+            mHandlerThread.quitSafely();
+        }
+        super.finalize();
+    }
+
     public void release() {
         synchronized (mInterfaceLock) {
-            mHandlerThread.quitSafely();
-
             if (mSessionProcessor != null) {
                 try {
                     mSessionProcessor.deInitSession();
@@ -812,6 +818,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     Log.e(TAG,"Failed to parcel buffer fence!");
                 }
             }
+            parcelImage.width = img.getWidth();
+            parcelImage.height = img.getHeight();
             parcelImage.format = img.getFormat();
             parcelImage.timestamp = img.getTimestamp();
             parcelImage.transform = img.getTransform();
