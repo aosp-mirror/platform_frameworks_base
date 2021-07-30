@@ -133,7 +133,6 @@ import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
-import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
@@ -446,6 +445,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Accessed directly by all users.
     private boolean mLayoutNeeded;
     int pendingLayoutChanges;
+    boolean mLayoutAndAssignWindowLayersScheduled;
 
     /**
      * Used to gate application window layout until we have sent the complete configuration.
@@ -3464,27 +3464,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        int focusChanged = getDisplayPolicy().focusChangedLw(oldFocus, newFocus);
+        getDisplayPolicy().focusChangedLw(oldFocus, newFocus);
 
         if (imWindowChanged && oldFocus != mInputMethodWindow) {
             // Focus of the input method window changed. Perform layout if needed.
             if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                 performLayout(true /*initial*/,  updateInputWindows);
-                focusChanged &= ~FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                 // Client will do the layout, but we need to assign layers
                 // for handleNewWindowLocked() below.
                 assignWindowLayers(false /* setLayoutNeeded */);
-            }
-        }
-
-        if ((focusChanged & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
-            // The change in focus caused us to need to do a layout.  Okay.
-            setLayoutNeeded();
-            if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
-                performLayout(true /*initial*/, updateInputWindows);
-            } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
-                mWmService.mRoot.performSurfacePlacement();
             }
         }
 

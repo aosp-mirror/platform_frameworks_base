@@ -1984,11 +1984,7 @@ public class DisplayPolicy {
             mTopIsFullscreen = topIsFullscreen;
         }
 
-        if (updateSystemUiVisibilityLw()) {
-            // If the navigation bar has been hidden or shown, we need to do another
-            // layout pass to update that window.
-            changes |= FINISH_LAYOUT_REDO_LAYOUT;
-        }
+        updateSystemBarAttributes();
 
         if (mShowingDream != mLastShowingDream) {
             mLastShowingDream = mShowingDream;
@@ -2528,18 +2524,13 @@ public class DisplayPolicy {
     /**
      * A new window has been focused.
      */
-    public int focusChangedLw(WindowState lastFocus, WindowState newFocus) {
+    public void focusChangedLw(WindowState lastFocus, WindowState newFocus) {
         mFocusedWindow = newFocus;
         mLastFocusedWindow = lastFocus;
         if (mDisplayContent.isDefaultDisplay) {
             mService.mPolicy.onDefaultDisplayFocusChangedLw(newFocus);
         }
-        if (updateSystemUiVisibilityLw()) {
-            // If the navigation bar has been hidden or shown, we need to do another
-            // layout pass to update that window.
-            return FINISH_LAYOUT_REDO_LAYOUT;
-        }
-        return 0;
+        updateSystemBarAttributes();
     }
 
     private void requestTransientBars(WindowState swipeTarget) {
@@ -2615,21 +2606,18 @@ public class DisplayPolicy {
         return mDisplayContent.getInsetsPolicy();
     }
 
-    void resetSystemUiVisibilityLw() {
+    void resetSystemBarAttributes() {
         mLastDisableFlags = 0;
-        updateSystemUiVisibilityLw();
+        updateSystemBarAttributes();
     }
 
-    /**
-     * @return {@code true} if the update may affect the layout.
-     */
-    boolean updateSystemUiVisibilityLw() {
+    void updateSystemBarAttributes() {
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
         WindowState winCandidate = mFocusedWindow != null ? mFocusedWindow
                 : mTopFullscreenOpaqueWindowState;
         if (winCandidate == null) {
-            return false;
+            return;
         }
 
         // The immersive mode confirmation should never affect the system bar visibility, otherwise
@@ -2645,7 +2633,7 @@ public class DisplayPolicy {
                     : lastFocusCanReceiveKeys ? mLastFocusedWindow
                             : mTopFullscreenOpaqueWindowState;
             if (winCandidate == null) {
-                return false;
+                return;
             }
         }
         final WindowState win = winCandidate;
@@ -2684,7 +2672,7 @@ public class DisplayPolicy {
                 && Objects.equals(mFocusedApp, focusedApp)
                 && mLastFocusIsFullscreen == isFullscreen
                 && Arrays.equals(mLastStatusBarAppearanceRegions, appearanceRegions)) {
-            return false;
+            return;
         }
         if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
                 && ((mLastAppearance ^ appearance) & APPEARANCE_LOW_PROFILE_BARS) != 0) {
@@ -2702,7 +2690,6 @@ public class DisplayPolicy {
         callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
                 appearance, appearanceRegions, isNavbarColorManagedByIme, behavior,
                 requestedVisibilities, focusedApp));
-        return true;
     }
 
     private int getStatusBarAppearance(WindowState opaque, WindowState opaqueOrDimming) {
@@ -2974,7 +2961,7 @@ public class DisplayPolicy {
                     return;
                 }
                 mPendingPanicGestureUptime = SystemClock.uptimeMillis();
-                updateSystemUiVisibilityLw();
+                updateSystemBarAttributes();
             }
         }
     };
