@@ -233,6 +233,8 @@ final class LogicalDisplay {
                 info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
                 info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
                 info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
+                info.shouldConstrainMetricsForLauncher =
+                        mOverrideDisplayInfo.shouldConstrainMetricsForLauncher;
             }
             mInfo.set(info);
         }
