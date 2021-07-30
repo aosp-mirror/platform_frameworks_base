@@ -1551,7 +1551,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return;
         }
         if (task.isVisible()) {
-            mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
+            if (mService.getTransitionController().isCollecting()) {
+                // We don't want the finishing to change the transition ready state since there will
+                // not be corresponding setReady for finishing.
+                mService.getTransitionController().collectExistenceChange(task);
+            } else {
+                mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
+            }
         } else {
             // Removing a non-visible task doesn't require a transition, but if there is one
             // collecting, this should be a member just in case.
