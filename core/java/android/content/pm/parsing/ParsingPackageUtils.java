@@ -72,6 +72,7 @@ import android.content.pm.parsing.component.ParsedProviderUtils;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedServiceUtils;
 import android.content.pm.parsing.component.ParsedUsesPermission;
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
@@ -1339,7 +1340,7 @@ public class ParsingPackageUtils {
             }
 
             if (!found) {
-                pkg.addUsesPermission(new ParsedUsesPermission(name, usesPermissionFlags));
+                pkg.addUsesPermission(new ParsedUsesPermissionImpl(name, usesPermissionFlags));
             }
             return success;
         } finally {
@@ -2878,7 +2879,7 @@ public class ParsingPackageUtils {
     private static void convertCompatPermissions(ParsingPackage pkg) {
         for (int i = 0, size = CompatibilityPermissionInfo.COMPAT_PERMS.length; i < size; i++) {
             final CompatibilityPermissionInfo info = CompatibilityPermissionInfo.COMPAT_PERMS[i];
-            if (pkg.getTargetSdkVersion() >= info.sdkVersion) {
+            if (pkg.getTargetSdkVersion() >= info.getSdkVersion()) {
                 break;
             }
             if (!pkg.getRequestedPermissions().contains(info.getName())) {

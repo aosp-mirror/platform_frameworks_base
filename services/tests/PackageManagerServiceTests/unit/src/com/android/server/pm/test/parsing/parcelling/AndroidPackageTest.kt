@@ -34,7 +34,7 @@ import android.content.pm.parsing.component.ParsedPermissionImpl
 import android.content.pm.parsing.component.ParsedProcessImpl
 import android.content.pm.parsing.component.ParsedProviderImpl
 import android.content.pm.parsing.component.ParsedServiceImpl
-import android.content.pm.parsing.component.ParsedUsesPermission
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -418,7 +418,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                 it.filterNot { it.name == "test.implicit.PERMISSION" }
                     .singleOrNull()?.name.orEmpty()
             },
-            transformSet = { ParsedUsesPermission(it, 0) }
+            transformSet = { ParsedUsesPermissionImpl(it, 0) }
         ),
         getSetByValue(
             AndroidPackage::getRequestedFeatures,

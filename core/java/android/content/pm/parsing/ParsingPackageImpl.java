@@ -52,6 +52,7 @@ import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedServiceImpl;
 import android.content.pm.parsing.component.ParsedUsesPermission;
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
@@ -725,7 +726,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 
     @Override
     public ParsingPackageImpl addImplicitPermission(String permission) {
-        addUsesPermission(new ParsedUsesPermission(permission, 0 /*usesPermissionFlags*/));
+        addUsesPermission(new ParsedUsesPermissionImpl(permission, 0 /*usesPermissionFlags*/));
         this.implicitPermissions = CollectionUtils.add(this.implicitPermissions,
                 TextUtils.safeIntern(permission));
         return this;
@@ -1284,7 +1285,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.originalPackages = in.createStringArrayList();
         this.adoptPermissions = sForInternedStringList.unparcel(in);
         this.requestedPermissions = sForInternedStringList.unparcel(in);
-        this.usesPermissions = in.createTypedArrayList(ParsedUsesPermission.CREATOR);
+        this.usesPermissions = ParsingUtils.createTypedInterfaceList(in,
+                ParsedUsesPermissionImpl.CREATOR);
         this.implicitPermissions = sForInternedStringList.unparcel(in);
         this.upgradeKeySets = sForStringSet.unparcel(in);
         this.keySetMapping = ParsingPackageUtils.readKeySetMapping(in);

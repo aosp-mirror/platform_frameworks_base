@@ -60,6 +60,8 @@ import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedServiceImpl;
 import android.content.pm.parsing.component.ParsedUsesPermission;
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
+import android.content.pm.permission.CompatibilityPermissionInfo;
 import android.content.pm.pkg.PackageUserState;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -529,7 +531,7 @@ public class PackageParserTest {
             final ParsedPackage pkg = new TestPackageParser2()
                     .parsePackage(testFile, 0 /*flags*/, false /*useCaches*/);
             final List<String> compatPermissions =
-                    Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .collect(toList());
             assertWithMessage(
                     "Compatibility permissions shouldn't be added into uses permissions.")
@@ -555,19 +557,19 @@ public class PackageParserTest {
                     .parsePackage(testFile, 0 /*flags*/, false /*useCaches*/);
             assertWithMessage(
                     "Compatibility permissions should be added into uses permissions.")
-                    .that(Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getUsesPermissions().stream()
                                     .map(ParsedUsesPermission::getName)
                             .collect(toList())::contains))
                     .isTrue();
             assertWithMessage(
                     "Compatibility permissions should be added into requested permissions.")
-                    .that(Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getRequestedPermissions()::contains))
                     .isTrue();
             assertWithMessage(
                     "Compatibility permissions should be added into implicit permissions.")
-                    .that(Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getImplicitPermissions()::contains))
                     .isTrue();
         } finally {
@@ -926,7 +928,7 @@ public class PackageParserTest {
                 .addProvider(new ParsedProviderImpl())
                 .addService(new ParsedServiceImpl())
                 .addInstrumentation(new ParsedInstrumentationImpl())
-                .addUsesPermission(new ParsedUsesPermission("foo7", 0))
+                .addUsesPermission(new ParsedUsesPermissionImpl("foo7", 0))
                 .addImplicitPermission("foo25")
                 .addProtectedBroadcast("foo8")
                 .setStaticSharedLibName("foo23")

@@ -3455,7 +3455,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0, size = CompatibilityPermissionInfo.COMPAT_PERMS.length; i < size; i++) {
             final CompatibilityPermissionInfo info = CompatibilityPermissionInfo.COMPAT_PERMS[i];
             if (info.getName().equals(perm)
-                    && pkg.getTargetSdkVersion() < info.sdkVersion) {
+                    && pkg.getTargetSdkVersion() < info.getSdkVersion()) {
                 allowed = true;
                 Log.i(TAG, "Auto-granting " + perm + " to old pkg "
                         + pkg.getPackageName());
