@@ -943,6 +943,8 @@ public interface WindowManager extends ViewManager {
             case TRANSIT_KEYGUARD_GOING_AWAY: return "KEYGUARD_GOING_AWAY";
             case TRANSIT_KEYGUARD_OCCLUDE: return "KEYGUARD_OCCLUDE";
             case TRANSIT_KEYGUARD_UNOCCLUDE: return "KEYGUARD_UNOCCLUDE";
+            case TRANSIT_PIP: return "PIP";
+            case TRANSIT_WAKE: return "WAKE";
             case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
             default:
                 if (type > TRANSIT_FIRST_CUSTOM) {
