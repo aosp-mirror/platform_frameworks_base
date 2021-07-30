@@ -31,8 +31,8 @@
         android:focusable="true"
         android:background="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/settingslib_switchbar_padding_left"
-        android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp">
 
         <FrameLayout
             android:layout_width="24dp"
