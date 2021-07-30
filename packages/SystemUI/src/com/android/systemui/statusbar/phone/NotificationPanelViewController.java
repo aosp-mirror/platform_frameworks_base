@@ -1045,6 +1045,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     mCommunalViewComponentFactory.build(communalView);
             mCommunalViewController =
                     communalViewComponent.getCommunalHostViewController();
+            mCommunalViewController.init();
         }
 
         if (mKeyguardUserSwitcherController != null) {

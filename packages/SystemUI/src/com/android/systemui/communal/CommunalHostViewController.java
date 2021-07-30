@@ -90,25 +90,19 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
         mMainExecutor = mainExecutor;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
-        mState = 0;
+    }
 
-        if (mKeyguardStateController.isShowing()) {
-            mState |= STATE_KEYGUARD_SHOWING;
-        }
+    @Override
+    public void init() {
+        super.init();
 
-        if (mStatusBarStateController.isDozing()) {
-            mState |= STATE_DOZING;
-        }
-
-        mKeyguardStateController.addCallback(mKeyguardCallback);
-        mStatusBarStateController.addCallback(mDozeCallback);
+        setState(STATE_KEYGUARD_SHOWING, mKeyguardStateController.isShowing());
+        setState(STATE_DOZING, mStatusBarStateController.isDozing());
     }
 
     @Override
     protected void onViewAttached() {
-        mKeyguardStateController.removeCallback(mKeyguardCallback);
         mKeyguardStateController.addCallback(mKeyguardCallback);
-        mStatusBarStateController.removeCallback(mDozeCallback);
         mStatusBarStateController.addCallback(mDozeCallback);
     }
 
