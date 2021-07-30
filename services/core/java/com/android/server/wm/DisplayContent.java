@@ -734,12 +734,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // When switching the app task, we keep the IME window visibility for better
         // transitioning experiences.
-        // However, in case IME created a child window without dismissing during the task
-        // switching to keep the window focus because IME window has higher window hierarchy,
-        // we don't give it focus if the next IME layering target doesn't request IME visible.
-        if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
+        // However, in case IME created a child window or the IME selection dialog without
+        // dismissing during the task switching to keep the window focus because IME window has
+        // higher window hierarchy, we don't give it focus if the next IME layering target
+        // doesn't request IME visible.
+        if (w.mIsImWindow && (mImeLayeringTarget == null
                 || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
-            return false;
+            if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG) {
+                return false;
+            }
+
+            if (w.isChildWindow()) {
+                return false;
+            }
         }
 
         final ActivityRecord activity = w.mActivityRecord;
@@ -3975,7 +3982,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update Ime parent when IME insets leash created or the new IME layering target might
         // updated from setImeLayeringTarget, which is the best time that default IME visibility
         // has been settled down after IME control target changed.
-        if (prevImeControlTarget != mImeControlTarget || forceUpdateImeParent) {
+        final boolean imeParentChanged =
+                prevImeControlTarget != mImeControlTarget || forceUpdateImeParent;
+        if (imeParentChanged) {
             updateImeParent();
         }
 
@@ -3983,7 +3992,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final IBinder token = win != null ? win.mClient.asBinder() : null;
         // Note: not allowed to call into IMMS with the WM lock held, hence the post.
         mWmService.mH.post(() ->
-                InputMethodManagerInternal.get().reportImeControl(token)
+                InputMethodManagerInternal.get().reportImeControl(token, imeParentChanged)
         );
     }
 
