@@ -90,4 +90,9 @@ public class ComponentMutateUtils {
             int priority) {
         ((ParsedPermissionGroupImpl) parsedPermissionGroup).setPriority(priority);
     }
+
+    public static void addStateFrom(@NonNull ParsedProcess oldProcess,
+            @NonNull ParsedProcess newProcess) {
+        ((ParsedProcessImpl) oldProcess).addStateFrom(newProcess);
+    }
 }

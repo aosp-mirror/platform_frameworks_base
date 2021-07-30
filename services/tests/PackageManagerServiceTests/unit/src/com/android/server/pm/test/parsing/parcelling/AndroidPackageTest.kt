@@ -24,23 +24,15 @@ import android.content.pm.FeatureInfo
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
 import android.content.pm.parsing.ParsingPackage
-import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedAttribution
 import android.content.pm.parsing.component.ParsedAttributionImpl
-import android.content.pm.parsing.component.ParsedComponent
 import android.content.pm.parsing.component.ParsedComponentImpl
-import android.content.pm.parsing.component.ParsedInstrumentation
 import android.content.pm.parsing.component.ParsedInstrumentationImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
-import android.content.pm.parsing.component.ParsedPermission
-import android.content.pm.parsing.component.ParsedPermissionGroup
 import android.content.pm.parsing.component.ParsedPermissionGroupImpl
 import android.content.pm.parsing.component.ParsedPermissionImpl
-import android.content.pm.parsing.component.ParsedProcess
-import android.content.pm.parsing.component.ParsedProvider
+import android.content.pm.parsing.component.ParsedProcessImpl
 import android.content.pm.parsing.component.ParsedProviderImpl
-import android.content.pm.parsing.component.ParsedService
 import android.content.pm.parsing.component.ParsedServiceImpl
 import android.content.pm.parsing.component.ParsedUsesPermission
 import android.net.Uri
@@ -51,14 +43,12 @@ import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
 import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
 import java.security.PublicKey
 import kotlin.contracts.ExperimentalContracts
-import kotlin.reflect.KFunction1
 
 @ExperimentalContracts
 class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, PackageImpl::class) {
@@ -453,7 +443,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         getSetByValue(
             AndroidPackage::getProcesses,
             PackageImpl::setProcesses,
-            mapOf("testProcess" to ParsedProcess().apply { name = "testProcessName" }),
+            mapOf("testProcess" to ParsedProcessImpl().apply { name = "testProcessName" }),
             compare = { first, second ->
                 equalBy(
                     first, second,
