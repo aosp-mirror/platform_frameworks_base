@@ -93,7 +93,7 @@ public class PackageItemInfo {
 
     private static final float MAX_LABEL_SIZE_PX = 500f;
     /** The maximum length of a safe label, in characters */
-    private static final int MAX_SAFE_LABEL_LENGTH = 50000;
+    private static final int MAX_SAFE_LABEL_LENGTH = 1000;
 
     private static volatile boolean sForceSafeLabels = false;
 
@@ -191,7 +191,9 @@ public class PackageItemInfo {
         if (sForceSafeLabels) {
             return loadSafeLabel(pm);
         } else {
-            return loadUnsafeLabel(pm);
+            // Trims the label string to the MAX_SAFE_LABEL_LENGTH. This is to prevent that the
+            // system is overwhelmed by an enormous string returned by the application.
+            return TextUtils.trimToSize(loadUnsafeLabel(pm), MAX_SAFE_LABEL_LENGTH);
         }
     }
 
