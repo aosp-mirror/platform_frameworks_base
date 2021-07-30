@@ -118,12 +118,19 @@ public final class IncrementalStates {
      * @param progress Value between [0, 1].
      */
     public void setProgress(float progress) {
+        final boolean oldLoadingState;
         final boolean newLoadingState;
         synchronized (mLock) {
-            updateProgressLocked(progress);
+            oldLoadingState = mLoadingState.isLoading();
+            if (oldLoadingState) {
+                // Due to asynchronous progress reporting, incomplete progress might be received
+                // after the app is migrated off incremental. Ignore such progress updates.
+                updateProgressLocked(progress);
+            }
             newLoadingState = mLoadingState.isLoading();
         }
-        if (!newLoadingState) {
+        if (oldLoadingState && !newLoadingState) {
+            // Only report the state change when loading state changes from true to false
             onLoadingStateChanged();
         }
     }

@@ -47,7 +47,6 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
-import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ComponentParseUtils;
@@ -91,6 +90,7 @@ import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.ext.SdkExtensions;
@@ -99,6 +99,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Slog;
@@ -122,7 +123,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -330,8 +336,6 @@ public class ParsingPackageUtils {
      * result from a previous parse of the same {@code packageFile} with the same
      * {@code flags}. Note that this method does not check whether {@code packageFile}
      * has changed since the last parse, it's up to callers to do so.
-     *
-     * @see PackageParser#parsePackageLite(File, int)
      */
     public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags) {
         if (packageFile.isDirectory()) {
@@ -1069,7 +1073,7 @@ public class ParsingPackageUtils {
                                     + " must define a public-key value on first use at "
                                     + parser.getPositionDescription());
                         } else if (encodedKey != null) {
-                            PublicKey currentKey = PackageParser.parsePublicKey(encodedKey);
+                            PublicKey currentKey = parsePublicKey(encodedKey);
                             if (currentKey == null) {
                                 Slog.w(TAG, "No recognized valid key in 'public-key' tag at "
                                         + parser.getPositionDescription() + " key-set "
@@ -1613,8 +1617,39 @@ public class ParsingPackageUtils {
     }
 
     /**
-     * {@link ParseResult} version of
-     * {@link PackageParser#computeMinSdkVersion(int, String, int, String[], String[])}
+     * Computes the minSdkVersion to use at runtime. If the package is not
+     * compatible with this platform, populates {@code outError[0]} with an
+     * error message.
+     * <p>
+     * If {@code minCode} is not specified, e.g. the value is {@code null},
+     * then behavior varies based on the {@code platformSdkVersion}:
+     * <ul>
+     * <li>If the platform SDK version is greater than or equal to the
+     * {@code minVers}, returns the {@code mniVers} unmodified.
+     * <li>Otherwise, returns -1 to indicate that the package is not
+     * compatible with this platform.
+     * </ul>
+     * <p>
+     * Otherwise, the behavior varies based on whether the current platform
+     * is a pre-release version, e.g. the {@code platformSdkCodenames} array
+     * has length > 0:
+     * <ul>
+     * <li>If this is a pre-release platform and the value specified by
+     * {@code targetCode} is contained within the array of allowed pre-release
+     * codenames, this method will return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
+     * <li>If this is a released platform, this method will return -1 to
+     * indicate that the package is not compatible with this platform.
+     * </ul>
+     *
+     * @param minVers minSdkVersion number, if specified in the application
+     *                manifest, or 1 otherwise
+     * @param minCode minSdkVersion code, if specified in the application
+     *                manifest, or {@code null} otherwise
+     * @param platformSdkVersion platform SDK version number, typically
+     *                           Build.VERSION.SDK_INT
+     * @param platformSdkCodenames array of allowed prerelease SDK codenames
+     *                             for this platform
+     * @return the minSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeMinSdkVersion(@IntRange(from = 1) int minVers,
             @Nullable String minCode, @IntRange(from = 1) int platformSdkVersion,
@@ -1651,8 +1686,31 @@ public class ParsingPackageUtils {
     }
 
     /**
-     * {@link ParseResult} version of
-     * {@link PackageParser#computeTargetSdkVersion(int, String, String[], String[])}
+     * Computes the targetSdkVersion to use at runtime. If the package is not
+     * compatible with this platform, populates {@code outError[0]} with an
+     * error message.
+     * <p>
+     * If {@code targetCode} is not specified, e.g. the value is {@code null},
+     * then the {@code targetVers} will be returned unmodified.
+     * <p>
+     * Otherwise, the behavior varies based on whether the current platform
+     * is a pre-release version, e.g. the {@code platformSdkCodenames} array
+     * has length > 0:
+     * <ul>
+     * <li>If this is a pre-release platform and the value specified by
+     * {@code targetCode} is contained within the array of allowed pre-release
+     * codenames, this method will return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
+     * <li>If this is a released platform, this method will return -1 to
+     * indicate that the package is not compatible with this platform.
+     * </ul>
+     *
+     * @param targetVers targetSdkVersion number, if specified in the
+     *                   application manifest, or 0 otherwise
+     * @param targetCode targetSdkVersion code, if specified in the application
+     *                   manifest, or {@code null} otherwise
+     * @param platformSdkCodenames array of allowed pre-release SDK codenames
+     *                             for this platform
+     * @return the targetSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
@@ -2684,7 +2742,7 @@ public class ParsingPackageUtils {
                     R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyName);
             String propValue = sa.getString(
                     R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyValue);
-            if (!PackageParser.checkRequiredSystemProperties(propName, propValue)) {
+            if (!checkRequiredSystemProperties(propName, propValue)) {
                 String message = "Skipping target and overlay pair " + target + " and "
                         + pkg.getBaseApkPath()
                         + ": overlay ignored due to required system property: "
@@ -2959,6 +3017,114 @@ public class ParsingPackageUtils {
         } finally {
             sa.recycle();
         }
+    }
+
+    /**
+     * @return {@link PublicKey} of a given encoded public key.
+     */
+    public static final PublicKey parsePublicKey(final String encodedPublicKey) {
+        if (encodedPublicKey == null) {
+            Slog.w(TAG, "Could not parse null public key");
+            return null;
+        }
+
+        try {
+            return parsePublicKey(Base64.decode(encodedPublicKey, Base64.DEFAULT));
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Could not parse verifier public key; invalid Base64");
+            return null;
+        }
+    }
+
+    /**
+     * @return {@link PublicKey} of the given byte array of a public key.
+     */
+    public static final PublicKey parsePublicKey(final byte[] publicKey) {
+        if (publicKey == null) {
+            Slog.w(TAG, "Could not parse null public key");
+            return null;
+        }
+
+        final EncodedKeySpec keySpec;
+        try {
+            keySpec = new X509EncodedKeySpec(publicKey);
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Could not parse verifier public key; invalid Base64");
+            return null;
+        }
+
+        /* First try the key as an RSA key. */
+        try {
+            final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException e) {
+            Slog.wtf(TAG, "Could not parse public key: RSA KeyFactory not included in build");
+        } catch (InvalidKeySpecException e) {
+            // Not a RSA public key.
+        }
+
+        /* Now try it as a ECDSA key. */
+        try {
+            final KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            return keyFactory.generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException e) {
+            Slog.wtf(TAG, "Could not parse public key: EC KeyFactory not included in build");
+        } catch (InvalidKeySpecException e) {
+            // Not a ECDSA public key.
+        }
+
+        /* Now try it as a DSA key. */
+        try {
+            final KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+            return keyFactory.generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException e) {
+            Slog.wtf(TAG, "Could not parse public key: DSA KeyFactory not included in build");
+        } catch (InvalidKeySpecException e) {
+            // Not a DSA public key.
+        }
+
+        /* Not a supported key type */
+        return null;
+    }
+
+    /**
+     * Returns {@code true} if both the property name and value are empty or if the given system
+     * property is set to the specified value. Properties can be one or more, and if properties are
+     * more than one, they must be separated by comma, and count of names and values must be equal,
+     * and also every given system property must be set to the corresponding value.
+     * In all other cases, returns {@code false}
+     */
+    public static boolean checkRequiredSystemProperties(@Nullable String rawPropNames,
+            @Nullable String rawPropValues) {
+        if (TextUtils.isEmpty(rawPropNames) || TextUtils.isEmpty(rawPropValues)) {
+            if (!TextUtils.isEmpty(rawPropNames) || !TextUtils.isEmpty(rawPropValues)) {
+                // malformed condition - incomplete
+                Slog.w(TAG, "Disabling overlay - incomplete property :'" + rawPropNames
+                        + "=" + rawPropValues + "' - require both requiredSystemPropertyName"
+                        + " AND requiredSystemPropertyValue to be specified.");
+                return false;
+            }
+            // no valid condition set - so no exclusion criteria, overlay will be included.
+            return true;
+        }
+
+        final String[] propNames = rawPropNames.split(",");
+        final String[] propValues = rawPropValues.split(",");
+
+        if (propNames.length != propValues.length) {
+            Slog.w(TAG, "Disabling overlay - property :'" + rawPropNames
+                    + "=" + rawPropValues + "' - require both requiredSystemPropertyName"
+                    + " AND requiredSystemPropertyValue lists to have the same size.");
+            return false;
+        }
+        for (int i = 0; i < propNames.length; i++) {
+            // Check property value: make sure it is both set and equal to expected value
+            final String currValue = SystemProperties.get(propNames[i]);
+            if (!TextUtils.equals(currValue, propValues[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

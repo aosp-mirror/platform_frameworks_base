@@ -571,7 +571,7 @@ final class Policy {
      * In all cases, a return value of null should be interpreted as the apk failing
      * to match this Policy instance; i.e. failing this policy stanza.
      * </p>
-     * @param pkg the apk to check given as a PackageParser.Package object
+     * @param pkg the apk to check given as a AndroidPackage object
      * @return A string representing the seinfo matched during policy lookup.
      *         A value of null can also be returned if no match occured.
      */

@@ -17,10 +17,10 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
+import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 
-import android.content.pm.PackageParser;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
@@ -801,7 +801,7 @@ public class KeySetManagerService {
         long identifier = parser.getAttributeLong(null, "identifier");
         int refCount = 0;
         byte[] publicKey = parser.getAttributeBytesBase64(null, "value", null);
-        PublicKey pub = PackageParser.parsePublicKey(publicKey);
+        PublicKey pub = parsePublicKey(publicKey);
         if (pub != null) {
             PublicKeyHandle pkh = new PublicKeyHandle(identifier, refCount, pub);
             mPublicKeys.put(identifier, pkh);

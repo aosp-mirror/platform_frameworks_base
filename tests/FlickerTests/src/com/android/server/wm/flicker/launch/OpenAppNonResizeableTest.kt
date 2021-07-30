@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.FlakyTest
@@ -66,7 +66,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerIsVisible() {
         testSpec.assertLayersEnd {
@@ -74,7 +74,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun nonResizableAppLayerBecomesVisible() {
         testSpec.assertLayers {
@@ -86,7 +86,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun nonResizableAppWindowBecomesVisible() {
         testSpec.assertWm {
@@ -99,7 +99,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun nonResizableAppWindowBecomesVisibleAtEnd() {
         testSpec.assertWmEnd {

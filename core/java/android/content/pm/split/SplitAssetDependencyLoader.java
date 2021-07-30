@@ -115,8 +115,8 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<IllegalArg
 
     @Override
     public AssetManager getSplitAssetManager(int idx) throws IllegalArgumentException {
-        // Since we insert the base at position 0, and PackageParser keeps splits separate from
-        // the base, we need to adjust the index.
+        // Since we insert the base at position 0, and ParsingPackageUtils keeps splits separate
+        // from the base, we need to adjust the index.
         loadDependenciesForSplit(idx + 1);
         return mCachedAssetManagers[idx + 1];
     }
