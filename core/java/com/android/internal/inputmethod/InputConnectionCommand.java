@@ -23,12 +23,12 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -356,24 +356,14 @@ public final class InputConnectionCommand implements Parcelable {
                 | (mResultCallbackType != ResultCallbackType.NULL ? FieldMask.CALLBACK : 0);
     }
 
-
-    /**
-     * A utility method to unparcel {@link InputConnectionCommand} from the given {@link Parcel}.
-     *
-     * <p>When this method throws any {@link RuntimeException} or its derived class, notably
-     * {@link BadParcelableException}, {@code source} is considered to be in an unexpected state and
-     * unsafe to continue reading any subsequent data.</p>
-     *
-     * @param source {@link Parcel} to read the data from.
-     * @return {@link InputConnectionCommand} that is parcelled from {@code source}.
-     */
     @AnyThread
-    @NonNull
+    @Nullable
     private static InputConnectionCommand createFromParcel(@NonNull Parcel source) {
         final int type = source.readInt();
         if (type < InputConnectionCommandType.FIRST_COMMAND
                 || InputConnectionCommandType.LAST_COMMAND < type) {
-            throw new BadParcelableException("Invalid InputConnectionCommandType=" + type);
+            Log.e(TAG, "Invalid InputConnectionCommand type=" + type);
+            return null;
         }
 
         @FieldMask final int fieldMask = source.readInt();
@@ -390,6 +380,9 @@ public final class InputConnectionCommand implements Parcelable {
         if ((fieldMask & FieldMask.PARCELABLE) != 0) {
             parcelableType = source.readInt();
             switch (parcelableType) {
+                case ParcelableType.NULL:
+                    Log.e(TAG, "Unexpected ParcelableType=NULL");
+                    return null;
                 case ParcelableType.EXTRACTED_TEXT_REQUEST:
                     parcelable = source.readTypedObject(ExtractedTextRequest.CREATOR);
                     break;
@@ -406,8 +399,8 @@ public final class InputConnectionCommand implements Parcelable {
                     parcelable = source.readTypedObject(InputContentInfo.CREATOR);
                     break;
                 default:
-                    throw new BadParcelableException(
-                            "Invalid InputConnectionCommand.ParcelableType=" + parcelableType);
+                    Log.e(TAG, "Unknown ParcelableType=" + parcelableType);
+                    return null;
             }
         } else {
             parcelableType = ParcelableType.NULL;
@@ -418,6 +411,9 @@ public final class InputConnectionCommand implements Parcelable {
         if ((fieldMask & FieldMask.CALLBACK) != 0) {
             resultCallbackType = source.readInt();
             switch (resultCallbackType) {
+                case ResultCallbackType.NULL:
+                    Log.e(TAG, "Unexpected ResultCallbackType=NULL");
+                    return null;
                 case ResultCallbackType.BOOLEAN:
                 case ResultCallbackType.INT:
                 case ResultCallbackType.CHAR_SEQUENCE:
@@ -426,9 +422,8 @@ public final class InputConnectionCommand implements Parcelable {
                     resultCallback = source.readStrongBinder();
                     break;
                 default:
-                    throw new BadParcelableException(
-                            "Invalid InputConnectionCommand.ResultCallbackType="
-                                    + resultCallbackType);
+                    Log.e(TAG, "Unknown ResultCallbackType=" + resultCallbackType);
+                    return null;
             }
         } else {
             resultCallbackType = ResultCallbackType.NULL;
@@ -444,10 +439,15 @@ public final class InputConnectionCommand implements Parcelable {
     public static final Parcelable.Creator<InputConnectionCommand> CREATOR =
             new Parcelable.Creator<InputConnectionCommand>() {
                 @AnyThread
-                @NonNull
+                @Nullable
                 @Override
                 public InputConnectionCommand createFromParcel(Parcel source) {
-                    return InputConnectionCommand.createFromParcel(source);
+                    try {
+                        return InputConnectionCommand.createFromParcel(source);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Returning null due to exception.", e);
+                        return null;
+                    }
                 }
 
                 @AnyThread
