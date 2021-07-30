@@ -19,15 +19,13 @@ package com.android.systemui.qs
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.brightness.BrightnessController
-import com.android.systemui.statusbar.policy.BrightnessMirrorController
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.times
 import org.mockito.Mockito.never
-import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
@@ -105,14 +103,5 @@ class QuickQSBrightnessControllerTest : SysuiTestCase() {
         quickQSBrightnessController.refreshVisibility(shouldUseSplitNotificationShade = false)
 
         verify(brightnessController, never()).registerCallbacks()
-    }
-
-    @Test
-    fun testMirrorIsSetWhenSliderIsShown() {
-        val mirrorController = mock(BrightnessMirrorController::class.java)
-        quickQSBrightnessController.setMirror(mirrorController)
-        quickQSBrightnessController.refreshVisibility(shouldUseSplitNotificationShade = true)
-
-        verify(brightnessController).setMirror(mirrorController)
     }
 }
