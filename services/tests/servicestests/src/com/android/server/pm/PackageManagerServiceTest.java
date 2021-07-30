@@ -101,16 +101,15 @@ public class PackageManagerServiceTest {
 
         PackageSenderImpl sender = new PackageSenderImpl();
         PackageSetting setting = null;
-        PackageManagerService.PackageRemovedInfo pri =
-                new PackageManagerService.PackageRemovedInfo(sender);
+        PackageRemovedInfo pri = new PackageRemovedInfo(sender);
 
         // Initial conditions: nothing there
-        Assert.assertNull(pri.removedUsers);
-        Assert.assertNull(pri.broadcastUsers);
+        Assert.assertNull(pri.mRemovedUsers);
+        Assert.assertNull(pri.mBroadcastUsers);
 
         // populateUsers with nothing leaves nothing
         pri.populateUsers(null, setting);
-        Assert.assertNull(pri.broadcastUsers);
+        Assert.assertNull(pri.mBroadcastUsers);
 
         // Create a real (non-null) PackageSetting and confirm that the removed
         // users are copied properly
@@ -126,22 +125,22 @@ public class PackageManagerServiceTest {
         pri.populateUsers(new int[] {
                 1, 2, 3, 4, 5
         }, setting);
-        Assert.assertNotNull(pri.broadcastUsers);
-        Assert.assertEquals(5, pri.broadcastUsers.length);
-        Assert.assertNotNull(pri.instantUserIds);
-        Assert.assertEquals(0, pri.instantUserIds.length);
+        Assert.assertNotNull(pri.mBroadcastUsers);
+        Assert.assertEquals(5, pri.mBroadcastUsers.length);
+        Assert.assertNotNull(pri.mInstantUserIds);
+        Assert.assertEquals(0, pri.mInstantUserIds.length);
 
         // Exclude a user
-        pri.broadcastUsers = null;
+        pri.mBroadcastUsers = null;
         final int EXCLUDED_USER_ID = 4;
         setting.setInstantApp(true, EXCLUDED_USER_ID);
         pri.populateUsers(new int[] {
                 1, 2, 3, EXCLUDED_USER_ID, 5
         }, setting);
-        Assert.assertNotNull(pri.broadcastUsers);
-        Assert.assertEquals(4, pri.broadcastUsers.length);
-        Assert.assertNotNull(pri.instantUserIds);
-        Assert.assertEquals(1, pri.instantUserIds.length);
+        Assert.assertNotNull(pri.mBroadcastUsers);
+        Assert.assertEquals(4, pri.mBroadcastUsers.length);
+        Assert.assertNotNull(pri.mInstantUserIds);
+        Assert.assertEquals(1, pri.mInstantUserIds.length);
 
         // TODO: test that sendApplicationHiddenForUser() actually fills in
         // broadcastUsers

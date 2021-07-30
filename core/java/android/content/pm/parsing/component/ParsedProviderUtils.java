@@ -16,10 +16,10 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.parsing.ParsingPackageUtils.RIGID_PARSER;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
-import android.content.pm.PackageParser;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -262,7 +262,7 @@ public class ParsedProviderUtils {
                 }
                 provider.setGrantUriPermissions(true);
             } else {
-                if (PackageParser.RIGID_PARSER) {
+                if (RIGID_PARSER) {
                     return input.error("No path, pathPrefix, or pathPattern for <path-permission>");
                 }
 
@@ -308,7 +308,7 @@ public class ParsedProviderUtils {
             }
 
             if (!havePerm) {
-                if (PackageParser.RIGID_PARSER) {
+                if (RIGID_PARSER) {
                     return input.error(
                             "No readPermission or writePermission for <path-permission>");
                 }
@@ -365,7 +365,7 @@ public class ParsedProviderUtils {
                     provider.setPathPermissions(newp);
                 }
             } else {
-                if (PackageParser.RIGID_PARSER) {
+                if (RIGID_PARSER) {
                     return input.error(
                             "No path, pathPrefix, or pathPattern for <path-permission>");
                 }

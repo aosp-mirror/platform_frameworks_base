@@ -31,8 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * For use by {@link PackageSetting} to maintain functionality that used to exist in
- * {@link PackageParser.Package}.
+ * For use by {@link PackageSetting} to maintain functionality that used to exist in PackageParser.
  *
  * It is assumed that anything inside the package was not cached or written to disk, so none of
  * these fields are either. They must be set on every boot from other state on the device.

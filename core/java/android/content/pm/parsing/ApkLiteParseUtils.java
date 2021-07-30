@@ -18,6 +18,8 @@ package android.content.pm.parsing;
 
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+import static android.content.pm.parsing.ParsingPackageUtils.checkRequiredSystemProperties;
+import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 import static android.content.pm.parsing.ParsingPackageUtils.validateName;
 import static android.content.pm.parsing.ParsingUtils.ANDROID_RES_NAMESPACE;
 import static android.content.pm.parsing.ParsingUtils.DEFAULT_MIN_SDK_VERSION;
@@ -27,7 +29,6 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import android.annotation.NonNull;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
 import android.content.pm.parsing.result.ParseInput;
@@ -78,8 +79,6 @@ public class ApkLiteParseUtils {
      * This performs validity checking on cluster style packages, such as
      * requiring identical package name and version codes, a single base APK,
      * and unique split names.
-     *
-     * @see PackageParser#parsePackage(File, int)
      */
     public static ParseResult<PackageLite> parsePackageLite(ParseInput input,
             File packageFile, int flags) {
@@ -506,7 +505,7 @@ public class ApkLiteParseUtils {
         }
 
         // Check to see if overlay should be excluded based on system property condition
-        if (!PackageParser.checkRequiredSystemProperties(requiredSystemPropertyName,
+        if (!checkRequiredSystemProperties(requiredSystemPropertyName,
                 requiredSystemPropertyValue)) {
             Slog.i(TAG, "Skipping target and overlay pair " + targetPackage + " and "
                     + codePath + ": overlay ignored due to required system property: "
@@ -577,7 +576,7 @@ public class ApkLiteParseUtils {
             return null;
         }
 
-        final PublicKey publicKey = PackageParser.parsePublicKey(encodedPublicKey);
+        final PublicKey publicKey = parsePublicKey(encodedPublicKey);
         if (publicKey == null) {
             Slog.i(TAG, "Unable to parse verifier public key for " + packageName);
             return null;

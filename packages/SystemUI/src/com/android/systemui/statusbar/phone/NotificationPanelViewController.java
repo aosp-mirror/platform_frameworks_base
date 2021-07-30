@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.View.GONE;
 
-import static androidx.constraintlayout.widget.ConstraintSet.BOTTOM;
 import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
@@ -117,6 +116,9 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.idle.IdleHostView;
+import com.android.systemui.idle.IdleHostViewController;
+import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -332,6 +334,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
     private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
+    private final IdleViewComponent.Factory mIdleViewComponentFactory;
     private final QSDetailDisplayer mQSDetailDisplayer;
     private final FragmentService mFragmentService;
     private final ScrimController mScrimController;
@@ -365,6 +368,8 @@ public class NotificationPanelViewController extends PanelViewController {
     @Nullable
     private CommunalHostViewController mCommunalViewController;
     private KeyguardStatusViewController mKeyguardStatusViewController;
+    @Nullable
+    private IdleHostViewController mIdleHostViewController;
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
@@ -748,6 +753,7 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardUserSwitcherComponent.Factory keyguardUserSwitcherComponentFactory,
             KeyguardStatusBarViewComponent.Factory keyguardStatusBarViewComponentFactory,
             CommunalViewComponent.Factory communalViewComponentFactory,
+            IdleViewComponent.Factory idleViewComponentFactory,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             QSDetailDisplayer qsDetailDisplayer,
             NotificationGroupManagerLegacy groupManager,
@@ -795,6 +801,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mCommunalViewComponentFactory = communalViewComponentFactory;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mKeyguardStatusBarViewComponentFactory = keyguardStatusBarViewComponentFactory;
+        mIdleViewComponentFactory = idleViewComponentFactory;
         mDepthController = notificationShadeDepthController;
         mContentResolver = contentResolver;
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
@@ -917,7 +924,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 userAvatarView,
                 mKeyguardStatusBar,
                 keyguardUserSwitcherView,
-                mCommunalView);
+                mCommunalView,
+                mView.findViewById(R.id.idle_host_view));
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
                 R.id.notification_stack_scroller);
@@ -1010,12 +1018,17 @@ public class NotificationPanelViewController extends PanelViewController {
             UserAvatarView userAvatarView,
             KeyguardStatusBarView keyguardStatusBarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView,
-            CommunalHostView communalView) {
+            CommunalHostView communalView,
+            IdleHostView idleHostView) {
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
+
+        IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(idleHostView);
+        mIdleHostViewController = idleViewComponent.getIdleHostViewController();
+        mIdleHostViewController.init();
 
         KeyguardStatusBarViewComponent statusBarViewComponent =
                 mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
@@ -1194,7 +1207,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                mKeyguardStatusBar, keyguardUserSwitcherView, mCommunalView);
+                mKeyguardStatusBar, keyguardUserSwitcherView, mCommunalView,
+                mView.findViewById(R.id.idle_host_view));
 
         // Update keyguard bottom area
         int index = mView.indexOfChild(mKeyguardBottomArea);
@@ -1400,10 +1414,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewController.updatePosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY,
                 mClockPositionResult.clockScale, animateClock);
-        // CommunalView's height is constrained to KeyguardStatusView. Match Y offset as well.
-        if (mCommunalViewController != null) {
-            mCommunalViewController.updatePositionY(mClockPositionResult.clockY, animateClock);
-        }
         if (mKeyguardQsUserSwitchController != null) {
             mKeyguardQsUserSwitchController.updatePosition(
                     mClockPositionResult.clockX,
@@ -1438,20 +1448,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                 TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
             }
-
-            // By default, the CommunalView is not shown. We set parameters as if it is shown, which
-            // are based on it being aligned with the start of the qs edge guide, like the
-            // notification stack scroller. These constraints cannot be expressed in the layout as
-            // they reference a peer rather than the parent.
-            constraintSet.connect(
-                    R.id.communal_host, START,
-                    R.id.qs_edge_guideline, START);
-            constraintSet.connect(
-                    R.id.communal_host, TOP,
-                    R.id.keyguard_status_view, TOP);
-            constraintSet.connect(
-                    R.id.communal_host, BOTTOM,
-                    R.id.keyguard_status_view, BOTTOM);
 
             constraintSet.applyTo(mNotificationContainerParent);
         }
@@ -3377,7 +3373,10 @@ public class NotificationPanelViewController extends PanelViewController {
         switch (mBarState) {
             case KEYGUARD:
                 if (!mDozingOnDown) {
-                    if (mKeyguardBypassController.getBypassEnabled()) {
+                    if (mUpdateMonitor.isFaceEnrolled()
+                            && !mUpdateMonitor.isFaceDetectionRunning()
+                            && !mUpdateMonitor.getUserCanSkipBouncer(
+                                    KeyguardUpdateMonitor.getCurrentUser())) {
                         mUpdateMonitor.requestFaceAuth(true);
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,

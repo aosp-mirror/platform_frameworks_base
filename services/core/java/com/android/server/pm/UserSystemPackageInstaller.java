@@ -487,7 +487,7 @@ class UserSystemPackageInstaller {
     /**
      * Gets the system package names that should be installed on users of the given user type, as
      * determined by SystemConfig, the allowlist mode, and the apps actually on the device.
-     * Names are the {@link PackageParser.Package#packageName}, not necessarily the manifest names.
+     * Names are the {@link AndroidPackage#getPackageName()}, not necessarily the manifest names.
      *
      * Returns null if all system packages should be installed (due to enforce-mode being off).
      */

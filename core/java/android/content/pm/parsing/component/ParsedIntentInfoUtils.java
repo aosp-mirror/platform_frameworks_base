@@ -16,10 +16,11 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.parsing.ParsingUtils.ANDROID_RES_NAMESPACE;
+
 import android.annotation.NonNull;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
@@ -97,8 +98,7 @@ public class ParsedIntentInfoUtils {
             String nodeName = parser.getName();
             switch (nodeName) {
                 case "action": {
-                    String value = parser.getAttributeValue(PackageParser.ANDROID_RESOURCES,
-                            "name");
+                    String value = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "name");
                     if (value == null) {
                         result = input.error("No value supplied for <android:name>");
                     } else if (value.isEmpty()) {
@@ -113,8 +113,7 @@ public class ParsedIntentInfoUtils {
                     break;
                 }
                 case "category": {
-                    String value = parser.getAttributeValue(PackageParser.ANDROID_RESOURCES,
-                            "name");
+                    String value = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "name");
                     if (value == null) {
                         result = input.error("No value supplied for <android:name>");
                     } else if (value.isEmpty()) {

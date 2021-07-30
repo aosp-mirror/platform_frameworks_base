@@ -39,9 +39,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OU
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
@@ -159,8 +157,6 @@ import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -242,7 +238,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -269,9 +264,10 @@ import javax.inject.Provider;
 
 import dagger.Lazy;
 
-public class StatusBar extends SystemUI implements DemoMode,
-        ActivityStarter, KeyguardStateController.Callback,
-        OnHeadsUpChangedListener, CommandQueue.Callbacks,
+/** */
+public class StatusBar extends SystemUI implements
+        ActivityStarter,
+        CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener,
         LifecycleOwner, BatteryController.BatteryStateChangeCallback,
@@ -973,8 +969,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Connect in to the status bar manager service
         mCommandQueue.addCallback(this);
 
-        // Listen for demo mode changes
-        mDemoModeController.addCallback(this);
 
         RegisterStatusBarResult result = null;
         try {
@@ -1046,7 +1040,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy.init();
 
-        mKeyguardStateController.addCallback(this);
+        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onUnlockedChanged() {
+                updateKeyguardState();
+                logStateToEventlog();
+            }
+        });
         startKeyguard();
 
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
@@ -1227,7 +1227,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mHeadsUpManager.setup(mVisualStabilityManager);
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
-        mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanelViewController.getOnHeadsUpChangedListener());
         mHeadsUpManager.addListener(mVisualStabilityManager);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
@@ -1325,8 +1324,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
-                    mQSPanelController = ((QSFragment) qs).getQSPanelController();
-                    mQSPanelController.setBrightnessMirror(mBrightnessMirrorController);
+                    ((QSFragment) qs).setBrightnessMirrorController(mBrightnessMirrorController);
                 }
             });
         }
@@ -1607,6 +1605,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mAuthRippleController = statusBarComponent.getAuthRippleController();
         mAuthRippleController.init();
+
+        mHeadsUpManager.addListener(statusBarComponent.getStatusBarHeadsUpChangeListener());
+
+        // Listen for demo mode changes
+        mDemoModeController.addCallback(statusBarComponent.getStatusBarDemoMode());
     }
 
     protected void startKeyguard() {
@@ -1925,70 +1928,6 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     public void onKeyguardViewManagerStatesUpdated() {
         logStateToEventlog();
-    }
-
-    @Override
-    public void onUnlockedChanged() {
-        updateKeyguardState();
-        logStateToEventlog();
-    }
-
-    @Override
-    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-        if (inPinnedMode) {
-            mNotificationShadeWindowController.setHeadsUpShowing(true);
-            mStatusBarWindowController.setForceStatusBarVisible(true);
-            if (mNotificationPanelViewController.isFullyCollapsed()) {
-                // We need to ensure that the touchable region is updated before the window will be
-                // resized, in order to not catch any touches. A layout will ensure that
-                // onComputeInternalInsets will be called and after that we can resize the layout. Let's
-                // make sure that the window stays small for one frame until the touchableRegion is set.
-                mNotificationPanelViewController.getView().requestLayout();
-                mNotificationShadeWindowController.setForceWindowCollapsed(true);
-                mNotificationPanelViewController.getView().post(() -> {
-                    mNotificationShadeWindowController.setForceWindowCollapsed(false);
-                });
-            }
-        } else {
-            boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
-                    && mState == StatusBarState.KEYGUARD;
-            if (!mNotificationPanelViewController.isFullyCollapsed()
-                    || mNotificationPanelViewController.isTracking() || bypassKeyguard) {
-                // We are currently tracking or is open and the shade doesn't need to be kept
-                // open artificially.
-                mNotificationShadeWindowController.setHeadsUpShowing(false);
-                if (bypassKeyguard) {
-                    mStatusBarWindowController.setForceStatusBarVisible(false);
-                }
-            } else {
-                // we need to keep the panel open artificially, let's wait until the animation
-                // is finished.
-                mHeadsUpManager.setHeadsUpGoingAway(true);
-                mNotificationPanelViewController.runAfterAnimationFinished(() -> {
-                    if (!mHeadsUpManager.hasPinnedHeadsUp()) {
-                        mNotificationShadeWindowController.setHeadsUpShowing(false);
-                        mHeadsUpManager.setHeadsUpGoingAway(false);
-                    }
-                    mRemoteInputManager.onPanelCollapsed();
-                });
-            }
-        }
-    }
-
-    @Override
-    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mNotificationsController.requestNotificationUpdate("onHeadsUpStateChanged");
-        if (mStatusBarStateController.isDozing() && isHeadsUp) {
-            entry.setPulseSuppressed(false);
-            mDozeServiceHost.fireNotificationPulse(entry);
-            if (mDozeServiceHost.isPulsing()) {
-                mDozeScrimController.cancelPendingPulseTimeout();
-            }
-        }
-        if (!isHeadsUp && !mHeadsUpManager.hasNotifications()) {
-            // There are no longer any notifications to show.  We should end the pulse now.
-            mDozeScrimController.pulseOutNow();
-        }
     }
 
     public void setPanelExpanded(boolean isExpanded) {
@@ -3380,82 +3319,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 0 /* flags */,
                                 animationController),
                 delay);
-    }
-
-    @Override
-    public List<String> demoCommands() {
-        List<String> s = new ArrayList<>();
-        s.add(DemoMode.COMMAND_BARS);
-        s.add(DemoMode.COMMAND_CLOCK);
-        s.add(DemoMode.COMMAND_OPERATOR);
-        return s;
-    }
-
-    @Override
-    public void onDemoModeStarted() {
-        // Must send this message to any view that we delegate to via dispatchDemoCommandToView
-        dispatchDemoModeStartedToView(R.id.clock);
-        dispatchDemoModeStartedToView(R.id.operator_name);
-    }
-
-    @Override
-    public void onDemoModeFinished() {
-        dispatchDemoModeFinishedToView(R.id.clock);
-        dispatchDemoModeFinishedToView(R.id.operator_name);
-        checkBarModes();
-    }
-
-    @Override
-    public void dispatchDemoCommand(String command, @NonNull Bundle args) {
-        if (command.equals(COMMAND_CLOCK)) {
-            dispatchDemoCommandToView(command, args, R.id.clock);
-        }
-        if (command.equals(COMMAND_BARS)) {
-            String mode = args.getString("mode");
-            int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
-                    "translucent".equals(mode) ? MODE_TRANSLUCENT :
-                    "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
-                    "transparent".equals(mode) ? MODE_TRANSPARENT :
-                    "warning".equals(mode) ? MODE_WARNING :
-                    -1;
-            if (barMode != -1) {
-                boolean animate = true;
-                if (mNotificationShadeWindowController != null
-                        && mNotificationShadeWindowViewController.getBarTransitions() != null) {
-                    mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
-                            barMode, animate);
-                }
-                mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
-            }
-        }
-        if (command.equals(COMMAND_OPERATOR)) {
-            dispatchDemoCommandToView(command, args, R.id.operator_name);
-        }
-    }
-
-    //TODO: these should have controllers, and this method should be removed
-    private void dispatchDemoCommandToView(String command, Bundle args, int id) {
-        if (mStatusBarView == null) return;
-        View v = mStatusBarView.findViewById(id);
-        if (v instanceof DemoModeCommandReceiver) {
-            ((DemoModeCommandReceiver) v).dispatchDemoCommand(command, args);
-        }
-    }
-
-    private void dispatchDemoModeStartedToView(int id) {
-        if (mStatusBarView == null) return;
-        View v = mStatusBarView.findViewById(id);
-        if (v instanceof DemoModeCommandReceiver) {
-            ((DemoModeCommandReceiver) v).onDemoModeStarted();
-        }
-    }
-
-    private void dispatchDemoModeFinishedToView(int id) {
-        if (mStatusBarView == null) return;
-        View v = mStatusBarView.findViewById(id);
-        if (v instanceof DemoModeCommandReceiver) {
-            ((DemoModeCommandReceiver) v).onDemoModeFinished();
-        }
     }
 
     public void showKeyguard() {

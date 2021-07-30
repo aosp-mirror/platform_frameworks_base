@@ -210,7 +210,7 @@ public class PackageDexOptimizer {
         if (paths.size() != classLoaderContexts.length) {
             String[] splitCodePaths = pkg.getSplitCodePaths();
             throw new IllegalStateException("Inconsistent information "
-                + "between PackageParser.Package and its ApplicationInfo. "
+                + "between AndroidPackage and its ApplicationInfo. "
                 + "pkg.getAllCodePaths=" + paths
                 + " pkg.getBaseCodePath=" + pkg.getBaseApkPath()
                 + " pkg.getSplitCodePaths="

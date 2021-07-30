@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
@@ -123,6 +124,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Nullable private final UdfpsHbmProvider mHbmProvider;
     @NonNull private final KeyguardBypassController mKeyguardBypassController;
+    @NonNull private final ConfigurationController mConfigurationController;
     @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -522,7 +524,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull KeyguardBypassController keyguardBypassController,
             @NonNull DisplayManager displayManager,
-            @Main Handler mainHandler) {
+            @Main Handler mainHandler,
+            @NonNull ConfigurationController configurationController) {
         mContext = context;
         mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
@@ -557,6 +560,7 @@ public class UdfpsController implements DozeReceiver {
                 displayManager,
                 mainHandler);
         mKeyguardBypassController = keyguardBypassController;
+        mConfigurationController = configurationController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -776,6 +780,7 @@ public class UdfpsController implements DozeReceiver {
                         mDumpManager,
                         mKeyguardViewMediator,
                         mLockscreenShadeTransitionController,
+                        mConfigurationController,
                         this
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
@@ -888,7 +893,8 @@ public class UdfpsController implements DozeReceiver {
             return;
         }
 
-        if (mView.getAnimationViewController() instanceof UdfpsKeyguardViewController) {
+        if (mView.getAnimationViewController() instanceof UdfpsKeyguardViewController
+                && !mStatusBarStateController.isDozing()) {
             mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
         }
 

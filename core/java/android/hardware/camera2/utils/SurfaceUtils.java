@@ -105,6 +105,20 @@ public class SurfaceUtils {
     }
 
     /**
+     * Get the surface usage bits.
+     *
+     * @param surface The surface to be queried for usage.
+     * @return the native object id of the surface, 0 if surface is not backed by a native object.
+     */
+    public static long getSurfaceUsage(Surface surface) {
+        checkNotNull(surface);
+        try {
+            return nativeDetectSurfaceUsageFlags(surface);
+        } catch (IllegalArgumentException e) {
+            return 0;
+        }
+    }
+    /**
      * Get the Surface size.
      *
      * @param surface The surface to be queried for size.

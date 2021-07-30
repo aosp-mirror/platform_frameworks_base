@@ -16,9 +16,10 @@
 
 package android.content.pm.parsing;
 
+import static android.content.pm.parsing.ParsingPackageUtils.RIGID_PARSER;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.PackageParser;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.XmlResourceParser;
@@ -62,7 +63,7 @@ public class ParsingUtils {
     @NonNull
     public static ParseResult unknownTag(String parentTag, ParsingPackage pkg,
             XmlResourceParser parser, ParseInput input) throws IOException, XmlPullParserException {
-        if (PackageParser.RIGID_PARSER) {
+        if (RIGID_PARSER) {
             return input.error("Bad element under " + parentTag + ": " + parser.getName());
         }
         Slog.w(TAG, "Unknown element under " + parentTag + ": "

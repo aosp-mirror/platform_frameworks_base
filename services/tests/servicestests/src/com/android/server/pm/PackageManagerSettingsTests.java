@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
+import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 import static android.content.res.Resources.ID_NULL;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -39,7 +40,6 @@ import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
@@ -1216,9 +1216,9 @@ public class PackageManagerSettingsTests {
         assertThat(KeySetUtils.getPubKeyRefCount(ksms, 3), is(1));
 
         /* verify public keys properly read */
-        PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
-        PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
-        PublicKey keyC = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyC);
+        PublicKey keyA = parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
+        PublicKey keyB = parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
+        PublicKey keyC = parsePublicKey(KeySetStrings.ctsKeySetPublicKeyC);
         assertThat(KeySetUtils.getPubKey(ksms, 1), is(keyA));
         assertThat(KeySetUtils.getPubKey(ksms, 2), is(keyB));
         assertThat(KeySetUtils.getPubKey(ksms, 3), is(keyC));
