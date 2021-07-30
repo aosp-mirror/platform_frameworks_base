@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Vezeték nélküli kijelző tanúsítványa"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Részletes Wi-Fi-naplózás engedélyezése"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi-Fi-hálózat szabályozása"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi nem állandó MAC-randomizációja"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"A mobilhálózati kapcsolat mindig aktív"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Internetmegosztás hardveres gyorsítása"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Név nélküli Bluetooth-eszközök megjelenítése"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Csökkenti az akkumulátorhasználatot, és javítja a hálózat teljesítményét"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Ha ez a mód be van kapcsolva, akkor ennek az eszköznek a MAC-címe minden alkalommal módosulhat, amikor olyan hálózathoz csatlakozik, amelyen engedélyezve van a MAC-címek randomizálása."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forgalomkorlátos"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Nem forgalomkorlátos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Naplózási puffer mérete"</string>
