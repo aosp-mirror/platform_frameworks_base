@@ -24,12 +24,12 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
@@ -379,7 +379,7 @@ public final class SensorPrivacyManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
-        return isSensorPrivacyEnabled(sensor, getCurrentUserId());
+        return isSensorPrivacyEnabled(sensor, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -410,7 +410,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable) {
-        setSensorPrivacy(source, sensor, enable, getCurrentUserId());
+        setSensorPrivacy(source, sensor, enable, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -446,7 +446,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacyForProfileGroup(source , sensor, enable, getCurrentUserId());
+        setSensorPrivacyForProfileGroup(source , sensor, enable, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -481,7 +481,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(sensor, suppress, getCurrentUserId());
+        suppressSensorPrivacyReminders(sensor, suppress, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -609,12 +609,4 @@ public final class SensorPrivacyManager {
         }
     }
 
-    private int getCurrentUserId() {
-        try {
-            return ActivityManager.getService().getCurrentUserId();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return 0;
-    }
 }
