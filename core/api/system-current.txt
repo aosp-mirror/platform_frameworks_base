@@ -2354,6 +2354,7 @@ package android.content {
     field public static final String TETHERING_SERVICE = "tethering";
     field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
     field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
+    field public static final String UWB_SERVICE = "uwb";
     field public static final String VR_SERVICE = "vrmanager";
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";

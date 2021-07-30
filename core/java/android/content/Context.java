@@ -5606,6 +5606,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
+    @SystemApi
     public static final String UWB_SERVICE = "uwb";
 
     /**
