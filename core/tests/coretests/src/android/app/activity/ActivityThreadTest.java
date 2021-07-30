@@ -286,7 +286,6 @@ public class ActivityThreadTest {
     }
 
     @Test
-    @FlakyTest(bugId = 194242735)
     public void testHandleActivityConfigurationChanged_EnsureUpdatesProcessedInOrder()
             throws Exception {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());

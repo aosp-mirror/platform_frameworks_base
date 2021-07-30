@@ -116,8 +116,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         void dispose() {
-            mOrganizedTaskFragments.forEach(TaskFragment::removeImmediately);
-            mOrganizedTaskFragments.clear();
+            while (!mOrganizedTaskFragments.isEmpty()) {
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(0);
+                taskFragment.removeImmediately();
+                mOrganizedTaskFragments.remove(taskFragment);
+            }
             mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
         }
 

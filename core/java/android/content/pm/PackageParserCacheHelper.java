@@ -56,6 +56,9 @@ public class PackageParserCacheHelper {
             mStrings.clear();
 
             final int poolPosition = mParcel.readInt();
+            if (poolPosition < 0) {
+                throw new IllegalStateException("Invalid string pool position: " + poolPosition);
+            }
             final int startPosition = mParcel.dataPosition();
 
             // The pool is at the end of the parcel.
