@@ -25,11 +25,17 @@ package {
 
 android_test {
     name: "WMShellFlickerTests",
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     manifest: "AndroidManifest.xml",
     test_config: "AndroidTest.xml",
     platform_apis: true,
     certificate: "platform",
+    optimize: {
+        enabled: false,
+    },
     test_suites: ["device-tests"],
     libs: ["android.test.runner"],
     static_libs: [

@@ -22,24 +22,24 @@ import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.appLayerReplacesLauncher
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.focusChanges
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.replacesLayer
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.launcherWindowBecomesInvisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SNAPSHOT_COMPONENT
 import org.junit.Test
 
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
@@ -71,14 +71,14 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    open fun navBarWindowIsAlwaysVisible() {
-        testSpec.navBarWindowIsAlwaysVisible()
+    open fun navBarWindowIsVisible() {
+        testSpec.navBarWindowIsVisible()
     }
 
     @Presubmit
     @Test
-    open fun navBarLayerIsAlwaysVisible() {
-        testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
+    open fun navBarLayerIsVisible() {
+        testSpec.navBarLayerIsVisible()
     }
 
     @Presubmit
@@ -89,14 +89,14 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    open fun statusBarWindowIsAlwaysVisible() {
-        testSpec.statusBarWindowIsAlwaysVisible()
+    open fun statusBarWindowIsVisible() {
+        testSpec.statusBarWindowIsVisible()
     }
 
     @Presubmit
     @Test
-    open fun statusBarLayerIsAlwaysVisible() {
-        testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
+    open fun statusBarLayerIsVisible() {
+        testSpec.statusBarLayerIsVisible()
     }
 
     @Presubmit
@@ -124,31 +124,43 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     // During testing the launcher is always in portrait mode
-    open fun noUncoveredRegions() {
-        testSpec.noUncoveredRegions(Surface.ROTATION_0, testSpec.config.endRotation)
+    open fun entireScreenCovered() {
+        testSpec.entireScreenCovered(Surface.ROTATION_0, testSpec.config.endRotation)
     }
 
     @Presubmit
     @Test
     open fun focusChanges() {
-        testSpec.focusChanges("NexusLauncherActivity", testApp.`package`)
+        testSpec.assertEventLog {
+            this.focusChanges("NexusLauncherActivity", testApp.`package`)
+        }
     }
 
     @Presubmit
     @Test
     open fun appLayerReplacesLauncher() {
-        testSpec.appLayerReplacesLauncher(testApp.`package`)
+        testSpec.replacesLayer(LAUNCHER_COMPONENT, testApp.component)
     }
 
     @Presubmit
     @Test
     open fun appWindowReplacesLauncherAsTopWindow() {
-        testSpec.appWindowReplacesLauncherAsTopWindow(testApp)
+        testSpec.assertWm {
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
+                    .then()
+                    .isAppWindowOnTop(SNAPSHOT_COMPONENT, isOptional = true)
+                    .then()
+                    .isAppWindowOnTop(testApp.component)
+        }
     }
 
     @Presubmit
     @Test
     open fun launcherWindowBecomesInvisible() {
-        testSpec.launcherWindowBecomesInvisible()
+        testSpec.assertWm {
+            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+                    .then()
+                    .isAppWindowInvisible(LAUNCHER_COMPONENT)
+        }
     }
 }
