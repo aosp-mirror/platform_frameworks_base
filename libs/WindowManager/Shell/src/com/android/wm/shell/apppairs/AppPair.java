@@ -215,7 +215,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
             if (mSplitLayout != null) {
                 if (mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
-                    onBoundsChanged(mSplitLayout);
+                    onLayoutChanged(mSplitLayout);
                 }
                 // updateConfiguration re-inits the dividerbar, so show it now
                 mSyncQueue.runInSync(t -> t.show(mSplitLayout.getDividerLeash()));
@@ -299,17 +299,24 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     }
 
     @Override
-    public void onBoundsChanging(SplitLayout layout) {
+    public void onLayoutChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t ->
                 layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
     }
 
     @Override
-    public void onBoundsChanged(SplitLayout layout) {
+    public void onLayoutChanged(SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         layout.applyTaskChanges(wct, mTaskInfo1, mTaskInfo2);
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t ->
                 layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
+    }
+
+    @Override
+    public void onLayoutShifted(int offsetX, int offsetY, SplitLayout layout) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        layout.applyLayoutShifted(wct, offsetX, offsetY, mTaskInfo1, mTaskInfo2);
+        mController.getTaskOrganizer().applyTransaction(wct);
     }
 }
