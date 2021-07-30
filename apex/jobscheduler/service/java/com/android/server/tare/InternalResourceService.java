@@ -19,12 +19,15 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.tare.TareUtils.appToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.tare.IEconomyManager;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -154,6 +157,18 @@ public class InternalResourceService extends SystemService {
         }
     };
 
+    private final UsageStatsManagerInternal.UsageEventListener mSurveillanceAgent =
+            new UsageStatsManagerInternal.UsageEventListener() {
+                /**
+                 * Callback to inform listeners of a new event.
+                 */
+                @Override
+                public void onUsageEvent(int userId, @NonNull UsageEvents.Event event) {
+                    mHandler.obtainMessage(MSG_PROCESS_USAGE_EVENT, userId, 0, event)
+                            .sendToTarget();
+                }
+            };
+
     private final AlarmManager.OnAlarmListener mUnusedWealthReclamationListener =
             new AlarmManager.OnAlarmListener() {
                 @Override
@@ -168,6 +183,7 @@ public class InternalResourceService extends SystemService {
 
     private static final int MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER = 0;
     private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
+    private static final int MSG_PROCESS_USAGE_EVENT = 2;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
     private static final String KEY_PKG = "pkg";
 
@@ -342,6 +358,42 @@ public class InternalResourceService extends SystemService {
     }
 
     @GuardedBy("mLock")
+    private void processUsageEventLocked(final int userId, @NonNull UsageEvents.Event event) {
+        if (!mIsEnabled) {
+            return;
+        }
+        final String pkgName = event.getPackageName();
+        if (DEBUG) {
+            Slog.d(TAG, "Processing event " + event.getEventType()
+                    + " for " + appToString(userId, pkgName));
+        }
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        switch (event.getEventType()) {
+            case UsageEvents.Event.ACTIVITY_RESUMED:
+                mAgent.noteOngoingEventLocked(userId, pkgName,
+                        EconomicPolicy.REWARD_TOP_ACTIVITY, null, nowElapsed);
+                break;
+            case UsageEvents.Event.ACTIVITY_PAUSED:
+            case UsageEvents.Event.ACTIVITY_STOPPED:
+            case UsageEvents.Event.ACTIVITY_DESTROYED:
+                final long now = getCurrentTimeMillis();
+                mAgent.stopOngoingActionLocked(userId, pkgName,
+                        EconomicPolicy.REWARD_TOP_ACTIVITY, null, nowElapsed, now);
+                break;
+            case UsageEvents.Event.USER_INTERACTION:
+            case UsageEvents.Event.CHOOSER_ACTION:
+                mAgent.noteInstantaneousEventLocked(userId, pkgName,
+                        EconomicPolicy.REWARD_OTHER_USER_INTERACTION, null);
+                break;
+            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+            case UsageEvents.Event.NOTIFICATION_SEEN:
+                mAgent.noteInstantaneousEventLocked(userId, pkgName,
+                        EconomicPolicy.REWARD_NOTIFICATION_SEEN, null);
+                break;
+        }
+    }
+
+    @GuardedBy("mLock")
     private void scheduleUnusedWealthReclamationLocked() {
         final long now = getCurrentTimeMillis();
         final long nextReclamationTime =
@@ -386,7 +438,7 @@ public class InternalResourceService extends SystemService {
         mPkgCache = mPackageManager.getInstalledPackages(0);
     }
 
-    private void registerReceivers() {
+    private void registerListeners() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
@@ -403,6 +455,9 @@ public class InternalResourceService extends SystemService {
         userFilter.addAction(Intent.ACTION_USER_ADDED);
         getContext()
                 .registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
+
+        UsageStatsManagerInternal usmi = LocalServices.getService(UsageStatsManagerInternal.class);
+        usmi.registerListener(mSurveillanceAgent);
     }
 
     /** Perform long-running and/or heavy setup work. This should be called off the main thread. */
@@ -422,7 +477,7 @@ public class InternalResourceService extends SystemService {
             return;
         }
         synchronized (mLock) {
-            registerReceivers();
+            registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             mHandler.post(this::setupHeavyWork);
             scheduleUnusedWealthReclamationLocked();
@@ -447,6 +502,9 @@ public class InternalResourceService extends SystemService {
             mPkgCache.clear();
             mUidToPackageCache.clear();
             getContext().unregisterReceiver(mBroadcastReceiver);
+            UsageStatsManagerInternal usmi =
+                    LocalServices.getService(UsageStatsManagerInternal.class);
+            usmi.unregisterListener(mSurveillanceAgent);
         }
     }
 
@@ -469,6 +527,15 @@ public class InternalResourceService extends SystemService {
                     listener.onAffordabilityChanged(userId, pkgName,
                             affordabilityNote.getActionBill(),
                             affordabilityNote.isCurrentlyAffordable());
+                }
+                break;
+
+                case MSG_PROCESS_USAGE_EVENT: {
+                    final int userId = msg.arg1;
+                    final UsageEvents.Event event = (UsageEvents.Event) msg.obj;
+                    synchronized (mLock) {
+                        processUsageEventLocked(userId, event);
+                    }
                 }
                 break;
 
