@@ -642,23 +642,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind, SEMI_TRANSPARENT));
     }
 
-    @Test
-    public void transitionToBubbleExpanded() {
-        mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
-        finishAnimationsImmediately();
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, false,
-                mScrimBehind, false
-        ));
-
-        // Front scrim should be transparent
-        assertEquals(ScrimController.TRANSPARENT,
-                mScrimInFront.getViewAlpha(), 0.0f);
-        // Back scrim should be visible
-        assertEquals(ScrimController.BUSY_SCRIM_ALPHA,
-                mScrimBehind.getViewAlpha(), 0.0f);
-    }
 
     @Test
     public void scrimStateCallback() {
@@ -1061,7 +1044,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
                 ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR, ScrimState.UNLOCKED,
-                ScrimState.BUBBLE_EXPANDED, ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED));
+                ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED));
 
         for (ScrimState state : ScrimState.values()) {
             if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
