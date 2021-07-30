@@ -26,8 +26,7 @@
         android:id="@+id/udfps_keyguard_fp_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/fingerprint_bg"
-        android:visibility="gone"/>
+        android:src="@drawable/fingerprint_bg"/>
 
     <!-- Fingerprint -->
     <!-- AOD dashed fingerprint icon with moving dashes -->
