@@ -18,8 +18,6 @@ package com.android.systemui.settings.brightness;
 
 import android.view.MotionEvent;
 
-import androidx.annotation.NonNull;
-
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
@@ -29,7 +27,7 @@ public interface ToggleSlider {
     }
 
     void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin);
-    void setMirrorControllerAndMirror(@NonNull BrightnessMirrorController c);
+    void setMirrorControllerAndMirror(BrightnessMirrorController c);
     boolean mirrorTouchEvent(MotionEvent ev);
 
     void setOnChangedListener(Listener l);
