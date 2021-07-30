@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -62,18 +63,21 @@ class EnterExitPipTest(
     @Test
     fun pipAppRemainInsideVisibleBounds() {
         testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.component)
         }
     }
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun showBothAppWindowsThenHidePip() {
         testSpec.assertWm {
-            showsAppWindow(testApp.defaultWindowName)
-                .showsAppWindowOnTop(pipApp.defaultWindowName)
+            // when the activity is STOPPING, sometimes it becomes invisible in an entry before
+            // the window, sometimes in the same entry. This occurs because we log 1x per frame
+            // thus we ignore activity here
+            isAppWindowVisible(testApp.component, ignoreActivity = true)
+                .isAppWindowOnTop(pipApp.component)
                 .then()
-                .hidesAppWindow(testApp.defaultWindowName)
+                .isAppWindowInvisible(testApp.component)
         }
     }
 
@@ -81,10 +85,10 @@ class EnterExitPipTest(
     @Test
     fun showBothAppLayersThenHidePip() {
         testSpec.assertLayers {
-            isVisible(testApp.defaultWindowName)
-                .isVisible(pipApp.defaultWindowName)
+            isVisible(testApp.component)
+                .isVisible(pipApp.component)
                 .then()
-                .isInvisible(testApp.defaultWindowName)
+                .isInvisible(testApp.component)
         }
     }
 
@@ -92,8 +96,8 @@ class EnterExitPipTest(
     @Test
     fun testAppCoversFullScreenWithPipOnDisplay() {
         testSpec.assertLayersStart {
-            visibleRegion(testApp.defaultWindowName).coversExactly(displayBounds)
-            visibleRegion(pipApp.defaultWindowName).coversAtMost(displayBounds)
+            visibleRegion(testApp.component).coversExactly(displayBounds)
+            visibleRegion(pipApp.component).coversAtMost(displayBounds)
         }
     }
 
@@ -101,7 +105,7 @@ class EnterExitPipTest(
     @Test
     fun pipAppCoversFullScreen() {
         testSpec.assertLayersEnd {
-            visibleRegion(pipApp.defaultWindowName).coversExactly(displayBounds)
+            visibleRegion(pipApp.component).coversExactly(displayBounds)
         }
     }
 

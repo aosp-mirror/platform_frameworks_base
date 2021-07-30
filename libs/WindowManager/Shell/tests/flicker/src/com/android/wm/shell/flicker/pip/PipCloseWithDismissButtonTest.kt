@@ -48,13 +48,9 @@ class PipCloseWithDismissButtonTest(testSpec: FlickerTestParameter) : PipCloseTr
 
     @FlakyTest
     @Test
-    override fun pipLayerBecomesInvisible() {
-        super.pipLayerBecomesInvisible()
-    }
+    override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
     @FlakyTest
     @Test
-    override fun pipWindowBecomesInvisible() {
-        super.pipWindowBecomesInvisible()
-    }
+    override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
 }

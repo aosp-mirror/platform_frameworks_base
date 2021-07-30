@@ -16,22 +16,24 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.HOME_WINDOW_TITLE
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
-import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -60,16 +62,16 @@ class EnterSplitScreenDockActivity(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME, LIVE_WALLPAPER_PACKAGE_NAME,
-            splitScreenApp.defaultWindowName, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME, *HOME_WINDOW_TITLE)
+    override val ignoredWindows: List<ComponentName>
+        get() = listOf(LAUNCHER_COMPONENT, LIVE_WALLPAPER_COMPONENT,
+            splitScreenApp.component, WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+            WindowManagerStateHelper.SNAPSHOT_COMPONENT, LAUNCHER_COMPONENT)
 
     @Presubmit
     @Test
-    fun dockedStackPrimaryBoundsIsVisible() =
-        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
-            splitScreenApp.defaultWindowName)
+    fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+            splitScreenApp.component)
 
     @Presubmit
     @Test
@@ -77,19 +79,29 @@ class EnterSplitScreenDockActivity(
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.defaultWindowName)
+            isVisible(splitScreenApp.component)
         }
     }
+
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
@@ -97,7 +109,9 @@ class EnterSplitScreenDockActivity(
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
-                supportedRotations = listOf(Surface.ROTATION_0) // bugId = 179116910
+                supportedRotations = listOf(Surface.ROTATION_0), // bugId = 179116910
+                supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
             )
         }
     }

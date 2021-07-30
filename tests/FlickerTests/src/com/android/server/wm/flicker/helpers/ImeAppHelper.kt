@@ -61,7 +61,8 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitImeWindowShown()
+            wmHelper.waitImeShown()
+            wmHelper.waitForAppTransitionIdle()
         }
     }
 
@@ -78,7 +79,7 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitImeWindowGone()
+            wmHelper.waitImeGone()
         }
     }
 }
