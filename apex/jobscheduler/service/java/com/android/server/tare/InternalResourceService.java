@@ -104,7 +104,6 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private long mLastUnusedReclamationTime;
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Nullable
         private String getPackageName(Intent intent) {
@@ -514,6 +513,15 @@ public class InternalResourceService extends SystemService {
     }
 
     private final class LocalService implements EconomyManagerInternal {
+        /**
+         * Use an extremely large value to indicate that an app can pay for a bill indefinitely.
+         * The value set here should be large/long enough that there's no reasonable expectation
+         * of a device operating uninterrupted (or in the exact same state) for that period of time.
+         * We intentionally don't use Long.MAX_VALUE to avoid potential overflow if a client
+         * doesn't check the value and just immediately adds it to the current time.
+         */
+        private static final long FOREVER_MS = 27 * 365 * 24 * HOUR_IN_MILLIS;
+
         @Override
         public void registerAffordabilityChangeListener(int userId, @NonNull String pkgName,
                 @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
@@ -548,6 +556,29 @@ public class InternalResourceService extends SystemService {
             }
             synchronized (mLock) {
                 return mAgent.getBalanceLocked(userId, pkgName) >= requiredBalance;
+            }
+        }
+
+        @Override
+        public long getMaxDurationMs(int userId, @NonNull String pkgName,
+                @NonNull ActionBill bill) {
+            if (!mIsEnabled) {
+                return FOREVER_MS;
+            }
+            long totalCostPerSecond = 0;
+            final List<EconomyManagerInternal.AnticipatedAction> projectedActions =
+                    bill.getAnticipatedActions();
+            for (int i = 0; i < projectedActions.size(); ++i) {
+                AnticipatedAction action = projectedActions.get(i);
+                final long cost =
+                        mCompleteEconomicPolicy.getCostOfAction(action.actionId, userId, pkgName);
+                totalCostPerSecond += cost;
+            }
+            if (totalCostPerSecond == 0) {
+                return FOREVER_MS;
+            }
+            synchronized (mLock) {
+                return mAgent.getBalanceLocked(userId, pkgName) * 1000 / totalCostPerSecond;
             }
         }
 
@@ -630,6 +661,9 @@ public class InternalResourceService extends SystemService {
 
     private void dumpInternal(final IndentingPrintWriter pw) {
         synchronized (mLock) {
+            pw.print("Is enabled: ");
+            pw.println(mIsEnabled);
+
             pw.print("Current battery level: ");
             pw.println(mCurrentBatteryLevel);
 
