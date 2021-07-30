@@ -19,8 +19,6 @@ package com.android.systemui.qs
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSlider
-import com.android.systemui.settings.brightness.MirroredBrightnessController
-import com.android.systemui.statusbar.policy.BrightnessMirrorController
 import javax.inject.Inject
 
 /**
@@ -29,7 +27,7 @@ import javax.inject.Inject
  */
 class QuickQSBrightnessController @VisibleForTesting constructor(
     private val brightnessControllerFactory: () -> BrightnessController
-) : MirroredBrightnessController {
+) {
 
     @Inject constructor(
         brightnessControllerFactory: BrightnessController.Factory,
@@ -44,7 +42,6 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
 
     private var isListening = false
     private var brightnessController: BrightnessController? = null
-    private var mirrorController: BrightnessMirrorController? = null
 
     fun init(shouldUseSplitNotificationShade: Boolean) {
         refreshVisibility(shouldUseSplitNotificationShade)
@@ -80,11 +77,6 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
         }
     }
 
-    override fun setMirror(controller: BrightnessMirrorController) {
-        mirrorController = controller
-        mirrorController?.let { brightnessController?.setMirror(it) }
-    }
-
     private fun hideBrightnessSlider() {
         brightnessController?.hideSlider()
     }
@@ -92,10 +84,11 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
     private fun showBrightnessSlider() {
         if (brightnessController == null) {
             brightnessController = brightnessControllerFactory()
-            mirrorController?.also { brightnessController?.setMirror(it) }
+        }
+        brightnessController?.showSlider()
+        if (!isListening) {
             brightnessController?.registerCallbacks()
             isListening = true
         }
-        brightnessController?.showSlider()
     }
 }
