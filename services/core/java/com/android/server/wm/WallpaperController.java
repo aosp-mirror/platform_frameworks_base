@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WallpaperManager.COMMAND_FREEZE;
+import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -79,6 +81,8 @@ class WallpaperController {
     private int mLastWallpaperDisplayOffsetX = Integer.MIN_VALUE;
     private int mLastWallpaperDisplayOffsetY = Integer.MIN_VALUE;
     private final float mMaxWallpaperScale;
+    // Whether COMMAND_FREEZE was dispatched.
+    private boolean mLastFrozen = false;
 
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
@@ -194,6 +198,7 @@ class WallpaperController {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                         "Win " + w + ": token animating, looking behind.");
             }
+            mFindResults.setIsWallpaperTargetForLetterbox(w.hasWallpaperForLetterboxBackground());
             // Found a target! End search.
             return true;
         }
@@ -424,18 +429,23 @@ class WallpaperController {
     Bundle sendWindowWallpaperCommand(
             WindowState window, String action, int x, int y, int z, Bundle extras, boolean sync) {
         if (window == mWallpaperTarget || window == mPrevWallpaperTarget) {
-            boolean doWait = sync;
-            for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-                final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-                token.sendWindowWallpaperCommand(action, x, y, z, extras, sync);
-            }
-
-            if (doWait) {
-                // TODO: Need to wait for result.
-            }
+            sendWindowWallpaperCommand(action, x, y, z, extras, sync);
         }
 
         return null;
+    }
+
+    private void sendWindowWallpaperCommand(
+                String action, int x, int y, int z, Bundle extras, boolean sync) {
+        boolean doWait = sync;
+        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
+            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
+            token.sendWindowWallpaperCommand(action, x, y, z, extras, sync);
+        }
+
+        if (doWait) {
+            // TODO: Need to wait for result.
+        }
     }
 
     private void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
@@ -641,6 +651,13 @@ class WallpaperController {
 
         updateWallpaperTokens(visible);
 
+        if (visible && mLastFrozen != mFindResults.isWallpaperTargetForLetterbox) {
+            mLastFrozen = mFindResults.isWallpaperTargetForLetterbox;
+            sendWindowWallpaperCommand(
+                    mFindResults.isWallpaperTargetForLetterbox ? COMMAND_FREEZE : COMMAND_UNFREEZE,
+                    /* x= */ 0, /* y= */ 0, /* z= */ 0, /* extras= */ null, /* sync= */ false);
+        }
+
         if (DEBUG_WALLPAPER_LIGHT)  Slog.d(TAG, "New wallpaper: target=" + mWallpaperTarget
                 + " prev=" + mPrevWallpaperTarget);
     }
@@ -838,6 +855,7 @@ class WallpaperController {
         boolean useTopWallpaperAsTarget = false;
         WindowState wallpaperTarget = null;
         boolean resetTopWallpaper = false;
+        boolean isWallpaperTargetForLetterbox = false;
 
         void setTopWallpaper(WindowState win) {
             topWallpaper = win;
@@ -851,11 +869,16 @@ class WallpaperController {
             useTopWallpaperAsTarget = topWallpaperAsTarget;
         }
 
+        void setIsWallpaperTargetForLetterbox(boolean isWallpaperTargetForLetterbox) {
+            this.isWallpaperTargetForLetterbox = isWallpaperTargetForLetterbox;
+        }
+
         void reset() {
             topWallpaper = null;
             wallpaperTarget = null;
             useTopWallpaperAsTarget = false;
             resetTopWallpaper = false;
+            isWallpaperTargetForLetterbox = false;
         }
     }
 }

@@ -16,6 +16,8 @@
 
 package android.service.wallpaper;
 
+import static android.app.WallpaperManager.COMMAND_FREEZE;
+import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.graphics.Matrix.MSCALE_X;
 import static android.graphics.Matrix.MSCALE_Y;
 import static android.graphics.Matrix.MSKEW_X;
@@ -42,12 +44,14 @@ import android.content.res.TypedArray;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Build;
@@ -56,6 +60,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -200,6 +205,12 @@ public abstract class WallpaperService extends Service {
         boolean mVisible;
         boolean mReportedVisible;
         boolean mDestroyed;
+        // Set to true after receiving WallpaperManager#COMMAND_FREEZE. It's reset back to false
+        // after receiving WallpaperManager#COMMAND_UNFREEZE. COMMAND_FREEZE is fully applied once
+        // mScreenshotSurfaceControl isn't null. When this happens, then Engine is notified through
+        // doVisibilityChanged that main wallpaper surface is no longer visible and the wallpaper
+        // host receives onVisibilityChanged(false) callback.
+        private boolean mFrozenRequested = false;
 
         // Current window state.
         boolean mCreated;
@@ -264,6 +275,8 @@ public abstract class WallpaperService extends Service {
         SurfaceControl mSurfaceControl = new SurfaceControl();
         SurfaceControl mBbqSurfaceControl;
         BLASTBufferQueue mBlastBufferQueue;
+        private SurfaceControl mScreenshotSurfaceControl;
+        private Point mScreenshotSize = new Point();
 
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
             {
@@ -1349,11 +1362,15 @@ public abstract class WallpaperService extends Service {
             if (!mDestroyed) {
                 mVisible = visible;
                 reportVisibility();
-                if (visible) processLocalColors(mPendingXOffset, mPendingXOffsetStep);
+                if (mReportedVisible) processLocalColors(mPendingXOffset, mPendingXOffsetStep);
             }
         }
 
         void reportVisibility() {
+            if (mScreenshotSurfaceControl != null && mVisible) {
+                if (DEBUG) Log.v(TAG, "Frozen so don't report visibility change");
+                return;
+            }
             if (!mDestroyed) {
                 mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getState();
                 boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
@@ -1370,6 +1387,10 @@ public abstract class WallpaperService extends Service {
                         updateSurface(true, false, false);
                     }
                     onVisibilityChanged(visible);
+                    if (mReportedVisible && mFrozenRequested) {
+                        if (DEBUG) Log.v(TAG, "Freezing wallpaper after visibility update");
+                        freeze();
+                    }
                 }
             }
         }
@@ -1830,6 +1851,9 @@ public abstract class WallpaperService extends Service {
         void doCommand(WallpaperCommand cmd) {
             Bundle result;
             if (!mDestroyed) {
+                if (COMMAND_FREEZE.equals(cmd.action) || COMMAND_UNFREEZE.equals(cmd.action)) {
+                    updateFrozenState(/* frozenRequested= */ !COMMAND_UNFREEZE.equals(cmd.action));
+                }
                 result = onCommand(cmd.action, cmd.x, cmd.y, cmd.z,
                         cmd.extras, cmd.sync);
             } else {
@@ -1842,6 +1866,159 @@ public abstract class WallpaperService extends Service {
                 } catch (RemoteException e) {
                 }
             }
+        }
+
+        private void updateFrozenState(boolean frozenRequested) {
+            if (mIWallpaperEngine.mWallpaperManager.getWallpaperInfo() == null
+                    // Procees the unfreeze command in case the wallaper became static while
+                    // being paused.
+                    && frozenRequested) {
+                if (DEBUG) Log.v(TAG, "Ignoring the freeze command for static wallpapers");
+                return;
+            }
+            mFrozenRequested = frozenRequested;
+            boolean isFrozen = mScreenshotSurfaceControl != null;
+            if (mFrozenRequested == isFrozen) {
+                return;
+            }
+            if (mFrozenRequested) {
+                freeze();
+            } else {
+                unfreeze();
+            }
+        }
+
+        private void freeze() {
+            if (!mReportedVisible || mDestroyed) {
+                // Screenshot can't be taken until visibility is reported to the wallpaper host.
+                return;
+            }
+            if (!showScreenshotOfWallpaper()) {
+                return;
+            }
+            // Prevent a wallpaper host from rendering wallpaper behind a screeshot.
+            doVisibilityChanged(false);
+            // Remember that visibility is requested since it's not guaranteed that
+            // mWindow#dispatchAppVisibility will be called when letterboxed application with
+            // wallpaper background transitions to the Home screen.
+            mVisible = true;
+        }
+
+        private void unfreeze() {
+            cleanUpScreenshotSurfaceControl();
+            if (mVisible) {
+                doVisibilityChanged(true);
+            }
+        }
+
+        private void cleanUpScreenshotSurfaceControl() {
+            // TODO(b/194399558): Add crossfade transition.
+            if (mScreenshotSurfaceControl != null) {
+                new SurfaceControl.Transaction()
+                        .remove(mScreenshotSurfaceControl)
+                        .show(mBbqSurfaceControl)
+                        .apply();
+                mScreenshotSurfaceControl = null;
+            }
+        }
+
+        void scaleAndCropScreenshot() {
+            if (mScreenshotSurfaceControl == null) {
+                return;
+            }
+            if (mScreenshotSize.x <= 0 || mScreenshotSize.y <= 0) {
+                Log.w(TAG, "Unexpected screenshot size: " + mScreenshotSize);
+                return;
+            }
+            // Don't scale down and using the same scaling factor for both dimensions to
+            // avoid stretching wallpaper image.
+            float scaleFactor = Math.max(1, Math.max(
+                    ((float) mSurfaceSize.x) / mScreenshotSize.x,
+                    ((float) mSurfaceSize.y) / mScreenshotSize.y));
+            int diffX =  ((int) (mScreenshotSize.x * scaleFactor)) - mSurfaceSize.x;
+            int diffY =  ((int) (mScreenshotSize.y * scaleFactor)) - mSurfaceSize.y;
+            if (DEBUG) {
+                Log.v(TAG, "Adjusting screenshot: scaleFactor=" + scaleFactor
+                        + " diffX=" + diffX + " diffY=" + diffY + " mSurfaceSize=" + mSurfaceSize
+                        + " mScreenshotSize=" + mScreenshotSize);
+            }
+            new SurfaceControl.Transaction()
+                        .setMatrix(
+                                mScreenshotSurfaceControl,
+                                /* dsdx= */ scaleFactor, /* dtdx= */ 0,
+                                /* dtdy= */ 0, /* dsdy= */ scaleFactor)
+                        .setWindowCrop(
+                                mScreenshotSurfaceControl,
+                                new Rect(
+                                        /* left= */ diffX / 2,
+                                        /* top= */ diffY / 2,
+                                        /* right= */ diffX / 2 + mScreenshotSize.x,
+                                        /* bottom= */ diffY / 2 + mScreenshotSize.y))
+                        .setPosition(mScreenshotSurfaceControl, -diffX / 2, -diffY / 2)
+                        .apply();
+        }
+
+        private boolean showScreenshotOfWallpaper() {
+            if (mDestroyed || mSurfaceControl == null || !mSurfaceControl.isValid()) {
+                if (DEBUG) Log.v(TAG, "Failed to screenshot wallpaper: surface isn't valid");
+                return false;
+            }
+
+            final Rect bounds = new Rect(0, 0, mSurfaceSize.x,  mSurfaceSize.y);
+            if (bounds.isEmpty()) {
+                Log.w(TAG, "Failed to screenshot wallpaper: surface bounds are empty");
+                return false;
+            }
+
+            if (mScreenshotSurfaceControl != null) {
+                Log.e(TAG, "Screenshot is unexpectedly not null");
+                // Destroying previous screenshot since it can have different size.
+                cleanUpScreenshotSurfaceControl();
+            }
+
+            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    SurfaceControl.captureLayers(
+                            new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
+                                    // Needed because SurfaceFlinger#validateScreenshotPermissions
+                                    // uses this parameter to check whether a caller only attempts
+                                    // to screenshot itself when call doesn't come from the system.
+                                    .setUid(Process.myUid())
+                                    .setChildrenOnly(false)
+                                    .setSourceCrop(bounds)
+                                    .build());
+
+            if (screenshotBuffer == null) {
+                Log.w(TAG, "Failed to screenshot wallpaper: screenshotBuffer is null");
+                return false;
+            }
+
+            final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+
+            // TODO(b/194399558): Add crossfade transition.
+            mScreenshotSurfaceControl = new SurfaceControl.Builder()
+                    .setName("Wallpaper snapshot for engine " + this)
+                    .setFormat(hardwareBuffer.getFormat())
+                    .setParent(mSurfaceControl)
+                    .setSecure(screenshotBuffer.containsSecureLayers())
+                    .setCallsite("WallpaperService.Engine.showScreenshotOfWallpaper")
+                    .setBLASTLayer()
+                    .build();
+
+            mScreenshotSize.set(mSurfaceSize.x, mSurfaceSize.y);
+
+            GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(hardwareBuffer);
+
+            t.setBuffer(mScreenshotSurfaceControl, graphicBuffer);
+            t.setColorSpace(mScreenshotSurfaceControl, screenshotBuffer.getColorSpace());
+            // Place on top everything else.
+            t.setLayer(mScreenshotSurfaceControl, Integer.MAX_VALUE);
+            t.show(mScreenshotSurfaceControl);
+            t.hide(mBbqSurfaceControl);
+            t.apply();
+
+            return true;
         }
 
         void reportSurfaceDestroyed() {
@@ -2166,6 +2343,7 @@ public abstract class WallpaperService extends Service {
                     final boolean reportDraw = message.arg1 != 0;
                     mEngine.updateSurface(true, false, reportDraw);
                     mEngine.doOffsetsChanged(true);
+                    mEngine.scaleAndCropScreenshot();
                 } break;
                 case MSG_WINDOW_MOVED: {
                     // Do nothing. What does it mean for a Wallpaper to move?
