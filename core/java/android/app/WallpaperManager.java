@@ -221,6 +221,20 @@ public class WallpaperManager {
     public static final String COMMAND_REAPPLY = "android.wallpaper.reapply";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when the live wallpaper needs to be
+     * frozen.
+     * @hide
+     */
+    public static final String COMMAND_FREEZE = "android.wallpaper.freeze";
+
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported when the live wallapper doesn't need
+     * to be frozen anymore.
+     * @hide
+     */
+    public static final String COMMAND_UNFREEZE = "android.wallpaper.unfreeze";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */

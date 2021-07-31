@@ -3230,7 +3230,7 @@ public class InputManagerService extends IInputManager.Stub
      * Interface for the system to handle request from InputMonitors.
      */
     private final class InputMonitorHost extends IInputMonitorHost.Stub {
-        private final IBinder mToken;
+        private IBinder mToken;
 
         InputMonitorHost(IBinder token) {
             mToken = token;
@@ -3238,12 +3238,23 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void pilferPointers() {
+            if (mToken == null) {
+                throw new IllegalStateException(
+                        "Illegal call to pilferPointers after InputMonitorHost is disposed.");
+            }
             nativePilferPointers(mPtr, mToken);
         }
 
         @Override
         public void dispose() {
-            nativeRemoveInputChannel(mPtr, mToken);
+            // We do not remove the input monitor here by calling nativeRemoveInputChannel because
+            // it causes a race in InputDispatcher between the removal of the InputChannel through
+            // that call and the InputChannel#dispose call (which causes an FD hangup) from the
+            // client (b/189135695).
+            //
+            // NOTE: This means the client is responsible for properly closing the InputMonitor by
+            // disposing the InputChannel and all its duplicates.
+            mToken = null;
         }
     }
 

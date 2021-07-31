@@ -92,13 +92,13 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     public void testUpdateDivideBounds() {
         mSplitLayout.updateDivideBounds(anyInt());
-        verify(mSplitLayoutHandler).onBoundsChanging(any(SplitLayout.class));
+        verify(mSplitLayoutHandler).onLayoutChanging(any(SplitLayout.class));
     }
 
     @Test
     public void testSetDividePosition() {
         mSplitLayout.setDividePosition(anyInt());
-        verify(mSplitLayoutHandler).onBoundsChanged(any(SplitLayout.class));
+        verify(mSplitLayoutHandler).onLayoutChanged(any(SplitLayout.class));
     }
 
     @Test

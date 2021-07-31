@@ -108,6 +108,15 @@ class BrightnessSliderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testNullMirrorControllerNotTrackingTouch() {
+        mController.setMirrorControllerAndMirror(null)
+
+        verify(brightnessSliderView, never()).max
+        verify(brightnessSliderView, never()).value
+        verify(brightnessSliderView).setOnDispatchTouchEventListener(isNull())
+    }
+
+    @Test
     fun testNullMirrorNotTrackingTouch() {
         whenever(mirrorController.toggleSlider).thenReturn(null)
 

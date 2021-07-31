@@ -16,7 +16,9 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
@@ -102,6 +104,34 @@ abstract class DisplayDevice {
      */
     public int getDisplayIdToMirrorLocked() {
         return Display.DEFAULT_DISPLAY;
+    }
+
+    /**
+     * Returns the window token of the level of the WindowManager hierarchy to mirror, or null
+     * if layer mirroring by SurfaceFlinger should not be performed.
+     * For now, only used for mirroring started from MediaProjection.
+     */
+    @Nullable
+    public IBinder getWindowTokenClientToMirrorLocked() {
+        return null;
+    }
+
+    /**
+     * Updates the window token of the level of the level of the WindowManager hierarchy to mirror.
+     * If windowToken is null, then no layer mirroring by SurfaceFlinger to should be performed.
+     * For now, only used for mirroring started from MediaProjection.
+     */
+    public void setWindowTokenClientToMirrorLocked(IBinder windowToken) {
+    }
+
+    /**
+     * Returns the default size of the surface associated with the display, or null if the surface
+     * is not provided for layer mirroring by SurfaceFlinger.
+     * For now, only used for mirroring started from MediaProjection.
+     */
+    @Nullable
+    public Point getDisplaySurfaceDefaultSize() {
+        return null;
     }
 
     /**

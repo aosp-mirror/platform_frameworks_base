@@ -61,7 +61,7 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            require(wmHelper.waitImeWindowShown()) { "IME did not appear" }
+            require(wmHelper.waitImeShown()) { "IME did not appear" }
         }
     }
 
@@ -78,7 +78,7 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
             if (wmHelper == null) {
                 uiDevice.waitForIdle()
             } else {
-                require(wmHelper.waitImeWindowGone()) { "IME did did not close" }
+                require(wmHelper.waitImeGone()) { "IME did did not close" }
             }
         } else {
             // While pressing the back button should close the IME on TV as well, it may also lead

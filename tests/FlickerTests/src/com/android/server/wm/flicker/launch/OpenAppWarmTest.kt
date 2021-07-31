@@ -67,15 +67,7 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @FlakyTest
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
-    @Test
-    override fun navBarLayerRotatesAndScales() {
-        super.navBarLayerRotatesAndScales()
-    }
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

@@ -21,8 +21,8 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import org.junit.Test
@@ -47,9 +47,9 @@ abstract class PipCloseTransition(testSpec: FlickerTestParameter) : PipTransitio
     @Test
     open fun pipWindowBecomesInvisible() {
         testSpec.assertWm {
-            this.showsAppWindow(PIP_WINDOW_TITLE)
+            this.invoke("hasPipWindow") { it.isPinned(pipApp.component) }
                 .then()
-                .hidesAppWindow(PIP_WINDOW_TITLE)
+                .isAppWindowInvisible(pipApp.component)
         }
     }
 
@@ -57,15 +57,21 @@ abstract class PipCloseTransition(testSpec: FlickerTestParameter) : PipTransitio
     @Test
     open fun pipLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.isVisible(PIP_WINDOW_TITLE)
+            this.isVisible(pipApp.component)
+                .isVisible(LAUNCHER_COMPONENT)
                 .then()
-                .isInvisible(PIP_WINDOW_TITLE)
+                .isInvisible(pipApp.component)
+                .isVisible(LAUNCHER_COMPONENT)
         }
     }
 
     @FlakyTest(bugId = 151179149)
     @Test
-    open fun focusChanges() = testSpec.focusChanges(pipApp.launcherName, "NexusLauncherActivity")
+    open fun focusChanges() {
+        testSpec.assertEventLog {
+            this.focusChanges(pipApp.launcherName, "NexusLauncherActivity")
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

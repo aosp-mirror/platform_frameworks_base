@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
@@ -272,6 +273,26 @@ public class ShellTransitionTests {
         final TransitionInfo openClose = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         assertTrue(filter.matches(openClose));
+    }
+
+    @Test
+    public void testTransitionFilterNotRequirement() {
+        // filter that requires one opening and NO translucent apps
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements = new TransitionFilter.Requirement[]{
+                new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+        filter.mRequirements[1].mFlags = FLAG_TRANSLUCENT;
+        filter.mRequirements[1].mNot = true;
+
+        final TransitionInfo openOnly = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        assertTrue(filter.matches(openOnly));
+
+        final TransitionInfo openAndTranslucent = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        openAndTranslucent.getChanges().get(1).setFlags(FLAG_TRANSLUCENT);
+        assertFalse(filter.matches(openAndTranslucent));
     }
 
     @Test
