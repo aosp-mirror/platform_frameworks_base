@@ -21,6 +21,7 @@ import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.content.pm.pkg.PackageUserState
 import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationManager
@@ -112,26 +113,30 @@ class DomainVerificationUserStateOverrideTest {
             val activityList = listOf(
                 ParsedActivityImpl().apply {
                     addIntent(
-                        ParsedIntentInfo().apply {
-                            autoVerify = true
-                            addAction(Intent.ACTION_VIEW)
-                            addCategory(Intent.CATEGORY_BROWSABLE)
-                            addCategory(Intent.CATEGORY_DEFAULT)
-                            addDataScheme("http")
-                            addDataScheme("https")
-                            addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                            addDataAuthority(DOMAIN_ONE, null)
+                        ParsedIntentInfoImpl().apply {
+                            intentFilter.apply {
+                                autoVerify = true
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataScheme("https")
+                                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority(DOMAIN_ONE, null)
+                            }
                         }
                     )
                     addIntent(
-                        ParsedIntentInfo().apply {
-                            autoVerify = true
-                            addAction(Intent.ACTION_VIEW)
-                            addCategory(Intent.CATEGORY_BROWSABLE)
-                            addCategory(Intent.CATEGORY_DEFAULT)
-                            addDataScheme("http")
-                            addDataPath("/sub2", PatternMatcher.PATTERN_LITERAL)
-                            addDataAuthority("example2.com", null)
+                        ParsedIntentInfoImpl().apply {
+                            intentFilter.apply {
+                                autoVerify = true
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataPath("/sub2", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority("example2.com", null)
+                            }
                         }
                     )
                 },

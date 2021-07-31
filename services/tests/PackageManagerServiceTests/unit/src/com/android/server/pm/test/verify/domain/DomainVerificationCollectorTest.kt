@@ -18,9 +18,8 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.os.Build
 import android.os.PatternMatcher
 import android.util.ArraySet
@@ -95,7 +94,8 @@ class DomainVerificationCollectorTest {
             val activityList = listOf(
                 ParsedActivityImpl().apply {
                     addIntent(
-                            ParsedIntentInfo().apply {
+                        ParsedIntentInfoImpl().apply {
+                            intentFilter.apply {
                                 addAction(Intent.ACTION_VIEW)
                                 addCategory(Intent.CATEGORY_BROWSABLE)
                                 addCategory(Intent.CATEGORY_DEFAULT)
@@ -105,11 +105,13 @@ class DomainVerificationCollectorTest {
                                 addDataAuthority("example1.com", null)
                                 addDataAuthority("invalid1", null)
                             }
+                        }
                     )
                 },
                 ParsedActivityImpl().apply {
                     addIntent(
-                            ParsedIntentInfo().apply {
+                        ParsedIntentInfoImpl().apply {
+                            intentFilter.apply {
                                 setAutoVerify(true)
                                 addAction(Intent.ACTION_VIEW)
                                 addCategory(Intent.CATEGORY_BROWSABLE)
@@ -125,6 +127,7 @@ class DomainVerificationCollectorTest {
                                 addDataAuthority("example2.com", null)
                                 addDataAuthority("invalid2", null)
                             }
+                        }
                     )
                 },
             )
@@ -267,7 +270,8 @@ class DomainVerificationCollectorTest {
             val activityList = listOf(
                     ParsedActivityImpl().apply {
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -278,9 +282,11 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example1.com", null)
                                     addDataAuthority("invalid1", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
@@ -289,11 +295,13 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example2.com", null)
                                     addDataAuthority("invalid2", null)
                                 }
+                            }
                         )
                     },
                     ParsedActivityImpl().apply {
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -303,11 +311,13 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example3.com", null)
                                     addDataAuthority("invalid3", null)
                                 }
+                            }
                         )
                     },
                     ParsedActivityImpl().apply {
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -316,9 +326,11 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example4.com", null)
                                     addDataAuthority("invalid4", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_DEFAULT)
@@ -327,9 +339,11 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example5.com", null)
                                     addDataAuthority("invalid5", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
@@ -338,30 +352,37 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example6.com", null)
                                     addDataAuthority("invalid6", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataAuthority("example7.com", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataScheme("https")
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataPath("/sub7", PatternMatcher.PATTERN_LITERAL)
                                 }
+                            }
                         )
                     },
             )

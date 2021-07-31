@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.apex.ApexInfo;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -33,6 +34,7 @@ import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionUtils;
 import android.content.pm.parsing.result.ParseResult;
@@ -64,6 +66,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -513,12 +516,13 @@ public class PackageParserLegacyCoreTest {
         findAndRemoveAppDetailsActivity(p);
 
         assertEquals("Expected exactly one activity", 1, p.getActivities().size());
-        assertEquals("Expected exactly one intent filter",
-                1, p.getActivities().get(0).getIntents().size());
-        assertEquals("Expected exactly one mime group in intent filter",
-                1, p.getActivities().get(0).getIntents().get(0).countMimeGroups());
+        List<ParsedIntentInfo> intentInfos = p.getActivities().get(0).getIntents();
+        assertEquals("Expected exactly one intent filter", 1, intentInfos.size());
+        IntentFilter intentFilter = intentInfos.get(0).getIntentFilter();
+        assertEquals("Expected exactly one mime group in intent filter", 1,
+                intentFilter.countMimeGroups());
         assertTrue("Did not find expected mime group 'mime_group_1'",
-                p.getActivities().get(0).getIntents().get(0).hasMimeGroup("mime_group_1"));
+                intentFilter.hasMimeGroup("mime_group_1"));
     }
 
     @Test

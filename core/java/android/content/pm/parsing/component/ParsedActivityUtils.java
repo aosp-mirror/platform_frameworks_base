@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -353,15 +354,16 @@ public class ParsedActivityUtils {
                 ParseResult<ParsedIntentInfo> intentResult = parseIntentFilter(pkg, activity,
                         !isReceiver, visibleToEphemeral, resources, parser, input);
                 if (intentResult.isSuccess()) {
-                    ParsedIntentInfo intent = intentResult.getResult();
-                    if (intent != null) {
-                        activity.setOrder(Math.max(intent.getOrder(), activity.getOrder()));
-                        activity.addIntent(intent);
+                    ParsedIntentInfo intentInfo = intentResult.getResult();
+                    if (intentInfo != null) {
+                        IntentFilter intentFilter = intentInfo.getIntentFilter();
+                        activity.setOrder(Math.max(intentFilter.getOrder(), activity.getOrder()));
+                        activity.addIntent(intentInfo);
                         if (LOG_UNSAFE_BROADCASTS && isReceiver
                                 && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.O) {
-                            int actionCount = intent.countActions();
+                            int actionCount = intentFilter.countActions();
                             for (int i = 0; i < actionCount; i++) {
-                                final String action = intent.getAction(i);
+                                final String action = intentFilter.getAction(i);
                                 if (action == null || !action.startsWith("android.")) {
                                     continue;
                                 }
@@ -458,10 +460,11 @@ public class ParsedActivityUtils {
 
         ParsedIntentInfo intent = result.getResult();
         if (intent != null) {
-            if (intent.isVisibleToInstantApp()) {
+            final IntentFilter intentFilter = intent.getIntentFilter();
+            if (intentFilter.isVisibleToInstantApp()) {
                 activity.setFlags(activity.getFlags() | ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP);
             }
-            if (intent.isImplicitlyVisibleToInstantApp()) {
+            if (intentFilter.isImplicitlyVisibleToInstantApp()) {
                 activity.setFlags(
                         activity.getFlags() | ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP);
             }

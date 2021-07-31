@@ -50,6 +50,7 @@ import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedIntentInfoImpl;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedPermissionGroupImpl;
@@ -956,7 +957,7 @@ public class PackageParserTest {
                 .setOverlayTarget("foo21")
                 .setOverlayPriority(100)
                 .setUpgradeKeySets(new ArraySet<>())
-                .addPreferredActivityFilter("className", new ParsedIntentInfo())
+                .addPreferredActivityFilter("className", new ParsedIntentInfoImpl())
                 .addConfigPreference(new ConfigurationInfo())
                 .addReqFeature(new FeatureInfo())
                 .addFeatureGroup(new FeatureGroupInfo())

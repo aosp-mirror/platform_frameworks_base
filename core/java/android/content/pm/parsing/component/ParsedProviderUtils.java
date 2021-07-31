@@ -21,6 +21,7 @@ import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentFilter;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -180,7 +181,8 @@ public class ParsedProviderUtils {
                     result = intentResult;
                     if (intentResult.isSuccess()) {
                         ParsedIntentInfo intent = intentResult.getResult();
-                        provider.setOrder(Math.max(intent.getOrder(), provider.getOrder()));
+                        IntentFilter intentFilter = intent.getIntentFilter();
+                        provider.setOrder(Math.max(intentFilter.getOrder(), provider.getOrder()));
                         provider.addIntent(intent);
                     }
                     break;

@@ -150,6 +150,7 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.pkg.PackageUserState;
@@ -3286,8 +3287,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
             for (int i=0; i< a.getIntents().size(); i++) {
-                if (a.getIntents().get(i).match(intent.getAction(), resolvedType, intent.getScheme(),
-                        intent.getData(), intent.getCategories(), TAG) >= 0) {
+                if (a.getIntents().get(i).getIntentFilter()
+                        .match(intent.getAction(), resolvedType, intent.getScheme(),
+                                intent.getData(), intent.getCategories(), TAG) >= 0) {
                     return true;
                 }
             }
@@ -7029,24 +7031,12 @@ public class PackageManagerService extends IPackageManager.Stub
             ArrayList<IntentFilter> result = new ArrayList<>();
             for (int n=0; n<count; n++) {
                 ParsedActivity activity = pkg.getActivities().get(n);
-                if (activity.getIntents() != null && activity.getIntents().size() > 0) {
-                    result.addAll(activity.getIntents());
+                List<ParsedIntentInfo> intentInfos = activity.getIntents();
+                for (int index = 0; index < intentInfos.size(); index++) {
+                    result.add(new IntentFilter(intentInfos.get(index).getIntentFilter()));
                 }
             }
-            return new ParceledListSlice<IntentFilter>(result) {
-                @Override
-                protected void writeElement(IntentFilter parcelable, Parcel dest, int callFlags) {
-                    parcelable.writeToParcel(dest, callFlags);
-                }
-
-                @Override
-                protected void writeParcelableCreator(IntentFilter parcelable, Parcel dest) {
-                    // All Parcel#writeParcelableCreator does is serialize the class name to
-                    // access via reflection to grab its CREATOR. This does that manually, pointing
-                    // to the parent IntentFilter so that all of the subclass fields are ignored.
-                    dest.writeString(IntentFilter.class.getName());
-                }
-            };
+            return new ParceledListSlice<IntentFilter>(result);
         }
     }
 

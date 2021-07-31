@@ -39,6 +39,7 @@ import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedIntentInfoImpl;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.os.Build;
@@ -152,18 +153,19 @@ public class AppsFilterTest {
         ParsedActivityImpl activity = new ParsedActivityImpl();
         activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
-            final ParsedIntentInfo info = new ParsedIntentInfo();
+            final ParsedIntentInfoImpl info = new ParsedIntentInfoImpl();
+            final IntentFilter intentInfoFilter = info.getIntentFilter();
             if (filter.countActions() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
+                filter.actionsIterator().forEachRemaining(intentInfoFilter::addAction);
             }
             if (filter.countCategories() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
+                filter.actionsIterator().forEachRemaining(intentInfoFilter::addAction);
             }
             if (filter.countDataAuthorities() > 0) {
-                filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
+                filter.authoritiesIterator().forEachRemaining(intentInfoFilter::addDataAuthority);
             }
             if (filter.countDataSchemes() > 0) {
-                filter.schemesIterator().forEachRemaining(info::addDataScheme);
+                filter.schemesIterator().forEachRemaining(intentInfoFilter::addDataScheme);
             }
             activity.addIntent(info);
             activity.setExported(true);

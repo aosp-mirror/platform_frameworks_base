@@ -1815,7 +1815,7 @@ public class ParsingPackageUtils {
                     return input.error(result);
                 }
 
-                ParsedIntentInfo intentInfo = result.getResult();
+                IntentFilter intentInfo = result.getResult().getIntentFilter();
 
                 Uri data = null;
                 String dataType = null;
@@ -2653,7 +2653,7 @@ public class ParsingPackageUtils {
             List<ParsedIntentInfo> filters = activity.getIntents();
             final int filtersSize = filters.size();
             for (int filtersIndex = 0; filtersIndex < filtersSize; filtersIndex++) {
-                ParsedIntentInfo aii = filters.get(filtersIndex);
+                IntentFilter aii = filters.get(filtersIndex).getIntentFilter();
                 if (!aii.hasAction(Intent.ACTION_VIEW)) continue;
                 if (!aii.hasAction(Intent.ACTION_DEFAULT)) continue;
                 if (aii.hasDataScheme(IntentFilter.SCHEME_HTTP) ||

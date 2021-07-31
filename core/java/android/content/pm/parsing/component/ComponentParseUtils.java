@@ -22,6 +22,7 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
@@ -45,10 +46,11 @@ import java.io.IOException;
 public class ComponentParseUtils {
 
     public static boolean isImplicitlyExposedIntent(ParsedIntentInfo intentInfo) {
-        return intentInfo.hasCategory(Intent.CATEGORY_BROWSABLE)
-                || intentInfo.hasAction(Intent.ACTION_SEND)
-                || intentInfo.hasAction(Intent.ACTION_SENDTO)
-                || intentInfo.hasAction(Intent.ACTION_SEND_MULTIPLE);
+        IntentFilter intentFilter = intentInfo.getIntentFilter();
+        return intentFilter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                || intentFilter.hasAction(Intent.ACTION_SEND)
+                || intentFilter.hasAction(Intent.ACTION_SENDTO)
+                || intentFilter.hasAction(Intent.ACTION_SEND_MULTIPLE);
     }
 
     static <Component extends ParsedComponentImpl> ParseResult<Component> parseAllMetaData(

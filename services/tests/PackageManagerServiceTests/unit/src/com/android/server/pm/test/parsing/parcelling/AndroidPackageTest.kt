@@ -28,7 +28,7 @@ import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedAttributionImpl
 import android.content.pm.parsing.component.ParsedComponentImpl
 import android.content.pm.parsing.component.ParsedInstrumentationImpl
-import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.content.pm.parsing.component.ParsedPermissionGroupImpl
 import android.content.pm.parsing.component.ParsedPermissionImpl
 import android.content.pm.parsing.component.ParsedProcessImpl
@@ -301,17 +301,20 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         getSetByValue2(
             AndroidPackage::getPreferredActivityFilters,
             PackageImpl::addPreferredActivityFilter,
-            "TestClassName" to ParsedIntentInfo().apply {
-                addDataScheme("http")
-                addDataAuthority("test.pm.server.android.com", null)
+            "TestClassName" to ParsedIntentInfoImpl().apply {
+                intentFilter.apply {
+                    addDataScheme("http")
+                    addDataAuthority("test.pm.server.android.com", null)
+                }
             },
             transformGet = { it.singleOrNull()?.let { it.first to it.second } },
             compare = { first, second ->
                 equalBy(
                     first, second,
                     { it.first },
-                    { it.second.schemesIterator().asSequence().singleOrNull() },
-                    { it.second.authoritiesIterator().asSequence().singleOrNull()?.host },
+                    { it.second.intentFilter.schemesIterator().asSequence().singleOrNull() },
+                    { it.second.intentFilter.authoritiesIterator().asSequence()
+                        .singleOrNull()?.host },
                 )
             }
         ),
@@ -562,8 +565,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
 
     private fun <T : ParsedComponentImpl> T.withMimeGroups() = apply {
         val componentName = name
-        addIntent(ParsedIntentInfo().apply {
-            addMimeGroup("$componentName/mimeGroup")
+        addIntent(ParsedIntentInfoImpl().apply {
+            intentFilter.apply {
+                addMimeGroup("$componentName/mimeGroup")
+            }
         })
     }
 }

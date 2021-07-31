@@ -624,7 +624,7 @@ public class AppsFilter implements Watchable, Snappable {
             Set<String> protectedBroadcasts) {
         List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
-            IntentFilter intentFilter = intents.get(i);
+            IntentFilter intentFilter = intents.get(i).getIntentFilter();
             if (matchesIntentFilter(intent, intentFilter, protectedBroadcasts)) {
                 return true;
             }

@@ -124,7 +124,8 @@ class ParsedMainComponentUtils {
         }
 
         ParsedIntentInfo intent = intentResult.getResult();
-        int actionCount = intent.countActions();
+        IntentFilter intentFilter = intent.getIntentFilter();
+        int actionCount = intentFilter.countActions();
         if (actionCount == 0 && failOnNoActions) {
             Slog.w(TAG, "No actions in " + parser.getName() + " at " + pkg.getBaseApkPath() + " "
                     + parser.getPositionDescription());
@@ -141,7 +142,7 @@ class ParsedMainComponentUtils {
         } else {
             intentVisibility = IntentFilter.VISIBILITY_NONE;
         }
-        intent.setVisibilityToInstantApp(intentVisibility);
+        intentFilter.setVisibilityToInstantApp(intentVisibility);
 
         return input.success(intentResult.getResult());
     }

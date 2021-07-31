@@ -111,8 +111,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     public static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
     public static ForInternedStringSet sForInternedStringSet =
             Parcelling.Cache.getOrCreate(ForInternedStringSet.class);
-    protected static ParsedIntentInfo.StringPairListParceler sForIntentInfoPairs =
-            Parcelling.Cache.getOrCreate(ParsedIntentInfo.StringPairListParceler.class);
+    protected static ParsingUtils.StringPairListParceler sForIntentInfoPairs =
+            new ParsingUtils.StringPairListParceler();
 
     private static final Comparator<ParsedMainComponent> ORDER_COMPARATOR =
             (first, second) -> Integer.compare(second.getOrder(), first.getOrder());
@@ -278,7 +278,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     protected List<ParsedInstrumentation> instrumentations = emptyList();
 
     @NonNull
-    @DataClass.ParcelWith(ParsedIntentInfo.ListParceler.class)
+//    @DataClass.ParcelWith(ParsingUtils.StringPairListParceler.class)
     private List<Pair<String, ParsedIntentInfo>> preferredActivityFilters = emptyList();
 
     @NonNull
@@ -1697,7 +1697,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 
     private void addMimeGroupsFromComponent(ParsedComponent component) {
         for (int i = component.getIntents().size() - 1; i >= 0; i--) {
-            IntentFilter filter = component.getIntents().get(i);
+            IntentFilter filter = component.getIntents().get(i).getIntentFilter();
             for (int groupIndex = filter.countMimeGroups() - 1; groupIndex >= 0; groupIndex--) {
                 mimeGroups = ArrayUtils.add(mimeGroups, filter.getMimeGroup(groupIndex));
             }

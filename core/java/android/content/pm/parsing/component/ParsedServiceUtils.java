@@ -20,6 +20,7 @@ import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -140,7 +141,8 @@ public class ParsedServiceUtils {
                     parseResult = intentResult;
                     if (intentResult.isSuccess()) {
                         ParsedIntentInfo intent = intentResult.getResult();
-                        service.setOrder(Math.max(intent.getOrder(), service.getOrder()));
+                        IntentFilter intentFilter = intent.getIntentFilter();
+                        service.setOrder(Math.max(intentFilter.getOrder(), service.getOrder()));
                         service.addIntent(intent);
                     }
                     break;
