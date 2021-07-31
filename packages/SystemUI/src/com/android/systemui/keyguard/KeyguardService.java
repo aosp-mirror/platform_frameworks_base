@@ -164,7 +164,7 @@ public class KeyguardService extends Service {
                     info.getChanges().size() - i,
                     new Point(), localBounds, new Rect(change.getEndAbsBounds()),
                     windowConfiguration, isNotInRecents, null /* startLeash */,
-                    change.getStartAbsBounds(), taskInfo));
+                    change.getStartAbsBounds(), taskInfo, false /* allowEnterPip */));
         }
         return out.toArray(new RemoteAnimationTarget[out.size()]);
     }
