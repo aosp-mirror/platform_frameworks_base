@@ -27,7 +27,6 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -108,7 +107,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        mShadowRouter2Manager.setAvailableRoutes(routes);
+        mShadowRouter2Manager.setTransferableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -159,7 +158,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        mShadowRouter2Manager.setAvailableRoutes(routes);
+        mShadowRouter2Manager.setTransferableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -195,7 +194,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        mShadowRouter2Manager.setAvailableRoutes(routes);
+        mShadowRouter2Manager.setTransferableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -618,7 +617,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        mShadowRouter2Manager.setAvailableRoutes(routes);
+        mShadowRouter2Manager.setTransferableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -728,9 +727,8 @@ public class InfoMediaManagerTest {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         final List<MediaRoute2Info> infos = new ArrayList<>();
         infos.add(info);
-        mShadowRouter2Manager.setAvailableRoutes(infos);
+        mShadowRouter2Manager.setTransferableRoutes(infos);
 
-        when(mRouterManager.getAvailableRoutes(anyString())).thenReturn(infos);
         when(info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
 
         assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isTrue();
@@ -741,9 +739,8 @@ public class InfoMediaManagerTest {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         final List<MediaRoute2Info> infos = new ArrayList<>();
         infos.add(info);
-        mShadowRouter2Manager.setAvailableRoutes(infos);
+        mShadowRouter2Manager.setTransferableRoutes(infos);
 
-        when(mRouterManager.getAvailableRoutes(anyString())).thenReturn(infos);
         when(info.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 
         assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isFalse();
@@ -757,9 +754,8 @@ public class InfoMediaManagerTest {
         final List<MediaRoute2Info> infos = new ArrayList<>();
         infos.add(info);
         infos.add(info2);
-        mShadowRouter2Manager.setAvailableRoutes(infos);
+        mShadowRouter2Manager.setTransferableRoutes(infos);
 
-        when(mRouterManager.getAvailableRoutes(anyString())).thenReturn(infos);
         when(info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
         when(info2.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
 

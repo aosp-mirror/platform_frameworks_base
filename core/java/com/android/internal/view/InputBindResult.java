@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2007-2008 The Android Open Source Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.android.internal.view;
@@ -25,7 +25,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.view.InputChannel;
 
 import java.lang.annotation.Retention;
@@ -69,7 +68,7 @@ public final class InputBindResult implements Parcelable {
          *
          * <p>Some of fields such as {@link #channel} is not yet available.</p>
          *
-         * @see android.inputmethodservice.InputMethodService##onCreateInputMethodSessionInterface()
+         * @see android.inputmethodservice.InputMethodService#onCreateInputMethodSessionInterface()
          **/
         int SUCCESS_WAITING_IME_SESSION = 1;
         /**
@@ -128,7 +127,8 @@ public final class InputBindResult implements Parcelable {
          * Indicates that {@link com.android.server.inputmethod.InputMethodManagerService} tried to
          * connect to an {@link android.inputmethodservice.InputMethodService} but failed.
          *
-         * @see android.content.Context#bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)
+         * @see android.content.Context#bindServiceAsUser(Intent, ServiceConnection, int,
+         *      android.os.UserHandle)
          */
         int ERROR_IME_NOT_CONNECTED = 9;
         /**
@@ -186,26 +186,42 @@ public final class InputBindResult implements Parcelable {
      * no input method will be bound.
      */
     public final String id;
-    
+
     /**
      * Sequence number of this binding.
      */
     public final int sequence;
 
+    /**
+     * {@code true} if the IME explicitly specifies {@code suppressesSpellChecker="true"}.
+     */
     public final boolean isInputMethodSuppressingSpellChecker;
 
-    public InputBindResult(@ResultCode int _result,
-            IInputMethodSession _method, InputChannel _channel, String _id, int _sequence,
+    /**
+     * Creates a new instance of {@link InputBindResult}.
+     *
+     * @param result A result code defined in {@link ResultCode}.
+     * @param method {@link IInputMethodSession} to interact with the IME.
+     * @param channel {@link InputChannel} to forward input events to the IME.
+     * @param id The {@link String} representations of the IME, which is the same as
+     *           {@link android.view.inputmethod.InputMethodInfo#getId()} and
+     *           {@link android.content.ComponentName#flattenToShortString()}.
+     * @param sequence A sequence number of this binding.
+     * @param isInputMethodSuppressingSpellChecker {@code true} if the IME explicitly specifies
+     *                                             {@code suppressesSpellChecker="true"}.
+     */
+    public InputBindResult(@ResultCode int result,
+            IInputMethodSession method, InputChannel channel, String id, int sequence,
             boolean isInputMethodSuppressingSpellChecker) {
-        result = _result;
-        method = _method;
-        channel = _channel;
-        id = _id;
-        sequence = _sequence;
+        this.result = result;
+        this.method = method;
+        this.channel = channel;
+        this.id = id;
+        this.sequence = sequence;
         this.isInputMethodSuppressingSpellChecker = isInputMethodSuppressingSpellChecker;
     }
 
-    InputBindResult(Parcel source) {
+    private InputBindResult(Parcel source) {
         result = source.readInt();
         method = IInputMethodSession.Stub.asInterface(source.readStrongBinder());
         if (source.readInt() != 0) {
@@ -218,19 +234,19 @@ public final class InputBindResult implements Parcelable {
         isInputMethodSuppressingSpellChecker = source.readBoolean();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
-        return "InputBindResult{result=" + getResultString() + " method="+ method + " id=" + id
+        return "InputBindResult{result=" + getResultString() + " method=" + method + " id=" + id
                 + " sequence=" + sequence
                 + " isInputMethodSuppressingSpellChecker=" + isInputMethodSuppressingSpellChecker
                 + "}";
     }
 
     /**
-     * Used to package this object into a {@link Parcel}.
-     *
-     * @param dest The {@link Parcel} to be written.
-     * @param flags The flags used for parceling.
+     * {@inheritDoc}
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -263,12 +279,15 @@ public final class InputBindResult implements Parcelable {
         }
     };
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int describeContents() {
         return channel != null ? channel.describeContents() : 0;
     }
 
-    public String getResultString() {
+    private String getResultString() {
         switch (result) {
             case ResultCode.SUCCESS_WITH_IME_SESSION:
                 return "SUCCESS_WITH_IME_SESSION";

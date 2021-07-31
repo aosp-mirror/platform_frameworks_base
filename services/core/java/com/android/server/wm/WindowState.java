@@ -1442,6 +1442,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    @Override
+    public Rect getBounds() {
+        // The window bounds are used for layout in screen coordinates. If the token has bounds for
+        // size compatibility mode, its configuration bounds are app based coordinates which should
+        // not be used for layout.
+        return mToken.hasSizeCompatBounds() ? mToken.getBounds() : super.getBounds();
+    }
+
     /** Retrieves the current frame of the window that the application sees. */
     Rect getFrame() {
         return mWindowFrames.mFrame;
@@ -6045,8 +6053,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean hasWallpaper() {
-        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
-                || (mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox());
+        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0 || hasWallpaperForLetterboxBackground();
+    }
+
+    boolean hasWallpaperForLetterboxBackground() {
+        return mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox();
     }
 
     /**

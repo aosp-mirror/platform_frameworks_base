@@ -85,4 +85,13 @@ public class ShadowRouter2Manager {
         return (ShadowRouter2Manager) Shadow.extract(
                 MediaRouter2Manager.getInstance(RuntimeEnvironment.application));
     }
+
+    @Implementation
+    protected List<MediaRoute2Info> getTransferableRoutes(String packageName) {
+        return mAvailableRoutes;
+    }
+
+    public void setTransferableRoutes(List<MediaRoute2Info> infos) {
+        mAvailableRoutes = infos;
+    }
 }

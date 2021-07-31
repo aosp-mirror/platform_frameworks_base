@@ -215,7 +215,7 @@ public class PowerManagerServiceTest {
             @Override
             Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                     SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                    FaceDownDetector faceDownDetector) {
+                    FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
                 return mNotifierMock;
             }
 

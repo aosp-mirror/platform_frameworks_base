@@ -24,11 +24,13 @@ import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.tare.IEconomyManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManagerInternal;
 import android.os.Binder;
@@ -38,6 +40,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -81,6 +84,7 @@ public class InternalResourceService extends SystemService {
 
     private final Agent mAgent;
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
+    private final ConfigObserver mConfigObserver;
     private final EconomyManagerStub mEconomyManagerStub;
 
     @NonNull
@@ -91,8 +95,8 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private final SparseSetArray<String> mUidToPackageCache = new SparseSetArray<>();
 
-    @GuardedBy("mLock")
-    private boolean mIsSetup;
+    private volatile boolean mIsEnabled;
+    private volatile int mBootPhase;
     // In the range [0,100] to represent 0% to 100% battery.
     @GuardedBy("mLock")
     private int mCurrentBatteryLevel;
@@ -185,18 +189,7 @@ public class InternalResourceService extends SystemService {
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
         mAgent = new Agent(this, mCompleteEconomicPolicy);
 
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
-        final IntentFilter pkgFilter = new IntentFilter();
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        pkgFilter.addDataScheme("package");
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, pkgFilter, null, null);
-        final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
-        userFilter.addAction(Intent.ACTION_USER_ADDED);
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
+        mConfigObserver = new ConfigObserver(mHandler, context);
 
         publishLocalService(EconomyManagerInternal.class, new LocalService());
     }
@@ -208,19 +201,11 @@ public class InternalResourceService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
+        mBootPhase = phase;
+
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            synchronized (mLock) {
-                mCurrentBatteryLevel = getCurrentBatteryLevel();
-                // TODO: base on if we have anything persisted
-                final boolean isFirstSetup = true;
-                if (isFirstSetup) {
-                    mHandler.post(this::setupEconomy);
-                } else {
-                    mIsSetup = true;
-                }
-                scheduleUnusedWealthReclamationLocked();
-                mCompleteEconomicPolicy.onSystemServicesReady();
-            }
+            mConfigObserver.start();
+            setupEverything();
         }
     }
 
@@ -245,6 +230,10 @@ public class InternalResourceService extends SystemService {
     long getMinBalanceLocked(final int userId, @NonNull final String pkgName) {
         return mCurrentBatteryLevel * mCompleteEconomicPolicy.getMinSatiatedBalance(userId, pkgName)
                 / 100;
+    }
+
+    boolean isEnabled() {
+        return mIsEnabled;
     }
 
     void onBatteryLevelChanged() {
@@ -396,11 +385,67 @@ public class InternalResourceService extends SystemService {
         mPkgCache = mPackageManager.getInstalledPackages(0);
     }
 
-    private void setupEconomy() {
+    private void registerReceivers() {
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
+        getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+
+        final IntentFilter pkgFilter = new IntentFilter();
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        pkgFilter.addDataScheme("package");
+        getContext()
+                .registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, pkgFilter, null, null);
+
+        final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
+        userFilter.addAction(Intent.ACTION_USER_ADDED);
+        getContext()
+                .registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
+    }
+
+    /** Perform long-running and/or heavy setup work. This should be called off the main thread. */
+    private void setupHeavyWork() {
         synchronized (mLock) {
             loadInstalledPackageListLocked();
-            mAgent.grantBirthrightsLocked();
-            mIsSetup = true;
+            // TODO: base on if we have anything persisted
+            final boolean isFirstSetup = true;
+            if (isFirstSetup) {
+                mAgent.grantBirthrightsLocked();
+            }
+        }
+    }
+
+    private void setupEverything() {
+        if (mBootPhase < PHASE_SYSTEM_SERVICES_READY || !mIsEnabled) {
+            return;
+        }
+        synchronized (mLock) {
+            registerReceivers();
+            mCurrentBatteryLevel = getCurrentBatteryLevel();
+            mHandler.post(this::setupHeavyWork);
+            scheduleUnusedWealthReclamationLocked();
+            mCompleteEconomicPolicy.setup();
+        }
+    }
+
+    private void tearDownEverything() {
+        if (mIsEnabled) {
+            return;
+        }
+        synchronized (mLock) {
+            mAgent.tearDownLocked();
+            mCompleteEconomicPolicy.tearDown();
+            mHandler.post(() -> {
+                // Never call out to AlarmManager with the lock held. This sits below AM.
+                AlarmManager alarmManager = getContext().getSystemService(AlarmManager.class);
+                if (alarmManager != null) {
+                    alarmManager.cancel(mUnusedWealthReclamationListener);
+                }
+            });
+            mPkgCache.clear();
+            mUidToPackageCache.clear();
+            getContext().unregisterReceiver(mBroadcastReceiver);
         }
     }
 
@@ -487,6 +532,9 @@ public class InternalResourceService extends SystemService {
 
         @Override
         public boolean canPayFor(int userId, @NonNull String pkgName, @NonNull ActionBill bill) {
+            if (!mIsEnabled) {
+                return true;
+            }
             // TODO: take temp-allowlist into consideration
             long requiredBalance = 0;
             final List<EconomyManagerInternal.AnticipatedAction> projectedActions =
@@ -506,6 +554,9 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            if (!mIsEnabled) {
+                return;
+            }
             synchronized (mLock) {
                 mAgent.noteInstantaneousEventLocked(userId, pkgName, eventId, tag);
             }
@@ -514,6 +565,9 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteOngoingEventStarted(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            if (!mIsEnabled) {
+                return;
+            }
             synchronized (mLock) {
                 final long nowElapsed = SystemClock.elapsedRealtime();
                 mAgent.noteOngoingEventLocked(userId, pkgName, eventId, tag, nowElapsed);
@@ -523,10 +577,46 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteOngoingEventStopped(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            if (!mIsEnabled) {
+                return;
+            }
             final long nowElapsed = SystemClock.elapsedRealtime();
             final long now = System.currentTimeMillis();
             synchronized (mLock) {
                 mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
+            }
+        }
+    }
+
+    private class ConfigObserver extends ContentObserver {
+        private final ContentResolver mContentResolver;
+
+        ConfigObserver(Handler handler, Context context) {
+            super(handler);
+            mContentResolver = context.getContentResolver();
+        }
+
+        public void start() {
+            mContentResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ENABLE_TARE), false, this);
+            updateConfig();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateConfig();
+        }
+
+        private void updateConfig() {
+            final boolean isTareEnabled = Settings.Global.getInt(mContentResolver,
+                    Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE) == 1;
+            if (mIsEnabled != isTareEnabled) {
+                mIsEnabled = isTareEnabled;
+                if (mIsEnabled) {
+                    setupEverything();
+                } else {
+                    tearDownEverything();
+                }
             }
         }
     }

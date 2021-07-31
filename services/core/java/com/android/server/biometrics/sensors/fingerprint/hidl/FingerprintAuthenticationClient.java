@@ -112,7 +112,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             resetFailedAttempts(getTargetUserId());
             UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         } else {
-            mState = STATE_STARTED_PAUSED;
+            mState = STATE_STARTED_PAUSED_ATTEMPTED;
             final @LockoutTracker.LockoutMode int lockoutMode =
                     mLockoutFrameworkImpl.getLockoutModeForUser(getTargetUserId());
             if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
@@ -206,7 +206,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onPointerUp() {
         mIsPointerDown = false;
-        mState = STATE_STARTED_PAUSED;
+        mState = STATE_STARTED_PAUSED_ATTEMPTED;
         mALSProbeCallback.getProbe().disable();
         UdfpsHelper.onFingerUp(getFreshDaemon());
 
