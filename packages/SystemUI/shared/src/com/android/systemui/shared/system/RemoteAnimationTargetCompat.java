@@ -68,6 +68,7 @@ public class RemoteAnimationTargetCompat {
     public final boolean isNotInRecents;
     public final Rect contentInsets;
     public final ActivityManager.RunningTaskInfo taskInfo;
+    public final boolean allowEnterPip;
     public final int rotationChange;
     public final int windowType;
 
@@ -88,6 +89,7 @@ public class RemoteAnimationTargetCompat {
         contentInsets = app.contentInsets;
         activityType = app.windowConfiguration.getActivityType();
         taskInfo = app.taskInfo;
+        allowEnterPip = app.allowEnterPip;
         rotationChange = 0;
 
         mStartLeash = app.startLeash;
@@ -214,6 +216,7 @@ public class RemoteAnimationTargetCompat {
             activityType = ACTIVITY_TYPE_UNDEFINED;
         }
         taskInfo = change.getTaskInfo();
+        allowEnterPip = false; /* always false in shell-transition case */
         mStartLeash = null;
         rotationChange = change.getEndRotation() - change.getStartRotation();
         windowType = INVALID_WINDOW_TYPE;

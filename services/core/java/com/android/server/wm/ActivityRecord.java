@@ -2826,7 +2826,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * @return Whether AppOps allows this package to enter picture-in-picture.
      */
-    private boolean checkEnterPictureInPictureAppOpsState() {
+    boolean checkEnterPictureInPictureAppOpsState() {
         return mAtmService.getAppOpsManager().checkOpNoThrow(
                 OP_PICTURE_IN_PICTURE, info.applicationInfo.uid, packageName) == MODE_ALLOWED;
     }
@@ -9075,7 +9075,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 record.mAdapter.mRootTaskBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
-                record.mStartBounds, task.getTaskInfo());
+                record.mStartBounds, task.getTaskInfo(), checkEnterPictureInPictureAppOpsState());
     }
 
     @Override

@@ -138,7 +138,7 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
         mTarget = new RemoteAnimationTarget(-1, -1, getLeash(), false,
                 new Rect(), null, mWindowContainer.getPrefixOrderIndex(),
                 mWindowContainer.getLastSurfacePosition(), mWindowContainer.getBounds(), null,
-                mWindowContainer.getWindowConfiguration(), true, null, null, null,
+                mWindowContainer.getWindowConfiguration(), true, null, null, null, false,
                 mWindowContainer.getWindowType());
         return mTarget;
     }

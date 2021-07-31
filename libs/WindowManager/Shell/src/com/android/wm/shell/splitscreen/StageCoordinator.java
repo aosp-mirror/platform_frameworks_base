@@ -1125,7 +1125,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
                 new android.graphics.Point(0, 0) /* position */, bounds, bounds,
                 new WindowConfiguration(), true, null /* startLeash */, null /* startBounds */,
-                null /* taskInfo */, TYPE_DOCK_DIVIDER);
+                null /* taskInfo */, false /* allowEnterPip */, TYPE_DOCK_DIVIDER);
     }
 
     @Override

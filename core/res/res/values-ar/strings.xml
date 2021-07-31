@@ -2079,7 +2079,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"قطع الاتصال"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"مكالمة واردة"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"مكالمة جارية"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"رصد مكالمة واردة"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"يتم فحص المكالمة الواردة"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="zero">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
       <item quantity="two">تم اختيار عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
