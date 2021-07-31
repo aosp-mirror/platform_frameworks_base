@@ -720,8 +720,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 fragmentToken = hop.getContainer();
                 final IBinder adjacentFragmentToken = hop.getAdjacentRoot();
                 final TaskFragment tf1 = mLaunchTaskFragments.get(fragmentToken);
-                final TaskFragment tf2 = mLaunchTaskFragments.get(adjacentFragmentToken);
-                if (tf1 == null || tf2 == null) {
+                final TaskFragment tf2 = adjacentFragmentToken != null
+                        ? mLaunchTaskFragments.get(adjacentFragmentToken)
+                        : null;
+                if (tf1 == null || (adjacentFragmentToken != null && tf2 == null)) {
                     final Throwable exception = new IllegalArgumentException(
                             "Not allowed to set adjacent on invalid fragment tokens");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
