@@ -46,7 +46,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 161435597)
 @Group3
 class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
@@ -80,11 +79,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 161435597)
     @Test
     fun pipWindowInsideDisplayBounds() {
         testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.component)
         }
     }
 
@@ -92,25 +91,17 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isVisible(testApp.defaultWindowName)
-            isVisible(imeApp.defaultWindowName)
-            noWindowsOverlap(testApp.defaultWindowName, imeApp.defaultWindowName)
+            isVisible(testApp.component)
+            isVisible(imeApp.component)
+            noWindowsOverlap(testApp.component, imeApp.component)
         }
     }
 
-    @Presubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    @Presubmit
+    @FlakyTest(bugId = 161435597)
     @Test
     fun pipLayerInsideDisplayBounds() {
         testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.component)
         }
     }
 
@@ -118,18 +109,14 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
-            visibleRegion(testApp.defaultWindowName).coversAtMost(displayBounds)
-            visibleRegion(imeApp.defaultWindowName).coversAtMost(displayBounds)
+            visibleRegion(testApp.component).coversAtMost(displayBounds)
+            visibleRegion(imeApp.component).coversAtMost(displayBounds)
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 161435597)
     @Test
-    override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         const val TEST_REPETITIONS = 2

@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.content.ComponentName
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -27,20 +27,18 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.focusDoesNotChange
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.layerBecomesInvisible
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.dockedStackDividerBecomesInvisible
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
@@ -62,8 +60,6 @@ import org.junit.runners.Parameterized
 class LegacySplitScreenToLauncher(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    private val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
-        .launcherStrategy.supportedLauncherPackage
     private val testApp = SimpleAppHelper(instrumentation)
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
@@ -90,25 +86,25 @@ class LegacySplitScreenToLauncher(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(launcherPackageName, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<ComponentName>
+        get() = listOf(LAUNCHER_COMPONENT, WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+            WindowManagerStateHelper.SNAPSHOT_COMPONENT)
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.endRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.endRotation)
 
     @Presubmit
     @Test
@@ -122,19 +118,39 @@ class LegacySplitScreenToLauncher(
 
     @Presubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun dockedStackDividerBecomesInvisible() = testSpec.dockedStackDividerBecomesInvisible()
 
+    @Postsubmit
+    @Test
+    fun layerBecomesInvisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+                    .then()
+                    .isInvisible(testApp.component)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
+    }
+
     @Presubmit
     @Test
-    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(testApp.getPackage())
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @FlakyTest(bugId = 151179149)
+    @Presubmit
     @Test
-    fun focusDoesNotChange() = testSpec.focusDoesNotChange()
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

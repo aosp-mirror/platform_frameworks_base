@@ -19,6 +19,8 @@ package com.android.wm.shell.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -33,11 +35,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -106,9 +108,6 @@ public class BubbleStackView extends FrameLayout
      */
     private static final float FLYOUT_OVERSCROLL_ATTENUATION_FACTOR = 8f;
 
-    /** Duration of the flyout alpha animations. */
-    private static final int FLYOUT_ALPHA_ANIMATION_DURATION = 100;
-
     private static final int FADE_IN_DURATION = 320;
 
     /** Percent to darken the bubbles when they're in the dismiss target. */
@@ -121,6 +120,10 @@ public class BubbleStackView extends FrameLayout
     private static final float EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT = 0.1f;
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
+
+    private static final int MANAGE_MENU_SCRIM_ANIM_DURATION = 150;
+
+    private static final float SCRIM_ALPHA = 0.6f;
 
     /**
      * How long to wait to animate the stack temporarily invisible after a drag/flyout hide
@@ -195,7 +198,8 @@ public class BubbleStackView extends FrameLayout
     private StackAnimationController mStackAnimationController;
     private ExpandedAnimationController mExpandedAnimationController;
 
-    private View mTaskbarScrim;
+    private View mScrim;
+    private View mManageMenuScrim;
     private FrameLayout mExpandedViewContainer;
 
     /** Matrix used to scale the expanded view container with a given pivot point. */
@@ -858,11 +862,20 @@ public class BubbleStackView extends FrameLayout
             mBubbleData.setExpanded(true);
         });
 
-        mTaskbarScrim = new View(getContext());
-        mTaskbarScrim.setBackgroundColor(Color.BLACK);
-        addView(mTaskbarScrim);
-        mTaskbarScrim.setAlpha(0f);
-        mTaskbarScrim.setVisibility(GONE);
+        mScrim = new View(getContext());
+        mScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        mScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
+        addView(mScrim);
+        mScrim.setAlpha(0f);
+
+        mManageMenuScrim = new View(getContext());
+        mManageMenuScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        mManageMenuScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
+        addView(mManageMenuScrim, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mManageMenuScrim.setAlpha(0f);
+        mManageMenuScrim.setVisibility(INVISIBLE);
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
@@ -1220,6 +1233,10 @@ public class BubbleStackView extends FrameLayout
         updateOverflow();
         updateUserEdu();
         updateExpandedViewTheme();
+        mScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
+        mManageMenuScrim.setBackgroundDrawable(new ColorDrawable(
+                getResources().getColor(android.R.color.system_neutral1_1000)));
     }
 
     /**
@@ -1799,6 +1816,20 @@ public class BubbleStackView extends FrameLayout
         mExpandedViewAlphaAnimator.start();
     }
 
+    private void showScrim(boolean show) {
+        if (show) {
+            mScrim.animate()
+                    .setInterpolator(ALPHA_IN)
+                    .alpha(SCRIM_ALPHA)
+                    .start();
+        } else {
+            mScrim.animate()
+                    .alpha(0f)
+                    .setInterpolator(ALPHA_OUT)
+                    .start();
+        }
+    }
+
     private void animateExpansion() {
         cancelDelayedExpandCollapseSwitchAnimations();
         final boolean showVertically = mPositioner.showBubblesVertically();
@@ -1808,6 +1839,7 @@ public class BubbleStackView extends FrameLayout
         }
         beforeExpandedViewAnimation();
 
+        showScrim(true);
         updateZOrder();
         updateBadges(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
@@ -1819,16 +1851,6 @@ public class BubbleStackView extends FrameLayout
             }
         } /* after */);
 
-        if (mPositioner.showingInTaskbar()
-                // Don't need the scrim when the bar is at the bottom
-                && mPositioner.getTaskbarPosition() != BubblePositioner.TASKBAR_POSITION_BOTTOM) {
-            mTaskbarScrim.getLayoutParams().width = mPositioner.getTaskbarSize();
-            mTaskbarScrim.setTranslationX(mStackOnLeftOrWillBe
-                    ? 0f
-                    : mPositioner.getAvailableRect().right - mPositioner.getTaskbarSize());
-            mTaskbarScrim.setVisibility(VISIBLE);
-            mTaskbarScrim.animate().alpha(1f).start();
-        }
         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
                 getBubbleIndex(mExpandedBubble));
         mExpandedViewContainer.setTranslationX(0f);
@@ -1939,6 +1961,8 @@ public class BubbleStackView extends FrameLayout
         mIsExpanded = false;
         mIsExpansionAnimating = true;
 
+        showScrim(false);
+
         mBubbleContainer.cancelAllAnimations();
 
         // If we were in the middle of swapping, the animating-out surface would have been scaling
@@ -1955,10 +1979,6 @@ public class BubbleStackView extends FrameLayout
                 mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
                 /* collapseTo */,
                 () -> mBubbleContainer.setActiveController(mStackAnimationController));
-
-        if (mTaskbarScrim.getVisibility() == VISIBLE) {
-            mTaskbarScrim.animate().alpha(0f).start();
-        }
 
         int index;
         if (mExpandedBubble != null && BubbleOverflow.KEY.equals(mExpandedBubble.getKey())) {
@@ -2026,10 +2046,6 @@ public class BubbleStackView extends FrameLayout
                     afterExpandedViewAnimation();
                     if (previouslySelected != null) {
                         previouslySelected.setTaskViewVisibility(false);
-                    }
-
-                    if (mPositioner.showingInTaskbar()) {
-                        mTaskbarScrim.setVisibility(GONE);
                     }
                 })
                 .start();
@@ -2504,6 +2520,24 @@ public class BubbleStackView extends FrameLayout
             mManageMenu.setVisibility(View.INVISIBLE);
             return;
         }
+
+        if (show) {
+            mManageMenuScrim.setVisibility(VISIBLE);
+            mManageMenuScrim.setTranslationZ(mManageMenu.getElevation() - 1f);
+        }
+        Runnable endAction = () -> {
+            if (!show) {
+                mManageMenuScrim.setVisibility(INVISIBLE);
+                mManageMenuScrim.setTranslationZ(0f);
+            }
+        };
+
+        mManageMenuScrim.animate()
+                .setDuration(MANAGE_MENU_SCRIM_ANIM_DURATION)
+                .setInterpolator(show ? ALPHA_IN : ALPHA_OUT)
+                .alpha(show ? SCRIM_ALPHA : 0f)
+                .withEndAction(endAction)
+                .start();
 
         // If available, update the manage menu's settings option with the expanded bubble's app
         // name and icon.

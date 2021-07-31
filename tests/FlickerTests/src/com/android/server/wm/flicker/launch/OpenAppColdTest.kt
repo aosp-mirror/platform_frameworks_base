@@ -64,35 +64,17 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @FlakyTest
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest
-    @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
-    @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()
     }
 
-    @FlakyTest
-    @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
+    @FlakyTest(bugId = 192721431)
     @Test
     override fun appLayerReplacesLauncher() {
         super.appLayerReplacesLauncher()
     }
 
-    @FlakyTest
+    @FlakyTest(bugId = 192721431)
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() {
         super.appWindowReplacesLauncherAsTopWindow()

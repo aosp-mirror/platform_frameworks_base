@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.systemui.util.wrapper
 
-import android.content.ComponentName
-import com.android.server.wm.traces.common.windowmanager.WindowManagerState
-import com.android.server.wm.traces.parser.toWindowName
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
 
-/**
- * Checks that an activity [activity] is in PIP mode
- */
-fun WindowManagerState.isInPipMode(activity: ComponentName): Boolean {
-    val windowName = activity.toWindowName()
-    return isInPipMode(windowName)
+@Module
+abstract class UtilWrapperModule {
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindRotationPolicyWrapper(impl: RotationPolicyWrapperImpl): RotationPolicyWrapper
 }

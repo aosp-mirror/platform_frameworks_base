@@ -25,7 +25,13 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.statusBarLayerIsVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.ROTATION_COMPONENT
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,39 +67,62 @@ class ChangeAppRotationTest(
         super.focusDoesNotChange()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun screenshotLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.getPackage())
+            this.isVisible(testApp.component)
                 .then()
-                .isVisible(SCREENSHOT_LAYER)
+                .isVisible(ROTATION_COMPONENT)
                 .then()
-                .isVisible(testApp.getPackage())
+                .isVisible(testApp.component)
         }
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerRotatesScales() {
-        super.statusBarLayerRotatesScales()
     }
 
     @Presubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() {
-        super.navBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() {
+        testSpec.statusBarWindowIsVisible()
+    }
+
+    @Postsubmit
+    @Test
+    fun statusBarLayerIsVisible() {
+        testSpec.statusBarLayerIsVisible()
+    }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales() {
+        testSpec.statusBarLayerRotatesScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
+
+    @Presubmit
+    @Test
+    override fun navBarWindowIsVisible() {
+        super.navBarWindowIsVisible()
+    }
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() {
+        super.navBarLayerIsVisible()
     }
 
     @FlakyTest
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
+
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {
-        private const val SCREENSHOT_LAYER = "RotationLayer"
-
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {

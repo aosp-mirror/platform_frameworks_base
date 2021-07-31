@@ -45,6 +45,8 @@ public class CoexCoordinator {
     private static final String TAG = "BiometricCoexCoordinator";
     public static final String SETTING_ENABLE_NAME =
             "com.android.server.biometrics.sensors.CoexCoordinator.enable";
+    public static final String FACE_HAPTIC_DISABLE =
+            "com.android.server.biometrics.sensors.CoexCoordinator.disable_face_haptics";
     private static final boolean DEBUG = true;
 
     // Successful authentications should be used within this amount of time.
@@ -144,6 +146,10 @@ public class CoexCoordinator {
         mAdvancedLogicEnabled = enabled;
     }
 
+    public void setFaceHapticDisabledWhenNonBypass(boolean disabled) {
+        mFaceHapticDisabledWhenNonBypass = disabled;
+    }
+
     @VisibleForTesting
     void reset() {
         mClientMap.clear();
@@ -153,6 +159,7 @@ public class CoexCoordinator {
     private final Map<Integer, AuthenticationClient<?>> mClientMap;
     @VisibleForTesting final LinkedList<SuccessfulAuth> mSuccessfulAuths;
     private boolean mAdvancedLogicEnabled;
+    private boolean mFaceHapticDisabledWhenNonBypass;
     private final Handler mHandler;
 
     private CoexCoordinator() {
@@ -225,7 +232,11 @@ public class CoexCoordinator {
                         mSuccessfulAuths.add(new SuccessfulAuth(mHandler, mSuccessfulAuths,
                                 currentTimeMillis, SENSOR_TYPE_FACE, client, callback));
                     } else {
-                        callback.sendHapticFeedback();
+                        if (mFaceHapticDisabledWhenNonBypass && !face.isKeyguardBypassEnabled()) {
+                            Slog.w(TAG, "Skipping face success haptic");
+                        } else {
+                            callback.sendHapticFeedback();
+                        }
                         callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
                         callback.handleLifecycleAfterAuth();
                     }
@@ -278,10 +289,21 @@ public class CoexCoordinator {
                         // BiometricScheduler do not get stuck.
                         Slog.d(TAG, "Face rejected in multi-sensor auth, udfps: " + udfps);
                         callback.handleLifecycleAfterAuth();
-                    } else {
-                        // UDFPS is not actively authenticating (finger not touching, already
-                        // rejected, etc).
+                    } else if (isUdfpsAuthAttempted(udfps)) {
+                        // If UDFPS is STATE_STARTED_PAUSED (e.g. finger rejected but can still
+                        // auth after pointer goes down, it means UDFPS encountered a rejection. In
+                        // this case, we need to play the final reject haptic since face auth is
+                        // also done now.
                         callback.sendHapticFeedback();
+                        callback.handleLifecycleAfterAuth();
+                    }
+                    else {
+                        // UDFPS auth has never been attempted.
+                        if (mFaceHapticDisabledWhenNonBypass && !face.isKeyguardBypassEnabled()) {
+                            Slog.w(TAG, "Skipping face reject haptic");
+                        } else {
+                            callback.sendHapticFeedback();
+                        }
                         callback.handleLifecycleAfterAuth();
                     }
                 } else if (isCurrentUdfps(client)) {
@@ -374,6 +396,13 @@ public class CoexCoordinator {
         return false;
     }
 
+    private static boolean isUdfpsAuthAttempted(@Nullable AuthenticationClient<?> client) {
+        if (client instanceof Udfps) {
+            return client.getState() == AuthenticationClient.STATE_STARTED_PAUSED_ATTEMPTED;
+        }
+        return false;
+    }
+
     private boolean isUnknownClient(@NonNull AuthenticationClient<?> client) {
         for (AuthenticationClient<?> c : mClientMap.values()) {
             if (c == client) {
@@ -400,6 +429,7 @@ public class CoexCoordinator {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Enabled: ").append(mAdvancedLogicEnabled);
+        sb.append(", Face Haptic Disabled: ").append(mFaceHapticDisabledWhenNonBypass);
         sb.append(", Queue size: " ).append(mSuccessfulAuths.size());
         for (SuccessfulAuth auth : mSuccessfulAuths) {
             sb.append(", Auth: ").append(auth.toString());
