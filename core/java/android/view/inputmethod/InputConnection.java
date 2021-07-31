@@ -1013,8 +1013,10 @@ public interface InputConnection {
      *
      * @param imeConsumesInput {@code true} when the IME is consuming input and the cursor should be
      * hidden, {@code false} when input to the editor resumes and the cursor should be shown again.
-     * @return {@code true} on success, {@code false} if the input connection is no longer valid, or
-     * the protocol is not supported.
+     * @return For editor authors, the return value will always be ignored. For IME authors, this
+     *         method returns {@code true} if the request was sent (whether or not the associated
+     *         editor does something based on this request), {@code false} if the input connection
+     *         is no longer valid.
      */
     default boolean setImeConsumesInput(boolean imeConsumesInput) {
         return false;
