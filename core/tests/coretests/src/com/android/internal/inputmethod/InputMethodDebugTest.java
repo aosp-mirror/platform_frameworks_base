@@ -73,13 +73,4 @@ public class InputMethodDebugTest {
                 InputMethodDebug.softInputDisplayReasonToString(
                         SoftInputShowHideReason.HIDE_REMOVE_CLIENT));
     }
-
-    @Test
-    public void testDumpInputConnectionCommand() {
-        // TODO: add more tests
-        assertEquals("null", InputMethodDebug.dumpInputConnectionCommand(null));
-        assertEquals("endBatchEdit()",
-                InputMethodDebug.dumpInputConnectionCommand(
-                        InputConnectionCommand.create(InputConnectionCommandType.END_BATCH_EDIT)));
-    }
 }

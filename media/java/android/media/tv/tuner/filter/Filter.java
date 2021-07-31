@@ -256,7 +256,13 @@ public class Filter implements AutoCloseable {
     private void onFilterStatus(int status) {
         synchronized (mCallbackLock) {
             if (mCallback != null && mExecutor != null) {
-                mExecutor.execute(() -> mCallback.onFilterStatusChanged(this, status));
+                mExecutor.execute(() -> {
+                    synchronized (mCallbackLock) {
+                        if (mCallback != null) {
+                            mCallback.onFilterStatusChanged(this, status);
+                        }
+                    }
+                });
             }
         }
     }
@@ -264,7 +270,13 @@ public class Filter implements AutoCloseable {
     private void onFilterEvent(FilterEvent[] events) {
         synchronized (mCallbackLock) {
             if (mCallback != null && mExecutor != null) {
-                mExecutor.execute(() -> mCallback.onFilterEvent(this, events));
+                mExecutor.execute(() -> {
+                    synchronized (mCallbackLock) {
+                        if (mCallback != null) {
+                            mCallback.onFilterEvent(this, events);
+                        }
+                    }
+                });
             }
         }
     }

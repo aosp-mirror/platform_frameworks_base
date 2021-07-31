@@ -110,7 +110,7 @@ class ProcessStateModifier extends Modifier {
 
     @Override
     @GuardedBy("mLock")
-    void onSystemServicesReady() {
+    void setup() {
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
@@ -118,6 +118,18 @@ class ProcessStateModifier extends Modifier {
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    void tearDown() {
+        try {
+            ActivityManager.getService().unregisterUidObserver(mUidObserver);
+        } catch (RemoteException e) {
+            // ignored; both services live in system_server
+        }
+        mPackageToUidCache.clear();
+        mUidProcStateBucketCache.clear();
     }
 
     /**

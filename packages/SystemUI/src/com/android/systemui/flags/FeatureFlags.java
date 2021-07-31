@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.flags;
 
 import android.content.Context;
 import android.util.FeatureFlagUtils;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlagReader;
 
 import javax.inject.Inject;
 
@@ -53,6 +52,7 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
     }
 
+    /** */
     public boolean useNewLockscreenAnimations() {
         return mFlagReader.isEnabled(R.bool.flag_lockscreen_animations);
     }

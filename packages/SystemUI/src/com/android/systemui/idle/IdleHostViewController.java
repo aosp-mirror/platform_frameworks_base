@@ -55,7 +55,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     private static final String INPUT_MONITOR_IDENTIFIER = "IdleHostViewController";
     private static final String TAG = "IdleHostViewController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final int TIMEOUT_TO_DOZE_MS = 10000;
 
     @Retention(RetentionPolicy.RUNTIME)
     @IntDef({STATE_IDLE_MODE_ENABLED, STATE_DOZING, STATE_KEYGUARD_SHOWING, STATE_IDLING})
@@ -89,6 +88,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
 
     // Timeout to idle in milliseconds.
     private final int mIdleTimeout;
+    private final int mDozeTimeout;
 
     // Factory for generating input listeners.
     private final InputMonitorFactory mInputMonitorFactory;
@@ -200,6 +200,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         setState(mState, true);
 
         mIdleTimeout = resources.getInteger(R.integer.config_idleModeTimeout);
+        mDozeTimeout = resources.getInteger(R.integer.config_dozeModeTimeout);
         mInputMonitorFactory = factory;
         mDelayableExecutor = delayableExecutor;
 
@@ -296,7 +297,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
 
         if (mIdleModeActive) {
             mCancelIdleModeToDoze = mDelayableExecutor.executeDelayed(mIdleModeToDozeCallback,
-                    TIMEOUT_TO_DOZE_MS);
+                    mDozeTimeout);
 
             // Track when the dream ends to cancel any timeouts.
             final IntentFilter filter = new IntentFilter();

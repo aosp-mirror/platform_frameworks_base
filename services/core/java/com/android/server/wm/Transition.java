@@ -39,6 +39,7 @@ import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -705,6 +706,22 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return wc.asWallpaperToken() != null;
     }
 
+    private static boolean occludesKeyguard(WindowContainer wc) {
+        final ActivityRecord ar = wc.asActivityRecord();
+        if (ar != null) {
+            return ar.canShowWhenLocked();
+        }
+        final Task t = wc.asTask();
+        if (t != null) {
+            // Get the top activity which was visible (since this is going away, it will remain
+            // client visible until the transition is finished).
+            // skip hidden (or about to hide) apps
+            final ActivityRecord top = t.getActivity(WindowToken::isClientVisible);
+            return top != null && top.canShowWhenLocked();
+        }
+        return false;
+    }
+
     /**
      * Under some conditions (eg. all visible targets within a parent container are transitioning
      * the same way) the transition can be "promoted" to the parent container. This means an
@@ -1152,6 +1169,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             if (isWallpaper(wc)) {
                 flags |= FLAG_IS_WALLPAPER;
+            }
+            if (occludesKeyguard(wc)) {
+                flags |= FLAG_OCCLUDES_KEYGUARD;
             }
             return flags;
         }

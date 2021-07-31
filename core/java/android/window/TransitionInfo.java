@@ -91,8 +91,11 @@ public final class TransitionInfo implements Parcelable {
     /** The container is the display. */
     public static final int FLAG_IS_DISPLAY = 1 << 5;
 
+    /** The container can show on top of lock screen. */
+    public static final int FLAG_OCCLUDES_KEYGUARD = 1 << 6;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 6;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 7;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -103,6 +106,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT,
             FLAG_IS_VOICE_INTERACTION,
             FLAG_IS_DISPLAY,
+            FLAG_OCCLUDES_KEYGUARD,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -234,7 +238,7 @@ public final class TransitionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + transitTypeToString(mType) + " f=" + Integer.toHexString(mFlags)
+        sb.append("{t=" + transitTypeToString(mType) + " f=0x" + Integer.toHexString(mFlags)
                 + " ro=" + mRootOffset + " c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
@@ -282,6 +286,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_DISPLAY) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "IS_DISPLAY");
+        }
+        if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "OCCLUDES_KEYGUARD");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");

@@ -21,7 +21,6 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
-import static android.app.ActivityManager.getCurrentUser;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
@@ -718,6 +717,9 @@ public final class SensorPrivacyService extends SystemService {
         public void setIndividualSensorPrivacy(@UserIdInt int userId,
                 @SensorPrivacyManager.Sources.Source int source, int sensor, boolean enable) {
             enforceManageSensorPrivacyPermission();
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = mCurrentUser;
+            }
             if (!canChangeIndividualSensorPrivacy(userId, sensor)) {
                 return;
             }
@@ -843,6 +845,9 @@ public final class SensorPrivacyService extends SystemService {
         public void setIndividualSensorPrivacyForProfileGroup(@UserIdInt int userId,
                 @SensorPrivacyManager.Sources.Source int source, int sensor, boolean enable) {
             enforceManageSensorPrivacyPermission();
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = mCurrentUser;
+            }
             int parentId = mUserManagerInternal.getProfileParentId(userId);
             forAllUsers(userId2 -> {
                 if (parentId == mUserManagerInternal.getProfileParentId(userId2)) {
@@ -896,6 +901,9 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public boolean isIndividualSensorPrivacyEnabled(@UserIdInt int userId, int sensor) {
             enforceObserveSensorPrivacyPermission();
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = mCurrentUser;
+            }
             synchronized (mLock) {
                 return isIndividualSensorPrivacyEnabledLocked(userId, sensor);
             }
@@ -1213,6 +1221,9 @@ public final class SensorPrivacyService extends SystemService {
         public void suppressIndividualSensorPrivacyReminders(int userId, int sensor,
                 IBinder token, boolean suppress) {
             enforceManageSensorPrivacyPermission();
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = mCurrentUser;
+            }
             Objects.requireNonNull(token);
 
             Pair<Integer, UserHandle> key = new Pair<>(sensor, UserHandle.of(userId));
@@ -1898,9 +1909,9 @@ public final class SensorPrivacyService extends SystemService {
                 if (!mIsInEmergencyCall) {
                     mIsInEmergencyCall = true;
                     if (mSensorPrivacyServiceImpl
-                            .isIndividualSensorPrivacyEnabled(getCurrentUser(), MICROPHONE)) {
+                            .isIndividualSensorPrivacyEnabled(mCurrentUser, MICROPHONE)) {
                         mSensorPrivacyServiceImpl.setIndividualSensorPrivacyUnchecked(
-                                getCurrentUser(), OTHER, MICROPHONE, false);
+                                mCurrentUser, OTHER, MICROPHONE, false);
                         mMicUnmutedForEmergencyCall = true;
                     } else {
                         mMicUnmutedForEmergencyCall = false;
@@ -1915,7 +1926,7 @@ public final class SensorPrivacyService extends SystemService {
                     mIsInEmergencyCall = false;
                     if (mMicUnmutedForEmergencyCall) {
                         mSensorPrivacyServiceImpl.setIndividualSensorPrivacyUnchecked(
-                                getCurrentUser(), OTHER, MICROPHONE, true);
+                                mCurrentUser, OTHER, MICROPHONE, true);
                         mMicUnmutedForEmergencyCall = false;
                     }
                 }

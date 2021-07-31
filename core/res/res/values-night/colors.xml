@@ -29,5 +29,8 @@
     <color name="resolver_empty_state_text">#FFFFFF</color>
     <color name="resolver_empty_state_icon">#FFFFFF</color>
 
+    <color name="call_notification_decline_color">#E66A5E</color>
+    <color name="call_notification_answer_color">#5DBA80</color>
+
     <color name="personal_apps_suspension_notification_color">#8AB4F8</color>
 </resources>

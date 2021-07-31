@@ -24,7 +24,9 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
+import com.android.systemui.statusbar.phone.StatusBarCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.StatusBarDemoMode;
+import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.lang.annotation.Documented;
@@ -94,6 +96,18 @@ public interface StatusBarComponent {
      */
     @StatusBarScope
     StatusBarDemoMode getStatusBarDemoMode();
+
+    /**
+     * Creates a StatusBarHeadsUpChangeListener.
+     */
+    @StatusBarScope
+    StatusBarHeadsUpChangeListener getStatusBarHeadsUpChangeListener();
+
+    /**
+     * Creates a StatusBarCommandQueueCallbacks.
+     */
+    @StatusBarScope
+    StatusBarCommandQueueCallbacks getStatusBarCommandQueueCallbacks();
 
     /**
      * Creates a SplitShadeHeaderController.

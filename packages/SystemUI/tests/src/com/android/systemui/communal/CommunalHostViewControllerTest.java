@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.lang.ref.WeakReference;
@@ -67,9 +68,12 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mCommunalView.isAttachedToWindow()).thenReturn(true);
 
         mController = new CommunalHostViewController(mFakeExecutor, mKeyguardStateController,
                 mStatusBarStateController, mCommunalView);
+        mController.init();
+        mFakeExecutor.runAllReady();
     }
 
     @Test
@@ -82,6 +86,7 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
 
         // Verify the communal view is shown when the controller is initialized with keyguard
         // showing (see setup).
+        Mockito.clearInvocations(mCommunalView);
         mController.show(new WeakReference<>(mCommunalSource));
         mFakeExecutor.runAllReady();
         verify(mCommunalView).setVisibility(View.VISIBLE);

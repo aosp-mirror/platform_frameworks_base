@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package com.android.systemui.util.wrapper
 
-parcelable InputConnectionCommand;
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+
+@Module
+abstract class UtilWrapperModule {
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindRotationPolicyWrapper(impl: RotationPolicyWrapperImpl): RotationPolicyWrapper
+}

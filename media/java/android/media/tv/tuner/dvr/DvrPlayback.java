@@ -119,7 +119,13 @@ public class DvrPlayback implements AutoCloseable {
         }
         synchronized (mListenerLock) {
             if (mExecutor != null && mListener != null) {
-                mExecutor.execute(() -> mListener.onPlaybackStatusChanged(status));
+                mExecutor.execute(() -> {
+                    synchronized (mListenerLock) {
+                        if (mListener != null) {
+                            mListener.onPlaybackStatusChanged(status);
+                        }
+                    }
+                });
             }
         }
     }

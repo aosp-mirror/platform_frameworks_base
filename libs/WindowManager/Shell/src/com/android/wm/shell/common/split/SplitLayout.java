@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.common.split;
 
+import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_TOP;
 
@@ -224,13 +226,13 @@ public final class SplitLayout {
     void updateDivideBounds(int position) {
         updateBounds(position);
         mSplitWindowManager.setResizingSplits(true);
-        mSplitLayoutHandler.onBoundsChanging(this);
+        mSplitLayoutHandler.onLayoutChanging(this);
     }
 
     void setDividePosition(int position) {
         mDividePosition = position;
         updateBounds(mDividePosition);
-        mSplitLayoutHandler.onBoundsChanged(this);
+        mSplitLayoutHandler.onLayoutChanged(this);
         mSplitWindowManager.setResizingSplits(false);
     }
 
@@ -352,6 +354,46 @@ public final class SplitLayout {
                 .setBounds(task2.token, mImePositionProcessor.adjustForIme(mBounds2));
     }
 
+    /**
+     * Shift configuration bounds to prevent client apps get configuration changed or relaunch. And
+     * restore shifted configuration bounds if it's no longer shifted.
+     */
+    public void applyLayoutShifted(WindowContainerTransaction wct, int offsetX, int offsetY,
+            ActivityManager.RunningTaskInfo taskInfo1, ActivityManager.RunningTaskInfo taskInfo2) {
+        if (offsetX == 0 && offsetY == 0) {
+            wct.setBounds(taskInfo1.token, mBounds1);
+            wct.setAppBounds(taskInfo1.token, null);
+            wct.setScreenSizeDp(taskInfo1.token,
+                    SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+
+            wct.setBounds(taskInfo2.token, mBounds2);
+            wct.setAppBounds(taskInfo2.token, null);
+            wct.setScreenSizeDp(taskInfo2.token,
+                    SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+        } else {
+            final Rect bounds = new Rect();
+            bounds.set(taskInfo1.configuration.windowConfiguration.getBounds());
+            bounds.offset(offsetX, offsetY);
+            wct.setBounds(taskInfo1.token, bounds);
+            bounds.set(taskInfo1.configuration.windowConfiguration.getAppBounds());
+            bounds.offset(offsetX, offsetY);
+            wct.setAppBounds(taskInfo1.token, bounds);
+            wct.setScreenSizeDp(taskInfo1.token,
+                    taskInfo1.configuration.screenWidthDp,
+                    taskInfo1.configuration.screenHeightDp);
+
+            bounds.set(taskInfo2.configuration.windowConfiguration.getBounds());
+            bounds.offset(offsetX, offsetY);
+            wct.setBounds(taskInfo2.token, bounds);
+            bounds.set(taskInfo2.configuration.windowConfiguration.getAppBounds());
+            bounds.offset(offsetX, offsetY);
+            wct.setAppBounds(taskInfo2.token, bounds);
+            wct.setScreenSizeDp(taskInfo2.token,
+                    taskInfo2.configuration.screenWidthDp,
+                    taskInfo2.configuration.screenHeightDp);
+        }
+    }
+
     /** Handles layout change event. */
     public interface SplitLayoutHandler {
 
@@ -359,10 +401,18 @@ public final class SplitLayout {
         void onSnappedToDismiss(boolean snappedToEnd);
 
         /** Calls when the bounds is changing due to animation or dragging divider bar. */
-        void onBoundsChanging(SplitLayout layout);
+        void onLayoutChanging(SplitLayout layout);
 
         /** Calls when the target bounds changed. */
-        void onBoundsChanged(SplitLayout layout);
+        void onLayoutChanged(SplitLayout layout);
+
+        /**
+         * Notifies when the layout shifted. So the layout handler can shift configuration
+         * bounds correspondingly to make sure client apps won't get configuration changed or
+         * relaunch. If the layout is no longer shifted, layout handler should restore shifted
+         * configuration bounds.
+         */
+        void onLayoutShifted(int offsetX, int offsetY, SplitLayout layout);
 
         /** Calls when user double tapped on the divider bar. */
         default void onDoubleTappedDivider() {
@@ -427,6 +477,18 @@ public final class SplitLayout {
                     && !isFloating && !isLandscape(mRootBounds) && showing;
             mTargetYOffset = needOffset ? getTargetYOffset() : 0;
 
+            if (mTargetYOffset != mLastYOffset) {
+                // Freeze the configuration size with offset to prevent app get a configuration
+                // changed or relaunch. This is required to make sure client apps will calculate
+                // insets properly after layout shifted.
+                if (mTargetYOffset == 0) {
+                    mSplitLayoutHandler.onLayoutShifted(0, 0, SplitLayout.this);
+                } else {
+                    mSplitLayoutHandler.onLayoutShifted(0, mTargetYOffset - mLastYOffset,
+                            SplitLayout.this);
+                }
+            }
+
             // Make {@link DividerView} non-interactive while IME showing in split mode. Listen to
             // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
             // because DividerView won't receive onImeVisibilityChanged callback after it being
@@ -441,7 +503,7 @@ public final class SplitLayout {
         public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
             if (displayId != mDisplayId) return;
             onProgress(getProgress(imeTop));
-            mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+            mSplitLayoutHandler.onLayoutChanging(SplitLayout.this);
         }
 
         @Override
@@ -449,7 +511,7 @@ public final class SplitLayout {
                 SurfaceControl.Transaction t) {
             if (displayId != mDisplayId || cancel) return;
             onProgress(1.0f);
-            mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+            mSplitLayoutHandler.onLayoutChanging(SplitLayout.this);
         }
 
         @Override
@@ -459,7 +521,7 @@ public final class SplitLayout {
             if (!controlling && mImeShown) {
                 reset();
                 mSplitWindowManager.setInteractive(true);
-                mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
+                mSplitLayoutHandler.onLayoutChanging(SplitLayout.this);
             }
         }
 

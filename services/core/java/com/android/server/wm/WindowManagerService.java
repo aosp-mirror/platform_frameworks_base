@@ -3050,7 +3050,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mSettingsObserver.updateSystemUiSettings(true /* handleChange */);
         synchronized (mGlobalLock) {
             // force a re-application of focused window sysui visibility on each display.
-            mRoot.forAllDisplayPolicies(DisplayPolicy::resetSystemUiVisibilityLw);
+            mRoot.forAllDisplayPolicies(DisplayPolicy::resetSystemBarAttributes);
         }
     }
 
@@ -5292,6 +5292,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 case LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED: {
                     synchronized (mGlobalLock) {
                         final DisplayContent displayContent = (DisplayContent) msg.obj;
+                        displayContent.mLayoutAndAssignWindowLayersScheduled = false;
                         displayContent.layoutAndAssignWindowLayersIfNeeded();
                     }
                     break;
@@ -8667,5 +8668,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return dc.getImePolicy() == DISPLAY_IME_POLICY_LOCAL ? dc.getDisplayId()
                     : DEFAULT_DISPLAY;
         }
+    }
+
+    @Override
+    public void setTaskSnapshotEnabled(boolean enabled) {
+        mTaskSnapshotController.setTaskSnapshotEnabled(enabled);
     }
 }

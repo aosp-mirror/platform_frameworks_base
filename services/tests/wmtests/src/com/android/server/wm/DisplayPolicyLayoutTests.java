@@ -115,7 +115,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         spyOn(mNavBarWindow);
 
         // Disabling this call for most tests since it can override the systemUiFlags when called.
-        doReturn(false).when(mDisplayPolicy).updateSystemUiVisibilityLw();
+        doNothing().when(mDisplayPolicy).updateSystemBarAttributes();
 
         updateDisplayFrames();
     }
