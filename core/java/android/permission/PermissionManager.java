@@ -1315,6 +1315,7 @@ public final class PermissionManager {
     private static final class PackageNamePermissionQuery {
         final String permName;
         final String pkgName;
+        @UserIdInt
         final int userId;
 
         PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName,
@@ -1373,6 +1374,10 @@ public final class PermissionManager {
                 protected Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(
                             query.permName, query.pkgName, query.userId);
+                }
+                @Override
+                protected boolean bypass(PackageNamePermissionQuery query) {
+                    return query.userId < 0;
                 }
             };
 
