@@ -179,6 +179,7 @@ struct JTuner : public RefBase {
     int unlinkCiCam(jint id);
     jobject getFrontendIds();
     jobject openFrontendByHandle(int feHandle);
+    int shareFrontend(int feId);
     jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
     int tune(const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
@@ -210,6 +211,7 @@ private:
     static sp<TunerClient> mTunerClient;
     sp<FrontendClient> mFeClient;
     int mFeId;
+    int mSharedFeId;
     sp<LnbClient> mLnbClient;
     sp<DemuxClient> mDemuxClient;
     static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
