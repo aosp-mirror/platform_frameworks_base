@@ -186,7 +186,6 @@ public class BstatsCpuTimesValidationTest {
         sPerProcStateTimesAvailable = fgCpuTimes != null;
     }
 
-    @SkipPresubmit("b/184201598 flaky")
     @Test
     public void testCpuFreqTimes() throws Exception {
         if (!sCpuFreqTimesAvailable) {
@@ -215,7 +214,6 @@ public class BstatsCpuTimesValidationTest {
         batteryOffScreenOn();
     }
 
-    @SkipPresubmit("b/184201598 flaky")
     @Test
     public void testCpuFreqTimes_screenOff() throws Exception {
         if (!sCpuFreqTimesAvailable) {
@@ -278,7 +276,6 @@ public class BstatsCpuTimesValidationTest {
         batteryOffScreenOn();
     }
 
-    @SkipPresubmit("b/184201598 flaky")
     @Test
     public void testCpuFreqTimes_stateTop() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
@@ -312,7 +309,6 @@ public class BstatsCpuTimesValidationTest {
         batteryOffScreenOn();
     }
 
-    @SkipPresubmit("b/184201598 flaky")
     @Test
     public void testIsolatedCpuFreqTimes_stateService() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
@@ -354,7 +350,6 @@ public class BstatsCpuTimesValidationTest {
         batteryOffScreenOn();
     }
 
-    @SkipPresubmit("b/185960974 flaky")
     @Test
     public void testCpuFreqTimes_stateTopSleeping() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
@@ -389,7 +384,6 @@ public class BstatsCpuTimesValidationTest {
     }
 
     @Test
-    @SkipPresubmit("b/183225190 flaky")
     public void testCpuFreqTimes_stateFgService() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
             Log.w(TAG, "Skipping " + testName.getMethodName()
@@ -455,7 +449,6 @@ public class BstatsCpuTimesValidationTest {
         batteryOff();
     }
 
-    @SkipPresubmit("b/184201598 flaky")
     @Test
     public void testCpuFreqTimes_stateBg() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
@@ -522,7 +515,6 @@ public class BstatsCpuTimesValidationTest {
         batteryOffScreenOn();
     }
 
-    @SkipPresubmit("b/184201598 flaky")
     @Test
     public void testCpuFreqTimes_trackingDisabled() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
