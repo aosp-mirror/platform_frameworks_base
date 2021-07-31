@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikacija bežičnog ekrana"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući detaljniju evidenciju za Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje WiFi skeniranja"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Nasumično razvrstavanje MAC adresa po WiFi-ju sa prekidima"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilni podaci su uvek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzanje privezivanja"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikazuje opcije za sertifikaciju bežičnog ekrana"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava učinak mreže"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Kada je ovaj režim omogućen, MAC adresa ovog uređaja može da se promeni svaki put kada se poveže sa mrežom na kojoj je omogućeno nasumično razvrstavanje MAC adresa."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sa ograničenjem"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez ograničenja"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine bafera podataka u programu za evidentiranje"</string>
