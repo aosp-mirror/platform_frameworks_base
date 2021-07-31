@@ -72,7 +72,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted, owner,
                 cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */);
+                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
+                false /* isKeyguardBypassEnabled */);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
         mSensorProps = sensorProps;
@@ -113,7 +114,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
             mState = STATE_STOPPED;
             UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         } else {
-            mState = STATE_STARTED_PAUSED;
+            mState = STATE_STARTED_PAUSED_ATTEMPTED;
         }
     }
 
@@ -187,7 +188,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     public void onPointerUp() {
         try {
             mIsPointerDown = false;
-            mState = STATE_STARTED_PAUSED;
+            mState = STATE_STARTED_PAUSED_ATTEMPTED;
             mALSProbeCallback.getProbe().disable();
             getFreshDaemon().onPointerUp(0 /* pointerId */);
 

@@ -43,7 +43,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
@@ -97,8 +96,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
     @NonNull private final Drawable mUnlockIcon;
-    @NonNull private final CharSequence mUnlockedLabel;
-    @NonNull private final CharSequence mLockedLabel;
+    @NonNull private CharSequence mUnlockedLabel;
+    @NonNull private CharSequence mLockedLabel;
     @Nullable private final Vibrator mVibrator;
 
     private boolean mIsDozing;
@@ -111,7 +110,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mUserUnlockedWithBiometric;
     private Runnable mCancelDelayedUpdateVisibilityRunnable;
 
-    private boolean mHasUdfps;
+    private boolean mUdfpsSupported;
     private float mHeightPixels;
     private float mWidthPixels;
     private int mBottomPadding; // in pixels
@@ -152,9 +151,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
         final Context context = view.getContext();
         mUnlockIcon = mView.getContext().getResources().getDrawable(
-            R.anim.lock_to_unlock,
+            R.drawable.ic_unlock,
             mView.getContext().getTheme());
-        ((AnimatedVectorDrawable) mUnlockIcon).start();
         mLockIcon = mView.getContext().getResources().getDrawable(
                 R.anim.lock_to_unlock,
                 mView.getContext().getTheme());
@@ -177,7 +175,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     protected void onViewAttached() {
         // we check this here instead of onInit since the FingerprintManager + FaceManager may not
         // have started up yet onInit
-        mHasUdfps = mAuthController.getUdfpsSensorLocation() != null;
+        mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
 
         updateConfiguration();
         updateKeyguardShowing();
@@ -307,12 +305,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateColors() {
-        final int color = Utils.getColorAttrDefaultColor(mView.getContext(),
-                R.attr.wallpaperTextColorAccent);
-        mFpToUnlockIcon.setTint(color);
-        mLockToUnlockIcon.setTint(color);
-        mLockIcon.setTint(color);
-        mUnlockIcon.setTint(color);
+        mView.updateColorAndBackgroundVisibility(mUdfpsSupported);
     }
 
     private void updateConfiguration() {
@@ -321,11 +314,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mHeightPixels = metrics.heightPixels;
         mBottomPadding = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.lock_icon_margin_bottom);
+
+        mUnlockedLabel = mView.getContext().getResources().getString(
+                R.string.accessibility_unlock_button);
+        mLockedLabel = mView.getContext()
+                .getResources().getString(R.string.accessibility_lock_icon);
+
         updateLockIconLocation();
     }
 
     private void updateLockIconLocation() {
-        if (mHasUdfps) {
+        if (mUdfpsSupported) {
             FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
             mView.setCenterLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
                     props.sensorRadius);
@@ -467,6 +466,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onConfigChanged(Configuration newConfig) {
             updateConfiguration();
+            updateColors();
         }
     };
 
@@ -560,7 +560,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private boolean isClickable() {
-        return mUdfpsEnrolled || mShowUnlockIcon;
+        return mUdfpsSupported || mShowUnlockIcon;
     }
 
     /**

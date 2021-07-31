@@ -54,12 +54,18 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     public static final int STATE_NEW = 0;
     // Framework/HAL have started this operation
     public static final int STATE_STARTED = 1;
-    // Operation is started, but requires some user action (such as finger lift & re-touch)
+    // Operation is started, but requires some user action to start (such as finger lift & re-touch)
     public static final int STATE_STARTED_PAUSED = 2;
+    // Same as above, except auth was attempted (rejected, timed out, etc).
+    public static final int STATE_STARTED_PAUSED_ATTEMPTED = 3;
     // Done, errored, canceled, etc. HAL/framework are not running this sensor anymore.
-    public static final int STATE_STOPPED = 3;
+    public static final int STATE_STOPPED = 4;
 
-    @IntDef({STATE_NEW, STATE_STARTED, STATE_STARTED_PAUSED, STATE_STOPPED})
+    @IntDef({STATE_NEW,
+            STATE_STARTED,
+            STATE_STARTED_PAUSED,
+            STATE_STARTED_PAUSED_ATTEMPTED,
+            STATE_STOPPED})
     @interface State {}
 
     private final boolean mIsStrongBiometric;
@@ -70,6 +76,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
     private final boolean mAllowBackgroundAuthentication;
+    private final boolean mIsKeyguardBypassEnabled;
 
     protected final long mOperationId;
 
@@ -97,7 +104,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
             int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
-            boolean shouldVibrate) {
+            boolean shouldVibrate, boolean isKeyguardBypassEnabled) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE,
                 statsClient);
@@ -110,6 +117,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
         mAllowBackgroundAuthentication = allowBackgroundAuthentication;
+        mIsKeyguardBypassEnabled = isKeyguardBypassEnabled;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -392,6 +400,14 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public @State int getState() {
         return mState;
+    }
+
+    /**
+     * @return true if the client supports bypass (e.g. passive auth such as face), and if it's
+     * enabled by the user.
+     */
+    public boolean isKeyguardBypassEnabled() {
+        return mIsKeyguardBypassEnabled;
     }
 
     @Override

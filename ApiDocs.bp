@@ -113,7 +113,10 @@ stubs_defaults {
     // TODO(b/169090544): remove below aidl includes.
     aidl: {
         local_include_dirs: ["media/aidl"],
-        include_dirs: ["frameworks/av/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+        ],
     },
 }
 
@@ -199,7 +202,10 @@ doc_defaults {
     // TODO(b/169090544): remove below aidl includes.
     aidl: {
         local_include_dirs: ["media/aidl"],
-        include_dirs: ["frameworks/av/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+        ],
     },
 }
 

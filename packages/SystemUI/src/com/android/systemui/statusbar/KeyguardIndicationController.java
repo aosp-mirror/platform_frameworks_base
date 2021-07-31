@@ -821,6 +821,16 @@ public class KeyguardIndicationController {
         }
     }
 
+    private void showTryFingerprintMsg() {
+        if (mKeyguardUpdateMonitor.isUdfpsAvailable()) {
+            // if udfps available, there will always be a tappable affordance to unlock
+            // For example, the lock icon
+            showTransientIndication(R.string.keyguard_unlock_press);
+        } else {
+            showTransientIndication(R.string.keyguard_try_fingerprint);
+        }
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationController:");
         pw.println("  mInitialTextColorState: " + mInitialTextColorState);
@@ -891,7 +901,7 @@ public class KeyguardIndicationController {
                 return;
             }
 
-            boolean showSwipeToUnlock =
+            boolean showActionToUnlock =
                     msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
@@ -899,13 +909,11 @@ public class KeyguardIndicationController {
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
                 if (biometricSourceType == BiometricSourceType.FACE
                         && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                    // suggest trying fingerprint
-                    showTransientIndication(R.string.keyguard_try_fingerprint);
+                    showTryFingerprintMsg();
                     return;
                 }
-                showTransientIndication(helpString, false /* isError */, showSwipeToUnlock);
-            }
-            if (showSwipeToUnlock) {
+                showTransientIndication(helpString, false /* isError */, showActionToUnlock);
+            } else if (showActionToUnlock) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_ACTION_TO_UNLOCK),
                         TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
             }
@@ -921,8 +929,7 @@ public class KeyguardIndicationController {
                     && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()
                     && mKeyguardUpdateMonitor.isScreenOn()) {
-                // suggest trying fingerprint
-                showTransientIndication(R.string.keyguard_try_fingerprint);
+                showTryFingerprintMsg();
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -931,11 +938,10 @@ public class KeyguardIndicationController {
                 if (!mStatusBarKeyguardViewManager.isBouncerShowing()
                         && mKeyguardUpdateMonitor.isUdfpsEnrolled()
                         && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
-                    // suggest trying fingerprint
-                    showTransientIndication(R.string.keyguard_try_fingerprint);
+                    showTryFingerprintMsg();
                 } else if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
                     mStatusBarKeyguardViewManager.showBouncerMessage(
-                            mContext.getResources().getString(R.string.keyguard_try_fingerprint),
+                            mContext.getResources().getString(R.string.keyguard_unlock_press),
                             mInitialTextColorState
                     );
                 } else {

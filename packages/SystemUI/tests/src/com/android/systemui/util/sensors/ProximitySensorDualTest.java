@@ -60,6 +60,25 @@ public class ProximitySensorDualTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPrimaryBelowDoesNotInvokeSecondary() {
+        TestableListener listener = new TestableListener();
+
+        mProximitySensor.register(listener);
+        assertTrue(mProximitySensor.isRegistered());
+        assertFalse(mThresholdSensorPrimary.isPaused());
+        assertTrue(mThresholdSensorSecondary.isPaused());
+        assertNull(listener.mLastEvent);
+        assertEquals(0, listener.mCallCount);
+
+        // Trigger primary sensor. Our secondary sensor is not registered.
+        mThresholdSensorPrimary.triggerEvent(false, 0);
+        assertFalse(mThresholdSensorPrimary.isPaused());
+        assertTrue(mThresholdSensorSecondary.isPaused());
+        assertNull(listener.mLastEvent);
+        assertEquals(0, listener.mCallCount);
+    }
+
+    @Test
     public void testSingleListener() {
         TestableListener listener = new TestableListener();
 
@@ -256,40 +275,6 @@ public class ProximitySensorDualTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPrimaryCancelsSecondary() {
-        TestableListener listener = new TestableListener();
-
-        mProximitySensor.register(listener);
-        assertFalse(mThresholdSensorPrimary.isPaused());
-        assertTrue(mThresholdSensorSecondary.isPaused());
-        assertNull(listener.mLastEvent);
-        assertEquals(0, listener.mCallCount);
-
-        mThresholdSensorPrimary.triggerEvent(true, 0);
-        assertNull(listener.mLastEvent);
-        assertEquals(0, listener.mCallCount);
-        mThresholdSensorSecondary.triggerEvent(true, 0);
-        assertTrue(listener.mLastEvent.getBelow());
-        assertEquals(1, listener.mCallCount);
-
-        // When the primary reports false, the secondary is no longer needed. We get an immediate
-        // report.
-        mThresholdSensorPrimary.triggerEvent(false, 1);
-        assertFalse(listener.mLastEvent.getBelow());
-        assertEquals(2, listener.mCallCount);
-
-        // The secondary is now ignored. No more work is scheduled.
-        mFakeExecutor.advanceClockToNext();
-        mFakeExecutor.runNextReady();
-        mThresholdSensorSecondary.triggerEvent(true, 0);
-        assertFalse(listener.mLastEvent.getBelow());
-        assertEquals(2, listener.mCallCount);
-        assertEquals(0, mFakeExecutor.numPending());
-
-        mProximitySensor.unregister(listener);
-    }
-
-    @Test
     public void testSecondaryCancelsSecondary() {
         TestableListener listener = new TestableListener();
         ThresholdSensor.Listener cancelingListener = new ThresholdSensor.Listener() {
@@ -342,7 +327,7 @@ public class ProximitySensorDualTest extends SysuiTestCase {
 
         // The secondary sensor should now remain resumed indefinitely.
         assertFalse(mThresholdSensorSecondary.isPaused());
-        mThresholdSensorPrimary.triggerEvent(false, 1);
+        mThresholdSensorSecondary.triggerEvent(false, 1);
         assertFalse(listener.mLastEvent.getBelow());
         assertEquals(2, listener.mCallCount);
 

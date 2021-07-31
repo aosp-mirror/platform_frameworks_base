@@ -18,6 +18,9 @@ package com.android.settingslib.enterprise;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 
+import static com.android.settingslib.enterprise.ActionDisabledLearnMoreButtonLauncher.DEFAULT_RESOLVE_ACTIVITY_CHECKER;
+import static com.android.settingslib.enterprise.ManagedDeviceActionDisabledByAdminController.DEFAULT_FOREGROUND_USER_CHECKER;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -43,7 +46,11 @@ public final class ActionDisabledByAdminControllerFactory {
         } else if (isFinancedDevice(context)) {
             return new FinancedDeviceActionDisabledByAdminController(stringProvider);
         } else {
-            return new ManagedDeviceActionDisabledByAdminController(stringProvider, userHandle);
+            return new ManagedDeviceActionDisabledByAdminController(
+                    stringProvider,
+                    userHandle,
+                    DEFAULT_FOREGROUND_USER_CHECKER,
+                    DEFAULT_RESOLVE_ACTIVITY_CHECKER);
         }
     }
 
