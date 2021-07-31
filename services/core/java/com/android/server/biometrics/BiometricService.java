@@ -1103,9 +1103,13 @@ public class BiometricService extends SystemService {
         }
 
         public boolean isAdvancedCoexLogicEnabled(Context context) {
-            return (Build.IS_USERDEBUG || Build.IS_ENG)
-                    && Settings.Secure.getInt(context.getContentResolver(),
-                    CoexCoordinator.SETTING_ENABLE_NAME, 0) != 0;
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    CoexCoordinator.SETTING_ENABLE_NAME, 1) != 0;
+        }
+
+        public boolean isCoexFaceNonBypassHapticsDisabled(Context context) {
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    CoexCoordinator.FACE_HAPTIC_DISABLE, 1) != 0;
         }
     }
 
@@ -1138,6 +1142,8 @@ public class BiometricService extends SystemService {
         //  by default.
         CoexCoordinator coexCoordinator = CoexCoordinator.getInstance();
         coexCoordinator.setAdvancedLogicEnabled(injector.isAdvancedCoexLogicEnabled(context));
+        coexCoordinator.setFaceHapticDisabledWhenNonBypass(
+                injector.isCoexFaceNonBypassHapticsDisabled(context));
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(

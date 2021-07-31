@@ -631,6 +631,9 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScreenCornerRadius;
     private boolean mQSAnimatingHiddenFromCollapsed;
 
+    private int mQsClipTop;
+    private int mQsClipBottom;
+    private boolean mQsVisible;
     private final ContentResolver mContentResolver;
 
     private final Executor mUiExecutor;
@@ -2336,6 +2339,9 @@ public class NotificationPanelViewController extends PanelViewController {
             final int startTop = mKeyguardStatusAreaClipBounds.top;
             final int startRight = mKeyguardStatusAreaClipBounds.right;
             final int startBottom = mKeyguardStatusAreaClipBounds.bottom;
+            if (mQsClippingAnimation != null) {
+                mQsClippingAnimation.cancel();
+            }
             mQsClippingAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
             mQsClippingAnimation.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
             mQsClippingAnimation.setDuration(mNotificationBoundsAnimationDuration);
@@ -2399,9 +2405,12 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsTranslationForFullShadeTransition = qsTranslation;
             updateQsFrameTranslation();
             float currentTranslation = mQsFrame.getTranslationY();
-            mQs.setFancyClipping((
-                    int) (top - currentTranslation),
-                    (int) (bottom - currentTranslation),
+            mQsClipTop = (int) (top - currentTranslation);
+            mQsClipBottom = (int) (bottom - currentTranslation);
+            mQsVisible = qsVisible;
+            mQs.setFancyClipping(
+                    mQsClipTop,
+                    mQsClipBottom,
                     radius, qsVisible
                     && !mShouldUseSplitNotificationShade);
         }
@@ -3239,7 +3248,10 @@ public class NotificationPanelViewController extends PanelViewController {
         switch (mBarState) {
             case KEYGUARD:
                 if (!mDozingOnDown) {
-                    if (mKeyguardBypassController.getBypassEnabled()) {
+                    if (mUpdateMonitor.isFaceEnrolled()
+                            && !mUpdateMonitor.isFaceDetectionRunning()
+                            && !mUpdateMonitor.getUserCanSkipBouncer(
+                                    KeyguardUpdateMonitor.getCurrentUser())) {
                         mUpdateMonitor.requestFaceAuth(true);
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
@@ -3730,7 +3742,10 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
-        pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect());
+        pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect()
+                + " applyQSClippingImmediately: top(" + mQsClipTop + ") bottom(" + mQsClipBottom
+                + ") qsVisible(" + mQsVisible
+        );
         if (mKeyguardStatusBar != null) {
             mKeyguardStatusBar.dump(fd, pw, args);
         }

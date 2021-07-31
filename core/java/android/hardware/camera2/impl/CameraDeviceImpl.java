@@ -696,6 +696,16 @@ public class CameraDeviceImpl extends CameraDevice
                 mCurrentSession.replaceSessionClose();
             }
 
+            if (mCurrentExtensionSession != null) {
+                mCurrentExtensionSession.release();
+                mCurrentExtensionSession = null;
+            }
+
+            if (mCurrentAdvancedExtensionSession != null) {
+                mCurrentAdvancedExtensionSession.release();
+                mCurrentAdvancedExtensionSession = null;
+            }
+
             // TODO: dont block for this
             boolean configureSuccess = true;
             CameraAccessException pendingException = null;
