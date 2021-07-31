@@ -1573,6 +1573,9 @@ public class ExifInterface {
             if (isFdDuped) {
                 closeFileDescriptor(fileDescriptor);
             }
+            if (modernFd != null) {
+                modernFd.close();
+            }
         }
     }
 
@@ -2554,12 +2557,13 @@ public class ExifInterface {
 
     private void initForFilename(String filename) throws IOException {
         FileInputStream in = null;
+        ParcelFileDescriptor modernFd = null;
         mAssetInputStream = null;
         mFilename = filename;
         mIsInputStream = false;
         try {
             in = new FileInputStream(filename);
-            ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(in.getFD());
+            modernFd = FileUtils.convertToModernFd(in.getFD());
             if (modernFd != null) {
                 closeQuietly(in);
                 in = new FileInputStream(modernFd.getFileDescriptor());
@@ -2570,6 +2574,9 @@ public class ExifInterface {
             loadAttributes(in);
         } finally {
             closeQuietly(in);
+            if (modernFd != null) {
+                modernFd.close();
+            }
         }
     }
 
