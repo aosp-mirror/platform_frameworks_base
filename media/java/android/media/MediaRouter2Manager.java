@@ -292,8 +292,7 @@ public final class MediaRouter2Manager {
         }
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (sessionInfo.getSelectedRoutes().contains(route.getId())
-                        || sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
                     routes.add(route);
                     continue;
                 }
