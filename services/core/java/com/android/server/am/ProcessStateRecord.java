@@ -302,6 +302,23 @@ final class ProcessStateRecord {
     private int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
 
     /**
+     * Whether or not the app is background restricted (OP_RUN_ANY_IN_BACKGROUND is NOT allowed).
+     */
+    @GuardedBy("mService")
+    private boolean mBackgroundRestricted = false;
+
+    /**
+     * Whether or not this process is being bound by a non-background restricted app.
+     */
+    @GuardedBy("mService")
+    private boolean mCurBoundByNonBgRestrictedApp = false;
+
+    /**
+     * Last set state of {@link #mCurBoundByNonBgRestrictedApp}.
+     */
+    private boolean mSetBoundByNonBgRestrictedApp = false;
+
+    /**
      * Debugging: primary thing impacting oom_adj.
      */
     @GuardedBy("mService")
@@ -1113,6 +1130,36 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
+    boolean isBackgroundRestricted() {
+        return mBackgroundRestricted;
+    }
+
+    @GuardedBy("mService")
+    void setBackgroundRestricted(boolean restricted) {
+        mBackgroundRestricted = restricted;
+    }
+
+    @GuardedBy("mService")
+    boolean isCurBoundByNonBgRestrictedApp() {
+        return mCurBoundByNonBgRestrictedApp;
+    }
+
+    @GuardedBy("mService")
+    void setCurBoundByNonBgRestrictedApp(boolean bound) {
+        mCurBoundByNonBgRestrictedApp = bound;
+    }
+
+    @GuardedBy("mService")
+    boolean isSetBoundByNonBgRestrictedApp() {
+        return mSetBoundByNonBgRestrictedApp;
+    }
+
+    @GuardedBy("mService")
+    void setSetBoundByNonBgRestrictedApp(boolean bound) {
+        mSetBoundByNonBgRestrictedApp = bound;
+    }
+
+    @GuardedBy("mService")
     void updateLastInvisibleTime(boolean hasVisibleActivities) {
         if (hasVisibleActivities) {
             mLastInvisibleTime = Long.MAX_VALUE;
@@ -1164,7 +1211,14 @@ final class ProcessStateRecord {
         ActivityManager.printCapabilitiesFull(pw, mSetCapability);
         pw.println();
         pw.print(prefix); pw.print("allowStartFgsState=");
-        pw.println(mAllowStartFgsState);
+        pw.print(mAllowStartFgsState);
+        if (mBackgroundRestricted) {
+            pw.print(" backgroundRestricted=");
+            pw.print(mBackgroundRestricted);
+            pw.print(" boundByNonBgRestrictedApp=");
+            pw.print(mSetBoundByNonBgRestrictedApp);
+        }
+        pw.println();
         if (mHasShownUi || mApp.mProfile.hasPendingUiClean()) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(mHasShownUi);
             pw.print(" pendingUiClean="); pw.println(mApp.mProfile.hasPendingUiClean());
