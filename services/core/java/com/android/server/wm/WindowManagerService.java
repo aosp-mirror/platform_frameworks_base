@@ -8669,4 +8669,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     : DEFAULT_DISPLAY;
         }
     }
+
+    @Override
+    public void setTaskSnapshotEnabled(boolean enabled) {
+        mTaskSnapshotController.setTaskSnapshotEnabled(enabled);
+    }
 }
