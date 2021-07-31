@@ -196,7 +196,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         return RemoteAnimationTarget(
                 0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
                 Point(), Rect(), bounds, WindowConfiguration(), false, SurfaceControl(), Rect(),
-                taskInfo
+                taskInfo, false
         )
     }
 }
