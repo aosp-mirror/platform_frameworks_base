@@ -197,6 +197,12 @@ public class RemoteAnimationTarget implements Parcelable {
     public ActivityManager.RunningTaskInfo taskInfo;
 
     /**
+     * {@code true} if picture-in-picture permission is granted in {@link android.app.AppOpsManager}
+     */
+    @UnsupportedAppUsage
+    public boolean allowEnterPip;
+
+    /**
      * The {@link android.view.WindowManager.LayoutParams.WindowType} of this window. It's only used
      * for non-app window.
      */
@@ -206,10 +212,11 @@ public class RemoteAnimationTarget implements Parcelable {
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
             WindowConfiguration windowConfig, boolean isNotInRecents,
-            SurfaceControl startLeash, Rect startBounds, ActivityManager.RunningTaskInfo taskInfo) {
+            SurfaceControl startLeash, Rect startBounds, ActivityManager.RunningTaskInfo taskInfo,
+            boolean allowEnterPip) {
         this(taskId, mode, leash, isTranslucent, clipRect, contentInsets, prefixOrderIndex,
                 position, localBounds, screenSpaceBounds, windowConfig, isNotInRecents, startLeash,
-                startBounds, taskInfo, INVALID_WINDOW_TYPE);
+                startBounds, taskInfo, allowEnterPip, INVALID_WINDOW_TYPE);
     }
 
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
@@ -217,7 +224,7 @@ public class RemoteAnimationTarget implements Parcelable {
             Rect localBounds, Rect screenSpaceBounds,
             WindowConfiguration windowConfig, boolean isNotInRecents,
             SurfaceControl startLeash, Rect startBounds,
-            ActivityManager.RunningTaskInfo taskInfo,
+            ActivityManager.RunningTaskInfo taskInfo, boolean allowEnterPip,
             @WindowManager.LayoutParams.WindowType int windowType) {
         this.mode = mode;
         this.taskId = taskId;
@@ -235,6 +242,7 @@ public class RemoteAnimationTarget implements Parcelable {
         this.startLeash = startLeash;
         this.startBounds = startBounds == null ? null : new Rect(startBounds);
         this.taskInfo = taskInfo;
+        this.allowEnterPip = allowEnterPip;
         this.windowType = windowType;
     }
 
@@ -255,6 +263,7 @@ public class RemoteAnimationTarget implements Parcelable {
         startLeash = in.readTypedObject(SurfaceControl.CREATOR);
         startBounds = in.readTypedObject(Rect.CREATOR);
         taskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+        allowEnterPip = in.readBoolean();
         windowType = in.readInt();
     }
 
@@ -281,6 +290,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeTypedObject(startLeash, 0 /* flags */);
         dest.writeTypedObject(startBounds, 0 /* flags */);
         dest.writeTypedObject(taskInfo, 0 /* flags */);
+        dest.writeBoolean(allowEnterPip);
         dest.writeInt(windowType);
     }
 
@@ -299,6 +309,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("windowConfiguration="); pw.println(windowConfiguration);
         pw.print(prefix); pw.print("leash="); pw.println(leash);
         pw.print(prefix); pw.print("taskInfo="); pw.println(taskInfo);
+        pw.print(prefix); pw.print("allowEnterPip="); pw.println(allowEnterPip);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
     }
 
