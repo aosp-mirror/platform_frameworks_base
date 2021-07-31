@@ -35,6 +35,7 @@ import static com.android.server.accessibility.AccessibilityTraceProto.CALENDAR_
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_PARAMS;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_PKG;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_STACKS;
+import static com.android.server.accessibility.AccessibilityTraceProto.CPU_STATS;
 import static com.android.server.accessibility.AccessibilityTraceProto.ELAPSED_REALTIME_NANOS;
 import static com.android.server.accessibility.AccessibilityTraceProto.LOGGING_TYPE;
 import static com.android.server.accessibility.AccessibilityTraceProto.PROCESS_NAME;
@@ -75,6 +76,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -1959,6 +1961,7 @@ final class AccessibilityController {
             }
         }
 
+        private static final int CPU_STATS_COUNT = 5;
         private static final int BUFFER_CAPACITY = 1024 * 1024 * 12;
         private static final String TRACE_FILENAME = "/data/misc/a11ytrace/a11y_trace"
                 + WINSCOPE_EXT;
@@ -2230,6 +2233,7 @@ final class AccessibilityController {
                                 mService.dumpDebugLocked(os, WindowTraceLogLevel.ALL);
                             }
                             os.end(tokenInner);
+                            os.write(CPU_STATS, printCpuStats(reportedTimeStampNanos));
 
                             os.end(tokenOuter);
                             synchronized (mLock) {
@@ -2261,6 +2265,16 @@ final class AccessibilityController {
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to write buffer to file", e);
             }
+        }
+
+        /**
+         * Returns the string of CPU stats.
+         */
+        private String printCpuStats(long timeStampNanos) {
+            Pair<String, String> stats = mService.mAmInternal.getAppProfileStatsForDebugging(
+                    timeStampNanos, CPU_STATS_COUNT);
+
+            return stats.first + stats.second;
         }
     }
 }

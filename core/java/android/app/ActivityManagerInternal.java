@@ -36,6 +36,7 @@ import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,18 @@ public abstract class ActivityManagerInternal {
      * Otherwise, {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required.
      */
     public static final int ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE = 3;
+
+    /**
+     * Returns profile information in free form string in two separate strings.
+     * See AppProfiler for the output format.
+     * The output can only be used for human consumption. The format may change
+     * in the future.
+     * Do not call it frequently.
+     * @param time uptime for the cpu state
+     * @param lines lines of the cpu state should be returned
+     * @return a pair of Strings. The first is the current cpu load, the second is the cpu state.
+     */
+    public abstract Pair<String, String> getAppProfileStatsForDebugging(long time, int lines);
 
     /**
      * Verify that calling app has access to the given provider.
