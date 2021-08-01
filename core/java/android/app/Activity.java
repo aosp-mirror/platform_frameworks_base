@@ -1934,10 +1934,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or
-     * {@link #onPause}, for your activity to start interacting with the user. This is an indicator
-     * that the activity became active and ready to receive input. It is on top of an activity stack
-     * and visible to user.
+     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or {@link #onPause}. This
+     * is usually a hint for your activity to start interacting with the user, which is a good
+     * indicator that the activity became active and ready to receive input. This sometimes could
+     * also be a transit state toward another resting state. For instance, an activity may be
+     * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
+     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * called before {@link #onPause} in this case which honors the activity lifecycle policy and
+     * the activity eventually rests in {@link #onPause}.
      *
      * <p>On platform versions prior to {@link android.os.Build.VERSION_CODES#Q} this is also a good
      * place to try to open exclusive-access devices or to get access to singleton resources.
