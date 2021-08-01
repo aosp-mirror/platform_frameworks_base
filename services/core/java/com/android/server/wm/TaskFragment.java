@@ -161,7 +161,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** Avoid reentrant of {@link #removeImmediately()}. */
     private boolean mRemoving;
 
-    // The TaskFragment that adjacent to this one.
+    /** The TaskFragment that is adjacent to this one. */
+    @Nullable
     private TaskFragment mAdjacentTaskFragment;
 
     /**
@@ -282,9 +283,23 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mRemoteToken = new RemoteToken(this);
     }
 
-    void setAdjacentTaskFragment(TaskFragment taskFragment) {
-        mAdjacentTaskFragment = taskFragment;
-        taskFragment.mAdjacentTaskFragment = this;
+    void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment) {
+        if (mAdjacentTaskFragment == taskFragment) {
+            return;
+        }
+        resetAdjacentTaskFragment();
+        if (taskFragment != null) {
+            mAdjacentTaskFragment = taskFragment;
+            taskFragment.setAdjacentTaskFragment(this);
+        }
+    }
+
+    private void resetAdjacentTaskFragment() {
+        // Reset the adjacent TaskFragment if its adjacent TaskFragment is also this TaskFragment.
+        if (mAdjacentTaskFragment != null && mAdjacentTaskFragment.mAdjacentTaskFragment == this) {
+            mAdjacentTaskFragment.mAdjacentTaskFragment = null;
+        }
+        mAdjacentTaskFragment = null;
     }
 
     void setTaskFragmentOrganizer(TaskFragmentOrganizerToken organizer, int pid) {
@@ -1951,6 +1966,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
         mRemoving = true;
+        resetAdjacentTaskFragment();
         super.removeImmediately();
         sendTaskFragmentVanished();
         mRemoving = false;

@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Зымсыз мониторлорду тастыктамалоо"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi таржымалы"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi тармактарын издөөнү жөнгө салуу"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi туташуусу туруксуз MAC даректерин башаламан иретте түзүү"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилдик Интернет иштей берет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем режиминде аппараттын иштешин тездетүү"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрүнсүн"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батареяны үнөмдөп, тармактын иштешин жакшыртат"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Бул режим өчүрүлгөндөн кийин, түзмөк MAC дарегин башаламан иретте түзүү функциясы иштетилген тармакка туташкан сайын анын MAC дареги өзгөрүшү мүмкүн."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журнал буферинин өлчөмү"</string>
@@ -311,7 +309,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Орнотулуучу колдонмону текшерүү"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT аркылуу орнотулган колдонмолордун коопсуздугу текшерилет."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Аталышсыз Bluetooth түзмөктөрү (MAC даректери менен гана) көрсөтүлөт"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Аталышсыз Bluetooth түзмөктөрү (MAC даректери менен гана) көрүнөт"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Алыскы түзмөктөр өтө катуу добуш чыгарып же көзөмөлдөнбөй жатса Bluetooth \"Үндүн абсолюттук деңгээли\" функциясын өчүрөт."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche функциясынын топтомун иштетет."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жакшыртылган туташуу функциясын иштетет."</string>

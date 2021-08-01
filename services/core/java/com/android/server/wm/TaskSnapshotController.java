@@ -114,14 +114,9 @@ class TaskSnapshotController {
     private final boolean mIsRunningOnIoT;
 
     /**
-     * Flag indicating whether we are running on an Android Wear device.
+     * Flag indicating if task snapshot is enabled on this device.
      */
-    private final boolean mIsRunningOnWear;
-
-    /**
-     * Flag indicating if device configuration has disabled app snapshots.
-     */
-    private final boolean mConfigDisableTaskSnapshots;
+    private boolean mTaskSnapshotEnabled;
 
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
@@ -132,12 +127,12 @@ class TaskSnapshotController {
                 PackageManager.FEATURE_LEANBACK);
         mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EMBEDDED);
-        mIsRunningOnWear = mService.mContext.getPackageManager().hasSystemFeature(
-            PackageManager.FEATURE_WATCH);
         mHighResTaskSnapshotScale = mService.mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_highResTaskSnapshotScale);
-        mConfigDisableTaskSnapshots = mService.mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_disableTaskSnapshots);
+        mTaskSnapshotEnabled =
+                !mService.mContext
+                        .getResources()
+                        .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots);
     }
 
     void systemReady() {
@@ -494,9 +489,12 @@ class TaskSnapshotController {
         return builder.build();
     }
 
+    void setTaskSnapshotEnabled(boolean enabled) {
+        mTaskSnapshotEnabled = enabled;
+    }
+
     boolean shouldDisableSnapshots() {
-        return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT
-                || mConfigDisableTaskSnapshots;
+        return mIsRunningOnTv || mIsRunningOnIoT || !mTaskSnapshotEnabled;
     }
 
     /**
@@ -696,6 +694,7 @@ class TaskSnapshotController {
 
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "mHighResTaskSnapshotScale=" + mHighResTaskSnapshotScale);
+        pw.println(prefix + "mTaskSnapshotEnabled=" + mTaskSnapshotEnabled);
         mCache.dump(pw, prefix);
     }
 }

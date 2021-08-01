@@ -838,6 +838,13 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCommunalhostViewControllerInit() {
+        clearInvocations(mCommunalHostViewController);
+        givenViewAttached();
+        verify(mCommunalHostViewController).init();
+    }
+
+    @Test
     public void testCommunalSourceListening() {
         final ArgumentCaptor<CommunalSourceMonitor.Callback> monitorCallback =
                 ArgumentCaptor.forClass(CommunalSourceMonitor.Callback.class);

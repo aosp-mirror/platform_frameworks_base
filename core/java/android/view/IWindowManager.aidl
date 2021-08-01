@@ -875,4 +875,10 @@ interface IWindowManager
      * @see android.window.WindowProviderService#getLaunchedDisplayId
      */
     int getImeDisplayId();
+
+    /**
+     * Control if we should enable task snapshot features on this device.
+     * @hide
+     */
+    void setTaskSnapshotEnabled(boolean enabled);
 }

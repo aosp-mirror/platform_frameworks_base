@@ -34,7 +34,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -223,7 +223,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
 
-
     @Test
     fun onEntryRemoved_notifKeyDoesNotMatchOngoingCallNotif_listenerNotNotified() {
         notifCollectionListener.onEntryAdded(createOngoingCallNotifEntry())
@@ -349,7 +348,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         // Update the process to visible.
         uidObserver.onUidStateChanged(CALL_UID, PROC_STATE_VISIBLE, 0, 0)
         mainExecutor.advanceClockToLast()
-        mainExecutor.runAllReady();
+        mainExecutor.runAllReady()
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
@@ -370,7 +369,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         // Update the process to invisible.
         uidObserver.onUidStateChanged(CALL_UID, PROC_STATE_INVISIBLE, 0, 0)
         mainExecutor.advanceClockToLast()
-        mainExecutor.runAllReady();
+        mainExecutor.runAllReady()
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }

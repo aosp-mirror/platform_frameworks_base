@@ -16,7 +16,7 @@
 
 package com.android.internal.view;
 
-import com.android.internal.view.InputBindResult;
+import com.android.internal.inputmethod.InputBindResult;
 
 /**
  * Interface a client of the IInputMethodManager implements, to identify

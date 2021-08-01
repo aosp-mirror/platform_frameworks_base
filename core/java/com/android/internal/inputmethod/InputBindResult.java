@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -26,6 +26,8 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InputChannel;
+
+import com.android.internal.view.IInputMethodSession;
 
 import java.lang.annotation.Retention;
 

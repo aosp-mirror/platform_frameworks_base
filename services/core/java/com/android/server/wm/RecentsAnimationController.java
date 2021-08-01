@@ -1201,7 +1201,8 @@ public class RecentsAnimationController implements DeathRecipient {
                     !topApp.fillsParent(), new Rect(),
                     insets, mTask.getPrefixOrderIndex(), new Point(mBounds.left, mBounds.top),
                     mLocalBounds, mBounds, mTask.getWindowConfiguration(),
-                    mIsRecentTaskInvisible, null, null, mTask.getTaskInfo());
+                    mIsRecentTaskInvisible, null, null, mTask.getTaskInfo(),
+                    topApp.checkEnterPictureInPictureAppOpsState());
             return mTarget;
         }
 

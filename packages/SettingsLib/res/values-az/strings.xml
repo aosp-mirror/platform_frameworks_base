@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Simsiz monitor sertifikatlaşması"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi axtarışının məhdudlaşdırılması"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi müvəqqəti MAC randomizasiyası"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil data həmişə aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Modem rejimində cihaz sürətləndiricisi"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth cihazları adsız göstərilsin"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz monitorların sertifikasiya parametrləri göstərilsin"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Enerji sərfiyyatını azaldır və şəbəkənin işini yaxşılaşdırır"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Bu rejim aktiv edildikdə, bu cihaz hər dəfə MAC randomizasiyası aktiv olan şəbəkəyə qoşulanda onun MAC ünvanı dəyişə bilər."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Tarif sayğacılı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Jurnal buferi ölçüsü"</string>
