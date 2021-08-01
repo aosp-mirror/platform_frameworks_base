@@ -378,10 +378,10 @@ class KeyguardController {
             mService.deferWindowLayout();
             try {
                 mRootWindowContainer.getDefaultDisplay()
-                        .prepareAppTransition(
+                        .requestTransitionAndLegacyPrepare(
                                 isDisplayOccluded(DEFAULT_DISPLAY)
                                         ? TRANSIT_KEYGUARD_OCCLUDE
-                                        : TRANSIT_KEYGUARD_UNOCCLUDE);
+                                        : TRANSIT_KEYGUARD_UNOCCLUDE, 0 /* flags */);
                 // When the occluding activity also turns on the display, visibility of the activity
                 // can be committed before KEYGUARD_OCCLUDE transition is handled.
                 // Set mRequestForceTransition flag to make sure that the app transition animation
