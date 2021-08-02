@@ -149,7 +149,11 @@
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
-    <dimen name="bubble_manage_button_height">56dp</dimen>
+    <dimen name="bubble_manage_button_height">36dp</dimen>
+    <!-- Height of manage button including margins. -->
+    <dimen name="bubble_manage_button_total_height">68dp</dimen>
+    <!-- The margin around the outside of the manage button. -->
+    <dimen name="bubble_manage_button_margin">16dp</dimen>
     <!-- Height of an item in the bubble manage menu. -->
     <dimen name="bubble_menu_item_height">60dp</dimen>
     <!-- Padding applied to the bubble manage menu. -->

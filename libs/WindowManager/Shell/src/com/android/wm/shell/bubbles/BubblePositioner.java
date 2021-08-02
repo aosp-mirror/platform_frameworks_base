@@ -77,7 +77,6 @@ public class BubblePositioner {
     private int mPointerMargin;
     private int mPointerWidth;
     private int mPointerHeight;
-    private int mPointerOverlap;
     private int mManageButtonHeight;
     private int mExpandedViewMinHeight;
     private int mOverflowHeight;
@@ -166,8 +165,7 @@ public class BubblePositioner {
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
-        mPointerOverlap = res.getDimensionPixelSize(R.dimen.bubble_pointer_overlap);
-        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_height);
+        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_total_height);
         mExpandedViewMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
 
