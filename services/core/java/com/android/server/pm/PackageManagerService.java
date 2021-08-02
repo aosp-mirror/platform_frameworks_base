@@ -21865,8 +21865,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         } catch (InstallerException e2) {
                             logCriticalInfo(Log.DEBUG, "Recovery failed!");
                         }
-                    } else {
-                        Slog.e(TAG, "Failed to create app data for " + packageName);
                     }
 
                     // Prepare the application profiles only for upgrades and
