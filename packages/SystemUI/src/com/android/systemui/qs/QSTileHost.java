@@ -39,7 +39,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -512,33 +511,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 }
             }
         }
-        // TODO(b/174753536): Move it into the config file.
-        // Only do the below hacking when at least one of the below tiles exist
-        //   --InternetTile
-        //   --WiFiTile
-        //   --CellularTIle
-        if (tiles.contains("internet") || tiles.contains("wifi") || tiles.contains("cell")) {
-            if (FeatureFlags.isProviderModelSettingEnabled(context)) {
-                if (!tiles.contains("internet")) {
-                    if (tiles.contains("wifi")) {
-                        // Replace the WiFi with Internet, and remove the Cell
-                        tiles.set(tiles.indexOf("wifi"), "internet");
-                        tiles.remove("cell");
-                    } else if (tiles.contains("cell")) {
-                        // Replace the Cell with Internet
-                        tiles.set(tiles.indexOf("cell"), "internet");
-                    }
-                } else {
-                    tiles.remove("wifi");
-                    tiles.remove("cell");
-                }
-            } else {
-                if (tiles.contains("internet")) {
-                    tiles.set(tiles.indexOf("internet"), "wifi");
-                    tiles.add("cell");
-                }
-            }
-        }
         return tiles;
     }
 
@@ -557,14 +529,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (Build.IS_DEBUGGABLE
                 && GarbageMonitor.ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
             tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
-        }
-        // TODO(b/174753536): Change the config file directly.
-        // Filter out unused tiles from the default QS config.
-        if (FeatureFlags.isProviderModelSettingEnabled(context)) {
-            tiles.remove("cell");
-            tiles.remove("wifi");
-        } else {
-            tiles.remove("internet");
         }
         return tiles;
     }
