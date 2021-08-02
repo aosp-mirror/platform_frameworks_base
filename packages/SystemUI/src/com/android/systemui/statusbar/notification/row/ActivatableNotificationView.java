@@ -521,8 +521,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             @Override
             public void onAnimationStart(Animator animation) {
                 mWasCancelled = false;
-                Configuration.Builder builder = new Configuration.Builder(getCujType(isAppearing))
-                        .setView(ActivatableNotificationView.this);
+                Configuration.Builder builder = Configuration.Builder
+                        .withView(getCujType(isAppearing), ActivatableNotificationView.this);
                 InteractionJankMonitor.getInstance().begin(builder);
             }
 
