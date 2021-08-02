@@ -124,7 +124,7 @@
          should also be updated. -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- On large screens the width of the expanded view is restricted to this size. -->
-    <dimen name="bubble_expanded_view_tablet_width">412dp</dimen>
+    <dimen name="bubble_expanded_view_phone_landscape_overflow_width">412dp</dimen>
     <!-- Inset to apply to the icon in the overflow button. -->
     <dimen name="bubble_overflow_icon_inset">30dp</dimen>
     <!-- Default (and minimum) height of bubble overflow -->
