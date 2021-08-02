@@ -170,7 +170,14 @@ public class IllustrationPreference extends Preference {
     }
 
     /**
-     * Sets image drawable to display image in {@link LottieAnimationView}
+     * Gets the lottie illustration resource id.
+     */
+    public int getLottieAnimationResId() {
+        return mImageResId;
+    }
+
+    /**
+     * Sets the image drawable to display image in {@link LottieAnimationView}.
      *
      * @param imageDrawable the drawable of an image
      */
@@ -183,7 +190,16 @@ public class IllustrationPreference extends Preference {
     }
 
     /**
-     * Sets image uri to display image in {@link LottieAnimationView}
+     * Gets the image drawable from display image in {@link LottieAnimationView}.
+     *
+     * @return the drawable of an image
+     */
+    public Drawable getImageDrawable() {
+        return mImageDrawable;
+    }
+
+    /**
+     * Sets the image uri to display image in {@link LottieAnimationView}.
      *
      * @param imageUri the Uri of an image
      */
@@ -193,6 +209,15 @@ public class IllustrationPreference extends Preference {
             mImageUri = imageUri;
             notifyChanged();
         }
+    }
+
+    /**
+     * Gets the image uri from display image in {@link LottieAnimationView}.
+     *
+     * @return the Uri of an image
+     */
+    public Uri getImageUri() {
+        return mImageUri;
     }
 
     private void resetImageResourceCache() {
