@@ -136,6 +136,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
@@ -773,6 +774,7 @@ public class StatusBar extends SystemUI implements
 
     private final ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
+    private BatteryMeterViewController mBatteryMeterViewController;
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
@@ -1204,6 +1206,11 @@ public class StatusBar extends SystemUI implements
                     mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
+
+                    mBatteryMeterViewController = new BatteryMeterViewController(
+                            mStatusBarView.findViewById(R.id.battery)
+                    );
+                    mBatteryMeterViewController.init();
 
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
                     // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.
