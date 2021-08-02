@@ -884,10 +884,14 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
 
+        mKeyguardStatusBarViewController =
+                mKeyguardStatusBarViewComponentFactory.build(mKeyguardStatusBar)
+                        .getKeyguardStatusBarViewController();
+        mKeyguardStatusBarViewController.init();
+
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarView,
-                mKeyguardStatusBar,
                 keyguardUserSwitcherView);
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
@@ -979,23 +983,12 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
             UserAvatarView userAvatarView,
-            KeyguardStatusBarView keyguardStatusBarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView) {
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
-
-        KeyguardStatusBarViewComponent statusBarViewComponent =
-                mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
-        if (mKeyguardStatusBarViewController != null) {
-            // TODO(b/194181195): This shouldn't be necessary.
-            mKeyguardStatusBarViewController.destroy();
-        }
-        mKeyguardStatusBarViewController =
-                statusBarViewComponent.getKeyguardStatusBarViewController();
-        mKeyguardStatusBarViewController.init();
 
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
@@ -1156,7 +1149,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                mKeyguardStatusBar, keyguardUserSwitcherView);
+                keyguardUserSwitcherView);
 
         // Update keyguard bottom area
         int index = mView.indexOfChild(mKeyguardBottomArea);
