@@ -317,6 +317,8 @@ public class GlobalSettingsValidators {
                 NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BURN_IN_PROTECTION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.COMBINED_LOCATION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WRIST_ORIENTATION_MODE,
+                       new DiscreteValueValidator(new String[] {"0", "1", "2", "3"}));
     }
 }
 
