@@ -209,6 +209,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                     @Override
                     public void onCancelled(
                             @Nullable WindowInsetsAnimationController controller) {
+                        // It is possible to be denied control of ime insets, which means onReady
+                        // is never called. We still need to notify the runnables in order to
+                        // complete the bouncer disappearing
+                        runOnFinishImeAnimationRunnable();
+                        finishRunnable.run();
                     }
                 });
         return true;
