@@ -55,6 +55,7 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
@@ -211,6 +212,13 @@ public abstract class WMShellBaseModule {
     static FullscreenTaskListener provideFullscreenTaskListener(SyncTransactionQueue syncQueue) {
         return new FullscreenTaskListener(syncQueue);
     }
+
+    //
+    // Freeform (optional feature)
+    //
+
+    @BindsOptionalOf
+    abstract Optional<FreeformTaskListener> optionalFreeformTaskListener();
 
     //
     // Hide display cutout
@@ -451,6 +459,7 @@ public abstract class WMShellBaseModule {
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Optional<Optional<FreeformTaskListener>> freeformTaskListener,
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -463,6 +472,7 @@ public abstract class WMShellBaseModule {
                 appPairsOptional,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
+                freeformTaskListener,
                 transitions,
                 startingWindow,
                 mainExecutor);
