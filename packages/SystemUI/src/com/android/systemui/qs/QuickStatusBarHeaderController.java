@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -69,6 +70,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyLogger mPrivacyLogger;
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
+    private final BatteryMeterViewController mBatteryMeterViewController;
     private final FeatureFlags mFeatureFlags;
 
     private boolean mListening;
@@ -134,6 +136,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             SysuiColorExtractor colorExtractor,
             PrivacyDialogController privacyDialogController,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            BatteryMeterViewController batteryMeterViewController,
             FeatureFlags featureFlags) {
         super(view);
         mPrivacyItemController = privacyItemController;
@@ -145,6 +148,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyLogger = privacyLogger;
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
+        mBatteryMeterViewController = batteryMeterViewController;
         mFeatureFlags = featureFlags;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
@@ -167,6 +171,11 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mCameraSlot = getResources().getString(com.android.internal.R.string.status_bar_camera);
         mMicSlot = getResources().getString(com.android.internal.R.string.status_bar_microphone);
         mLocationSlot = getResources().getString(com.android.internal.R.string.status_bar_location);
+    }
+
+    @Override
+    protected void onInit() {
+        mBatteryMeterViewController.init();
     }
 
     @Override

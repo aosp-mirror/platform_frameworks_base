@@ -42,9 +42,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
 import java.io.FileDescriptor;
