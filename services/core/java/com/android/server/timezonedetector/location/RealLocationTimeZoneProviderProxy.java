@@ -71,7 +71,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
         mServiceWatcher = ServiceWatcher.create(context,
                 handler,
                 "RealLocationTimeZoneProviderProxy",
-                new CurrentUserServiceSupplier(context, action,
+                CurrentUserServiceSupplier.create(context, action,
                         providerPackageName, BIND_TIME_ZONE_PROVIDER_SERVICE,
                         INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE),
                 this);

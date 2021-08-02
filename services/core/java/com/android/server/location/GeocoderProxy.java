@@ -56,7 +56,7 @@ public class GeocoderProxy {
 
     private GeocoderProxy(Context context) {
         mServiceWatcher = ServiceWatcher.create(context, "GeocoderProxy",
-                new CurrentUserServiceSupplier(context, SERVICE_ACTION,
+                CurrentUserServiceSupplier.createFromConfig(context, SERVICE_ACTION,
                         com.android.internal.R.bool.config_enableGeocoderOverlay,
                         com.android.internal.R.string.config_geocoderProviderPackageName),
                 null);
