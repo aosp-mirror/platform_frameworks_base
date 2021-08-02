@@ -69,6 +69,8 @@ class QSPanelTest : SysuiTestCase() {
     @Mock
     private lateinit var mQSTileView: QSTileView
 
+    private lateinit var mFooter: View
+
     @Before
     @Throws(Exception::class)
     fun setup() {
@@ -81,7 +83,8 @@ class QSPanelTest : SysuiTestCase() {
             mQsPanel = QSPanel(mContext, null)
             mQsPanel.initialize()
             // QSPanel inflates a footer inside of it, mocking it here
-            mQsPanel.addView(LinearLayout(mContext).apply { id = R.id.qs_footer })
+            mFooter = LinearLayout(mContext).apply { id = R.id.qs_footer }
+            mQsPanel.addView(mFooter)
             mQsPanel.onFinishInflate()
             mQsPanel.setSecurityFooter(View(mContext), false)
             mQsPanel.setHeaderContainer(LinearLayout(mContext))
@@ -125,7 +128,10 @@ class QSPanelTest : SysuiTestCase() {
             mQsPanel.isExpanded = true
         }
 
-        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(2)
+        // After mFooter
+        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(
+                mQsPanel.indexOfChild(mFooter) + 1
+        )
     }
 
     @Test
@@ -137,7 +143,10 @@ class QSPanelTest : SysuiTestCase() {
             mQsPanel.isExpanded = true
         }
 
-        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(2)
+        // After mFooter
+        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(
+                mQsPanel.indexOfChild(mFooter) + 1
+        )
     }
 
     @Test
