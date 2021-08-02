@@ -5151,8 +5151,8 @@ class Task extends TaskFragment {
 
                 final ActivityRecord prev = baseTask.getActivity(
                         a -> a.mStartingData != null && a.showToCurrentUser());
-                r.showStartingWindow(prev, newTask, isTaskSwitch,
-                        true /* startActivity */, sourceRecord);
+                mWmService.mStartingSurfaceController.showStartingWindow(r, prev, newTask,
+                        isTaskSwitch, sourceRecord);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
