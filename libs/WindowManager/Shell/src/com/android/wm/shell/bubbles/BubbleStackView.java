@@ -1186,7 +1186,7 @@ public class BubbleStackView extends FrameLayout
         if (mFlyout != null) {
             removeView(mFlyout);
         }
-        mFlyout = new BubbleFlyoutView(getContext());
+        mFlyout = new BubbleFlyoutView(getContext(), mPositioner);
         mFlyout.setVisibility(GONE);
         mFlyout.setOnClickListener(mFlyoutClickListener);
         mFlyout.setOnTouchListener(mFlyoutTouchListener);
@@ -2423,20 +2423,19 @@ public class BubbleStackView extends FrameLayout
 
 
             if (mFlyout.getVisibility() == View.VISIBLE) {
-                mFlyout.animateUpdate(bubble.getFlyoutMessage(), getWidth(),
+                mFlyout.animateUpdate(bubble.getFlyoutMessage(),
                         mStackAnimationController.getStackPosition(), !bubble.showDot(),
                         mAfterFlyoutHidden /* onHide */);
             } else {
                 mFlyout.setVisibility(INVISIBLE);
                 mFlyout.setupFlyoutStartingAsDot(bubble.getFlyoutMessage(),
-                        mStackAnimationController.getStackPosition(), getWidth(),
+                        mStackAnimationController.getStackPosition(),
                         mStackAnimationController.isStackOnLeftSide(),
                         bubble.getIconView().getDotColor() /* dotColor */,
                         expandFlyoutAfterDelay /* onLayoutComplete */,
                         mAfterFlyoutHidden /* onHide */,
                         bubble.getIconView().getDotCenter(),
-                        !bubble.showDot(),
-                        mPositioner);
+                        !bubble.showDot());
             }
             mFlyout.bringToFront();
         });
