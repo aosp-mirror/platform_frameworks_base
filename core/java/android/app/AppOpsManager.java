@@ -7205,6 +7205,34 @@ public class AppOpsManager {
      * @hide
      */
     public interface OnOpStartedListener {
+
+        /**
+         * Represents a start operation that was unsuccessful
+         * @hide
+         */
+        public int START_TYPE_FAILED = 0;
+
+        /**
+         * Represents a successful start operation
+         * @hide
+         */
+        public int START_TYPE_STARTED = 1;
+
+        /**
+         * Represents an operation where a restricted operation became unrestricted, and resumed.
+         * @hide
+         */
+        public int START_TYPE_RESUMED = 2;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+            START_TYPE_FAILED,
+            START_TYPE_STARTED,
+            START_TYPE_RESUMED
+        })
+        public @interface StartedType {}
+
         /**
          * Called when an op was started.
          *
@@ -7213,11 +7241,35 @@ public class AppOpsManager {
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
          * @param attributionTag The attribution tag performing the operation.
-         * @param flags The flags of this op
+         * @param flags The flags of this op.
          * @param result The result of the start.
          */
         void onOpStarted(int op, int uid, String packageName, String attributionTag,
                 @OpFlags int flags, @Mode int result);
+
+        /**
+         * Called when an op was started.
+         *
+         * Note: This is only for op starts. It is not called when an op is noted or stopped.
+         * By default, unless this method is overridden, no code will be executed for resume
+         * events.
+         * @param op The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
+         * @param flags The flags of this op.
+         * @param result The result of the start.
+         * @param startType The start type of this start event. Either failed, resumed, or started.
+         * @param attributionFlags The location of this started op in an attribution chain.
+         * @param attributionChainId The ID of the attribution chain of this op, if it is in one.
+         */
+        default void onOpStarted(int op, int uid, String packageName, String attributionTag,
+                @OpFlags int flags, @Mode int result, @StartedType int startType,
+                @AttributionFlags int attributionFlags, int attributionChainId) {
+            if (startType != START_TYPE_RESUMED) {
+                onOpStarted(op, uid, packageName, attributionTag, flags, result);
+            }
+        }
     }
 
     AppOpsManager(Context context, IAppOpsService service) {
@@ -7858,8 +7910,10 @@ public class AppOpsManager {
              cb = new IAppOpsStartedCallback.Stub() {
                  @Override
                  public void opStarted(int op, int uid, String packageName, String attributionTag,
-                         int flags, int mode) {
-                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode);
+                         int flags, int mode, int startType, int attributionFlags,
+                         int attributionChainId) {
+                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode,
+                             startType, attributionFlags, attributionChainId);
                  }
              };
              mStartedWatchers.put(callback, cb);
