@@ -928,10 +928,14 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
 
+        mKeyguardStatusBarViewController =
+                mKeyguardStatusBarViewComponentFactory.build(mKeyguardStatusBar)
+                        .getKeyguardStatusBarViewController();
+        mKeyguardStatusBarViewController.init();
+
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarView,
-                mKeyguardStatusBar,
                 keyguardUserSwitcherView,
                 mCommunalView,
                 mView.findViewById(R.id.idle_host_view));
@@ -1025,7 +1029,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
             UserAvatarView userAvatarView,
-            KeyguardStatusBarView keyguardStatusBarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView,
             CommunalHostView communalView,
             IdleHostView idleHostView) {
@@ -1038,16 +1041,6 @@ public class NotificationPanelViewController extends PanelViewController {
         IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(idleHostView);
         mIdleHostViewController = idleViewComponent.getIdleHostViewController();
         mIdleHostViewController.init();
-
-        KeyguardStatusBarViewComponent statusBarViewComponent =
-                mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
-        if (mKeyguardStatusBarViewController != null) {
-            // TODO(b/194181195): This shouldn't be necessary.
-            mKeyguardStatusBarViewController.destroy();
-        }
-        mKeyguardStatusBarViewController =
-                statusBarViewComponent.getKeyguardStatusBarViewController();
-        mKeyguardStatusBarViewController.init();
 
         if (communalView != null) {
             CommunalViewComponent communalViewComponent =
@@ -1217,7 +1210,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                mKeyguardStatusBar, keyguardUserSwitcherView, mCommunalView,
+                keyguardUserSwitcherView, mCommunalView,
                 mView.findViewById(R.id.idle_host_view));
 
         // Update keyguard bottom area
