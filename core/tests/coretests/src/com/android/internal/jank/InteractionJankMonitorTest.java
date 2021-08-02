@@ -16,8 +16,6 @@
 
 package com.android.internal.jank;
 
-import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
-import static com.android.internal.jank.FrameTracker.ViewRootWrapper;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_TO_STATSD_INTERACTION_TYPE;
 
@@ -25,17 +23,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Message;
 import android.provider.DeviceConfig;
 import android.view.View;
 import android.view.ViewAttachTestActivity;
@@ -43,8 +41,12 @@ import android.view.ViewAttachTestActivity;
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
+import com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
+import com.android.internal.jank.FrameTracker.ViewRootWrapper;
+import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.jank.InteractionJankMonitor.Session;
 
 import org.junit.Before;
@@ -92,12 +94,15 @@ public class InteractionJankMonitorTest {
         verify(mWorker).start();
 
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, CUJ_POSTFIX);
+        Configuration config = mock(Configuration.class);
+        when(config.isSurfaceOnly()).thenReturn(false);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
-                new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
-                mock(FrameTracker.ChoreographerWrapper.class),
-                new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
-                /*traceThresholdFrameTimeMillis=*/ -1, null));
+                new ViewRootWrapper(mView.getViewRootImpl()),
+                new SurfaceControlWrapper(), mock(ChoreographerWrapper.class),
+                new FrameMetricsWrapper(),
+                /* traceThresholdMissedFrames= */ 1, /* traceThresholdFrameTimeMillis= */ -1,
+                /* FrameTrackerListener */ null, config));
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
         doNothing().when(tracker).triggerPerfetto();
         doNothing().when(tracker).postTraceStartMarker();
@@ -138,28 +143,30 @@ public class InteractionJankMonitorTest {
     public void testBeginCancel() {
         InteractionJankMonitor monitor = spy(new InteractionJankMonitor(mWorker));
 
-        ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
 
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, CUJ_POSTFIX);
+        Configuration config = mock(Configuration.class);
+        when(config.isSurfaceOnly()).thenReturn(false);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
-                new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
-                mock(FrameTracker.ChoreographerWrapper.class),
-                new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
-                /*traceThresholdFrameTimeMillis=*/ -1, null));
+                new ViewRootWrapper(mView.getViewRootImpl()),
+                new SurfaceControlWrapper(), mock(FrameTracker.ChoreographerWrapper.class),
+                new FrameMetricsWrapper(),
+                /* traceThresholdMissedFrames= */ 1, /* traceThresholdFrameTimeMillis= */ -1,
+                /* FrameTrackerListener */ null, config));
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
         doNothing().when(tracker).triggerPerfetto();
         doNothing().when(tracker).postTraceStartMarker();
 
         assertThat(monitor.begin(mView, session.getCuj())).isTrue();
         verify(tracker).begin();
-        verify(mWorker.getThreadHandler(), atLeastOnce()).sendMessageAtTime(captor.capture(),
-                anyLong());
-        Runnable runnable = captor.getValue().getCallback();
+        verify(monitor).scheduleTimeoutAction(anyInt(), anyLong(), captor.capture());
+        Runnable runnable = captor.getValue();
         assertThat(runnable).isNotNull();
         mWorker.getThreadHandler().removeCallbacks(runnable);
         runnable.run();
-        verify(tracker).cancel(FrameTracker.REASON_CANCEL_NORMAL);
+        verify(tracker).cancel(FrameTracker.REASON_CANCEL_TIMEOUT);
     }
 
     @Test
