@@ -18,11 +18,11 @@ package com.android.internal.jank;
 
 import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
 
-import static com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NOT_BEGUN;
+import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
-import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
+import static com.android.internal.jank.FrameTracker.REASON_END_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
@@ -41,6 +41,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON;
@@ -58,6 +59,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -72,11 +74,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.SurfaceControl;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
 import com.android.internal.jank.FrameTracker.FrameTrackerListener;
+import com.android.internal.jank.FrameTracker.Reasons;
+import com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 import com.android.internal.jank.FrameTracker.ViewRootWrapper;
 import com.android.internal.util.PerfettoTrigger;
@@ -103,7 +109,7 @@ public class InteractionJankMonitor {
     private static final String ACTION_PREFIX = InteractionJankMonitor.class.getCanonicalName();
 
     private static final String DEFAULT_WORKER_NAME = TAG + "-Worker";
-    private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L);
+    private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(2L);
     private static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
     private static final String SETTINGS_THRESHOLD_MISSED_FRAMES_KEY =
@@ -163,6 +169,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE = 32;
     public static final int CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON = 33;
     public static final int CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP = 34;
+    public static final int CUJ_PIP_TRANSITION = 35;
+    public static final int CUJ_WALLPAPER_TRANSITION = 36;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -206,6 +214,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -213,10 +223,10 @@ public class InteractionJankMonitor {
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
             this::updateProperties;
 
-    private FrameMetricsWrapper mMetrics;
-    private SparseArray<FrameTracker> mRunningTrackers;
-    private SparseArray<Runnable> mTimeoutActions;
-    private HandlerThread mWorker;
+    private final FrameMetricsWrapper mMetrics;
+    private final SparseArray<FrameTracker> mRunningTrackers;
+    private final SparseArray<Runnable> mTimeoutActions;
+    private final HandlerThread mWorker;
 
     private boolean mEnabled = DEFAULT_ENABLED;
     private int mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
@@ -260,6 +270,8 @@ public class InteractionJankMonitor {
             CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
             CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
             CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+            CUJ_PIP_TRANSITION,
+            CUJ_WALLPAPER_TRANSITION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -310,24 +322,31 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Create a {@link FrameTracker} instance.
+     * Creates a {@link FrameTracker} instance.
      *
+     * @param config the config used in instrumenting
      * @param session the session associates with this tracker
      * @return instance of the FrameTracker
      */
     @VisibleForTesting
-    public FrameTracker createFrameTracker(Configuration conf, Session session) {
-        final View v = conf.mView;
-        final Context c = v.getContext().getApplicationContext();
-        final ThreadedRendererWrapper r = new ThreadedRendererWrapper(v.getThreadedRenderer());
-        final ViewRootWrapper vr = new ViewRootWrapper(v.getViewRootImpl());
-        final SurfaceControlWrapper sc = new SurfaceControlWrapper();
-        final ChoreographerWrapper cg = new ChoreographerWrapper(Choreographer.getInstance());
+    public FrameTracker createFrameTracker(Configuration config, Session session) {
+        final View view = config.mView;
+        final ThreadedRendererWrapper threadedRenderer =
+                view == null ? null : new ThreadedRendererWrapper(view.getThreadedRenderer());
+        final ViewRootWrapper viewRoot =
+                view == null ? null : new ViewRootWrapper(view.getViewRootImpl());
+
+        final SurfaceControlWrapper surfaceControl = new SurfaceControlWrapper();
+        final ChoreographerWrapper choreographer =
+                new ChoreographerWrapper(Choreographer.getInstance());
 
         synchronized (this) {
-            FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(c, act, s);
-            return new FrameTracker(session, mWorker.getThreadHandler(), r, vr, sc, cg, mMetrics,
-                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis, eventsListener);
+            FrameTrackerListener eventsListener =
+                    (s, act) -> handleCujEvents(config.getContext(), act, s);
+            return new FrameTracker(session, mWorker.getThreadHandler(),
+                    threadedRenderer, viewRoot, surfaceControl, choreographer, mMetrics,
+                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
+                    eventsListener, config);
         }
     }
 
@@ -376,7 +395,7 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Begin a trace session.
+     * Begins a trace session.
      *
      * @param v an attached view.
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
@@ -385,8 +404,7 @@ public class InteractionJankMonitor {
     public boolean begin(View v, @CujType int cujType) {
         try {
             return beginInternal(
-                    new Configuration.Builder(cujType)
-                            .setView(v)
+                    Configuration.Builder.withView(cujType, v)
                             .build());
         } catch (IllegalArgumentException ex) {
             Log.d(TAG, "Build configuration failed!", ex);
@@ -395,7 +413,7 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Begin a trace session.
+     * Begins a trace session.
      *
      * @param builder the builder of the configurations for instrumenting the CUJ.
      * @return boolean true if the tracker is started successfully, false otherwise.
@@ -431,48 +449,60 @@ public class InteractionJankMonitor {
             tracker.begin();
 
             // Cancel the trace if we don't get an end() call in specified duration.
-            Runnable timeoutAction = () -> cancel(cujType);
-            mTimeoutActions.put(cujType, timeoutAction);
-            mWorker.getThreadHandler().postDelayed(timeoutAction, conf.mTimeout);
+            scheduleTimeoutAction(
+                    cujType, conf.mTimeout, () -> cancel(cujType, REASON_CANCEL_TIMEOUT));
             return true;
         }
     }
 
     /**
-     * End a trace session.
+     * Schedules a timeout action.
+     * @param cuj cuj type
+     * @param timeout duration to timeout
+     * @param action action once timeout
+     */
+    @VisibleForTesting
+    public void scheduleTimeoutAction(@CujType int cuj, long timeout, Runnable action) {
+        mTimeoutActions.put(cuj, action);
+        mWorker.getThreadHandler().postDelayed(action, timeout);
+    }
+
+    /**
+     * Ends a trace session.
      *
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
         synchronized (this) {
-
             // remove the timeout action first.
             removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.end(FrameTracker.REASON_END_NORMAL);
+            tracker.end(REASON_END_NORMAL);
             removeTracker(cujType);
             return true;
         }
     }
 
     /**
-     * Cancel the trace session.
+     * Cancels the trace session.
      *
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
+        return cancel(cujType, REASON_CANCEL_NORMAL);
+    }
+
+    boolean cancel(@CujType int cujType, @Reasons int reason) {
         synchronized (this) {
             // remove the timeout action first.
             removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.cancel(FrameTracker.REASON_CANCEL_NORMAL);
+            tracker.cancel(reason);
             removeTracker(cujType);
             return true;
         }
@@ -509,7 +539,7 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Trigger the perfetto daemon to collect and upload data.
+     * Triggers the perfetto daemon to collect and upload data.
      */
     @VisibleForTesting
     public void trigger(Session session) {
@@ -608,6 +638,10 @@ public class InteractionJankMonitor {
                 return "SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON";
             case CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP:
                 return "STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP";
+            case CUJ_PIP_TRANSITION:
+                return "PIP_TRANSITION";
+            case CUJ_WALLPAPER_TRANSITION:
+                return "WALLPAPER_TRANSITION";
         }
         return "UNKNOWN";
     }
@@ -618,32 +652,64 @@ public class InteractionJankMonitor {
      */
     public static class Configuration {
         private final View mView;
+        private final Context mContext;
         private final long mTimeout;
         private final String mTag;
+        private final boolean mSurfaceOnly;
+        private final SurfaceControl mSurfaceControl;
         private final @CujType int mCujType;
 
         /**
-         * A builder for building Configuration. <br/>
+         * A builder for building Configuration. {@link #setView(View)} is essential
+         * if {@link #setSurfaceOnly(boolean)} is not set, otherwise both
+         * {@link #setSurfaceControl(SurfaceControl)} and {@link #setContext(Context)}
+         * are necessary<br/>
          * <b>It may refer to an attached view, don't use static reference for any purpose.</b>
          */
         public static class Builder {
             private View mAttrView = null;
+            private Context mAttrContext = null;
             private long mAttrTimeout = DEFAULT_TIMEOUT_MS;
             private String mAttrTag = "";
+            private boolean mAttrSurfaceOnly;
+            private SurfaceControl mAttrSurfaceControl;
             private @CujType int mAttrCujType;
 
             /**
+             * Creates a builder which instruments only surface.
              * @param cuj The enum defined in {@link InteractionJankMonitor.CujType}.
+             * @param context context
+             * @param surfaceControl surface control
+             * @return builder
              */
-            public Builder(@CujType int cuj) {
+            public static Builder withSurface(@CujType int cuj, @NonNull Context context,
+                    @NonNull SurfaceControl surfaceControl) {
+                return new Builder(cuj)
+                        .setContext(context)
+                        .setSurfaceControl(surfaceControl)
+                        .setSurfaceOnly(true);
+            }
+
+            /**
+             * Creates a builder which instruments both surface and view.
+             * @param cuj The enum defined in {@link InteractionJankMonitor.CujType}.
+             * @param view view
+             * @return builder
+             */
+            public static Builder withView(@CujType int cuj, @NonNull View view) {
+                return new Builder(cuj).setView(view);
+            }
+
+            private Builder(@CujType int cuj) {
                 mAttrCujType = cuj;
             }
 
             /**
+             * Specifies a view, must be set if {@link #setSurfaceOnly(boolean)} is set to false.
              * @param view an attached view
              * @return builder
              */
-            public Builder setView(@NonNull View view) {
+            private Builder setView(@NonNull View view) {
                 mAttrView = view;
                 return this;
             }
@@ -669,20 +735,56 @@ public class InteractionJankMonitor {
             }
 
             /**
-             * Build the {@link Configuration} instance
+             * Indicates if only instrument with surface,
+             * if true, must also setup with {@link #setContext(Context)}
+             * and {@link #setSurfaceControl(SurfaceControl)}.
+             * @param surfaceOnly true if only instrument with surface, false otherwise
+             * @return builder Surface only builder.
+             */
+            private Builder setSurfaceOnly(boolean surfaceOnly) {
+                mAttrSurfaceOnly = surfaceOnly;
+                return this;
+            }
+
+            /**
+             * Specifies a context, must set if {@link #setSurfaceOnly(boolean)} is set.
+             */
+            private Builder setContext(Context context) {
+                mAttrContext = context;
+                return this;
+            }
+
+            /**
+             * Specifies a surface control, must be set if {@link #setSurfaceOnly(boolean)} is set.
+             */
+            private Builder setSurfaceControl(SurfaceControl surfaceControl) {
+                mAttrSurfaceControl = surfaceControl;
+                return this;
+            }
+
+            /**
+             * Builds the {@link Configuration} instance
              * @return the instance of {@link Configuration}
              * @throws IllegalArgumentException if any invalid attribute is set
              */
             public Configuration build() throws IllegalArgumentException {
-                return new Configuration(mAttrCujType, mAttrView, mAttrTag, mAttrTimeout);
+                return new Configuration(
+                        mAttrCujType, mAttrView, mAttrTag, mAttrTimeout,
+                        mAttrSurfaceOnly, mAttrContext, mAttrSurfaceControl);
             }
         }
 
-        private Configuration(@CujType int cuj, View view, String tag, long timeout) {
+        private Configuration(@CujType int cuj, View view, String tag, long timeout,
+                boolean surfaceOnly, Context context, SurfaceControl surfaceControl) {
             mCujType = cuj;
             mTag = tag;
             mTimeout = timeout;
             mView = view;
+            mSurfaceOnly = surfaceOnly;
+            mContext = context != null
+                    ? context
+                    : (view != null ? view.getContext().getApplicationContext() : null);
+            mSurfaceControl = surfaceControl;
             validate();
         }
 
@@ -698,13 +800,46 @@ public class InteractionJankMonitor {
                 shouldThrow = true;
                 msg.append("Invalid timeout value; ");
             }
-            if (mView == null || !mView.isAttachedToWindow()) {
-                shouldThrow = true;
-                msg.append("Null view or view is not attached yet; ");
+            if (mSurfaceOnly) {
+                if (mContext == null) {
+                    shouldThrow = true;
+                    msg.append("Must pass in a context if only instrument surface; ");
+                }
+                if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
+                    shouldThrow = true;
+                    msg.append("Must pass in a valid surface control if only instrument surface; ");
+                }
+            } else {
+                if (mView == null || !mView.isAttachedToWindow()) {
+                    shouldThrow = true;
+                    msg.append("Null view or unattached view while instrumenting view; ");
+                }
             }
             if (shouldThrow) {
                 throw new IllegalArgumentException(msg.toString());
             }
+        }
+
+        /**
+         * @return true if only instrumenting surface, false otherwise
+         */
+        public boolean isSurfaceOnly() {
+            return mSurfaceOnly;
+        }
+
+        /**
+         * @return the surafce control which is instrumenting
+         */
+        public SurfaceControl getSurfaceControl() {
+            return mSurfaceControl;
+        }
+
+        View getView() {
+            return mView;
+        }
+
+        Context getContext() {
+            return mContext;
         }
     }
 
@@ -715,8 +850,8 @@ public class InteractionJankMonitor {
         @CujType
         private final int mCujType;
         private final long mTimeStamp;
-        @FrameTracker.Reasons
-        private int mReason = FrameTracker.REASON_END_UNKNOWN;
+        @Reasons
+        private int mReason = REASON_END_UNKNOWN;
         private final boolean mShouldNotify;
         private final String mName;
 
@@ -756,15 +891,15 @@ public class InteractionJankMonitor {
             return mTimeStamp;
         }
 
-        public void setReason(@FrameTracker.Reasons int reason) {
+        public void setReason(@Reasons int reason) {
             mReason = reason;
         }
 
-        public int getReason() {
+        public @Reasons int getReason() {
             return mReason;
         }
 
-        /** Determine if should notify the receivers of cuj events */
+        /** Determines if should notify the receivers of cuj events */
         public boolean shouldNotify() {
             return mShouldNotify;
         }
