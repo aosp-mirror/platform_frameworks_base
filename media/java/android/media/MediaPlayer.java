@@ -1271,11 +1271,14 @@ public class MediaPlayer extends PlayerBase
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd);
-        if (modernFd == null) {
-            _setDataSource(fd, offset, length);
-        } else {
-            _setDataSource(modernFd.getFileDescriptor(), offset, length);
+        try (ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd)) {
+            if (modernFd == null) {
+                _setDataSource(fd, offset, length);
+            } else {
+                _setDataSource(modernFd.getFileDescriptor(), offset, length);
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Ignoring IO error while setting data source", e);
         }
     }
 
