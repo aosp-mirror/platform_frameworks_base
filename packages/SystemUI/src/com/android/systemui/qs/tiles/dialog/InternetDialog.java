@@ -341,14 +341,17 @@ public class InternetDialog extends SystemUIDialog implements
                 mMobileSummaryText.setVisibility(View.GONE);
             }
             mSignalIcon.setImageDrawable(getSignalStrengthDrawable());
-            int titleColor = isCellularNetwork ? mContext.getColor(
-                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorPrimary);
-            int summaryColor = isCellularNetwork ? mContext.getColor(
-                    R.color.connected_network_tertiary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorTertiary);
-            mMobileTitleText.setTextColor(titleColor);
-            mMobileSummaryText.setTextColor(summaryColor);
+            if (mInternetDialogController.isNightMode()) {
+                int titleColor = isCellularNetwork ? mContext.getColor(
+                        R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
+                        mContext, android.R.attr.textColorPrimary);
+                int summaryColor = isCellularNetwork ? mContext.getColor(
+                        R.color.connected_network_secondary_color) : Utils.getColorAttrDefaultColor(
+                        mContext, android.R.attr.textColorSecondary);
+
+                mMobileTitleText.setTextColor(titleColor);
+                mMobileSummaryText.setTextColor(summaryColor);
+            }
             mMobileNetworkLayout.setBackground(isCellularNetwork ? mBackgroundOn : null);
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
@@ -366,10 +369,12 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifiSummaryText.setText(getConnectedWifiSummary());
         mConnectedWifiIcon.setImageDrawable(
                 mInternetDialogController.getConnectedWifiDrawable(mConnectedWifiEntry));
-        mConnectedWifiTitleText.setTextColor(
-                mContext.getColor(R.color.connected_network_primary_color));
-        mConnectedWifiSummaryText.setTextColor(
-                mContext.getColor(R.color.connected_network_tertiary_color));
+        if (mInternetDialogController.isNightMode()) {
+            mConnectedWifiTitleText.setTextColor(
+                    mContext.getColor(R.color.connected_network_primary_color));
+            mConnectedWifiSummaryText.setTextColor(
+                    mContext.getColor(R.color.connected_network_secondary_color));
+        }
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
         mConnectedWifListLayout.setBackground(mBackgroundOn);

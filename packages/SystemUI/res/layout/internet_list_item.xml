@@ -56,12 +56,13 @@
             android:layout_height="72dp">
             <TextView
                 android:id="@+id/wifi_title"
+                android:textDirection="locale"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center_vertical|start"
                 android:gravity="start|center_vertical"
-                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="?android:attr/textColorPrimary"
@@ -69,12 +70,13 @@
                 android:fontFamily="google-sans"/>
             <TextView
                 android:id="@+id/wifi_summary"
+                android:textDirection="locale"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center_vertical|start"
                 android:gravity="start|center_vertical"
-                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="?android:attr/textColorSecondary"
@@ -85,7 +87,7 @@
         <FrameLayout
             android:layout_width="24dp"
             android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/settingslib_switchbar_padding_right"
+            android:layout_marginEnd="@dimen/settingslib_switchbar_padding_right"
             android:clickable="false"
             android:gravity="center">
             <ImageView
