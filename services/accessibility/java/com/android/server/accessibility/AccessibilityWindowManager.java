@@ -1383,20 +1383,9 @@ public class AccessibilityWindowManager {
             // the touched window are delivered is fine.
             final int oldActiveWindow = mActiveWindowId;
             setActiveWindowLocked(mTopFocusedWindowId);
-
-            // If there is no service that can operate with interactive windows
-            // then we keep the old behavior where a window loses accessibility
-            // focus if it is no longer active. This still changes the behavior
-            // for services that do not operate with interactive windows and run
-            // at the same time as the one(s) which does. In practice however,
-            // there is only one service that uses accessibility focus and it
-            // is typically the one that operates with interactive windows, So,
-            // this is fine. Note that to allow a service to work across windows
-            // we have to allow accessibility focus stay in any of them. Sigh...
-            final boolean accessibilityFocusOnlyInActiveWindow = !isTrackingWindowsLocked();
             if (oldActiveWindow != mActiveWindowId
                     && mAccessibilityFocusedWindowId == oldActiveWindow
-                    && accessibilityFocusOnlyInActiveWindow) {
+                    && accessibilityFocusOnlyInActiveWindowLocked()) {
                 clearAccessibilityFocusLocked(oldActiveWindow);
             }
         }
@@ -1615,6 +1604,15 @@ public class AccessibilityWindowManager {
             }
         }
         return displayList;
+    }
+
+    // If there is no service that can operate with interactive windows
+    // then a window loses accessibility focus if it is no longer active.
+    // This inspection happens when the user interaction is ended.
+    // Note that to allow a service to work across windows,
+    // we have to allow accessibility focus stay in any of them.
+    boolean accessibilityFocusOnlyInActiveWindowLocked() {
+        return !isTrackingWindowsLocked();
     }
 
     /**
