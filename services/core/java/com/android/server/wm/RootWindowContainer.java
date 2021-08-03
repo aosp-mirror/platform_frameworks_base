@@ -2811,7 +2811,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         r.detachFromProcess();
-        r.mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
                 TRANSIT_FLAG_APP_CRASHED);
         r.destroyIfPossible("handleAppCrashed");

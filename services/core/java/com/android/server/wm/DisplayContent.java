@@ -4984,10 +4984,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    /**
+     * @deprecated new transition should use {@link #requestTransitionAndLegacyPrepare(int, int)}
+     */
+    @Deprecated
     void prepareAppTransition(@WindowManager.TransitionType int transit) {
         prepareAppTransition(transit, 0 /* flags */);
     }
 
+    /**
+     * @deprecated new transition should use {@link #requestTransitionAndLegacyPrepare(int, int)}
+     */
+    @Deprecated
     void prepareAppTransition(@WindowManager.TransitionType int transit,
             @WindowManager.TransitionFlags int flags) {
         final boolean prepared = mAppTransition.prepareAppTransition(transit, flags);
@@ -5000,7 +5008,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Helper that both requests a transition (using the new transition system) and prepares
      * the legacy transition system. Use this when both systems have the same start-point.
      *
-     * @see TransitionController#requestTransitionIfNeeded(int, int, WindowContainer)
+     * @see TransitionController#requestTransitionIfNeeded(int, int, WindowContainer,
+     *      WindowContainer)
      * @see AppTransition#prepareAppTransition
      */
     void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
