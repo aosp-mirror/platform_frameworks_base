@@ -16,19 +16,23 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -38,9 +42,10 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtilsLocked;
-    private ViewGroup mContainer;
+    private ConstraintLayout mContainer;
     private int mDisappearYTranslation;
     private View[][] mViews;
+    @DevicePostureInt private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
 
     public KeyguardPINView(Context context) {
         this(context, null);
@@ -64,6 +69,11 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        updateMargins();
+    }
+
+    void onDevicePostureChanged(@DevicePostureInt int posture) {
+        mLastDevicePosture = posture;
         updateMargins();
     }
 
@@ -109,6 +119,16 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 key.setLayoutParams(lp);
             }
         }
+
+        // Update the guideline based on the device posture...
+        float halfOpenPercentage =
+                mContext.getResources().getFloat(R.dimen.half_opened_bouncer_height_ratio);
+
+        ConstraintSet cs = new ConstraintSet();
+        cs.clone(mContainer);
+        cs.setGuidelinePercent(R.id.pin_pad_top_guideline,
+                mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED ? halfOpenPercentage : 0.0f);
+        cs.applyTo(mContainer);
     }
 
     @Override
