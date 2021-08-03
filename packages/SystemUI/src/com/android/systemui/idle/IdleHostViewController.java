@@ -24,6 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -40,6 +44,7 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,7 +56,8 @@ import javax.inject.Provider;
 /**
  * {@link IdleHostViewController} processes signals to control the lifecycle of the idle screen.
  */
-public class IdleHostViewController extends ViewController<IdleHostView> {
+public class IdleHostViewController extends ViewController<IdleHostView> implements
+        SensorEventListener {
     private static final String INPUT_MONITOR_IDENTIFIER = "IdleHostViewController";
     private static final String TAG = "IdleHostViewController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -72,6 +78,9 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     // Set when input monitoring has established the device is now idling.
     private static final int STATE_IDLING = 1 << 3;
 
+    // Set when the device is in a low light environment.
+    private static final int STATE_LOW_LIGHT = 1 << 4;
+
     // The state the controller must be in to start recognizing idleness (lack of input
     // interaction).
     private static final int CONDITIONS_IDLE_MONITORING =
@@ -80,15 +89,20 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     // The state the controller must be in before entering idle mode.
     private static final int CONDITIONS_IDLING = CONDITIONS_IDLE_MONITORING | STATE_IDLING;
 
+    // The state the controller must be in to start listening for low light signals.
+    private static final int CONDITIONS_LOW_LIGHT_MONITORING =
+            STATE_IDLE_MODE_ENABLED | STATE_KEYGUARD_SHOWING;
+
     // The aggregate current state.
     private int mState;
     private boolean mIdleModeActive;
+    private boolean mLowLightModeActive;
+    private boolean mIsMonitoringLowLight;
 
     private final Context mContext;
 
     // Timeout to idle in milliseconds.
     private final int mIdleTimeout;
-    private final int mDozeTimeout;
 
     // Factory for generating input listeners.
     private final InputMonitorFactory mInputMonitorFactory;
@@ -99,6 +113,11 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     private final PowerManager mPowerManager;
+
+    private final AsyncSensorManager mSensorManager;
+
+    // Light sensor used to detect low light condition.
+    private final Sensor mSensor;
 
     // Runnable for canceling enabling idle.
     private Runnable mCancelEnableIdling;
@@ -125,20 +144,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         }
         setState(STATE_IDLING, true);
     };
-
-    // Delayed callback for enabling doze mode from idle.
-    private Runnable mIdleModeToDozeCallback = new Runnable() {
-        @Override
-        public void run() {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Start dozing from timeout");
-            }
-            mPowerManager.goToSleep(SystemClock.uptimeMillis(),
-                    PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0);
-        }
-    };
-
-    private Runnable mCancelIdleModeToDoze;
 
     private final KeyguardStateController.Callback mKeyguardCallback =
             new KeyguardStateController.Callback() {
@@ -172,6 +177,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
             Context context,
             BroadcastDispatcher broadcastDispatcher,
             PowerManager powerManager,
+            AsyncSensorManager sensorManager,
             IdleHostView view, InputMonitorFactory factory,
             @Main DelayableExecutor delayableExecutor,
             @Main Resources resources,
@@ -184,6 +190,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mPowerManager = powerManager;
+        mSensorManager = sensorManager;
         mIdleViewProvider = idleViewProvider;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
@@ -200,9 +207,9 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         setState(mState, true);
 
         mIdleTimeout = resources.getInteger(R.integer.config_idleModeTimeout);
-        mDozeTimeout = resources.getInteger(R.integer.config_dozeModeTimeout);
         mInputMonitorFactory = factory;
         mDelayableExecutor = delayableExecutor;
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         if (DEBUG) {
             Log.d(TAG, "initial state:" + mState + " enabled:" + enabled
@@ -243,6 +250,11 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
 
         enableIdleMonitoring(mState == CONDITIONS_IDLE_MONITORING);
         enableIdleMode(mState == CONDITIONS_IDLING);
+        // Loose matching. Doesn't need to be the exact state to monitor low light, but only
+        // the specified states need to match.
+        enableLowLightMonitoring(
+                (mState & CONDITIONS_LOW_LIGHT_MONITORING) == CONDITIONS_LOW_LIGHT_MONITORING);
+        enableLowLightMode((mState & STATE_LOW_LIGHT) == STATE_LOW_LIGHT);
     }
 
     private void enableIdleMonitoring(boolean enable) {
@@ -259,7 +271,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
             mInputMonitor.getInputReceiver(mLooper, mChoreographer,
                     v -> {
                         if (DEBUG) {
-                            Log.d(TAG, "touch detected, reseting timeout");
+                            Log.d(TAG, "touch detected, resetting timeout");
                         }
                         // When input is received, reset timeout.
                         if (mCancelEnableIdling != null) {
@@ -296,9 +308,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         mIdleModeActive = enable;
 
         if (mIdleModeActive) {
-            mCancelIdleModeToDoze = mDelayableExecutor.executeDelayed(mIdleModeToDozeCallback,
-                    mDozeTimeout);
-
             // Track when the dream ends to cancel any timeouts.
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DREAMING_STOPPED);
@@ -309,12 +318,43 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
         } else {
             // Stop tracking dream end.
             mBroadcastDispatcher.unregisterReceiver(mDreamEndedReceiver);
+        }
+    }
 
-            // Remove timeout.
-            if (mCancelIdleModeToDoze != null) {
-                mCancelIdleModeToDoze.run();
-                mCancelIdleModeToDoze = null;
-            }
+    private void enableLowLightMonitoring(boolean enable) {
+        if (enable == mIsMonitoringLowLight) {
+            return;
+        }
+
+        mIsMonitoringLowLight = enable;
+
+        if (mIsMonitoringLowLight) {
+            if (DEBUG) Log.d(TAG, "Enabling low light monitoring.");
+            mSensorManager.registerListener(this /*listener*/, mSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        } else {
+            if (DEBUG) Log.d(TAG, "Disabling low light monitoring.");
+            mSensorManager.unregisterListener(this);
+        }
+    }
+
+    private void enableLowLightMode(boolean enable) {
+        if (mLowLightModeActive == enable) {
+            return;
+        }
+
+        mLowLightModeActive = enable;
+
+        if (mLowLightModeActive) {
+            if (DEBUG) Log.d(TAG, "Entering low light, start dozing.");
+
+            mPowerManager.goToSleep(
+                    SystemClock.uptimeMillis(),
+                    PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
+        } else {
+            if (DEBUG) Log.d(TAG, "Exiting low light, stop dozing.");
+            mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                    PowerManager.WAKE_REASON_APPLICATION, "Exit low light condition");
         }
     }
 
@@ -332,5 +372,23 @@ public class IdleHostViewController extends ViewController<IdleHostView> {
     protected void onViewDetached() {
         mKeyguardStateController.removeCallback(mKeyguardCallback);
         mStatusBarStateController.removeCallback(mStatusBarCallback);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.values.length == 0) {
+            if (DEBUG) Log.w(TAG, "SensorEvent doesn't have value");
+            return;
+        }
+
+        final boolean isLowLight = event.values[0] < 10;
+        setState(STATE_LOW_LIGHT, isLowLight);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        if (DEBUG) {
+            Log.d(TAG, "onAccuracyChanged accuracy=" + accuracy);
+        }
     }
 }

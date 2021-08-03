@@ -649,6 +649,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
+    private EnterpriseSpecificIdCalculator mEsidCalculator;
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -1452,6 +1453,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         LockPatternUtils newLockPatternUtils() {
             return new LockPatternUtils(mContext);
+        }
+
+        EnterpriseSpecificIdCalculator newEnterpriseSpecificIdCalculator() {
+            return new EnterpriseSpecificIdCalculator(mContext);
         }
 
         boolean storageManagerIsFileBasedEncryptionEnabled() {
@@ -3102,6 +3107,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 factoryResetIfDelayedEarlier();
 
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
+
+                // This is constructed here as EnterpriseSpecificIdCalculator depends on telephony
+                // and wifi service and these services are only fully available at this stage.
+                mEsidCalculator = mInjector.newEnterpriseSpecificIdCalculator();
                 break;
         }
     }
@@ -16899,6 +16908,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setOrganizationIdForUser(
             @NonNull String callerPackage, @NonNull String organizationId, int userId) {
+        Preconditions.checkState(mEsidCalculator != null,
+                "setOrganizationIdForUser can't be called before boot phase completion");
         if (!mHasFeature) {
             return;
         }
@@ -16932,10 +16943,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             + "be changed");
             final String dpcPackage = owner.info.getPackageName();
             mInjector.binderWithCleanCallingIdentity(() -> {
-                EnterpriseSpecificIdCalculator esidCalculator =
-                        new EnterpriseSpecificIdCalculator(mContext);
-
-                final String esid = esidCalculator.calculateEnterpriseId(dpcPackage,
+                final String esid = mEsidCalculator.calculateEnterpriseId(dpcPackage,
                         organizationId);
                 owner.mOrganizationId = organizationId;
                 owner.mEnrollmentSpecificId = esid;

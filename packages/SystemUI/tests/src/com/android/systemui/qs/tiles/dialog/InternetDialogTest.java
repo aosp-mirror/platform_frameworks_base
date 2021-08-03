@@ -41,6 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -141,11 +142,13 @@ public class InternetDialogTest extends SysuiTestCase {
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
         when(mWifiEntry.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
-        when(mInternetDialogController.getConnectedWifiEntry()).thenReturn(mWifiEntry);
+        when(mWifiEntry.isDefaultNetwork()).thenReturn(true);
+        mInternetDialog.mConnectedWifiEntry = mWifiEntry;
+
         mInternetDialog.updateDialog();
+
         final LinearLayout linearLayout = mInternetDialog.mDialogView.requireViewById(
                 R.id.wifi_connected_layout);
-
         assertThat(linearLayout.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
@@ -180,6 +183,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
     @Test
     public void showProgressBar_wifiDisabled_hideProgressBar() {
+        Mockito.reset(mHandler);
         when(mMockWifiManager.isWifiEnabled()).thenReturn(false);
 
         mInternetDialog.showProgressBar();
@@ -190,6 +194,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
     @Test
     public void showProgressBar_wifiEnabledWithWifiEntry_showProgressBarThenHide() {
+        Mockito.reset(mHandler);
         when(mMockWifiManager.isWifiEnabled()).thenReturn(true);
         List<ScanResult> wifiScanResults = mock(ArrayList.class);
         when(wifiScanResults.size()).thenReturn(1);
@@ -211,6 +216,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
     @Test
     public void showProgressBar_wifiEnabledWithoutWifiScanResults_showProgressBarThenHideSearch() {
+        Mockito.reset(mHandler);
         when(mMockWifiManager.isWifiEnabled()).thenReturn(true);
         List<ScanResult> wifiScanResults = mock(ArrayList.class);
         when(wifiScanResults.size()).thenReturn(0);
