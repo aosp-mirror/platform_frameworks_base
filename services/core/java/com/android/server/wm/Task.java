@@ -628,7 +628,7 @@ class Task extends TaskFragment {
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
             boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
             boolean _removeWithTaskOrganizer) {
-        super(atmService, null /* fragmentToken */, _createdByOrganizer);
+        super(atmService, null /* fragmentToken */, _createdByOrganizer, false /* isEmbedded */);
 
         mTaskId = _taskId;
         mUserId = _userId;
@@ -707,13 +707,13 @@ class Task extends TaskFragment {
         return this;
     }
 
-    private void cleanUpResourcesForDestroy(ConfigurationContainer oldParent) {
+    private void cleanUpResourcesForDestroy(WindowContainer<?> oldParent) {
         if (hasChild()) {
             return;
         }
 
         // This task is going away, so save the last state if necessary.
-        saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
+        saveLaunchingStateIfNeeded(oldParent.getDisplayContent());
 
         // TODO: VI what about activity?
         final boolean isVoiceSession = voiceSession != null;
@@ -1144,11 +1144,11 @@ class Task extends TaskFragment {
     }
 
     @Override
-    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        final DisplayContent display = newParent != null
-                ? ((WindowContainer) newParent).getDisplayContent() : null;
-        final DisplayContent oldDisplay = oldParent != null
-                ? ((WindowContainer) oldParent).getDisplayContent() : null;
+    void onParentChanged(ConfigurationContainer rawNewParent, ConfigurationContainer rawOldParent) {
+        final WindowContainer<?> newParent = (WindowContainer<?>) rawNewParent;
+        final WindowContainer<?> oldParent = (WindowContainer<?>) rawOldParent;
+        final DisplayContent display = newParent != null ? newParent.getDisplayContent() : null;
+        final DisplayContent oldDisplay = oldParent != null ? oldParent.getDisplayContent() : null;
 
         mPrevDisplayId = (oldDisplay != null) ? oldDisplay.mDisplayId : INVALID_DISPLAY;
 
@@ -1189,7 +1189,7 @@ class Task extends TaskFragment {
         }
 
         if (oldParent != null) {
-            final Task oldParentTask = ((WindowContainer) oldParent).asTask();
+            final Task oldParentTask = oldParent.asTask();
             if (oldParentTask != null) {
                 final PooledConsumer c = PooledLambda.obtainConsumer(
                         Task::cleanUpActivityReferences, oldParentTask,
@@ -5164,21 +5164,17 @@ class Task extends TaskFragment {
                 // "has the same starting icon" as the next one.  This allows the
                 // window manager to keep the previous window it had previously
                 // created, if it still had one.
-                Task prevTask = r.getTask();
-                ActivityRecord prev = prevTask.getActivity(
-                        a -> a.mStartingData != null && a.okToShowLocked());
-                if (prev != null) {
-                    // We don't want to reuse the previous starting preview if:
-                    // (1) The current activity is in a different task.
-                    if (prev.getTask() != prevTask) {
-                        prev = null;
-                    }
-                    // (2) The current activity is already displayed.
-                    else if (prev.nowVisible) {
-                        prev = null;
-                    }
+                Task baseTask = r.getTask();
+                if (baseTask.isEmbedded()) {
+                    // If the task is embedded in a task fragment, there may have an existing
+                    // starting window in the parent task. This allows the embedded activities
+                    // to share the starting window and make sure that the window can have top
+                    // z-order by transferring to the top activity.
+                    baseTask = baseTask.getParent().asTaskFragment().getTask();
                 }
 
+                final ActivityRecord prev = baseTask.getActivity(
+                        a -> a.mStartingData != null && a.okToShowLocked());
                 r.showStartingWindow(prev, newTask, isTaskSwitch,
                         true /* startActivity */, sourceRecord);
             }

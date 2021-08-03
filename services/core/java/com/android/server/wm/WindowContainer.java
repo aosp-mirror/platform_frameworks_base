@@ -3400,6 +3400,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Forces the receiver container to always use the configuration of the supplier container as
+     * its requested override configuration. It allows to propagate configuration without changing
+     * the relationship between child and parent.
+     */
+    static void overrideConfigurationPropagation(WindowContainer<?> receiver,
+            WindowContainer<?> supplier) {
+        final ConfigurationContainerListener listener = new ConfigurationContainerListener() {
+            @Override
+            public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
+                receiver.onRequestedOverrideConfigurationChanged(supplier.getConfiguration());
+            }
+        };
+        supplier.registerConfigurationChangeListener(listener);
+        receiver.registerWindowContainerListener(new WindowContainerListener() {
+            @Override
+            public void onRemoved() {
+                receiver.unregisterWindowContainerListener(this);
+                supplier.unregisterConfigurationChangeListener(listener);
+            }
+        });
+    }
+
+    /**
      * Returns the {@link WindowManager.LayoutParams.WindowType}.
      */
     @WindowManager.LayoutParams.WindowType int getWindowType() {
