@@ -98,6 +98,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     /** A read or write operation was requested with an invalid offset */
     public static final int GATT_INVALID_OFFSET = 0x7;
 
+    /** Insufficient authorization for a given operation */
+    public static final int GATT_INSUFFICIENT_AUTHORIZATION = 0x8;
+
     /** A write operation exceeds the maximum length of the attribute */
     public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
 
