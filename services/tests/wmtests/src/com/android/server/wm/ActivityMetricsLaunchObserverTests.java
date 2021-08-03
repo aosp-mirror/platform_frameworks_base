@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMor
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -70,6 +71,7 @@ import java.util.function.ToIntFunction;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
+    private static final long TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLogger.LaunchingState mLaunchingState;
     private ActivityMetricsLaunchObserver mLaunchObserver;
@@ -137,7 +139,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // messages that are waiting for the lock.
         waitHandlerIdle(mAtm.mH);
         // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
-        return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
+        return verify(mock, timeout(TIMEOUT_MS));
     }
 
     private void verifyOnActivityLaunchFinished(ActivityRecord activity) {
@@ -258,15 +260,40 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityLaunchWhileSleeping() {
-        notifyActivityLaunching(mTopActivity.intent);
-        notifyActivityLaunched(START_SUCCESS, mTopActivity);
-        doReturn(true).when(mTopActivity.mDisplayContent).isSleeping();
-        mTopActivity.setState(ActivityRecord.State.RESUMED, "test");
-        mTopActivity.setVisibility(false);
+        notifyActivityLaunching(mTrampolineActivity.intent);
+        notifyActivityLaunched(START_SUCCESS, mTrampolineActivity);
+        doReturn(true).when(mTrampolineActivity.mDisplayContent).isSleeping();
+        mTrampolineActivity.setState(ActivityRecord.State.RESUMED, "test");
+        mTrampolineActivity.setVisibility(false);
         waitHandlerIdle(mAtm.mH);
         // Not cancel immediately because in one of real cases, the keyguard may be going away or
         // occluded later, then the activity can be drawn.
-        verify(mLaunchObserver, never()).onActivityLaunchCancelled(eqProto(mTopActivity));
+        verify(mLaunchObserver, never()).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
+
+        clearInvocations(mLaunchObserver);
+        mLaunchTopByTrampoline = true;
+        mTopActivity.mVisibleRequested = false;
+        notifyActivityLaunching(mTopActivity.intent);
+        // It should schedule a message with UNKNOWN_VISIBILITY_CHECK_DELAY_MS to check whether
+        // the launch event is still valid.
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+
+        // The posted message will acquire wm lock, so the test needs to release the lock to verify.
+        final Throwable error = awaitInWmLock(() -> {
+            try {
+                // Though the aborting target should be eqProto(mTopActivity), use any() to avoid
+                // any changes in proto that may cause failure by different arguments.
+                verify(mLaunchObserver, timeout(TIMEOUT_MS)).onActivityLaunchCancelled(any());
+            } catch (Throwable e) {
+                // Catch any errors including assertion because this runs in another thread.
+                return e;
+            }
+            return null;
+        });
+        // The launch event must be cancelled because the activity keeps invisible.
+        if (error != null) {
+            throw new AssertionError(error);
+        }
     }
 
     @Test
