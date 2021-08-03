@@ -1236,15 +1236,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public MediaSession.Token getMediaKeyEventSession() {
+        public MediaSession.Token getMediaKeyEventSession(ComponentName notificationListener) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+            final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission is required to"
-                            + " get the media key event session");
+                if (!hasMediaControlPermission(pid, uid)
+                        && !isEnabledNotificationListener(
+                                notificationListener, userHandle, userId)) {
+                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission or an enabled"
+                            + " notification listener is required to"
+                            + " get media key event session.");
                 }
                 MediaSessionRecordImpl record;
                 synchronized (mLock) {
@@ -1267,15 +1271,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public String getMediaKeyEventSessionPackageName() {
+        public String getMediaKeyEventSessionPackageName(ComponentName notificationListener) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+            final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission is required to"
-                            + " get the media key event session package");
+                if (!hasMediaControlPermission(pid, uid)
+                        && !isEnabledNotificationListener(
+                        notificationListener, userHandle, userId)) {
+                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission or an enabled"
+                            + " notification listener is required to"
+                            + " get media key event session package name");
                 }
                 MediaSessionRecordImpl record;
                 synchronized (mLock) {

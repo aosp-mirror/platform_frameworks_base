@@ -205,7 +205,28 @@ public final class MediaSessionManager {
     @Nullable
     public MediaSession.Token getMediaKeyEventSession() {
         try {
-            return mService.getMediaKeyEventSession();
+            return mService.getMediaKeyEventSession(null);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to get media key event session", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the media key event session, which would receive a media key event unless specified.
+     * <p>
+     * This requires that your app is an enabled notificationlistener using the
+     * {@link NotificationListenerService} APIs, in which case you must pass
+     * the {@link ComponentName} of your enabled listener.
+     *
+     * @return The media key event session, which would receive key events by default, unless
+     *          the caller has specified the target. Can be {@code null}.
+     */
+    @Nullable
+    public MediaSession.Token getMediaKeyEventSession(@NonNull ComponentName notificationListener) {
+        Objects.requireNonNull(notificationListener, "notificationListener shouldn't be null");
+        try {
+            return mService.getMediaKeyEventSession(notificationListener);
         } catch (RemoteException ex) {
             Log.e(TAG, "Failed to get media key event session", ex);
         }
@@ -224,10 +245,34 @@ public final class MediaSessionManager {
     @NonNull
     public String getMediaKeyEventSessionPackageName() {
         try {
-            String packageName = mService.getMediaKeyEventSessionPackageName();
+            String packageName = mService.getMediaKeyEventSessionPackageName(null);
             return (packageName != null) ? packageName : "";
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to get media key event session", ex);
+            Log.e(TAG, "Failed to get media key event session package name", ex);
+        }
+        return "";
+    }
+
+    /**
+     * Gets the package name of the media key event session.
+     * <p>
+     * This requires that your app is an enabled notificationlistener using the
+     * {@link NotificationListenerService} APIs, in which case you must pass
+     * the {@link ComponentName} of your enabled listener.
+     *
+     * @return The package name of the media key event session or the last session's media button
+     *          receiver if the media key event session is {@code null}. Returns an empty string
+     *          if neither of them exists.
+     * @see #getMediaKeyEventSession(ComponentName)
+     */
+    @NonNull
+    public String getMediaKeyEventSessionPackageName(@NonNull ComponentName notificationListener) {
+        Objects.requireNonNull(notificationListener, "notificationListener shouldn't be null");
+        try {
+            String packageName = mService.getMediaKeyEventSessionPackageName(notificationListener);
+            return (packageName != null) ? packageName : "";
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to get media key event session package name", ex);
         }
         return "";
     }
