@@ -16,12 +16,17 @@
 
 package com.android.systemui.statusbar.phone;
 
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.ViewController;
 
 /** Controller for {@link PhoneStatusBarView}. */
 public class PhoneStatusBarViewController extends ViewController<PhoneStatusBarView> {
-    protected PhoneStatusBarViewController(PhoneStatusBarView view) {
+
+    protected PhoneStatusBarViewController(
+            PhoneStatusBarView view,
+            CommandQueue commandQueue) {
         super(view);
+        mView.setPanelEnabledProvider(commandQueue::panelsEnabled);
     }
 
     @Override
