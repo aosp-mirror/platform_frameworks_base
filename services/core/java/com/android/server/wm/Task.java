@@ -5266,7 +5266,6 @@ class Task extends TaskFragment {
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         Task finishedTask = r.getTask();
-        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.finishIfPossible(reason, false /* oomAdj */);
 
@@ -5646,7 +5645,6 @@ class Task extends TaskFragment {
 
         // Skip the transition for pinned task.
         if (!inPinnedWindowingMode()) {
-            mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
             mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
         }
         moveToBack("moveTaskToBackLocked", tr);
