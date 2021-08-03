@@ -4736,7 +4736,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int drawState = mWinAnimator.mDrawState;
         if ((drawState == HAS_DRAWN || drawState == READY_TO_SHOW) && mActivityRecord != null) {
             if (mAttrs.type != TYPE_APPLICATION_STARTING) {
-                mActivityRecord.onFirstWindowDrawn(this, mWinAnimator);
+                mActivityRecord.onFirstWindowDrawn(this);
             } else {
                 mActivityRecord.onStartingWindowDrawn();
             }
