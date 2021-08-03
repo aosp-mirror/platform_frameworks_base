@@ -45,6 +45,9 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
+import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_RESUMED;
+import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
 import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.RestrictionBypass;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
@@ -1238,6 +1241,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid, parent.packageName,
                             tag, true, event.getAttributionFlags(), event.getAttributionChainId());
                 }
+                // Note: this always sends MODE_ALLOWED, even if the mode is FOREGROUND
+                // TODO ntmyren: figure out how to get the real mode.
+                scheduleOpStartedIfNeededLocked(parent.op, parent.uid, parent.packageName,
+                        tag, event.getFlags(), MODE_ALLOWED, START_TYPE_RESUMED,
+                        event.getAttributionFlags(), event.getAttributionChainId());
             }
             mPausedInProgressEvents = null;
         }
@@ -3945,13 +3953,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         boolean isRestricted = false;
+        int startType = START_TYPE_FAILED;
         synchronized (this) {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag,
                     pvr.isAttributionTagValid, pvr.bypass, /* edit */ true);
             if (ops == null) {
                 if (!dryRun) {
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                            flags, AppOpsManager.MODE_IGNORED);
+                            flags, AppOpsManager.MODE_IGNORED, startType, attributionFlags,
+                            attributionChainId);
                 }
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName + " flags: "
@@ -3977,7 +3987,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (!dryRun) {
                         attributedOp.rejected(uidState.state, flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                                flags, uidMode);
+                                flags, uidMode, startType, attributionFlags, attributionChainId);
                     }
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
@@ -3993,7 +4003,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (!dryRun) {
                         attributedOp.rejected(uidState.state, flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                                flags, mode);
+                                flags, mode, startType, attributionFlags, attributionChainId);
                     }
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
@@ -4011,12 +4021,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                         attributedOp.started(clientId, proxyUid, proxyPackageName,
                                 proxyAttributionTag, uidState.state, flags, attributionFlags,
                                 attributionChainId);
+                        startType = START_TYPE_STARTED;
                     }
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
                 scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
-                        isRestricted ? MODE_IGNORED : MODE_ALLOWED);
+                        isRestricted ? MODE_IGNORED : MODE_ALLOWED, startType, attributionFlags,
+                        attributionChainId);
             }
         }
 
@@ -4187,7 +4199,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void scheduleOpStartedIfNeededLocked(int code, int uid, String pkgName,
-            String attributionTag, @OpFlags int flags, @Mode int result) {
+            String attributionTag, @OpFlags int flags, @Mode int result,
+            @AppOpsManager.OnOpStartedListener.StartedType int startedType,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         ArraySet<StartedCallback> dispatchedCallbacks = null;
         final int callbackListCount = mStartedWatchers.size();
         for (int i = 0; i < callbackListCount; i++) {
@@ -4213,12 +4227,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 AppOpsService::notifyOpStarted,
                 this, dispatchedCallbacks, code, uid, pkgName, attributionTag, flags,
-                result));
+                result, startedType, attributionFlags, attributionChainId));
     }
 
     private void notifyOpStarted(ArraySet<StartedCallback> callbacks,
             int code, int uid, String packageName, String attributionTag, @OpFlags int flags,
-            @Mode int result) {
+            @Mode int result, @AppOpsManager.OnOpStartedListener.StartedType int startedType,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             final int callbackCount = callbacks.size();
@@ -4226,7 +4241,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final StartedCallback callback = callbacks.valueAt(i);
                 try {
                     callback.mCallback.opStarted(code, uid, packageName, attributionTag, flags,
-                            result);
+                            result, startedType, attributionFlags, attributionChainId);
                 } catch (RemoteException e) {
                     /* do nothing */
                 }
