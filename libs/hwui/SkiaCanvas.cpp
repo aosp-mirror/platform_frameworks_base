@@ -396,6 +396,22 @@ bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
     return !mCanvas->isClipEmpty();
 }
 
+bool SkiaCanvas::replaceClipRect_deprecated(float left, float top, float right, float bottom) {
+    SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+
+    // Emulated clip rects are not recorded for partial saves, since
+    // partial saves have been removed from the public API.
+    SkAndroidFrameworkUtils::ResetClip(mCanvas);
+    mCanvas->clipRect(rect, SkClipOp::kIntersect);
+    return !mCanvas->isClipEmpty();
+}
+
+bool SkiaCanvas::replaceClipPath_deprecated(const SkPath* path) {
+    SkAndroidFrameworkUtils::ResetClip(mCanvas);
+    mCanvas->clipPath(*path, SkClipOp::kIntersect, true);
+    return !mCanvas->isClipEmpty();
+}
+
 // ----------------------------------------------------------------------------
 // Canvas state operations: Filters
 // ----------------------------------------------------------------------------
