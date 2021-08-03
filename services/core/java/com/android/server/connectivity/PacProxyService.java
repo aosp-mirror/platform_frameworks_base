@@ -192,7 +192,7 @@ public class PacProxyService extends IPacProxyManager.Stub {
     }
 
     /**
-     * Updates the PAC Proxy Installer with current Proxy information. This is called by
+     * Updates the PAC Proxy Service with current Proxy information. This is called by
      * the ProxyTracker through PacProxyManager before a broadcast takes place to allow
      * the PacProxyService to indicate that the broadcast should not be sent and the
      * PacProxyService will trigger a new broadcast when it is ready.
