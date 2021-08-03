@@ -5058,7 +5058,7 @@ class Task extends TaskFragment {
     }
 
     void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
-            boolean newTask, boolean keepCurTransition, ActivityOptions options,
+            boolean newTask, boolean isTaskSwitch, ActivityOptions options,
             @Nullable ActivityRecord sourceRecord) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
@@ -5179,7 +5179,7 @@ class Task extends TaskFragment {
                     }
                 }
 
-                r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
+                r.showStartingWindow(prev, newTask, isTaskSwitch,
                         true /* startActivity */, sourceRecord);
             }
         } else {
@@ -5211,10 +5211,6 @@ class Task extends TaskFragment {
             return false;
         }
         return true;
-    }
-
-    private boolean isTaskSwitch(ActivityRecord r, ActivityRecord topFocusedActivity) {
-        return topFocusedActivity != null && r.getTask() != topFocusedActivity.getTask();
     }
 
     /**

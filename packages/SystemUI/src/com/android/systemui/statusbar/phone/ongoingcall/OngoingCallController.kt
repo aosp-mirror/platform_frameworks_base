@@ -24,7 +24,6 @@ import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.content.Intent
 import android.util.Log
 import android.view.View
-import android.widget.Chronometer
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.R
@@ -32,7 +31,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
@@ -130,7 +129,6 @@ class OngoingCallController @Inject constructor(
         }
     }
 
-
     /**
      * Called when the chip's visibility may have changed.
      *
@@ -220,7 +218,11 @@ class OngoingCallController @Inject constructor(
 
         uidObserver = object : IUidObserver.Stub() {
             override fun onUidStateChanged(
-                    uid: Int, procState: Int, procStateSeq: Long, capability: Int) {
+                uid: Int,
+                procState: Int,
+                procStateSeq: Long,
+                capability: Int
+            ) {
                 if (uid == currentCallNotificationInfo.uid) {
                     val oldIsCallAppVisible = isCallAppVisible
                     isCallAppVisible = isProcessVisibleToUser(procState)

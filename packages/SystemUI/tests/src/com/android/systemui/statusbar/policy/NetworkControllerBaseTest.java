@@ -70,7 +70,7 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;

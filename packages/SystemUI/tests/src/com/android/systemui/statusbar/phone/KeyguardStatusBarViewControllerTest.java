@@ -28,7 +28,8 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -59,6 +60,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private StatusBarIconController mStatusBarIconController;
     @Mock
     private FeatureFlags mFeatureFlags;
+    @Mock
+    private BatteryMeterViewController mBatteryMeterViewController;
 
     private KeyguardStatusBarViewController mController;
 
@@ -78,7 +81,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mBatteryController,
                 mUserInfoController,
                 mStatusBarIconController,
-                new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags)
+                new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags),
+                mBatteryMeterViewController
         );
     }
 
