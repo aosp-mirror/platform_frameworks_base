@@ -45,10 +45,10 @@ class TaskFragmentContainer {
     private TaskFragmentInfo mInfo;
 
     /**
-     * Activity that is being reparented to this container, but haven't been added to {@link #mInfo}
-     * yet.
+     * Activities that are being reparented or being started to this container, but haven't been
+     * added to {@link #mInfo} yet.
      */
-    private Activity mReparentingActivity;
+    private final ArrayList<Activity> mPendingAppearedActivities = new ArrayList<>();
 
     /** Containers that are dependent on this one and should be completely destroyed on exit. */
     private final List<TaskFragmentContainer> mContainersToFinishOnExit =
@@ -71,7 +71,9 @@ class TaskFragmentContainer {
      */
     TaskFragmentContainer(@Nullable Activity activity) {
         mToken = new Binder("TaskFragmentContainer");
-        mReparentingActivity = activity;
+        if (activity != null) {
+            addPendingAppearedActivity(activity);
+        }
     }
 
     /**
@@ -89,8 +91,8 @@ class TaskFragmentContainer {
         // fragment info update with it placed in this container. We still want to apply rules
         // in this intermediate state.
         List<Activity> allActivities = new ArrayList<>();
-        if (mReparentingActivity != null) {
-            allActivities.add(mReparentingActivity);
+        if (!mPendingAppearedActivities.isEmpty()) {
+            allActivities.addAll(mPendingAppearedActivities);
         }
         // Add activities reported from the server.
         if (mInfo == null) {
@@ -106,12 +108,20 @@ class TaskFragmentContainer {
         return allActivities;
     }
 
+    void addPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        mPendingAppearedActivities.add(pendingAppearedActivity);
+    }
+
     boolean hasActivity(@NonNull IBinder token) {
         if (mInfo != null && mInfo.getActivities().contains(token)) {
             return true;
         }
-        return mReparentingActivity != null
-                && mReparentingActivity.getActivityToken().equals(token);
+        for (Activity activity : mPendingAppearedActivities) {
+            if (activity.getActivityToken().equals(token)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Nullable
@@ -121,14 +131,15 @@ class TaskFragmentContainer {
 
     void setInfo(@Nullable TaskFragmentInfo info) {
         mInfo = info;
-        if (mInfo == null || mReparentingActivity == null) {
+        if (mInfo == null || mPendingAppearedActivities.isEmpty()) {
             return;
         }
         // Cleanup activities that were being re-parented
-        for (IBinder activityToken : mInfo.getActivities()) {
-            if (mReparentingActivity.getActivityToken().equals(activityToken)) {
-                mReparentingActivity = null;
-                break;
+        List<IBinder> infoActivities = mInfo.getActivities();
+        for (int i = mPendingAppearedActivities.size() - 1; i >= 0; --i) {
+            final Activity activity = mPendingAppearedActivities.get(i);
+            if (infoActivities.contains(activity.getActivityToken())) {
+                mPendingAppearedActivities.remove(i);
             }
         }
     }
@@ -147,7 +158,7 @@ class TaskFragmentContainer {
     }
 
     boolean isEmpty() {
-        return mReparentingActivity == null && (mInfo == null || mInfo.isEmpty());
+        return mPendingAppearedActivities.isEmpty() && (mInfo == null || mInfo.isEmpty());
     }
 
     /**
@@ -196,10 +207,10 @@ class TaskFragmentContainer {
         mActivitiesToFinishOnExit.clear();
 
         // Finish activities that were being re-parented to this container.
-        if (mReparentingActivity != null) {
-            mReparentingActivity.finish();
-            mReparentingActivity = null;
+        for (Activity activity : mPendingAppearedActivities) {
+            activity.finish();
         }
+        mPendingAppearedActivities.clear();
     }
 
     boolean isFinished() {

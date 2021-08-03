@@ -73,6 +73,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private IBinder mAssistToken;
     private IBinder mShareableActivityToken;
     private boolean mLaunchedFromBubble;
+    private IBinder mTaskFragmentToken;
     /**
      * It is only non-null if the process is the first time to launch activity. It is only an
      * optimization for quick look up of the interface so the field is ignored for comparison.
@@ -86,7 +87,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
                 client, mAssistToken, mFixedRotationAdjustments, mShareableActivityToken,
-                mLaunchedFromBubble);
+                mLaunchedFromBubble, mTaskFragmentToken);
         client.addLaunchingActivity(token, r);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
@@ -124,7 +125,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken,
             IActivityClientController activityClientController,
             FixedRotationAdjustments fixedRotationAdjustments, IBinder shareableActivityToken,
-            boolean launchedFromBubble) {
+            boolean launchedFromBubble, IBinder taskFragmentToken) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
@@ -133,7 +134,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 voiceInteractor, procState, state, persistentState, pendingResults,
                 pendingNewIntents, activityOptions, isForward, profilerInfo, assistToken,
                 activityClientController, fixedRotationAdjustments, shareableActivityToken,
-                launchedFromBubble);
+                launchedFromBubble, taskFragmentToken);
 
         return instance;
     }
@@ -141,7 +142,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
-                null, false, null, null, null, null, null, false);
+                null, false, null, null, null, null, null, false, null);
         ObjectPool.recycle(this);
     }
 
@@ -172,6 +173,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeTypedObject(mFixedRotationAdjustments, flags);
         dest.writeStrongBinder(mShareableActivityToken);
         dest.writeBoolean(mLaunchedFromBubble);
+        dest.writeStrongBinder(mTaskFragmentToken);
     }
 
     /** Read from Parcel. */
@@ -190,7 +192,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readStrongBinder(),
                 IActivityClientController.Stub.asInterface(in.readStrongBinder()),
                 in.readTypedObject(FixedRotationAdjustments.CREATOR), in.readStrongBinder(),
-                in.readBoolean());
+                in.readBoolean(),
+                in.readStrongBinder());
     }
 
     public static final @NonNull Creator<LaunchActivityItem> CREATOR =
@@ -229,7 +232,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mProfilerInfo, other.mProfilerInfo)
                 && Objects.equals(mAssistToken, other.mAssistToken)
                 && Objects.equals(mFixedRotationAdjustments, other.mFixedRotationAdjustments)
-                && Objects.equals(mShareableActivityToken, other.mShareableActivityToken);
+                && Objects.equals(mShareableActivityToken, other.mShareableActivityToken)
+                && Objects.equals(mTaskFragmentToken, other.mTaskFragmentToken);
     }
 
     @Override
@@ -252,6 +256,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + Objects.hashCode(mAssistToken);
         result = 31 * result + Objects.hashCode(mFixedRotationAdjustments);
         result = 31 * result + Objects.hashCode(mShareableActivityToken);
+        result = 31 * result + Objects.hashCode(mTaskFragmentToken);
         return result;
     }
 
@@ -301,7 +306,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             ActivityOptions activityOptions, boolean isForward, ProfilerInfo profilerInfo,
             IBinder assistToken, IActivityClientController activityClientController,
             FixedRotationAdjustments fixedRotationAdjustments, IBinder shareableActivityToken,
-            boolean launchedFromBubble) {
+            boolean launchedFromBubble, IBinder taskFragmentToken) {
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;
@@ -323,5 +328,6 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mFixedRotationAdjustments = fixedRotationAdjustments;
         instance.mShareableActivityToken = shareableActivityToken;
         instance.mLaunchedFromBubble = launchedFromBubble;
+        instance.mTaskFragmentToken = taskFragmentToken;
     }
 }
