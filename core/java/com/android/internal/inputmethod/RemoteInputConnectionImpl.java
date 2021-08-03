@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,21 +40,21 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.ICharSequenceResultCallback;
-import com.android.internal.inputmethod.IExtractedTextResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
-import com.android.internal.inputmethod.ISurroundingTextResultCallback;
-import com.android.internal.inputmethod.ImeTracing;
-import com.android.internal.inputmethod.InputConnectionProtoDumper;
+import com.android.internal.view.IInputContext;
 
 import java.lang.ref.WeakReference;
 
 /**
  * Takes care of remote method invocations of {@link InputConnection} in the IME client side.
+ *
+ * <p>{@link android.inputmethodservice.RemoteInputConnection} code is executed in the IME process.
+ * It makes IInputContext binder calls under the hood. {@link RemoteInputConnectionImpl} receives
+ * {@link IInputContext} binder calls in the IME client (editor app) process, and forwards them to
+ * {@link InputConnection} that the IME client provided, on the {@link Looper} associated to the
+ * {@link InputConnection}.</p>
  */
-public final class IInputConnectionWrapper extends IInputContext.Stub {
-    private static final String TAG = "IInputConnectionWrapper";
+public final class RemoteInputConnectionImpl extends IInputContext.Stub {
+    private static final String TAG = "RemoteInputConnectionImpl";
     private static final boolean DEBUG = false;
 
     @GuardedBy("mLock")
@@ -72,7 +72,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     private final InputMethodManager mParentInputMethodManager;
     private final WeakReference<View> mServedView;
 
-    public IInputConnectionWrapper(@NonNull Looper looper,
+    public RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
         mInputConnection = inputConnection;
@@ -140,7 +140,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
 
     @Override
     public String toString() {
-        return "IInputConnectionWrapper{"
+        return "RemoteInputConnectionImpl{"
                 + "connection=" + getInputConnection()
                 + " finished=" + isFinished()
                 + " mParentInputMethodManager.isActive()=" + mParentInputMethodManager.isActive()
