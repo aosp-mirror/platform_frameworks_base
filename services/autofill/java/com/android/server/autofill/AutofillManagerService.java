@@ -241,9 +241,6 @@ public final class AutofillManagerService
     protected void registerForExtraSettingsChanges(@NonNull ContentResolver resolver,
             @NonNull ContentObserver observer) {
         resolver.registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES), false, observer,
-                UserHandle.USER_ALL);
-        resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.AUTOFILL_LOGGING_LEVEL), false, observer,
                 UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.Global.getUriFor(
@@ -274,8 +271,6 @@ public final class AutofillManagerService
                 break;
             default:
                 Slog.w(TAG, "Unexpected property (" + property + "); updating cache instead");
-                // fall through
-            case Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
                 synchronized (mLock) {
                     updateCachedServiceLocked(userId);
                 }
@@ -306,6 +301,9 @@ public final class AutofillManagerService
                 case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
                 case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
                     setDeviceConfigProperties();
+                    break;
+                case AutofillManager.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
+                    updateCachedServices();
                     break;
                 default:
                     Slog.i(mTag, "Ignoring change on " + key);
@@ -588,6 +586,15 @@ public final class AutofillManagerService
         }
     }
 
+    private void updateCachedServices() {
+        List<UserInfo> supportedUsers = getSupportedUsers();
+        for (UserInfo userInfo : supportedUsers) {
+            synchronized (mLock) {
+                updateCachedServiceLocked(userInfo.id);
+            }
+        }
+    }
+
     // Called by Shell command.
     void calculateScore(@Nullable String algorithmName, @NonNull String value1,
             @NonNull String value2, @NonNull RemoteCallback callback) {
@@ -702,31 +709,44 @@ public final class AutofillManagerService
             return;
         }
 
-        final Map<String, String[]> whiteListedPackages = getWhitelistedCompatModePackages();
+        final Map<String, String[]> allowedPackages = getAllowedCompatModePackages();
         final int compatPackageCount = compatPackages.size();
         for (int i = 0; i < compatPackageCount; i++) {
             final String packageName = compatPackages.keyAt(i);
-            if (whiteListedPackages == null || !whiteListedPackages.containsKey(packageName)) {
-                Slog.w(TAG, "Ignoring not whitelisted compat package " + packageName);
+            if (allowedPackages == null || !allowedPackages.containsKey(packageName)) {
+                Slog.w(TAG, "Ignoring not allowed compat package " + packageName);
                 continue;
             }
             final Long maxVersionCode = compatPackages.valueAt(i);
             if (maxVersionCode != null) {
                 mAutofillCompatState.addCompatibilityModeRequest(packageName,
-                        maxVersionCode, whiteListedPackages.get(packageName), userId);
+                        maxVersionCode, allowedPackages.get(packageName), userId);
             }
         }
     }
 
-    private String getWhitelistedCompatModePackagesFromSettings() {
+    private String getAllowedCompatModePackagesFromDeviceConfig() {
+        String config = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                AutofillManager.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
+                /* defaultValue */ null);
+        if (!TextUtils.isEmpty(config)) {
+            return config;
+        }
+        // Fallback to Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES if
+        // the device config is null.
+        return getAllowedCompatModePackagesFromSettings();
+    }
+
+    private String getAllowedCompatModePackagesFromSettings() {
         return Settings.Global.getString(
                 getContext().getContentResolver(),
                 Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
     }
 
     @Nullable
-    private Map<String, String[]> getWhitelistedCompatModePackages() {
-        return getWhitelistedCompatModePackages(getWhitelistedCompatModePackagesFromSettings());
+    private Map<String, String[]> getAllowedCompatModePackages() {
+        return getAllowedCompatModePackages(getAllowedCompatModePackagesFromDeviceConfig());
     }
 
     private void send(@NonNull IResultReceiver receiver, int value) {
@@ -771,7 +791,7 @@ public final class AutofillManagerService
 
     @Nullable
     @VisibleForTesting
-    static Map<String, String[]> getWhitelistedCompatModePackages(String setting) {
+    static Map<String, String[]> getAllowedCompatModePackages(String setting) {
         if (TextUtils.isEmpty(setting)) {
             return null;
         }
@@ -1756,8 +1776,8 @@ public final class AutofillManagerService
                     mUi.dump(pw);
                     pw.print("Autofill Compat State: ");
                     mAutofillCompatState.dump(prefix, pw);
-                    pw.print("from settings: ");
-                    pw.println(getWhitelistedCompatModePackagesFromSettings());
+                    pw.print("from device config: ");
+                    pw.println(getAllowedCompatModePackagesFromDeviceConfig());
                     if (mSupportedSmartSuggestionModes != 0) {
                         pw.print("Smart Suggestion modes: ");
                         pw.println(getSmartSuggestionModeToString(mSupportedSmartSuggestionModes));

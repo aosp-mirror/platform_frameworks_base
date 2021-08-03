@@ -472,6 +472,24 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT =
             "augmented_service_request_timeout";
 
+    /**
+     * Sets allowed list for the autofill compatibility mode.
+     *
+     * The list of packages is {@code ":"} colon delimited, and each entry has the name of the
+     * package and an optional list of url bar resource ids (the list is delimited by
+     * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
+     *
+     * <p>For example, a list with 3 packages {@code p1}, {@code p2}, and {@code p3}, where
+     * package {@code p1} have one id ({@code url_bar}, {@code p2} has none, and {@code p3 }
+     * have 2 ids {@code url_foo} and {@code url_bas}) would be
+     * {@code p1[url_bar]:p2:p3[url_foo,url_bas]}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
+            "compat_mode_allowed_packages";
+
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */
