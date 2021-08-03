@@ -661,7 +661,8 @@ public final class ConnectivityController extends RestrictingController implemen
             NetworkCapabilities capabilities, Constants constants) {
         // A restricted job that's out of quota MUST use an unmetered network.
         if (jobStatus.getEffectiveStandbyBucket() == RESTRICTED_INDEX
-                && !jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
+                && (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)
+                || !jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_TARE_WEALTH))) {
             final NetworkCapabilities.Builder builder =
                     copyCapabilities(jobStatus.getJob().getRequiredNetwork());
             builder.addCapability(NET_CAPABILITY_NOT_METERED);

@@ -678,6 +678,7 @@ public class JobStatusTest {
 
     private void markImplicitConstraintsSatisfied(JobStatus job, boolean isSatisfied) {
         job.setQuotaConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
+        job.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
         job.setDeviceNotDozingConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
         job.setBackgroundNotRestrictedConstraintSatisfied(

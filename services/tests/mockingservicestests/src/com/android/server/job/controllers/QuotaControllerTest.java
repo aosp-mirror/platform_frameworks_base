@@ -389,6 +389,8 @@ public class QuotaControllerTest {
                 /* state */ true, /* allowlisted */false);
         js.setBackgroundNotRestrictedConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), true, false);
+        js.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
+        js.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), true);
         return js;
     }
 

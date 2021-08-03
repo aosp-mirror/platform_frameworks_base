@@ -27,6 +27,7 @@ import android.util.Slog;
 import android.util.SparseArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.tare.EconomyManagerInternal;
@@ -170,6 +171,7 @@ public class TareController extends StateController {
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
         mEconomyManagerInternal = LocalServices.getService(EconomyManagerInternal.class);
+        mIsEnabled = mConstants.USE_TARE_POLICY;
     }
 
     @Override
@@ -237,12 +239,53 @@ public class TareController extends StateController {
         }
     }
 
+    @Override
+    @GuardedBy("mLock")
+    public void onConstantsUpdatedLocked() {
+        if (mIsEnabled != mConstants.USE_TARE_POLICY) {
+            mIsEnabled = mConstants.USE_TARE_POLICY;
+            // Update job bookkeeping out of band.
+            JobSchedulerBackgroundThread.getHandler().post(() -> {
+                synchronized (mLock) {
+                    final long nowElapsed = sElapsedRealtimeClock.millis();
+                    mService.getJobStore().forEachJob((jobStatus) -> {
+                        if (!mIsEnabled) {
+                            jobStatus.setTareWealthConstraintSatisfied(nowElapsed, true);
+                            setExpeditedTareApproved(jobStatus, nowElapsed, true);
+                        } else {
+                            jobStatus.setTareWealthConstraintSatisfied(
+                                    nowElapsed, hasEnoughWealthLocked(jobStatus));
+                            setExpeditedTareApproved(jobStatus, nowElapsed,
+                                    jobStatus.isRequestedExpeditedJob()
+                                            && canAffordExpeditedBillLocked(jobStatus));
+                        }
+                    });
+                }
+            });
+        }
+    }
+
     @GuardedBy("mLock")
     public boolean canScheduleEJ(@NonNull JobStatus jobStatus) {
         if (!mIsEnabled) {
             return true;
         }
         return canAffordBillLocked(jobStatus, BILL_JOB_START_EXPEDITED);
+    }
+
+    @GuardedBy("mLock")
+    public long getMaxJobExecutionTimeMsLocked(@NonNull JobStatus jobStatus) {
+        if (!mIsEnabled) {
+            return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
+        }
+        if (jobStatus.shouldTreatAsExpeditedJob()) {
+            return mEconomyManagerInternal.getMaxDurationMs(
+                    jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
+                    BILL_JOB_RUNNING_EXPEDITED);
+        }
+        return mEconomyManagerInternal.getMaxDurationMs(
+                jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
+                BILL_JOB_RUNNING_DEFAULT);
     }
 
     @GuardedBy("mLock")

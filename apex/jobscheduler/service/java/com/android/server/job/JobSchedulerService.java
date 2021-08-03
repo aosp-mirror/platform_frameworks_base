@@ -40,6 +40,7 @@ import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -50,6 +51,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
@@ -66,6 +68,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -106,6 +109,7 @@ import com.android.server.job.controllers.QuotaController;
 import com.android.server.job.controllers.RestrictingController;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.StorageController;
+import com.android.server.job.controllers.TareController;
 import com.android.server.job.controllers.TimeController;
 import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.job.restrictions.ThermalStatusRestriction;
@@ -250,6 +254,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final DeviceIdleJobsController mDeviceIdleJobsController;
     /** Needed to get remaining quota time. */
     private final QuotaController mQuotaController;
+    /** Needed to get max execution time and expedited-job allowance. */
+    private final TareController mTareController;
     /**
      * List of restrictions.
      * Note: do not add to or remove from this list at runtime except in the constructor, because we
@@ -344,12 +350,38 @@ public class JobSchedulerService extends com.android.server.SystemService
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int RESTRICTED_INDEX = 5;
 
-    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener {
+    private class ConstantsObserver extends ContentObserver
+            implements DeviceConfig.OnPropertiesChangedListener {
+        private final ContentResolver mContentResolver;
+
+        ConstantsObserver(Handler handler, Context context) {
+            super(handler);
+            mContentResolver = context.getContentResolver();
+        }
+
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     JobSchedulerBackgroundThread.getExecutor(), this);
+            mContentResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ENABLE_TARE), false, this);
             // Load all the constants.
+            synchronized (mLock) {
+                mConstants.updateSettingsConstantsLocked(mContentResolver);
+            }
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            synchronized (mLock) {
+                if (mConstants.updateSettingsConstantsLocked(mContentResolver)) {
+                    for (int controller = 0; controller < mControllers.size(); controller++) {
+                        final StateController sc = mControllers.get(controller);
+                        sc.onConstantsUpdatedLocked();
+                    }
+                    onControllerStateChanged(null);
+                }
+            }
         }
 
         @Override
@@ -482,6 +514,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
+        private static final boolean DEFAULT_USE_TARE_POLICY = false;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -558,6 +591,11 @@ public class JobSchedulerService extends com.android.server.SystemService
          * The minimum amount of time we try to guarantee EJs will run for.
          */
         public long RUNTIME_MIN_EJ_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS;
+
+        /**
+         * If true, use TARE policy for job limiting. If false, use quotas.
+         */
+        public boolean USE_TARE_POLICY = DEFAULT_USE_TARE_POLICY;
 
         private void updateBatchingConstantsLocked() {
             MIN_READY_NON_ACTIVE_JOBS_COUNT = DeviceConfig.getInt(
@@ -637,6 +675,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                             DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS));
         }
 
+        private boolean updateSettingsConstantsLocked(ContentResolver contentResolver) {
+            boolean changed = false;
+            final boolean isTareEnabled = Settings.Global.getInt(contentResolver,
+                    Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE) == 1;
+            if (USE_TARE_POLICY != isTareEnabled) {
+                USE_TARE_POLICY = isTareEnabled;
+                changed = true;
+            }
+            return changed;
+        }
+
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
@@ -664,6 +713,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                     .println();
+
+            pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY).println();
 
             pw.decreaseIndent();
         }
@@ -1130,9 +1181,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
 
             // Return failure early if expedited job quota used up.
-            if (jobStatus.isRequestedExpeditedJob()
-                    && !mQuotaController.isWithinEJQuotaLocked(jobStatus)) {
-                return JobScheduler.RESULT_FAILURE;
+            if (jobStatus.isRequestedExpeditedJob()) {
+                if ((mConstants.USE_TARE_POLICY && !mTareController.canScheduleEJ(jobStatus))
+                        || (!mConstants.USE_TARE_POLICY
+                        && !mQuotaController.isWithinEJQuotaLocked(jobStatus))) {
+                    return JobScheduler.RESULT_FAILURE;
+                }
             }
 
             // Give exemption if the source is in the foreground just now.
@@ -1474,7 +1528,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         mHandler = new JobHandler(context.getMainLooper());
         mConstants = new Constants();
-        mConstantsObserver = new ConstantsObserver();
+        mConstantsObserver = new ConstantsObserver(mHandler, context);
         mJobSchedulerStub = new JobSchedulerStub();
 
         mConcurrencyManager = new JobConcurrencyManager(this);
@@ -1519,6 +1573,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 new QuotaController(this, backgroundJobsController, connectivityController);
         mControllers.add(mQuotaController);
         mControllers.add(new ComponentController(this));
+        mTareController =
+                new TareController(this, backgroundJobsController, connectivityController);
+        mControllers.add(mTareController);
 
         mRestrictiveControllers = new ArrayList<>();
         mRestrictiveControllers.add(mBatteryController);
@@ -2560,7 +2617,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
             return Math.min(mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                    mQuotaController.getMaxJobExecutionTimeMsLocked(job));
+                    mConstants.USE_TARE_POLICY
+                            ? mTareController.getMaxJobExecutionTimeMsLocked(job)
+                            : mQuotaController.getMaxJobExecutionTimeMsLocked(job));
         }
     }
 

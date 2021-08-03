@@ -1141,7 +1141,7 @@ public final class JobStatus {
      * treated as an expedited job.
      */
     public boolean shouldTreatAsExpeditedJob() {
-        return mExpeditedQuotaApproved && isRequestedExpeditedJob();
+        return mExpeditedQuotaApproved && mExpeditedTareApproved && isRequestedExpeditedJob();
     }
 
     /**
@@ -1564,7 +1564,8 @@ public final class JobStatus {
         // sessions (exempt from dynamic restrictions), we need the additional check to ensure
         // that NEVER jobs don't run.
         // TODO: cleanup quota and standby bucket management so we don't need the additional checks
-        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied && !shouldTreatAsExpeditedJob())
+        if (((!mReadyWithinQuota || !mReadyTareWealth)
+                && !mReadyDynamicSatisfied && !shouldTreatAsExpeditedJob())
                 || getEffectiveStandbyBucket() == NEVER_INDEX) {
             return false;
         }
