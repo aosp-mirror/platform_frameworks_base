@@ -399,7 +399,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardClockSwitchController);
         when(mKeyguardStatusViewComponent.getKeyguardStatusViewController())
                 .thenReturn(mKeyguardStatusViewController);
-        when(mKeyguardStatusBarViewComponentFactory.build(any()))
+        when(mKeyguardStatusBarViewComponentFactory.build(any(), any()))
                 .thenReturn(mKeyguardStatusBarViewComponent);
         when(mKeyguardStatusBarViewComponent.getKeyguardStatusBarViewController())
                 .thenReturn(mKeyguardStatusBarViewController);

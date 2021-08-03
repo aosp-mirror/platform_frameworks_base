@@ -19,16 +19,21 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -52,6 +57,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final StatusBarIconController mStatusBarIconController;
     private final StatusBarIconController.TintedIconManager.Factory mTintedIconManagerFactory;
     private final BatteryMeterViewController mBatteryMeterViewController;
+    private final ViewStateProvider mViewStateProvider;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -103,10 +109,18 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             (name, picture, userAccount) -> mView.onUserInfoChanged(picture);
 
+    private final ValueAnimator.AnimatorUpdateListener mAnimatorUpdateListener =
+            animation -> {
+                mKeyguardStatusBarAnimateAlpha = (float) animation.getAnimatedValue();
+                updateViewState();
+            };
+
     private final List<String> mBlockedIcons;
 
     private boolean mBatteryListening;
     private StatusBarIconController.TintedIconManager mTintedIconManager;
+
+    private float mKeyguardStatusBarAnimateAlpha = 1f;
 
     @Inject
     public KeyguardStatusBarViewController(
@@ -118,7 +132,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             UserInfoController userInfoController,
             StatusBarIconController statusBarIconController,
             StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory,
-            BatteryMeterViewController batteryMeterViewController) {
+            BatteryMeterViewController batteryMeterViewController,
+            ViewStateProvider viewStateProvider) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
@@ -128,6 +143,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mStatusBarIconController = statusBarIconController;
         mTintedIconManagerFactory = tintedIconManagerFactory;
         mBatteryMeterViewController = batteryMeterViewController;
+        mViewStateProvider = viewStateProvider;
 
         Resources r = getResources();
         mBlockedIcons = Collections.unmodifiableList(Arrays.asList(
@@ -205,6 +221,49 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.setTopClipping(notificationPanelTop - mView.getTop());
     }
 
+    /** Animate the keyguard status bar in. */
+    public void animateKeyguardStatusBarIn() {
+        mView.setVisibility(View.VISIBLE);
+        mView.setAlpha(0f);
+        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+        anim.addUpdateListener(mAnimatorUpdateListener);
+        anim.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        anim.start();
+    }
+
+    /** Animate the keyguard status bar out. */
+    public void animateKeyguardStatusBarOut(long startDelay, long duration) {
+        ValueAnimator anim = ValueAnimator.ofFloat(mView.getAlpha(), 0f);
+        anim.addUpdateListener(mAnimatorUpdateListener);
+        anim.setStartDelay(startDelay);
+        anim.setDuration(duration);
+        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mView.setVisibility(View.INVISIBLE);
+                mView.setAlpha(1f);
+                mKeyguardStatusBarAnimateAlpha = 1f;
+            }
+        });
+        anim.start();
+    }
+
+    /**
+     * Updates the {@link KeyguardStatusBarView} state based on what the {@link ViewStateProvider}
+     * provides.
+     */
+    public void updateViewState() {
+        ViewState newViewState = mViewStateProvider.provideViewState();
+        if (!newViewState.mShouldUpdate) {
+            return;
+        }
+        updateViewState(
+                newViewState.mAlpha * mKeyguardStatusBarAnimateAlpha,
+                newViewState.mVisibility);
+    }
+
     /**
      * Updates the {@link KeyguardStatusBarView} state based on the provided values.
      */
@@ -218,5 +277,24 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryListening: " + mBatteryListening);
         mView.dump(fd, pw, args);
+    }
+
+    /** An interface that provides the desired state of {@link KeyguardStatusBarView}. */
+    public interface ViewStateProvider {
+        /** Provides the state. */
+        ViewState provideViewState();
+    }
+
+    /** A POJO for the desired state of {@link KeyguardStatusBarView}. */
+    static class ViewState {
+        final boolean mShouldUpdate;
+        final float mAlpha;
+        final int mVisibility;
+
+        ViewState(boolean shouldUpdate, float alpha, int visibility) {
+            this.mShouldUpdate = shouldUpdate;
+            this.mAlpha = alpha;
+            this.mVisibility = visibility;
+        }
     }
 }

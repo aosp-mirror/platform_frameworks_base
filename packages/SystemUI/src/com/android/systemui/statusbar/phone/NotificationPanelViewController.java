@@ -298,7 +298,7 @@ public class NotificationPanelViewController extends PanelViewController {
                             && !mDelayShowingKeyguardStatusBar
                             && !mBiometricUnlockController.isBiometricUnlock()) {
                         mFirstBypassAttempt = false;
-                        animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                        mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
                     }
                 }
 
@@ -436,7 +436,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mQsTouchAboveFalsingThreshold;
     private int mQsFalsingThreshold;
 
-    private float mKeyguardStatusBarAnimateAlpha = 1f;
     private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private boolean mListenForHeadsUp;
     private int mNavigationBarBottomHeight;
@@ -687,6 +686,27 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     };
 
+    private final KeyguardStatusBarViewController.ViewStateProvider mViewStateProvider =
+            new KeyguardStatusBarViewController.ViewStateProvider() {
+                @Override
+                public KeyguardStatusBarViewController.ViewState provideViewState() {
+                    float alphaQsExpansion = 1 - Math.min(1, computeQsExpansionFraction() * 2);
+                    float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
+                            * (1.0f - mKeyguardHeadsUpShowingAmount);
+
+                    boolean hideForBypass =
+                            mFirstBypassAttempt && mUpdateMonitor.shouldListenForFace()
+                                    || mDelayShowingKeyguardStatusBar;
+                    int newVisibility = newAlpha != 0f && !mDozing && !hideForBypass
+                                    ? View.VISIBLE : View.INVISIBLE;
+
+                    return new KeyguardStatusBarViewController.ViewState(
+                            /* shouldAnimate= */ mKeyguardShowing,
+                            newAlpha,
+                            newVisibility);
+                }
+            };
+
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Resources resources,
@@ -893,7 +913,9 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mKeyguardStatusBarViewController =
-                mKeyguardStatusBarViewComponentFactory.build(mKeyguardStatusBar)
+                mKeyguardStatusBarViewComponentFactory.build(
+                        mKeyguardStatusBar,
+                        mViewStateProvider)
                         .getKeyguardStatusBarViewController();
         mKeyguardStatusBarViewController.init();
 
@@ -2174,59 +2196,6 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private final Runnable mAnimateKeyguardStatusBarInvisibleEndRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mKeyguardStatusBar.setVisibility(View.INVISIBLE);
-            mKeyguardStatusBar.setAlpha(1f);
-            mKeyguardStatusBarAnimateAlpha = 1f;
-        }
-    };
-
-    private void animateKeyguardStatusBarOut() {
-        ValueAnimator anim = ValueAnimator.ofFloat(mKeyguardStatusBar.getAlpha(), 0f);
-        anim.addUpdateListener(mStatusBarAnimateAlphaListener);
-        anim.setStartDelay(mKeyguardStateController.isKeyguardFadingAway()
-                ? mKeyguardStateController.getKeyguardFadingAwayDelay() : 0);
-
-        long duration;
-        if (mKeyguardStateController.isKeyguardFadingAway()) {
-            duration = mKeyguardStateController.getShortenedFadingAwayDuration();
-        } else {
-            duration = StackStateAnimator.ANIMATION_DURATION_STANDARD;
-        }
-        anim.setDuration(duration);
-
-        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mAnimateKeyguardStatusBarInvisibleEndRunnable.run();
-            }
-        });
-        anim.start();
-    }
-
-    private final ValueAnimator.AnimatorUpdateListener
-            mStatusBarAnimateAlphaListener =
-            new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mKeyguardStatusBarAnimateAlpha = (float) animation.getAnimatedValue();
-                    updateHeaderKeyguardAlpha();
-                }
-            };
-
-    private void animateKeyguardStatusBarIn(long duration) {
-        mKeyguardStatusBar.setVisibility(View.VISIBLE);
-        mKeyguardStatusBar.setAlpha(0f);
-        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.addUpdateListener(mStatusBarAnimateAlphaListener);
-        anim.setDuration(duration);
-        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        anim.start();
-    }
-
     private final Runnable mAnimateKeyguardBottomAreaInvisibleEndRunnable = new Runnable() {
         @Override
         public void run() {
@@ -2279,7 +2248,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mQsExpansionHeight = height;
         updateQsExpansion();
         requestScrollerTopPaddingUpdate(false /* animate */);
-        updateHeaderKeyguardAlpha();
+        mKeyguardStatusBarViewController.updateViewState();
         if (mBarState == StatusBarState.SHADE_LOCKED || mBarState == KEYGUARD) {
             updateKeyguardBottomAreaAlpha();
             positionClockAndNotifications();
@@ -3003,7 +2972,7 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private void updateHeader() {
         if (mBarState == KEYGUARD) {
-            updateHeaderKeyguardAlpha();
+            mKeyguardStatusBarViewController.updateViewState();
         }
         updateQsExpansion();
     }
@@ -3049,23 +3018,6 @@ public class NotificationPanelViewController extends PanelViewController {
         alpha = MathUtils.saturate(alpha);
         alpha = (float) Math.pow(alpha, 0.75);
         return alpha;
-    }
-
-    private void updateHeaderKeyguardAlpha() {
-        if (!mKeyguardShowing) {
-            return;
-        }
-        float alphaQsExpansion = 1 - Math.min(1, computeQsExpansionFraction() * 2);
-        float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
-                * mKeyguardStatusBarAnimateAlpha;
-        newAlpha *= 1.0f - mKeyguardHeadsUpShowingAmount;
-        mKeyguardStatusBar.setAlpha(newAlpha);
-        boolean
-                hideForBypass =
-                mFirstBypassAttempt && mUpdateMonitor.shouldListenForFace()
-                        || mDelayShowingKeyguardStatusBar;
-        mKeyguardStatusBar.setVisibility(
-                newAlpha != 0f && !mDozing && !hideForBypass ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void updateKeyguardBottomAreaAlpha() {
@@ -3294,7 +3246,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateDozingVisibilities(boolean animate) {
         mKeyguardBottomArea.setDozing(mDozing, animate);
         if (!mDozing && animate) {
-            animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
         }
     }
 
@@ -3381,7 +3333,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void setKeyguardHeadsUpShowingAmount(float amount) {
         mKeyguardHeadsUpShowingAmount = amount;
-        updateHeaderKeyguardAlpha();
+        mKeyguardStatusBarViewController.updateViewState();
     }
 
     private float getKeyguardHeadsUpShowingAmount() {
@@ -4478,11 +4430,22 @@ public class NotificationPanelViewController extends PanelViewController {
 
             if (oldState == KEYGUARD && (goingToFullShade
                     || statusBarState == StatusBarState.SHADE_LOCKED)) {
-                animateKeyguardStatusBarOut();
+
+                long startDelay;
+                long duration;
+                if (mKeyguardStateController.isKeyguardFadingAway()) {
+                    startDelay = mKeyguardStateController.getKeyguardFadingAwayDelay();
+                    duration = mKeyguardStateController.getShortenedFadingAwayDuration();
+                } else {
+                    startDelay = 0;
+                    duration = StackStateAnimator.ANIMATION_DURATION_STANDARD;
+                }
+                mKeyguardStatusBarViewController.animateKeyguardStatusBarOut(startDelay, duration);
                 updateQSMinHeight();
             } else if (oldState == StatusBarState.SHADE_LOCKED
                     && statusBarState == KEYGUARD) {
-                animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
+
                 mNotificationStackScrollLayoutController.resetScrollPosition();
                 // Only animate header if the header is visible. If not, it will partially
                 // animate out
