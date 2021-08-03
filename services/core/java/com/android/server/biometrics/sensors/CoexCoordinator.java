@@ -73,6 +73,11 @@ public class CoexCoordinator {
          * from scheduler if auth was successful).
          */
         void handleLifecycleAfterAuth();
+
+        /**
+         * Requests the owner to notify the caller that authentication was canceled.
+         */
+        void sendAuthenticationCanceled();
     }
 
     private static CoexCoordinator sInstance;
@@ -356,7 +361,11 @@ public class CoexCoordinator {
     private SuccessfulAuth popSuccessfulFaceAuthIfExists(long currentTimeMillis) {
         for (SuccessfulAuth auth : mSuccessfulAuths) {
             if (currentTimeMillis - auth.mAuthTimestamp >= SUCCESSFUL_AUTH_VALID_DURATION_MS) {
-                Slog.d(TAG, "Removing stale auth: " + auth);
+                // TODO(b/193089985): This removes the auth but does not notify the client with
+                //  an appropriate lifecycle event (such as ERROR_CANCELED), and violates the
+                //  API contract. However, this might be OK for now since the validity duration
+                //  is way longer than the time it takes to auth with fingerprint.
+                Slog.e(TAG, "Removing stale auth: " + auth);
                 mSuccessfulAuths.remove(auth);
             } else if (auth.mSensorType == SENSOR_TYPE_FACE) {
                 mSuccessfulAuths.remove(auth);
@@ -367,9 +376,13 @@ public class CoexCoordinator {
     }
 
     private void removeAndFinishAllFaceFromQueue() {
+        // Note that these auth are all successful, but have never notified the client (e.g.
+        // keyguard). To comply with the authentication lifecycle, we must notify the client that
+        // auth is "done". The safest thing to do is to send ERROR_CANCELED.
         for (SuccessfulAuth auth : mSuccessfulAuths) {
             if (auth.mSensorType == SENSOR_TYPE_FACE) {
-                Slog.d(TAG, "Removing from queue and finishing: " + auth);
+                Slog.d(TAG, "Removing from queue, canceling, and finishing: " + auth);
+                auth.mCallback.sendAuthenticationCanceled();
                 auth.mCallback.handleLifecycleAfterAuth();
                 mSuccessfulAuths.remove(auth);
             }
