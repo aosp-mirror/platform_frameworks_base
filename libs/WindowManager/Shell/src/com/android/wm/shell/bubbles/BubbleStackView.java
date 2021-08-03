@@ -1186,7 +1186,7 @@ public class BubbleStackView extends FrameLayout
         if (mFlyout != null) {
             removeView(mFlyout);
         }
-        mFlyout = new BubbleFlyoutView(getContext());
+        mFlyout = new BubbleFlyoutView(getContext(), mPositioner);
         mFlyout.setVisibility(GONE);
         mFlyout.setOnClickListener(mFlyoutClickListener);
         mFlyout.setOnTouchListener(mFlyoutTouchListener);
@@ -2423,20 +2423,19 @@ public class BubbleStackView extends FrameLayout
 
 
             if (mFlyout.getVisibility() == View.VISIBLE) {
-                mFlyout.animateUpdate(bubble.getFlyoutMessage(), getWidth(),
+                mFlyout.animateUpdate(bubble.getFlyoutMessage(),
                         mStackAnimationController.getStackPosition(), !bubble.showDot(),
                         mAfterFlyoutHidden /* onHide */);
             } else {
                 mFlyout.setVisibility(INVISIBLE);
                 mFlyout.setupFlyoutStartingAsDot(bubble.getFlyoutMessage(),
-                        mStackAnimationController.getStackPosition(), getWidth(),
+                        mStackAnimationController.getStackPosition(),
                         mStackAnimationController.isStackOnLeftSide(),
                         bubble.getIconView().getDotColor() /* dotColor */,
                         expandFlyoutAfterDelay /* onLayoutComplete */,
                         mAfterFlyoutHidden /* onHide */,
                         bubble.getIconView().getDotCenter(),
-                        !bubble.showDot(),
-                        mPositioner);
+                        !bubble.showDot());
             }
             mFlyout.bringToFront();
         });
@@ -2548,7 +2547,6 @@ public class BubbleStackView extends FrameLayout
                     R.string.bubbles_app_settings, bubble.getAppName()));
         }
 
-        mExpandedBubble.getExpandedView().getManageButtonBoundsOnScreen(mTempRect);
         if (mExpandedBubble.getExpandedView().getTaskView() != null) {
             mExpandedBubble.getExpandedView().getTaskView().setObscuredTouchRect(mShowingManage
                     ? new Rect(0, 0, getWidth(), getHeight())
@@ -2560,7 +2558,11 @@ public class BubbleStackView extends FrameLayout
 
         // When the menu is open, it should be at these coordinates. The menu pops out to the right
         // in LTR and to the left in RTL.
-        final float targetX = isLtr ? mTempRect.left : mTempRect.right - mManageMenu.getWidth();
+        mExpandedBubble.getExpandedView().getManageButtonBoundsOnScreen(mTempRect);
+        final float margin = mExpandedBubble.getExpandedView().getManageButtonMargin();
+        final float targetX = isLtr
+                ? mTempRect.left - margin
+                : mTempRect.right + margin - mManageMenu.getWidth();
         final float targetY = mTempRect.bottom - mManageMenu.getHeight();
 
         final float xOffsetForAnimation = (isLtr ? 1 : -1) * mManageMenu.getWidth() / 4f;
