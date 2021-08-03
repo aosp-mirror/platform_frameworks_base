@@ -18,12 +18,13 @@ package com.android.wm.shell.bubbles
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.TextView
-import com.android.internal.util.ContrastColorUtil
+import com.android.internal.R.color.system_neutral1_900
 import com.android.wm.shell.R
 import com.android.wm.shell.animation.Interpolators
 
@@ -31,21 +32,21 @@ import com.android.wm.shell.animation.Interpolators
  * User education view to highlight the manage button that allows a user to configure the settings
  * for the bubble. Shown only the first time a user expands a bubble.
  */
-class ManageEducationView constructor(context: Context) : LinearLayout(context) {
+class ManageEducationView constructor(context: Context, positioner: BubblePositioner)
+    : LinearLayout(context) {
 
-    private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleManageEducationView"
+    private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "ManageEducationView"
         else BubbleDebugConfig.TAG_BUBBLES
 
     private val ANIMATE_DURATION: Long = 200
-    private val ANIMATE_DURATION_SHORT: Long = 40
 
-    private val manageView by lazy { findViewById<View>(R.id.manage_education_view) }
-    private val manageButton by lazy { findViewById<Button>(R.id.manage) }
+    private val positioner: BubblePositioner = positioner
+    private val manageView by lazy { findViewById<ViewGroup>(R.id.manage_education_view) }
+    private val manageButton by lazy { findViewById<Button>(R.id.manage_button) }
     private val gotItButton by lazy { findViewById<Button>(R.id.got_it) }
-    private val titleTextView by lazy { findViewById<TextView>(R.id.user_education_title) }
-    private val descTextView by lazy { findViewById<TextView>(R.id.user_education_description) }
 
     private var isHiding = false
+    private var realManageButtonRect = Rect()
 
     init {
         LayoutInflater.from(context).inflate(R.layout.bubbles_manage_button_education, this)
@@ -66,18 +67,17 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
     override fun onFinishInflate() {
         super.onFinishInflate()
         layoutDirection = resources.configuration.layoutDirection
-        setTextColor()
     }
 
-    private fun setTextColor() {
-        val typedArray = mContext.obtainStyledAttributes(intArrayOf(android.R.attr.colorAccent,
-            android.R.attr.textColorPrimaryInverse))
-        val bgColor = typedArray.getColor(0 /* index */, Color.BLACK)
-        var textColor = typedArray.getColor(1 /* index */, Color.WHITE)
+    private fun setButtonColor() {
+        val typedArray = mContext.obtainStyledAttributes(intArrayOf(
+                com.android.internal.R.attr.colorAccentPrimary))
+        val buttonColor = typedArray.getColor(0 /* index */, Color.TRANSPARENT)
         typedArray.recycle()
-        textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, true)
-        titleTextView.setTextColor(textColor)
-        descTextView.setTextColor(textColor)
+
+        manageButton.setTextColor(mContext.getColor(system_neutral1_900))
+        manageButton.setBackgroundDrawable(ColorDrawable(buttonColor))
+        gotItButton.setBackgroundDrawable(ColorDrawable(buttonColor))
     }
 
     private fun setDrawableDirection() {
@@ -91,30 +91,36 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
      * If necessary, toggles the user education view for the manage button. This is shown when the
      * bubble stack is expanded for the first time.
      *
-     * @param show whether the user education view should show or not.
+     * @param expandedView the expandedView the user education is shown on top of.
      */
-    fun show(expandedView: BubbleExpandedView, rect: Rect) {
+    fun show(expandedView: BubbleExpandedView) {
+        setButtonColor()
         if (visibility == VISIBLE) return
+
+        layoutParams.width = if (positioner.isLargeScreen)
+            context.resources.getDimensionPixelSize(
+                    R.dimen.bubbles_user_education_width_large_screen)
+        else ViewGroup.LayoutParams.MATCH_PARENT
 
         alpha = 0f
         visibility = View.VISIBLE
+        expandedView.getManageButtonBoundsOnScreen(realManageButtonRect)
+        manageView.setPadding(realManageButtonRect.left - expandedView.manageButtonMargin,
+                manageView.paddingTop, manageView.paddingRight, manageView.paddingBottom)
         post {
-            expandedView.getManageButtonBoundsOnScreen(rect)
-
             manageButton
                 .setOnClickListener {
-                    expandedView.findViewById<View>(R.id.settings_button).performClick()
-                    hide(true /* isStackExpanding */)
+                    hide()
+                    expandedView.findViewById<View>(R.id.manage_button).performClick()
                 }
-            gotItButton.setOnClickListener { hide(true /* isStackExpanding */) }
-            setOnClickListener { hide(true /* isStackExpanding */) }
+            gotItButton.setOnClickListener { hide() }
+            setOnClickListener { hide() }
 
-            with(manageView) {
-                translationX = 0f
-                val inset = resources.getDimensionPixelSize(
-                    R.dimen.bubbles_manage_education_top_inset)
-                translationY = (rect.top - manageView.height + inset).toFloat()
-            }
+            val offsetViewBounds = Rect()
+            manageButton.getDrawingRect(offsetViewBounds)
+            manageView.offsetDescendantRectToMyCoords(manageButton, offsetViewBounds)
+            translationX = 0f
+            translationY = (realManageButtonRect.top - offsetViewBounds.top).toFloat()
             bringToFront()
             animate()
                 .setDuration(ANIMATE_DURATION)
@@ -124,13 +130,13 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
         setShouldShow(false)
     }
 
-    fun hide(isStackExpanding: Boolean) {
+    fun hide() {
         if (visibility != VISIBLE || isHiding) return
 
         animate()
             .withStartAction { isHiding = true }
             .alpha(0f)
-            .setDuration(if (isStackExpanding) ANIMATE_DURATION_SHORT else ANIMATE_DURATION)
+            .setDuration(ANIMATE_DURATION)
             .withEndAction {
                 isHiding = false
                 visibility = GONE
