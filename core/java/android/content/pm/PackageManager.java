@@ -9096,7 +9096,6 @@ public abstract class PackageManager {
     private static final class ApplicationInfoQuery {
         final String packageName;
         final int flags;
-        @UserIdInt
         final int userId;
 
         ApplicationInfoQuery(@Nullable String packageName, int flags, int userId) {
@@ -9158,10 +9157,6 @@ public abstract class PackageManager {
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected boolean bypass(ApplicationInfoQuery query) {
-                    return query.userId < 0;
-                }
-                @Override
                 protected ApplicationInfo maybeCheckConsistency(
                         ApplicationInfoQuery query, ApplicationInfo proposedResult) {
                     // Implementing this debug check for ApplicationInfo would require a
@@ -9172,7 +9167,7 @@ public abstract class PackageManager {
 
     /** @hide */
     public static ApplicationInfo getApplicationInfoAsUserCached(
-            String packageName, int flags, @UserIdInt int userId) {
+            String packageName, int flags, int userId) {
         return sApplicationInfoCache.query(
                 new ApplicationInfoQuery(packageName, flags, userId));
     }
@@ -9204,7 +9199,6 @@ public abstract class PackageManager {
     private static final class PackageInfoQuery {
         final String packageName;
         final int flags;
-        @UserIdInt
         final int userId;
 
         PackageInfoQuery(@Nullable String packageName, int flags, int userId) {
@@ -9265,10 +9259,6 @@ public abstract class PackageManager {
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected boolean bypass(PackageInfoQuery query) {
-                    return query.userId < 0;
-                }
-                @Override
                 protected PackageInfo maybeCheckConsistency(
                         PackageInfoQuery query, PackageInfo proposedResult) {
                     // Implementing this debug check for PackageInfo would require a
@@ -9279,7 +9269,7 @@ public abstract class PackageManager {
 
     /** @hide */
     public static PackageInfo getPackageInfoAsUserCached(
-            String packageName, int flags, @UserIdInt int userId) {
+            String packageName, int flags, int userId) {
         return sPackageInfoCache.query(new PackageInfoQuery(packageName, flags, userId));
     }
 
