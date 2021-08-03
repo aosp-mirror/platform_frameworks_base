@@ -1365,7 +1365,7 @@ public class StatusBar extends SystemUI implements
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
                     mQSPanelController = ((QSFragment) qs).getQSPanelController();
-                    mQSPanelController.setBrightnessMirror(mBrightnessMirrorController);
+                    ((QSFragment) qs).setBrightnessMirrorController(mBrightnessMirrorController);
                 }
             });
         }
