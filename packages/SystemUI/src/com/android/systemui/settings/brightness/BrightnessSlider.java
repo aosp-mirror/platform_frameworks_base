@@ -140,13 +140,7 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
     @Override
     public void setMirrorControllerAndMirror(BrightnessMirrorController c) {
         mMirrorController = c;
-        if (c != null) {
-            setMirror(c.getToggleSlider());
-        } else {
-            // If there's no mirror, we may be the ones dispatching, events but we should not mirror
-            // them
-            mView.setOnDispatchTouchEventListener(null);
-        }
+        setMirror(c.getToggleSlider());
     }
 
     @Override
