@@ -61,7 +61,8 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     @Nullable
     private InputConnection mInputConnection;
 
-    private final Looper mMainLooper;
+    @NonNull
+    private final Looper mLooper;
     private final Handler mH;
 
     private final Object mLock = new Object();
@@ -71,12 +72,12 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     private final InputMethodManager mParentInputMethodManager;
     private final WeakReference<View> mServedView;
 
-    public IInputConnectionWrapper(@NonNull Looper mainLooper,
+    public IInputConnectionWrapper(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
         mInputConnection = inputConnection;
-        mMainLooper = mainLooper;
-        mH = new Handler(mMainLooper);
+        mLooper = looper;
+        mH = new Handler(mLooper);
         mParentInputMethodManager = inputMethodManager;
         mServedView = new WeakReference<>(servedView);
     }
@@ -156,13 +157,13 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mLock) {
-            // Check that the call is initiated in the main thread of the current InputConnection
+            // Check that the call is initiated in the target thread of the current InputConnection
             // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
             // executed on this thread. Otherwise the messages are dispatched to the correct thread
             // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
             // reasons.
             if ((mInputConnection instanceof DumpableInputConnection)
-                    && Looper.myLooper() == mMainLooper) {
+                    && mLooper.isCurrentThread()) {
                 ((DumpableInputConnection) mInputConnection).dumpDebug(proto, fieldId);
             }
         }
@@ -766,10 +767,9 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     private void dispatch(@NonNull Runnable runnable) {
-        // If we are calling this from the main thread, then we can call
-        // right through.  Otherwise, we need to send the message to the
-        // main thread.
-        if (mMainLooper.isCurrentThread()) {
+        // If we are calling this from the target thread, then we can call right through.
+        // Otherwise, we need to send the message to the target thread.
+        if (mLooper.isCurrentThread()) {
             runnable.run();
             return;
         }
