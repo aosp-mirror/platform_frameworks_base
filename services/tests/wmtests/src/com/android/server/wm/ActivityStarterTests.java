@@ -32,6 +32,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
@@ -755,12 +756,12 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     /**
-     * This test ensures that {@link ActivityStarter#setTargetStackAndMoveToFrontIfNeeded} will
-     * move the existing task to front if the current focused stack doesn't have running task.
+     * This test ensures that {@link ActivityStarter#setTargetRootTaskIfNeeded} will
+     * move the existing task to front if the current focused root task doesn't have running task.
      */
     @Test
-    public void testBringTaskToFrontWhenFocusedStackIsFinising() {
-        // Put 2 tasks in the same stack (simulate the behavior of home stack).
+    public void testBringTaskToFrontWhenFocusedTaskIsFinishing() {
+        // Put 2 tasks in the same root task (simulate the behavior of home root task).
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setParentTask(rootTask)
@@ -777,13 +778,16 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertEquals(finishingTopActivity, mRootWindowContainer.topRunningActivity());
         finishingTopActivity.finishing = true;
 
-        // Launch the bottom task of the target stack.
+        // Launch the bottom task of the target root task.
         prepareStarter(FLAG_ACTIVITY_NEW_TASK, false /* mockGetLaunchStack */)
-                .setReason("testBringTaskToFrontWhenTopStackIsFinising")
-                .setIntent(activity.intent)
+                .setReason("testBringTaskToFrontWhenFocusedTaskIsFinishing")
+                .setIntent(activity.intent.addFlags(
+                        FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                 .execute();
+        verify(activity.getRootTask()).startActivityLocked(any(), any(), anyBoolean(),
+                eq(true) /* isTaskSwitch */, any(), any());
         // The hierarchies of the activity should move to front.
-        assertEquals(activity, mRootWindowContainer.topRunningActivity());
+        assertEquals(activity.getTask(), mRootWindowContainer.topRunningActivity().getTask());
     }
 
     /**

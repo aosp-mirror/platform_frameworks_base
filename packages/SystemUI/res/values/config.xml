@@ -691,7 +691,4 @@
 
     <!-- Timeout to idle mode duration in milliseconds. -->
     <integer name="config_idleModeTimeout">10000</integer>
-
-    <!-- Tiemout to doze mode from idle in milliseconds. -->
-    <integer name="config_dozeModeTimeout">15000</integer>
 </resources>

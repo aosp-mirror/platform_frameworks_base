@@ -91,6 +91,8 @@ public class InternetDialog extends SystemUIDialog implements
     protected WifiManager mWifiManager;
     @VisibleForTesting
     protected View mDialogView;
+    @VisibleForTesting
+    protected WifiEntry mConnectedWifiEntry;
 
     private InternetDialogFactory mInternetDialogFactory;
     private SubscriptionManager mSubscriptionManager;
@@ -123,7 +125,6 @@ public class InternetDialog extends SystemUIDialog implements
     private Switch mWiFiToggle;
     private Button mDoneButton;
     private Drawable mBackgroundOn;
-    private WifiEntry mConnectedWifiEntry;
     private int mListMaxHeight;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
@@ -355,8 +356,7 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void setConnectedWifiLayout() {
-        if (!mWifiManager.isWifiEnabled()
-                || mInternetDialogController.getConnectedWifiEntry() == null) {
+        if (!mWifiManager.isWifiEnabled() || mConnectedWifiEntry == null) {
             mConnectedWifListLayout.setBackground(null);
             mConnectedWifListLayout.setVisibility(View.GONE);
             return;
@@ -364,7 +364,8 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifListLayout.setVisibility(View.VISIBLE);
         mConnectedWifiTitleText.setText(getConnectedWifiTitle());
         mConnectedWifiSummaryText.setText(getConnectedWifiSummary());
-        mConnectedWifiIcon.setImageDrawable(getConnectedWifiDrawable());
+        mConnectedWifiIcon.setImageDrawable(
+                mInternetDialogController.getConnectedWifiDrawable(mConnectedWifiEntry));
         mConnectedWifiTitleText.setTextColor(
                 mContext.getColor(R.color.connected_network_primary_color));
         mConnectedWifiSummaryText.setTextColor(
@@ -391,15 +392,6 @@ public class InternetDialog extends SystemUIDialog implements
                 mIsProgressBarVisible && !mIsSearchingHidden);
     }
 
-    private Drawable getConnectedWifiDrawable() {
-        try {
-            return mInternetDialogController.getWifiConnectedDrawable(mConnectedWifiEntry);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private Drawable getSignalStrengthDrawable() {
         return mInternetDialogController.getSignalStrengthDrawable();
     }
@@ -413,11 +405,11 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     String getConnectedWifiTitle() {
-        return mInternetDialogController.getConnectedWifiTitle();
+        return mInternetDialogController.getDefaultWifiTitle();
     }
 
     String getConnectedWifiSummary() {
-        return mInternetDialogController.getConnectedWifiSummary();
+        return mInternetDialogController.getDefaultWifiSummary();
     }
 
     protected void showProgressBar() {

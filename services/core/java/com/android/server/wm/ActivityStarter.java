@@ -194,7 +194,6 @@ class ActivityStarter {
     private Task mTargetTask;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
-    private boolean mKeepCurTransition;
     private boolean mAvoidMoveToFront;
     private boolean mFrozeTaskList;
     private boolean mTransientLaunch;
@@ -593,7 +592,6 @@ class ActivityStarter {
         mTargetRootTask = starter.mTargetRootTask;
         mMovedToFront = starter.mMovedToFront;
         mNoAnimation = starter.mNoAnimation;
-        mKeepCurTransition = starter.mKeepCurTransition;
         mAvoidMoveToFront = starter.mAvoidMoveToFront;
         mFrozeTaskList = starter.mFrozeTaskList;
 
@@ -1708,6 +1706,8 @@ class ActivityStarter {
 
         mIntent.setFlags(mLaunchFlags);
 
+        // Get top task at beginning because the order may be changed when reusing existing task.
+        final Task prevTopTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         final Task reusedTask = getReusableTask();
 
         // If requested, freeze the task list
@@ -1787,24 +1787,23 @@ class ActivityStarter {
                     UserHandle.getAppId(mStartActivity.info.applicationInfo.uid) /*recipient*/,
                     resultToUid /*visible*/, true /*direct*/);
         }
+        final Task startedTask = mStartActivity.getTask();
         if (newTask) {
-            EventLogTags.writeWmCreateTask(mStartActivity.mUserId,
-                    mStartActivity.getTask().mTaskId);
+            EventLogTags.writeWmCreateTask(mStartActivity.mUserId, startedTask.mTaskId);
         }
-        mStartActivity.logStartActivity(
-                EventLogTags.WM_CREATE_ACTIVITY, mStartActivity.getTask());
+        mStartActivity.logStartActivity(EventLogTags.WM_CREATE_ACTIVITY, startedTask);
 
         mStartActivity.getTaskFragment().clearLastPausedActivity();
 
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
+        final boolean isTaskSwitch = startedTask != prevTopTask;
         mTargetRootTask.startActivityLocked(mStartActivity,
                 topRootTask != null ? topRootTask.getTopNonFinishingActivity() : null, newTask,
-                mKeepCurTransition, mOptions, sourceRecord);
+                isTaskSwitch, mOptions, sourceRecord);
         if (mDoResume) {
-            final ActivityRecord topTaskActivity =
-                    mStartActivity.getTask().topRunningActivityLocked();
+            final ActivityRecord topTaskActivity = startedTask.topRunningActivityLocked();
             if (!mTargetRootTask.isTopActivityFocusable()
                     || (topTaskActivity != null && topTaskActivity.isTaskOverlay()
                     && mStartActivity != topTaskActivity)) {
@@ -1838,8 +1837,8 @@ class ActivityStarter {
         mRootWindowContainer.updateUserRootTask(mStartActivity.mUserId, mTargetRootTask);
 
         // Update the recent tasks list immediately when the activity starts
-        mSupervisor.mRecentTasks.add(mStartActivity.getTask());
-        mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(),
+        mSupervisor.mRecentTasks.add(startedTask);
+        mSupervisor.handleNonResizableTaskIfNeeded(startedTask,
                 mPreferredWindowingMode, mPreferredTaskDisplayArea, mTargetRootTask);
 
         return START_SUCCESS;
@@ -2278,7 +2277,6 @@ class ActivityStarter {
         mTargetTask = null;
         mMovedToFront = false;
         mNoAnimation = false;
-        mKeepCurTransition = false;
         mAvoidMoveToFront = false;
         mFrozeTaskList = false;
         mTransientLaunch = false;

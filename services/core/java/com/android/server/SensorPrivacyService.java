@@ -21,7 +21,6 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
@@ -382,17 +381,9 @@ public final class SensorPrivacyService extends SystemService {
 
             int sensor;
             if (result == MODE_IGNORED) {
-                if (code == OP_RECORD_AUDIO) {
+                if (code == OP_RECORD_AUDIO || code == OP_PHONE_CALL_MICROPHONE) {
                     sensor = MICROPHONE;
-                } else if (code == OP_CAMERA) {
-                    sensor = CAMERA;
-                } else {
-                    return;
-                }
-            } else if (result == MODE_ALLOWED) {
-                if (code == OP_PHONE_CALL_MICROPHONE) {
-                    sensor = MICROPHONE;
-                } else if (code == OP_PHONE_CALL_CAMERA) {
+                } else if (code == OP_CAMERA || code == OP_PHONE_CALL_CAMERA) {
                     sensor = CAMERA;
                 } else {
                     return;
@@ -1276,9 +1267,13 @@ public final class SensorPrivacyService extends SystemService {
                 case MICROPHONE:
                     mAppOpsManagerInternal.setGlobalRestriction(OP_RECORD_AUDIO, enabled,
                             mAppOpsRestrictionToken);
+                    mAppOpsManagerInternal.setGlobalRestriction(OP_PHONE_CALL_MICROPHONE, enabled,
+                            mAppOpsRestrictionToken);
                     break;
                 case CAMERA:
                     mAppOpsManagerInternal.setGlobalRestriction(OP_CAMERA, enabled,
+                            mAppOpsRestrictionToken);
+                    mAppOpsManagerInternal.setGlobalRestriction(OP_PHONE_CALL_CAMERA, enabled,
                             mAppOpsRestrictionToken);
                     break;
             }

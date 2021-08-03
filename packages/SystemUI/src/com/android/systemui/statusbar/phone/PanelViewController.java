@@ -1397,8 +1397,7 @@ public abstract class PanelViewController {
 
     private void beginJankMonitoring(int cuj) {
         InteractionJankMonitor.Configuration.Builder builder =
-                new InteractionJankMonitor.Configuration.Builder(cuj)
-                        .setView(mView)
+                InteractionJankMonitor.Configuration.Builder.withView(cuj, mView)
                         .setTag(isFullyCollapsed() ? "Expand" : "Collapse");
         InteractionJankMonitor.getInstance().begin(builder);
     }
