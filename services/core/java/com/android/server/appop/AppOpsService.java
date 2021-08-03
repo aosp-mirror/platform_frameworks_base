@@ -3438,7 +3438,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         + " package " + packageName + "flags: " +
                         AppOpsManager.flagsToString(flags));
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                        packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                        packageName);
             }
             final Op op = getOpLocked(ops, code, uid, true);
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
