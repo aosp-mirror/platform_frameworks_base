@@ -183,6 +183,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.onThemeChanged(mTintedIconManager);
     }
 
+    /** Sets whether user switcher is enabled. */
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+        mView.setKeyguardUserSwitcherEnabled(enabled);
+    }
+
     /** Sets whether this controller should listen to battery updates. */
     public void setBatteryListening(boolean listening) {
         if (listening == mBatteryListening) {

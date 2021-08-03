@@ -321,7 +321,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
     }
 
-    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+    void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 
