@@ -353,6 +353,12 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
 
     /**
+     * Retrieve all receivers that can handle a broadcast of the given intent.
+     */
+    public abstract List<ResolveInfo> queryIntentReceivers(Intent intent,
+            String resolvedType, int flags, int filterCallingUid, int userId);
+
+    /**
      * Retrieve all services that can be performed for the given intent.
      * @see PackageManager#queryIntentServices(Intent, int)
      */
