@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.LifecycleFragment;
@@ -405,6 +406,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     public QSPanelController getQSPanelController() {
         return mQSPanelController;
+    }
+
+    public void setBrightnessMirrorController(
+            BrightnessMirrorController brightnessMirrorController) {
+        mQSPanelController.setBrightnessMirror(brightnessMirrorController);
+        mQuickQSPanelController.setBrightnessMirror(brightnessMirrorController);
     }
 
     @Override
