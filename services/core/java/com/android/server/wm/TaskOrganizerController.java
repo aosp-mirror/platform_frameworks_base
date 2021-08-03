@@ -113,109 +113,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return mTaskOrganizer.asBinder();
         }
 
-        void addStartingWindow(Task task, ActivityRecord activity, int launchTheme,
-                TaskSnapshot taskSnapshot) {
-            final StartingWindowInfo info = task.getStartingWindowInfo(activity);
-            if (launchTheme != 0) {
-                info.splashScreenThemeResId = launchTheme;
-            }
-            info.mTaskSnapshot = taskSnapshot;
-            // make this happen prior than prepare surface
-            try {
-                mTaskOrganizer.addStartingWindow(info, activity.token);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskStart callback", e);
-            }
-        }
-
-        // Capture the animation surface control for activity's main window
-        private class StartingWindowAnimationAdaptor implements AnimationAdapter {
-            private SurfaceControl mAnimationLeash;
-            @Override
-            public boolean getShowWallpaper() {
-                return false;
-            }
-
-            @Override
-            public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-                    int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
-                mAnimationLeash = animationLeash;
-            }
-
-            @Override
-            public void onAnimationCancelled(SurfaceControl animationLeash) {
-                if (mAnimationLeash == animationLeash) {
-                    mAnimationLeash = null;
-                }
-            }
-
-            @Override
-            public long getDurationHint() {
-                return 0;
-            }
-
-            @Override
-            public long getStatusBarTransitionsStartTime() {
-                return 0;
-            }
-
-            @Override
-            public void dump(PrintWriter pw, String prefix) {
-                pw.print(prefix + "StartingWindowAnimationAdaptor mCapturedLeash=");
-                pw.print(mAnimationLeash);
-                pw.println();
-            }
-
-            @Override
-            public void dumpDebug(ProtoOutputStream proto) {
-            }
-        }
-
-        void removeStartingWindow(Task task, boolean prepareAnimation) {
-            SurfaceControl windowAnimationLeash = null;
-            Rect mainFrame = null;
-            final boolean playShiftUpAnimation = !task.inMultiWindowMode();
-            if (prepareAnimation && playShiftUpAnimation) {
-                final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
-                if (topActivity != null) {
-                    final WindowState mainWindow =
-                            topActivity.findMainWindow(false/* includeStartingApp */);
-                    if (mainWindow != null) {
-                        final StartingWindowAnimationAdaptor adaptor =
-                                new StartingWindowAnimationAdaptor();
-                        final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
-                        mainWindow.startAnimation(t, adaptor, false,
-                                ANIMATION_TYPE_STARTING_REVEAL);
-                        windowAnimationLeash = adaptor.mAnimationLeash;
-                        mainFrame = mainWindow.getRelativeFrame();
-                        t.setPosition(windowAnimationLeash, mainFrame.left, mainFrame.top);
-                    }
-                }
-            }
-            try {
-                mTaskOrganizer.removeStartingWindow(task.mTaskId, windowAnimationLeash,
-                        mainFrame, prepareAnimation);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
-            }
-        }
-
-        void copySplashScreenView(Task task) {
-            try {
-                mTaskOrganizer.copySplashScreenView(task.mTaskId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending copyStartingWindowView callback", e);
-            }
-        }
-
-        void onAppSplashScreenViewRemoved(Task task) {
-            try {
-                mTaskOrganizer.onAppSplashScreenViewRemoved(task.mTaskId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onAppSplashScreenViewRemoved callback", e);
-            }
-        }
-
         SurfaceControl prepareLeash(Task task, String reason) {
             return new SurfaceControl(task.getSurfaceControl(), reason);
         }
@@ -300,23 +197,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
-        }
-
-        void addStartingWindow(Task t, ActivityRecord activity, int launchTheme,
-                TaskSnapshot taskSnapshot) {
-            mOrganizer.addStartingWindow(t, activity, launchTheme, taskSnapshot);
-        }
-
-        void removeStartingWindow(Task t, boolean prepareAnimation) {
-            mOrganizer.removeStartingWindow(t, prepareAnimation);
-        }
-
-        void copySplashScreenView(Task t) {
-            mOrganizer.copySplashScreenView(t);
-        }
-
-        public void onAppSplashScreenViewRemoved(Task t) {
-            mOrganizer.onAppSplashScreenViewRemoved(t);
         }
 
         /**
@@ -563,36 +443,126 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
     }
 
+    // Capture the animation surface control for activity's main window
+    private static class StartingWindowAnimationAdaptor implements AnimationAdapter {
+        private SurfaceControl mAnimationLeash;
+        @Override
+        public boolean getShowWallpaper() {
+            return false;
+        }
+
+        @Override
+        public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
+                int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+            mAnimationLeash = animationLeash;
+        }
+
+        @Override
+        public void onAnimationCancelled(SurfaceControl animationLeash) {
+            if (mAnimationLeash == animationLeash) {
+                mAnimationLeash = null;
+            }
+        }
+
+        @Override
+        public long getDurationHint() {
+            return 0;
+        }
+
+        @Override
+        public long getStatusBarTransitionsStartTime() {
+            return 0;
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix + "StartingWindowAnimationAdaptor mCapturedLeash=");
+            pw.print(mAnimationLeash);
+            pw.println();
+        }
+
+        @Override
+        public void dumpDebug(ProtoOutputStream proto) {
+        }
+    }
+
     boolean addStartingWindow(Task task, ActivityRecord activity, int launchTheme,
             TaskSnapshot taskSnapshot) {
         final Task rootTask = task.getRootTask();
-        if (rootTask == null || rootTask.mTaskOrganizer == null || activity.mStartingData == null) {
+        if (rootTask == null || activity.mStartingData == null) {
             return false;
         }
-        final TaskOrganizerState state =
-                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.addStartingWindow(task, activity, launchTheme, taskSnapshot);
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null) {
+            return false;
+        }
+        final StartingWindowInfo info = task.getStartingWindowInfo(activity);
+        if (launchTheme != 0) {
+            info.splashScreenThemeResId = launchTheme;
+        }
+        info.mTaskSnapshot = taskSnapshot;
+        // make this happen prior than prepare surface
+        try {
+            lastOrganizer.addStartingWindow(info, activity.token);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception sending onTaskStart callback", e);
+            return false;
+        }
         return true;
     }
 
     void removeStartingWindow(Task task, boolean prepareAnimation) {
         final Task rootTask = task.getRootTask();
-        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+        if (rootTask == null) {
             return;
         }
-        final TaskOrganizerState state =
-                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.removeStartingWindow(task, prepareAnimation);
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null) {
+            return;
+        }
+        SurfaceControl windowAnimationLeash = null;
+        Rect mainFrame = null;
+        final boolean playShiftUpAnimation = !task.inMultiWindowMode();
+        if (prepareAnimation && playShiftUpAnimation) {
+            final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
+            if (topActivity != null) {
+                final WindowState mainWindow =
+                        topActivity.findMainWindow(false/* includeStartingApp */);
+                if (mainWindow != null) {
+                    final StartingWindowAnimationAdaptor adaptor =
+                            new StartingWindowAnimationAdaptor();
+                    final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
+                    mainWindow.startAnimation(t, adaptor, false,
+                            ANIMATION_TYPE_STARTING_REVEAL);
+                    windowAnimationLeash = adaptor.mAnimationLeash;
+                    mainFrame = mainWindow.getRelativeFrame();
+                    t.setPosition(windowAnimationLeash, mainFrame.left, mainFrame.top);
+                }
+            }
+        }
+        try {
+            lastOrganizer.removeStartingWindow(task.mTaskId, windowAnimationLeash,
+                    mainFrame, prepareAnimation);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
+        }
     }
 
     boolean copySplashScreenView(Task task) {
         final Task rootTask = task.getRootTask();
-        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+        if (rootTask == null) {
             return false;
         }
-        final TaskOrganizerState state =
-                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.copySplashScreenView(task);
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null) {
+            return false;
+        }
+        try {
+            lastOrganizer.copySplashScreenView(task.mTaskId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception sending copyStartingWindowView callback", e);
+            return false;
+        }
         return true;
     }
 
@@ -604,12 +574,18 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      */
     public void onAppSplashScreenViewRemoved(Task task) {
         final Task rootTask = task.getRootTask();
-        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+        if (rootTask == null) {
             return;
         }
-        final TaskOrganizerState state =
-                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.onAppSplashScreenViewRemoved(task);
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null) {
+            return;
+        }
+        try {
+            lastOrganizer.onAppSplashScreenViewRemoved(task.mTaskId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception sending onAppSplashScreenViewRemoved callback", e);
+        }
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
