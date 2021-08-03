@@ -2219,6 +2219,9 @@ public class DisplayContentTests extends WindowTestsBase {
         // request IME visible.
         final WindowState nextImeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
+        spyOn(nextImeAppTarget);
+        doReturn(true).when(nextImeAppTarget).isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION);
         mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
         assertNotEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
     }
