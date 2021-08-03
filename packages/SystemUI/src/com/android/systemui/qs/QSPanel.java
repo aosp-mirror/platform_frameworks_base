@@ -27,11 +27,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.RemeasuringLinearLayout;
@@ -386,19 +389,18 @@ public class QSPanel extends LinearLayout implements Tunable {
                 if (mediaView != null) {
                     index = indexOfChild(mediaView);
                 }
+                if (mSecurityFooter.getParent() == this && indexOfChild(mSecurityFooter) < index) {
+                    // When we remove the securityFooter to rearrange, the index of media will go
+                    // down by one, so we correct it
+                    index--;
+                }
                 switchToParent(mSecurityFooter, this, index);
             }
         }
     }
 
     private void switchToParent(View child, ViewGroup parent, int index) {
-        ViewGroup currentParent = (ViewGroup) child.getParent();
-        if (currentParent != parent || currentParent.indexOfChild(child) != index) {
-            if (currentParent != null) {
-                currentParent.removeView(child);
-            }
-            parent.addView(child, index);
-        }
+        switchToParent(child, parent, index, getDumpableTag());
     }
 
     /** Call when orientation has changed and MediaHost needs to be adjusted. */
@@ -766,5 +768,30 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     interface OnConfigurationChangedListener {
         void onConfigurationChange(Configuration newConfig);
+    }
+
+    @VisibleForTesting
+    static void switchToParent(View child, ViewGroup parent, int index, String tag) {
+        if (parent == null) {
+            Log.w(tag, "Trying to move view to null parent",
+                    new IllegalStateException());
+            return;
+        }
+        ViewGroup currentParent = (ViewGroup) child.getParent();
+        if (currentParent != parent) {
+            if (currentParent != null) {
+                currentParent.removeView(child);
+            }
+            parent.addView(child, index);
+            return;
+        }
+        // Same parent, we are just changing indices
+        int currentIndex = parent.indexOfChild(child);
+        if (currentIndex == index) {
+            // We want to be in the same place. Nothing to do here
+            return;
+        }
+        parent.removeView(child);
+        parent.addView(child, index);
     }
 }
