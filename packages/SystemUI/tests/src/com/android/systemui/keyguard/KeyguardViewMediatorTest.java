@@ -67,7 +67,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
     private KeyguardViewMediator mViewMediator;
@@ -126,7 +126,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 () -> mNotificationShadeDepthController);
         mViewMediator.start();
-        mViewMediator.onSystemReady();
     }
 
     @Test
@@ -165,8 +164,10 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway() {
         // When showing and provisioned
+        mViewMediator.onSystemReady();
         when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
         mViewMediator.setShowingLocked(true);
 

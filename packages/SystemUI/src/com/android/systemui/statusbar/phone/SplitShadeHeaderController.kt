@@ -17,10 +17,11 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.View
-import com.android.systemui.BatteryMeterView
 import com.android.systemui.R
+import com.android.systemui.battery.BatteryMeterView
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_HEADER
 import javax.inject.Inject
@@ -31,7 +32,8 @@ class SplitShadeHeaderController @Inject constructor(
     @Named(SPLIT_SHADE_HEADER) private val statusBar: View,
     private val statusBarIconController: StatusBarIconController,
     qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
-    featureFlags: FeatureFlags
+    featureFlags: FeatureFlags,
+    batteryMeterViewController: BatteryMeterViewController
 ) {
 
     // TODO(b/194178072) Handle RSSI hiding when multi carrier
@@ -56,6 +58,7 @@ class SplitShadeHeaderController @Inject constructor(
         // battery settings same as in QS icons
         batteryIcon.setIgnoreTunerUpdates(true)
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        batteryMeterViewController.init()
 
         val iconContainer: StatusIconContainer = statusBar.findViewById(R.id.statusIcons)
         iconManager = StatusBarIconController.IconManager(iconContainer, featureFlags)

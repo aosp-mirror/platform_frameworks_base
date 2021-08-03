@@ -25,9 +25,11 @@ import androidx.annotation.NonNull;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.PrivacyChipEvent;
@@ -37,7 +39,6 @@ import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.dagger.QSScope;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
@@ -69,6 +70,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyLogger mPrivacyLogger;
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
+    private final BatteryMeterViewController mBatteryMeterViewController;
     private final FeatureFlags mFeatureFlags;
 
     private boolean mListening;
@@ -134,6 +136,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             SysuiColorExtractor colorExtractor,
             PrivacyDialogController privacyDialogController,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            BatteryMeterViewController batteryMeterViewController,
             FeatureFlags featureFlags) {
         super(view);
         mPrivacyItemController = privacyItemController;
@@ -145,6 +148,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyLogger = privacyLogger;
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
+        mBatteryMeterViewController = batteryMeterViewController;
         mFeatureFlags = featureFlags;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
@@ -167,6 +171,11 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mCameraSlot = getResources().getString(com.android.internal.R.string.status_bar_camera);
         mMicSlot = getResources().getString(com.android.internal.R.string.status_bar_microphone);
         mLocationSlot = getResources().getString(com.android.internal.R.string.status_bar_location);
+    }
+
+    @Override
+    protected void onInit() {
+        mBatteryMeterViewController.init();
     }
 
     @Override
