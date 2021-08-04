@@ -61,10 +61,16 @@ public class BubblePositioner {
     public static final int NUM_VISIBLE_WHEN_RESTING = 2;
     /** Indicates a bubble's height should be the maximum available space. **/
     public static final int MAX_HEIGHT = -1;
+    /** The max percent of screen width to use for the flyout on large screens. */
+    public static final float FLYOUT_MAX_WIDTH_PERCENT_LARGE_SCREEN = 0.3f;
+    /** The max percent of screen width to use for the flyout on phone. */
+    public static final float FLYOUT_MAX_WIDTH_PERCENT = 0.6f;
+
 
     private Context mContext;
     private WindowManager mWindowManager;
     private Rect mPositionRect;
+    private Rect mScreenRect;
     private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
     private int mDefaultMaxBubbles;
@@ -77,10 +83,10 @@ public class BubblePositioner {
     private int mPointerMargin;
     private int mPointerWidth;
     private int mPointerHeight;
-    private int mPointerOverlap;
     private int mManageButtonHeight;
     private int mExpandedViewMinHeight;
     private int mOverflowHeight;
+    private int mMinimumFlyoutWidthLargeScreen;
 
     private PointF mPinLocation;
     private PointF mRestingStackPosition;
@@ -149,6 +155,7 @@ public class BubblePositioner {
         mRotation = rotation;
         mInsets = insets;
 
+        mScreenRect = new Rect(bounds);
         mPositionRect = new Rect(bounds);
         mPositionRect.left += mInsets.left;
         mPositionRect.top += mInsets.top;
@@ -166,10 +173,11 @@ public class BubblePositioner {
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
-        mPointerOverlap = res.getDimensionPixelSize(R.dimen.bubble_pointer_overlap);
-        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_height);
+        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_total_height);
         mExpandedViewMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
+        mMinimumFlyoutWidthLargeScreen = res.getDimensionPixelSize(
+                R.dimen.bubbles_flyout_min_width_large_screen);
 
         mMaxBubbles = calculateMaxBubbles();
 
@@ -423,6 +431,17 @@ public class BubblePositioner {
                 : mPositionRect.centerX();
         final float rowStart = centerPosition - (expandedStackSize / 2f);
         return rowStart + positionInBar;
+    }
+
+    /**
+     * @return the width of the bubble flyout (message originating from the bubble).
+     */
+    public float getMaxFlyoutSize() {
+        if (isLargeScreen()) {
+            return Math.max(mScreenRect.width() * FLYOUT_MAX_WIDTH_PERCENT_LARGE_SCREEN,
+                    mMinimumFlyoutWidthLargeScreen);
+        }
+        return mScreenRect.width() * FLYOUT_MAX_WIDTH_PERCENT;
     }
 
     /**
