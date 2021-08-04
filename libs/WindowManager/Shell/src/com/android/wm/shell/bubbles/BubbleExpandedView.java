@@ -735,6 +735,10 @@ public class BubbleExpandedView extends LinearLayout {
         mManageButton.getBoundsOnScreen(rect);
     }
 
+    public int getManageButtonMargin() {
+        return ((LinearLayout.LayoutParams) mManageButton.getLayoutParams()).getMarginStart();
+    }
+
     /**
      * Cleans up anything related to the task and {@code TaskView}. If this view should be reused
      * after this method is called, then

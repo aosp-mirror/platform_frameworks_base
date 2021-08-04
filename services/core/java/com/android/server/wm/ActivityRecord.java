@@ -330,8 +330,6 @@ import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
-import com.android.internal.util.function.pooled.PooledFunction;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
@@ -746,6 +744,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean startingDisplayed;
     boolean startingMoved;
 
+    /**
+     * If it is non-null, it requires all activities who have the same starting data to be drawn
+     * to remove the starting window.
+     * TODO(b/189385912): Remove starting window related fields after migrating them to task.
+     */
+    private StartingData mSharedStartingData;
+
     boolean mHandleExitSplashScreen;
     @TransferSplashScreenState
     int mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
@@ -1085,6 +1090,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
             pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
+        if (mSharedStartingData != null) {
+            pw.println(prefix + "mSharedStartingData=" + mSharedStartingData);
+        }
         if (mStartingWindow != null || mStartingSurface != null
                 || startingDisplayed || startingMoved || mVisibleSetFromTransferredStartingWindow) {
             pw.print(prefix); pw.print("startingWindow="); pw.print(mStartingWindow);
@@ -1379,9 +1387,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        final Task oldTask = oldParent != null ? ((TaskFragment) oldParent).getTask() : null;
-        final Task newTask = newParent != null ? ((TaskFragment) newParent).getTask() : null;
+    void onParentChanged(ConfigurationContainer rawNewParent, ConfigurationContainer rawOldParent) {
+        final TaskFragment oldParent = (TaskFragment) rawOldParent;
+        final TaskFragment newParent = (TaskFragment) rawNewParent;
+        final Task oldTask = oldParent != null ? oldParent.getTask() : null;
+        final Task newTask = newParent != null ? newParent.getTask() : null;
         this.task = newTask;
 
         super.onParentChanged(newParent, oldParent);
@@ -1440,11 +1450,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         updateColorTransform();
 
         if (oldParent != null) {
-            ((TaskFragment) oldParent).cleanUpActivityReferences(this);
+            oldParent.cleanUpActivityReferences(this);
         }
 
         if (newParent != null && isState(RESUMED)) {
-            ((TaskFragment) newParent).setResumedActivity(this, "onParentChanged");
+            newParent.setResumedActivity(this, "onParentChanged");
+            if (mStartingWindow != null && mStartingData != null
+                    && mStartingData.mAssociatedTask == null && newParent.isEmbedded()) {
+                // The starting window should keep covering its task when the activity is
+                // reparented to a task fragment that may not fill the task bounds.
+                associateStartingDataWithTask();
+                overrideConfigurationPropagation(mStartingWindow, task);
+            }
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -2005,7 +2022,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting
     boolean addStartingWindow(String pkg, int resolvedTheme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
-            IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
+            ActivityRecord from, boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean useEmpty) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
@@ -2064,7 +2081,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         applyStartingWindowTheme(pkg, resolvedTheme);
 
-        if (transferStartingWindow(transferFrom)) {
+        if (from != null && transferStartingWindow(from)) {
             return true;
         }
 
@@ -2089,6 +2106,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SnapshotStartingData");
         mStartingData = new SnapshotStartingData(mWmService, snapshot, typeParams);
+        if (task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+            // Associate with the task so if this activity is resized by task fragment later, the
+            // starting window can keep the same bounds as the task.
+            associateStartingDataWithTask();
+        }
         scheduleAddStartingWindow();
         return true;
     }
@@ -2337,6 +2359,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    void attachStartingWindow(@NonNull WindowState startingWindow) {
+        mStartingWindow = startingWindow;
+        if (mStartingData != null && mStartingData.mAssociatedTask != null) {
+            // Associate the configuration of starting window with the task.
+            overrideConfigurationPropagation(startingWindow, mStartingData.mAssociatedTask);
+        }
+    }
+
+    private void associateStartingDataWithTask() {
+        mStartingData.mAssociatedTask = task;
+        task.forAllActivities(r -> {
+            if (r.mVisibleRequested && !r.firstWindowDrawn) {
+                r.mSharedStartingData = mStartingData;
+            }
+        });
+    }
+
     void removeStartingWindow() {
         if (transferSplashScreenIfNeeded()) {
             return;
@@ -2346,6 +2385,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void removeStartingWindowAnimation(boolean prepareAnimation) {
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
+        if (mSharedStartingData != null) {
+            mSharedStartingData.mAssociatedTask.forAllActivities(r -> {
+                r.mSharedStartingData = null;
+            });
+        }
         if (mStartingWindow == null) {
             if (mStartingData != null) {
                 // Starting window has not been added yet, but it is scheduled to be added.
@@ -3864,12 +3908,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    boolean transferStartingWindow(IBinder transferFrom) {
-        final ActivityRecord fromActivity = getDisplayContent().getActivityRecord(transferFrom);
-        if (fromActivity == null) {
-            return false;
-        }
-
+    private boolean transferStartingWindow(@NonNull ActivityRecord fromActivity) {
         final WindowState tStartingWindow = fromActivity.mStartingWindow;
         if (tStartingWindow != null && fromActivity.mStartingSurface != null) {
             // In this case, the starting icon has already been displayed, so start
@@ -3890,6 +3929,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 // Transfer the starting window over to the new token.
                 mStartingData = fromActivity.mStartingData;
+                mSharedStartingData = fromActivity.mSharedStartingData;
                 mStartingSurface = fromActivity.mStartingSurface;
                 startingDisplayed = fromActivity.startingDisplayed;
                 fromActivity.startingDisplayed = false;
@@ -3952,6 +3992,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                     "Moving pending starting from %s to %s", fromActivity, this);
             mStartingData = fromActivity.mStartingData;
+            mSharedStartingData = fromActivity.mSharedStartingData;
             fromActivity.mStartingData = null;
             fromActivity.startingMoved = true;
             scheduleAddStartingWindow();
@@ -3970,16 +4011,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * immediately finishes after, so we have to transfer T to M.
      */
     void transferStartingWindowFromHiddenAboveTokenIfNeeded() {
-        final PooledFunction p = PooledLambda.obtainFunction(ActivityRecord::transferStartingWindow,
-                this, PooledLambda.__(ActivityRecord.class));
-        task.forAllActivities(p);
-        p.recycle();
-    }
-
-    private boolean transferStartingWindow(ActivityRecord fromActivity) {
-        if (fromActivity == this) return true;
-
-        return !fromActivity.mVisibleRequested && transferStartingWindow(fromActivity.token);
+        task.forAllActivities(fromActivity -> {
+            if (fromActivity == this) return true;
+            return !fromActivity.mVisibleRequested && transferStartingWindow(fromActivity);
+        });
     }
 
     void checkKeyguardFlagsChanged() {
@@ -5160,6 +5195,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void notifyAppStopped() {
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
+        firstWindowDrawn = false;
         // This is to fix the edge case that auto-enter-pip is finished in Launcher but app calls
         // setAutoEnterEnabled(false) and transitions to STOPPED state, see b/191930787.
         // Clear any surface transactions and content overlay in this case.
@@ -5923,7 +5959,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {
+    void onFirstWindowDrawn(WindowState win) {
         firstWindowDrawn = true;
         // stop tracking
         mSplashScreenStyleEmpty = true;
@@ -5939,7 +5975,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // own stuff.
             win.cancelAnimation();
         }
-        removeStartingWindow();
+
+        // Remove starting window directly if is in a pure task. Otherwise if it is associated with
+        // a task (e.g. nested task fragment), then remove only if all visible windows in the task
+        // are drawn.
+        final Task associatedTask =
+                mSharedStartingData != null ? mSharedStartingData.mAssociatedTask : null;
+        if (associatedTask == null) {
+            removeStartingWindow();
+        } else if (associatedTask.getActivity(
+                r -> r.mVisibleRequested && !r.firstWindowDrawn) == null) {
+            // The last drawn activity may not be the one that owns the starting window.
+            final ActivityRecord r = associatedTask.topActivityContainsStartingWindow();
+            if (r != null) {
+                r.removeStartingWindow();
+            }
+        }
         updateReportedVisibilityLocked();
     }
 
@@ -6510,8 +6561,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean scheduled = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                prev != null ? prev.appToken : null,
-                newTask || newSingleActivity, taskSwitch, isProcessRunning(),
+                prev, newTask || newSingleActivity, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty);
         if (DEBUG_STARTING_WINDOW_VERBOSE && scheduled) {
             Slog.d(TAG, "Scheduled starting window for " + this);

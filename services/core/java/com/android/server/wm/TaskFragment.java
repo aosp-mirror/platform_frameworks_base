@@ -207,6 +207,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @VisibleForTesting
     boolean mCreatedByOrganizer;
 
+    /** Whether this TaskFragment is embedded in a task. */
+    private final boolean mIsEmbedded;
+
     /** Organizer that organizing this TaskFragment. */
     @Nullable
     private ITaskFragmentOrganizer mTaskFragmentOrganizer;
@@ -269,14 +272,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
+    /** Creates an embedded task fragment. */
     TaskFragment(ActivityTaskManagerService atmService, IBinder fragmentToken,
             boolean createdByOrganizer) {
+        this(atmService, fragmentToken, createdByOrganizer, true /* isEmbedded */);
+    }
+
+    TaskFragment(ActivityTaskManagerService atmService, IBinder fragmentToken,
+            boolean createdByOrganizer, boolean isEmbedded) {
         super(atmService.mWindowManager);
 
         mAtmService = atmService;
         mTaskSupervisor = mAtmService.mTaskSupervisor;
         mRootWindowContainer = mAtmService.mRootWindowContainer;
         mCreatedByOrganizer = createdByOrganizer;
+        mIsEmbedded = isEmbedded;
         mTaskFragmentOrganizerController =
                 mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
         mFragmentToken = fragmentToken;
@@ -389,6 +399,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return this;
     }
 
+    /** Returns {@code true} if this is a container for embedded activities or tasks. */
+    boolean isEmbedded() {
+        if (mIsEmbedded) {
+            return true;
+        }
+        final WindowContainer<?> parent = getParent();
+        if (parent != null) {
+            final TaskFragment taskFragment = parent.asTaskFragment();
+            return taskFragment != null && taskFragment.isEmbedded();
+        }
+        return false;
+    }
 
     /**
      * Simply check and give warning logs if this is not operated on leaf {@link TaskFragment}.
@@ -1900,6 +1922,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (mTaskFragmentOrganizer != null) {
             mTaskFragmentOrganizerController.onTaskFragmentVanished(mTaskFragmentOrganizer, this);
         }
+    }
+
+    int getTaskFragmentOrganizerPid() {
+        return mTaskFragmentOrganizerPid;
     }
 
     /**

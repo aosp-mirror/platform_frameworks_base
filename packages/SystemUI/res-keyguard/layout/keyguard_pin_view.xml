@@ -47,11 +47,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/num_pad_entry_row_margin_bottom"
-            androidprv:layout_constraintBottom_toTopOf="@id/key1"
             androidprv:layout_constraintEnd_toEndOf="parent"
             androidprv:layout_constraintStart_toStartOf="parent"
 
             androidprv:layout_constraintTop_toTopOf="parent"
+            androidprv:layout_constraintBottom_toTopOf="@id/key1"
             androidprv:layout_constraintVertical_bias="1.0">
 
             <com.android.keyguard.PasswordTextView
@@ -64,6 +64,15 @@
                 android:contentDescription="@string/keyguard_accessibility_pin_area"
                 androidprv:scaledTextSize="@integer/scaled_password_text_size" />
         </com.android.keyguard.AlphaOptimizedRelativeLayout>
+
+        <!-- Guideline used to place the top row of keys relative to the screen height. This will be
+             updated in KeyguardPINView to reduce the height of the PIN pad. -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/pin_pad_top_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            androidprv:layout_constraintGuide_percent="0"
+            android:orientation="horizontal" />
 
         <androidx.constraintlayout.helper.widget.Flow
             android:id="@+id/flow1"
@@ -78,16 +87,15 @@
             androidprv:flow_horizontalStyle="packed"
             androidprv:flow_maxElementsWrap="3"
 
+            androidprv:flow_verticalBias="1.0"
             androidprv:flow_verticalGap="@dimen/num_pad_entry_row_margin_bottom"
             androidprv:flow_verticalStyle="packed"
-            androidprv:flow_verticalBias="1.0"
 
             androidprv:flow_wrapMode="aligned"
-
-            androidprv:layout_constraintTop_toTopOf="parent"
             androidprv:layout_constraintBottom_toBottomOf="parent"
             androidprv:layout_constraintEnd_toEndOf="parent"
-            androidprv:layout_constraintStart_toStartOf="parent" />
+            androidprv:layout_constraintStart_toStartOf="parent"
+            androidprv:layout_constraintTop_toBottomOf="@id/pin_pad_top_guideline" />
 
         <com.android.keyguard.NumPadKey
             android:id="@+id/key1"
