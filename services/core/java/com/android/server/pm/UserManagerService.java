@@ -5087,8 +5087,11 @@ public class UserManagerService extends IUserManager.Stub {
                             Binder.restoreCallingIdentity(ident);
                         }
                     }
-                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s%s%s\n", i, user.id,
+                    pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
+                            i,
+                            user.id,
                             user.name,
+                            user.userType.replace("android.os.usertype.", ""),
                             UserInfo.flagsToString(user.flags),
                             hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
                             running ? " (running)" : "",
