@@ -47,6 +47,7 @@ import java.util.Collections;
 public class SystemAudioInitiationActionFromAvrTest {
 
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
+    private FakePowerManagerWrapper mPowerManager;
     private TestLooper mTestLooper = new TestLooper();
 
     private boolean mShouldDispatchActiveSource;
@@ -143,9 +144,6 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
 
                     @Override
-                    void wakeUp() {}
-
-                    @Override
                     int getPhysicalAddress() {
                         return 0;
                     }
@@ -175,6 +173,8 @@ public class SystemAudioInitiationActionFromAvrTest {
                 hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());
         hdmiControlService.setCecController(hdmiCecController);
         hdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(context);
+        hdmiControlService.setPowerManager(mPowerManager);
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
                     @Override
