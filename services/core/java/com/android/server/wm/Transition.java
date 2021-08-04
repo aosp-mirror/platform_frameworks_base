@@ -657,7 +657,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         ArrayMap<WindowContainer, Integer> reasons = new ArrayMap<>();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             ActivityRecord r = mParticipants.valueAt(i).asActivityRecord();
-            if (r == null) continue;
+            if (r == null || !r.mVisibleRequested) continue;
             // At this point, r is "ready", but if it's not "ALL ready" then it is probably only
             // ready due to starting-window.
             reasons.put(r, (r.mStartingData instanceof SplashScreenStartingData
