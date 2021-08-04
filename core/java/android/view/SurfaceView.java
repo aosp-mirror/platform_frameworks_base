@@ -1242,7 +1242,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mBlastSurfaceControl.setTransformHint(mTransformHint);
             if (mBlastBufferQueue != null) {
                 mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight,
-                        mFormat);
+                        mFormat, transaction);
             }
         } else {
             transaction.setBufferSize(mSurfaceControl, mSurfaceWidth, mSurfaceHeight);
