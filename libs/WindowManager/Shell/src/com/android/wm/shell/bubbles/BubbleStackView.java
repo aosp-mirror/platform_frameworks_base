@@ -927,8 +927,10 @@ public class BubbleStackView extends FrameLayout
         setOnClickListener(view -> {
             if (mShowingManage) {
                 showManageMenu(false /* show */);
+            } else if (mManageEduView != null && mManageEduView.getVisibility() == VISIBLE) {
+                mManageEduView.hide();
             } else if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
-                mStackEduView.hide(false);
+                mStackEduView.hide(false /* isExpanding */);
             } else if (mBubbleData.isExpanded()) {
                 mBubbleData.setExpanded(false);
             }
@@ -1158,7 +1160,7 @@ public class BubbleStackView extends FrameLayout
             return false;
         }
         if (mStackEduView == null) {
-            mStackEduView = new StackEducationView(mContext, mPositioner);
+            mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
         }
         mBubbleContainer.bringToFront();
@@ -1169,7 +1171,7 @@ public class BubbleStackView extends FrameLayout
     private void updateUserEdu() {
         if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
             removeView(mStackEduView);
-            mStackEduView = new StackEducationView(mContext, mPositioner);
+            mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
             mBubbleContainer.bringToFront(); // Stack appears on top of the stack education
             mStackEduView.show(mPositioner.getDefaultStartPosition());
@@ -1732,6 +1734,21 @@ public class BubbleStackView extends FrameLayout
         notifyExpansionChanged(mExpandedBubble, mIsExpanded);
     }
 
+    /**
+     * Called when back press occurs while bubbles are expanded.
+     */
+    public void onBackPressed() {
+        if (mIsExpanded) {
+            if (mShowingManage) {
+                showManageMenu(false);
+            } else if (mManageEduView != null && mManageEduView.getVisibility() == VISIBLE) {
+                mManageEduView.hide();
+            } else {
+                setExpanded(false);
+            }
+        }
+    }
+
     void setBubbleVisibility(Bubble b, boolean visible) {
         if (b.getIconView() != null) {
             b.getIconView().setVisibility(visible ? VISIBLE : GONE);
@@ -1957,6 +1974,9 @@ public class BubbleStackView extends FrameLayout
     private void animateCollapse() {
         cancelDelayedExpandCollapseSwitchAnimations();
 
+        if (mManageEduView != null && mManageEduView.getVisibility() == VISIBLE) {
+            mManageEduView.hide();
+        }
         // Hide the menu if it's visible.
         showManageMenu(false);
 
