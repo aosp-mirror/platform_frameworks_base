@@ -26533,7 +26533,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean readPermissionStateForUser(@UserIdInt int userId) {
-        synchronized (mPackages) {
+        synchronized (mLock) {
             mPermissionManager.writeLegacyPermissionStateTEMP();
             mSettings.readPermissionStateForUserSyncLPr(userId);
             mPermissionManager.readLegacyPermissionStateTEMP();
@@ -26609,7 +26609,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null || alias == null) {
             return null;
         }
-        synchronized(mLock) {
+        synchronized (mLock) {
             final AndroidPackage pkg = mPackages.get(packageName);
             if (pkg == null
                     || shouldFilterApplicationLocked(getPackageSetting(pkg.getPackageName()),
@@ -26656,7 +26656,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null || ks == null) {
             return false;
         }
-        synchronized(mLock) {
+        synchronized (mLock) {
             final AndroidPackage pkg = mPackages.get(packageName);
             if (pkg == null
                     || shouldFilterApplicationLocked(getPackageSetting(pkg.getPackageName()),
