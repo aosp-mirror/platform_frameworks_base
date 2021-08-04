@@ -83,6 +83,37 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
+     * Creates a new split with the primary activity and an empty secondary container.
+     * @return The newly created secondary container.
+     */
+    TaskFragmentContainer createNewSplitWithEmptySideContainer(@NonNull Activity primaryActivity,
+            @NonNull ExtensionSplitPairRule rule) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        final Rect parentBounds = getParentContainerBounds(primaryActivity);
+        final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
+        final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
+                primaryActivity, primaryRectBounds, null);
+
+        // Create new empty task fragment
+        TaskFragmentContainer secondaryContainer = mController.newContainer(null);
+        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
+        createTaskFragment(wct, secondaryContainer.getTaskFragmentToken(),
+                primaryActivity.getActivityToken(), secondaryRectBounds,
+                WINDOWING_MODE_MULTI_WINDOW);
+        secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
+
+        // Set adjacent to each other so that the containers below will be invisible.
+        wct.setAdjacentTaskFragments(
+                primaryContainer.getTaskFragmentToken(), secondaryContainer.getTaskFragmentToken());
+        applyTransaction(wct);
+
+        mController.registerSplit(primaryContainer, primaryActivity, secondaryContainer, rule);
+
+        return secondaryContainer;
+    }
+
+    /**
      * Creates a new split container with the two provided activities.
      * @param primaryActivity An activity that should be in the primary container. If it is not
      *                        currently in an existing container, a new one will be created and the
@@ -99,48 +130,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
-        TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
-                primaryActivity.getActivityToken());
-        if (primaryContainer == null) {
-            primaryContainer = mController.newContainer(primaryActivity);
-
-            final TaskFragmentCreationParams fragmentOptions =
-                    createFragmentOptions(
-                            primaryContainer.getTaskFragmentToken(),
-                            primaryActivity.getActivityToken(),
-                            primaryRectBounds,
-                            WINDOWING_MODE_MULTI_WINDOW);
-            wct.createTaskFragment(fragmentOptions);
-
-            wct.reparentActivityToTaskFragment(primaryContainer.getTaskFragmentToken(),
-                    primaryActivity.getActivityToken());
-
-            primaryContainer.setLastRequestedBounds(primaryRectBounds);
-        } else {
-            resizeTaskFragmentIfRegistered(wct, primaryContainer, primaryRectBounds);
-        }
+        final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
+                primaryActivity, primaryRectBounds, null);
 
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
-        TaskFragmentContainer secondaryContainer = mController.getContainerWithActivity(
-                secondaryActivity.getActivityToken());
-        if (secondaryContainer == null || secondaryContainer == primaryContainer) {
-            secondaryContainer = mController.newContainer(secondaryActivity);
-
-            final TaskFragmentCreationParams fragmentOptions =
-                    createFragmentOptions(
-                            secondaryContainer.getTaskFragmentToken(),
-                            secondaryActivity.getActivityToken(),
-                            secondaryRectBounds,
-                            WINDOWING_MODE_MULTI_WINDOW);
-            wct.createTaskFragment(fragmentOptions);
-
-            wct.reparentActivityToTaskFragment(secondaryContainer.getTaskFragmentToken(),
-                    secondaryActivity.getActivityToken());
-
-            secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
-        } else {
-            resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
-        }
+        final TaskFragmentContainer secondaryContainer = prepareContainerForActivity(wct,
+                secondaryActivity, secondaryRectBounds, primaryContainer);
 
         // Set adjacent to each other so that the containers below will be invisible.
         wct.setAdjacentTaskFragments(
@@ -148,6 +143,38 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         applyTransaction(wct);
 
         mController.registerSplit(primaryContainer, primaryActivity, secondaryContainer, rule);
+    }
+
+    /**
+     * Creates a new container or resizes an existing container for activity to the provided bounds.
+     * @param activity The activity to be re-parented to the container if necessary.
+     * @param containerToAvoid Re-parent from this container if an activity is already in it.
+     */
+    private TaskFragmentContainer prepareContainerForActivity(
+            @NonNull WindowContainerTransaction wct, @NonNull Activity activity,
+            @NonNull Rect bounds, @Nullable TaskFragmentContainer containerToAvoid) {
+        TaskFragmentContainer container = mController.getContainerWithActivity(
+                activity.getActivityToken());
+        if (container == null || container == containerToAvoid) {
+            container = mController.newContainer(activity);
+
+            final TaskFragmentCreationParams fragmentOptions =
+                    createFragmentOptions(
+                            container.getTaskFragmentToken(),
+                            activity.getActivityToken(),
+                            bounds,
+                            WINDOWING_MODE_MULTI_WINDOW);
+            wct.createTaskFragment(fragmentOptions);
+
+            wct.reparentActivityToTaskFragment(container.getTaskFragmentToken(),
+                    activity.getActivityToken());
+
+            container.setLastRequestedBounds(bounds);
+        } else {
+            resizeTaskFragmentIfRegistered(wct, container, bounds);
+        }
+
+        return container;
     }
 
     /**
