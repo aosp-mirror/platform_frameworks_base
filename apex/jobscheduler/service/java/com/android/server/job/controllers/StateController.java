@@ -160,8 +160,8 @@ public abstract class StateController {
 
     public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate);
-    public abstract void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
-            Predicate<JobStatus> predicate);
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {}
 
     /** Dump any internal constants the Controller may have. */
     public void dumpConstants(IndentingPrintWriter pw) {

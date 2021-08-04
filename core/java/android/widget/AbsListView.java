@@ -2543,33 +2543,32 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return;
         }
 
-        boolean isItemEnabled = view.isEnabled() && isEnabled();
+        boolean isItemActionable = isEnabled();
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof AbsListView.LayoutParams) {
-            isItemEnabled &= ((AbsListView.LayoutParams) lp).isEnabled;
+            isItemActionable &= ((AbsListView.LayoutParams) lp).isEnabled;
         }
-
-        info.setEnabled(isItemEnabled);
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_CLEAR_SELECTION);
         } else  {
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_SELECT);
         }
 
         if (isItemClickable(view)) {
-            addAccessibilityActionIfEnabled(info, isItemEnabled, AccessibilityAction.ACTION_CLICK);
+            addAccessibilityActionIfEnabled(info, isItemActionable,
+                    AccessibilityAction.ACTION_CLICK);
             // A disabled item is a separator which should not be clickable.
-            info.setClickable(isItemEnabled);
+            info.setClickable(isItemActionable);
         }
 
         if (isLongClickable()) {
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_LONG_CLICK);
-            info.setLongClickable(true);
+            info.setLongClickable(isItemActionable);
         }
     }
 

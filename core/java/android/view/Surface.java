@@ -29,7 +29,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorSpace;
 import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
@@ -405,20 +404,6 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             checkNotReleasedLocked();
             return nativeIsConsumerRunningBehind(mNativeObject);
-        }
-    }
-
-    /**
-     * Returns the default size of this Surface provided by the consumer of the surface.
-     * Should only be used by the producer of the surface.
-     *
-     * @hide
-     */
-    @NonNull
-    public Point getDefaultSize() {
-        synchronized (mLock) {
-            checkNotReleasedLocked();
-            return new Point(nativeGetWidth(mNativeObject), nativeGetHeight(mNativeObject));
         }
     }
 

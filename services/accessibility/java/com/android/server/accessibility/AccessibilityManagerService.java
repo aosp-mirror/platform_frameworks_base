@@ -1322,7 +1322,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public boolean accessibilityFocusOnlyInActiveWindow() {
         synchronized (mLock) {
-            return mA11yWindowManager.isTrackingWindowsLocked();
+            return mA11yWindowManager.accessibilityFocusOnlyInActiveWindowLocked();
         }
     }
 

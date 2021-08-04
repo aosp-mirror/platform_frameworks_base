@@ -31,9 +31,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUST
 import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
-import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Point;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
@@ -233,7 +231,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private Display.Mode mMode;
         private boolean mIsDisplayOn;
         private int mDisplayIdToMirror;
-        private IBinder mWindowTokenClientToMirror;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
@@ -256,7 +253,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mUniqueIndex = uniqueIndex;
             mIsDisplayOn = surface != null;
             mDisplayIdToMirror = virtualDisplayConfig.getDisplayIdToMirror();
-            mWindowTokenClientToMirror = virtualDisplayConfig.getWindowTokenClientToMirror();
         }
 
         @Override
@@ -284,26 +280,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         @Override
         public int getDisplayIdToMirrorLocked() {
             return mDisplayIdToMirror;
-        }
-
-        @Override
-        @Nullable
-        public IBinder getWindowTokenClientToMirrorLocked() {
-            return mWindowTokenClientToMirror;
-        }
-
-        @Override
-        public void setWindowTokenClientToMirrorLocked(IBinder windowToken) {
-            if (mWindowTokenClientToMirror != windowToken) {
-                mWindowTokenClientToMirror = windowToken;
-                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
-                sendTraversalRequestLocked();
-            }
-        }
-
-        @Override
-        public Point getDisplaySurfaceDefaultSize() {
-            return mSurface.getDefaultSize();
         }
 
         @VisibleForTesting
@@ -386,7 +362,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             pw.println("mDisplayState=" + Display.stateToString(mDisplayState));
             pw.println("mStopped=" + mStopped);
             pw.println("mDisplayIdToMirror=" + mDisplayIdToMirror);
-            pw.println("mWindowTokenClientToMirror=" + mWindowTokenClientToMirror);
         }
 
 

@@ -26,6 +26,7 @@ import android.view.View;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.systemui.communal.CommunalSource;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.communal.ICommunalSource;
 import com.android.systemui.shared.communal.ICommunalSurfaceCallback;
 
@@ -35,6 +36,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * {@link CommunalSourceImpl} provides a wrapper around {@link ICommunalSource} proxies as an
@@ -46,6 +49,19 @@ public class CommunalSourceImpl implements CommunalSource {
     private static final boolean DEBUG = false;
     private final ICommunalSource mSourceProxy;
     private final Executor mMainExecutor;
+
+    static class Factory {
+        private final Executor mExecutor;
+
+        @Inject
+        Factory(@Main Executor executor) {
+            mExecutor = executor;
+        }
+
+        public CommunalSource create(ICommunalSource source) {
+            return new CommunalSourceImpl(mExecutor, source);
+        }
+    }
 
     // mConnected is initialized to true as it is presumed instances are constructed with valid
     // proxies. The source can never be reconnected once the proxy has died. Once this value

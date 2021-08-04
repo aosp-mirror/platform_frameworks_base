@@ -19,12 +19,13 @@ package com.android.systemui.communal;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -45,7 +46,7 @@ import java.lang.ref.WeakReference;
 @RunWith(AndroidTestingRunner.class)
 public class CommunalHostViewControllerTest extends SysuiTestCase {
     @Mock
-    private Context mContext;
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Mock
     private KeyguardStateController mKeyguardStateController;
@@ -70,10 +71,11 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mCommunalView.isAttachedToWindow()).thenReturn(true);
 
-        mController = new CommunalHostViewController(mFakeExecutor, mKeyguardStateController,
-                mStatusBarStateController, mCommunalView);
+        mController = new CommunalHostViewController(mFakeExecutor, mKeyguardUpdateMonitor,
+                mKeyguardStateController, mStatusBarStateController, mCommunalView);
         mController.init();
         mFakeExecutor.runAllReady();
+        Mockito.clearInvocations(mCommunalView);
     }
 
     @Test
@@ -86,7 +88,6 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
 
         // Verify the communal view is shown when the controller is initialized with keyguard
         // showing (see setup).
-        Mockito.clearInvocations(mCommunalView);
         mController.show(new WeakReference<>(mCommunalSource));
         mFakeExecutor.runAllReady();
         verify(mCommunalView).setVisibility(View.VISIBLE);
@@ -96,5 +97,59 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onKeyguardShowingChanged();
         mFakeExecutor.runAllReady();
         verify(mCommunalView).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testHideOnBouncer() {
+        ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+
+        // Capture callback value for later use.
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCapture.capture());
+
+        // Establish a visible communal view.
+        mController.show(new WeakReference<>(mCommunalSource));
+        mFakeExecutor.runAllReady();
+        verify(mCommunalView).setVisibility(View.VISIBLE);
+        Mockito.clearInvocations(mCommunalView);
+
+        // Trigger bouncer.
+        Mockito.clearInvocations(mCommunalView);
+        callbackCapture.getValue().onKeyguardBouncerChanged(true);
+        mFakeExecutor.runAllReady();
+        verify(mCommunalView).setVisibility(View.INVISIBLE);
+
+        // Hide bouncer
+        Mockito.clearInvocations(mCommunalView);
+        callbackCapture.getValue().onKeyguardBouncerChanged(false);
+        mFakeExecutor.runAllReady();
+        verify(mCommunalView).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testHideOnOcclude() {
+        ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+
+        // Capture callback value for later use.
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCapture.capture());
+
+        // Establish a visible communal view.
+        mController.show(new WeakReference<>(mCommunalSource));
+        mFakeExecutor.runAllReady();
+        verify(mCommunalView).setVisibility(View.VISIBLE);
+        Mockito.clearInvocations(mCommunalView);
+
+        // Occlude.
+        Mockito.clearInvocations(mCommunalView);
+        callbackCapture.getValue().onKeyguardOccludedChanged(true);
+        mFakeExecutor.runAllReady();
+        verify(mCommunalView).setVisibility(View.INVISIBLE);
+
+        // Unocclude.
+        Mockito.clearInvocations(mCommunalView);
+        callbackCapture.getValue().onKeyguardOccludedChanged(false);
+        mFakeExecutor.runAllReady();
+        verify(mCommunalView).setVisibility(View.VISIBLE);
     }
 }
