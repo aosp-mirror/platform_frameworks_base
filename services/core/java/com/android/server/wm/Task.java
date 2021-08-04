@@ -2969,12 +2969,13 @@ class Task extends TaskFragment {
     @Nullable
     ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
         final ActivityRecord top = getActivity(r -> {
-            if (!r.occludesParent()) {
-                return false;
-            }
             if (r == activity) {
                 // Reached the given activity, return the activity to stop searching.
                 return true;
+            }
+
+            if (!r.occludesParent()) {
+                return false;
             }
 
             TaskFragment parent = r.getTaskFragment();
