@@ -825,7 +825,11 @@ public class KeyguardIndicationController {
         if (mKeyguardUpdateMonitor.isUdfpsAvailable()) {
             // if udfps available, there will always be a tappable affordance to unlock
             // For example, the lock icon
-            showTransientIndication(R.string.keyguard_unlock_press);
+            if (mKeyguardBypassController.getUserHasDeviceEntryIntent()) {
+                showTransientIndication(R.string.keyguard_unlock_press);
+            } else {
+                showTransientIndication(R.string.keyguard_face_failed_use_fp);
+            }
         } else {
             showTransientIndication(R.string.keyguard_try_fingerprint);
         }
