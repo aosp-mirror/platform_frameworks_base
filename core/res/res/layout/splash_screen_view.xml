@@ -26,6 +26,7 @@
           android:layout_width="wrap_content"
           android:layout_gravity="center"
           android:padding="0dp"
+          android:background="@null"
           android:contentDescription="@string/splash_screen_view_icon_description"/>
 
     <View android:id="@+id/splashscreen_branding_view"
