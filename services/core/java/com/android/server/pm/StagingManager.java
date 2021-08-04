@@ -29,7 +29,9 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApexStagedEvent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -102,7 +104,8 @@ public class StagingManager {
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
     private final Context mContext;
-    private final PreRebootVerificationHandler mPreRebootVerificationHandler;
+    @VisibleForTesting
+    final PreRebootVerificationHandler mPreRebootVerificationHandler;
     private final Supplier<PackageParser2> mPackageParserSupplier;
 
     private final File mFailureReasonFile = new File("/metadata/staged-install/failure_reason.txt");
@@ -117,6 +120,9 @@ public class StagingManager {
 
     @GuardedBy("mSuccessfulStagedSessionIds")
     private final List<Integer> mSuccessfulStagedSessionIds = new ArrayList<>();
+
+    @GuardedBy("mStagedApexObservers")
+    private final List<IStagedApexObserver> mStagedApexObservers = new ArrayList<>();
 
     interface StagedSession {
         boolean isMultiPackage();
@@ -200,6 +206,18 @@ public class StagingManager {
 
     private void markBootCompleted() {
         mApexManager.markBootCompleted();
+    }
+
+    void registerStagedApexObserver(IStagedApexObserver observer) {
+        synchronized (mStagedApexObservers) {
+            mStagedApexObservers.add(observer);
+        }
+    }
+
+    void unregisterStagedApexObserver(IStagedApexObserver observer) {
+        synchronized (mStagedApexObservers) {
+            mStagedApexObservers.remove(observer);
+        }
     }
 
     /**
@@ -840,6 +858,9 @@ public class StagingManager {
                 // Also, cleaning up the stageDir prevents the apex from being activated.
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
             }
+            if (session.containsApexSession()) {
+                notifyStagedApexObservers();
+            }
         }
 
         // Session was successfully aborted from apexd (if required) and pre-reboot verification
@@ -1218,7 +1239,22 @@ public class StagingManager {
         return null;
     }
 
-    private final class PreRebootVerificationHandler extends Handler {
+    private void notifyStagedApexObservers() {
+        synchronized (mStagedApexObservers) {
+            for (IStagedApexObserver observer : mStagedApexObservers) {
+                ApexStagedEvent event = new ApexStagedEvent();
+                event.stagedApexModuleNames = getStagedApexModuleNames().toArray(new String[0]);
+                try {
+                    observer.onApexStaged(event);
+                } catch (RemoteException re) {
+                    Slog.w(TAG, "Failed to contact the observer " + re.getMessage());
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    final class PreRebootVerificationHandler extends Handler {
         // Hold sessions before handler gets ready to do the verification.
         private List<StagedSession> mPendingSessions;
         private boolean mIsReady;
@@ -1244,7 +1280,8 @@ public class StagingManager {
         private static final int MSG_PRE_REBOOT_VERIFICATION_START = 1;
         private static final int MSG_PRE_REBOOT_VERIFICATION_APEX = 2;
         private static final int MSG_PRE_REBOOT_VERIFICATION_APK = 3;
-        private static final int MSG_PRE_REBOOT_VERIFICATION_END = 4;
+        @VisibleForTesting
+        static final int MSG_PRE_REBOOT_VERIFICATION_END = 4;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1486,6 +1523,7 @@ public class StagingManager {
                 if (hasApex) {
                     try {
                         mApexManager.markStagedSessionReady(session.sessionId());
+                        notifyStagedApexObservers();
                     } catch (PackageManagerException e) {
                         session.setSessionFailed(e.error, e.getMessage());
                         return;
