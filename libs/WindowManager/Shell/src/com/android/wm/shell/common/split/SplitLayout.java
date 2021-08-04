@@ -41,6 +41,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -249,15 +250,15 @@ public final class SplitLayout {
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
         switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
-                mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */);
-                mSplitWindowManager.setResizingSplits(false);
+                flingDividePosition(currentPosition, snapTarget.position,
+                        () -> mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */));
                 break;
             case FLAG_DISMISS_END:
-                mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */);
-                mSplitWindowManager.setResizingSplits(false);
+                flingDividePosition(currentPosition, snapTarget.position,
+                        () -> mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */));
                 break;
             default:
-                flingDividePosition(currentPosition, snapTarget.position);
+                flingDividePosition(currentPosition, snapTarget.position, null);
                 break;
         }
     }
@@ -287,7 +288,8 @@ public final class SplitLayout {
                 isLandscape ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }
 
-    private void flingDividePosition(int from, int to) {
+    @VisibleForTesting
+    void flingDividePosition(int from, int to, @Nullable Runnable flingFinishedCallback) {
         if (from == to) {
             // No animation run, it should stop resizing here.
             mSplitWindowManager.setResizingSplits(false);
@@ -303,6 +305,9 @@ public final class SplitLayout {
             @Override
             public void onAnimationEnd(Animator animation) {
                 setDividePosition(to);
+                if (flingFinishedCallback != null) {
+                    flingFinishedCallback.run();
+                }
             }
 
             @Override
