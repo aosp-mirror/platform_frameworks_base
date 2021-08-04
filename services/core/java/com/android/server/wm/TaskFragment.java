@@ -293,6 +293,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mRemoteToken = new RemoteToken(this);
     }
 
+    @NonNull
+    static TaskFragment fromTaskFragmentToken(@Nullable IBinder token,
+            @NonNull ActivityTaskManagerService service) {
+        if (token == null) return null;
+        return service.mWindowOrganizerController.getTaskFragment(token);
+    }
+
     void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment) {
         if (mAdjacentTaskFragment == taskFragment) {
             return;

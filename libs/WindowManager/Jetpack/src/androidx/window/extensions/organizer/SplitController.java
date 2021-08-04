@@ -20,9 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityClient;
+import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application.ActivityLifecycleCallbacks;
+import android.app.Instrumentation;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -61,9 +64,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     public SplitController() {
         mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
         // Register a callback to be notified about activities being created.
-        ActivityThread.currentActivityThread().getApplication().registerActivityLifecycleCallbacks(
+        activityThread.getApplication().registerActivityLifecycleCallbacks(
                 new LifecycleCallbacks());
+        // Intercept activity starts to route activities to new containers if necessary.
+        Instrumentation instrumentation = activityThread.getInstrumentation();
+        instrumentation.addMonitor(new ActivityStartMonitor());
     }
 
     public void setSplitRules(@NonNull List<ExtensionSplitRule> splitRules) {
@@ -118,7 +125,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         container.setInfo(taskFragmentInfo);
-        if (taskFragmentInfo.isEmpty()) {
+        // Check if there are no running activities - consider the container empty if there are no
+        // non-finishing activities left.
+        if (!taskFragmentInfo.hasRunningActivity()) {
             cleanupContainer(container, true /* shouldFinishDependent */);
             updateCallbackIfNecessary();
         }
@@ -662,6 +671,42 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public void execute(Runnable r) {
             handler.post(r);
+        }
+    }
+
+    /**
+     * A monitor that intercepts all activity start requests originating in the client process and
+     * can amend them to target a specific task fragment to form a split.
+     */
+    private class ActivityStartMonitor extends Instrumentation.ActivityMonitor {
+
+        @Override
+        public Instrumentation.ActivityResult onStartActivity(Context who, Intent intent,
+                Bundle options) {
+            // TODO(b/190433398): Check if the activity is configured to always be expanded.
+
+            // Check if activity should be put in a split with the activity that launched it.
+            if (!(who instanceof Activity)) {
+                return super.onStartActivity(who, intent, options);
+            }
+            final Activity launchingActivity = (Activity) who;
+
+            final ExtensionSplitPairRule splitPairRule = getSplitRule(
+                    launchingActivity.getComponentName(), intent.getComponent(), getSplitRules());
+            if (splitPairRule == null) {
+                return super.onStartActivity(who, intent, options);
+            }
+
+            // Create a new split with an empty side container
+            final TaskFragmentContainer secondaryContainer = mPresenter
+                    .createNewSplitWithEmptySideContainer(launchingActivity, splitPairRule);
+
+            // Amend the request to let the WM know that the activity should be placed in the
+            // dedicated container.
+            options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
+                    secondaryContainer.getTaskFragmentToken());
+
+            return super.onStartActivity(who, intent, options);
         }
     }
 }

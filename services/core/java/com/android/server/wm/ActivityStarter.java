@@ -2384,6 +2384,11 @@ class ActivityStarter {
             }
             mTransientLaunch = mOptions.getTransientLaunch();
             mTargetRootTask = Task.fromWindowContainerToken(mOptions.getLaunchRootTask());
+
+            if (inTaskFragment == null) {
+                inTaskFragment = TaskFragment.fromTaskFragmentToken(
+                        mOptions.getLaunchTaskFragmentToken(), mService);
+            }
         }
 
         mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? sourceRecord : null;
