@@ -11382,8 +11382,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void prepareToLeaveProcess(Context context) {
-        final boolean leavingPackage = (mComponent == null)
-                || !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        final boolean leavingPackage;
+        if (mComponent != null) {
+            leavingPackage = !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        } else if (mPackage != null) {
+            leavingPackage = !Objects.equals(mPackage, context.getPackageName());
+        } else {
+            // When no specific component or package has been defined, we have
+            // to assume that we might be routed through an intent
+            // disambiguation dialog which might leave our package
+            leavingPackage = true;
+        }
         prepareToLeaveProcess(leavingPackage);
     }
 
