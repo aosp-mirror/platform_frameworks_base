@@ -74,6 +74,8 @@ import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
+import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.util.Optional;
 
@@ -128,15 +130,34 @@ public class WMShellModule {
     }
 
     //
+    // Window decoration
+    //
+
+    @WMSingleton
+    @Provides
+    static WindowDecorViewModel<?> provideWindowDecorViewModel(
+            Context context,
+            ShellTaskOrganizer taskOrganizer,
+            DisplayController displayController,
+            SyncTransactionQueue syncQueue) {
+        return new CaptionWindowDecorViewModel(
+                        context,
+                        taskOrganizer,
+                        displayController,
+                        syncQueue);
+    }
+
+    //
     // Freeform
     //
 
     @WMSingleton
     @Provides
     @DynamicOverride
-    static FreeformTaskListener provideFreeformTaskListener(
+    static FreeformTaskListener<?> provideFreeformTaskListener(
+            WindowDecorViewModel<?> windowDecorViewModel,
             SyncTransactionQueue syncQueue) {
-        return new FreeformTaskListener(syncQueue);
+        return new FreeformTaskListener<>(windowDecorViewModel, syncQueue);
     }
 
     //
