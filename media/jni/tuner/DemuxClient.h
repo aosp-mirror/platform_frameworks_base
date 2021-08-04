@@ -61,6 +61,11 @@ public:
     Result setFrontendDataSource(sp<FrontendClient> frontendClient);
 
     /**
+     * Set a frontend resource by handle as data input of the demux.
+     */
+    Result setFrontendDataSourceById(int frontendId);
+
+    /**
      * Open a new filter client.
      */
     sp<FilterClient> openFilter(DemuxFilterType type, int bufferSize, sp<FilterClientCallback> cb);
