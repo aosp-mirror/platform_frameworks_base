@@ -88,9 +88,12 @@
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
 
-    <!-- Czechia: 7-8 digits, starting with 9, plus EU:
-         http://www.o2.cz/osobni/en/services-by-alphabet/91670-premium_sms.html -->
-    <shortcode country="cz" premium="9\\d{6,7}" free="116\\d{3}" />
+    <!-- Czechia: Premium numbers start with 90, and are either 5 or 7 digits (5 digits is a
+         subscription request, you will be charged for the messages received, but it's necessary
+         to warn on the _request_ as that's the last chance to stop), plus EU:
+         https://www.t-mobile.cz/platebni-a-premium-sms
+         https://www.vodafone.cz/pece/vyuctovani-platby-kredit/platby-mobilem/cena-premium-sms/ -->
+    <shortcode country="cz" premium="90\\d{5}|90\\d{3}" free="116\\d{3}" />
 
     <!-- Germany: 4-5 digits plus 1232xxx (premium codes from http://www.vodafone.de/infofaxe/537.pdf and http://premiumdienste.eplus.de/pdf/kodex.pdf), plus EU. To keep the premium regex from being too large, it only includes payment processors that have been used by SMS malware, with the regular pattern matching the other premium short codes. -->
     <shortcode country="de" pattern="\\d{4,5}|1232\\d{3}" premium="11(?:111|833)|1232(?:013|021|060|075|286|358)|118(?:44|80|86)|20[25]00|220(?:21|22|88|99)|221(?:14|21)|223(?:44|53|77)|224[13]0|225(?:20|59|90)|226(?:06|10|20|26|30|40|56|70)|227(?:07|33|39|66|76|78|79|88|99)|228(?:08|11|66|77)|23300|30030|3[12347]000|330(?:33|55|66)|33(?:233|331|366|533)|34(?:34|567)|37000|40(?:040|123|444|[3568]00)|41(?:010|414)|44(?:000|044|344|44[24]|544)|50005|50100|50123|50555|51000|52(?:255|783)|54(?:100|2542)|55(?:077|[24]00|222|333|55|[12369]55)|56(?:789|886)|60800|6[13]000|66(?:[12348]66|566|766|777|88|999)|68888|70(?:07|123|777)|76766|77(?:007|070|222|444|[567]77)|80(?:008|123|888)|82(?:002|[378]00|323|444|472|474|488|727)|83(?:005|[169]00|333|830)|84(?:141|300|32[34]|343|488|499|777|888)|85888|86(?:188|566|640|644|650|677|868|888)|870[24]9|871(?:23|[49]9)|872(?:1[0-8]|49|99)|87499|875(?:49|55|99)|876(?:0[1367]|1[1245678]|54|99)|877(?:00|99)|878(?:15|25|3[567]|8[12])|87999|880(?:08|44|55|77|99)|88688|888(?:03|10|8|89)|8899|90(?:009|999)|99999" free="116\\d{3}|81214|81215|47529|70296|83782|3011|73240|72438" />
