@@ -216,6 +216,21 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assertThat(getStagingDirectories()).isEmpty();
     }
 
+    @Test
+    public void testGetStagedModuleNames() throws Exception {
+        runPhase("testGetStagedModuleNames");
+    }
+
+    @Test
+    public void testGetStagedApexInfo() throws Exception {
+        runPhase("testGetStagedApexInfo");
+    }
+
+    @Test
+    public void testStagedApexObserver() throws Exception {
+        runPhase("testStagedApexObserver");
+    }
+
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {
         String baseDir = "/data/app-staging";
         try {

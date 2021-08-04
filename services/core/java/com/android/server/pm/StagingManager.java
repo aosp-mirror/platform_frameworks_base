@@ -40,6 +40,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
+import android.content.pm.StagedApexInfo;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
@@ -196,6 +197,23 @@ public class StagingManager {
     }
 
     void registerStagedApexObserver(IStagedApexObserver observer) {
+        if (observer == null) {
+            return;
+        }
+        if  (observer.asBinder() != null) {
+            try {
+                observer.asBinder().linkToDeath(new IBinder.DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        synchronized (mStagedApexObservers) {
+                            mStagedApexObservers.remove(observer);
+                        }
+                    }
+                }, 0);
+            } catch (RemoteException re) {
+                Slog.w(TAG, re.getMessage());
+            }
+        }
         synchronized (mStagedApexObservers) {
             mStagedApexObservers.add(observer);
         }
@@ -1388,7 +1406,7 @@ public class StagingManager {
      * Returns ApexInfo of the {@code moduleInfo} provided if it is staged, otherwise returns null.
      */
     @Nullable
-    ApexInfo getStagedApexInfo(String moduleName) {
+    StagedApexInfo getStagedApexInfo(String moduleName) {
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final PackageInstallerSession session = mStagedSessions.valueAt(i);
@@ -1396,9 +1414,14 @@ public class StagingManager {
                         || session.hasParentSessionId() || !sessionContainsApex(session)) {
                     continue;
                 }
-                ApexInfo result = getStagedApexInfos(session).get(moduleName);
-                if (result != null) {
-                    return result;
+                ApexInfo ai = getStagedApexInfos(session).get(moduleName);
+                if (ai != null) {
+                    StagedApexInfo info = new StagedApexInfo();
+                    info.moduleName = ai.moduleName;
+                    info.diskImagePath = ai.modulePath;
+                    info.versionCode = ai.versionCode;
+                    info.versionName = ai.versionName;
+                    return info;
                 }
             }
         }
