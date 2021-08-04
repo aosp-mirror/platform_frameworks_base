@@ -843,9 +843,14 @@ public interface InputConnection {
     /**
      * Called back when the connected IME switches between fullscreen and normal modes.
      *
-     * <p>Note: On {@link android.os.Build.VERSION_CODES#O} and later devices, input methods are no
-     * longer allowed to directly call this method at any time. To signal this event in the target
-     * application, input methods should always call
+     * <p><p><strong>Editor authors:</strong> There is a bug on
+     * {@link android.os.Build.VERSION_CODES#O} and later devices that this method is called back
+     * on the main thread even when {@link #getHandler()} is overridden.  This bug is fixed in
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU}.</p>
+     *
+     * <p><p><strong>IME authors:</strong> On {@link android.os.Build.VERSION_CODES#O} and later
+     * devices, input methods are no longer allowed to directly call this method at any time.
+     * To signal this event in the target application, input methods should always call
      * {@link InputMethodService#updateFullscreenMode()} instead. This approach should work on API
      * {@link android.os.Build.VERSION_CODES#N_MR1} and prior devices.</p>
      *

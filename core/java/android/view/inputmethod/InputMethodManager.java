@@ -950,15 +950,15 @@ public final class InputMethodManager {
                 }
                 case MSG_REPORT_FULLSCREEN_MODE: {
                     final boolean fullscreen = msg.arg1 != 0;
-                    InputConnection ic = null;
+                    RemoteInputConnectionImpl ic = null;
                     synchronized (mH) {
                         if (mFullscreenMode != fullscreen && mServedInputConnection != null) {
-                            ic = mServedInputConnection.getInputConnection();
+                            ic = mServedInputConnection;
                             mFullscreenMode = fullscreen;
                         }
                     }
                     if (ic != null) {
-                        ic.reportFullscreenMode(fullscreen);
+                        ic.dispatchReportFullscreenMode(fullscreen);
                     }
                     return;
                 }
