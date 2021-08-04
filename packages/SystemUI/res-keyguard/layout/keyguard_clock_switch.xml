@@ -68,6 +68,16 @@
             lockScreenWeight="400"
         />
     </FrameLayout>
+    <FrameLayout
+        android:id="@+id/keyguard_smartspace_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/below_clock_padding_start"
+        android:paddingEnd="@dimen/below_clock_padding_end"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/lockscreen_clock_view"
+        />
+    <!-- either keyguard_status_area or keyguard_smartspace_container is visible -->
     <include layout="@layout/keyguard_status_area"
         android:id="@+id/keyguard_status_area"
         android:layout_width="match_parent"

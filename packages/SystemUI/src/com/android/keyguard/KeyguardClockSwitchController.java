@@ -17,13 +17,13 @@
 package com.android.keyguard;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 
 import android.app.WallpaperManager;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -93,8 +93,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private final ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
 
-    // If set, will replace keyguard_status_area
-    private View mSmartspaceView;
+    private ViewGroup mSmartspaceContainer;
 
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private SmartspaceTransitionController mSmartspaceTransitionController;
@@ -139,6 +138,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
+        mSmartspaceContainer = mView.findViewById(R.id.keyguard_smartspace_container);
+        mSmartspaceController.setKeyguardStatusContainer(mSmartspaceContainer);
 
         mClockViewController =
                 new AnimatableClockController(
@@ -170,35 +171,25 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.updateColors(getGradientColors());
         updateAodIcons();
 
-        if (mSmartspaceController.isEnabled()) {
-            mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
+        if (mSmartspaceController.isSmartspaceEnabled()) {
+            // "Enabled" doesn't mean smartspace is displayed here - inside mSmartspaceContainer -
+            // it might be a part of another view when in split shade. But it means that it CAN be
+            // displayed here, so we want to hide keyguard_status_area and set views relations
+            // accordingly.
 
             View ksa = mView.findViewById(R.id.keyguard_status_area);
-            int ksaIndex = mView.indexOfChild(ksa);
+            // we show either keyguard_status_area or smartspace, so when smartspace can be visible,
+            // keyguard_status_area should be hidden
             ksa.setVisibility(View.GONE);
-
-            // Place smartspace view below normal clock...
-            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                    MATCH_PARENT, WRAP_CONTENT);
-            lp.addRule(RelativeLayout.BELOW, R.id.lockscreen_clock_view);
-
-            mView.addView(mSmartspaceView, ksaIndex, lp);
-            int startPadding = getContext().getResources()
-                    .getDimensionPixelSize(R.dimen.below_clock_padding_start);
-            int endPadding = getContext().getResources()
-                    .getDimensionPixelSize(R.dimen.below_clock_padding_end);
-            mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
             updateClockLayout();
 
-            View nic = mView.findViewById(
-                    R.id.left_aligned_notification_icon_container);
-            lp = (RelativeLayout.LayoutParams) nic.getLayoutParams();
-            lp.addRule(RelativeLayout.BELOW, mSmartspaceView.getId());
+            View nic = mView.findViewById(R.id.left_aligned_notification_icon_container);
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) nic.getLayoutParams();
+            lp.addRule(RelativeLayout.BELOW, mSmartspaceContainer.getId());
             nic.setLayoutParams(lp);
-
-            mView.setSmartspaceView(mSmartspaceView);
-            mSmartspaceTransitionController.setLockscreenSmartspace(mSmartspaceView);
+            mView.setSmartspaceView(mSmartspaceContainer);
+            mSmartspaceTransitionController.setLockscreenSmartspace(mSmartspaceContainer);
         }
     }
 
@@ -221,10 +212,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         // instance of this class. In order to fix this, we need to modify the plugin so that
         // (a) we get a new view each time and (b) we can properly clean up an old view by making
         // it unregister itself as a plugin listener.
-        if (mSmartspaceView != null) {
-            mView.removeView(mSmartspaceView);
-            mSmartspaceView = null;
-        }
+        mSmartspaceContainer.removeAllViews();
     }
 
     /**
@@ -237,7 +225,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateClockLayout() {
-        if (mSmartspaceController.isEnabled()) {
+        if (mSmartspaceController.isSmartspaceEnabled()) {
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
                     MATCH_PARENT);
             lp.topMargin = getContext().getResources().getDimensionPixelSize(
@@ -302,8 +290,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_Y,
                 scale, props, animate);
 
-        if (mSmartspaceView != null) {
-            PropertyAnimator.setProperty(mSmartspaceView, AnimatableProperty.TRANSLATION_X,
+        if (mSmartspaceContainer != null) {
+            PropertyAnimator.setProperty(mSmartspaceContainer, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
 
             // If we're unlocking with the SmartSpace shared element transition, let the controller
@@ -321,8 +309,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     public void setChildrenAlphaExcludingSmartspace(float alpha) {
         final Set<View> excludedViews = new HashSet<>();
 
-        if (mSmartspaceView != null) {
-            excludedViews.add(mSmartspaceView);
+        if (mSmartspaceContainer != null) {
+            excludedViews.add(mSmartspaceContainer);
         }
 
         setChildrenAlphaExcluding(alpha, excludedViews);
