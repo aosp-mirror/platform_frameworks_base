@@ -42,6 +42,7 @@ import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
+import android.content.pm.StagedApexInfo;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.os.storage.IStorageManager;
@@ -701,12 +702,15 @@ public class StagingManagerTest {
         when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
 
         // Verify null is returned if module name is not found
-        ApexInfo result = mStagingManager.getStagedApexInfo("not found");
+        StagedApexInfo result = mStagingManager.getStagedApexInfo("not found");
         assertThat(result).isNull();
         verify(mApexManager, times(1)).getStagedApexInfos(any());
         // Otherwise, the correct object is returned
         result = mStagingManager.getStagedApexInfo("module1");
-        assertThat(result).isEqualTo(fakeApexInfos[0]);
+        assertThat(result.moduleName).isEqualTo(fakeApexInfos[0].moduleName);
+        assertThat(result.diskImagePath).isEqualTo(fakeApexInfos[0].modulePath);
+        assertThat(result.versionCode).isEqualTo(fakeApexInfos[0].versionCode);
+        assertThat(result.versionName).isEqualTo(fakeApexInfos[0].versionName);
         verify(mApexManager, times(2)).getStagedApexInfos(any());
     }
 
