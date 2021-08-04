@@ -67,7 +67,7 @@ public final class RippleAnimationSession {
 
     @NonNull RippleAnimationSession enter(Canvas canvas) {
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
-        if (isHwAccelerated(canvas)) {
+        if (useRTAnimations(canvas)) {
             enterHardware((RecordingCanvas) canvas);
         } else {
             enterSoftware();
@@ -82,7 +82,7 @@ public final class RippleAnimationSession {
     }
 
     @NonNull RippleAnimationSession exit(Canvas canvas) {
-        if (isHwAccelerated(canvas)) exitHardware((RecordingCanvas) canvas);
+        if (useRTAnimations(canvas)) exitHardware((RecordingCanvas) canvas);
         else exitSoftware();
         return this;
     }
@@ -102,8 +102,12 @@ public final class RippleAnimationSession {
         return this;
     }
 
-    private boolean isHwAccelerated(Canvas canvas) {
-        return canvas.isHardwareAccelerated() && !mForceSoftware;
+    private boolean useRTAnimations(Canvas canvas) {
+        if (mForceSoftware) return false;
+        if (!canvas.isHardwareAccelerated()) return false;
+        RecordingCanvas hwCanvas = (RecordingCanvas) canvas;
+        if (hwCanvas.mNode == null || !hwCanvas.mNode.isAttached()) return false;
+        return true;
     }
 
     private void exitSoftware() {
