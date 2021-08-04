@@ -159,10 +159,16 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     @Override
     protected void onViewDetached() {
+        destroy();
+    }
+
+    @Override
+    public void destroy() {
         // Don't receive future #onViewAttached calls so that we don't accidentally have two
         // controllers registered for the same view.
         // TODO(b/194181195): This shouldn't be necessary.
-        destroy();
+        super.destroy();
+        mBatteryMeterViewController.destroy();
 
         mConfigurationController.removeCallback(mConfigurationListener);
         mAnimationScheduler.removeCallback(mAnimationCallback);
