@@ -31,7 +31,7 @@
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"స్టాచ్"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ఆన్‌స్టాచ్"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"స్క్రీన్ విభజనతో యాప్‌ పని చేయకపోవచ్చు."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"యాప్‌లో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ప్రత్యామ్నాయ డిస్‌ప్లేలో యాప్ పని చేయకపోవచ్చు."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ప్రత్యామ్నాయ డిస్‌ప్లేల్లో ప్రారంభానికి యాప్ మద్దతు లేదు."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"విభజన స్క్రీన్ విభాగిని"</string>
