@@ -138,6 +138,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -229,6 +230,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final HeightListener mHeightListener = new HeightListener();
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
     private final SettingsChangeObserver mSettingsChangeObserver;
+    private final LockscreenSmartspaceController mLockscreenSmartspaceController;
 
     @VisibleForTesting final StatusBarStateListener mStatusBarStateListener =
             new StatusBarStateListener();
@@ -353,6 +355,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardStatusViewController mKeyguardStatusViewController;
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
+    private FrameLayout mSplitShadeSmartspaceContainer;
+
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsOffsetHeight;
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -731,6 +735,7 @@ public class NotificationPanelViewController extends PanelViewController {
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
             SplitShadeHeaderController splitShadeHeaderController,
+            LockscreenSmartspaceController lockscreenSmartspaceController,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             NotificationRemoteInputManager remoteInputManager,
             ControlsComponent controlsComponent) {
@@ -762,6 +767,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mQSDetailDisplayer = qsDetailDisplayer;
         mFragmentService = fragmentService;
         mSettingsChangeObserver = new SettingsChangeObserver(handler);
+        mLockscreenSmartspaceController = lockscreenSmartspaceController;
         mShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mResources);
         mView.setWillNotDraw(!DEBUG);
@@ -856,6 +862,9 @@ public class NotificationPanelViewController extends PanelViewController {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
         mBigClockContainer = mView.findViewById(R.id.big_clock_container);
+        mSplitShadeSmartspaceContainer = mView.findViewById(R.id.split_shade_smartspace_container);
+        mLockscreenSmartspaceController.setSplitShadeContainer(mSplitShadeSmartspaceContainer);
+        mLockscreenSmartspaceController.onSplitShadeChanged(mShouldUseSplitNotificationShade);
 
         UserAvatarView userAvatarView = null;
         KeyguardUserSwitcherView keyguardUserSwitcherView = null;
@@ -1068,7 +1077,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationContainerParent.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
 
         updateKeyguardStatusViewAlignment(false /* animate */);
-
+        mLockscreenSmartspaceController.onSplitShadeChanged(mShouldUseSplitNotificationShade);
         mKeyguardMediaController.refreshMediaPosition();
     }
 
@@ -1328,16 +1337,15 @@ public class NotificationPanelViewController extends PanelViewController {
                         ? 1.0f : mInterpolatedDarkAmount;
         mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
                 totalHeight - bottomPadding,
-                mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
                 expandedFraction,
-                totalHeight,
                 mKeyguardStatusViewController.getLockscreenHeight(),
                 userIconHeight,
-                userSwitcherPreferredY, hasCustomClock(),
-                hasVisibleNotifications, darkamount, mOverStretchAmount,
+                userSwitcherPreferredY,
+                darkamount, mOverStretchAmount,
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),
                 mDisplayTopInset,
+                mSplitShadeSmartspaceContainer.getHeight(),
                 mShouldUseSplitNotificationShade);
         mClockPositionAlgorithm.run(mClockPositionResult);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
@@ -1357,6 +1365,9 @@ public class NotificationPanelViewController extends PanelViewController {
                     mClockPositionResult.userSwitchY,
                     animateClock);
         }
+        // no need to translate in X axis - horizontal position is determined by constraints
+        mLockscreenSmartspaceController
+                .shiftSplitShadeSmartspace(mClockPositionResult.clockY, animateClock);
         updateNotificationTranslucency();
         updateClock();
     }
@@ -1523,6 +1534,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardUserSwitcherController != null) {
             mKeyguardUserSwitcherController.setAlpha(alpha);
         }
+        mLockscreenSmartspaceController.setSplitShadeSmartspaceAlpha(alpha);
     }
 
     public void animateToFullShade(long delay) {
@@ -3701,6 +3713,7 @@ public class NotificationPanelViewController extends PanelViewController {
     public void dozeTimeTick() {
         mKeyguardBottomArea.dozeTimeTick();
         mKeyguardStatusViewController.dozeTimeTick();
+        mLockscreenSmartspaceController.requestSmartspaceUpdate();
         if (mInterpolatedDarkAmount > 0) {
             positionClockAndNotifications();
         }
