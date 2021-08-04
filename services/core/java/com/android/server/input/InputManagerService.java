@@ -180,7 +180,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final boolean UNTRUSTED_TOUCHES_TOAST = false;
 
     public static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
+            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", true);
 
     // Pointer to native input manager service object.
     private final long mPtr;
@@ -189,7 +189,7 @@ public class InputManagerService extends IInputManager.Stub
     private final InputManagerHandler mHandler;
 
     // Context cache used for loading pointer resources.
-    private Context mDisplayContext;
+    private Context mPointerIconDisplayContext;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -839,21 +839,31 @@ public class InputManagerService extends IInputManager.Stub
             throw new IllegalArgumentException("mode is invalid");
         }
         if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            if (event instanceof MotionEvent) {
-                final Context dispCtx = getContextForDisplay(event.getDisplayId());
-                final Display display = dispCtx.getDisplay();
+            // Motion events that are pointer events or relative mouse events will need to have the
+            // inverse display rotation applied to them.
+            if (event instanceof MotionEvent
+                    && (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
+                    || event.isFromSource(InputDevice.SOURCE_MOUSE_RELATIVE))) {
+                Context displayContext = getContextForDisplay(event.getDisplayId());
+                if (displayContext == null) {
+                    displayContext = Objects.requireNonNull(
+                            getContextForDisplay(Display.DEFAULT_DISPLAY));
+                }
+                final Display display = displayContext.getDisplay();
                 final int rotation = display.getRotation();
                 if (rotation != ROTATION_0) {
                     final MotionEvent motion = (MotionEvent) event;
                     // Injections are currently expected to be in the space of the injector (ie.
-                    // usually assumed to be post-rotated). Thus we need to unrotate into raw
+                    // usually assumed to be post-rotated). Thus we need to un-rotate into raw
                     // input coordinates for dispatch.
                     final Point sz = new Point();
-                    display.getRealSize(sz);
-                    if ((rotation % 2) != 0) {
-                        final int tmpX = sz.x;
-                        sz.x = sz.y;
-                        sz.y = tmpX;
+                    if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+                        display.getRealSize(sz);
+                        if ((rotation % 2) != 0) {
+                            final int tmpX = sz.x;
+                            sz.x = sz.y;
+                            sz.y = tmpX;
+                        }
                     }
                     motion.applyTransform(MotionEvent.createRotateMatrix(
                             (4 - rotation), sz.x, sz.y));
@@ -1742,6 +1752,11 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Clean up input window handles of the given display. */
     public void onDisplayRemoved(int displayId) {
+        if (mPointerIconDisplayContext != null
+                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
+            mPointerIconDisplayContext = null;
+        }
+
         nativeDisplayRemoved(mPtr, displayId);
     }
 
@@ -2969,24 +2984,43 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private PointerIcon getPointerIcon(int displayId) {
-        return PointerIcon.getDefaultIcon(getContextForDisplay(displayId));
+        return PointerIcon.getDefaultIcon(getContextForPointerIcon(displayId));
     }
 
-    private Context getContextForDisplay(int displayId) {
-        if (mDisplayContext != null && mDisplayContext.getDisplay().getDisplayId() == displayId) {
-            return mDisplayContext;
-        }
-
-        if (mContext.getDisplay().getDisplayId() == displayId) {
-            mDisplayContext = mContext;
-            return mDisplayContext;
+    @NonNull
+    private Context getContextForPointerIcon(int displayId) {
+        if (mPointerIconDisplayContext != null
+                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
+            return mPointerIconDisplayContext;
         }
 
         // Create and cache context for non-default display.
-        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        mPointerIconDisplayContext = getContextForDisplay(displayId);
+
+        // Fall back to default display if the requested displayId does not exist.
+        if (mPointerIconDisplayContext == null) {
+            mPointerIconDisplayContext = getContextForDisplay(Display.DEFAULT_DISPLAY);
+        }
+        return mPointerIconDisplayContext;
+    }
+
+    @Nullable
+    private Context getContextForDisplay(int displayId) {
+        if (displayId == Display.INVALID_DISPLAY) {
+            return null;
+        }
+        if (mContext.getDisplay().getDisplayId() == displayId) {
+            return mContext;
+        }
+
+        final DisplayManager displayManager = Objects.requireNonNull(
+                mContext.getSystemService(DisplayManager.class));
         final Display display = displayManager.getDisplay(displayId);
-        mDisplayContext = mContext.createDisplayContext(display);
-        return mDisplayContext;
+        if (display == null) {
+            return null;
+        }
+
+        return mContext.createDisplayContext(display);
     }
 
     // Native callback.
