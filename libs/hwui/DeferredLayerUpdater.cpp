@@ -21,7 +21,6 @@
 // TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
 #include <surfacetexture/surface_texture_platform.h>
 #include "AutoBackendTextureRelease.h"
-#include "Matrix.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
@@ -145,16 +144,17 @@ void DeferredLayerUpdater::apply() {
         }
         if (mUpdateTexImage) {
             mUpdateTexImage = false;
-            float transformMatrix[16];
             android_dataspace dataspace;
             int slot;
             bool newContent = false;
+            ARect rect;
+            uint32_t textureTransform;
             // Note: ASurfaceTexture_dequeueBuffer discards all but the last frame. This
             // is necessary if the SurfaceTexture queue is in synchronous mode, and we
             // cannot tell which mode it is in.
             AHardwareBuffer* hardwareBuffer = ASurfaceTexture_dequeueBuffer(
-                    mSurfaceTexture.get(), &slot, &dataspace, transformMatrix, &newContent,
-                    createReleaseFence, fenceWait, this);
+                    mSurfaceTexture.get(), &slot, &dataspace, &newContent, createReleaseFence,
+                    fenceWait, this, &rect, &textureTransform);
 
             if (hardwareBuffer) {
                 mCurrentSlot = slot;
@@ -165,12 +165,12 @@ void DeferredLayerUpdater::apply() {
                 // (invoked by createIfNeeded) will add a ref to the AHardwareBuffer.
                 AHardwareBuffer_release(hardwareBuffer);
                 if (layerImage.get()) {
-                    SkMatrix textureTransform;
-                    mat4(transformMatrix).copyTo(textureTransform);
                     // force filtration if buffer size != layer size
                     bool forceFilter =
                             mWidth != layerImage->width() || mHeight != layerImage->height();
-                    updateLayer(forceFilter, textureTransform, layerImage);
+                    SkRect cropRect =
+                            SkRect::MakeLTRB(rect.left, rect.top, rect.right, rect.bottom);
+                    updateLayer(forceFilter, textureTransform, cropRect, layerImage);
                 }
             }
         }
@@ -182,12 +182,13 @@ void DeferredLayerUpdater::apply() {
     }
 }
 
-void DeferredLayerUpdater::updateLayer(bool forceFilter, const SkMatrix& textureTransform,
-                                       const sk_sp<SkImage>& layerImage) {
+void DeferredLayerUpdater::updateLayer(bool forceFilter, const uint32_t textureTransform,
+                                       const SkRect cropRect, const sk_sp<SkImage>& layerImage) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
-    mLayer->getTexTransform() = textureTransform;
+    mLayer->setTextureTransform(textureTransform);
+    mLayer->setCropRect(cropRect);
     mLayer->setImage(layerImage);
 }
 
