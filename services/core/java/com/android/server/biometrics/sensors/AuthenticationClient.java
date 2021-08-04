@@ -180,7 +180,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 + ", isBP: " + isBiometricPrompt()
                 + ", listener: " + listener
                 + ", requireConfirmation: " + mRequireConfirmation
-                + ", user: " + getTargetUserId());
+                + ", user: " + getTargetUserId()
+                + ", clientMonitor: " + toString());
 
         final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
         if (isCryptoOperation()) {
@@ -304,6 +305,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 public void handleLifecycleAfterAuth() {
                     AuthenticationClient.this.handleLifecycleAfterAuth(true /* authenticated */);
                 }
+
+                @Override
+                public void sendAuthenticationCanceled() {
+                    sendCancelOnly(listener);
+                }
             });
         } else {
             // Allow system-defined limit of number of attempts before giving up
@@ -338,7 +344,27 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 public void handleLifecycleAfterAuth() {
                     AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
                 }
+
+                @Override
+                public void sendAuthenticationCanceled() {
+                    sendCancelOnly(listener);
+                }
             });
+        }
+    }
+
+    private void sendCancelOnly(@Nullable ClientMonitorCallbackConverter listener) {
+        if (listener == null) {
+            Slog.e(TAG, "Unable to sendAuthenticationCanceled, listener null");
+            return;
+        }
+        try {
+            listener.onError(getSensorId(),
+                    getCookie(),
+                    BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                    0 /* vendorCode */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 

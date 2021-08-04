@@ -255,13 +255,16 @@ public class CoexCoordinatorTest {
         mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
         mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_UDFPS, udfpsClient);
 
+        // For easier reading
+        final CoexCoordinator.Callback faceCallback = mCallback;
+
         mCoexCoordinator.onAuthenticationSucceeded(0 /* currentTimeMillis */, faceClient,
-                mCallback);
-        verify(mCallback, never()).sendHapticFeedback();
-        verify(mCallback, never()).sendAuthenticationResult(anyBoolean());
+                faceCallback);
+        verify(faceCallback, never()).sendHapticFeedback();
+        verify(faceCallback, never()).sendAuthenticationResult(anyBoolean());
         // CoexCoordinator requests the system to hold onto this AuthenticationClient until
         // UDFPS result is known
-        verify(mCallback, never()).handleLifecycleAfterAuth();
+        verify(faceCallback, never()).handleLifecycleAfterAuth();
 
         // Reset the mock
         CoexCoordinator.Callback udfpsCallback = mock(CoexCoordinator.Callback.class);
@@ -274,6 +277,8 @@ public class CoexCoordinatorTest {
             verify(udfpsCallback).sendAuthenticationResult(true /* addAuthTokenIfStrong */);
             verify(udfpsCallback).handleLifecycleAfterAuth();
 
+            verify(faceCallback).sendAuthenticationCanceled();
+
             assertTrue(mCoexCoordinator.mSuccessfulAuths.isEmpty());
         } else {
             mCoexCoordinator.onAuthenticationRejected(udfpsRejectedAfterMs, udfpsClient,
@@ -281,16 +286,16 @@ public class CoexCoordinatorTest {
             if (udfpsRejectedAfterMs <= CoexCoordinator.SUCCESSFUL_AUTH_VALID_DURATION_MS) {
                 verify(udfpsCallback, never()).sendHapticFeedback();
 
-                verify(mCallback).sendHapticFeedback();
-                verify(mCallback).sendAuthenticationResult(eq(true) /* addAuthTokenIfStrong */);
-                verify(mCallback).handleLifecycleAfterAuth();
+                verify(faceCallback).sendHapticFeedback();
+                verify(faceCallback).sendAuthenticationResult(eq(true) /* addAuthTokenIfStrong */);
+                verify(faceCallback).handleLifecycleAfterAuth();
 
                 assertTrue(mCoexCoordinator.mSuccessfulAuths.isEmpty());
             } else {
                 assertTrue(mCoexCoordinator.mSuccessfulAuths.isEmpty());
 
-                verify(mCallback, never()).sendHapticFeedback();
-                verify(mCallback, never()).sendAuthenticationResult(anyBoolean());
+                verify(faceCallback, never()).sendHapticFeedback();
+                verify(faceCallback, never()).sendAuthenticationResult(anyBoolean());
 
                 verify(udfpsCallback).sendHapticFeedback();
                 verify(udfpsCallback)
