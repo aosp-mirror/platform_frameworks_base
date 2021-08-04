@@ -82,7 +82,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     private long mStartTimeMs;
 
-    protected boolean mAuthAttempted;
+    private boolean mAuthAttempted;
 
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
     //  the state. We should think of a way to improve this in the future.
@@ -97,6 +97,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
      * @param authenticated
      */
     protected abstract void handleLifecycleAfterAuth(boolean authenticated);
+
+    /**
+     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
+     *         etc)
+     */
+    public abstract boolean wasUserDetected();
 
     public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
@@ -381,9 +387,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     }
 
     @Override
-    public void onError(int errorCode, int vendorCode) {
+    public void onError(@BiometricConstants.Errors int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
         mState = STATE_STOPPED;
+
+        CoexCoordinator.getInstance().onAuthenticationError(this, errorCode, this::vibrateError);
     }
 
     /**
@@ -444,5 +452,9 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public boolean interruptsPrecedingClients() {
         return true;
+    }
+
+    public boolean wasAuthAttempted() {
+        return mAuthAttempted;
     }
 }
