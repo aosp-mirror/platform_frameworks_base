@@ -204,7 +204,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardPatternViewController((KeyguardPatternView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mLatencyTracker, mFalsingCollector,
-                        emergencyButtonController, mMessageAreaControllerFactory);
+                        emergencyButtonController, mMessageAreaControllerFactory,
+                        mDevicePostureController);
             } else if (keyguardInputView instanceof KeyguardPasswordView) {
                 return new KeyguardPasswordViewController((KeyguardPasswordView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
