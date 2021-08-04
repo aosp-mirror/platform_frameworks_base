@@ -47,6 +47,7 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
 
     private var isHiding = false
     private var realManageButtonRect = Rect()
+    private var bubbleExpandedView: BubbleExpandedView? = null
 
     init {
         LayoutInflater.from(context).inflate(R.layout.bubbles_manage_button_education, this)
@@ -97,6 +98,9 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
         setButtonColor()
         if (visibility == VISIBLE) return
 
+        bubbleExpandedView = expandedView
+        expandedView.taskView?.setObscuredTouchRect(Rect(positioner.screenRect))
+
         layoutParams.width = if (positioner.isLargeScreen)
             context.resources.getDimensionPixelSize(
                     R.dimen.bubbles_user_education_width_large_screen)
@@ -131,6 +135,7 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
     }
 
     fun hide() {
+        bubbleExpandedView?.taskView?.setObscuredTouchRect(null)
         if (visibility != VISIBLE || isHiding) return
 
         animate()
