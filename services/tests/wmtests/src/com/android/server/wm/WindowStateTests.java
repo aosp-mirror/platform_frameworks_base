@@ -53,9 +53,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_WAITING_FOR_DRAW;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -893,36 +890,6 @@ public class WindowStateTests extends WindowTestsBase {
         navSource.setVisible(true);
         assertTrue(mImeWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
         assertTrue(mAppWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
-    }
-
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
-    @Test
-    public void testAdjustImeInsetsVisibilityWhenTaskSwitchIsAnimating() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
-        final InsetsStateController controller = mDisplayContent.getInsetsStateController();
-        controller.getImeSourceProvider().setWindow(mImeWindow, null, null);
-
-        // Simulate app requests IME with updating all windows Insets State when IME is above app.
-        mDisplayContent.setImeLayeringTarget(app);
-        mDisplayContent.setImeInputTarget(app);
-        assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
-        controller.getImeSourceProvider().getSource().setVisible(true);
-        controller.updateAboveInsetsState(mImeWindow, false);
-
-        // Simulate task switching animation happens when switching app to app2.
-        spyOn(app);
-        spyOn(app2);
-        doReturn(true).when(app).isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_RECENTS);
-        doReturn(true).when(app2).isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_RECENTS);
-        app.mActivityRecord.mLastImeShown = true;
-
-        // Verify the IME insets is visible on app, but not for app2 during task animating.
-        InsetsState stateApp = app.getInsetsState();
-        InsetsState stateApp2 = app2.getInsetsState();
-        assertTrue(stateApp.getSource(ITYPE_IME).isVisible());
-        assertFalse(stateApp2.getSource(ITYPE_IME).isVisible());
     }
 
     @UseTestDisplay(addWindows = { W_ACTIVITY })
