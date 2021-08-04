@@ -2784,7 +2784,8 @@ class ActivityStarter {
             }
         } else {
             // Use the child TaskFragment (if any) as the new parent if the activity can be embedded
-            final ActivityRecord top = task.topRunningActivity();
+            final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
+                    false /* includingEmbeddedTask */);
             newParent = top != null ? top.getTaskFragment() : task;
         }
 
