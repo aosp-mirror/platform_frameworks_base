@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
@@ -145,6 +146,7 @@ import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 
 /**
@@ -2506,7 +2508,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 false, false);
         waitUntilHandlersIdle();
         activity2.addStartingWindow(mPackageName,
-                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1,
                 true, true, false, true, false, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
@@ -2523,7 +2525,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     // Surprise, ...! Transfer window in the middle of the creation flow.
                     activity2.addStartingWindow(mPackageName,
                             android.R.style.Theme, null, "Test", 0, 0, 0, 0,
-                            activity1.appToken.asBinder(), true, true, false,
+                            activity1, true, true, false,
                             true, false, false);
                 });
         activity1.addStartingWindow(mPackageName,
@@ -2544,7 +2546,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 false, false);
         waitUntilHandlersIdle();
         activity2.addStartingWindow(mPackageName,
-                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1,
                 true, true, false, true, false, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
@@ -2650,7 +2652,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Make sure the fixed rotation transform linked to activity2 when adding starting window
         // on activity2.
         topActivity.addStartingWindow(mPackageName,
-                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity.appToken.asBinder(),
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity,
                 false, false, false, true, false, false);
         waitUntilHandlersIdle();
         assertTrue(topActivity.hasFixedRotationTransform());
@@ -2679,6 +2681,52 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Assert that the bottom window now has the starting window.
         assertNoStartingWindow(activityTop);
         assertHasStartingWindow(activityBottom);
+    }
+
+    @Test
+    public void testStartingWindowInTaskFragment() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowState startingWindow = createWindowState(
+                new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING), activity1);
+        activity1.addWindow(startingWindow);
+        activity1.attachStartingWindow(startingWindow);
+        activity1.mStartingData = mock(StartingData.class);
+        final Task task = activity1.getTask();
+        final Rect taskBounds = task.getBounds();
+        final int width = taskBounds.width();
+        final int height = taskBounds.height();
+        final BiConsumer<TaskFragment, Rect> fragmentSetup = (fragment, bounds) -> {
+            final Configuration config = fragment.getRequestedOverrideConfiguration();
+            config.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+            config.windowConfiguration.setBounds(bounds);
+            fragment.onRequestedOverrideConfigurationChanged(config);
+        };
+
+        final TaskFragment taskFragment1 = new TaskFragment(
+                mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
+        fragmentSetup.accept(taskFragment1, new Rect(0, 0, width / 2, height));
+        task.addChild(taskFragment1, POSITION_TOP);
+
+        final TaskFragment taskFragment2 = new TaskFragment(
+                mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
+        fragmentSetup.accept(taskFragment2, new Rect(width / 2, 0, width, height));
+        task.addChild(taskFragment2, POSITION_TOP);
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).build();
+        activity2.mVisibleRequested = true;
+        taskFragment2.addChild(activity2);
+        activity1.reparent(taskFragment1, POSITION_TOP);
+
+        assertEquals(task, activity1.mStartingData.mAssociatedTask);
+        assertEquals(taskFragment1.getBounds(), activity1.getBounds());
+        // The activity was resized by task fragment, but starting window must still cover the task.
+        assertEquals(taskBounds, activity1.mStartingWindow.getBounds());
+
+        // The starting window is only removed when all embedded activities are drawn.
+        final WindowState activityWindow = mock(WindowState.class);
+        activity1.onFirstWindowDrawn(activityWindow);
+        assertNotNull(activity1.mStartingWindow);
+        activity2.onFirstWindowDrawn(activityWindow);
+        assertNull(activity1.mStartingWindow);
     }
 
     @Test

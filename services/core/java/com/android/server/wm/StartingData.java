@@ -32,6 +32,12 @@ public abstract class StartingData {
      */
     boolean mIsTransitionForward;
 
+    /**
+     * Non-null if the starting window should cover the bounds of associated task. It is assigned
+     * when the parent activity of starting window may be put in a partial area of the task.
+     */
+    Task mAssociatedTask;
+
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
         mTypeParams = typeParams;

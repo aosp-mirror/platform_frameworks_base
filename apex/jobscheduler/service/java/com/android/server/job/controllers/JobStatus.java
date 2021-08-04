@@ -89,6 +89,7 @@ public final class JobStatus {
     static final int CONSTRAINT_TIMING_DELAY = 1<<31;
     static final int CONSTRAINT_DEADLINE = 1<<30;
     static final int CONSTRAINT_CONNECTIVITY = 1 << 28;
+    static final int CONSTRAINT_TARE_WEALTH = 1 << 27; // Implicit constraint
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1 << 25; // Implicit constraint
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
@@ -146,6 +147,7 @@ public final class JobStatus {
     private static final int STATSD_CONSTRAINTS_TO_LOG = CONSTRAINT_CONTENT_TRIGGER
             | CONSTRAINT_DEADLINE
             | CONSTRAINT_IDLE
+            | CONSTRAINT_TARE_WEALTH
             | CONSTRAINT_TIMING_DELAY
             | CONSTRAINT_WITHIN_QUOTA;
 
@@ -395,6 +397,10 @@ public final class JobStatus {
      * Whether or not this job is approved to be treated as expedited per quota policy.
      */
     private boolean mExpeditedQuotaApproved;
+    /**
+     * Whether or not this job is approved to be treated as expedited per TARE policy.
+     */
+    private boolean mExpeditedTareApproved;
 
     /////// Booleans that track if a job is ready to run. They should be updated whenever dependent
     /////// states change.
@@ -420,6 +426,9 @@ public final class JobStatus {
 
     /** The job is within its quota based on its standby bucket. */
     private boolean mReadyWithinQuota;
+
+    /** The job has enough credits to run based on TARE. */
+    private boolean mReadyTareWealth;
 
     /** The job's dynamic requirements have been satisfied. */
     private boolean mReadyDynamicSatisfied;
@@ -1230,6 +1239,16 @@ public final class JobStatus {
         return false;
     }
 
+    /** @return true if the constraint was changed, false otherwise. */
+    boolean setTareWealthConstraintSatisfied(final long nowElapsed, boolean state) {
+        if (setConstraintSatisfied(CONSTRAINT_TARE_WEALTH, nowElapsed, state)) {
+            // The constraint was changed. Update the ready flag.
+            mReadyTareWealth = state;
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Sets whether or not this job is approved to be treated as an expedited job based on quota
      * policy.
@@ -1241,6 +1260,21 @@ public final class JobStatus {
             return false;
         }
         mExpeditedQuotaApproved = state;
+        updateExpeditedDependencies();
+        return true;
+    }
+
+    /**
+     * Sets whether or not this job is approved to be treated as an expedited job based on TARE
+     * policy.
+     *
+     * @return true if the approval bit was changed, false otherwise.
+     */
+    boolean setExpeditedJobTareApproved(final long nowElapsed, boolean state) {
+        if (mExpeditedTareApproved == state) {
+            return false;
+        }
+        mExpeditedTareApproved = state;
         updateExpeditedDependencies();
         return true;
     }
@@ -1353,6 +1387,7 @@ public final class JobStatus {
             case CONSTRAINT_DEVICE_NOT_DOZING:
                 return JobParameters.STOP_REASON_DEVICE_STATE;
 
+            case CONSTRAINT_TARE_WEALTH:
             case CONSTRAINT_WITHIN_QUOTA:
                 return JobParameters.STOP_REASON_QUOTA;
 
@@ -1404,6 +1439,11 @@ public final class JobStatus {
             // Quota should never be used as a dynamic constraint.
             Slog.wtf(TAG, "Tried to set quota as a dynamic constraint");
             constraints &= ~CONSTRAINT_WITHIN_QUOTA;
+        }
+        if ((constraints & CONSTRAINT_TARE_WEALTH) != 0) {
+            // Quota should never be used as a dynamic constraint.
+            Slog.wtf(TAG, "Tried to set TARE as a dynamic constraint");
+            constraints &= ~CONSTRAINT_TARE_WEALTH;
         }
 
         // Connectivity and content trigger are special since they're only valid to add if the
@@ -1472,6 +1512,10 @@ public final class JobStatus {
                 oldValue = mReadyNotDozing;
                 mReadyNotDozing = value;
                 break;
+            case CONSTRAINT_TARE_WEALTH:
+                oldValue = mReadyTareWealth;
+                mReadyTareWealth = value;
+                break;
             case CONSTRAINT_WITHIN_QUOTA:
                 oldValue = mReadyWithinQuota;
                 mReadyWithinQuota = value;
@@ -1499,6 +1543,9 @@ public final class JobStatus {
                 break;
             case CONSTRAINT_DEVICE_NOT_DOZING:
                 mReadyNotDozing = oldValue;
+                break;
+            case CONSTRAINT_TARE_WEALTH:
+                mReadyTareWealth = oldValue;
                 break;
             case CONSTRAINT_WITHIN_QUOTA:
                 mReadyWithinQuota = oldValue;
@@ -1726,6 +1773,9 @@ public final class JobStatus {
         }
         if ((constraints&CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
             pw.print(" BACKGROUND_NOT_RESTRICTED");
+        }
+        if ((constraints & CONSTRAINT_TARE_WEALTH) != 0) {
+            pw.print(" TARE_WEALTH");
         }
         if ((constraints & CONSTRAINT_WITHIN_QUOTA) != 0) {
             pw.print(" WITHIN_QUOTA");
@@ -1991,7 +2041,8 @@ public final class JobStatus {
             pw.println();
             pw.print("Unsatisfied constraints:");
             dumpConstraints(pw,
-                    ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA) & ~satisfiedConstraints));
+                    ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA | CONSTRAINT_TARE_WEALTH)
+                            & ~satisfiedConstraints));
             pw.println();
 
             pw.println("Constraint history:");
@@ -2050,6 +2101,8 @@ public final class JobStatus {
         if ((getFlags() & JobInfo.FLAG_EXPEDITED) != 0) {
             pw.print("expeditedQuotaApproved: ");
             pw.print(mExpeditedQuotaApproved);
+            pw.print(" expeditedTareApproved: ");
+            pw.print(mExpeditedTareApproved);
             pw.print(" (started as EJ: ");
             pw.print(startedAsExpeditedJob);
             pw.println(")");

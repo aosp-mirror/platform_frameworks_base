@@ -23,6 +23,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -48,6 +50,7 @@ public abstract class SystemUI implements Dumpable {
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
+    @VisibleForTesting
     protected void onBootCompleted() {
     }
 

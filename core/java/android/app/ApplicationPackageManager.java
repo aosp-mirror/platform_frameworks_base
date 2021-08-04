@@ -1014,17 +1014,13 @@ public class ApplicationPackageManager extends PackageManager {
                     }
                 }
                 @Override
-                protected boolean bypass(Integer uid) {
-                    return uid < 0;
-                }
-                @Override
                 public String queryToString(Integer uid) {
                     return String.format("uid=%d", uid.intValue());
                 }
             };
 
     @Override
-    public String[] getPackagesForUid(@UserIdInt int uid) {
+    public String[] getPackagesForUid(int uid) {
         return mGetPackagesForUidCache.query(uid).value();
     }
 
@@ -1039,7 +1035,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getNameForUid(@UserIdInt int uid) {
+    public String getNameForUid(int uid) {
         try {
             return mPM.getNameForUid(uid);
         } catch (RemoteException e) {

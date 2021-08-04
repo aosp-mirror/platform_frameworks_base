@@ -327,7 +327,6 @@ import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.ActiveAdmin.TrustAgentInfo;
-import com.android.server.devicepolicy.Owners.OwnerDto;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.RestrictionsSet;
@@ -1260,17 +1259,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     // Used by DevicePolicyManagerServiceShellCommand
-    List<OwnerDto> listAllOwners() {
+    List<OwnerShellData> listAllOwners() {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            List<OwnerDto> owners = mOwners.listAllOwners();
+            SparseArray<DevicePolicyData> userData;
+
+            // Gets the owners of "full users" first (device owner and profile owners)
+            List<OwnerShellData> owners = mOwners.listAllOwners();
             synchronized (getLockObject()) {
                 for (int i = 0; i < owners.size(); i++) {
-                    OwnerDto owner = owners.get(i);
+                    OwnerShellData owner = owners.get(i);
                     owner.isAffiliated = isUserAffiliatedWithDeviceLocked(owner.userId);
                 }
+                userData = mUserData;
             }
+
+            // Then the owners of profile users (managed profiles)
+            for (int i = 0; i < userData.size(); i++) {
+                DevicePolicyData policyData = mUserData.valueAt(i);
+                int userId = userData.keyAt(i);
+                int parentUserId = mUserManagerInternal.getProfileParentId(userId);
+                boolean isProfile = parentUserId != userId;
+                if (!isProfile) continue;
+                for (int j = 0; j < policyData.mAdminList.size(); j++) {
+                    ActiveAdmin admin = policyData.mAdminList.get(j);
+                    OwnerShellData owner = OwnerShellData.forManagedProfileOwner(userId,
+                            parentUserId, admin.info.getComponent());
+                    owners.add(owner);
+                }
+            }
+
             return owners;
         });
     }

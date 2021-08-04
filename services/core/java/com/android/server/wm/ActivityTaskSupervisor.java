@@ -841,6 +841,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         proc.getThread(), r.appToken);
 
                 final boolean isTransitionForward = r.isTransitionForward();
+                IBinder fragmentToken = null;
+                if (r.getTaskFragment().getTaskFragmentOrganizerPid() == r.getPid()) {
+                    fragmentToken = r.getTaskFragment().getFragmentToken();
+                }
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
@@ -852,7 +856,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         r.takeOptions(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.createFixedRotationAdjustmentsIfNeeded(), r.shareableActivityToken,
-                        r.getLaunchedFromBubble()));
+                        r.getLaunchedFromBubble(), fragmentToken));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;

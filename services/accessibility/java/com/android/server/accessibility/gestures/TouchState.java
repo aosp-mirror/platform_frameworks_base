@@ -98,7 +98,6 @@ public class TouchState {
             mLastReceivedEvent.recycle();
             mLastReceivedEvent = null;
         }
-        mLastTouchedWindowId = -1;
         mReceivedPointerTracker.clear();
         mInjectedPointersDown = 0;
     }

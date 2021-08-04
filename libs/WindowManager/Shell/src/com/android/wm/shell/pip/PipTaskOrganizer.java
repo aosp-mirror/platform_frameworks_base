@@ -137,11 +137,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         public void onPipAnimationStart(TaskInfo taskInfo,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
-            if (direction == TRANSITION_DIRECTION_TO_PIP) {
-                // TODO (b//169221267): Add jank listener for transactions without buffer updates.
-                //InteractionJankMonitor.getInstance().begin(
-                //        InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP, 2000);
-            }
             sendOnPipTransitionStarted(direction);
         }
 

@@ -691,4 +691,13 @@
 
     <!-- Timeout to idle mode duration in milliseconds. -->
     <integer name="config_idleModeTimeout">10000</integer>
+
+    <!-- The maximum number of attempts to reconnect to the communal source target after failing
+         to connect -->
+    <integer name="config_communalSourceMaxReconnectAttempts">10</integer>
+
+    <!-- The initial amount of time (in milliseconds) before attempting to reconnect to a communal
+         source. This value is used as the base value in an exponential backoff in subsequent
+         attempts. -->
+    <integer name="config_communalSourceReconnectBaseDelay">1000</integer>
 </resources>

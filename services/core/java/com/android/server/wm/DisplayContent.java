@@ -732,15 +732,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // dismissing during the task switching to keep the window focus because IME window has
         // higher window hierarchy, we don't give it focus if the next IME layering target
         // doesn't request IME visible.
-        if (w.mIsImWindow && (mImeLayeringTarget == null
+        if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
                 || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
-            if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG) {
-                return false;
-            }
-
-            if (w.isChildWindow()) {
-                return false;
-            }
+            return false;
+        }
+        if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
+                && !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME)
+                && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION)) {
+            return false;
         }
 
         final ActivityRecord activity = w.mActivityRecord;
@@ -4930,10 +4930,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    /**
+     * @deprecated new transition should use {@link #requestTransitionAndLegacyPrepare(int, int)}
+     */
+    @Deprecated
     void prepareAppTransition(@WindowManager.TransitionType int transit) {
         prepareAppTransition(transit, 0 /* flags */);
     }
 
+    /**
+     * @deprecated new transition should use {@link #requestTransitionAndLegacyPrepare(int, int)}
+     */
+    @Deprecated
     void prepareAppTransition(@WindowManager.TransitionType int transit,
             @WindowManager.TransitionFlags int flags) {
         final boolean prepared = mAppTransition.prepareAppTransition(transit, flags);
@@ -4946,7 +4954,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Helper that both requests a transition (using the new transition system) and prepares
      * the legacy transition system. Use this when both systems have the same start-point.
      *
-     * @see TransitionController#requestTransitionIfNeeded(int, int, WindowContainer)
+     * @see TransitionController#requestTransitionIfNeeded(int, int, WindowContainer,
+     *      WindowContainer)
      * @see AppTransition#prepareAppTransition
      */
     void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,

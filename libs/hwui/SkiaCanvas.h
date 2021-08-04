@@ -94,6 +94,9 @@ public:
     virtual bool quickRejectPath(const SkPath& path) const override;
     virtual bool clipRect(float left, float top, float right, float bottom, SkClipOp op) override;
     virtual bool clipPath(const SkPath* path, SkClipOp op) override;
+    virtual bool replaceClipRect_deprecated(float left, float top, float right,
+                                            float bottom) override;
+    virtual bool replaceClipPath_deprecated(const SkPath* path) override;
 
     virtual PaintFilter* getPaintFilter() override;
     virtual void setPaintFilter(sk_sp<PaintFilter> paintFilter) override;
