@@ -43,6 +43,16 @@ import com.android.internal.view.IInputMethod;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * Takes care of remote method invocations of {@link InputConnection} in the IME side.
+ *
+ * <p>This class works as a proxy to forward API calls on {@link InputConnection} to
+ * {@link com.android.internal.inputmethod.RemoteInputConnectionImpl} running on the IME client
+ * (editor app) process then waits replies as needed.</p>
+ *
+ * <p>See also {@link IInputContext} for the actual {@link android.os.Binder} IPC protocols under
+ * the hood.</p>
+ */
 final class RemoteInputConnection implements InputConnection {
     private static final String TAG = "RemoteInputConnection";
 
