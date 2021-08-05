@@ -19816,6 +19816,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Check if this view can be scrolled horizontally in a certain direction.
      *
+     * <p>This is without regard to whether the view is enabled or not, or if it will scroll
+     * in response to user input or not.
+     *
      * @param direction Negative to check scrolling left, positive to check scrolling right.
      * @return true if this view can be scrolled in the specified direction, false otherwise.
      */
@@ -19832,6 +19835,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Check if this view can be scrolled vertically in a certain direction.
+     *
+     * <p>This is without regard to whether the view is enabled or not, or if it will scroll
+     * in response to user input or not.
      *
      * @param direction Negative to check scrolling up, positive to check scrolling down.
      * @return true if this view can be scrolled in the specified direction, false otherwise.
