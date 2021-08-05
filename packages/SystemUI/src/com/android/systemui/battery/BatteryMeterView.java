@@ -18,7 +18,6 @@ package com.android.systemui.battery;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -61,8 +60,6 @@ import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -72,8 +69,7 @@ import java.lang.annotation.Retention;
 import java.text.NumberFormat;
 
 public class BatteryMeterView extends LinearLayout implements
-        BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
-
+        BatteryStateChangeCallback, Tunable, DarkReceiver {
 
     @Retention(SOURCE)
     @IntDef({MODE_DEFAULT, MODE_ON, MODE_OFF, MODE_ESTIMATE})
@@ -167,7 +163,6 @@ public class BatteryMeterView extends LinearLayout implements
 
         setClipChildren(false);
         setClipToPadding(false);
-        Dependency.get(ConfigurationController.class).observe(viewAttachLifecycle(this), this);
     }
 
     private void setupLayoutTransition() {
@@ -398,11 +393,6 @@ public class BatteryMeterView extends LinearLayout implements
         }
     }
 
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        scaleBatteryMeterViews();
-    }
-
     private Drawable getUnknownStateDrawable() {
         if (mUnknownStateDrawable == null) {
             mUnknownStateDrawable = mContext.getDrawable(R.drawable.ic_battery_unknown);
@@ -432,7 +422,7 @@ public class BatteryMeterView extends LinearLayout implements
     /**
      * Looks up the scale factor for status bar icons and scales the battery view by that amount.
      */
-    private void scaleBatteryMeterViews() {
+    void scaleBatteryMeterViews() {
         Resources res = getContext().getResources();
         TypedValue typedValue = new TypedValue();
 
