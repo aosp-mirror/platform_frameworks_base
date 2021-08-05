@@ -142,6 +142,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultTrue() {
+        // Tablets may be using taskbar and the logic is different
+        mNavigationBarController.mIsTablet = false;
         doNothing().when(mNavigationBarController).createNavigationBar(any(), any(), any());
 
         mNavigationBarController.createNavigationBars(true, null);
