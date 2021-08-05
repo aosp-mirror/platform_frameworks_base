@@ -18,6 +18,7 @@ package com.android.server.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -34,6 +35,11 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+
+import static org.mockito.Mockito.mock;
+
+import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.WindowProcessController;
 
 import junit.framework.Assert;
 
@@ -63,6 +69,8 @@ public final class DeviceStateManagerServiceTest {
     private static final DeviceState UNSUPPORTED_DEVICE_STATE =
             new DeviceState(255, "UNSUPPORTED", 0 /* flags */);
 
+    private static final int FAKE_PROCESS_ID = 100;
+
     private TestDeviceStatePolicy mPolicy;
     private TestDeviceStateProvider mProvider;
     private DeviceStateManagerService mService;
@@ -72,6 +80,14 @@ public final class DeviceStateManagerServiceTest {
         mProvider = new TestDeviceStateProvider();
         mPolicy = new TestDeviceStatePolicy(mProvider);
         mService = new DeviceStateManagerService(InstrumentationRegistry.getContext(), mPolicy);
+
+        // Necessary to allow us to check for top app process id in tests
+        mService.mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
+        WindowProcessController windowProcessController = mock(WindowProcessController.class);
+        when(mService.mActivityTaskManagerInternal.getTopApp())
+                .thenReturn(windowProcessController);
+        when(windowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
+
         flushHandler(); // Flush the handler to ensure the initial values are committed.
     }
 

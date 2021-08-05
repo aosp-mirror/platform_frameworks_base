@@ -86,12 +86,13 @@ public final class DeviceStateManager {
      * However, this behavior can be changed by setting flags on the {@link DeviceStateRequest}.
      *
      * @throws IllegalArgumentException if the requested state is unsupported.
-     * @throws SecurityException if the {@link android.Manifest.permission#CONTROL_DEVICE_STATE}
-     * permission is not held.
+     * @throws SecurityException if the caller is neither the current top-focused activity nor if
+     * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
      *
      * @see DeviceStateRequest
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
+    @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
+            conditional = true)
     public void requestState(@NonNull DeviceStateRequest request,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable DeviceStateRequest.Callback callback) {
@@ -105,10 +106,11 @@ public final class DeviceStateManager {
      * This method is noop if the {@code request} has not been submitted with a call to
      * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      *
-     * @throws SecurityException if the {@link android.Manifest.permission#CONTROL_DEVICE_STATE}
-     * permission is not held.
+     * @throws SecurityException if the caller is neither the current top-focused activity nor if
+     * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
+    @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
+            conditional = true)
     public void cancelRequest(@NonNull DeviceStateRequest request) {
         mGlobal.cancelRequest(request);
     }
