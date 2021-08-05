@@ -92,6 +92,18 @@
                  android:layout_height="match_parent"
                  android:visibility="gone"/>
 
+        <FrameLayout
+            android:id="@+id/split_shade_smartspace_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/notification_side_paddings"
+            android:paddingEnd="@dimen/notification_side_paddings"
+            systemui:layout_constraintStart_toStartOf="@id/qs_edge_guideline"
+            systemui:layout_constraintEnd_toEndOf="parent"
+            systemui:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone">
+        </FrameLayout>
+
         <include layout="@layout/dock_info_overlay"/>
 
         <FrameLayout

@@ -1174,6 +1174,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         taskFragment.removeImmediately();
     }
 
+    @Nullable
+    TaskFragment getTaskFragment(IBinder tfToken) {
+        return mLaunchTaskFragments.get(tfToken);
+    }
+
     static class CallerInfo {
         final int mPid;
         final int mUid;

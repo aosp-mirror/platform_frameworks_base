@@ -1173,6 +1173,8 @@ JTuner::JTuner(JNIEnv *env, jobject thiz)
     if (mTunerClient == NULL) {
         mTunerClient = new TunerClient();
     }
+
+    mSharedFeId = (int) Constant::INVALID_FRONTEND_ID;
 }
 
 JTuner::~JTuner() {
@@ -1251,6 +1253,17 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
             gFields.frontendInitID,
             tuner,
             (jint) mFeId);
+}
+
+int JTuner::shareFrontend(int feId) {
+    if (mFeClient != NULL) {
+        ALOGE("Cannot share frontend:%d because this session is already holding %d",
+              feId, mFeClient->getId());
+        return (int)Result::INVALID_STATE;
+    }
+
+    mSharedFeId = feId;
+    return (int)Result::SUCCESS;
 }
 
 jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
@@ -1605,7 +1618,9 @@ Result JTuner::openDemux(int handle) {
             return Result::UNKNOWN_ERROR;
         }
         if (mFeClient != NULL) {
-            mDemuxClient->setFrontendDataSource(mFeClient);
+            return mDemuxClient->setFrontendDataSource(mFeClient);
+        } else if (mSharedFeId != (int) Constant::INVALID_FRONTEND_ID) {
+            return mDemuxClient->setFrontendDataSourceById(mSharedFeId);
         }
     }
 
@@ -1629,6 +1644,8 @@ jint JTuner::close() {
         }
         mDemuxClient = NULL;
     }
+
+    mSharedFeId = (int) Constant::INVALID_FRONTEND_ID;
     return (jint) res;
 }
 
@@ -3229,6 +3246,12 @@ static jobject android_media_tv_Tuner_open_frontend_by_handle(
     return tuner->openFrontendByHandle(handle);
 }
 
+static int android_media_tv_Tuner_share_frontend(
+        JNIEnv *env, jobject thiz, jint id) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->shareFrontend(id);
+}
+
 static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
     sp<JTuner> tuner = getTuner(env, thiz);
     FrontendSettings setting = getFrontendSettings(env, type, settings);
@@ -4307,6 +4330,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
             (void *)android_media_tv_Tuner_open_frontend_by_handle },
+    { "nativeShareFrontend", "(I)I",
+            (void *)android_media_tv_Tuner_share_frontend },
     { "nativeTune", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },

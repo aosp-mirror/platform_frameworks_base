@@ -633,6 +633,7 @@ class ActivityMetricsLogger {
             if (crossPackage) {
                 startLaunchTrace(info);
             }
+            scheduleCheckActivityToBeDrawnIfSleeping(launchedActivity);
             return;
         }
 
@@ -654,13 +655,7 @@ class ActivityMetricsLogger {
             // As abort for no process switch.
             launchObserverNotifyIntentFailed();
         }
-        if (launchedActivity.mDisplayContent.isSleeping()) {
-            // It is unknown whether the activity can be drawn or not, e.g. it depends on the
-            // keyguard states and the attributes or flags set by the activity. If the activity
-            // keeps invisible in the grace period, the tracker will be cancelled so it won't get
-            // a very long launch time that takes unlocking as the end of launch.
-            scheduleCheckActivityToBeDrawn(launchedActivity, UNKNOWN_VISIBILITY_CHECK_DELAY_MS);
-        }
+        scheduleCheckActivityToBeDrawnIfSleeping(launchedActivity);
 
         // If the previous transitions are no longer visible, abort them to avoid counting the
         // launch time when resuming from back stack. E.g. launch 2 independent tasks in a short
@@ -672,6 +667,16 @@ class ActivityMetricsLogger {
             if (prevInfo.allDrawn()) {
                 abort(prevInfo, "nothing will be drawn");
             }
+        }
+    }
+
+    private void scheduleCheckActivityToBeDrawnIfSleeping(@NonNull ActivityRecord r) {
+        if (r.mDisplayContent.isSleeping()) {
+            // It is unknown whether the activity can be drawn or not, e.g. it depends on the
+            // keyguard states and the attributes or flags set by the activity. If the activity
+            // keeps invisible in the grace period, the tracker will be cancelled so it won't get
+            // a very long launch time that takes unlocking as the end of launch.
+            scheduleCheckActivityToBeDrawn(r, UNKNOWN_VISIBILITY_CHECK_DELAY_MS);
         }
     }
 

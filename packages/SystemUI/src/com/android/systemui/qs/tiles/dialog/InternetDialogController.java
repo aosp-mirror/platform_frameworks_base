@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -323,9 +324,13 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (drawable == null) {
             return null;
         }
-        drawable.setTint(Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.colorControlNormal));
+        drawable.setTint(mContext.getColor(R.color.connected_network_primary_color));
         return drawable;
+    }
+
+    boolean isNightMode() {
+        return (mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
     }
 
     Drawable getSignalStrengthDrawable() {
@@ -345,8 +350,9 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 drawable = shared.get();
             }
 
-            drawable.setTint(
-                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorControlNormal));
+            drawable.setTint(activeNetworkIsCellular() ? mContext.getColor(
+                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
+                    mContext, android.R.attr.textColorTertiary));
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -393,7 +399,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         // Set the signal strength icon at the bottom right
         icons.setLayerGravity(1 /* index of SignalDrawable */, Gravity.BOTTOM | Gravity.RIGHT);
         icons.setLayerSize(1 /* index of SignalDrawable */, iconSize, iconSize);
-        icons.setTintList(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
+        icons.setTintList(Utils.getColorAttr(context, android.R.attr.textColorTertiary));
         return icons;
     }
 

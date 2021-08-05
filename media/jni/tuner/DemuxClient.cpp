@@ -60,6 +60,15 @@ Result DemuxClient::setFrontendDataSource(sp<FrontendClient> frontendClient) {
     return Result::INVALID_STATE;
 }
 
+Result DemuxClient::setFrontendDataSourceById(int frontendId) {
+    if (mTunerDemux != NULL) {
+        Status s = mTunerDemux->setFrontendDataSourceById(frontendId);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
 sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
         sp<FilterClientCallback> cb) {
     if (mTunerDemux != NULL) {

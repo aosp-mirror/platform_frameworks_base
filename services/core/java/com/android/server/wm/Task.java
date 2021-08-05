@@ -1394,14 +1394,6 @@ class Task extends TaskFragment {
         return mFindRootHelper.findRoot(ignoreRelinquishIdentity, setToBottomIfNone);
     }
 
-    ActivityRecord getTopNonFinishingActivity() {
-        return getTopNonFinishingActivity(true /* includeOverlays */);
-    }
-
-    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
-        return getTopActivity(false /*includeFinishing*/, includeOverlays);
-    }
-
     ActivityRecord topRunningActivityLocked() {
         if (getParent() == null) {
             return null;
@@ -2976,9 +2968,52 @@ class Task extends TaskFragment {
     /** Returns the top-most activity that occludes the given one, or {@code null} if none. */
     @Nullable
     ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
-        final ActivityRecord top = getActivity(ActivityRecord::occludesParent,
-                true /* traverseTopToBottom */, activity);
+        final ActivityRecord top = getActivity(r -> {
+            if (r == activity) {
+                // Reached the given activity, return the activity to stop searching.
+                return true;
+            }
+
+            if (!r.occludesParent()) {
+                return false;
+            }
+
+            TaskFragment parent = r.getTaskFragment();
+            if (parent == activity.getTaskFragment()) {
+                // Found it. This activity on top of the given activity on the same TaskFragment.
+                return true;
+            }
+            if (isSelfOrNonEmbeddedTask(parent.asTask())) {
+                // Found it. This activity is the direct child of a leaf Task without being
+                // embedded.
+                return true;
+            }
+            // The candidate activity is being embedded. Checking if the bounds of the containing
+            // TaskFragment equals to the outer TaskFragment.
+            TaskFragment grandParent = parent.getParent().asTaskFragment();
+            while (grandParent != null) {
+                if (!parent.getBounds().equals(grandParent.getBounds())) {
+                    // Not occluding the grandparent.
+                    break;
+                }
+                if (isSelfOrNonEmbeddedTask(grandParent.asTask())) {
+                    // Found it. The activity occludes its parent TaskFragment and the parent
+                    // TaskFragment also occludes its parent all the way up.
+                    return true;
+                }
+                parent = grandParent;
+                grandParent = parent.getParent().asTaskFragment();
+            }
+            return false;
+        });
         return top != activity ? top : null;
+    }
+
+    private boolean isSelfOrNonEmbeddedTask(Task task) {
+        if (task == this) {
+            return true;
+        }
+        return task != null && !task.isEmbedded();
     }
 
     @Override

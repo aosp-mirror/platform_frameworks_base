@@ -33,21 +33,9 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
  */
 public class KeyguardClockPositionAlgorithm {
     /**
-     * How much the clock height influences the shade position.
-     * 0 means nothing, 1 means move the shade up by the height of the clock
-     * 0.5f means move the shade up by half of the size of the clock.
-     */
-    private static float CLOCK_HEIGHT_WEIGHT = 0.7f;
-
-    /**
      * Margin between the bottom of the status view and the notification shade.
      */
     private int mStatusViewBottomMargin;
-
-    /**
-     * Height of the parent view - display size in px.
-     */
-    private int mHeight;
 
     /**
      * Height of {@link KeyguardStatusView}.
@@ -66,21 +54,6 @@ public class KeyguardClockPositionAlgorithm {
      * Preferred Y position of user avatar used by the multi-user switcher.
      */
     private int mUserSwitchPreferredY;
-
-    /**
-     * Whether or not there is a custom clock face on keyguard.
-     */
-    private boolean mHasCustomClock;
-
-    /**
-     * Whether or not the NSSL contains any visible notifications.
-     */
-    private boolean mHasVisibleNotifs;
-
-    /**
-     * Height of notification stack: Sum of height of each notification.
-     */
-    private int mNotificationStackHeight;
 
     /**
      * Minimum top margin to avoid overlap with status bar, lock icon, or multi-user switcher
@@ -148,6 +121,7 @@ public class KeyguardClockPositionAlgorithm {
     private int mUnlockedStackScrollerPadding;
 
     private boolean mIsSplitShade;
+    private int mSplitShadeSmartspaceHeight;
 
     /**
      * Refreshes the dimension values.
@@ -170,28 +144,25 @@ public class KeyguardClockPositionAlgorithm {
      * Sets up algorithm values.
      */
     public void setup(int keyguardStatusBarHeaderHeight, int maxShadeBottom,
-            int notificationStackHeight, float panelExpansion, int parentHeight,
-            int keyguardStatusHeight, int userSwitchHeight, int userSwitchPreferredY,
-            boolean hasCustomClock, boolean hasVisibleNotifs, float dark,
+            float panelExpansion,
+            int keyguardStatusHeight, int userSwitchHeight, int userSwitchPreferredY, float dark,
             float overStrechAmount, boolean bypassEnabled, int unlockedStackScrollerPadding,
-            float qsExpansion, int cutoutTopInset, boolean isSplitShade) {
+            float qsExpansion, int cutoutTopInset, int splitShadeSmartspaceHeight,
+            boolean isSplitShade) {
         mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(mContainerTopPadding,
                 userSwitchHeight);
         mMaxShadeBottom = maxShadeBottom;
-        mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
-        mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight + mStatusViewBottomMargin;
         mUserSwitchHeight = userSwitchHeight;
         mUserSwitchPreferredY = userSwitchPreferredY;
-        mHasCustomClock = hasCustomClock;
-        mHasVisibleNotifs = hasVisibleNotifs;
         mDarkAmount = dark;
         mOverStretchAmount = overStrechAmount;
         mBypassEnabled = bypassEnabled;
         mUnlockedStackScrollerPadding = unlockedStackScrollerPadding;
         mQsExpansion = qsExpansion;
         mCutoutTopInset = cutoutTopInset;
+        mSplitShadeSmartspaceHeight = splitShadeSmartspaceHeight;
         mIsSplitShade = isSplitShade;
     }
 
@@ -213,7 +184,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return (int) (mUnlockedStackScrollerPadding + mOverStretchAmount);
         } else if (mIsSplitShade) {
-            return clockYPosition;
+            return clockYPosition + mSplitShadeSmartspaceHeight;
         } else {
             return clockYPosition + mKeyguardStatusHeight;
         }
