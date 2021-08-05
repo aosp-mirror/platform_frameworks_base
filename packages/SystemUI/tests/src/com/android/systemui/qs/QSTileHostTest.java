@@ -44,7 +44,6 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.CollectionUtils;
@@ -53,7 +52,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -71,15 +69,12 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.SecureSettings;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -133,16 +128,9 @@ public class QSTileHostTest extends SysuiTestCase {
     private Handler mHandler;
     private TestableLooper mLooper;
     private QSTileHost mQSTileHost;
-    MockitoSession mMockingSession = null;
 
     @Before
     public void setUp() {
-        // TODO(b/174753536): Remove the mMockingSession when
-        // FeatureFlagUtils.SETTINGS_PROVIDER_MODEL is removed.
-        mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
-                .mockStatic(FeatureFlags.class).startMocking();
-        ExtendedMockito.doReturn(false)
-                .when(() -> FeatureFlags.isProviderModelSettingEnabled(mContext));
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
@@ -154,13 +142,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
         when(mSecureSettings.getStringForUser(eq(QSTileHost.TILES_SETTING), anyInt()))
                 .thenReturn("");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (mMockingSession != null) {
-            mMockingSession.finishMocking();
-        }
     }
 
     private void setUpTileFactory() {
