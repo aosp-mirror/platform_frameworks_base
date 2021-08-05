@@ -352,7 +352,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
             // Apply any launch flags from the ActivityOptions. This is to ensure that the caller
             // can specify a consistent launch mode even if the PendingIntent is immutable
-            final ActivityOptions opts = ActivityOptions.fromBundle(options);
+            final ActivityOptions opts = options != null ? ActivityOptions.fromBundle(options)
+                    : null;
             if (opts != null) {
                 finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
             }

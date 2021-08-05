@@ -187,13 +187,18 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readPersistableBundle(getClass().getClassLoader()),
                 in.createTypedArrayList(ResultInfo.CREATOR),
                 in.createTypedArrayList(ReferrerIntent.CREATOR),
-                ActivityOptions.fromBundle(in.readBundle()), in.readBoolean(),
+                readActivityOptions(in), in.readBoolean(),
                 in.readTypedObject(ProfilerInfo.CREATOR),
                 in.readStrongBinder(),
                 IActivityClientController.Stub.asInterface(in.readStrongBinder()),
                 in.readTypedObject(FixedRotationAdjustments.CREATOR), in.readStrongBinder(),
                 in.readBoolean(),
                 in.readStrongBinder());
+    }
+
+    private static ActivityOptions readActivityOptions(Parcel in) {
+        Bundle bundle = in.readBundle();
+        return bundle != null ? ActivityOptions.fromBundle(bundle) : null;
     }
 
     public static final @NonNull Creator<LaunchActivityItem> CREATOR =

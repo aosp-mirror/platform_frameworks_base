@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ExitTransitionCoordinator.ActivityExitTransitionCallbacks;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
@@ -1352,9 +1353,17 @@ public class ActivityOptions {
         return mRemoteTransition;
     }
 
-    /** @hide */
-    public static ActivityOptions fromBundle(Bundle bOptions) {
-        return bOptions != null ? new ActivityOptions(bOptions) : null;
+    /**
+     * Creates an ActivityOptions from the Bundle generated from {@link ActivityOptions#toBundle()}.
+     * Returns an instance of ActivityOptions populated with options with known keys from the
+     * provided Bundle, stripping out unknown entries.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    @NonNull
+    public static ActivityOptions fromBundle(@NonNull Bundle bOptions) {
+        return new ActivityOptions(bOptions);
     }
 
     /** @hide */
