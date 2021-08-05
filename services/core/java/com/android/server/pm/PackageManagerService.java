@@ -13528,10 +13528,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-
-
-
-
     /**
      * Returns the actual scan flags depending upon the state of the other settings.
      * <p>Updated system applications will not have the following flags set
@@ -13699,10 +13695,10 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
             throws PackageManagerException {
-        if (!result.mExistingSettingCopied) {
+        if (!result.mExistingSettingCopied || result.mNeedsNewAppId) {
             // THROWS: when we can't allocate a user id. add call to check if there's
             // enough space to ensure we won't throw; otherwise, don't modify state
-            return mSettings.registerAppIdLPw(result.mPkgSetting);
+            return mSettings.registerAppIdLPw(result.mPkgSetting, result.mNeedsNewAppId);
         }
         return false;
     }
@@ -14072,15 +14068,25 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        boolean leavingSharedUser = false;
+
         if (pkgSetting != null && pkgSetting.sharedUser != sharedUserSetting) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                            + (pkgSetting.sharedUser != null
-                            ? pkgSetting.sharedUser.name : "<nothing>")
-                            + " to "
-                            + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
-                            + "; replacing with new");
-            pkgSetting = null;
+            if (pkgSetting.sharedUser != null && sharedUserSetting == null) {
+                leavingSharedUser = true;
+                // Log that something is leaving shareduid and keep going
+                Slog.i(TAG,
+                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
+                        + pkgSetting.sharedUser.name + " to " + "<nothing>.");
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
+                                + (pkgSetting.sharedUser != null
+                                ? pkgSetting.sharedUser.name : "<nothing>")
+                                + " to "
+                                + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
+                                + "; replacing with new");
+                pkgSetting = null;
+            }
         }
 
         String[] usesStaticLibraries = null;
@@ -14356,7 +14362,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
-                !createNewPackage /* existingSettingCopied */, staticSharedLibraryInfo,
+                !createNewPackage /* existingSettingCopied */,
+                leavingSharedUser /* needsNewAppId */, staticSharedLibraryInfo,
                 dynamicSharedLibraryInfos);
     }
 
@@ -21734,6 +21741,10 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 continue;
             }
+
+            // TODO@ashfall check ScanResult.mNeedsNewAppId, and if true instead
+            // of creating app data, migrate / change ownership of existing
+            // data.
 
             if (ps.getInstalled(user.id)) {
                 // TODO: when user data is locked, mark that we're still dirty

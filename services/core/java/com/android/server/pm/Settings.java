@@ -1126,9 +1126,9 @@ public final class Settings implements Watchable, Snappable {
      *         already registered.
      * @throws PackageManagerException If a user ID could not be allocated.
      */
-    boolean registerAppIdLPw(PackageSetting p) throws PackageManagerException {
+    boolean registerAppIdLPw(PackageSetting p, boolean forceNew) throws PackageManagerException {
         final boolean createdNew;
-        if (p.appId == 0) {
+        if (p.appId == 0 || forceNew) {
             // Assign new user ID
             p.appId = acquireAndRegisterNewAppIdLPw(p);
             createdNew = true;
