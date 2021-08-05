@@ -51,6 +51,9 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
     private int mCurrentState;
 
+    // The current in-flight request for a surface package.
+    private ListenableFuture<SurfaceControlViewHost.SurfacePackage> mCurrentSurfaceFuture;
+
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(@NonNull SurfaceHolder holder) {
@@ -99,20 +102,30 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
         mCurrentState = newState;
 
-        if (newState == STATE_CAN_SHOW_SURFACE) {
-            showSurface();
-        }
+        showSurface(newState == STATE_CAN_SHOW_SURFACE);
     }
 
-    private void showSurface() {
+    private void showSurface(boolean show) {
         mView.setWillNotDraw(false);
 
-        final ListenableFuture<SurfaceControlViewHost.SurfacePackage> surfaceFuture =
-                mSource.requestCommunalSurface(mView.getHostToken(),
+        if (!show) {
+            // If the surface is no longer showing, cancel any in-flight requests.
+            if (mCurrentSurfaceFuture != null) {
+                mCurrentSurfaceFuture.cancel(true);
+                mCurrentSurfaceFuture = null;
+            }
+
+            mView.setWillNotDraw(true);
+            return;
+        }
+
+        // Since this method is only called when the state has changed, mCurrentSurfaceFuture should
+        // be null here.
+        mCurrentSurfaceFuture = mSource.requestCommunalSurface(mView.getHostToken(),
                         mView.getDisplay().getDisplayId(), mView.getMeasuredWidth(),
                         mView.getMeasuredHeight());
 
-        surfaceFuture.addListener(new Runnable() {
+        mCurrentSurfaceFuture.addListener(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -121,7 +134,9 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
                         return;
                     }
 
-                    SurfaceControlViewHost.SurfacePackage surfacePackage = surfaceFuture.get();
+                    SurfaceControlViewHost.SurfacePackage surfacePackage =
+                            mCurrentSurfaceFuture.get();
+                    mCurrentSurfaceFuture = null;
 
                     if (DEBUG) {
                         Log.d(TAG, "Received surface package:" + surfacePackage);

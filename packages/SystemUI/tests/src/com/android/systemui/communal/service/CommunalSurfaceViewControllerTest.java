@@ -16,8 +16,10 @@
 
 package com.android.systemui.communal.service;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -109,6 +111,8 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         verify(mCommunalSource, times(0))
                 .requestCommunalSurface(any(), anyInt(), anyInt(), anyInt());
 
+        clearInvocations(mSurfaceView);
+
         // Request surface view once all conditions are met.
         mCallback.surfaceCreated(mSurfaceHolder);
         verify(mCommunalSource)
@@ -125,5 +129,46 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         verify(mSurfaceView).setChildSurfacePackage(mSurfacePackage);
         verify(mSurfaceView).setZOrderOnTop(true);
         verify(mSurfaceView).setWillNotDraw(false);
+    }
+
+    // Invoked to setup surface view package.
+    private void givenSurfacePresent() {
+        mController.onViewAttached();
+        mCallback.surfaceCreated(mSurfaceHolder);
+        when(mSurfaceView.isAttachedToWindow()).thenReturn(true);
+        mPackageFuture.set(mSurfacePackage);
+        mFakeExecutor.runAllReady();
+        clearInvocations(mSurfaceView);
+    }
+
+    @Test
+    public void testClearOnDetach() {
+        givenSurfacePresent();
+        when(mSurfaceView.isAttachedToWindow()).thenReturn(false);
+        mController.onViewDetached();
+        verify(mSurfaceView).setWillNotDraw(true);
+    }
+
+    @Test
+    public void testClearOnSurfaceDestroyed() {
+        givenSurfacePresent();
+        mCallback.surfaceDestroyed(mSurfaceHolder);
+        verify(mSurfaceView).setWillNotDraw(true);
+    }
+
+    @Test
+    public void testCancelRequest() {
+        mController.onViewAttached();
+        mCallback.surfaceCreated(mSurfaceHolder);
+        when(mSurfaceView.isAttachedToWindow()).thenReturn(true);
+        mFakeExecutor.runAllReady();
+        clearInvocations(mSurfaceView);
+
+        verify(mCommunalSource, times(1))
+                .requestCommunalSurface(mHostToken, DISPLAY_ID, MEASURED_WIDTH, MEASURED_HEIGHT);
+
+        mController.onViewDetached();
+        assertTrue(mPackageFuture.isCancelled());
+        verify(mSurfaceView).setWillNotDraw(true);
     }
 }
