@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -60,7 +61,6 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -2260,7 +2260,7 @@ class ContextImpl extends Context {
             int modeFlags) {
         try {
             return ActivityManager.getService().checkUriPermissions(uris, pid, uid, modeFlags,
-                    null);
+                    getUserId(), null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

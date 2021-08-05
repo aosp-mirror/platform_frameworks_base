@@ -5696,7 +5696,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,
-            final int modeFlags, IBinder callerToken) {
+            final int modeFlags, int userId, IBinder callerToken) {
         final int size = uris.size();
         int[] res = new int[size];
         // Default value DENIED.
@@ -5704,9 +5704,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         for (int i = 0; i < size; i++) {
             final Uri uri = uris.get(i);
-            final int userId = ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+            final int userIdFromUri = ContentProvider.getUserIdFromUri(uri, userId);
             res[i] = checkUriPermission(ContentProvider.getUriWithoutUserId(uri), pid, uid,
-                    modeFlags, userId, callerToken);
+                    modeFlags, userIdFromUri, callerToken);
         }
         return res;
     }
