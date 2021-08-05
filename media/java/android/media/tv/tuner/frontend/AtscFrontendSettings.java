@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendAtscModulation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,19 +44,19 @@ public class AtscFrontendSettings extends FrontendSettings {
     /**
      * Modulation undefined.
      */
-    public static final int MODULATION_UNDEFINED = Constants.FrontendAtscModulation.UNDEFINED;
+    public static final int MODULATION_UNDEFINED = FrontendAtscModulation.UNDEFINED;
     /**
      * Hardware is able to detect and set modulation automatically
      */
-    public static final int MODULATION_AUTO = Constants.FrontendAtscModulation.AUTO;
+    public static final int MODULATION_AUTO = FrontendAtscModulation.AUTO;
     /**
      * 8VSB Modulation.
      */
-    public static final int MODULATION_MOD_8VSB = Constants.FrontendAtscModulation.MOD_8VSB;
+    public static final int MODULATION_MOD_8VSB = FrontendAtscModulation.MOD_8VSB;
     /**
      * 16VSB Modulation.
      */
-    public static final int MODULATION_MOD_16VSB = Constants.FrontendAtscModulation.MOD_16VSB;
+    public static final int MODULATION_MOD_16VSB = FrontendAtscModulation.MOD_16VSB;
 
 
     private final int mModulation;

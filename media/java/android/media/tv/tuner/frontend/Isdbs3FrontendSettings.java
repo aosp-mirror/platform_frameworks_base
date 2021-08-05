@@ -20,7 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendIsdbs3Coderate;
+import android.hardware.tv.tuner.FrontendIsdbs3Modulation;
+import android.hardware.tv.tuner.FrontendIsdbs3Rolloff;
 import android.media.tv.tuner.Tuner;
 
 import java.lang.annotation.Retention;
@@ -45,31 +47,31 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
     /**
      * Modulation undefined.
      */
-    public static final int MODULATION_UNDEFINED = Constants.FrontendIsdbs3Modulation.UNDEFINED;
+    public static final int MODULATION_UNDEFINED = FrontendIsdbs3Modulation.UNDEFINED;
     /**
      * Hardware is able to detect and set modulation automatically.
      */
-    public static final int MODULATION_AUTO = Constants.FrontendIsdbs3Modulation.AUTO;
+    public static final int MODULATION_AUTO = FrontendIsdbs3Modulation.AUTO;
     /**
      * BPSK Modulation.
      */
-    public static final int MODULATION_MOD_BPSK = Constants.FrontendIsdbs3Modulation.MOD_BPSK;
+    public static final int MODULATION_MOD_BPSK = FrontendIsdbs3Modulation.MOD_BPSK;
     /**
      * QPSK Modulation.
      */
-    public static final int MODULATION_MOD_QPSK = Constants.FrontendIsdbs3Modulation.MOD_QPSK;
+    public static final int MODULATION_MOD_QPSK = FrontendIsdbs3Modulation.MOD_QPSK;
     /**
      * 8PSK Modulation.
      */
-    public static final int MODULATION_MOD_8PSK = Constants.FrontendIsdbs3Modulation.MOD_8PSK;
+    public static final int MODULATION_MOD_8PSK = FrontendIsdbs3Modulation.MOD_8PSK;
     /**
      * 16APSK Modulation.
      */
-    public static final int MODULATION_MOD_16APSK = Constants.FrontendIsdbs3Modulation.MOD_16APSK;
+    public static final int MODULATION_MOD_16APSK = FrontendIsdbs3Modulation.MOD_16APSK;
     /**
      * 32APSK Modulation.
      */
-    public static final int MODULATION_MOD_32APSK = Constants.FrontendIsdbs3Modulation.MOD_32APSK;
+    public static final int MODULATION_MOD_32APSK = FrontendIsdbs3Modulation.MOD_32APSK;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -83,55 +85,55 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
     /**
      * Code rate undefined.
      */
-    public static final int CODERATE_UNDEFINED = Constants.FrontendIsdbs3Coderate.UNDEFINED;
+    public static final int CODERATE_UNDEFINED = FrontendIsdbs3Coderate.UNDEFINED;
     /**
      * Hardware is able to detect and set code rate automatically.
      */
-    public static final int CODERATE_AUTO = Constants.FrontendIsdbs3Coderate.AUTO;
+    public static final int CODERATE_AUTO = FrontendIsdbs3Coderate.AUTO;
     /**
      * 1/3 code rate.
      */
-    public static final int CODERATE_1_3 = Constants.FrontendIsdbs3Coderate.CODERATE_1_3;
+    public static final int CODERATE_1_3 = FrontendIsdbs3Coderate.CODERATE_1_3;
     /**
      * 2/5 code rate.
      */
-    public static final int CODERATE_2_5 = Constants.FrontendIsdbs3Coderate.CODERATE_2_5;
+    public static final int CODERATE_2_5 = FrontendIsdbs3Coderate.CODERATE_2_5;
     /**
      * 1/2 code rate.
      */
-    public static final int CODERATE_1_2 = Constants.FrontendIsdbs3Coderate.CODERATE_1_2;
+    public static final int CODERATE_1_2 = FrontendIsdbs3Coderate.CODERATE_1_2;
     /**
      * 3/5 code rate.
      */
-    public static final int CODERATE_3_5 = Constants.FrontendIsdbs3Coderate.CODERATE_3_5;
+    public static final int CODERATE_3_5 = FrontendIsdbs3Coderate.CODERATE_3_5;
     /**
      * 2/3 code rate.
      */
-    public static final int CODERATE_2_3 = Constants.FrontendIsdbs3Coderate.CODERATE_2_3;
+    public static final int CODERATE_2_3 = FrontendIsdbs3Coderate.CODERATE_2_3;
     /**
      * 3/4 code rate.
      */
-    public static final int CODERATE_3_4 = Constants.FrontendIsdbs3Coderate.CODERATE_3_4;
+    public static final int CODERATE_3_4 = FrontendIsdbs3Coderate.CODERATE_3_4;
     /**
      * 7/9 code rate.
      */
-    public static final int CODERATE_7_9 = Constants.FrontendIsdbs3Coderate.CODERATE_7_9;
+    public static final int CODERATE_7_9 = FrontendIsdbs3Coderate.CODERATE_7_9;
     /**
      * 4/5 code rate.
      */
-    public static final int CODERATE_4_5 = Constants.FrontendIsdbs3Coderate.CODERATE_4_5;
+    public static final int CODERATE_4_5 = FrontendIsdbs3Coderate.CODERATE_4_5;
     /**
      * 5/6 code rate.
      */
-    public static final int CODERATE_5_6 = Constants.FrontendIsdbs3Coderate.CODERATE_5_6;
+    public static final int CODERATE_5_6 = FrontendIsdbs3Coderate.CODERATE_5_6;
     /**
      * 7/8 code rate.
      */
-    public static final int CODERATE_7_8 = Constants.FrontendIsdbs3Coderate.CODERATE_7_8;
+    public static final int CODERATE_7_8 = FrontendIsdbs3Coderate.CODERATE_7_8;
     /**
      * 9/10 code rate.
      */
-    public static final int CODERATE_9_10 = Constants.FrontendIsdbs3Coderate.CODERATE_9_10;
+    public static final int CODERATE_9_10 = FrontendIsdbs3Coderate.CODERATE_9_10;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -142,11 +144,11 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
     /**
      * Rolloff type undefined.
      */
-    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbs3Rolloff.UNDEFINED;
+    public static final int ROLLOFF_UNDEFINED = FrontendIsdbs3Rolloff.UNDEFINED;
     /**
      * 0,03 Rolloff.
      */
-    public static final int ROLLOFF_0_03 = Constants.FrontendIsdbs3Rolloff.ROLLOFF_0_03;
+    public static final int ROLLOFF_0_03 = FrontendIsdbs3Rolloff.ROLLOFF_0_03;
 
 
     private final int mStreamId;

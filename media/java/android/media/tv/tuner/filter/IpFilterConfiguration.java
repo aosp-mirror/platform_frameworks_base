@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.SystemApi;
+import android.hardware.tv.tuner.Constant;
 import android.media.tv.tuner.TunerVersionChecker;
 
 /**
@@ -33,8 +34,7 @@ public final class IpFilterConfiguration extends FilterConfiguration {
     /**
      * Undefined filter type.
      */
-    public static final int INVALID_IP_FILTER_CONTEXT_ID =
-            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_IP_FILTER_CONTEXT_ID;
+    public static final int INVALID_IP_FILTER_CONTEXT_ID = Constant.INVALID_IP_FILTER_CONTEXT_ID;
 
     private final byte[] mSrcIpAddress;
     private final byte[] mDstIpAddress;
