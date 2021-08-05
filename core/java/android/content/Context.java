@@ -3799,6 +3799,7 @@ public abstract class Context {
             //@hide: INCIDENT_COMPANION_SERVICE,
             //@hide: STATS_COMPANION_SERVICE,
             COMPANION_DEVICE_SERVICE,
+            //@hide: VIRTUAL_DEVICE_SERVICE,
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
@@ -5259,6 +5260,16 @@ public abstract class Context {
      * @see android.companion.CompanionDeviceManager
      */
     public static final String COMPANION_DEVICE_SERVICE = "companiondevice";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.companion.virtual.VirtualDeviceManager} for managing virtual devices.
+     *
+     * @see #getSystemService(String)
+     * @see android.companion.virtual.VirtualDeviceManager
+     * @hide
+     */
+    public static final String VIRTUAL_DEVICE_SERVICE = "virtualdevice";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
