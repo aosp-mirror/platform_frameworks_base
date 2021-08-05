@@ -378,6 +378,11 @@ public class BiometricSchedulerTest {
         protected void handleLifecycleAfterAuth(boolean authenticated) {
 
         }
+
+        @Override
+        public boolean wasUserDetected() {
+            return false;
+        }
     }
 
     private static class TestAuthenticationClient extends AuthenticationClient<Object> {
@@ -406,6 +411,11 @@ public class BiometricSchedulerTest {
         @Override
         protected void handleLifecycleAfterAuth(boolean authenticated) {
 
+        }
+
+        @Override
+        public boolean wasUserDetected() {
+            return false;
         }
     }
 
