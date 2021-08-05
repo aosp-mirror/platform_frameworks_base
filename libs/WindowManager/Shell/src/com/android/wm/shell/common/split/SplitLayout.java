@@ -18,11 +18,16 @@ package com.android.wm.shell.common.split;
 
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
+import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
+import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -32,6 +37,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
@@ -80,6 +86,7 @@ public final class SplitLayout {
     private final int mDividerInsets;
     private final int mDividerSize;
 
+    private final Rect mTempRect = new Rect();
     private final Rect mRootBounds = new Rect();
     private final Rect mDividerBounds = new Rect();
     private final Rect mBounds1 = new Rect();
@@ -88,6 +95,7 @@ public final class SplitLayout {
     private final SplitWindowManager mSplitWindowManager;
     private final DisplayImeController mDisplayImeController;
     private final ImePositionProcessor mImePositionProcessor;
+    private final DismissingParallaxPolicy mDismissingParallaxPolicy;
     private final ShellTaskOrganizer mTaskOrganizer;
 
     private Context mContext;
@@ -110,6 +118,7 @@ public final class SplitLayout {
                 windowName, mContext, configuration, parentContainerCallbacks);
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
+        mDismissingParallaxPolicy = new DismissingParallaxPolicy();
 
         final Resources resources = context.getResources();
         mDividerWindowWidth = resources.getDimensionPixelSize(
@@ -187,7 +196,8 @@ public final class SplitLayout {
         mDividerBounds.set(mRootBounds);
         mBounds1.set(mRootBounds);
         mBounds2.set(mRootBounds);
-        if (isLandscape(mRootBounds)) {
+        final boolean isLandscape = isLandscape(mRootBounds);
+        if (isLandscape) {
             position += mRootBounds.left;
             mDividerBounds.left = position - mDividerInsets;
             mDividerBounds.right = mDividerBounds.left + mDividerWindowWidth;
@@ -200,6 +210,7 @@ public final class SplitLayout {
             mBounds1.bottom = position;
             mBounds2.top = mBounds1.bottom + mDividerSize;
         }
+        mDismissingParallaxPolicy.applyDividerPosition(position, isLandscape);
     }
 
     /** Inflates {@link DividerView} on the root surface. */
@@ -239,6 +250,7 @@ public final class SplitLayout {
     /** Resets divider position. */
     public void resetDividerPosition() {
         mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
+        mSplitWindowManager.setResizingSplits(false);
         updateBounds(mDividePosition);
     }
 
@@ -328,30 +340,34 @@ public final class SplitLayout {
     /** Apply recorded surface layout to the {@link SurfaceControl.Transaction}. */
     public void applySurfaceChanges(SurfaceControl.Transaction t, SurfaceControl leash1,
             SurfaceControl leash2, SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
-        final Rect dividerBounds = mImePositionProcessor.adjustForIme(mDividerBounds);
-        final Rect bounds1 = mImePositionProcessor.adjustForIme(mBounds1);
-        final Rect bounds2 = mImePositionProcessor.adjustForIme(mBounds2);
         final SurfaceControl dividerLeash = getDividerLeash();
         if (dividerLeash != null) {
-            t.setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
-                    // Resets layer of divider bar to make sure it is always on top.
-                    .setLayer(dividerLeash, Integer.MAX_VALUE);
+            t.setPosition(dividerLeash, mDividerBounds.left, mDividerBounds.top);
+            // Resets layer of divider bar to make sure it is always on top.
+            t.setLayer(dividerLeash, Integer.MAX_VALUE);
+        }
+        t.setPosition(leash1, mBounds1.left, mBounds1.top)
+                .setWindowCrop(leash1, mBounds1.width(), mBounds1.height());
+        t.setPosition(leash2, mBounds2.left, mBounds2.top)
+                .setWindowCrop(leash2, mBounds2.width(), mBounds2.height());
+
+        if (mImePositionProcessor.adjustSurfaceLayoutForIme(
+                t, dividerLeash, leash1, leash2, dimLayer1, dimLayer2)) {
+            return;
         }
 
-        t.setPosition(leash1, bounds1.left, bounds1.top)
-                .setWindowCrop(leash1, bounds1.width(), bounds1.height());
-
-        t.setPosition(leash2, bounds2.left, bounds2.top)
-                .setWindowCrop(leash2, bounds2.width(), bounds2.height());
-
-        mImePositionProcessor.applySurfaceDimValues(t, dimLayer1, dimLayer2);
+        mDismissingParallaxPolicy.adjustDismissingSurface(t, leash1, leash2, dimLayer1, dimLayer2);
     }
 
     /** Apply recorded task layout to the {@link WindowContainerTransaction}. */
     public void applyTaskChanges(WindowContainerTransaction wct,
             ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2) {
-        wct.setBounds(task1.token, mImePositionProcessor.adjustForIme(mBounds1))
-                .setBounds(task2.token, mImePositionProcessor.adjustForIme(mBounds2));
+        if (mImePositionProcessor.applyTaskLayoutForIme(wct, task1.token, task2.token)) {
+            return;
+        }
+
+        wct.setBounds(task1.token, mBounds1)
+                .setBounds(task2.token, mBounds2);
     }
 
     /**
@@ -371,23 +387,22 @@ public final class SplitLayout {
             wct.setScreenSizeDp(taskInfo2.token,
                     SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
         } else {
-            final Rect bounds = new Rect();
-            bounds.set(taskInfo1.configuration.windowConfiguration.getBounds());
-            bounds.offset(offsetX, offsetY);
-            wct.setBounds(taskInfo1.token, bounds);
-            bounds.set(taskInfo1.configuration.windowConfiguration.getAppBounds());
-            bounds.offset(offsetX, offsetY);
-            wct.setAppBounds(taskInfo1.token, bounds);
+            mTempRect.set(taskInfo1.configuration.windowConfiguration.getBounds());
+            mTempRect.offset(offsetX, offsetY);
+            wct.setBounds(taskInfo1.token, mTempRect);
+            mTempRect.set(taskInfo1.configuration.windowConfiguration.getAppBounds());
+            mTempRect.offset(offsetX, offsetY);
+            wct.setAppBounds(taskInfo1.token, mTempRect);
             wct.setScreenSizeDp(taskInfo1.token,
                     taskInfo1.configuration.screenWidthDp,
                     taskInfo1.configuration.screenHeightDp);
 
-            bounds.set(taskInfo2.configuration.windowConfiguration.getBounds());
-            bounds.offset(offsetX, offsetY);
-            wct.setBounds(taskInfo2.token, bounds);
-            bounds.set(taskInfo2.configuration.windowConfiguration.getAppBounds());
-            bounds.offset(offsetX, offsetY);
-            wct.setAppBounds(taskInfo2.token, bounds);
+            mTempRect.set(taskInfo2.configuration.windowConfiguration.getBounds());
+            mTempRect.offset(offsetX, offsetY);
+            wct.setBounds(taskInfo2.token, mTempRect);
+            mTempRect.set(taskInfo2.configuration.windowConfiguration.getAppBounds());
+            mTempRect.offset(offsetX, offsetY);
+            wct.setAppBounds(taskInfo2.token, mTempRect);
             wct.setScreenSizeDp(taskInfo2.token,
                     taskInfo2.configuration.screenWidthDp,
                     taskInfo2.configuration.screenHeightDp);
@@ -421,6 +436,106 @@ public final class SplitLayout {
         /** Returns split position of the token. */
         @SplitPosition
         int getSplitItemPosition(WindowContainerToken token);
+    }
+
+    /**
+     * Calculates and applies proper dismissing parallax offset and dimming value to hint users
+     * dismissing gesture.
+     */
+    private class DismissingParallaxPolicy {
+        // The current dismissing side.
+        int mDismissingSide = DOCKED_INVALID;
+
+        // The parallax offset to hint the dismissing side and progress.
+        final Point mDismissingParallaxOffset = new Point();
+
+        // The dimming value to hint the dismissing side and progress.
+        float mDismissingDimValue = 0.0f;
+
+        /**
+         * Applies a parallax to the task to hint dismissing progress.
+         *
+         * @param position the split position to apply dismissing parallax effect
+         * @param isLandscape indicates whether it's splitting horizontally or vertically
+         */
+        void applyDividerPosition(int position, boolean isLandscape) {
+            mDismissingSide = DOCKED_INVALID;
+            mDismissingParallaxOffset.set(0, 0);
+            mDismissingDimValue = 0;
+
+            int totalDismissingDistance = 0;
+            if (position <= mDividerSnapAlgorithm.getFirstSplitTarget().position) {
+                mDismissingSide = isLandscape ? DOCKED_LEFT : DOCKED_TOP;
+                totalDismissingDistance = mDividerSnapAlgorithm.getDismissStartTarget().position
+                                - mDividerSnapAlgorithm.getFirstSplitTarget().position;
+            } else if (position >= mDividerSnapAlgorithm.getLastSplitTarget().position) {
+                mDismissingSide = isLandscape ? DOCKED_RIGHT : DOCKED_BOTTOM;
+                totalDismissingDistance = mDividerSnapAlgorithm.getLastSplitTarget().position
+                                - mDividerSnapAlgorithm.getDismissEndTarget().position;
+            }
+
+            if (mDismissingSide != DOCKED_INVALID) {
+                float fraction = Math.max(0,
+                        Math.min(mDividerSnapAlgorithm.calculateDismissingFraction(position), 1f));
+                mDismissingDimValue = DIM_INTERPOLATOR.getInterpolation(fraction);
+                fraction = calculateParallaxDismissingFraction(fraction, mDismissingSide);
+                if (isLandscape) {
+                    mDismissingParallaxOffset.x = (int) (fraction * totalDismissingDistance);
+                } else {
+                    mDismissingParallaxOffset.y = (int) (fraction * totalDismissingDistance);
+                }
+            }
+        }
+
+        /**
+         * @return for a specified {@code fraction}, this returns an adjusted value that simulates a
+         * slowing down parallax effect
+         */
+        private float calculateParallaxDismissingFraction(float fraction, int dockSide) {
+            float result = SLOWDOWN_INTERPOLATOR.getInterpolation(fraction) / 3.5f;
+
+            // Less parallax at the top, just because.
+            if (dockSide == WindowManager.DOCKED_TOP) {
+                result /= 2f;
+            }
+            return result;
+        }
+
+        /** Applies parallax offset and dimming value to the root surface at the dismissing side. */
+        boolean adjustDismissingSurface(SurfaceControl.Transaction t,
+                SurfaceControl leash1, SurfaceControl leash2,
+                SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
+            SurfaceControl targetLeash, targetDimLayer;
+            switch (mDismissingSide) {
+                case DOCKED_TOP:
+                case DOCKED_LEFT:
+                    targetLeash = leash1;
+                    targetDimLayer = dimLayer1;
+                    mTempRect.set(mBounds1);
+                    break;
+                case DOCKED_BOTTOM:
+                case DOCKED_RIGHT:
+                    targetLeash = leash2;
+                    targetDimLayer = dimLayer2;
+                    mTempRect.set(mBounds2);
+                    break;
+                case DOCKED_INVALID:
+                default:
+                    t.setAlpha(dimLayer1, 0).hide(dimLayer1);
+                    t.setAlpha(dimLayer2, 0).hide(dimLayer2);
+                    return false;
+            }
+
+            t.setPosition(targetLeash,
+                    mTempRect.left + mDismissingParallaxOffset.x,
+                    mTempRect.top + mDismissingParallaxOffset.y);
+            // Transform the screen-based split bounds to surface-based crop bounds.
+            mTempRect.offsetTo(-mDismissingParallaxOffset.x, -mDismissingParallaxOffset.y);
+            t.setWindowCrop(targetLeash, mTempRect);
+            t.setAlpha(targetDimLayer, mDismissingDimValue)
+                    .setVisibility(targetDimLayer, mDismissingDimValue > 0.001f);
+            return true;
+        }
     }
 
     /** Records IME top offset changes and updates SplitLayout correspondingly. */
@@ -553,24 +668,61 @@ public final class SplitLayout {
             return start + (end - start) * progress;
         }
 
-        private void reset() {
+        void reset() {
             mImeShown = false;
             mYOffsetForIme = mLastYOffset = mTargetYOffset = 0;
             mDimValue1 = mLastDim1 = mTargetDim1 = 0.0f;
             mDimValue2 = mLastDim2 = mTargetDim2 = 0.0f;
         }
 
-        /* Adjust bounds with IME offset. */
-        private Rect adjustForIme(Rect bounds) {
-            final Rect temp = new Rect(bounds);
-            if (mYOffsetForIme != 0) temp.offset(0, mYOffsetForIme);
-            return temp;
+        /**
+         * Applies adjusted task layout for showing IME.
+         *
+         * @return {@code false} if there's no need to adjust, otherwise {@code true}
+         */
+        boolean applyTaskLayoutForIme(WindowContainerTransaction wct,
+                WindowContainerToken token1, WindowContainerToken token2) {
+            if (mYOffsetForIme == 0) return false;
+
+            mTempRect.set(mBounds1);
+            mTempRect.offset(0, mYOffsetForIme);
+            wct.setBounds(token1, mTempRect);
+
+            mTempRect.set(mBounds2);
+            mTempRect.offset(0, mYOffsetForIme);
+            wct.setBounds(token2, mTempRect);
+
+            return true;
         }
 
-        private void applySurfaceDimValues(SurfaceControl.Transaction t, SurfaceControl dimLayer1,
-                SurfaceControl dimLayer2) {
+        /**
+         * Adjusts surface layout while showing IME.
+         *
+         * @return {@code false} if there's no need to adjust, otherwise {@code true}
+         */
+        boolean adjustSurfaceLayoutForIme(SurfaceControl.Transaction t,
+                SurfaceControl dividerLeash, SurfaceControl leash1, SurfaceControl leash2,
+                SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
+            if (mYOffsetForIme == 0) return false;
+
+            if (dividerLeash != null) {
+                mTempRect.set(mDividerBounds);
+                mTempRect.offset(0, mYOffsetForIme);
+                t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
+            }
+
+            mTempRect.set(mBounds1);
+            mTempRect.offset(0, mYOffsetForIme);
+            t.setPosition(leash1, mTempRect.left, mTempRect.top);
+
+            mTempRect.set(mBounds2);
+            mTempRect.offset(0, mYOffsetForIme);
+            t.setPosition(leash2, mTempRect.left, mTempRect.top);
+
             t.setAlpha(dimLayer1, mDimValue1).setVisibility(dimLayer1, mDimValue1 > 0.001f);
             t.setAlpha(dimLayer2, mDimValue2).setVisibility(dimLayer2, mDimValue2 > 0.001f);
+
+            return true;
         }
     }
 }
