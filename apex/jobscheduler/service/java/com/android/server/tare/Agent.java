@@ -26,6 +26,7 @@ import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
 import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
@@ -183,7 +184,7 @@ class Agent {
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents != null) {
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long now = System.currentTimeMillis();
+            final long now = getCurrentTimeMillis();
             mTotalDeltaCalculator.reset(ledger, nowElapsed, now);
             ongoingEvents.forEach(mTotalDeltaCalculator);
             balance += mTotalDeltaCalculator.mTotal;
@@ -194,7 +195,7 @@ class Agent {
     @GuardedBy("mLock")
     void noteInstantaneousEventLocked(final int userId, @NonNull final String pkgName,
             final int eventId, @Nullable String tag) {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final Ledger ledger = getLedgerLocked(userId, pkgName);
 
         final int eventType = getEventType(eventId);
@@ -278,7 +279,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void onDeviceStateChangedLocked() {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
 
         mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
@@ -326,7 +327,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void onAppStatesChangedLocked(final int userId, @NonNull ArraySet<String> pkgNames) {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
 
         for (int i = 0; i < pkgNames.size(); ++i) {
@@ -477,7 +478,7 @@ class Agent {
             // The earliest transaction won't change until we clean up the ledger, so no point
             // continuing to reschedule an existing cleanup.
             final long cleanupAlarmElapsed = SystemClock.elapsedRealtime() + MAX_TRANSACTION_AGE_MS
-                    - (System.currentTimeMillis() - ledger.getEarliestTransaction().endTimeMs);
+                    - (getCurrentTimeMillis() - ledger.getEarliestTransaction().endTimeMs);
             mLedgerCleanupAlarmListener.addAlarmLocked(userId, pkgName, cleanupAlarmElapsed);
         }
         // TODO: save changes to disk in a background thread
@@ -509,7 +510,7 @@ class Agent {
     @GuardedBy("mLock")
     void reclaimUnusedAssetsLocked(double percentage) {
         final List<PackageInfo> pkgs = mIrs.getInstalledPackages();
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
             final int userId = UserHandle.getUserId(pkgs.get(i).applicationInfo.uid);
             final String pkgName = pkgs.get(i).packageName;
@@ -543,7 +544,7 @@ class Agent {
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo pkgInfo = pkgs.get(i);
             final int userId = UserHandle.getUserId(pkgInfo.applicationInfo.uid);
@@ -578,7 +579,7 @@ class Agent {
         List<PackageInfo> pkgs = packageManager.getInstalledPackagesAsUser(0, userId);
         final long maxBirthright =
                 mIrs.getMaxCirculationLocked() / mIrs.getInstalledPackages().size();
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
 
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo packageInfo = pkgs.get(i);
@@ -609,7 +610,7 @@ class Agent {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
         final int numPackages = pkgs.size();
         final long maxBirthright = mIrs.getMaxCirculationLocked() / numPackages;
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
 
         recordTransactionLocked(userId, pkgName, ledger,
                 new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
