@@ -153,6 +153,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     }
 
     @Override
+    public boolean wasUserDetected() {
+        // TODO: Update if it needs to be used for fingerprint, i.e. success/reject, error_timeout
+        return false;
+    }
+
+    @Override
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
         mLockoutFrameworkImpl.addFailedAttemptForUser(userId);
         return super.handleFailedAttempt(userId);

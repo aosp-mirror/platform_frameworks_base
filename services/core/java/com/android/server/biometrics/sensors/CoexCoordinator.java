@@ -22,6 +22,7 @@ import static com.android.server.biometrics.sensors.BiometricScheduler.sensorTyp
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.biometrics.BiometricConstants;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Slog;
@@ -54,7 +55,7 @@ public class CoexCoordinator {
 
     /**
      * Callback interface notifying the owner of "results" from the CoexCoordinator's business
-     * logic.
+     * logic for accept and reject.
      */
     interface Callback {
         /**
@@ -78,6 +79,17 @@ public class CoexCoordinator {
          * Requests the owner to notify the caller that authentication was canceled.
          */
         void sendAuthenticationCanceled();
+    }
+
+    /**
+     * Callback interface notifying the owner of "results" from the CoexCoordinator's business
+     * logic for errors.
+     */
+    interface ErrorCallback {
+        /**
+         * Requests the owner to initiate a vibration for this event.
+         */
+        void sendHapticFeedback();
     }
 
     private static CoexCoordinator sInstance;
@@ -203,6 +215,9 @@ public class CoexCoordinator {
         mClientMap.remove(sensorType);
     }
 
+    /**
+     * Notify the coordinator that authentication succeeded (accepted)
+     */
     public void onAuthenticationSucceeded(long currentTimeMillis,
             @NonNull AuthenticationClient<?> client,
             @NonNull Callback callback) {
@@ -273,6 +288,9 @@ public class CoexCoordinator {
         }
     }
 
+    /**
+     * Notify the coordinator that a rejection has occurred.
+     */
     public void onAuthenticationRejected(long currentTimeMillis,
             @NonNull AuthenticationClient<?> client,
             @LockoutTracker.LockoutMode int lockoutMode,
@@ -354,6 +372,54 @@ public class CoexCoordinator {
             // janky UI on Keyguard/BiometricPrompt since "authentication failed"
             // will show briefly and be replaced by "device locked out" message.
             callback.sendAuthenticationResult(false /* addAuthTokenIfStrong */);
+        }
+    }
+
+    /**
+     * Notify the coordinator that an error has occurred.
+     */
+    public void onAuthenticationError(@NonNull AuthenticationClient<?> client,
+            @BiometricConstants.Errors int error, @NonNull ErrorCallback callback) {
+        // Figure out non-coex state
+        final boolean shouldUsuallyVibrate;
+        if (isCurrentFaceAuth(client)) {
+            final boolean notDetectedOnKeyguard = client.isKeyguard() && !client.wasUserDetected();
+            final boolean authAttempted = client.wasAuthAttempted();
+
+            switch (error) {
+                case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
+                case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
+                case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
+                    shouldUsuallyVibrate = authAttempted && !notDetectedOnKeyguard;
+                    break;
+                default:
+                    shouldUsuallyVibrate = false;
+                    break;
+            }
+        } else {
+            shouldUsuallyVibrate = false;
+        }
+
+        // Figure out coex state
+        final boolean keyguardAdvancedLogic = mAdvancedLogicEnabled && client.isKeyguard();
+        final boolean hapticSuppressedByCoex;
+
+        if (keyguardAdvancedLogic) {
+            if (isSingleAuthOnly(client)) {
+                hapticSuppressedByCoex = false;
+            } else {
+                hapticSuppressedByCoex = isCurrentFaceAuth(client)
+                        && !client.isKeyguardBypassEnabled();
+            }
+        } else {
+            hapticSuppressedByCoex = false;
+        }
+
+        // Combine and send feedback if appropriate
+        Slog.d(TAG, "shouldUsuallyVibrate: " + shouldUsuallyVibrate
+                + ", hapticSuppressedByCoex: " + hapticSuppressedByCoex);
+        if (shouldUsuallyVibrate && !hapticSuppressedByCoex) {
+            callback.sendHapticFeedback();
         }
     }
 
