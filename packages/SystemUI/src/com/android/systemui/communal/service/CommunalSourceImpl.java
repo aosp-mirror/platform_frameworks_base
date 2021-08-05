@@ -21,7 +21,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.SurfaceControlViewHost;
-import android.view.View;
+import android.view.SurfaceView;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 
@@ -106,13 +106,15 @@ public class CommunalSourceImpl implements CommunalSource {
     }
 
     @Override
-    public ListenableFuture<View> requestCommunalView(Context context) {
+    public ListenableFuture<CommunalViewResult> requestCommunalView(Context context) {
         if (DEBUG) {
             Log.d(TAG, "Received request for communal view");
         }
-        ListenableFuture<View> packageFuture =
+        ListenableFuture<CommunalViewResult> packageFuture =
                 CallbackToFutureAdapter.getFuture(completer -> {
-                    completer.set(new CommunalSurfaceView(context, mMainExecutor, this));
+                    final SurfaceView view = new SurfaceView(context);
+                    completer.set(new CommunalViewResult(view,
+                            new CommunalSurfaceViewController(view, mMainExecutor, this)));
                     return "CommunalSourceImpl::requestCommunalSurface::getCommunalSurface";
                 });
 

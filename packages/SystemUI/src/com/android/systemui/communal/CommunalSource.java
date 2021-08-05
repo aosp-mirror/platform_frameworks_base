@@ -19,6 +19,8 @@ package com.android.systemui.communal;
 import android.content.Context;
 import android.view.View;
 
+import com.android.systemui.util.ViewController;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -28,13 +30,38 @@ import com.google.common.util.concurrent.ListenableFuture;
  */
 public interface CommunalSource {
     /**
+     * {@link CommunalViewResult} is handed back from {@link #requestCommunalView(Context)} and
+     * contains the view to be displayed and its associated controller.
+     */
+    class CommunalViewResult {
+        /**
+         * The resulting communal view.
+         */
+        public final View view;
+        /**
+         * The controller for the communal view.
+         */
+        public final ViewController<? extends View> viewController;
+
+        /**
+         * The default constructor for {@link CommunalViewResult}.
+         * @param view The communal view.
+         * @param viewController The communal view's controller.
+         */
+        public CommunalViewResult(View view, ViewController<? extends View> viewController) {
+            this.view = view;
+            this.viewController = viewController;
+        }
+    }
+
+    /**
      * Requests a communal surface that can be displayed inside {@link CommunalHostView}.
      *
      * @param context The {@link View} {@link Context} to build the resulting view from
-     * @return A future that can be listened upon for the resulting {@link View}. The value will be
-     * {@code null} in case of a failure.
+     * @return A future that can be listened upon for the resulting {@link CommunalViewResult}. The
+     * value will be {@code null} in case of a failure.
      */
-    ListenableFuture<View> requestCommunalView(Context context);
+    ListenableFuture<CommunalViewResult> requestCommunalView(Context context);
 
     /**
      * Adds a {@link Callback} to receive future status updates regarding this

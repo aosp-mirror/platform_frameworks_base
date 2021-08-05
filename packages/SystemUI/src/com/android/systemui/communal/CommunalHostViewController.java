@@ -67,6 +67,8 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private static final int SHOW_COMMUNAL_VIEW_INVALID_STATES =
             STATE_DOZING | STATE_BOUNCER_SHOWING | STATE_KEYGUARD_OCCLUDED;
 
+    private ViewController<? extends View> mCommunalViewController;
+
     private KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -220,7 +222,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
 
                 final Context context = mView.getContext();
 
-                final ListenableFuture<View> listenableFuture =
+                final ListenableFuture<CommunalSource.CommunalViewResult> listenableFuture =
                         currentSource.requestCommunalView(context);
 
                 if (listenableFuture == null) {
@@ -230,11 +232,14 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
 
                 listenableFuture.addListener(() -> {
                     try {
-                        final View view = listenableFuture.get();
-                        view.setLayoutParams(new ViewGroup.LayoutParams(
+                        final CommunalSource.CommunalViewResult result = listenableFuture.get();
+                        result.view.setLayoutParams(new ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT));
-                        mView.addView(view);
+                        mView.addView(result.view);
+
+                        mCommunalViewController = result.viewController;
+                        mCommunalViewController.init();
                     } catch (Exception e) {
                         Log.e(TAG, "could not obtain communal view through callback:" + e);
                     }
