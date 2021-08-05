@@ -102,6 +102,7 @@ import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
 import android.content.Context;
@@ -307,6 +308,7 @@ public final class ActiveServices {
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
+    @Overridable
     static final long FGS_BG_START_RESTRICTION_CHANGE_ID = 170668199L;
 
     /**
