@@ -1986,6 +1986,61 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.areBoundsLetterboxed());
     }
 
+    /**
+     * Tests that all three paths in which aspect ratio logic can be applied yield the same
+     * result, which is that aspect ratio is respected on app bounds. The three paths are
+     * fixed orientation, no fixed orientation but fixed aspect ratio, and size compat mode.
+     */
+    @Test
+    public void testAllAspectRatioLogicConsistent() {
+        // Create display that has all stable insets and does not rotate. Make sure that status bar
+        // height is greater than notch height so that stable bounds do not equal app bounds.
+        final int notchHeight = 75;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1080, 600)
+                .setSystemDecorations(true).setNotch(notchHeight)
+                .setStatusBarHeight(notchHeight + 20).setCanRotate(false).build();
+
+        // Create task on test display.
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+
+        // Target min aspect ratio must be larger than parent aspect ratio to be applied.
+        final float targetMinAspectRatio = 3.0f;
+
+        // Create fixed portait activity with min aspect ratio greater than parent aspect ratio.
+        final ActivityRecord fixedOrientationActivity = new ActivityBuilder(mAtm)
+                .setTask(task).setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setMinAspectRatio(targetMinAspectRatio).build();
+        final Rect fixedOrientationAppBounds = new Rect(fixedOrientationActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        // Create activity with no fixed orientation and min aspect ratio greater than parent aspect
+        // ratio.
+        final ActivityRecord minAspectRatioActivity = new ActivityBuilder(mAtm).setTask(task)
+                .setMinAspectRatio(targetMinAspectRatio).build();
+        final Rect minAspectRatioAppBounds = new Rect(minAspectRatioActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        // Create unresizeable fixed portait activity with min aspect ratio greater than parent
+        // aspect ratio.
+        final ActivityRecord sizeCompatActivity = new ActivityBuilder(mAtm)
+                .setTask(task).setResizeMode(RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setMinAspectRatio(targetMinAspectRatio).build();
+        // Resize display running unresizeable activity to make it enter size compat mode.
+        resizeDisplay(display, 1800, 1000);
+        final Rect sizeCompatAppBounds = new Rect(sizeCompatActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        // Check that aspect ratio of app bounds is equal to the min aspect ratio.
+        final float delta = 0.01f;
+        assertEquals(targetMinAspectRatio, ActivityRecord
+                .computeAspectRatio(fixedOrientationAppBounds), delta);
+        assertEquals(targetMinAspectRatio, ActivityRecord
+                .computeAspectRatio(minAspectRatioAppBounds), delta);
+        assertEquals(targetMinAspectRatio, ActivityRecord
+                .computeAspectRatio(sizeCompatAppBounds), delta);
+    }
+
     private void assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
             float letterboxHorizontalPositionMultiplier) {
         // Set up a display in landscape and ignoring orientation request.

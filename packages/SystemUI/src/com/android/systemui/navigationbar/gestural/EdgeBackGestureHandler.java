@@ -106,7 +106,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
 
     private static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
+            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", true);
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {

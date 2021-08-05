@@ -27,6 +27,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -42,7 +43,6 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.List;
@@ -52,7 +52,6 @@ public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = StatusBar.DEBUG;
     private static final boolean DEBUG_GESTURES = false;
-    private final CommandQueue mCommandQueue;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
     StatusBar mBar;
@@ -81,6 +80,8 @@ public class PhoneStatusBarView extends PanelBar {
     @Nullable
     private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
 
+    private PanelEnabledProvider mPanelEnabledProvider;
+
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
@@ -89,7 +90,6 @@ public class PhoneStatusBarView extends PanelBar {
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mCommandQueue = Dependency.get(CommandQueue.class);
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
@@ -177,7 +177,11 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean panelEnabled() {
-        return mCommandQueue.panelsEnabled();
+        if (mPanelEnabledProvider == null) {
+            Log.e(TAG, "panelEnabledProvider is null; defaulting to super class.");
+            return super.panelEnabled();
+        }
+        return mPanelEnabledProvider.panelEnabled();
     }
 
     @Override
@@ -294,6 +298,11 @@ public class PhoneStatusBarView extends PanelBar {
         }
     }
 
+    /** Set the {@link PanelEnabledProvider} to use. */
+    public void setPanelEnabledProvider(PanelEnabledProvider panelEnabledProvider) {
+        mPanelEnabledProvider = panelEnabledProvider;
+    }
+
     private void updateScrimFraction() {
         float scrimFraction = mPanelFraction;
         if (mMinFraction < 1.0f) {
@@ -390,5 +399,11 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     protected boolean shouldPanelBeVisible() {
         return mHeadsUpVisible || super.shouldPanelBeVisible();
+    }
+
+    /** An interface that will provide whether panel is enabled. */
+    interface PanelEnabledProvider {
+        /** Returns true if the panel is enabled and false otherwise. */
+        boolean panelEnabled();
     }
 }

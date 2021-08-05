@@ -19,7 +19,9 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -77,6 +79,7 @@ class TestDisplayContent extends DisplayContent {
         private int mPosition = POSITION_BOTTOM;
         protected final ActivityTaskManagerService mService;
         private boolean mSystemDecorations = false;
+        private int mStatusBarHeight = 0;
 
         Builder(ActivityTaskManagerService service, int width, int height) {
             mService = service;
@@ -125,6 +128,10 @@ class TestDisplayContent extends DisplayContent {
                     Insets.of(0, height, 0, 0), null, new Rect(20, 0, 80, height), null, null);
             return this;
         }
+        Builder setStatusBarHeight(int height) {
+            mStatusBarHeight = height;
+            return this;
+        }
         Builder setCanRotate(boolean canRotate) {
             mCanRotate = canRotate;
             return this;
@@ -157,6 +164,14 @@ class TestDisplayContent extends DisplayContent {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
                 doReturn(false).when(newDisplay).supportsSystemDecorations();
+            }
+            if (mStatusBarHeight > 0) {
+                doReturn(true).when(displayPolicy).hasStatusBar();
+                doAnswer(invocation -> {
+                    Rect inOutInsets = (Rect) invocation.getArgument(0);
+                    inOutInsets.top = mStatusBarHeight;
+                    return null;
+                }).when(displayPolicy).convertNonDecorInsetsToStableInsets(any(), anyInt());
             }
             Configuration c = new Configuration();
             newDisplay.computeScreenConfiguration(c);
