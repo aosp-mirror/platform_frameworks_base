@@ -18,6 +18,7 @@ package android.view.translation;
 
 import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_FAIL;
 import static android.view.translation.TranslationManager.SYNC_CALLS_TIMEOUT_MS;
+import static android.view.translation.UiTranslationController.DEBUG;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -38,7 +39,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -395,27 +395,26 @@ public class Translator {
 
     private static class TranslationResponseCallbackImpl extends ITranslationCallback.Stub {
 
-        private final WeakReference<Consumer<TranslationResponse>> mCallback;
-        private final WeakReference<Executor> mExecutor;
+        private final Consumer<TranslationResponse> mCallback;
+        private final Executor mExecutor;
 
         TranslationResponseCallbackImpl(Consumer<TranslationResponse> callback, Executor executor) {
-            mCallback = new WeakReference<>(callback);
-            mExecutor = new WeakReference<>(executor);
+            mCallback = callback;
+            mExecutor = executor;
         }
 
         @Override
         public void onTranslationResponse(TranslationResponse response) throws RemoteException {
-            final Consumer<TranslationResponse> callback = mCallback.get();
+            if (DEBUG) {
+                Log.i(TAG, "onTranslationResponse called.");
+            }
             final Runnable runnable =
-                    () -> callback.accept(response);
-            if (callback != null) {
-                final Executor executor = mExecutor.get();
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(runnable);
-                } finally {
-                    restoreCallingIdentity(token);
-                }
+                    () -> mCallback.accept(response);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(runnable);
+            } finally {
+                restoreCallingIdentity(token);
             }
         }
     }
