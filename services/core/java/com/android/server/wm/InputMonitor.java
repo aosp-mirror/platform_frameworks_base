@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
@@ -648,6 +649,7 @@ final class InputMonitor {
                 || type == TYPE_DOCK_DIVIDER
                 || type == TYPE_ACCESSIBILITY_OVERLAY
                 || type == TYPE_INPUT_CONSUMER
-                || type == TYPE_VOICE_INTERACTION;
+                || type == TYPE_VOICE_INTERACTION
+                || type == TYPE_STATUS_BAR_ADDITIONAL;
     }
 }
