@@ -124,6 +124,11 @@ public interface EconomyManagerInternal {
      */
     boolean canPayFor(int userId, @NonNull String pkgName, @NonNull ActionBill bill);
 
+    /**
+     * Returns the maximum duration (in milliseconds) that the specified app can afford the bill,
+     * based on current prices.
+     */
+    long getMaxDurationMs(int userId, @NonNull String pkgName, @NonNull ActionBill bill);
 
     /**
      * Register an {@link AffordabilityChangeListener} to track when an app's ability to afford the
