@@ -169,6 +169,23 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
         }
     }
 
+    /**
+     * Invoke {@link InputConnection#reportFullscreenMode(boolean)} or schedule it on the target
+     * thread associated with {@link InputConnection#getHandler()}.
+     *
+     * @param enabled the parameter to be passed to
+     *                {@link InputConnection#reportFullscreenMode(boolean)}.
+     */
+    public void dispatchReportFullscreenMode(boolean enabled) {
+        dispatch(() -> {
+            final InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                return;
+            }
+            ic.reportFullscreenMode(enabled);
+        });
+    }
+
     @Override
     public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
         dispatch(() -> {
