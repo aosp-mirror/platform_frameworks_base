@@ -180,7 +180,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final boolean UNTRUSTED_TOUCHES_TOAST = false;
 
     public static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", true);
+            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
 
     // Pointer to native input manager service object.
     private final long mPtr;
