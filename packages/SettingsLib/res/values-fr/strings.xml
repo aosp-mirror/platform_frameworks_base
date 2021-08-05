@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler les infos Wi-Fi, afficher par RSSI de SSID dans l\'outil de sélection Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit la décharge de la batterie et améliore les performances du réseau"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quand ce mode est activé, l\'adresse MAC de cet appareil peut changer chaque fois qu\'il se connecte à un réseau Wi-Fi où le changement aléatoire d\'adresse MAC est activé."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quand ce mode est activé, l\'adresse MAC de cet appareil peut changer chaque fois qu\'il se connecte à un réseau où le changement aléatoire d\'adresse MAC est activé."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non facturé à l\'usage"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des tampons de l\'enregistreur"</string>
