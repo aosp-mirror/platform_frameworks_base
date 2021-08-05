@@ -52,9 +52,8 @@
 #include <gui/DisplayEventReceiver.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
-
-#include <GLES/gl.h>
-#include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include <EGL/eglext.h>
 
 #include "BootAnimation.h"
@@ -108,6 +107,56 @@ static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
 static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
+static const char U_TEXTURE[] = "uTexture";
+static const char U_FADE[] = "uFade";
+static const char U_CROP_AREA[] = "uCropArea";
+static const char A_UV[] = "aUv";
+static const char A_POSITION[] = "aPosition";
+static const char VERTEX_SHADER_SOURCE[] = R"(
+    precision mediump float;
+    attribute vec4 aPosition;
+    attribute highp vec2 aUv;
+    varying highp vec2 vUv;
+    void main() {
+        gl_Position = aPosition;
+        vUv = aUv;
+    })";
+static const char IMAGE_FRAG_SHADER_SOURCE[] = R"(
+    precision mediump float;
+    uniform sampler2D uTexture;
+    uniform float uFade;
+    varying highp vec2 vUv;
+    void main() {
+        vec4 color = texture2D(uTexture, vUv);
+        gl_FragColor = vec4(color.x, color.y, color.z, 1.0 - uFade);
+    })";
+static const char TEXT_FRAG_SHADER_SOURCE[] = R"(
+    precision mediump float;
+    uniform sampler2D uTexture;
+    uniform vec4 uCropArea;
+    varying highp vec2 vUv;
+    void main() {
+        vec2 uv = vec2(mix(uCropArea.x, uCropArea.z, vUv.x),
+                       mix(uCropArea.y, uCropArea.w, vUv.y));
+        gl_FragColor = texture2D(uTexture, uv);
+    })";
+
+static GLfloat quadPositions[] = {
+    -0.5f, -0.5f,
+    +0.5f, -0.5f,
+    +0.5f, +0.5f,
+    +0.5f, +0.5f,
+    -0.5f, +0.5f,
+    -0.5f, -0.5f
+};
+static GLfloat quadUVs[] = {
+    0.0f, 1.0f,
+    1.0f, 1.0f,
+    1.0f, 0.0f,
+    1.0f, 0.0f,
+    0.0f, 0.0f,
+    0.0f, 1.0f
+};
 
 // ---------------------------------------------------------------------------
 
@@ -209,7 +258,6 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     const int w = bitmapInfo.width;
     const int h = bitmapInfo.height;
 
-    GLint crop[4] = { 0, h, w, -h };
     texture->w = w;
     texture->h = h;
 
@@ -237,11 +285,10 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
             break;
     }
 
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     return NO_ERROR;
 }
@@ -263,7 +310,6 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height) {
     const int w = bitmapInfo.width;
     const int h = bitmapInfo.height;
 
-    GLint crop[4] = { 0, h, w, -h };
     int tw = 1 << (31 - __builtin_clz(w));
     int th = 1 << (31 - __builtin_clz(h));
     if (tw < w) tw <<= 1;
@@ -297,7 +343,10 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height) {
             break;
     }
 
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     *width = w;
     *height = h;
@@ -470,7 +519,9 @@ status_t BootAnimation::readyToRun() {
     eglInitialize(display, nullptr, nullptr);
     EGLConfig config = getEglConfig(display);
     EGLSurface surface = eglCreateWindowSurface(display, config, s.get(), nullptr);
-    EGLContext context = eglCreateContext(display, config, nullptr, nullptr);
+    // Initialize egl context with client version number 2.0.
+    EGLint contextAttributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    EGLContext context = eglCreateContext(display, config, nullptr, contextAttributes);
     EGLint w, h;
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
@@ -503,11 +554,6 @@ status_t BootAnimation::readyToRun() {
 void BootAnimation::projectSceneToWindow() {
     glViewport(0, 0, mWidth, mHeight);
     glScissor(0, 0, mWidth, mHeight);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrthof(0, static_cast<float>(mWidth), 0, static_cast<float>(mHeight), -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 }
 
 void BootAnimation::resizeSurface(int newWidth, int newHeight) {
@@ -600,8 +646,68 @@ void BootAnimation::findBootAnimationFile() {
     }
 }
 
+GLuint compileShader(GLenum shaderType, const GLchar *source) {
+    GLuint shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &source, 0);
+    glCompileShader(shader);
+    GLint isCompiled = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+    if (isCompiled == GL_FALSE) {
+        SLOGE("Compile shader failed. Shader type: %d", shaderType);
+        return 0;
+    }
+    return shader;
+}
+
+GLuint linkShader(GLuint vertexShader, GLuint fragmentShader) {
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    GLint isLinked = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, (int *)&isLinked);
+    if (isLinked == GL_FALSE) {
+        SLOGE("Linking shader failed. Shader handles: vert %d, frag %d",
+            vertexShader, fragmentShader);
+        return 0;
+    }
+    return program;
+}
+
+void BootAnimation::initShaders() {
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, (const GLchar *)VERTEX_SHADER_SOURCE);
+    GLuint imageFragmentShader =
+        compileShader(GL_FRAGMENT_SHADER, (const GLchar *)IMAGE_FRAG_SHADER_SOURCE);
+    GLuint textFragmentShader =
+        compileShader(GL_FRAGMENT_SHADER, (const GLchar *)TEXT_FRAG_SHADER_SOURCE);
+
+    // Initialize image shader.
+    mImageShader = linkShader(vertexShader, imageFragmentShader);
+    GLint positionLocation = glGetAttribLocation(mImageShader, A_POSITION);
+    GLint uvLocation = glGetAttribLocation(mImageShader, A_UV);
+    mImageTextureLocation = glGetUniformLocation(mImageShader, U_TEXTURE);
+    mImageFadeLocation = glGetUniformLocation(mImageShader, U_FADE);
+    glEnableVertexAttribArray(positionLocation);
+    glVertexAttribPointer(positionLocation, 2,  GL_FLOAT, GL_FALSE, 0, quadPositions);
+    glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, 0, quadUVs);
+    glEnableVertexAttribArray(uvLocation);
+
+    // Initialize text shader.
+    mTextShader = linkShader(vertexShader, textFragmentShader);
+    positionLocation = glGetAttribLocation(mTextShader, A_POSITION);
+    uvLocation = glGetAttribLocation(mTextShader, A_UV);
+    mTextTextureLocation = glGetUniformLocation(mTextShader, U_TEXTURE);
+    mTextCropAreaLocation = glGetUniformLocation(mTextShader, U_CROP_AREA);
+    glEnableVertexAttribArray(positionLocation);
+    glVertexAttribPointer(positionLocation, 2,  GL_FLOAT, GL_FALSE, 0, quadPositions);
+    glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, 0, quadUVs);
+    glEnableVertexAttribArray(uvLocation);
+}
+
 bool BootAnimation::threadLoop() {
     bool result;
+    initShaders();
+
     // We have no bootanimation file, so we use the stock android logo
     // animation.
     if (mZipFileName.isEmpty()) {
@@ -623,6 +729,8 @@ bool BootAnimation::threadLoop() {
 }
 
 bool BootAnimation::android() {
+    glActiveTexture(GL_TEXTURE0);
+
     SLOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
             elapsedRealtime());
     initTexture(&mAndroid[0], mAssets, "images/android-logo-mask.png");
@@ -631,19 +739,14 @@ bool BootAnimation::android() {
     mCallbacks->init({});
 
     // clear screen
-    glShadeModel(GL_FLAT);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
     eglSwapBuffers(mDisplay, mSurface);
 
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
     // Blend state
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     const nsecs_t startTime = systemTime();
     do {
@@ -666,12 +769,12 @@ bool BootAnimation::android() {
         glEnable(GL_SCISSOR_TEST);
         glDisable(GL_BLEND);
         glBindTexture(GL_TEXTURE_2D, mAndroid[1].name);
-        glDrawTexiOES(x,                 yc, 0, mAndroid[1].w, mAndroid[1].h);
-        glDrawTexiOES(x + mAndroid[1].w, yc, 0, mAndroid[1].w, mAndroid[1].h);
+        drawTexturedQuad(x,                 yc, mAndroid[1].w, mAndroid[1].h);
+        drawTexturedQuad(x + mAndroid[1].w, yc, mAndroid[1].w, mAndroid[1].h);
 
         glEnable(GL_BLEND);
         glBindTexture(GL_TEXTURE_2D, mAndroid[0].name);
-        glDrawTexiOES(xc, yc, 0, mAndroid[0].w, mAndroid[0].h);
+        drawTexturedQuad(xc, yc, mAndroid[0].w, mAndroid[0].h);
 
         EGLBoolean res = eglSwapBuffers(mDisplay, mSurface);
         if (res == EGL_FALSE)
@@ -798,10 +901,10 @@ status_t BootAnimation::initFont(Font* font, const char* fallback) {
 
         status = initTexture(font->map, &font->texture.w, &font->texture.h);
 
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     } else if (fallback != nullptr) {
         status = initTexture(&font->texture, mAssets, fallback);
     } else {
@@ -816,40 +919,11 @@ status_t BootAnimation::initFont(Font* font, const char* fallback) {
     return status;
 }
 
-void BootAnimation::fadeFrame(const int frameLeft, const int frameBottom, const int frameWidth,
-                              const int frameHeight, const Animation::Part& part,
-                              const int fadedFramesCount) {
-    glEnable(GL_BLEND);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glDisable(GL_TEXTURE_2D);
-    // avoid creating a hole due to mixing result alpha with GL_REPLACE texture
-    glBlendFuncSeparateOES(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
-
-    const float alpha = static_cast<float>(fadedFramesCount) / part.framesToFadeCount;
-    glColor4f(part.backgroundColor[0], part.backgroundColor[1], part.backgroundColor[2], alpha);
-
-    const float frameStartX = static_cast<float>(frameLeft);
-    const float frameStartY = static_cast<float>(frameBottom);
-    const float frameEndX = frameStartX + frameWidth;
-    const float frameEndY = frameStartY + frameHeight;
-    const GLfloat frameRect[] = {
-        frameStartX, frameStartY,
-        frameEndX,   frameStartY,
-        frameEndX,   frameEndY,
-        frameStartX, frameEndY
-    };
-    glVertexPointer(2, GL_FLOAT, 0, frameRect);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisable(GL_BLEND);
-}
-
 void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* x, int* y) {
     glEnable(GL_BLEND);  // Allow us to draw on top of the animation
     glBindTexture(GL_TEXTURE_2D, font.texture.name);
+    glUseProgram(mTextShader);
+    glUniform1i(mTextTextureLocation, 0);
 
     const int len = strlen(str);
     const int strWidth = font.char_width * len;
@@ -865,8 +939,6 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
         *y = mHeight + *y - font.char_height;
     }
 
-    int cropRect[4] = { 0, 0, font.char_width, -font.char_height };
-
     for (int i = 0; i < len; i++) {
         char c = str[i];
 
@@ -878,13 +950,13 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
         const int charPos = (c - FONT_BEGIN_CHAR);  // Position in the list of valid characters
         const int row = charPos / FONT_NUM_COLS;
         const int col = charPos % FONT_NUM_COLS;
-        cropRect[0] = col * font.char_width;  // Left of column
-        cropRect[1] = row * font.char_height * 2; // Top of row
-        // Move down to bottom of regular (one char_heigh) or bold (two char_heigh) line
-        cropRect[1] += bold ? 2 * font.char_height : font.char_height;
-        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
-
-        glDrawTexiOES(*x, *y, 0, font.char_width, font.char_height);
+        // Bold fonts are expected in the second half of each row.
+        float v0 = (row + (bold ? 0.5f : 0.0f)) / FONT_NUM_ROWS;
+        float u0 = ((float)col) / FONT_NUM_COLS;
+        float v1 = v0 + 1.0f / FONT_NUM_ROWS / 2;
+        float u1 = u0 + 1.0f / FONT_NUM_COLS;
+        glUniform4f(mTextCropAreaLocation, u0, v0, u1, v1);
+        drawTexturedQuad(*x, *y, font.char_width, font.char_height);
 
         *x += font.char_width;
     }
@@ -1166,19 +1238,16 @@ bool BootAnimation::movie() {
 
     // Blend required to draw time on top of animation frames.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glShadeModel(GL_FLAT);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
     glDisable(GL_BLEND);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
     glEnable(GL_TEXTURE_2D);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     bool clockFontInitialized = false;
     if (mClockEnabled) {
         clockFontInitialized =
@@ -1218,6 +1287,34 @@ bool BootAnimation::shouldStopPlayingPart(const Animation::Part& part,
         (lastDisplayedProgress == 0 || lastDisplayedProgress == 100);
 }
 
+// Linear mapping from range <a1, a2> to range <b1, b2>
+float mapLinear(float x, float a1, float a2, float b1, float b2) {
+    return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
+}
+
+void BootAnimation::drawTexturedQuad(float xStart, float yStart, float width, float height) {
+    // Map coordinates from screen space to world space.
+    float x0 = mapLinear(xStart, 0, mWidth, -1, 1);
+    float y0 = mapLinear(yStart, 0, mHeight, -1, 1);
+    float x1 = mapLinear(xStart + width, 0, mWidth, -1, 1);
+    float y1 = mapLinear(yStart + height, 0, mHeight, -1, 1);
+    // Update quad vertex positions.
+    quadPositions[0] = x0;
+    quadPositions[1] = y0;
+    quadPositions[2] = x1;
+    quadPositions[3] = y0;
+    quadPositions[4] = x1;
+    quadPositions[5] = y1;
+    quadPositions[6] = x1;
+    quadPositions[7] = y1;
+    quadPositions[8] = x0;
+    quadPositions[9] = y1;
+    quadPositions[10] = x0;
+    quadPositions[11] = y0;
+    glDrawArrays(GL_TRIANGLES, 0,
+        sizeof(quadPositions) / sizeof(quadPositions[0]) / 2);
+}
+
 bool BootAnimation::playAnimation(const Animation& animation) {
     const size_t pcount = animation.parts.size();
     nsecs_t frameDuration = s2ns(1) / animation.fps;
@@ -1230,7 +1327,6 @@ bool BootAnimation::playAnimation(const Animation& animation) {
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
-        glBindTexture(GL_TEXTURE_2D, 0);
 
         // Handle animation package
         if (part.animation != nullptr) {
@@ -1272,12 +1368,8 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 if (r > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
-                    if (part.count != 1) {
-                        glGenTextures(1, &frame.tid);
-                        glBindTexture(GL_TEXTURE_2D, frame.tid);
-                        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    }
+                    glGenTextures(1, &frame.tid);
+                    glBindTexture(GL_TEXTURE_2D, frame.tid);
                     int w, h;
                     initTexture(frame.map, &w, &h);
                 }
@@ -1300,16 +1392,21 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
                 // which is equivalent to mHeight - (yc + frame.trimHeight)
                 const int frameDrawY = mHeight - (yc + frame.trimHeight);
-                glDrawTexiOES(xc, frameDrawY, 0, frame.trimWidth, frame.trimHeight);
 
+                float fade = 0;
                 // if the part hasn't been stopped yet then continue fading if necessary
                 if (exitPending() && part.hasFadingPhase()) {
-                    fadeFrame(xc, frameDrawY, frame.trimWidth, frame.trimHeight, part,
-                              ++fadedFramesCount);
+                    fade = static_cast<float>(++fadedFramesCount) / part.framesToFadeCount;
                     if (fadedFramesCount >= part.framesToFadeCount) {
                         fadedFramesCount = MAX_FADED_FRAMES_COUNT; // no more fading
                     }
                 }
+                glUseProgram(mImageShader);
+                glUniform1i(mImageTextureLocation, 0);
+                glUniform1f(mImageFadeLocation, fade);
+                glEnable(GL_BLEND);
+                drawTexturedQuad(xc, frameDrawY, frame.trimWidth, frame.trimHeight);
+                glDisable(GL_BLEND);
 
                 if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
                     drawClock(animation.clockFont, part.clockPosX, part.clockPosY);
