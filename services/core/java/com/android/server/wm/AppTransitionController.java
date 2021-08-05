@@ -464,7 +464,8 @@ public class AppTransitionController {
         }
         final RemoteAnimationAdapter adapter =
                 getRemoteAnimationOverride(animLpActivity, transit, activityTypes);
-        if (adapter != null) {
+        if (adapter != null
+                && mDisplayContent.mAppTransition.getRemoteAnimationController() == null) {
             mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(adapter);
         }
     }
