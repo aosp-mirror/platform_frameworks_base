@@ -19,6 +19,8 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -158,7 +160,7 @@ public class InternalResourceService extends SystemService {
                 public void onAlarm() {
                     synchronized (mLock) {
                         mAgent.reclaimUnusedAssetsLocked(DEFAULT_UNUSED_RECLAMATION_PERCENTAGE);
-                        mLastUnusedReclamationTime = System.currentTimeMillis();
+                        mLastUnusedReclamationTime = getCurrentTimeMillis();
                         scheduleUnusedWealthReclamationLocked();
                     }
                 }
@@ -341,7 +343,7 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private void scheduleUnusedWealthReclamationLocked() {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nextReclamationTime =
                 Math.max(mLastUnusedReclamationTime + UNUSED_RECLAMATION_PERIOD_MS, now + 30_000);
         mHandler.post(() -> {
@@ -612,7 +614,7 @@ public class InternalResourceService extends SystemService {
                 return;
             }
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long now = System.currentTimeMillis();
+            final long now = getCurrentTimeMillis();
             synchronized (mLock) {
                 mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
             }
