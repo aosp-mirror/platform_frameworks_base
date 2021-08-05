@@ -386,7 +386,9 @@ class KeyguardController {
                 // can be committed before KEYGUARD_OCCLUDE transition is handled.
                 // Set mRequestForceTransition flag to make sure that the app transition animation
                 // is applied for such case.
-                if (topActivity != null) {
+                // TODO(b/194243906): Fix this before enabling the remote keyguard animation.
+                if (WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
+                        && topActivity != null) {
                     topActivity.mRequestForceTransition = true;
                 }
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);
