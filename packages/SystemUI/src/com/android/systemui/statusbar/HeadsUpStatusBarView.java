@@ -137,7 +137,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mIconPlaceholder.getLocationOnScreen(mTmpPosition);
-        int left = (int) (mTmpPosition[0] - getTranslationX());
+        int left = mTmpPosition[0];
         int top = mTmpPosition[1];
         int right = left + mIconPlaceholder.getWidth();
         int bottom = top + mIconPlaceholder.getHeight();
@@ -145,20 +145,9 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         updateDrawingRect();
     }
 
-    /** In order to do UI alignment, this view will be notified by
-     * {@link com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout}.
-     * After scroller laid out, the scroller will tell this view about scroller's getX()
-     * @param translationX how to translate the horizontal position
-     */
-    public void setPanelTranslation(float translationX) {
-        setTranslationX(translationX);
-        updateDrawingRect();
-    }
-
     private void updateDrawingRect() {
         float oldLeft = mIconDrawingRect.left;
         mIconDrawingRect.set(mLayoutedIconRect);
-        mIconDrawingRect.offset((int) getTranslationX(), 0);
         if (oldLeft != mIconDrawingRect.left && mOnDrawingRectChangedListener != null) {
             mOnDrawingRectChangedListener.run();
         }
