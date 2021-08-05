@@ -360,7 +360,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setCompileSdkVersion(int compileSdkVersion);
 
-    ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename);
+    ParsingPackage setCompileSdkVersionCodeName(String compileSdkVersionCodeName);
 
     ParsingPackage setAttributionsAreUserVisible(boolean attributionsAreUserVisible);
 

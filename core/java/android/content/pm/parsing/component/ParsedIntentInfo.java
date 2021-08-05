@@ -16,6 +16,7 @@
 
 package android.content.pm.parsing.component;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.os.Parcel;
@@ -58,6 +59,7 @@ public final class ParsedIntentInfo extends IntentFilter {
             item.writeIntentInfoToParcel(dest, parcelFlags);
         }
 
+        @NonNull
         @Override
         public ParsedIntentInfo unparcel(Parcel source) {
             return new ParsedIntentInfo(source);

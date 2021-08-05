@@ -535,7 +535,7 @@ public class PackageInfoWithoutStateUtils {
         ai.setMaxAspectRatio(maxAspectRatio != null ? maxAspectRatio : 0f);
         Float minAspectRatio = a.getMinAspectRatio();
         ai.setMinAspectRatio(minAspectRatio != null ? minAspectRatio : 0f);
-        ai.supportsSizeChanges = a.getSupportsSizeChanges();
+        ai.supportsSizeChanges = a.isSupportsSizeChanges();
         ai.requestedVrComponent = a.getRequestedVrComponent();
         ai.rotationAnimation = a.getRotationAnimation();
         ai.colorMode = a.getColorMode();

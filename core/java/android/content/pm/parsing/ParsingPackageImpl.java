@@ -553,7 +553,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
             setCompileSdkVersion(manifestArray.getInteger(
                     R.styleable.AndroidManifest_compileSdkVersion, 0));
-            setCompileSdkVersionCodename(manifestArray.getNonConfigurationString(
+            setCompileSdkVersionCodeName(manifestArray.getNonConfigurationString(
                     R.styleable.AndroidManifest_compileSdkVersionCodename, 0));
 
             setIsolatedSplitLoading(manifestArray.getBoolean(
@@ -2686,8 +2686,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename) {
-        this.compileSdkVersionCodeName = compileSdkVersionCodename;
+    public ParsingPackage setCompileSdkVersionCodeName(String compileSdkVersionCodeName) {
+        this.compileSdkVersionCodeName = compileSdkVersionCodeName;
         return this;
     }
 

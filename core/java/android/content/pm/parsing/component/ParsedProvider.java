@@ -169,6 +169,7 @@ public class ParsedProvider extends ParsedMainComponent {
         this.pathPermissions = in.createTypedArray(PathPermission.CREATOR);
     }
 
+    @NonNull
     public static final Parcelable.Creator<ParsedProvider> CREATOR = new Creator<ParsedProvider>() {
         @Override
         public ParsedProvider createFromParcel(Parcel source) {
