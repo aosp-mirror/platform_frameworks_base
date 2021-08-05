@@ -5666,8 +5666,8 @@ public final class ActivityThread extends ClientTransactionHandler
      */
     private void scheduleRelaunchActivityIfPossible(@NonNull ActivityClientRecord r,
             boolean preserveWindow) {
-        if (r.activity.mFinished || r.token instanceof Binder) {
-            // Do not schedule relaunch if the activity is finishing or not a local object (e.g.
+        if ((r.activity != null && r.activity.mFinished) || r.token instanceof Binder) {
+            // Do not schedule relaunch if the activity is finishing or is a local object (e.g.
             // created by ActivtiyGroup that server side doesn't recognize it).
             return;
         }

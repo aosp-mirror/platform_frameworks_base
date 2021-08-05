@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.SystemClock;
@@ -22,9 +24,11 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternView;
@@ -32,6 +36,7 @@ import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 public class KeyguardPatternView extends KeyguardInputView
         implements AppearAnimationCreator<LockPatternView.CellState> {
@@ -68,7 +73,7 @@ public class KeyguardPatternView extends KeyguardInputView
 
     KeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
-    private ViewGroup mContainer;
+    private ConstraintLayout mContainer;
 
     public KeyguardPatternView(Context context) {
         this(context, null);
@@ -88,6 +93,18 @@ public class KeyguardPatternView extends KeyguardInputView
                 (long) (125 * DISAPPEAR_MULTIPLIER_LOCKED), 1.2f /* translationScale */,
                 0.6f /* delayScale */, AnimationUtils.loadInterpolator(
                 mContext, android.R.interpolator.fast_out_linear_in));
+    }
+
+    void onDevicePostureChanged(@DevicePostureInt int posture) {
+        // Update the guideline based on the device posture...
+        float halfOpenPercentage =
+                mContext.getResources().getFloat(R.dimen.half_opened_bouncer_height_ratio);
+
+        ConstraintSet cs = new ConstraintSet();
+        cs.clone(mContainer);
+        cs.setGuidelinePercent(R.id.pin_pad_top_guideline, posture == DEVICE_POSTURE_HALF_OPENED
+                ? halfOpenPercentage : 0.0f);
+        cs.applyTo(mContainer);
     }
 
     @Override
