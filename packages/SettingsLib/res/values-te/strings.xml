@@ -489,7 +489,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"సక్రియ ఇన్‌పుట్ పద్ధతులు"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"సిస్టమ్ భాషలను ఉపయోగించు"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> యొక్క సెట్టింగ్‌లను తెరవడం విఫలమైంది"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"ఈ ఇన్‌పుట్ పద్ధతి మీరు టైప్ చేసే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ్‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> అనువర్తనంలో అందించబడుతుంది. ఈ ఇన్‌పుట్ పద్ధతిని ఉపయోగించాలా?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"ఈ ఇన్‌పుట్ పద్ధతి మీరు టైప్ చేసే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ్‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> యాప్‌లో అందించబడుతుంది. ఈ ఇన్‌పుట్ పద్ధతిని ఉపయోగించాలా?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"గమనిక: రీబూట్ చేసాక, మీరు మీ ఫోన్‌ను అన్‌లాక్ చేసే వరకు ఈ యాప్ ప్రారంభం కాదు"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS నమోదు స్థితి"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"నమోదు చేయబడింది"</string>
