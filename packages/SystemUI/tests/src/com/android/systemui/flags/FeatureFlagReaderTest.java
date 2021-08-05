@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.wrapper.BuildInfo;
 
 import org.junit.Before;
@@ -43,6 +44,7 @@ import org.mockito.MockitoAnnotations;
 public class FeatureFlagReaderTest extends SysuiTestCase {
     @Mock private Resources mResources;
     @Mock private BuildInfo mBuildInfo;
+    @Mock private PluginManager mPluginManager;
     @Mock private SystemPropertiesHelper mSystemPropertiesHelper;
 
     private FeatureFlagReader mReader;
@@ -63,7 +65,8 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
     private void initialize(boolean isDebuggable, boolean isOverrideable) {
         when(mBuildInfo.isDebuggable()).thenReturn(isDebuggable);
         when(mResources.getBoolean(R.bool.are_flags_overrideable)).thenReturn(isOverrideable);
-        mReader = new FeatureFlagReader(mResources, mBuildInfo, mSystemPropertiesHelper);
+        mReader = new FeatureFlagReader(
+                mResources, mBuildInfo, mPluginManager, mSystemPropertiesHelper);
     }
 
     @Test

@@ -82,7 +82,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     private long mStartTimeMs;
 
-    protected boolean mAuthAttempted;
+    private boolean mAuthAttempted;
 
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
     //  the state. We should think of a way to improve this in the future.
@@ -97,6 +97,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
      * @param authenticated
      */
     protected abstract void handleLifecycleAfterAuth(boolean authenticated);
+
+    /**
+     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
+     *         etc)
+     */
+    public abstract boolean wasUserDetected();
 
     public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
@@ -180,7 +186,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 + ", isBP: " + isBiometricPrompt()
                 + ", listener: " + listener
                 + ", requireConfirmation: " + mRequireConfirmation
-                + ", user: " + getTargetUserId());
+                + ", user: " + getTargetUserId()
+                + ", clientMonitor: " + toString());
 
         final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
         if (isCryptoOperation()) {
@@ -304,6 +311,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 public void handleLifecycleAfterAuth() {
                     AuthenticationClient.this.handleLifecycleAfterAuth(true /* authenticated */);
                 }
+
+                @Override
+                public void sendAuthenticationCanceled() {
+                    sendCancelOnly(listener);
+                }
             });
         } else {
             // Allow system-defined limit of number of attempts before giving up
@@ -338,7 +350,27 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 public void handleLifecycleAfterAuth() {
                     AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
                 }
+
+                @Override
+                public void sendAuthenticationCanceled() {
+                    sendCancelOnly(listener);
+                }
             });
+        }
+    }
+
+    private void sendCancelOnly(@Nullable ClientMonitorCallbackConverter listener) {
+        if (listener == null) {
+            Slog.e(TAG, "Unable to sendAuthenticationCanceled, listener null");
+            return;
+        }
+        try {
+            listener.onError(getSensorId(),
+                    getCookie(),
+                    BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                    0 /* vendorCode */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 
@@ -355,9 +387,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     }
 
     @Override
-    public void onError(int errorCode, int vendorCode) {
+    public void onError(@BiometricConstants.Errors int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
         mState = STATE_STOPPED;
+
+        CoexCoordinator.getInstance().onAuthenticationError(this, errorCode, this::vibrateError);
     }
 
     /**
@@ -418,5 +452,9 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public boolean interruptsPrecedingClients() {
         return true;
+    }
+
+    public boolean wasAuthAttempted() {
+        return mAuthAttempted;
     }
 }

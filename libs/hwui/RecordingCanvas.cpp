@@ -187,6 +187,11 @@ struct ClipRegion final : Op {
     SkClipOp op;
     void draw(SkCanvas* c, const SkMatrix&) const { c->clipRegion(region, op); }
 };
+struct ResetClip final : Op {
+    static const auto kType = Type::ResetClip;
+    ResetClip() {}
+    void draw(SkCanvas* c, const SkMatrix&) const { SkAndroidFrameworkUtils::ResetClip(c); }
+};
 
 struct DrawPaint final : Op {
     static const auto kType = Type::DrawPaint;
@@ -662,6 +667,9 @@ void DisplayListData::clipRRect(const SkRRect& rrect, SkClipOp op, bool aa) {
 void DisplayListData::clipRegion(const SkRegion& region, SkClipOp op) {
     this->push<ClipRegion>(0, region, op);
 }
+void DisplayListData::resetClip() {
+    this->push<ResetClip>(0);
+}
 
 void DisplayListData::drawPaint(const SkPaint& paint) {
     this->push<DrawPaint>(0, paint);
@@ -968,6 +976,14 @@ void RecordingCanvas::onClipRegion(const SkRegion& region, SkClipOp op) {
     }
     fDL->clipRegion(region, op);
     this->INHERITED::onClipRegion(region, op);
+}
+void RecordingCanvas::onResetClip() {
+    // This is part of "replace op" emulation, but rely on the following intersection
+    // clip to potentially mark the clip as complex. If we are already complex, we do
+    // not reset the complexity so that we don't break the contract that no higher
+    // save point has a complex clip when "not complex".
+    fDL->resetClip();
+    this->INHERITED::onResetClip();
 }
 
 void RecordingCanvas::onDrawPaint(const SkPaint& paint) {

@@ -432,6 +432,7 @@ public class Tuner implements AutoCloseable  {
             mFrontend = tuner.mFrontend;
             mIsSharedFrontend = true;
         }
+        nativeShareFrontend(mFrontend.mId);
     }
 
     /**
@@ -551,6 +552,7 @@ public class Tuner implements AutoCloseable  {
      * Native method to open frontend of the given ID.
      */
     private native Frontend nativeOpenFrontendByHandle(int handle);
+    private native int nativeShareFrontend(int id);
     @Result
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();

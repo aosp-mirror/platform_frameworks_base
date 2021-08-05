@@ -54,13 +54,10 @@ bool CanvasStateHelper::internalSave(SaveEntry saveEntry) {
     return false;
 }
 
-// Assert that the cast from SkClipOp to SkRegion::Op is valid
+// Assert that the cast from SkClipOp to SkRegion::Op is valid.
+// SkClipOp is a subset of SkRegion::Op and only supports difference and intersect.
 static_assert(static_cast<int>(SkClipOp::kDifference) == SkRegion::Op::kDifference_Op);
 static_assert(static_cast<int>(SkClipOp::kIntersect) == SkRegion::Op::kIntersect_Op);
-static_assert(static_cast<int>(SkClipOp::kUnion_deprecated) == SkRegion::Op::kUnion_Op);
-static_assert(static_cast<int>(SkClipOp::kXOR_deprecated) == SkRegion::Op::kXOR_Op);
-static_assert(static_cast<int>(SkClipOp::kReverseDifference_deprecated) == SkRegion::Op::kReverseDifference_Op);
-static_assert(static_cast<int>(SkClipOp::kReplace_deprecated) == SkRegion::Op::kReplace_Op);
 
 void CanvasStateHelper::internalClipRect(const SkRect& rect, SkClipOp op) {
     clip().opRect(rect, transform(), mInitialBounds, (SkRegion::Op)op, false);

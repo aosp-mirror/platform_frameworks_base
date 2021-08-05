@@ -17,6 +17,7 @@
 package com.android.server.tare;
 
 import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
+import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
 import static com.android.server.tare.TareUtils.arcToNarc;
@@ -44,6 +45,7 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     private static final int[] COST_MODIFIERS = new int[]{
             COST_MODIFIER_CHARGING,
+            COST_MODIFIER_DEVICE_IDLE,
             COST_MODIFIER_POWER_SAVE_MODE,
             COST_MODIFIER_PROCESS_STATE
     };

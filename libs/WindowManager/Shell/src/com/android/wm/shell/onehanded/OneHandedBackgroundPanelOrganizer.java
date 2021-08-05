@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.view.ContextThemeWrapper;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.animation.LinearInterpolator;
@@ -31,7 +32,6 @@ import android.window.DisplayAreaOrganizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;

@@ -293,6 +293,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mRemoteToken = new RemoteToken(this);
     }
 
+    @NonNull
+    static TaskFragment fromTaskFragmentToken(@Nullable IBinder token,
+            @NonNull ActivityTaskManagerService service) {
+        if (token == null) return null;
+        return service.mWindowOrganizerController.getTaskFragment(token);
+    }
+
     void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment) {
         if (mAdjacentTaskFragment == taskFragment) {
             return;
@@ -607,17 +614,68 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    ActivityRecord getTopNonFinishingActivity() {
+        return getTopNonFinishingActivity(true /* includeOverlays */);
+    }
+
+    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
+        return getTopNonFinishingActivity(includeOverlays, true /* includingEmbeddedTask */);
+    }
+
+    /**
+     * Returns the top-most non-finishing activity, even if the activity is NOT ok to show to
+     * the current user.
+     * @param includeOverlays whether the task overlay activity should be included.
+     * @param includingEmbeddedTask whether the activity in a task that being embedded from this
+     *                              one should be included.
+     * @see #topRunningActivity(boolean, boolean)
+     * @see ActivityRecord#okToShowLocked()
+     */
+    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays,
+            boolean includingEmbeddedTask) {
+        // Split into 4 to avoid object creation due to variable capture.
+        if (includeOverlays) {
+            if (includingEmbeddedTask) {
+                return getActivity((r) -> !r.finishing);
+            }
+            return getActivity((r) -> !r.finishing && r.getTask() == this.getTask());
+        }
+
+        if (includingEmbeddedTask) {
+            return getActivity((r) -> !r.finishing && !r.isTaskOverlay());
+        }
+        return getActivity(
+                (r) -> !r.finishing && !r.isTaskOverlay() && r.getTask() == this.getTask());
+    }
+
     ActivityRecord topRunningActivity() {
         return topRunningActivity(false /* focusableOnly */);
     }
 
     ActivityRecord topRunningActivity(boolean focusableOnly) {
-        // Split into 2 to avoid object creation due to variable capture.
+        return topRunningActivity(focusableOnly, true /* includingEmbeddedTask */);
+    }
+
+    /**
+     * Returns the top-most running activity, which the activity is non-finishing and ok to show
+     * to the current user.
+     *
+     * @see ActivityRecord#canBeTopRunning()
+     */
+    ActivityRecord topRunningActivity(boolean focusableOnly, boolean includingEmbeddedTask) {
+        // Split into 4 to avoid object creation due to variable capture.
         if (focusableOnly) {
-            return getActivity((r) -> r.canBeTopRunning() && r.isFocusable());
-        } else {
+            if (includingEmbeddedTask) {
+                return getActivity((r) -> r.canBeTopRunning() && r.isFocusable());
+            }
+            return getActivity(
+                    (r) -> r.canBeTopRunning() && r.isFocusable() && r.getTask() == this.getTask());
+        }
+
+        if (includingEmbeddedTask) {
             return getActivity(ActivityRecord::canBeTopRunning);
         }
+        return getActivity((r) -> r.canBeTopRunning() && r.getTask() == this.getTask());
     }
 
     boolean isTopActivityFocusable() {
@@ -1340,6 +1398,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             } else {
                 prev.schedulePauseTimeout();
+                // Unset readiness since we now need to wait until this pause is complete.
+                mAtmService.getTransitionController().setReady(this, false /* ready */);
                 return true;
             }
 

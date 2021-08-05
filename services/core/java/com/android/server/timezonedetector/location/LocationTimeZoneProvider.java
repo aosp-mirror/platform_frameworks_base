@@ -16,9 +16,6 @@
 
 package com.android.server.timezonedetector.location;
 
-import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
-import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
-
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.debugLog;
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.warnLog;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
@@ -35,9 +32,7 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteCallback;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
@@ -358,8 +353,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     /**
      * Usually {@code false} but can be set to {@code true} for testing.
      */
-    @GuardedBy("mSharedLock")
-    private boolean mStateChangeRecording;
+    private final boolean mRecordStateChanges;
 
     @GuardedBy("mSharedLock")
     @NonNull
@@ -385,7 +379,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     LocationTimeZoneProvider(@NonNull ProviderMetricsLogger providerMetricsLogger,
             @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
-            @NonNull TimeZoneProviderEventPreProcessor timeZoneProviderEventPreProcessor) {
+            @NonNull TimeZoneProviderEventPreProcessor timeZoneProviderEventPreProcessor,
+            boolean recordStateChanges) {
         mThreadingDomain = Objects.requireNonNull(threadingDomain);
         mProviderMetricsLogger = Objects.requireNonNull(providerMetricsLogger);
         mInitializationTimeoutQueue = threadingDomain.createSingleRunnableQueue();
@@ -393,6 +388,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         mProviderName = Objects.requireNonNull(providerName);
         mTimeZoneProviderEventPreProcessor =
                 Objects.requireNonNull(timeZoneProviderEventPreProcessor);
+        mRecordStateChanges = recordStateChanges;
     }
 
     /**
@@ -456,12 +452,11 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     abstract void onDestroy();
 
     /**
-     * Sets the provider into state recording mode for tests.
+     * Clears recorded state changes.
      */
-    final void setStateChangeRecordingEnabled(boolean enabled) {
+    final void clearRecordedStates() {
         mThreadingDomain.assertCurrentThread();
         synchronized (mSharedLock) {
-            mStateChangeRecording = enabled;
             mRecordedStates.clear();
             mRecordedStates.trimToSize();
         }
@@ -478,12 +473,11 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     }
 
     /**
-     * Set the current state, for use by this class and subclasses only. If {@code #notifyChanges}
-     * is {@code true} and {@code newState} is not equal to the old state, then {@link
-     * ProviderListener#onProviderStateChange(ProviderState)} must be called on
-     * {@link #mProviderListener}.
+     * Sets the current state. If {@code #notifyChanges} is {@code true} and {@code newState} is not
+     * equal to the old state, then {@link ProviderListener#onProviderStateChange(ProviderState)}
+     * will be called on {@link #mProviderListener}.
      */
-    final void setCurrentState(@NonNull ProviderState newState, boolean notifyChanges) {
+    private void setCurrentState(@NonNull ProviderState newState, boolean notifyChanges) {
         mThreadingDomain.assertCurrentThread();
         synchronized (mSharedLock) {
             ProviderState oldState = mCurrentState.get();
@@ -491,7 +485,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             onSetCurrentState(newState);
             if (!Objects.equals(newState, oldState)) {
                 mProviderMetricsLogger.onProviderStateChanged(newState.stateEnum);
-                if (mStateChangeRecording) {
+                if (mRecordStateChanges) {
                     mRecordedStates.add(newState);
                 }
                 if (notifyChanges) {
@@ -608,23 +602,6 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      * Implemented by subclasses to do work during {@link #stopUpdates}.
      */
     abstract void onStopUpdates();
-
-    /**
-     * Overridden by subclasses to handle the supplied {@link TestCommand}. If {@code callback} is
-     * non-null, the default implementation sends a result {@link Bundle} with {@link
-     * android.service.timezone.TimeZoneProviderService#TEST_COMMAND_RESULT_SUCCESS_KEY} set to
-     * {@code false} and a "Not implemented" error message.
-     */
-    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
-        Objects.requireNonNull(testCommand);
-
-        if (callback != null) {
-            Bundle result = new Bundle();
-            result.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, false);
-            result.putString(TEST_COMMAND_RESULT_ERROR_KEY, "Not implemented");
-            callback.sendResult(result);
-        }
-    }
 
     /** For subclasses to invoke when a {@link TimeZoneProviderEvent} has been received. */
     final void handleTimeZoneProviderEvent(@NonNull TimeZoneProviderEvent timeZoneProviderEvent) {

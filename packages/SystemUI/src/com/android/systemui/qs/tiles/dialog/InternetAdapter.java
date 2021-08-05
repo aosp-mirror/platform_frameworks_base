@@ -215,7 +215,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                 return null;
             }
             drawable.setTint(
-                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorControlNormal));
+                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorTertiary));
             final AtomicReference<Drawable> shared = new AtomicReference<>();
             shared.set(drawable);
             return shared.get();

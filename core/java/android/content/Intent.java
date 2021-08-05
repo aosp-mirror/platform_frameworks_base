@@ -1866,7 +1866,7 @@ public class Intent implements Parcelable, Cloneable {
      * that should be managed by the launched UI.
      * </p>
      * <p>
-     * <li> {@link #EXTRA_USER} specifies the UserHandle of the user that owns the app.
+     * <li> {@link #EXTRA_USER} specifies the {@link UserHandle} of the user that owns the app.
      * </p>
      * <p>
      * Output: Nothing.
@@ -2850,8 +2850,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MY_PACKAGE_UNSUSPENDED = "android.intent.action.MY_PACKAGE_UNSUSPENDED";
 
     /**
-     * Broadcast Action: A user ID has been removed from the system.  The user
-     * ID number is stored in the extra data under {@link #EXTRA_UID}.
+     * Broadcast Action: A uid has been removed from the system.  The uid
+     * number is stored in the extra data under {@link #EXTRA_UID}.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -3726,10 +3726,12 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_BACKGROUND";
 
     /**
-     * Broadcast sent to the system when a user is added. Carries an extra
-     * EXTRA_USER_HANDLE that has the userHandle of the new user.  It is sent to
-     * all running users.  You must hold
-     * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
+     * Broadcast sent to the system when a user is added.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the new user
+     * (and for legacy reasons, also carries an int extra {@link #EXTRA_USER_HANDLE} specifying that
+     * user's user ID).
+     * It is sent to all running users.
+     * You must hold {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
     @SystemApi
@@ -3738,7 +3740,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent by the system when a user is started. Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only sent to
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is only sent to
      * registered receivers, not manifest receivers.  It is sent to the user
      * that has been started.  This is sent as a foreground
      * broadcast, since it is part of a visible user interaction; be as quick
@@ -3750,7 +3752,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent when a user is in the process of starting.  Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is only
      * sent to registered receivers, not manifest receivers.  It is sent to all
      * users (including the one that is being started).  You must hold
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
@@ -3767,7 +3769,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent when a user is going to be stopped.  Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is only
      * sent to registered receivers, not manifest receivers.  It is sent to all
      * users (including the one that is being stopped).  You must hold
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
@@ -3785,7 +3787,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent to the system when a user is stopped. Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is similar to
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is similar to
      * {@link #ACTION_PACKAGE_RESTARTED}, but for an entire user instead of a
      * specific package.  This is only sent to registered receivers, not manifest
      * receivers.  It is sent to all running users <em>except</em> the one that
@@ -3797,8 +3799,12 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_STOPPED";
 
     /**
-     * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user.  It is sent to all running users except the
+     * Broadcast sent to the system when a user is removed.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the user that
+     * was removed
+     * (and for legacy reasons, also carries an int extra {@link #EXTRA_USER_HANDLE} specifying that
+     * user's user ID).
+     * It is sent to all running users except the
      * one that has been removed. The user will not be completely removed until all receivers have
      * handled the broadcast. You must hold
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
@@ -3809,9 +3815,13 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_REMOVED";
 
     /**
-     * Broadcast sent to the system when the user switches. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user to become the current one. This is only sent to
-     * registered receivers, not manifest receivers.  It is sent to all running users.
+     * Broadcast sent to the system when the user switches.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle}
+     * of the user to become the current one
+     * (and for legacy reasons, also carries an int extra {@link #EXTRA_USER_HANDLE} specifying that
+     * user's user ID).
+     * This is only sent to registered receivers, not manifest receivers.
+     * It is sent to all running users.
      * You must hold
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
@@ -3840,17 +3850,18 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile is added (the profile
      * was created and is ready to be used). Carries an extra {@link #EXTRA_USER} that specifies
-     * the UserHandle of the profile that was added. Only applications (for example Launchers)
-     * that need to display merged content across both primary and managed profiles need to
-     * worry about this broadcast. This is only sent to registered receivers,
+     * the {@link UserHandle} of the profile that was added. Only applications (for example
+     * Launchers) that need to display merged content across both primary and managed profiles need
+     * to worry about this broadcast. This is only sent to registered receivers,
      * not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_ADDED =
             "android.intent.action.MANAGED_PROFILE_ADDED";
 
     /**
-     * Broadcast sent to the primary user when an associated managed profile is removed. Carries an
-     * extra {@link #EXTRA_USER} that specifies the UserHandle of the profile that was removed.
+     * Broadcast sent to the primary user when an associated managed profile is removed.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile
+     * that was removed.
      * Only applications (for example Launchers) that need to display merged content across both
      * primary and managed profiles need to worry about this broadcast. This is only sent to
      * registered receivers, not manifest receivers.
@@ -3861,9 +3872,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when the credential-encrypted private storage for
      * an associated managed profile is unlocked. Carries an extra {@link #EXTRA_USER} that
-     * specifies the UserHandle of the profile that was unlocked. Only applications (for example
-     * Launchers) that need to display merged content across both primary and managed profiles
-     * need to worry about this broadcast. This is only sent to registered receivers,
+     * specifies the {@link UserHandle} of the profile that was unlocked. Only applications (for
+     * example Launchers) that need to display merged content across both primary and managed
+     * profiles need to worry about this broadcast. This is only sent to registered receivers,
      * not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_UNLOCKED =
@@ -3872,9 +3883,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile has become available.
      * Currently this includes when the user disables quiet mode for the profile. Carries an extra
-     * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,
-     * this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the new state
-     * of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_AVAILABLE =
             "android.intent.action.MANAGED_PROFILE_AVAILABLE";
@@ -3882,9 +3893,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile has become unavailable.
      * Currently this includes when the user enables quiet mode for the profile. Carries an extra
-     * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,
-     * this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the new state
-     * of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_UNAVAILABLE =
             "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
@@ -5339,7 +5350,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
 
     /**
-     * An int representing the user id to be used.
+     * An int representing the user ID to be used.
      *
      * @hide
      */
@@ -5933,7 +5944,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
-     * The integer userHandle (i.e. userId) carried with broadcast intents related to addition,
+     * The user ID integer carried with broadcast intents related to addition,
      * removal and switching of users and managed profiles - {@link #ACTION_USER_ADDED},
      * {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
      *
@@ -5943,7 +5954,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.user_handle";
 
     /**
-     * The UserHandle carried with intents.
+     * The {@link UserHandle} carried with intents.
      */
     public static final String EXTRA_USER =
             "android.intent.extra.USER";
@@ -9418,7 +9429,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This is NOT a secure mechanism to identify the user who sent the intent.
-     * When the intent is sent to a different user, it is used to fix uris by adding the userId
+     * When the intent is sent to a different user, it is used to fix uris by adding the user ID
      * who sent the intent.
      * @hide
      */
@@ -11371,8 +11382,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void prepareToLeaveProcess(Context context) {
-        final boolean leavingPackage = (mComponent == null)
-                || !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        final boolean leavingPackage;
+        if (mComponent != null) {
+            leavingPackage = !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        } else if (mPackage != null) {
+            leavingPackage = !Objects.equals(mPackage, context.getPackageName());
+        } else {
+            // When no specific component or package has been defined, we have
+            // to assume that we might be routed through an intent
+            // disambiguation dialog which might leave our package
+            leavingPackage = true;
+        }
         prepareToLeaveProcess(leavingPackage);
     }
 

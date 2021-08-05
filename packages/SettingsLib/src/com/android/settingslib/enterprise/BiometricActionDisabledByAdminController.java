@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -32,10 +33,12 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
 
     // These MUST not change, as they are the stable API between here and device admin specified
     // by the component below.
-    private static final String ACTION_LEARN_MORE =
-            "android.intent.action.MANAGE_RESTRICTED_SETTING";
-    private static final String EXTRA_SETTING_KEY = "extra_setting";
-    private static final String EXTRA_SETTING_VALUE = "biometric_disabled_by_admin_controller";
+    @VisibleForTesting
+    static final String ACTION_LEARN_MORE = "android.intent.action.MANAGE_RESTRICTED_SETTING";
+    @VisibleForTesting
+    static final String EXTRA_SETTING_KEY = "extra_setting";
+    @VisibleForTesting
+    static final String EXTRA_SETTING_VALUE = "biometric_disabled_by_admin_controller";
 
     BiometricActionDisabledByAdminController(
             DeviceAdminStringProvider stringProvider) {

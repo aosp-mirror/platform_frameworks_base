@@ -26,7 +26,6 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteCallback;
 import android.util.IndentingPrintWriter;
 
 import java.time.Duration;
@@ -45,9 +44,10 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
             @NonNull ProviderMetricsLogger providerMetricsLogger,
             @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
-            @NonNull LocationTimeZoneProviderProxy proxy) {
+            @NonNull LocationTimeZoneProviderProxy proxy,
+            boolean recordStateChanges) {
         super(providerMetricsLogger, threadingDomain, providerName,
-                new ZoneInfoDbTimeZoneProviderEventPreProcessor());
+                new ZoneInfoDbTimeZoneProviderEventPreProcessor(), recordStateChanges);
         mProxy = Objects.requireNonNull(proxy);
     }
 
@@ -123,16 +123,6 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     void onStopUpdates() {
         TimeZoneProviderRequest request = TimeZoneProviderRequest.createStopUpdatesRequest();
         mProxy.setRequest(request);
-    }
-
-    /**
-     * Passes the supplied test command to the current proxy.
-     */
-    @Override
-    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
-        mThreadingDomain.assertCurrentThread();
-
-        mProxy.handleTestCommand(testCommand, callback);
     }
 
     @Override

@@ -290,15 +290,18 @@ public class ProximitySensor implements ThresholdSensor {
             return;
         }
 
-        if (!mSecondaryThresholdSensor.isLoaded()) {
+
+        if (!mSecondaryThresholdSensor.isLoaded()) {  // No secondary
             logDebug("Primary sensor event: " + event.getBelow() + ". No secondary.");
             onSensorEvent(event);
-        } else if (event.getBelow()) {
+        } else if (event.getBelow()) {  // Covered? Check secondary.
             logDebug("Primary sensor event: " + event.getBelow() + ". Checking secondary.");
             if (mCancelSecondaryRunnable != null) {
                 mCancelSecondaryRunnable.run();
             }
             mSecondaryThresholdSensor.resume();
+        } else {  // Uncovered. Report immediately.
+            onSensorEvent(event);
         }
     }
 

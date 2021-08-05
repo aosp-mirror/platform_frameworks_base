@@ -90,7 +90,7 @@ public:
 
     void detachSurfaceTexture();
 
-    void updateLayer(bool forceFilter, const SkMatrix& textureTransform,
+    void updateLayer(bool forceFilter, const uint32_t textureTransform, const SkRect cropRect,
                      const sk_sp<SkImage>& layerImage);
 
     void destroyLayer();

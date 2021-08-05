@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,25 +40,29 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.ICharSequenceResultCallback;
-import com.android.internal.inputmethod.IExtractedTextResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
-import com.android.internal.inputmethod.ISurroundingTextResultCallback;
-import com.android.internal.inputmethod.ImeTracing;
-import com.android.internal.inputmethod.InputConnectionProtoDumper;
+import com.android.internal.view.IInputContext;
 
 import java.lang.ref.WeakReference;
 
-public final class IInputConnectionWrapper extends IInputContext.Stub {
-    private static final String TAG = "IInputConnectionWrapper";
+/**
+ * Takes care of remote method invocations of {@link InputConnection} in the IME client side.
+ *
+ * <p>{@link android.inputmethodservice.RemoteInputConnection} code is executed in the IME process.
+ * It makes IInputContext binder calls under the hood. {@link RemoteInputConnectionImpl} receives
+ * {@link IInputContext} binder calls in the IME client (editor app) process, and forwards them to
+ * {@link InputConnection} that the IME client provided, on the {@link Looper} associated to the
+ * {@link InputConnection}.</p>
+ */
+public final class RemoteInputConnectionImpl extends IInputContext.Stub {
+    private static final String TAG = "RemoteInputConnectionImpl";
     private static final boolean DEBUG = false;
 
     @GuardedBy("mLock")
     @Nullable
     private InputConnection mInputConnection;
 
-    private final Looper mMainLooper;
+    @NonNull
+    private final Looper mLooper;
     private final Handler mH;
 
     private final Object mLock = new Object();
@@ -68,16 +72,19 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     private final InputMethodManager mParentInputMethodManager;
     private final WeakReference<View> mServedView;
 
-    public IInputConnectionWrapper(@NonNull Looper mainLooper,
+    public RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
         mInputConnection = inputConnection;
-        mMainLooper = mainLooper;
-        mH = new Handler(mMainLooper);
+        mLooper = looper;
+        mH = new Handler(mLooper);
         mParentInputMethodManager = inputMethodManager;
         mServedView = new WeakReference<>(servedView);
     }
 
+    /**
+     * @return {@link InputConnection} to which incoming IPCs will be dispatched.
+     */
     @Nullable
     public InputConnection getInputConnection() {
         synchronized (mLock) {
@@ -99,6 +106,11 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         return mServedView.get();
     }
 
+    /**
+     * Called when this object needs to be permanently deactivated.
+     *
+     * <p>Multiple invocations will be simply ignored.</p>
+     */
     public void deactivate() {
         if (isFinished()) {
             // This is a small performance optimization.  Still only the 1st call of
@@ -128,7 +140,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
 
     @Override
     public String toString() {
-        return "IInputConnectionWrapper{"
+        return "RemoteInputConnectionImpl{"
                 + "connection=" + getInputConnection()
                 + " finished=" + isFinished()
                 + " mParentInputMethodManager.isActive()=" + mParentInputMethodManager.isActive()
@@ -136,20 +148,28 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
                 + "}";
     }
 
+    /**
+     * Called by {@link InputMethodManager} to dump the editor state.
+     *
+     * @param proto {@link ProtoOutputStream} to which the editor state should be dumped.
+     * @param fieldId the ID to be passed to
+     *                {@link DumpableInputConnection#dumpDebug(ProtoOutputStream, long)}.
+     */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mLock) {
-            // Check that the call is initiated in the main thread of the current InputConnection
+            // Check that the call is initiated in the target thread of the current InputConnection
             // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
             // executed on this thread. Otherwise the messages are dispatched to the correct thread
             // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
             // reasons.
             if ((mInputConnection instanceof DumpableInputConnection)
-                    && Looper.myLooper() == mMainLooper) {
+                    && mLooper.isCurrentThread()) {
                 ((DumpableInputConnection) mInputConnection).dumpDebug(proto, fieldId);
             }
         }
     }
 
+    @Override
     public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextAfterCursor");
@@ -180,6 +200,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextBeforeCursor");
@@ -210,6 +231,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void getSelectedText(int flags, ICharSequenceResultCallback callback) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getSelectedText");
@@ -240,11 +262,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
-    /**
-     * Dispatches the request for retrieving surrounding text.
-     *
-     * <p>See {@link InputConnection#getSurroundingText(int, int, int)}.
-     */
+    @Override
     public void getSurroundingText(int beforeLength, int afterLength, int flags,
             ISurroundingTextResultCallback callback) {
         dispatch(() -> {
@@ -276,6 +294,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getCursorCapsMode");
@@ -306,6 +325,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void getExtractedText(ExtractedTextRequest request, int flags,
             IExtractedTextResultCallback callback) {
         dispatch(() -> {
@@ -337,6 +357,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void commitText(CharSequence text, int newCursorPosition) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitText");
@@ -353,6 +374,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void commitCompletion(CompletionInfo text) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitCompletion");
@@ -369,6 +391,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void commitCorrection(CorrectionInfo info) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitCorrection");
@@ -385,6 +408,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void setSelection(int start, int end) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setSelection");
@@ -401,6 +425,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void performEditorAction(int id) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performEditorAction");
@@ -417,6 +442,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void performContextMenuAction(int id) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performContextMenuAction");
@@ -433,6 +459,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void setComposingRegion(int start, int end) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setComposingRegion");
@@ -449,6 +476,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void setComposingText(CharSequence text, int newCursorPosition) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setComposingText");
@@ -465,6 +493,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void finishComposingText() {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#finishComposingText");
@@ -493,6 +522,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void sendKeyEvent(KeyEvent event) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#sendKeyEvent");
@@ -509,6 +539,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void clearMetaKeyStates(int states) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#clearMetaKeyStates");
@@ -525,6 +556,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void deleteSurroundingText(int beforeLength, int afterLength) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#deleteSurroundingText");
@@ -541,6 +573,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT,
@@ -558,6 +591,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void beginBatchEdit() {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#beginBatchEdit");
@@ -574,6 +608,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void endBatchEdit() {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#endBatchEdit");
@@ -590,11 +625,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
-    /**
-     * Dispatches the request for performing spell check.
-     *
-     * @see InputConnection#performSpellCheck()
-     */
+    @Override
     public void performSpellCheck() {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performSpellCheck");
@@ -611,6 +642,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void performPrivateCommand(String action, Bundle data) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performPrivateCommand");
@@ -627,6 +659,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#requestCursorUpdates");
@@ -651,7 +684,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
-    public void closeConnection() {
+    private void closeConnection() {
         dispatch(() -> {
             // Note that we do not need to worry about race condition here, because 1) mFinished is
             // updated only inside this block, and 2) the code here is running on a Handler hence we
@@ -684,6 +717,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
+    @Override
     public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
             IBooleanResultCallback callback) {
         dispatch(() -> {
@@ -715,11 +749,7 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         });
     }
 
-    /**
-     * Dispatches the request for setting ime consumes input.
-     *
-     * <p>See {@link InputConnection#setImeConsumesInput(boolean)}.
-     */
+    @Override
     public void setImeConsumesInput(boolean imeConsumesInput) {
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#setImeConsumesInput");
@@ -737,10 +767,9 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     private void dispatch(@NonNull Runnable runnable) {
-        // If we are calling this from the main thread, then we can call
-        // right through.  Otherwise, we need to send the message to the
-        // main thread.
-        if (mMainLooper.isCurrentThread()) {
+        // If we are calling this from the target thread, then we can call right through.
+        // Otherwise, we need to send the message to the target thread.
+        if (mLooper.isCurrentThread()) {
             runnable.run();
             return;
         }

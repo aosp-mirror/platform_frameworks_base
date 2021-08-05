@@ -2430,7 +2430,8 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.isIncomingCallPermitted(phoneAccountHandle);
+                return service.isIncomingCallPermitted(phoneAccountHandle,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error isIncomingCallPermitted", e);
             }
@@ -2463,7 +2464,8 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.isOutgoingCallPermitted(phoneAccountHandle);
+                return service.isOutgoingCallPermitted(phoneAccountHandle,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error isOutgoingCallPermitted", e);
             }

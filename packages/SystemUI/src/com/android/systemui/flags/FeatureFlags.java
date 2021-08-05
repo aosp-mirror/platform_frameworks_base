@@ -22,6 +22,10 @@ import android.util.FeatureFlagUtils;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 /**
@@ -38,6 +42,54 @@ public class FeatureFlags {
     public FeatureFlags(FeatureFlagReader flagReader, Context context) {
         mFlagReader = flagReader;
         mContext = context;
+    }
+
+    /**
+     * @param flag The {@link BooleanFlag} of interest.
+     * @return The value of the flag.
+     */
+    public boolean isEnabled(BooleanFlag flag) {
+        return mFlagReader.isEnabled(flag);
+    }
+
+    /**
+     * @param flag The {@link StringFlag} of interest.
+     * @return The value of the flag.
+     */
+    public String getValue(StringFlag flag) {
+        return mFlagReader.getValue(flag);
+    }
+
+    /**
+     * @param flag The {@link IntFlag} of interest.
+     * @return The value of the flag.
+     */
+    public int getValue(IntFlag flag) {
+        return mFlagReader.getValue(flag);
+    }
+
+    /**
+     * @param flag The {@link LongFlag} of interest.
+     * @return The value of the flag.
+     */
+    public long getValue(LongFlag flag) {
+        return mFlagReader.getValue(flag);
+    }
+
+    /**
+     * @param flag The {@link FloatFlag} of interest.
+     * @return The value of the flag.
+     */
+    public float getValue(FloatFlag flag) {
+        return mFlagReader.getValue(flag);
+    }
+
+    /**
+     * @param flag The {@link DoubleFlag} of interest.
+     * @return The value of the flag.
+     */
+    public double getValue(DoubleFlag flag) {
+        return mFlagReader.getValue(flag);
     }
 
     public boolean isNewNotifPipelineEnabled() {
@@ -106,5 +158,32 @@ public class FeatureFlags {
     /** static method for the system setting */
     public static boolean isProviderModelSettingEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
+    }
+
+    private Map<Integer, Flag<?>> collectFlags() {
+        Map<Integer, Flag<?>> flags = new HashMap<>();
+
+        Field[] fields = this.getClass().getFields();
+
+        for (Field field : fields) {
+            Class<?> t = field.getType();
+            if (Flag.class.isAssignableFrom(t)) {
+                try {
+                    //flags.add((Flag<?>) field.get(null));
+                    Flag flag = (Flag) field.get(null);
+                    flags.put(flag.getId(), flag);
+                } catch (IllegalAccessException e) {
+                    // no-op
+                }
+            }
+        }
+
+        return flags;
+    }
+
+    /** Simple interface for beinga alerted when a specific flag changes value. */
+    public interface Listener {
+        /** */
+        void onFlagChanged(Flag<?> flag);
     }
 }

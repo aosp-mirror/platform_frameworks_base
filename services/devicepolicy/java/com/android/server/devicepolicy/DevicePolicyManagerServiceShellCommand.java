@@ -22,8 +22,6 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 
-import com.android.server.devicepolicy.Owners.OwnerDto;
-
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
@@ -205,18 +203,21 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
     }
 
     private int runListOwners(PrintWriter pw) {
-        List<OwnerDto> owners = mService.listAllOwners();
+        List<OwnerShellData> owners = mService.listAllOwners();
         int size = printAndGetSize(pw, owners, "owner");
         if (size == 0) return 0;
 
         for (int i = 0; i < size; i++) {
-            OwnerDto owner = owners.get(i);
+            OwnerShellData owner = owners.get(i);
             pw.printf("User %2d: admin=%s", owner.userId, owner.admin.flattenToShortString());
             if (owner.isDeviceOwner) {
                 pw.print(",DeviceOwner");
             }
             if (owner.isProfileOwner) {
                 pw.print(",ProfileOwner");
+            }
+            if (owner.isManagedProfileOwner) {
+                pw.printf(",ManagedProfileOwner(parentUserId=%d)", owner.parentUserId);
             }
             if (owner.isAffiliated) {
                 pw.print(",Affiliated");
