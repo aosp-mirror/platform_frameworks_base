@@ -75,7 +75,7 @@ public final class CameraExtensionUtils {
         ImageWriter writer = null;
         Image img = null;
         SurfaceInfo surfaceInfo = new SurfaceInfo();
-        int nativeFormat = SurfaceUtils.getSurfaceFormat(s);
+        int nativeFormat = SurfaceUtils.detectSurfaceFormat(s);
         int dataspace = SurfaceUtils.getSurfaceDataspace(s);
         Size surfaceSize = SurfaceUtils.getSurfaceSize(s);
         surfaceInfo.mFormat = nativeFormat;
