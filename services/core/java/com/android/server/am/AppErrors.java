@@ -1058,6 +1058,7 @@ class AppErrors {
         }
         synchronized (mProcLock) {
             final ProcessErrorStateRecord errState = proc.mErrorState;
+            errState.setAnrData(data);
             if (!proc.isPersistent()) {
                 packageList = proc.getPackageListWithVersionCode();
             }
@@ -1106,6 +1107,24 @@ class AppErrors {
         if (packageList != null) {
             mPackageWatchdog.onPackageFailure(packageList,
                     PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+        }
+    }
+
+    void handleDismissAnrDialogs(ProcessRecord proc) {
+        synchronized (mProcLock) {
+            final ProcessErrorStateRecord errState = proc.mErrorState;
+
+            // Cancel any rescheduled ANR dialogs
+            mService.mUiHandler.removeMessages(
+                    ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG, errState.getAnrData());
+
+            // Dismiss any ANR dialogs currently visible
+            if (errState.getDialogController().hasAnrDialogs()) {
+                errState.setNotResponding(false);
+                errState.setNotRespondingReport(null);
+                errState.getDialogController().clearAnrDialogs();
+            }
+            proc.mErrorState.setAnrData(null);
         }
     }
 

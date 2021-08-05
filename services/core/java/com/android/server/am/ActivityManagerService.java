@@ -257,6 +257,7 @@ import android.os.IDeviceIdentifiersPolicyService;
 import android.os.IPermissionController;
 import android.os.IProcessInfoService;
 import android.os.IProgressListener;
+import android.os.InputConstants;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -15985,8 +15986,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void inputDispatchingResumed(int pid) {
-            // TODO (b/171218828)
-            return;
+            final ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+            if (proc != null) {
+                mAppErrors.handleDismissAnrDialogs(proc);
+            }
+        }
+
+        @Override
+        public void rescheduleAnrDialog(Object data) {
+            Message msg = Message.obtain();
+            msg.what = SHOW_NOT_RESPONDING_UI_MSG;
+            msg.obj = (AppNotRespondingDialog.Data) data;
+
+            mUiHandler.sendMessageDelayed(msg, InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
         }
 
         @Override
