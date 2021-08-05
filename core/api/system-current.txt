@@ -5587,17 +5587,12 @@ package android.media.session {
     method @Nullable @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public android.media.session.MediaSession.Token getMediaKeyEventSession();
     method @NonNull @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public String getMediaKeyEventSessionPackageName();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void removeOnMediaKeyEventDispatchedListener(@NonNull android.media.session.MediaSessionManager.OnMediaKeyEventDispatchedListener);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void removeOnMediaKeyEventSessionChangedListener(@NonNull android.media.session.MediaSessionManager.OnMediaKeyEventSessionChangedListener);
     method @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER) public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, @Nullable android.os.Handler);
   }
 
   public static interface MediaSessionManager.OnMediaKeyEventDispatchedListener {
     method public void onMediaKeyEventDispatched(@NonNull android.view.KeyEvent, @NonNull String, @Nullable android.media.session.MediaSession.Token);
-  }
-
-  public static interface MediaSessionManager.OnMediaKeyEventSessionChangedListener {
-    method public void onMediaKeyEventSessionChanged(@NonNull String, @Nullable android.media.session.MediaSession.Token);
   }
 
   public static interface MediaSessionManager.OnMediaKeyListener {

@@ -39,8 +39,8 @@ interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback sessionCb, String tag,
             in Bundle sessionInfo, int userId);
     List<MediaSession.Token> getSessions(in ComponentName compName, int userId);
-    MediaSession.Token getMediaKeyEventSession();
-    String getMediaKeyEventSessionPackageName();
+    MediaSession.Token getMediaKeyEventSession(in ComponentName compName);
+    String getMediaKeyEventSessionPackageName(in ComponentName compName);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
     boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
@@ -66,7 +66,8 @@ interface ISessionManager {
     void addOnMediaKeyEventDispatchedListener(in IOnMediaKeyEventDispatchedListener listener);
     void removeOnMediaKeyEventDispatchedListener(in IOnMediaKeyEventDispatchedListener listener);
     void addOnMediaKeyEventSessionChangedListener(
-            in IOnMediaKeyEventSessionChangedListener listener);
+            in IOnMediaKeyEventSessionChangedListener listener,
+            in ComponentName notificationListener);
     void removeOnMediaKeyEventSessionChangedListener(
             in IOnMediaKeyEventSessionChangedListener listener);
     void setOnVolumeKeyLongPressListener(in IOnVolumeKeyLongPressListener listener);
