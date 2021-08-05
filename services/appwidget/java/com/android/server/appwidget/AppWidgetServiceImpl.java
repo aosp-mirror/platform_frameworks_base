@@ -3285,57 +3285,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private void applyResourceOverlaysToWidgetsLocked(Set<String> packageNames, int userId,
-            boolean updateFrameworkRes) {
-        for (int i = 0, N = mProviders.size(); i < N; i++) {
-            Provider provider = mProviders.get(i);
-            if (provider.getUserId() != userId) {
-                continue;
-            }
-
-            final String packageName = provider.id.componentName.getPackageName();
-            if (!updateFrameworkRes && !packageNames.contains(packageName)) {
-                continue;
-            }
-
-            ApplicationInfo newAppInfo = null;
-            try {
-                newAppInfo = mPackageManager.getApplicationInfo(packageName,
-                        PackageManager.GET_SHARED_LIBRARY_FILES, userId);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to retrieve app info for " + packageName
-                        + " userId=" + userId, e);
-            }
-            if (newAppInfo == null) {
-                continue;
-            }
-            ApplicationInfo oldAppInfo = provider.info.providerInfo.applicationInfo;
-            if (!newAppInfo.sourceDir.equals(oldAppInfo.sourceDir)) {
-                // Overlay paths are generated against a particular version of an application.
-                // The overlays paths of a newly upgraded application are incompatible with the
-                // old version of the application.
-                continue;
-            }
-
-            // Isolate the changes relating to RROs. The app info must be copied to prevent
-            // affecting other parts of system server that may have cached this app info.
-            oldAppInfo = new ApplicationInfo(oldAppInfo);
-            oldAppInfo.overlayPaths = newAppInfo.overlayPaths.clone();
-            oldAppInfo.resourceDirs = newAppInfo.resourceDirs.clone();
-            provider.info.providerInfo.applicationInfo = oldAppInfo;
-
-            for (int j = 0, M = provider.widgets.size(); j < M; j++) {
-                Widget widget = provider.widgets.get(j);
-                if (widget.views != null) {
-                    widget.views.updateAppInfo(oldAppInfo);
-                }
-                if (widget.maskedViews != null) {
-                    widget.maskedViews.updateAppInfo(oldAppInfo);
-                }
-            }
-        }
-    }
-
     /**
      * Updates all providers with the specified package names, and records any providers that were
      * pruned.
@@ -4925,15 +4874,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         @Override
         public void unlockUser(int userId) {
             handleUserUnlocked(userId);
-        }
-
-        @Override
-        public void applyResourceOverlaysToWidgets(Set<String> packageNames, int userId,
-                boolean updateFrameworkRes) {
-            synchronized (mLock) {
-                applyResourceOverlaysToWidgetsLocked(new HashSet<>(packageNames), userId,
-                        updateFrameworkRes);
-            }
         }
     }
 }
