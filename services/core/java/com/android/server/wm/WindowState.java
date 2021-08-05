@@ -193,6 +193,7 @@ import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyCache;
 import android.app.compat.CompatChanges;
@@ -4824,6 +4825,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.focused = isFocused();
         Task task = getTask();
         windowInfo.inPictureInPicture = (task != null) && task.inPinnedWindowingMode();
+        windowInfo.taskId = task == null ? ActivityTaskManager.INVALID_TASK_ID : task.mTaskId;
         windowInfo.hasFlagWatchOutsideTouch =
                 (mAttrs.flags & WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH) != 0;
 
