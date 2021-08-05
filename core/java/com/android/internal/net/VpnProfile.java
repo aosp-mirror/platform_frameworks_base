@@ -377,12 +377,15 @@ public final class VpnProfile implements Cloneable, Parcelable {
     /** Checks if this profile specifies a LegacyVpn type. */
     public static boolean isLegacyType(int type) {
         switch (type) {
-            case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS: // fall through
-            case VpnProfile.TYPE_IKEV2_IPSEC_RSA: // fall through
-            case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
-                return false;
-            default:
+            case VpnProfile.TYPE_PPTP:
+            case VpnProfile.TYPE_L2TP_IPSEC_PSK:
+            case VpnProfile.TYPE_L2TP_IPSEC_RSA:
+            case VpnProfile.TYPE_IPSEC_XAUTH_PSK:
+            case VpnProfile.TYPE_IPSEC_XAUTH_RSA:
+            case VpnProfile.TYPE_IPSEC_HYBRID_RSA:
                 return true;
+            default:
+                return false;
         }
     }
 
