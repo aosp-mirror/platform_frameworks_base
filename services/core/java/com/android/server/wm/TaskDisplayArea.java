@@ -2104,7 +2104,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             if (destroyContentOnRemoval
                     || !task.isActivityTypeStandardOrUndefined()
                     || task.mCreatedByOrganizer) {
-                task.finishAllActivitiesImmediately();
+                task.remove(false /* withTransition */, "removeTaskDisplayArea");
             } else {
                 // Reparent task to corresponding launch root or display area.
                 final WindowContainer launchRoot =

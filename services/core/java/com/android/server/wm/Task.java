@@ -125,7 +125,6 @@ import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
 import static com.android.server.wm.TaskProto.TASK_FRAGMENT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
@@ -1513,7 +1512,7 @@ class Task extends TaskFragment {
         if (DEBUG_TASK_MOVEMENT) {
             Slog.d(TAG_WM, "removeChild: child=" + r + " reason=" + reason);
         }
-        super.removeChild(r);
+        super.removeChild(r, false /* removeSelfIfPossible */);
 
         if (inPinnedWindowingMode()) {
             // We normally notify listeners of task stack changes on pause, however root pinned task
@@ -1543,7 +1542,10 @@ class Task extends TaskFragment {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
             // or created by task organizer.
             if (!isRootTask()) {
-                getRootTask().removeChild(this, reason);
+                final WindowContainer<?> parent = getParent();
+                if (parent != null) {
+                    parent.asTaskFragment().removeChild(this);
+                }
             }
             EventLogTags.writeWmTaskRemoved(mTaskId,
                     "removeChild:" + reason + " last r=" + r + " in t=" + this);
@@ -2594,25 +2596,12 @@ class Task extends TaskFragment {
         }
     }
 
-    @VisibleForTesting
-    boolean hasWindowsAlive() {
-        return getActivity(ActivityRecord::hasWindowsAlive) != null;
-    }
-
-    @VisibleForTesting
-    boolean shouldDeferRemoval() {
-        if (mChildren.isEmpty()) {
-            // No reason to defer removal of a Task that doesn't have any child.
-            return false;
-        }
-        return hasWindowsAlive() && getRootTask().isAnimating(TRANSITION | CHILDREN);
-    }
-
     @Override
     void removeImmediately() {
         removeImmediately("removeTask");
     }
 
+    @Override
     void removeImmediately(String reason) {
         if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask:" + reason + " removing taskId=" + mTaskId);
         if (mRemoving) {
@@ -3393,19 +3382,9 @@ class Task extends TaskFragment {
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
-        pw.println(prefix + "bounds=" + getBounds().toShortString());
-        final String doublePrefix = prefix + "  ";
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowContainer<?> child = mChildren.get(i);
-            pw.println(prefix + "* " + child);
-            // Only dump non-activity because full activity info is already printed by
-            // RootWindowContainer#dumpActivities.
-            if (child.asActivityRecord() == null) {
-                child.dump(pw, doublePrefix, dumpAll);
-            }
-        }
 
         if (!mExitingActivities.isEmpty()) {
+            final String doublePrefix = prefix + "  ";
             pw.println();
             pw.println(prefix + "Exiting application tokens:");
             for (int i = mExitingActivities.size() - 1; i >= 0; i--) {
@@ -5358,18 +5337,6 @@ class Task extends TaskFragment {
         return true;
     }
 
-    /** Finish all activities in the root task without waiting. */
-    void finishAllActivitiesImmediately() {
-        if (!hasChild()) {
-            removeIfPossible("finishAllActivitiesImmediately");
-            return;
-        }
-        forAllActivities((r) -> {
-            Slog.d(TAG, "finishAllActivitiesImmediatelyLocked: finishing " + r);
-            r.destroyIfPossible("finishAllActivitiesImmediately");
-        });
-    }
-
     /** @return true if the root task behind this one is a standard activity type. */
     private boolean inFrontOfStandardRootTask() {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
@@ -5765,16 +5732,13 @@ class Task extends TaskFragment {
 
     @Override
     void dumpInner(String prefix, PrintWriter pw, boolean dumpAll, String dumpPackage) {
-        pw.print(prefix); pw.print("* "); pw.println(this);
-        pw.println(prefix + "  mBounds=" + getRequestedOverrideBounds());
-        pw.println(prefix + "  mCreatedByOrganizer=" + mCreatedByOrganizer);
+        super.dumpInner(prefix, pw, dumpAll, dumpPackage);
+        if (mCreatedByOrganizer) {
+            pw.println(prefix + "  mCreatedByOrganizer=true");
+        }
         if (mLastNonFullscreenBounds != null) {
             pw.print(prefix); pw.print("  mLastNonFullscreenBounds=");
             pw.println(mLastNonFullscreenBounds);
-        }
-        if (dumpAll) {
-            printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
-                    prefix + "  mLastPausedActivity: ", null);
         }
         if (isLeafTask()) {
             pw.println(prefix + "  isSleeping=" + shouldSleepActivities());
@@ -6170,16 +6134,6 @@ class Task extends TaskFragment {
         }
 
         getDisplayContent().getPinnedTaskController().setActions(actions);
-    }
-
-    /** Returns true if a removal action is still being deferred. */
-    boolean handleCompleteDeferredRemoval() {
-        if (isAnimating(TRANSITION | CHILDREN)
-                || mAtmService.getTransitionController().inTransition(this)) {
-            return true;
-        }
-
-        return super.handleCompleteDeferredRemoval();
     }
 
     public DisplayInfo getDisplayInfo() {

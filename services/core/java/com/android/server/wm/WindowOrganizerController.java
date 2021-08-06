@@ -1171,7 +1171,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             return;
         }
         mLaunchTaskFragments.removeAt(index);
-        taskFragment.removeImmediately();
+        taskFragment.remove(true /* withTransition */, "deleteTaskFragment");
     }
 
     @Nullable

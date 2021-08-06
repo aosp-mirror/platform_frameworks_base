@@ -191,7 +191,6 @@ public class RootTaskTests extends WindowTestsBase {
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         // Root task removal is deferred if one of its child is animating.
-        doReturn(true).when(rootTask).hasWindowsAlive();
         doReturn(rootTask).when(task).getAnimatingContainer(
                 eq(TRANSITION | CHILDREN), anyInt());
 
