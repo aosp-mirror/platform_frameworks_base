@@ -47,6 +47,7 @@ final class ConnectionRecord {
     public AssociationState.SourceState association; // Association tracking
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
+    private Object mProcStatsLock;  // Internal lock for accessing AssociationState
 
     // Please keep the following two enum list synced.
     private static final int[] BIND_ORIG_ENUMS = new int[] {
@@ -137,23 +138,29 @@ final class ConnectionRecord {
                 Slog.wtf(TAG_AM, "Inactive holder in referenced service "
                         + binding.service.shortInstanceName + ": proc=" + binding.service.app);
             } else {
-                association = holder.pkg.getAssociationStateLocked(holder.state,
-                        binding.service.instanceName.getClassName()).startSource(clientUid,
-                        clientProcessName, clientPackageName);
-
+                mProcStatsLock = binding.service.app.mService.mProcessStats.mLock;
+                synchronized (mProcStatsLock) {
+                    association = holder.pkg.getAssociationStateLocked(holder.state,
+                            binding.service.instanceName.getClassName()).startSource(clientUid,
+                            clientProcessName, clientPackageName);
+                }
             }
         }
     }
 
     public void trackProcState(int procState, int seq, long now) {
         if (association != null) {
-            association.trackProcState(procState, seq, now);
+            synchronized (mProcStatsLock) {
+                association.trackProcState(procState, seq, now);
+            }
         }
     }
 
     public void stopAssociation() {
         if (association != null) {
-            association.stop();
+            synchronized (mProcStatsLock) {
+                association.stop();
+            }
             association = null;
         }
     }
