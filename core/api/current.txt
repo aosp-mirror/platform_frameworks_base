@@ -51944,7 +51944,7 @@ package android.view.inputmethod {
     method public boolean finishComposingText();
     method public int getCursorCapsMode(int);
     method public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
-    method public android.os.Handler getHandler();
+    method @Nullable public android.os.Handler getHandler();
     method public CharSequence getSelectedText(int);
     method @Nullable public default android.view.inputmethod.SurroundingText getSurroundingText(@IntRange(from=0) int, @IntRange(from=0) int, int);
     method @Nullable public CharSequence getTextAfterCursor(@IntRange(from=0) int, int);
