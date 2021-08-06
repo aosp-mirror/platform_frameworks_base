@@ -121,25 +121,54 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             // reportFinish() will take effect.
             return;
         }
-        closeConnection();
-
-        // Notify the app that the InputConnection was closed.
-        final View servedView = mServedView.get();
-        if (servedView != null) {
-            final Handler handler = servedView.getHandler();
-            // The handler is null if the view is already detached. When that's the case, for
-            // now, we simply don't dispatch this callback.
-            if (handler != null) {
-                if (DEBUG) {
-                    Log.v(TAG, "Calling View.onInputConnectionClosed: view=" + servedView);
+        dispatch(() -> {
+            // Note that we do not need to worry about race condition here, because 1) mFinished is
+            // updated only inside this block, and 2) the code here is running on a Handler hence we
+            // assume multiple closeConnection() tasks will not be handled at the same time.
+            if (isFinished()) {
+                return;
+            }
+            Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#closeConnection");
+            try {
+                InputConnection ic = getInputConnection();
+                // Note we do NOT check isActive() here, because this is safe
+                // for an IME to call at any time, and we need to allow it
+                // through to clean up our state after the IME has switched to
+                // another client.
+                if (ic == null) {
+                    return;
                 }
-                if (handler.getLooper().isCurrentThread()) {
-                    servedView.onInputConnectionClosedInternal();
-                } else {
-                    handler.post(servedView::onInputConnectionClosedInternal);
+                @MissingMethodFlags
+                final int missingMethods = InputConnectionInspector.getMissingMethodFlags(ic);
+                if ((missingMethods & MissingMethodFlags.CLOSE_CONNECTION) == 0) {
+                    ic.closeConnection();
+                }
+            } finally {
+                synchronized (mLock) {
+                    mInputConnection = null;
+                    mFinished = true;
+                }
+                Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+            }
+
+            // Notify the app that the InputConnection was closed.
+            final View servedView = mServedView.get();
+            if (servedView != null) {
+                final Handler handler = servedView.getHandler();
+                // The handler is null if the view is already detached. When that's the case, for
+                // now, we simply don't dispatch this callback.
+                if (handler != null) {
+                    if (DEBUG) {
+                        Log.v(TAG, "Calling View.onInputConnectionClosed: view=" + servedView);
+                    }
+                    if (handler.getLooper().isCurrentThread()) {
+                        servedView.onInputConnectionClosedInternal();
+                    } else {
+                        handler.post(servedView::onInputConnectionClosedInternal);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Override
@@ -700,39 +729,6 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                             + " result=" + result, e);
                 }
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_INPUT);
-            }
-        });
-    }
-
-    private void closeConnection() {
-        dispatch(() -> {
-            // Note that we do not need to worry about race condition here, because 1) mFinished is
-            // updated only inside this block, and 2) the code here is running on a Handler hence we
-            // assume multiple closeConnection() tasks will not be handled at the same time.
-            if (isFinished()) {
-                return;
-            }
-            Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#closeConnection");
-            try {
-                InputConnection ic = getInputConnection();
-                // Note we do NOT check isActive() here, because this is safe
-                // for an IME to call at any time, and we need to allow it
-                // through to clean up our state after the IME has switched to
-                // another client.
-                if (ic == null) {
-                    return;
-                }
-                @MissingMethodFlags
-                final int missingMethods = InputConnectionInspector.getMissingMethodFlags(ic);
-                if ((missingMethods & MissingMethodFlags.CLOSE_CONNECTION) == 0) {
-                    ic.closeConnection();
-                }
-            } finally {
-                synchronized (mLock) {
-                    mInputConnection = null;
-                    mFinished = true;
-                }
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
         });
