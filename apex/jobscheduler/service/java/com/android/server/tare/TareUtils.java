@@ -69,4 +69,10 @@ class TareUtils {
         sb.append(" ARCs");
         return sb.toString();
     }
+
+    /** Returns a standardized format for printing userId+pkgName combinations. */
+    @NonNull
+    static String appToString(int userId, String pkgName) {
+        return "<" + userId + ">" + pkgName;
+    }
 }
