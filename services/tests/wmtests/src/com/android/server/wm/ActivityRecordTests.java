@@ -1616,6 +1616,21 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveImmediatelyWithFinishingActivity() throws RemoteException {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowProcessController wpc = activity.app;
+        activity.makeFinishingLocked();
+        assertTrue(activity.finishing);
+
+        activity.getTask().removeImmediately("test");
+
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
+                isA(DestroyActivityItem.class));
+        assertFalse(wpc.hasActivities());
+        assertEquals(DESTROYING, activity.getState());
+    }
+
+    @Test
     public void testRemoveFromHistory() {
         final ActivityRecord activity = createActivityWithTask();
         final Task rootTask = activity.getRootTask();
