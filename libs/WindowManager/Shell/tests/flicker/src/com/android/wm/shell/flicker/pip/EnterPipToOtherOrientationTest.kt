@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -25,7 +26,11 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -38,8 +43,22 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip with orientation changes.
- * To run this test: `atest WMShellFlickerTests:PipOrientationTest`
+ * Test entering pip while changing orientation (from app in landscape to pip window in portrait)
+ *
+ * To run this test: `atest EnterPipToOtherOrientationTest:EnterPipToOtherOrientationTest`
+ *
+ * Actions:
+ *     Launch [testApp] on a fixed portrait orientation
+ *     Launch [pipApp] on a fixed landscape orientation
+ *     Broadcast action [ACTION_ENTER_PIP] to enter pip mode
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -53,6 +72,9 @@ class EnterPipToOtherOrientationTest(
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
 
+    /**
+     * Defines the transition used to run the test
+     */
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setupAndTeardown(this, configuration)
@@ -82,18 +104,32 @@ class EnterPipToOtherOrientationTest(
             }
         }
 
+    /**
+     * Checks that the [WindowManagerStateHelper.NAV_BAR_COMPONENT] has the correct position at
+     * the start and end of the transition
+     */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerRotatesAndScales() =
+        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_90, Surface.ROTATION_0)
 
-    @FlakyTest
+    /**
+     * Checks that the [WindowManagerStateHelper.STATUS_BAR_COMPONENT] has the correct position at
+     * the start and end of the transition
+     */
+    @Postsubmit
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerRotatesScales() =
+        testSpec.statusBarLayerRotatesScales(Surface.ROTATION_90, Surface.ROTATION_0)
 
-    @FlakyTest
+    @Postsubmit
     @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    override fun entireScreenCovered() =
+        testSpec.entireScreenCovered(Surface.ROTATION_90, Surface.ROTATION_0, allStates = false)
 
+    /**
+     * Checks [pipApp] window remains visible and on top throughout the transition
+     */
     @Presubmit
     @Test
     fun pipAppWindowIsAlwaysOnTop() {
@@ -102,40 +138,84 @@ class EnterPipToOtherOrientationTest(
         }
     }
 
+    /**
+     * Checks that [testApp] window is not visible at the start
+     */
     @Presubmit
     @Test
-    fun pipAppHidesTestApp() {
+    fun testAppWindowInvisibleOnStart() {
         testSpec.assertWmStart {
             isInvisible(testApp.component)
         }
     }
 
+    /**
+     * Checks that [testApp] window is visible at the end
+     */
     @Presubmit
     @Test
-    fun testAppWindowIsVisible() {
+    fun testAppWindowVisibleOnEnd() {
         testSpec.assertWmEnd {
             isVisible(testApp.component)
         }
     }
 
+    /**
+     * Checks that [testApp] layer is not visible at the start
+     */
     @Presubmit
     @Test
-    fun pipAppLayerHidesTestApp() {
+    fun testAppLayerInvisibleOnStart() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.component).coversExactly(startingBounds)
             isInvisible(testApp.component)
         }
     }
 
+    /**
+     * Checks that [testApp] layer is visible at the end
+     */
     @Presubmit
     @Test
-    fun testAppLayerCoversFullScreen() {
+    fun testAppLayerVisibleOnEnd() {
         testSpec.assertLayersEnd {
-            visibleRegion(testApp.component).coversExactly(endingBounds)
+            isVisible(testApp.component)
+        }
+    }
+
+    /**
+     * Checks that the visible region of [pipApp] covers the full display area at the start of
+     * the transition
+     */
+    @Presubmit
+    @Test
+    fun pipAppLayerCoversFullScreenOnStart() {
+        testSpec.assertLayersStart {
+            visibleRegion(pipApp.component).coversExactly(startingBounds)
+        }
+    }
+
+    /**
+     * Checks that the visible region of [testApp] plus the visible region of [pipApp]
+     * cover the full display area at the end of the transition
+     */
+    @Presubmit
+    @Test
+    fun testAppPlusPipLayerCoversFullScreenOnEnd() {
+        testSpec.assertLayersEnd {
+            val pipRegion = visibleRegion(pipApp.component).region
+            visibleRegion(testApp.component)
+                .plus(pipRegion)
+                .coversExactly(endingBounds)
         }
     }
 
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
