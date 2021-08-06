@@ -2092,9 +2092,7 @@ public final class PowerManager {
      * when light idle mode restrictions are being actively applied; it will return false if the
      * device is in a long-term idle mode but currently running a maintenance window where
      * restrictions have been lifted.
-     * @hide
      */
-    @UnsupportedAppUsage
     public boolean isLightDeviceIdleMode() {
         try {
             return mService.isLightDeviceIdleMode();
@@ -2555,9 +2553,7 @@ public final class PowerManager {
     /**
      * Intent that is broadcast when the state of {@link #isLightDeviceIdleMode()} changes.
      * This broadcast is only sent to registered receivers.
-     * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED
             = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
