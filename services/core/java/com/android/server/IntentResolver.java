@@ -147,6 +147,47 @@ public abstract class IntentResolver<F, R extends Object> {
         return true;
     }
 
+    /**
+     * Returns whether an intent matches the IntentFilter with a pre-resolved type.
+     */
+    public static boolean intentMatchesFilter(
+            IntentFilter filter, Intent intent, String resolvedType) {
+        final boolean debug = localLOGV
+                || ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
+
+        final Printer logPrinter = debug
+                ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM) : null;
+
+        if (debug) {
+            Slog.v(TAG, "Intent: " + intent);
+            Slog.v(TAG, "Matching against filter: " + filter);
+            filter.dump(logPrinter, "  ");
+        }
+
+        final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
+                intent.getData(), intent.getCategories(), TAG);
+
+        if (match >= 0) {
+            if (debug) {
+                Slog.v(TAG, "Filter matched!  match=0x" + Integer.toHexString(match));
+            }
+            return true;
+        } else {
+            if (debug) {
+                final String reason;
+                switch (match) {
+                    case IntentFilter.NO_MATCH_ACTION: reason = "action"; break;
+                    case IntentFilter.NO_MATCH_CATEGORY: reason = "category"; break;
+                    case IntentFilter.NO_MATCH_DATA: reason = "data"; break;
+                    case IntentFilter.NO_MATCH_TYPE: reason = "type"; break;
+                    default: reason = "unknown reason"; break;
+                }
+                Slog.v(TAG, "Filter did not match: " + reason);
+            }
+            return false;
+        }
+    }
+
     private ArrayList<F> collectFilters(F[] array, IntentFilter matching) {
         ArrayList<F> res = null;
         if (array != null) {
