@@ -101,6 +101,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.hardware.security.keymint-V1-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
+        ":android.hardware.tv.tuner-V1-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
         ":android.security.legacykeystore-java-source",
@@ -250,8 +251,6 @@ java_library {
         "android.hardware.thermal-V1.1-java",
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb-V1.2-java-constants",
@@ -331,6 +330,7 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        "android.hardware.common.fmq-V1-java",
         // TODO(b/184162091)
         "android.hardware.soundtrigger3-V1-java",
         "bouncycastle-repackaged-unbundled",
@@ -559,8 +559,6 @@ stubs_defaults {
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb.gadget-V1.0-java",

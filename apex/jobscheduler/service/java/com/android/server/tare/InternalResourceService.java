@@ -19,6 +19,8 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -104,7 +106,6 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private long mLastUnusedReclamationTime;
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Nullable
         private String getPackageName(Intent intent) {
@@ -159,7 +160,7 @@ public class InternalResourceService extends SystemService {
                 public void onAlarm() {
                     synchronized (mLock) {
                         mAgent.reclaimUnusedAssetsLocked(DEFAULT_UNUSED_RECLAMATION_PERCENTAGE);
-                        mLastUnusedReclamationTime = System.currentTimeMillis();
+                        mLastUnusedReclamationTime = getCurrentTimeMillis();
                         scheduleUnusedWealthReclamationLocked();
                     }
                 }
@@ -342,7 +343,7 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private void scheduleUnusedWealthReclamationLocked() {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nextReclamationTime =
                 Math.max(mLastUnusedReclamationTime + UNUSED_RECLAMATION_PERIOD_MS, now + 30_000);
         mHandler.post(() -> {
@@ -514,6 +515,15 @@ public class InternalResourceService extends SystemService {
     }
 
     private final class LocalService implements EconomyManagerInternal {
+        /**
+         * Use an extremely large value to indicate that an app can pay for a bill indefinitely.
+         * The value set here should be large/long enough that there's no reasonable expectation
+         * of a device operating uninterrupted (or in the exact same state) for that period of time.
+         * We intentionally don't use Long.MAX_VALUE to avoid potential overflow if a client
+         * doesn't check the value and just immediately adds it to the current time.
+         */
+        private static final long FOREVER_MS = 27 * 365 * 24 * HOUR_IN_MILLIS;
+
         @Override
         public void registerAffordabilityChangeListener(int userId, @NonNull String pkgName,
                 @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
@@ -552,6 +562,29 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
+        public long getMaxDurationMs(int userId, @NonNull String pkgName,
+                @NonNull ActionBill bill) {
+            if (!mIsEnabled) {
+                return FOREVER_MS;
+            }
+            long totalCostPerSecond = 0;
+            final List<EconomyManagerInternal.AnticipatedAction> projectedActions =
+                    bill.getAnticipatedActions();
+            for (int i = 0; i < projectedActions.size(); ++i) {
+                AnticipatedAction action = projectedActions.get(i);
+                final long cost =
+                        mCompleteEconomicPolicy.getCostOfAction(action.actionId, userId, pkgName);
+                totalCostPerSecond += cost;
+            }
+            if (totalCostPerSecond == 0) {
+                return FOREVER_MS;
+            }
+            synchronized (mLock) {
+                return mAgent.getBalanceLocked(userId, pkgName) * 1000 / totalCostPerSecond;
+            }
+        }
+
+        @Override
         public void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
             if (!mIsEnabled) {
@@ -581,7 +614,7 @@ public class InternalResourceService extends SystemService {
                 return;
             }
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long now = System.currentTimeMillis();
+            final long now = getCurrentTimeMillis();
             synchronized (mLock) {
                 mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
             }
@@ -630,6 +663,9 @@ public class InternalResourceService extends SystemService {
 
     private void dumpInternal(final IndentingPrintWriter pw) {
         synchronized (mLock) {
+            pw.print("Is enabled: ");
+            pw.println(mIsEnabled);
+
             pw.print("Current battery level: ");
             pw.println(mCurrentBatteryLevel);
 

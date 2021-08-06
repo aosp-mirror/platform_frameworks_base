@@ -5587,17 +5587,12 @@ package android.media.session {
     method @Nullable @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public android.media.session.MediaSession.Token getMediaKeyEventSession();
     method @NonNull @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public String getMediaKeyEventSessionPackageName();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void removeOnMediaKeyEventDispatchedListener(@NonNull android.media.session.MediaSessionManager.OnMediaKeyEventDispatchedListener);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void removeOnMediaKeyEventSessionChangedListener(@NonNull android.media.session.MediaSessionManager.OnMediaKeyEventSessionChangedListener);
     method @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER) public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, @Nullable android.os.Handler);
   }
 
   public static interface MediaSessionManager.OnMediaKeyEventDispatchedListener {
     method public void onMediaKeyEventDispatched(@NonNull android.view.KeyEvent, @NonNull String, @Nullable android.media.session.MediaSession.Token);
-  }
-
-  public static interface MediaSessionManager.OnMediaKeyEventSessionChangedListener {
-    method public void onMediaKeyEventSessionChanged(@NonNull String, @Nullable android.media.session.MediaSession.Token);
   }
 
   public static interface MediaSessionManager.OnMediaKeyListener {
@@ -7028,13 +7023,13 @@ package android.media.tv.tuner.frontend {
     field public static final long FEC_23_36 = 268435456L; // 0x10000000L
     field public static final long FEC_25_36 = 536870912L; // 0x20000000L
     field public static final long FEC_26_45 = 1073741824L; // 0x40000000L
-    field public static final long FEC_28_45 = -2147483648L; // 0xffffffff80000000L
-    field public static final long FEC_29_45 = 1L; // 0x1L
+    field public static final long FEC_28_45 = 2147483648L; // 0x80000000L
+    field public static final long FEC_29_45 = 4294967296L; // 0x100000000L
     field public static final long FEC_2_3 = 32L; // 0x20L
     field public static final long FEC_2_5 = 64L; // 0x40L
     field public static final long FEC_2_9 = 128L; // 0x80L
-    field public static final long FEC_31_45 = 2L; // 0x2L
-    field public static final long FEC_32_45 = 4L; // 0x4L
+    field public static final long FEC_31_45 = 8589934592L; // 0x200000000L
+    field public static final long FEC_32_45 = 17179869184L; // 0x400000000L
     field public static final long FEC_3_4 = 256L; // 0x100L
     field public static final long FEC_3_5 = 512L; // 0x200L
     field public static final long FEC_4_15 = 2048L; // 0x800L
@@ -7042,7 +7037,7 @@ package android.media.tv.tuner.frontend {
     field public static final long FEC_5_6 = 4096L; // 0x1000L
     field public static final long FEC_5_9 = 8192L; // 0x2000L
     field public static final long FEC_6_7 = 16384L; // 0x4000L
-    field public static final long FEC_77_90 = 8L; // 0x8L
+    field public static final long FEC_77_90 = 34359738368L; // 0x800000000L
     field public static final long FEC_7_15 = 131072L; // 0x20000L
     field public static final long FEC_7_8 = 32768L; // 0x8000L
     field public static final long FEC_7_9 = 65536L; // 0x10000L

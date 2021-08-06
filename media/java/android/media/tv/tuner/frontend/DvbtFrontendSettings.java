@@ -20,7 +20,14 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendDvbtBandwidth;
+import android.hardware.tv.tuner.FrontendDvbtCoderate;
+import android.hardware.tv.tuner.FrontendDvbtConstellation;
+import android.hardware.tv.tuner.FrontendDvbtGuardInterval;
+import android.hardware.tv.tuner.FrontendDvbtHierarchy;
+import android.hardware.tv.tuner.FrontendDvbtPlpMode;
+import android.hardware.tv.tuner.FrontendDvbtStandard;
+import android.hardware.tv.tuner.FrontendDvbtTransmissionMode;
 import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
@@ -46,51 +53,49 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Transmission Mode undefined.
      */
-    public static final int TRANSMISSION_MODE_UNDEFINED =
-            Constants.FrontendDvbtTransmissionMode.UNDEFINED;
+    public static final int TRANSMISSION_MODE_UNDEFINED = FrontendDvbtTransmissionMode.UNDEFINED;
     /**
      * Hardware is able to detect and set Transmission Mode automatically
      */
-    public static final int TRANSMISSION_MODE_AUTO = Constants.FrontendDvbtTransmissionMode.AUTO;
+    public static final int TRANSMISSION_MODE_AUTO = FrontendDvbtTransmissionMode.AUTO;
     /**
      * 2K Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_2K = Constants.FrontendDvbtTransmissionMode.MODE_2K;
+    public static final int TRANSMISSION_MODE_2K = FrontendDvbtTransmissionMode.MODE_2K;
     /**
      * 8K Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_8K = Constants.FrontendDvbtTransmissionMode.MODE_8K;
+    public static final int TRANSMISSION_MODE_8K = FrontendDvbtTransmissionMode.MODE_8K;
     /**
      * 4K Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_4K = Constants.FrontendDvbtTransmissionMode.MODE_4K;
+    public static final int TRANSMISSION_MODE_4K = FrontendDvbtTransmissionMode.MODE_4K;
     /**
      * 1K Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_1K = Constants.FrontendDvbtTransmissionMode.MODE_1K;
+    public static final int TRANSMISSION_MODE_1K = FrontendDvbtTransmissionMode.MODE_1K;
     /**
      * 16K Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_16K = Constants.FrontendDvbtTransmissionMode.MODE_16K;
+    public static final int TRANSMISSION_MODE_16K = FrontendDvbtTransmissionMode.MODE_16K;
     /**
      * 32K Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_32K = Constants.FrontendDvbtTransmissionMode.MODE_32K;
+    public static final int TRANSMISSION_MODE_32K = FrontendDvbtTransmissionMode.MODE_32K;
     /**
      * 8K Transmission Extended Mode.
      */
-    public static final int TRANSMISSION_MODE_EXTENDED_8K =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtTransmissionMode.MODE_8K_E;
+    public static final int TRANSMISSION_MODE_EXTENDED_8K = FrontendDvbtTransmissionMode.MODE_8K_E;
     /**
      * 16K Transmission Extended Mode.
      */
     public static final int TRANSMISSION_MODE_EXTENDED_16K =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtTransmissionMode.MODE_16K_E;
+            FrontendDvbtTransmissionMode.MODE_16K_E;
     /**
      * 32K Transmission Extended Mode.
      */
     public static final int TRANSMISSION_MODE_EXTENDED_32K =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtTransmissionMode.MODE_32K_E;
+            FrontendDvbtTransmissionMode.MODE_32K_E;
 
     /** @hide */
     @IntDef(flag = true,
@@ -103,35 +108,35 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Bandwidth undefined.
      */
-    public static final int BANDWIDTH_UNDEFINED = Constants.FrontendDvbtBandwidth.UNDEFINED;
+    public static final int BANDWIDTH_UNDEFINED = FrontendDvbtBandwidth.UNDEFINED;
     /**
      * Hardware is able to detect and set Bandwidth automatically.
      */
-    public static final int BANDWIDTH_AUTO = Constants.FrontendDvbtBandwidth.AUTO;
+    public static final int BANDWIDTH_AUTO = FrontendDvbtBandwidth.AUTO;
     /**
      * 8 MHz bandwidth.
      */
-    public static final int BANDWIDTH_8MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_8MHZ;
+    public static final int BANDWIDTH_8MHZ = FrontendDvbtBandwidth.BANDWIDTH_8MHZ;
     /**
      * 7 MHz bandwidth.
      */
-    public static final int BANDWIDTH_7MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_7MHZ;
+    public static final int BANDWIDTH_7MHZ = FrontendDvbtBandwidth.BANDWIDTH_7MHZ;
     /**
      * 6 MHz bandwidth.
      */
-    public static final int BANDWIDTH_6MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_6MHZ;
+    public static final int BANDWIDTH_6MHZ = FrontendDvbtBandwidth.BANDWIDTH_6MHZ;
     /**
      * 5 MHz bandwidth.
      */
-    public static final int BANDWIDTH_5MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_5MHZ;
+    public static final int BANDWIDTH_5MHZ = FrontendDvbtBandwidth.BANDWIDTH_5MHZ;
     /**
      * 1,7 MHz bandwidth.
      */
-    public static final int BANDWIDTH_1_7MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_1_7MHZ;
+    public static final int BANDWIDTH_1_7MHZ = FrontendDvbtBandwidth.BANDWIDTH_1_7MHZ;
     /**
      * 10 MHz bandwidth.
      */
-    public static final int BANDWIDTH_10MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_10MHZ;
+    public static final int BANDWIDTH_10MHZ = FrontendDvbtBandwidth.BANDWIDTH_10MHZ;
 
 
     /** @hide */
@@ -147,55 +152,44 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Constellation not defined.
      */
-    public static final int CONSTELLATION_UNDEFINED = Constants.FrontendDvbtConstellation.UNDEFINED;
+    public static final int CONSTELLATION_UNDEFINED = FrontendDvbtConstellation.UNDEFINED;
     /**
      * Hardware is able to detect and set Constellation automatically.
      */
-    public static final int CONSTELLATION_AUTO = Constants.FrontendDvbtConstellation.AUTO;
+    public static final int CONSTELLATION_AUTO = FrontendDvbtConstellation.AUTO;
     /**
      * QPSK Constellation.
      */
-    public static final int CONSTELLATION_QPSK =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_QPSK;
+    public static final int CONSTELLATION_QPSK = FrontendDvbtConstellation.CONSTELLATION_QPSK;
     /**
      * 16QAM Constellation.
      */
-    public static final int CONSTELLATION_16QAM =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_16QAM;
+    public static final int CONSTELLATION_16QAM = FrontendDvbtConstellation.CONSTELLATION_16QAM;
     /**
      * 64QAM Constellation.
      */
-    public static final int CONSTELLATION_64QAM =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_64QAM;
+    public static final int CONSTELLATION_64QAM = FrontendDvbtConstellation.CONSTELLATION_64QAM;
     /**
      * 256QAM Constellation.
      */
-    public static final int CONSTELLATION_256QAM =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_256QAM;
+    public static final int CONSTELLATION_256QAM = FrontendDvbtConstellation.CONSTELLATION_256QAM;
     /**
      * QPSK Rotated Constellation.
      */
-    public static final int CONSTELLATION_QPSK_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_QPSK_R;
+    public static final int CONSTELLATION_QPSK_R = FrontendDvbtConstellation.CONSTELLATION_QPSK_R;
     /**
      * 16QAM Rotated Constellation.
      */
-    public static final int CONSTELLATION_16QAM_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_16QAM_R;
+    public static final int CONSTELLATION_16QAM_R = FrontendDvbtConstellation.CONSTELLATION_16QAM_R;
     /**
      * 64QAM Rotated Constellation.
      */
-    public static final int CONSTELLATION_64QAM_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_64QAM_R;
+    public static final int CONSTELLATION_64QAM_R = FrontendDvbtConstellation.CONSTELLATION_64QAM_R;
     /**
      * 256QAM Rotated Constellation.
      */
     public static final int CONSTELLATION_256QAM_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_256QAM_R;
+            FrontendDvbtConstellation.CONSTELLATION_256QAM_R;
 
     /** @hide */
     @IntDef(flag = true,
@@ -209,48 +203,43 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Hierarchy undefined.
      */
-    public static final int HIERARCHY_UNDEFINED = Constants.FrontendDvbtHierarchy.UNDEFINED;
+    public static final int HIERARCHY_UNDEFINED = FrontendDvbtHierarchy.UNDEFINED;
     /**
      * Hardware is able to detect and set Hierarchy automatically.
      */
-    public static final int HIERARCHY_AUTO = Constants.FrontendDvbtHierarchy.AUTO;
+    public static final int HIERARCHY_AUTO = FrontendDvbtHierarchy.AUTO;
     /**
      * Non-native Hierarchy
      */
-    public static final int HIERARCHY_NON_NATIVE =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_NON_NATIVE;
+    public static final int HIERARCHY_NON_NATIVE = FrontendDvbtHierarchy.HIERARCHY_NON_NATIVE;
     /**
      * 1-native Hierarchy
      */
-    public static final int HIERARCHY_1_NATIVE = Constants.FrontendDvbtHierarchy.HIERARCHY_1_NATIVE;
+    public static final int HIERARCHY_1_NATIVE = FrontendDvbtHierarchy.HIERARCHY_1_NATIVE;
     /**
      * 2-native Hierarchy
      */
-    public static final int HIERARCHY_2_NATIVE = Constants.FrontendDvbtHierarchy.HIERARCHY_2_NATIVE;
+    public static final int HIERARCHY_2_NATIVE = FrontendDvbtHierarchy.HIERARCHY_2_NATIVE;
     /**
      * 4-native Hierarchy
      */
-    public static final int HIERARCHY_4_NATIVE = Constants.FrontendDvbtHierarchy.HIERARCHY_4_NATIVE;
+    public static final int HIERARCHY_4_NATIVE = FrontendDvbtHierarchy.HIERARCHY_4_NATIVE;
     /**
      * Non-indepth Hierarchy
      */
-    public static final int HIERARCHY_NON_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_NON_INDEPTH;
+    public static final int HIERARCHY_NON_INDEPTH = FrontendDvbtHierarchy.HIERARCHY_NON_INDEPTH;
     /**
      * 1-indepth Hierarchy
      */
-    public static final int HIERARCHY_1_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_1_INDEPTH;
+    public static final int HIERARCHY_1_INDEPTH = FrontendDvbtHierarchy.HIERARCHY_1_INDEPTH;
     /**
      * 2-indepth Hierarchy
      */
-    public static final int HIERARCHY_2_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_2_INDEPTH;
+    public static final int HIERARCHY_2_INDEPTH = FrontendDvbtHierarchy.HIERARCHY_2_INDEPTH;
     /**
      * 4-indepth Hierarchy
      */
-    public static final int HIERARCHY_4_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_4_INDEPTH;
+    public static final int HIERARCHY_4_INDEPTH = FrontendDvbtHierarchy.HIERARCHY_4_INDEPTH;
 
 
     /** @hide */
@@ -264,48 +253,47 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Code rate undefined.
      */
-    public static final int CODERATE_UNDEFINED =
-            Constants.FrontendDvbtCoderate.UNDEFINED;
+    public static final int CODERATE_UNDEFINED = FrontendDvbtCoderate.UNDEFINED;
     /**
      * Hardware is able to detect and set code rate automatically.
      */
-    public static final int CODERATE_AUTO = Constants.FrontendDvbtCoderate.AUTO;
+    public static final int CODERATE_AUTO = FrontendDvbtCoderate.AUTO;
     /**
      * 1/2 code rate.
      */
-    public static final int CODERATE_1_2 = Constants.FrontendDvbtCoderate.CODERATE_1_2;
+    public static final int CODERATE_1_2 = FrontendDvbtCoderate.CODERATE_1_2;
     /**
      * 2/3 code rate.
      */
-    public static final int CODERATE_2_3 = Constants.FrontendDvbtCoderate.CODERATE_2_3;
+    public static final int CODERATE_2_3 = FrontendDvbtCoderate.CODERATE_2_3;
     /**
      * 3/4 code rate.
      */
-    public static final int CODERATE_3_4 = Constants.FrontendDvbtCoderate.CODERATE_3_4;
+    public static final int CODERATE_3_4 = FrontendDvbtCoderate.CODERATE_3_4;
     /**
      * 5/6 code rate.
      */
-    public static final int CODERATE_5_6 = Constants.FrontendDvbtCoderate.CODERATE_5_6;
+    public static final int CODERATE_5_6 = FrontendDvbtCoderate.CODERATE_5_6;
     /**
      * 7/8 code rate.
      */
-    public static final int CODERATE_7_8 = Constants.FrontendDvbtCoderate.CODERATE_7_8;
+    public static final int CODERATE_7_8 = FrontendDvbtCoderate.CODERATE_7_8;
     /**
      * 4/5 code rate.
      */
-    public static final int CODERATE_3_5 = Constants.FrontendDvbtCoderate.CODERATE_3_5;
+    public static final int CODERATE_3_5 = FrontendDvbtCoderate.CODERATE_3_5;
     /**
      * 4/5 code rate.
      */
-    public static final int CODERATE_4_5 = Constants.FrontendDvbtCoderate.CODERATE_4_5;
+    public static final int CODERATE_4_5 = FrontendDvbtCoderate.CODERATE_4_5;
     /**
      * 6/7 code rate.
      */
-    public static final int CODERATE_6_7 = Constants.FrontendDvbtCoderate.CODERATE_6_7;
+    public static final int CODERATE_6_7 = FrontendDvbtCoderate.CODERATE_6_7;
     /**
      * 8/9 code rate.
      */
-    public static final int CODERATE_8_9 = Constants.FrontendDvbtCoderate.CODERATE_8_9;
+    public static final int CODERATE_8_9 = FrontendDvbtCoderate.CODERATE_8_9;
 
     /** @hide */
     @IntDef(flag = true,
@@ -323,46 +311,39 @@ public class DvbtFrontendSettings extends FrontendSettings {
      * Guard Interval undefined.
      */
     public static final int GUARD_INTERVAL_UNDEFINED =
-            Constants.FrontendDvbtGuardInterval.UNDEFINED;
+            FrontendDvbtGuardInterval.UNDEFINED;
     /**
      * Hardware is able to detect and set Guard Interval automatically.
      */
-    public static final int GUARD_INTERVAL_AUTO = Constants.FrontendDvbtGuardInterval.AUTO;
+    public static final int GUARD_INTERVAL_AUTO = FrontendDvbtGuardInterval.AUTO;
     /**
      * 1/32 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_1_32 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_32;
+    public static final int GUARD_INTERVAL_1_32 = FrontendDvbtGuardInterval.INTERVAL_1_32;
     /**
      * 1/16 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_1_16 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_16;
+    public static final int GUARD_INTERVAL_1_16 = FrontendDvbtGuardInterval.INTERVAL_1_16;
     /**
      * 1/8 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_1_8 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_8;
+    public static final int GUARD_INTERVAL_1_8 = FrontendDvbtGuardInterval.INTERVAL_1_8;
     /**
      * 1/4 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_1_4 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_4;
+    public static final int GUARD_INTERVAL_1_4 = FrontendDvbtGuardInterval.INTERVAL_1_4;
     /**
      * 1/128 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_1_128 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_128;
+    public static final int GUARD_INTERVAL_1_128 = FrontendDvbtGuardInterval.INTERVAL_1_128;
     /**
      * 19/128 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_19_128 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_19_128;
+    public static final int GUARD_INTERVAL_19_128 = FrontendDvbtGuardInterval.INTERVAL_19_128;
     /**
      * 19/256 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_19_256 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_19_256;
+    public static final int GUARD_INTERVAL_19_256 = FrontendDvbtGuardInterval.INTERVAL_19_256;
 
     /** @hide */
     @IntDef(flag = true,
@@ -375,15 +356,15 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Hardware is able to detect and set Standard automatically.
      */
-    public static final int STANDARD_AUTO = Constants.FrontendDvbtStandard.AUTO;
+    public static final int STANDARD_AUTO = FrontendDvbtStandard.AUTO;
     /**
      * T standard.
      */
-    public static final int STANDARD_T = Constants.FrontendDvbtStandard.T;
+    public static final int STANDARD_T = FrontendDvbtStandard.T;
     /**
      * T2 standard.
      */
-    public static final int STANDARD_T2 = Constants.FrontendDvbtStandard.T2;
+    public static final int STANDARD_T2 = FrontendDvbtStandard.T2;
 
     /** @hide */
     @IntDef(prefix = "PLP_MODE_",
@@ -394,15 +375,15 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Physical Layer Pipe (PLP) Mode undefined.
      */
-    public static final int PLP_MODE_UNDEFINED = Constants.FrontendDvbtPlpMode.UNDEFINED;
+    public static final int PLP_MODE_UNDEFINED = FrontendDvbtPlpMode.UNDEFINED;
     /**
      * Hardware is able to detect and set Physical Layer Pipe (PLP) Mode automatically.
      */
-    public static final int PLP_MODE_AUTO = Constants.FrontendDvbtPlpMode.AUTO;
+    public static final int PLP_MODE_AUTO = FrontendDvbtPlpMode.AUTO;
     /**
      * Physical Layer Pipe (PLP) manual Mode.
      */
-    public static final int PLP_MODE_MANUAL = Constants.FrontendDvbtPlpMode.MANUAL;
+    public static final int PLP_MODE_MANUAL = FrontendDvbtPlpMode.MANUAL;
 
     private int mTransmissionMode;
     private final int mBandwidth;

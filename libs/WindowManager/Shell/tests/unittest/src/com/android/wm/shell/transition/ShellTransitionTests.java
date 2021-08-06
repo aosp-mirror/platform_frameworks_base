@@ -20,12 +20,18 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -49,6 +55,9 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.IDisplayWindowListener;
+import android.view.IWindowManager;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
@@ -66,12 +75,15 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 
@@ -98,8 +110,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testBasicTransitionFlow() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         IBinder transitToken = new Binder();
@@ -118,8 +129,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testNonDefaultHandler() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
@@ -202,8 +212,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testRequestRemoteTransition() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};
@@ -297,8 +306,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testRegisteredRemoteTransition() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};
@@ -343,8 +351,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testOneShotRemoteHandler() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};
@@ -390,8 +397,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testTransitionQueueing() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         IBinder transitToken1 = new Binder();
@@ -431,8 +437,7 @@ public class ShellTransitionTests {
 
     @Test
     public void testTransitionMerging() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
-                mMainExecutor, mAnimExecutor);
+        Transitions transitions = createTestTransitions();
         mDefaultHandler.setSimulateMerge(true);
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
@@ -468,6 +473,63 @@ public class ShellTransitionTests {
         assertEquals(0, mDefaultHandler.activeCount());
     }
 
+    @Test
+    public void testShouldRotateSeamlessly() throws Exception {
+        final RunningTaskInfo taskInfo =
+                createTaskInfo(1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final RunningTaskInfo taskInfoPip =
+                createTaskInfo(1, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
+
+        final DisplayController displays = createTestDisplayController();
+        final @Surface.Rotation int upsideDown = displays
+                .getDisplayLayout(DEFAULT_DISPLAY).getUpsideDownRotation();
+
+        final TransitionInfo normalDispRotate = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
+                        .build())
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo).setRotate().build())
+                .build();
+        assertFalse(DefaultTransitionHandler.isRotationSeamless(normalDispRotate, displays));
+
+        // Seamless if all tasks are seamless
+        final TransitionInfo rotateSeamless = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
+                        .build())
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertTrue(DefaultTransitionHandler.isRotationSeamless(rotateSeamless, displays));
+
+        // Not seamless if there is PiP (or any other non-seamless task)
+        final TransitionInfo pipDispRotate = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
+                        .build())
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfoPip)
+                        .setRotate().build())
+                .build();
+        assertFalse(DefaultTransitionHandler.isRotationSeamless(pipDispRotate, displays));
+
+        // Not seamless if one of rotations is upside-down
+        final TransitionInfo seamlessUpsideDown = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                        .setRotate(upsideDown, ROTATION_ANIMATION_UNSPECIFIED).build())
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(upsideDown, ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessUpsideDown, displays));
+
+        // Not seamless if system alert windows
+        final TransitionInfo seamlessButAlert = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(
+                        FLAG_IS_DISPLAY | FLAG_DISPLAY_HAS_ALERT_WINDOWS).setRotate().build())
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessButAlert, displays));
+    }
+
     class TransitionInfoBuilder {
         final TransitionInfo mInfo;
 
@@ -490,8 +552,50 @@ public class ShellTransitionTests {
             return addChange(mode, null /* taskInfo */);
         }
 
+        TransitionInfoBuilder addChange(TransitionInfo.Change change) {
+            mInfo.addChange(change);
+            return this;
+        }
+
         TransitionInfo build() {
             return mInfo;
+        }
+    }
+
+    class ChangeBuilder {
+        final TransitionInfo.Change mChange;
+
+        ChangeBuilder(@WindowManager.TransitionType int mode) {
+            mChange = new TransitionInfo.Change(null /* token */, null /* leash */);
+            mChange.setMode(mode);
+        }
+
+        ChangeBuilder setFlags(@TransitionInfo.ChangeFlags int flags) {
+            mChange.setFlags(flags);
+            return this;
+        }
+
+        ChangeBuilder setTask(RunningTaskInfo taskInfo) {
+            mChange.setTaskInfo(taskInfo);
+            return this;
+        }
+
+        ChangeBuilder setRotate(int anim) {
+            return setRotate(Surface.ROTATION_90, anim);
+        }
+
+        ChangeBuilder setRotate() {
+            return setRotate(ROTATION_ANIMATION_UNSPECIFIED);
+        }
+
+        ChangeBuilder setRotate(@Surface.Rotation int target, int anim) {
+            mChange.setRotation(Surface.ROTATION_0, target);
+            mChange.setRotationAnimation(anim);
+            return this;
+        }
+
+        TransitionInfo.Change build() {
+            return mChange;
         }
     }
 
@@ -565,5 +669,46 @@ public class ShellTransitionTests {
         taskInfo.taskId = taskId;
         return taskInfo;
     }
+
+    private DisplayController createTestDisplayController() {
+        IWindowManager mockWM = mock(IWindowManager.class);
+        final IDisplayWindowListener[] displayListener = new IDisplayWindowListener[1];
+        try {
+            doAnswer(new Answer() {
+                @Override
+                public Object answer(InvocationOnMock invocation) {
+                    displayListener[0] = invocation.getArgument(0);
+                    return null;
+                }
+            }).when(mockWM).registerDisplayWindowListener(any());
+        } catch (RemoteException e) {
+            // No remote stuff happening, so this can't be hit
+        }
+        DisplayController out = new DisplayController(mContext, mockWM, mMainExecutor);
+        try {
+            displayListener[0].onDisplayAdded(DEFAULT_DISPLAY);
+            mMainExecutor.flushAll();
+        } catch (RemoteException e) {
+            // Again, no remote stuff
+        }
+        return out;
+    }
+
+    private Transitions createTestTransitions() {
+        return new Transitions(mOrganizer, mTransactionPool, createTestDisplayController(),
+                mContext, mMainExecutor, mAnimExecutor);
+    }
+//
+//    private class TestDisplayController extends DisplayController {
+//        private final DisplayLayout mTestDisplayLayout;
+//        TestDisplayController() {
+//            super(mContext, mock(IWindowManager.class), mMainExecutor);
+//            mTestDisplayLayout = new DisplayLayout();
+//            mTestDisplayLayout.
+//        }
+//
+//        @Override
+//        DisplayLayout
+//    }
 
 }

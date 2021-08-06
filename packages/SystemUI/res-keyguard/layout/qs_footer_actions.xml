@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+** Copyright 2021, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+-->
+<com.android.systemui.qs.QSFooterActionsView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qs_footer_actions_container"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:gravity="center_vertical">
+
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:id="@android:id/edit"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_footer_action_button_size"
+        android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+        android:layout_weight="1"
+        android:background="@drawable/qs_footer_action_chip_background"
+        android:clickable="true"
+        android:clipToPadding="false"
+        android:contentDescription="@string/accessibility_quick_settings_edit"
+        android:focusable="true"
+        android:padding="@dimen/qs_footer_icon_padding"
+        android:src="@*android:drawable/ic_mode_edit"
+        android:tint="?android:attr/textColorPrimary" />
+
+    <com.android.systemui.statusbar.phone.MultiUserSwitch
+        android:id="@+id/multi_user_switch"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_footer_action_button_size"
+        android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+        android:layout_weight="1"
+        android:background="@drawable/qs_footer_action_chip_background"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/multi_user_avatar"
+            android:layout_width="@dimen/multi_user_avatar_expanded_size"
+            android:layout_height="@dimen/multi_user_avatar_expanded_size"
+            android:layout_gravity="center"
+            android:scaleType="centerInside" />
+    </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:id="@+id/pm_lite"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_footer_action_button_size"
+        android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+        android:layout_weight="1"
+        android:background="@drawable/qs_footer_action_chip_background"
+        android:clickable="true"
+        android:clipToPadding="false"
+        android:focusable="true"
+        android:padding="@dimen/qs_footer_icon_padding"
+        android:src="@*android:drawable/ic_lock_power_off"
+        android:contentDescription="@string/accessibility_quick_settings_power_menu"
+        android:tint="?android:attr/textColorPrimary" />
+
+    <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+        android:id="@+id/settings_button_container"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/qs_footer_action_button_size"
+        android:background="@drawable/qs_footer_action_chip_background"
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <com.android.systemui.statusbar.phone.SettingsButton
+            android:id="@+id/settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qs_footer_action_button_size"
+            android:layout_gravity="center"
+            android:contentDescription="@string/accessibility_quick_settings_settings"
+            android:background="@drawable/qs_footer_action_chip_background_borderless"
+            android:padding="@dimen/qs_footer_icon_padding"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_settings"
+            android:tint="?android:attr/textColorPrimary" />
+
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:id="@+id/tuner_icon"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="@dimen/qs_footer_icon_padding"
+            android:src="@drawable/tuner"
+            android:tint="?android:attr/textColorTertiary"
+            android:visibility="invisible" />
+
+    </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+
+</com.android.systemui.qs.QSFooterActionsView>

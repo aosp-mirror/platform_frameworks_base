@@ -1207,7 +1207,10 @@ final class InstallParams extends HandlerParams {
                     // Check for shared user id changes
                     String invalidPackageName = null;
                     if (!Objects.equals(oldPackage.getSharedUserId(),
-                            parsedPackage.getSharedUserId())) {
+                            parsedPackage.getSharedUserId())
+                            // Don't mark as invalid if the app is trying to
+                            // leave a sharedUserId
+                            && parsedPackage.getSharedUserId() != null) {
                         invalidPackageName = parsedPackage.getPackageName();
                     }
 

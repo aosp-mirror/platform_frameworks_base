@@ -1938,7 +1938,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-Warnung"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbeitsprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Gewarnt"</string>
-    <string name="notification_verified_content_description" msgid="6401483602782359391">"Bestätigt"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Verifiziert"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Maximieren"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Minimieren"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Maximierung ein-/auschalten"</string>

@@ -130,6 +130,10 @@
         <option name="instrumentation-arg" key="perfetto_config_file"
                 value="trace_config.textproto"/>
 
+        <!--
+         PackageInstallerBenchmark will break for 5 minutes time out so it changes to 10 minutes
+          -->
+        <option name="test-timeout" value="600000" />
     </test>
 
 

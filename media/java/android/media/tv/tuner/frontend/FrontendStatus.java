@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerVersionChecker;
 
@@ -61,175 +60,188 @@ public class FrontendStatus {
      * Lock status for Demod.
      */
     public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK =
-            Constants.FrontendStatusType.DEMOD_LOCK;
+            android.hardware.tv.tuner.FrontendStatusType.DEMOD_LOCK;
     /**
      * Signal to Noise Ratio.
      */
-    public static final int FRONTEND_STATUS_TYPE_SNR = Constants.FrontendStatusType.SNR;
+    public static final int FRONTEND_STATUS_TYPE_SNR =
+            android.hardware.tv.tuner.FrontendStatusType.SNR;
     /**
      * Bit Error Ratio.
      */
-    public static final int FRONTEND_STATUS_TYPE_BER = Constants.FrontendStatusType.BER;
+    public static final int FRONTEND_STATUS_TYPE_BER =
+            android.hardware.tv.tuner.FrontendStatusType.BER;
     /**
      * Packages Error Ratio.
      */
-    public static final int FRONTEND_STATUS_TYPE_PER = Constants.FrontendStatusType.PER;
+    public static final int FRONTEND_STATUS_TYPE_PER =
+            android.hardware.tv.tuner.FrontendStatusType.PER;
     /**
      * Bit Error Ratio before FEC.
      */
-    public static final int FRONTEND_STATUS_TYPE_PRE_BER = Constants.FrontendStatusType.PRE_BER;
+    public static final int FRONTEND_STATUS_TYPE_PRE_BER =
+            android.hardware.tv.tuner.FrontendStatusType.PRE_BER;
     /**
      * Signal Quality (0..100). Good data over total data in percent can be
      * used as a way to present Signal Quality.
      */
     public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY =
-            Constants.FrontendStatusType.SIGNAL_QUALITY;
+            android.hardware.tv.tuner.FrontendStatusType.SIGNAL_QUALITY;
     /**
      * Signal Strength.
      */
     public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH =
-            Constants.FrontendStatusType.SIGNAL_STRENGTH;
+            android.hardware.tv.tuner.FrontendStatusType.SIGNAL_STRENGTH;
     /**
      * Symbol Rate in symbols per second.
      */
     public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE =
-            Constants.FrontendStatusType.SYMBOL_RATE;
+            android.hardware.tv.tuner.FrontendStatusType.SYMBOL_RATE;
     /**
      * Forward Error Correction Type.
      */
-    public static final int FRONTEND_STATUS_TYPE_FEC = Constants.FrontendStatusType.FEC;
+    public static final int FRONTEND_STATUS_TYPE_FEC =
+            android.hardware.tv.tuner.FrontendStatusType.FEC;
     /**
      * Modulation Type.
      */
     public static final int FRONTEND_STATUS_TYPE_MODULATION =
-            Constants.FrontendStatusType.MODULATION;
+            android.hardware.tv.tuner.FrontendStatusType.MODULATION;
     /**
      * Spectral Inversion Type.
      */
-    public static final int FRONTEND_STATUS_TYPE_SPECTRAL = Constants.FrontendStatusType.SPECTRAL;
+    public static final int FRONTEND_STATUS_TYPE_SPECTRAL =
+            android.hardware.tv.tuner.FrontendStatusType.SPECTRAL;
     /**
      * LNB Voltage.
      */
     public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE =
-            Constants.FrontendStatusType.LNB_VOLTAGE;
+            android.hardware.tv.tuner.FrontendStatusType.LNB_VOLTAGE;
     /**
      * Physical Layer Pipe ID.
      */
-    public static final int FRONTEND_STATUS_TYPE_PLP_ID = Constants.FrontendStatusType.PLP_ID;
+    public static final int FRONTEND_STATUS_TYPE_PLP_ID =
+            android.hardware.tv.tuner.FrontendStatusType.PLP_ID;
     /**
      * Status for Emergency Warning Broadcasting System.
      */
-    public static final int FRONTEND_STATUS_TYPE_EWBS = Constants.FrontendStatusType.EWBS;
+    public static final int FRONTEND_STATUS_TYPE_EWBS =
+            android.hardware.tv.tuner.FrontendStatusType.EWBS;
     /**
      * Automatic Gain Control.
      */
-    public static final int FRONTEND_STATUS_TYPE_AGC = Constants.FrontendStatusType.AGC;
+    public static final int FRONTEND_STATUS_TYPE_AGC =
+            android.hardware.tv.tuner.FrontendStatusType.AGC;
     /**
      * Low Noise Amplifier.
      */
-    public static final int FRONTEND_STATUS_TYPE_LNA = Constants.FrontendStatusType.LNA;
+    public static final int FRONTEND_STATUS_TYPE_LNA =
+            android.hardware.tv.tuner.FrontendStatusType.LNA;
     /**
      * Error status by layer.
      */
     public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR =
-            Constants.FrontendStatusType.LAYER_ERROR;
+            android.hardware.tv.tuner.FrontendStatusType.LAYER_ERROR;
     /**
      * Modulation Error Ratio.
      */
-    public static final int FRONTEND_STATUS_TYPE_MER = Constants.FrontendStatusType.MER;
+    public static final int FRONTEND_STATUS_TYPE_MER =
+            android.hardware.tv.tuner.FrontendStatusType.MER;
     /**
      * Difference between tuning frequency and actual locked frequency.
      */
     public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET =
-            Constants.FrontendStatusType.FREQ_OFFSET;
+            android.hardware.tv.tuner.FrontendStatusType.FREQ_OFFSET;
     /**
      * Hierarchy for DVBT.
      */
-    public static final int FRONTEND_STATUS_TYPE_HIERARCHY = Constants.FrontendStatusType.HIERARCHY;
+    public static final int FRONTEND_STATUS_TYPE_HIERARCHY =
+            android.hardware.tv.tuner.FrontendStatusType.HIERARCHY;
     /**
      * Lock status for RF.
      */
-    public static final int FRONTEND_STATUS_TYPE_RF_LOCK = Constants.FrontendStatusType.RF_LOCK;
+    public static final int FRONTEND_STATUS_TYPE_RF_LOCK =
+            android.hardware.tv.tuner.FrontendStatusType.RF_LOCK;
     /**
      * PLP information in a frequency band for ATSC-3.0 frontend.
      */
     public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO =
-            Constants.FrontendStatusType.ATSC3_PLP_INFO;
+            android.hardware.tv.tuner.FrontendStatusType.ATSC3_PLP_INFO;
     /**
      * BERS Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_BERS =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.BERS;
+            android.hardware.tv.tuner.FrontendStatusType.BERS;
     /**
      * Coderate Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_CODERATES =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.CODERATES;
+            android.hardware.tv.tuner.FrontendStatusType.CODERATES;
     /**
      * Bandwidth Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_BANDWIDTH =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.BANDWIDTH;
+            android.hardware.tv.tuner.FrontendStatusType.BANDWIDTH;
     /**
      * Guard Interval Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_GUARD_INTERVAL =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.GUARD_INTERVAL;
+            android.hardware.tv.tuner.FrontendStatusType.GUARD_INTERVAL;
     /**
      * Transmission Mode Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_TRANSMISSION_MODE =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.TRANSMISSION_MODE;
+            android.hardware.tv.tuner.FrontendStatusType.TRANSMISSION_MODE;
     /**
      * UEC Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_UEC =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.UEC;
+            android.hardware.tv.tuner.FrontendStatusType.UEC;
     /**
      * T2 System Id Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_T2_SYSTEM_ID =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.T2_SYSTEM_ID;
+            android.hardware.tv.tuner.FrontendStatusType.T2_SYSTEM_ID;
     /**
      * Interleavings Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.INTERLEAVINGS;
+            android.hardware.tv.tuner.FrontendStatusType.INTERLEAVINGS;
     /**
      * ISDBT Segments Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.ISDBT_SEGMENTS;
+            android.hardware.tv.tuner.FrontendStatusType.ISDBT_SEGMENTS;
     /**
      * TS Data Rates Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_TS_DATA_RATES =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.TS_DATA_RATES;
+            android.hardware.tv.tuner.FrontendStatusType.TS_DATA_RATES;
     /**
      * Extended Modulations Type. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_MODULATIONS_EXT =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.MODULATIONS;
+            android.hardware.tv.tuner.FrontendStatusType.MODULATIONS;
     /**
      * Roll Off Type status of the frontend. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_ROLL_OFF =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.ROLL_OFF;
+            android.hardware.tv.tuner.FrontendStatusType.ROLL_OFF;
     /**
      * If the frontend currently supports MISO or not. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_IS_MISO_ENABLED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_MISO;
+            android.hardware.tv.tuner.FrontendStatusType.IS_MISO;
     /**
      * If the frontend code rate is linear or not. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_IS_LINEAR =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_LINEAR;
+            android.hardware.tv.tuner.FrontendStatusType.IS_LINEAR;
     /**
      * If short frames is enabled or not. Only supported in Tuner HAL 1.1 or higher.
      */
     public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_SHORT_FRAMES;
+            android.hardware.tv.tuner.FrontendStatusType.IS_SHORT_FRAMES;
 
     /** @hide */
     @IntDef(value = {

@@ -55,6 +55,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.split.SplitAssetLoader;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.ApkAssets;
@@ -7425,7 +7427,7 @@ public class PackageParser {
             mCompileSdkVersionCodename = dest.readString();
             mUpgradeKeySets = (ArraySet<String>) dest.readArraySet(boot);
 
-            mKeySetMapping = readKeySetMapping(dest);
+            mKeySetMapping = ParsingPackageUtils.readKeySetMapping(dest);
 
             cpuAbiOverride = dest.readString();
             use32bitAbi = (dest.readInt() == 1);
@@ -7551,71 +7553,11 @@ public class PackageParser {
             dest.writeInt(mCompileSdkVersion);
             dest.writeString(mCompileSdkVersionCodename);
             dest.writeArraySet(mUpgradeKeySets);
-            writeKeySetMapping(dest, mKeySetMapping);
+            ParsingPackageUtils.writeKeySetMapping(dest, mKeySetMapping);
             dest.writeString(cpuAbiOverride);
             dest.writeInt(use32bitAbi ? 1 : 0);
             dest.writeByteArray(restrictUpdateHash);
             dest.writeInt(visibleToInstantApps ? 1 : 0);
-        }
-
-        /**
-         * Writes the keyset mapping to the provided package. {@code null} mappings are permitted.
-         */
-        private static void writeKeySetMapping(
-                Parcel dest, ArrayMap<String, ArraySet<PublicKey>> keySetMapping) {
-            if (keySetMapping == null) {
-                dest.writeInt(-1);
-                return;
-            }
-
-            final int N = keySetMapping.size();
-            dest.writeInt(N);
-
-            for (int i = 0; i < N; i++) {
-                dest.writeString(keySetMapping.keyAt(i));
-                ArraySet<PublicKey> keys = keySetMapping.valueAt(i);
-                if (keys == null) {
-                    dest.writeInt(-1);
-                    continue;
-                }
-
-                final int M = keys.size();
-                dest.writeInt(M);
-                for (int j = 0; j < M; j++) {
-                    dest.writeSerializable(keys.valueAt(j));
-                }
-            }
-        }
-
-        /**
-         * Reads a keyset mapping from the given parcel at the given data position. May return
-         * {@code null} if the serialized mapping was {@code null}.
-         */
-        private static ArrayMap<String, ArraySet<PublicKey>> readKeySetMapping(Parcel in) {
-            final int N = in.readInt();
-            if (N == -1) {
-                return null;
-            }
-
-            ArrayMap<String, ArraySet<PublicKey>> keySetMapping = new ArrayMap<>();
-            for (int i = 0; i < N; ++i) {
-                String key = in.readString();
-                final int M = in.readInt();
-                if (M == -1) {
-                    keySetMapping.put(key, null);
-                    continue;
-                }
-
-                ArraySet<PublicKey> keys = new ArraySet<>(M);
-                for (int j = 0; j < M; ++j) {
-                    PublicKey pk = (PublicKey) in.readSerializable();
-                    keys.add(pk);
-                }
-
-                keySetMapping.put(key, keys);
-            }
-
-            return keySetMapping;
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Package>() {

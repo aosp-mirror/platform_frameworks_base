@@ -18,6 +18,7 @@ package android.content.pm.parsing.component;
 
 import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.Parcel;
@@ -83,6 +84,7 @@ public class ParsedService extends ParsedMainComponent {
         this.permission = sForInternedString.unparcel(in);
     }
 
+    @NonNull
     public static final Parcelable.Creator<ParsedService> CREATOR = new Creator<ParsedService>() {
         @Override
         public ParsedService createFromParcel(Parcel source) {

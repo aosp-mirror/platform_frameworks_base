@@ -228,16 +228,19 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
             Vibration.Status status = null;
             while (!mStepQueue.isEmpty()) {
-                long waitTime = mStepQueue.calculateWaitTime();
-                if (waitTime <= 0) {
-                    mStepQueue.consumeNext();
-                } else {
-                    synchronized (mLock) {
+                long waitTime;
+                synchronized (mLock) {
+                    waitTime = mStepQueue.calculateWaitTime();
+                    if (waitTime > 0) {
                         try {
                             mLock.wait(waitTime);
                         } catch (InterruptedException e) {
                         }
                     }
+                }
+                // If we waited, the queue may have changed, so let the loop run again.
+                if (waitTime <= 0) {
+                    mStepQueue.consumeNext();
                 }
                 Vibration.Status currentStatus = mStop ? Vibration.Status.CANCELLED
                         : mStepQueue.calculateVibrationStatus(sequentialEffectSize);
@@ -387,15 +390,13 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         /** Returns the time in millis to wait before calling {@link #consumeNext()}. */
+        @GuardedBy("mLock")
         public long calculateWaitTime() {
-            Step nextStep;
-            synchronized (mLock) {
-                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
-                    // Steps anticipated by vibrator complete callback should be played right away.
-                    return 0;
-                }
-                nextStep = mNextSteps.peek();
+            if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                // Steps anticipated by vibrator complete callback should be played right away.
+                return 0;
             }
+            Step nextStep = mNextSteps.peek();
             return nextStep == null ? 0 : nextStep.calculateWaitTime();
         }
 
@@ -603,7 +604,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             return false;
         }
 
-        /** Returns the time in millis to wait before playing this step. */
+        /**
+         * Returns the time in millis to wait before playing this step. This is performed
+         * while holding the queue lock, so should not rely on potentially slow operations.
+         */
         public long calculateWaitTime() {
             if (startTime == Long.MAX_VALUE) {
                 // This step don't have a predefined start time, it's just marked to be executed

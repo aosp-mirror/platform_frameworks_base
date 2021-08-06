@@ -21,60 +21,40 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
-import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
-import com.android.systemui.qs.TouchAnimator.Builder;
-import com.android.systemui.statusbar.phone.MultiUserSwitch;
-import com.android.systemui.statusbar.phone.SettingsButton;
 
-/** */
+/**
+ * Footer of expanded Quick Settings, tiles page indicator, (optionally) build number and
+ * {@link QSFooterActionsView}
+ */
 public class QSFooterView extends FrameLayout {
-    private SettingsButton mSettingsButton;
-    protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
     private TextView mBuildText;
-    private boolean mShouldShowBuildText;
-
-    private boolean mQsDisabled;
-
-    private boolean mExpanded;
-
-    private boolean mListening;
-
-    protected MultiUserSwitch mMultiUserSwitch;
-    private ImageView mMultiUserAvatar;
+    private View mActionsContainer;
 
     protected TouchAnimator mFooterAnimator;
+
+    private boolean mQsDisabled;
+    private boolean mExpanded;
     private float mExpansionAmount;
 
-    protected View mEdit;
-    private TouchAnimator mSettingsCogAnimator;
-
-    private View mActionsContainer;
-    private View mTunerIcon;
-    private int mTunerIconTranslation;
+    private boolean mShouldShowBuildText;
 
     private OnClickListener mExpandClickListener;
 
@@ -94,27 +74,11 @@ public class QSFooterView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mEdit = requireViewById(android.R.id.edit);
-
         mPageIndicator = findViewById(R.id.footer_page_indicator);
-
-        mSettingsButton = findViewById(R.id.settings_button);
-        mSettingsContainer = findViewById(R.id.settings_button_container);
-
-        mMultiUserSwitch = findViewById(R.id.multi_user_switch);
-        mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
-
         mActionsContainer = requireViewById(R.id.qs_footer_actions_container);
         mBuildText = findViewById(R.id.build);
-        mTunerIcon = requireViewById(R.id.tuner_icon);
 
-        // RenderThread is doing more harm than good when touching the header (to expand quick
-        // settings), so disable it for this view
-        if (mSettingsButton.getBackground() instanceof RippleDrawable) {
-            ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
-        }
         updateResources();
-
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         setBuildText();
     }
@@ -137,18 +101,7 @@ public class QSFooterView extends FrameLayout {
         }
     }
 
-    void updateAnimator(int width, int numTiles) {
-        int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
-                - mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_padding);
-        int remaining = (width - numTiles * size) / (numTiles - 1);
-        int defSpace = mContext.getResources().getDimensionPixelOffset(R.dimen.default_gear_space);
-
-        mSettingsCogAnimator = new Builder()
-                .addFloat(mSettingsButton, "translationX",
-                        isLayoutRtl() ? (remaining - defSpace) : -(remaining - defSpace), 0)
-                .addFloat(mSettingsButton, "rotation", -120, 0)
-                .build();
-
+    void updateExpansion() {
         setExpansion(mExpansionAmount);
     }
 
@@ -158,20 +111,11 @@ public class QSFooterView extends FrameLayout {
         updateResources();
     }
 
-    @Override
-    public void onRtlPropertiesChanged(int layoutDirection) {
-        super.onRtlPropertiesChanged(layoutDirection);
-        updateResources();
-    }
-
     private void updateResources() {
         updateFooterAnimator();
         MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
         lp.bottomMargin = getResources().getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
         setLayoutParams(lp);
-        mTunerIconTranslation = mContext.getResources()
-                .getDimensionPixelOffset(R.dimen.qs_footer_tuner_icon_translation);
-        mTunerIcon.setTranslationX(isLayoutRtl() ? -mTunerIconTranslation : mTunerIconTranslation);
     }
 
     private void updateFooterAnimator() {
@@ -197,17 +141,15 @@ public class QSFooterView extends FrameLayout {
         mExpandClickListener = onClickListener;
     }
 
-    void setExpanded(boolean expanded, boolean isTunerEnabled, boolean multiUserEnabled) {
+    void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        updateEverything(isTunerEnabled, multiUserEnabled);
+        updateEverything();
     }
 
     /** */
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
-        if (mSettingsCogAnimator != null) mSettingsCogAnimator.setPosition(headerExpansionFraction);
-
         if (mFooterAnimator != null) {
             mFooterAnimator.setPosition(headerExpansionFraction);
         }
@@ -228,14 +170,6 @@ public class QSFooterView extends FrameLayout {
         super.onDetachedFromWindow();
     }
 
-    /** */
-    public void setListening(boolean listening) {
-        if (listening == mListening) {
-            return;
-        }
-        mListening = listening;
-    }
-
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
@@ -253,50 +187,26 @@ public class QSFooterView extends FrameLayout {
         info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
-    void disable(int state2, boolean isTunerEnabled, boolean multiUserEnabled) {
+    void disable(int state2) {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        updateEverything(isTunerEnabled, multiUserEnabled);
+        updateEverything();
     }
 
-    void updateEverything(boolean isTunerEnabled, boolean multiUserEnabled) {
+    void updateEverything() {
         post(() -> {
-            updateVisibilities(isTunerEnabled, multiUserEnabled);
+            updateVisibilities();
             updateClickabilities();
             setClickable(false);
         });
     }
 
     private void updateClickabilities() {
-        mMultiUserSwitch.setClickable(mMultiUserSwitch.getVisibility() == View.VISIBLE);
-        mEdit.setClickable(mEdit.getVisibility() == View.VISIBLE);
-        mSettingsButton.setClickable(mSettingsButton.getVisibility() == View.VISIBLE);
         mBuildText.setLongClickable(mBuildText.getVisibility() == View.VISIBLE);
     }
 
-    private void updateVisibilities(boolean isTunerEnabled, boolean multiUserEnabled) {
-        mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
-        mTunerIcon.setVisibility(isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
-        final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
-        mMultiUserSwitch.setVisibility(
-                showUserSwitcher(multiUserEnabled) ? View.VISIBLE : View.GONE);
-        mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
-
+    private void updateVisibilities() {
         mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    private boolean showUserSwitcher(boolean multiUserEnabled) {
-        return mExpanded && multiUserEnabled;
-    }
-
-    void onUserInfoChanged(Drawable picture, boolean isGuestUser) {
-        if (picture != null && isGuestUser && !(picture instanceof UserIconDrawable)) {
-            picture = picture.getConstantState().newDrawable(getResources()).mutate();
-            picture.setColorFilter(
-                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorForeground),
-                    Mode.SRC_IN);
-        }
-        mMultiUserAvatar.setImageDrawable(picture);
     }
 }

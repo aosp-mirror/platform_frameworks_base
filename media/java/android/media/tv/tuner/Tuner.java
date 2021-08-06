@@ -25,7 +25,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.Constant;
+import android.hardware.tv.tuner.Constant64Bit;
+import android.hardware.tv.tuner.FrontendScanType;
 import android.media.tv.TvInputService;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
@@ -85,19 +87,19 @@ public class Tuner implements AutoCloseable  {
     /**
      * Invalid TS packet ID.
      */
-    public static final int INVALID_TS_PID = Constants.Constant.INVALID_TS_PID;
+    public static final int INVALID_TS_PID = Constant.INVALID_TS_PID;
     /**
      * Invalid stream ID.
      */
-    public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
+    public static final int INVALID_STREAM_ID = Constant.INVALID_STREAM_ID;
     /**
      * Invalid filter ID.
      */
-    public static final int INVALID_FILTER_ID = Constants.Constant.INVALID_FILTER_ID;
+    public static final int INVALID_FILTER_ID = Constant.INVALID_FILTER_ID;
     /**
      * Invalid AV Sync ID.
      */
-    public static final int INVALID_AV_SYNC_ID = Constants.Constant.INVALID_AV_SYNC_ID;
+    public static final int INVALID_AV_SYNC_ID = Constant.INVALID_AV_SYNC_ID;
     /**
      * Invalid timestamp.
      *
@@ -113,7 +115,7 @@ public class Tuner implements AutoCloseable  {
      * @see android.media.tv.tuner.filter.MmtpRecordEvent#getPts()
      */
     public static final long INVALID_TIMESTAMP =
-            android.hardware.tv.tuner.V1_1.Constants.Constant64Bit.INVALID_PRESENTATION_TIME_STAMP;
+            Constant64Bit.INVALID_PRESENTATION_TIME_STAMP;
     /**
      * Invalid mpu sequence number in MmtpRecordEvent.
      *
@@ -123,8 +125,7 @@ public class Tuner implements AutoCloseable  {
      * @see android.media.tv.tuner.filter.MmtpRecordEvent#getMpuSequenceNumber()
      */
     public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM =
-            android.hardware.tv.tuner.V1_1.Constants.Constant
-                    .INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM;
+            Constant.INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM;
     /**
      * Invalid first macroblock address in MmtpRecordEvent and TsRecordEvent.
      *
@@ -135,7 +136,7 @@ public class Tuner implements AutoCloseable  {
      * @see android.media.tv.tuner.filter.TsRecordEvent#getMbInSlice()
      */
     public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE =
-            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FIRST_MACROBLOCK_IN_SLICE;
+            Constant.INVALID_FIRST_MACROBLOCK_IN_SLICE;
     /**
      * Invalid local transport stream id.
      *
@@ -144,30 +145,26 @@ public class Tuner implements AutoCloseable  {
      *
      * @see #linkFrontendToCiCam(int)
      */
-    public static final int INVALID_LTS_ID =
-            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_LTS_ID;
+    public static final int INVALID_LTS_ID = Constant.INVALID_LTS_ID;
     /**
      * Invalid 64-bit filter ID.
      */
-    public static final long INVALID_FILTER_ID_LONG =
-            android.hardware.tv.tuner.V1_1.Constants.Constant64Bit.INVALID_FILTER_ID_64BIT;
+    public static final long INVALID_FILTER_ID_LONG = Constant64Bit.INVALID_FILTER_ID_64BIT;
     /**
      * Invalid frequency that is used as the default frontend frequency setting.
      */
     public static final int INVALID_FRONTEND_SETTING_FREQUENCY =
-            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FRONTEND_SETTING_FREQUENCY;
+            Constant.INVALID_FRONTEND_SETTING_FREQUENCY;
     /**
      * Invalid frontend id.
      */
-    public static final int INVALID_FRONTEND_ID =
-            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FRONTEND_ID;
+    public static final int INVALID_FRONTEND_ID = Constant.INVALID_FRONTEND_ID;
     /**
      * Invalid LNB id.
      *
      * @hide
      */
-    public static final int INVALID_LNB_ID =
-            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_LNB_ID;
+    public static final int INVALID_LNB_ID = Constant.INVALID_LNB_ID;
     /**
      * A void key token. It is used to remove the current key from descrambler.
      *
@@ -175,8 +172,7 @@ public class Tuner implements AutoCloseable  {
      * to use this constant to remove current key before closing MediaCas session.
      */
     @NonNull
-    public static final byte[] VOID_KEYTOKEN =
-            {android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_KEYTOKEN};
+    public static final byte[] VOID_KEYTOKEN = {Constant.INVALID_KEYTOKEN};
 
     /** @hide */
     @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
@@ -185,20 +181,20 @@ public class Tuner implements AutoCloseable  {
     /**
      * Scan type undefined.
      */
-    public static final int SCAN_TYPE_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
+    public static final int SCAN_TYPE_UNDEFINED = FrontendScanType.SCAN_UNDEFINED;
     /**
      * Scan type auto.
      *
      * <p> Tuner will send {@link android.media.tv.tuner.frontend.ScanCallback#onLocked}
      */
-    public static final int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
+    public static final int SCAN_TYPE_AUTO = FrontendScanType.SCAN_AUTO;
     /**
      * Blind scan.
      *
      * <p>Frequency range is not specified. The {@link android.media.tv.tuner.Tuner} will scan an
      * implementation specific range.
      */
-    public static final int SCAN_TYPE_BLIND = Constants.FrontendScanType.SCAN_BLIND;
+    public static final int SCAN_TYPE_BLIND = FrontendScanType.SCAN_BLIND;
 
 
     /** @hide */
@@ -210,31 +206,33 @@ public class Tuner implements AutoCloseable  {
     /**
      * Operation succeeded.
      */
-    public static final int RESULT_SUCCESS = Constants.Result.SUCCESS;
+    public static final int RESULT_SUCCESS = android.hardware.tv.tuner.Result.SUCCESS;
     /**
      * Operation failed because the corresponding resources are not available.
      */
-    public static final int RESULT_UNAVAILABLE = Constants.Result.UNAVAILABLE;
+    public static final int RESULT_UNAVAILABLE = android.hardware.tv.tuner.Result.UNAVAILABLE;
     /**
      * Operation failed because the corresponding resources are not initialized.
      */
-    public static final int RESULT_NOT_INITIALIZED = Constants.Result.NOT_INITIALIZED;
+    public static final int RESULT_NOT_INITIALIZED =
+            android.hardware.tv.tuner.Result.NOT_INITIALIZED;
     /**
      * Operation failed because it's not in a valid state.
      */
-    public static final int RESULT_INVALID_STATE = Constants.Result.INVALID_STATE;
+    public static final int RESULT_INVALID_STATE = android.hardware.tv.tuner.Result.INVALID_STATE;
     /**
      * Operation failed because there are invalid arguments.
      */
-    public static final int RESULT_INVALID_ARGUMENT = Constants.Result.INVALID_ARGUMENT;
+    public static final int RESULT_INVALID_ARGUMENT =
+            android.hardware.tv.tuner.Result.INVALID_ARGUMENT;
     /**
      * Memory allocation failed.
      */
-    public static final int RESULT_OUT_OF_MEMORY = Constants.Result.OUT_OF_MEMORY;
+    public static final int RESULT_OUT_OF_MEMORY = android.hardware.tv.tuner.Result.OUT_OF_MEMORY;
     /**
      * Operation failed due to unknown errors.
      */
-    public static final int RESULT_UNKNOWN_ERROR = Constants.Result.UNKNOWN_ERROR;
+    public static final int RESULT_UNKNOWN_ERROR = android.hardware.tv.tuner.Result.UNKNOWN_ERROR;
 
 
 
@@ -257,12 +255,12 @@ public class Tuner implements AutoCloseable  {
      * DVR for recording.
      * @hide
      */
-    public static final int DVR_TYPE_RECORD = Constants.DvrType.RECORD;
+    public static final int DVR_TYPE_RECORD = android.hardware.tv.tuner.DvrType.RECORD;
     /**
      * DVR for playback of recorded programs.
      * @hide
      */
-    public static final int DVR_TYPE_PLAYBACK = Constants.DvrType.PLAYBACK;
+    public static final int DVR_TYPE_PLAYBACK = android.hardware.tv.tuner.DvrType.PLAYBACK;
 
     static {
         try {

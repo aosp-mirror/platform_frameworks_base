@@ -34,7 +34,6 @@ import android.widget.Button;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
@@ -63,7 +62,6 @@ public class TileQueryHelper {
     private final Executor mBgExecutor;
     private final Context mContext;
     private final UserTracker mUserTracker;
-    private final FeatureFlags mFeatureFlags;
     private TileStateListener mListener;
 
     private boolean mFinished;
@@ -73,14 +71,12 @@ public class TileQueryHelper {
             Context context,
             UserTracker userTracker,
             @Main Executor mainExecutor,
-            @Background Executor bgExecutor,
-            FeatureFlags featureFlags
+            @Background Executor bgExecutor
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
-        mFeatureFlags = featureFlags;
     }
 
     public void setListener(TileStateListener listener) {
@@ -121,19 +117,11 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        // TODO(b/174753536): Move it into the config file.
-        if (mFeatureFlags.isProviderModelSettingEnabled()) {
-            possibleTiles.remove("cell");
-            possibleTiles.remove("wifi");
-        } else {
-            possibleTiles.remove("internet");
-        }
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
             // Do not include CustomTile. Those will be created by `addPackageTiles`.
             if (spec.startsWith(CustomTile.PREFIX)) continue;
-            // TODO(b/174753536): Move it into the config file.
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;

@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -229,6 +230,21 @@ public class ApexManagerTest {
 
         assertThrows(RuntimeException.class,
                 () -> mApexManager.submitStagedSession(testParamsWithChildren()));
+    }
+
+    @Test
+    public void testGetStagedApexInfos_throwRunTimeException() throws RemoteException {
+        doThrow(RemoteException.class).when(mApexService).getStagedApexInfos(any());
+
+        assertThrows(RuntimeException.class,
+                () -> mApexManager.getStagedApexInfos(testParamsWithChildren()));
+    }
+
+    @Test
+    public void testGetStagedApexInfos_returnsEmptyArrayOnError() throws RemoteException {
+        doThrow(ServiceSpecificException.class).when(mApexService).getStagedApexInfos(any());
+
+        assertThat(mApexManager.getStagedApexInfos(testParamsWithChildren())).hasLength(0);
     }
 
     @Test

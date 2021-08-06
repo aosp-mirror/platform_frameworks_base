@@ -36,6 +36,11 @@ final class ScanResult {
      */
     public final boolean mExistingSettingCopied;
     /**
+     * Whether or not the original PackageSetting needs to be updated with
+     * a new uid. Useful when leaving a sharedUserID.
+     */
+    public final boolean mNeedsNewAppId;
+    /**
      * The final package settings. This may be the same object passed in
      * the {@link ScanRequest}, but, with modified values.
      */
@@ -52,6 +57,7 @@ final class ScanResult {
             ScanRequest request, boolean success,
             @Nullable PackageSetting pkgSetting,
             @Nullable List<String> changedAbiCodePath, boolean existingSettingCopied,
+            boolean needsNewAppId,
             SharedLibraryInfo staticSharedLibraryInfo,
             List<SharedLibraryInfo> dynamicSharedLibraryInfos) {
         mRequest = request;
@@ -59,6 +65,7 @@ final class ScanResult {
         mPkgSetting = pkgSetting;
         mChangedAbiCodePath = changedAbiCodePath;
         mExistingSettingCopied = existingSettingCopied;
+        mNeedsNewAppId = needsNewAppId;
         mStaticSharedLibraryInfo = staticSharedLibraryInfo;
         mDynamicSharedLibraryInfos = dynamicSharedLibraryInfos;
     }

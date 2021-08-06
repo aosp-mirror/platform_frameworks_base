@@ -21,7 +21,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.DemuxFilterMainType;
+import android.hardware.tv.tuner.DemuxFilterMonitorEventType;
+import android.hardware.tv.tuner.DemuxFilterStatus;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
@@ -53,23 +55,23 @@ public class Filter implements AutoCloseable {
     /**
      * TS filter type.
      */
-    public static final int TYPE_TS = Constants.DemuxFilterMainType.TS;
+    public static final int TYPE_TS = DemuxFilterMainType.TS;
     /**
      * MMTP filter type.
      */
-    public static final int TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
+    public static final int TYPE_MMTP = DemuxFilterMainType.MMTP;
     /**
      * IP filter type.
      */
-    public static final int TYPE_IP = Constants.DemuxFilterMainType.IP;
+    public static final int TYPE_IP = DemuxFilterMainType.IP;
     /**
      * TLV filter type.
      */
-    public static final int TYPE_TLV = Constants.DemuxFilterMainType.TLV;
+    public static final int TYPE_TLV = DemuxFilterMainType.TLV;
     /**
      * ALP filter type.
      */
-    public static final int TYPE_ALP = Constants.DemuxFilterMainType.ALP;
+    public static final int TYPE_ALP = DemuxFilterMainType.ALP;
 
     /** @hide */
     @IntDef(prefix = "SUBTYPE_",
@@ -158,7 +160,7 @@ public class Filter implements AutoCloseable {
     /**
      * The status of a filter that the data in the filter buffer is ready to be read.
      */
-    public static final int STATUS_DATA_READY = Constants.DemuxFilterStatus.DATA_READY;
+    public static final int STATUS_DATA_READY = DemuxFilterStatus.DATA_READY;
     /**
      * The status of a filter that the amount of available data in the filter buffer is at low
      * level.
@@ -166,19 +168,19 @@ public class Filter implements AutoCloseable {
      * The value is set to 25 percent of the buffer size by default. It can be changed when
      * configuring the filter.
      */
-    public static final int STATUS_LOW_WATER = Constants.DemuxFilterStatus.LOW_WATER;
+    public static final int STATUS_LOW_WATER = DemuxFilterStatus.LOW_WATER;
     /**
      * The status of a filter that the amount of available data in the filter buffer is at high
      * level.
      * The value is set to 75 percent of the buffer size by default. It can be changed when
      * configuring the filter.
      */
-    public static final int STATUS_HIGH_WATER = Constants.DemuxFilterStatus.HIGH_WATER;
+    public static final int STATUS_HIGH_WATER = DemuxFilterStatus.HIGH_WATER;
     /**
      * The status of a filter that the filter buffer is full and newly filtered data is being
      * discarded.
      */
-    public static final int STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
+    public static final int STATUS_OVERFLOW = DemuxFilterStatus.OVERFLOW;
 
     /** @hide */
     @IntDef(flag = true,
@@ -192,17 +194,17 @@ public class Filter implements AutoCloseable {
      * Content’s scrambling status is unknown
      */
     public static final int SCRAMBLING_STATUS_UNKNOWN =
-            android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.UNKNOWN;
+            android.hardware.tv.tuner.ScramblingStatus.UNKNOWN;
     /**
      * Content is not scrambled.
      */
     public static final int SCRAMBLING_STATUS_NOT_SCRAMBLED =
-            android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.NOT_SCRAMBLED;
+            android.hardware.tv.tuner.ScramblingStatus.NOT_SCRAMBLED;
     /**
      * Content is scrambled.
      */
     public static final int SCRAMBLING_STATUS_SCRAMBLED =
-            android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.SCRAMBLED;
+            android.hardware.tv.tuner.ScramblingStatus.SCRAMBLED;
 
     /** @hide */
     @IntDef(flag = true,
@@ -215,12 +217,11 @@ public class Filter implements AutoCloseable {
      * Monitor scrambling status change.
      */
     public static final int MONITOR_EVENT_SCRAMBLING_STATUS =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxFilterMonitorEventType.SCRAMBLING_STATUS;
+            DemuxFilterMonitorEventType.SCRAMBLING_STATUS;
     /**
      * Monitor ip cid change.
      */
-    public static final int MONITOR_EVENT_IP_CID_CHANGE =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxFilterMonitorEventType.IP_CID_CHANGE;
+    public static final int MONITOR_EVENT_IP_CID_CHANGE = DemuxFilterMonitorEventType.IP_CID_CHANGE;
 
     private static final String TAG = "Filter";
 

@@ -19,18 +19,30 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.time.Clock;
+import java.time.ZoneOffset;
 
 /** Test that the ledger records transactions correctly. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LedgerTest {
+
+    @Before
+    public void setUp() {
+        TareUtils.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
+    }
 
     @Test
     public void testInitialState() {
@@ -71,5 +83,46 @@ public class LedgerTest {
                 ledger.get24HourSum(1, 26 * HOUR_IN_MILLIS + 30 * MINUTE_IN_MILLIS));
         assertEquals(1, ledger.get24HourSum(1, 27 * HOUR_IN_MILLIS));
         assertEquals(0, ledger.get24HourSum(1, 28 * HOUR_IN_MILLIS));
+    }
+
+    @Test
+    public void testRemoveOldTransactions() {
+        final Ledger ledger = new Ledger();
+        ledger.removeOldTransactions(24 * HOUR_IN_MILLIS);
+        assertNull(ledger.getEarliestTransaction());
+
+        final long now = getCurrentTimeMillis();
+        Ledger.Transaction transaction1 = new Ledger.Transaction(
+                now - 48 * HOUR_IN_MILLIS, now - 40 * HOUR_IN_MILLIS, 1, null, 4800);
+        Ledger.Transaction transaction2 = new Ledger.Transaction(
+                now - 24 * HOUR_IN_MILLIS, now - 23 * HOUR_IN_MILLIS, 1, null, 600);
+        Ledger.Transaction transaction3 = new Ledger.Transaction(
+                now - 22 * HOUR_IN_MILLIS, now - 21 * HOUR_IN_MILLIS, 1, null, 600);
+        // Instant event
+        Ledger.Transaction transaction4 = new Ledger.Transaction(
+                now - 20 * HOUR_IN_MILLIS, now - 20 * HOUR_IN_MILLIS, 1, null, 500);
+        // Recent event
+        Ledger.Transaction transaction5 = new Ledger.Transaction(
+                now - 5 * MINUTE_IN_MILLIS, now - MINUTE_IN_MILLIS, 1, null, 400);
+        ledger.recordTransaction(transaction1);
+        ledger.recordTransaction(transaction2);
+        ledger.recordTransaction(transaction3);
+        ledger.recordTransaction(transaction4);
+        ledger.recordTransaction(transaction5);
+
+        assertEquals(transaction1, ledger.getEarliestTransaction());
+        ledger.removeOldTransactions(24 * HOUR_IN_MILLIS);
+        assertEquals(transaction2, ledger.getEarliestTransaction());
+        ledger.removeOldTransactions(23 * HOUR_IN_MILLIS);
+        assertEquals(transaction3, ledger.getEarliestTransaction());
+        // Shouldn't delete transaction3 yet since there's still a piece of it within the min age
+        // window.
+        ledger.removeOldTransactions(21 * HOUR_IN_MILLIS + 30 * MINUTE_IN_MILLIS);
+        assertEquals(transaction3, ledger.getEarliestTransaction());
+        // Instant event should be removed as soon as we hit the exact threshold.
+        ledger.removeOldTransactions(20 * HOUR_IN_MILLIS);
+        assertEquals(transaction5, ledger.getEarliestTransaction());
+        ledger.removeOldTransactions(0);
+        assertNull(ledger.getEarliestTransaction());
     }
 }

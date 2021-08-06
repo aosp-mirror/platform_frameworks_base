@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिस्प्ले प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"वाय-फाय व्हर्बोझ लॉगिंग सुरू करा"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"वाय-फाय स्कॅन थ्रॉटलिंग"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization (7482769677894247316) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"वाय-फायचे सातत्याने न होणारे MAC रँडमायझेशन"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा नेहमी सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिंग हार्डवेअर अ‍ॅक्सिलरेशन"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिस्प्ले प्रमाणिकरणाचे पर्याय दाखवा"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाय-फाय लॉगिंग स्‍तर वाढवा, वाय-फाय सिलेक्टरमध्‍ये प्रति SSID RSSI दर्शवा"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बॅटरी जलदरीतीने संपण्यापासून रोखते आणि नेटवर्क परफॉर्मन्समध्ये सुधारणा करते"</string>
-    <!-- no translation found for wifi_non_persistent_mac_randomization_summary (2159794543105053930) -->
-    <skip />
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"हा मोड सुरू केलेला असले तेव्हा, हे डिव्हाइस MAC रँडमायझेशन सुरू केलेल्या नेटवर्कशी कनेक्ट होताना प्रत्येक वेळी त्याचा MAC अ‍ॅड्रेस बदलू शकतो."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"मीटरने मोजलेले"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मीटरने न मोजलेले"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफर आकार"</string>
