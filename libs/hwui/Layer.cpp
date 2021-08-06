@@ -35,6 +35,7 @@ Layer::Layer(RenderState& renderState, sk_sp<SkColorFilter> colorFilter, int alp
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
     renderState.registerLayer(this);
+    texTransform.setIdentity();
     transform.setIdentity();
 }
 
@@ -100,6 +101,7 @@ void Layer::draw(SkCanvas* canvas) {
     const int layerHeight = getHeight();
     if (layerImage) {
         SkMatrix textureMatrixInv;
+        textureMatrixInv = getTexTransform();
         // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
         // use bottom left origin and remove flipV and invert transformations.
         SkMatrix flipV;
