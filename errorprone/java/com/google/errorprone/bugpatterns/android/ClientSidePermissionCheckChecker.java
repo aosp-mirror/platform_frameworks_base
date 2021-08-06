@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.enclosingClass;
@@ -42,6 +43,7 @@ import com.sun.source.tree.Tree;
 @BugPattern(
         name = "AndroidFrameworkClientSidePermissionCheck",
         summary = "Verifies that permission checks aren't done in the app's process",
+        linkType = NONE,
         severity = WARNING)
 public final class ClientSidePermissionCheckChecker
         extends BugChecker implements MethodInvocationTreeMatcher {
