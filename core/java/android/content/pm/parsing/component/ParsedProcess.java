@@ -19,7 +19,6 @@ package android.content.pm.parsing.component;
 import static java.util.Collections.emptySet;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;

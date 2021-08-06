@@ -1245,7 +1245,8 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
         return NULL;
     }
 
-    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject);
+    sp<FrontendClientCallbackImpl> feClientCb =
+            new FrontendClientCallbackImpl(env->NewWeakGlobalRef(mObject));
     mFeClient->setCallback(feClientCb);
     // TODO: add more fields to frontend
     return env->NewObject(

@@ -125,7 +125,7 @@ public class AppPredictionPerUserService extends
             // connect with remote AppPredictionService instead for dark launch
             usesPeopleService = false;
         }
-        final boolean serviceExists = resolveService(sessionId, false,
+        final boolean serviceExists = resolveService(sessionId, true,
                 usesPeopleService, s -> s.onCreatePredictionSession(context, sessionId));
         if (serviceExists && !mSessionInfos.containsKey(sessionId)) {
             final AppPredictionSessionInfo sessionInfo = new AppPredictionSessionInfo(

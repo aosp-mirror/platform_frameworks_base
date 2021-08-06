@@ -86,13 +86,17 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
      * @return {@link InputConnection} to which incoming IPCs will be dispatched.
      */
     @Nullable
-    public InputConnection getInputConnection() {
+    private InputConnection getInputConnection() {
         synchronized (mLock) {
             return mInputConnection;
         }
     }
 
-    private boolean isFinished() {
+    /**
+     * @return {@code true} until the target {@link InputConnection} receives
+     * {@link InputConnection#closeConnection()} as a result of {@link #deactivate()}.
+     */
+    public boolean isFinished() {
         synchronized (mLock) {
             return mFinished;
         }
@@ -167,6 +171,23 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 ((DumpableInputConnection) mInputConnection).dumpDebug(proto, fieldId);
             }
         }
+    }
+
+    /**
+     * Invoke {@link InputConnection#reportFullscreenMode(boolean)} or schedule it on the target
+     * thread associated with {@link InputConnection#getHandler()}.
+     *
+     * @param enabled the parameter to be passed to
+     *                {@link InputConnection#reportFullscreenMode(boolean)}.
+     */
+    public void dispatchReportFullscreenMode(boolean enabled) {
+        dispatch(() -> {
+            final InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                return;
+            }
+            ic.reportFullscreenMode(enabled);
+        });
     }
 
     @Override

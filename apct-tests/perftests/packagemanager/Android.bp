@@ -20,6 +20,7 @@ android_test {
         "androidx.annotation_annotation",
         "apct-perftests-utils",
         "collector-device-lib-platform",
+        "cts-install-lib-java",
     ],
 
     libs: ["android.test.base"],

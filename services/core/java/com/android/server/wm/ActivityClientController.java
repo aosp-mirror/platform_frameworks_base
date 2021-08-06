@@ -1197,10 +1197,10 @@ class ActivityClientController extends IActivityClientController.Stub {
 
                 final Task task = r.getTask();
                 isLastRunningActivity = task.topRunningActivity() == r;
-                final Intent baseIntent = task.getBaseIntent();
-                final boolean activityIsBaseActivity = baseIntent != null
-                        && r.mActivityComponent.equals(baseIntent.getComponent());
-                baseActivityIntent = activityIsBaseActivity ? r.intent : null;
+
+                final boolean isBaseActivity = r.mActivityComponent.equals(task.realActivity);
+                baseActivityIntent = isBaseActivity ? r.intent : null;
+
                 launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 

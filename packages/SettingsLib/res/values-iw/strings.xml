@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת Wi-Fi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏ויסות סריקה לנקודות Wi-Fi"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏רנדומיזציה של כתובות MAC בלי חיבור יציב ל-Wi-Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏רנדומיזציה של כתובות MAC משתנות ברשתות Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"‏הצגת מכשירי Bluetooth ללא שמות"</string>

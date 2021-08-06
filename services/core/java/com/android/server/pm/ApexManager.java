@@ -250,6 +250,14 @@ public abstract class ApexManager {
             throws PackageManagerException;
 
     /**
+     * Returns {@code ApeInfo} about apex sessions that have been marked ready via
+     * {@link #markStagedSessionReady(int)}
+     *
+     * Returns empty array if there is no staged apex session or if there is any error.
+     */
+    abstract ApexInfo[] getStagedApexInfos(ApexSessionParams params);
+
+    /**
      * Mark a staged session previously submitted using {@code submitStagedSession} as ready to be
      * applied at next reboot.
      *
@@ -758,6 +766,19 @@ public abstract class ApexManager {
         }
 
         @Override
+        ApexInfo[] getStagedApexInfos(ApexSessionParams params) {
+            try {
+                return waitForApexService().getStagedApexInfos(params);
+            } catch (RemoteException re) {
+                Slog.w(TAG, "Unable to contact apexservice" + re.getMessage());
+                throw new RuntimeException(re);
+            } catch (Exception e) {
+                Slog.w(TAG, "Failed to collect staged apex infos" + e.getMessage());
+                return new ApexInfo[0];
+            }
+        }
+
+        @Override
         void markStagedSessionReady(int sessionId) throws PackageManagerException {
             try {
                 waitForApexService().markStagedSessionReady(sessionId);
@@ -1247,6 +1268,11 @@ public abstract class ApexManager {
                 throws PackageManagerException {
             throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                     "Device doesn't support updating APEX");
+        }
+
+        @Override
+        ApexInfo[] getStagedApexInfos(ApexSessionParams params) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

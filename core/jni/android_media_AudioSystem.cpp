@@ -2432,6 +2432,12 @@ android_media_AudioSystem_setAssistantUid(JNIEnv *env, jobject thiz, jint uid)
     return (jint)nativeToJavaStatus(status);
 }
 
+static jint android_media_AudioSystem_setHotwordDetectionServiceUid(JNIEnv *env, jobject thiz,
+                                                                    jint uid) {
+    status_t status = AudioSystem::setHotwordDetectionServiceUid(uid);
+    return (jint)nativeToJavaStatus(status);
+}
+
 static jint
 android_media_AudioSystem_setA11yServicesUids(JNIEnv *env, jobject thiz, jintArray uids) {
     std::vector<uid_t> nativeUidsVector;
@@ -2804,6 +2810,8 @@ static const JNINativeMethod gMethods[] =
          {"setSurroundFormatEnabled", "(IZ)I",
           (void *)android_media_AudioSystem_setSurroundFormatEnabled},
          {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
+         {"setHotwordDetectionServiceUid", "(I)I",
+          (void *)android_media_AudioSystem_setHotwordDetectionServiceUid},
          {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
          {"isHapticPlaybackSupported", "()Z",
           (void *)android_media_AudioSystem_isHapticPlaybackSupported},

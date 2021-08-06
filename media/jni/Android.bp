@@ -183,8 +183,8 @@ cc_library_shared {
         "libmedia",
         "libnativehelper",
         "libutils",
-        "tv_tuner_aidl_interface-ndk_platform",
-        "tv_tuner_resource_manager_aidl_interface-ndk_platform",
+        "tv_tuner_aidl_interface-ndk",
+        "tv_tuner_resource_manager_aidl_interface-ndk",
     ],
 
     static_libs: [

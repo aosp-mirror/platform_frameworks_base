@@ -43,8 +43,8 @@ import java.util.Map;
 /** @hide */
 public abstract class ParsedComponent implements Parcelable {
 
-    private static ParsedIntentInfo.ListParceler sForIntentInfos = Parcelling.Cache.getOrCreate(
-            ParsedIntentInfo.ListParceler.class);
+    private static final ParsedIntentInfo.ListParceler sForIntentInfos =
+            Parcelling.Cache.getOrCreate(ParsedIntentInfo.ListParceler.class);
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)

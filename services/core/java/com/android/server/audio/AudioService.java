@@ -738,6 +738,11 @@ public class AudioService extends IAudioService.Stub
     private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
 
+    // Uid of the active hotword detection service to check if caller is the one or not.
+    @GuardedBy("mHotwordDetectionServiceUidLock")
+    private int mHotwordDetectionServiceUid = android.os.Process.INVALID_UID;
+    private final Object mHotwordDetectionServiceUidLock = new Object();
+
     // Array of Uids of valid accessibility services to check if caller is one of them
     private final Object mAccessibilityServiceUidsLock = new Object();
     @GuardedBy("mAccessibilityServiceUidsLock")
@@ -1338,6 +1343,9 @@ public class AudioService extends IAudioService.Stub
             sendEnabledSurroundFormats(mContentResolver, true);
             updateAssistantUId(true);
             AudioSystem.setRttEnabled(mRttEnabled);
+        }
+        synchronized (mHotwordDetectionServiceUidLock) {
+            AudioSystem.setHotwordDetectionServiceUid(mHotwordDetectionServiceUid);
         }
         synchronized (mAccessibilityServiceUidsLock) {
             AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
@@ -9077,6 +9085,16 @@ public class AudioService extends IAudioService.Stub
             synchronized (mSettingsLock) {
                 if (updateRingerAndZenModeAffectedStreams()) {
                     setRingerModeInt(getRingerModeInternal(), false);
+                }
+            }
+        }
+
+        @Override
+        public void setHotwordDetectionServiceUid(int uid) {
+            synchronized (mHotwordDetectionServiceUidLock) {
+                if (mHotwordDetectionServiceUid != uid) {
+                    mHotwordDetectionServiceUid = uid;
+                    AudioSystem.setHotwordDetectionServiceUid(mHotwordDetectionServiceUid);
                 }
             }
         }

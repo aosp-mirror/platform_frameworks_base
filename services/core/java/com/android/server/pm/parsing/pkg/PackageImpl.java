@@ -55,6 +55,7 @@ import java.util.UUID;
  */
 public final class PackageImpl extends ParsingPackageImpl implements ParsedPackage, AndroidPackage {
 
+    @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
             @NonNull String codePath, @NonNull TypedArray manifestArray, boolean isCoreApp) {
         return new PackageImpl(packageName, baseCodePath, codePath, manifestArray, isCoreApp);
@@ -70,6 +71,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
      * this case only cares about
      * volumeUuid, just fake it rather than having separate method paths.
      */
+    @NonNull
     public static AndroidPackage buildFakeForDeletion(String packageName, String volumeUuid) {
         return ((ParsedPackage) PackageImpl.forTesting(packageName)
                 .setVolumeUuid(volumeUuid)
@@ -77,11 +79,13 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
                 .hideAsFinal();
     }
 
+    @NonNull
     @VisibleForTesting
     public static ParsingPackage forTesting(String packageName) {
         return forTesting(packageName, "");
     }
 
+    @NonNull
     @VisibleForTesting
     public static ParsingPackage forTesting(String packageName, String baseCodePath) {
         return new PackageImpl(packageName, baseCodePath, baseCodePath, null, false);
@@ -568,6 +572,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         assignDerivedFields();
     }
 
+    @NonNull
     public static final Creator<PackageImpl> CREATOR = new Creator<PackageImpl>() {
         @Override
         public PackageImpl createFromParcel(Parcel source) {

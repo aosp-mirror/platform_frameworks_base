@@ -17,6 +17,12 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.perftests.packagemanager">
+    <!-- prevent test application from being obscured because of package visibility -->
+    <queries>
+        <package android:name="com.android.cts.install.lib.testapp.A" />
+        <package android:name="com.android.cts.install.lib.testapp.B" />
+        <package android:name="com.android.cts.install.lib.testapp.C" />
+    </queries>
 
     <permission android:name="com.android.perftests.packagemanager.TestPermission" />
     <uses-permission android:name="com.android.perftests.packagemanager.TestPermission" />

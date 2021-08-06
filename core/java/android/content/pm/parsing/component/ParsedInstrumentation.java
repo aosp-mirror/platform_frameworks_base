@@ -18,6 +18,7 @@ package android.content.pm.parsing.component;
 
 import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.Parcel;
@@ -94,6 +95,7 @@ public class ParsedInstrumentation extends ParsedComponent {
         this.functionalTest = in.readByte() != 0;
     }
 
+    @NonNull
     public static final Parcelable.Creator<ParsedInstrumentation> CREATOR =
             new Parcelable.Creator<ParsedInstrumentation>() {
                 @Override
