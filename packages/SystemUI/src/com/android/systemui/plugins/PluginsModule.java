@@ -18,6 +18,7 @@ package com.android.systemui.plugins;
 
 import static com.android.systemui.util.concurrency.GlobalConcurrencyModule.PRE_HANDLER;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -32,6 +33,8 @@ import com.android.systemui.shared.plugins.PluginPrefs;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -70,9 +73,12 @@ public abstract class PluginsModule {
     @Singleton
     static PluginInstanceManager.Factory providePluginInstanceManagerFactory(Context context,
             PackageManager packageManager, @Main Executor mainExecutor,
-            @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer) {
+            @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer,
+            NotificationManager notificationManager, PluginEnabler pluginEnabler,
+            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins) {
         return new PluginInstanceManager.Factory(
-                context, packageManager, mainExecutor, pluginExecutor, initializer);
+                context, packageManager, mainExecutor, pluginExecutor, initializer,
+                notificationManager, pluginEnabler, privilegedPlugins);
     }
 
     @Provides
@@ -91,7 +97,7 @@ public abstract class PluginsModule {
                     Optional<Thread.UncaughtExceptionHandler> uncaughtExceptionHandlerOptional,
             PluginEnabler pluginEnabler,
             PluginPrefs pluginPrefs,
-            @Named(PLUGIN_PRIVILEGED) String[] privilegedPlugins) {
+            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins) {
         return new PluginManagerImpl(context, instanceManagerFactory, debug,
                 uncaughtExceptionHandlerOptional, pluginEnabler, pluginPrefs,
                 privilegedPlugins);
@@ -104,7 +110,7 @@ public abstract class PluginsModule {
 
     @Provides
     @Named(PLUGIN_PRIVILEGED)
-    static String[] providesPrivilegedPlugins(PluginInitializer initializer, Context context) {
-        return initializer.getPrivilegedPlugins(context);
+    static List<String> providesPrivilegedPlugins(PluginInitializer initializer, Context context) {
+        return Arrays.asList(initializer.getPrivilegedPlugins(context));
     }
 }

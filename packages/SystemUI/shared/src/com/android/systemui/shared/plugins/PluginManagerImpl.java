@@ -14,24 +14,15 @@
 
 package com.android.systemui.shared.plugins;
 
-import android.app.LoadedApk;
-import android.app.Notification;
-import android.app.Notification.Action;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -41,14 +32,9 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 
-import dalvik.system.PathClassLoader;
-
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,16 +50,13 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private final ArrayMap<PluginListener<?>, PluginInstanceManager<?>> mPluginMap
             = new ArrayMap<>();
     private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
-    private final ArraySet<String> mOneShotPackages = new ArraySet<>();
     private final ArraySet<String> mPrivilegedPlugins = new ArraySet<>();
     private final Context mContext;
     private final PluginInstanceManager.Factory mInstanceManagerFactory;
     private final boolean mIsDebuggable;
     private final PluginPrefs mPluginPrefs;
     private final PluginEnabler mPluginEnabler;
-    private ClassLoaderFilter mParentClassLoader;
     private boolean mListening;
-    private boolean mHasOneShot;
 
     public PluginManagerImpl(Context context,
             PluginInstanceManager.Factory instanceManagerFactory,
@@ -81,11 +64,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Optional<UncaughtExceptionHandler> defaultHandlerOptional,
             PluginEnabler pluginEnabler,
             PluginPrefs pluginPrefs,
-            String[] privilegedPlugins) {
+            List<String> privilegedPlugins) {
         mContext = context;
         mInstanceManagerFactory = instanceManagerFactory;
         mIsDebuggable = debuggable;
-        mPrivilegedPlugins.addAll(Arrays.asList(privilegedPlugins));
+        mPrivilegedPlugins.addAll(privilegedPlugins);
         mPluginPrefs = pluginPrefs;
         mPluginEnabler = pluginEnabler;
 
@@ -100,10 +83,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     public String[] getPrivilegedPlugins() {
         return mPrivilegedPlugins.toArray(new String[0]);
-    }
-
-    public PluginEnabler getPluginEnabler() {
-        return mPluginEnabler;
     }
 
     public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {
@@ -124,8 +103,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Class<?> cls, boolean allowMultiple) {
         mPluginPrefs.addAction(action);
         PluginInstanceManager<T> p = mInstanceManagerFactory.create(action, listener, allowMultiple,
-                new VersionInfo().addClass(cls), this, isDebuggable(),
-                getPrivilegedPlugins());
+                new VersionInfo().addClass(cls), isDebuggable());
         p.loadAll();
         synchronized (this) {
             mPluginMap.put(listener, p);
@@ -163,8 +141,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     private void stopListening() {
-        // Never stop listening if a one-shot is present.
-        if (!mListening || mHasOneShot) return;
+        if (!mListening) return;
         mListening = false;
         mContext.unregisterReceiver(this);
     }
@@ -185,42 +162,13 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 // Don't disable privileged plugins as they are a part of the OS.
                 return;
             }
-            getPluginEnabler().setDisabled(component, PluginEnabler.DISABLED_INVALID_VERSION);
+            mPluginEnabler.setDisabled(component, PluginEnabler.DISABLED_INVALID_VERSION);
             mContext.getSystemService(NotificationManager.class).cancel(component.getClassName(),
                     SystemMessage.NOTE_PLUGIN);
         } else {
             Uri data = intent.getData();
             String pkg = data.getEncodedSchemeSpecificPart();
             ComponentName componentName = ComponentName.unflattenFromString(pkg);
-            if (mOneShotPackages.contains(pkg)) {
-                int icon = Resources.getSystem().getIdentifier(
-                        "stat_sys_warning", "drawable", "android");
-                int color = Resources.getSystem().getIdentifier(
-                        "system_notification_accent_color", "color", "android");
-                String label = pkg;
-                try {
-                    PackageManager pm = mContext.getPackageManager();
-                    label = pm.getApplicationInfo(pkg, 0).loadLabel(pm).toString();
-                } catch (NameNotFoundException e) {
-                }
-                // Localization not required as this will never ever appear in a user build.
-                final Notification.Builder nb =
-                        new Notification.Builder(mContext, NOTIFICATION_CHANNEL_ID)
-                                .setSmallIcon(icon)
-                                .setWhen(0)
-                                .setShowWhen(false)
-                                .setPriority(Notification.PRIORITY_MAX)
-                                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                                .setColor(mContext.getColor(color))
-                                .setContentTitle("Plugin \"" + label + "\" has updated")
-                                .setContentText("Restart SysUI for changes to take effect.");
-                Intent i = new Intent("com.android.systemui.action.RESTART").setData(
-                            Uri.parse("package://" + pkg));
-                PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_MUTABLE_UNAUDITED);
-                nb.addAction(new Action.Builder(null, "Restart SysUI", pi).build());
-                mContext.getSystemService(NotificationManager.class)
-                        .notify(SystemMessage.NOTE_PLUGIN, nb.build());
-            }
             if (clearClassLoader(pkg)) {
                 if (Build.IS_ENG) {
                     Toast.makeText(mContext, "Reloading " + pkg, Toast.LENGTH_LONG).show();
@@ -231,13 +179,13 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             if (Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())
                     && componentName != null) {
                 @PluginEnabler.DisableReason int disableReason =
-                        getPluginEnabler().getDisableReason(componentName);
+                        mPluginEnabler.getDisableReason(componentName);
                 if (disableReason == PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH
                         || disableReason == PluginEnabler.DISABLED_FROM_SYSTEM_CRASH
                         || disableReason == PluginEnabler.DISABLED_INVALID_VERSION) {
                     Log.i(TAG, "Re-enabling previously disabled plugin that has been "
                             + "updated: " + componentName.flattenToShortString());
-                    getPluginEnabler().setEnabled(componentName);
+                    mPluginEnabler.setEnabled(componentName);
                 }
             }
             synchronized (this) {
@@ -254,39 +202,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         }
     }
 
-    /** Returns class loader specific for the given plugin. */
-    public ClassLoader getClassLoader(ApplicationInfo appInfo) {
-        if (!mIsDebuggable && !isPluginPackagePrivileged(appInfo.packageName)) {
-            Log.w(TAG, "Cannot get class loader for non-privileged plugin. Src:"
-                    + appInfo.sourceDir + ", pkg: " + appInfo.packageName);
-            return null;
-        }
-        if (mClassLoaders.containsKey(appInfo.packageName)) {
-            return mClassLoaders.get(appInfo.packageName);
-        }
-
-        List<String> zipPaths = new ArrayList<>();
-        List<String> libPaths = new ArrayList<>();
-        LoadedApk.makePaths(null, true, appInfo, zipPaths, libPaths);
-        ClassLoader classLoader = new PathClassLoader(
-                TextUtils.join(File.pathSeparator, zipPaths),
-                TextUtils.join(File.pathSeparator, libPaths),
-                getParentClassLoader());
-        mClassLoaders.put(appInfo.packageName, classLoader);
-        return classLoader;
-    }
-
     private boolean clearClassLoader(String pkg) {
         return mClassLoaders.remove(pkg) != null;
-    }
-
-    ClassLoader getParentClassLoader() {
-        if (mParentClassLoader == null) {
-            // Lazily load this so it doesn't have any effect on devices without plugins.
-            mParentClassLoader = new ClassLoaderFilter(getClass().getClassLoader(),
-                    "com.android.systemui.plugin");
-        }
-        return mParentClassLoader;
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
@@ -310,20 +227,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         }
     }
 
-    private boolean isPluginPackagePrivileged(String packageName) {
-        for (String componentNameOrPackage : mPrivilegedPlugins) {
-            ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
-            if (componentName != null) {
-                if (componentName.getPackageName().equals(packageName)) {
-                    return true;
-                }
-            } else if (componentNameOrPackage.equals(packageName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private boolean isPluginPrivileged(ComponentName pluginName) {
         for (String componentNameOrPackage : mPrivilegedPlugins) {
             ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
@@ -340,7 +243,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     // This allows plugins to include any libraries or copied code they want by only including
     // classes from the plugin library.
-    private static class ClassLoaderFilter extends ClassLoader {
+    static class ClassLoaderFilter extends ClassLoader {
         private final String mPackage;
         private final ClassLoader mBase;
 
