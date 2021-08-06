@@ -130,7 +130,7 @@ public final class OneHandedSettingsUtil {
      */
     public boolean getSettingsTapsAppToExit(ContentResolver resolver, int userId) {
         return Settings.Secure.getIntForUser(resolver,
-                Settings.Secure.TAPS_APP_TO_EXIT, 0, userId) == 1;
+                Settings.Secure.TAPS_APP_TO_EXIT, 1, userId) == 1;
     }
 
     /**
