@@ -71,12 +71,14 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     public static final int TASK_LISTENER_TYPE_FULLSCREEN = -2;
     public static final int TASK_LISTENER_TYPE_MULTI_WINDOW = -3;
     public static final int TASK_LISTENER_TYPE_PIP = -4;
+    public static final int TASK_LISTENER_TYPE_FREEFORM = -5;
 
     @IntDef(prefix = {"TASK_LISTENER_TYPE_"}, value = {
             TASK_LISTENER_TYPE_UNDEFINED,
             TASK_LISTENER_TYPE_FULLSCREEN,
             TASK_LISTENER_TYPE_MULTI_WINDOW,
             TASK_LISTENER_TYPE_PIP,
+            TASK_LISTENER_TYPE_FREEFORM,
     })
     public @interface TaskListenerType {}
 
@@ -572,6 +574,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             case WINDOWING_MODE_PINNED:
                 return TASK_LISTENER_TYPE_PIP;
             case WINDOWING_MODE_FREEFORM:
+                return TASK_LISTENER_TYPE_FREEFORM;
             case WINDOWING_MODE_UNDEFINED:
             default:
                 return TASK_LISTENER_TYPE_UNDEFINED;
@@ -586,6 +589,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 return "TASK_LISTENER_TYPE_MULTI_WINDOW";
             case TASK_LISTENER_TYPE_PIP:
                 return "TASK_LISTENER_TYPE_PIP";
+            case TASK_LISTENER_TYPE_FREEFORM:
+                return "TASK_LISTENER_TYPE_FREEFORM";
             case TASK_LISTENER_TYPE_UNDEFINED:
                 return "TASK_LISTENER_TYPE_UNDEFINED";
             default:

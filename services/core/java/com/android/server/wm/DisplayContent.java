@@ -4586,7 +4586,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return true;
             }
 
-            if (task.isOrganized()) {
+            // TODO(b/165794880): Freeform task organizer doesn't support drag-resize yet. Remove
+            // the special case when it does.
+            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
                 return true;
             }
 
