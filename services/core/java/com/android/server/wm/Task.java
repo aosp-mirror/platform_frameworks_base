@@ -4174,8 +4174,7 @@ class Task extends TaskFragment {
     }
 
     private boolean canBeOrganized() {
-        if (mForceNotOrganized || !mAtmService.mTaskOrganizerController
-                .isSupportedWindowingMode(getWindowingMode())) {
+        if (mForceNotOrganized) {
             return false;
         }
         // All root tasks can be organized
@@ -4332,7 +4331,7 @@ class Task extends TaskFragment {
 
         final int windowingMode = getWindowingMode();
         final TaskOrganizerController controller = mWmService.mAtmService.mTaskOrganizerController;
-        final ITaskOrganizer organizer = controller.getTaskOrganizer(windowingMode);
+        final ITaskOrganizer organizer = controller.getTaskOrganizer();
         if (!forceUpdate && mTaskOrganizer == organizer) {
             return false;
         }

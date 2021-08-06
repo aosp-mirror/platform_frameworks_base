@@ -36,6 +36,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -86,6 +87,18 @@ public class WMShellModule {
             TransactionPool transactionPool) {
         return new DisplayImeController(wmService, displayController, mainExecutor,
                 transactionPool);
+    }
+
+    //
+    // Freeform
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<FreeformTaskListener> provideFreeformTaskListener(
+            Context context,
+            SyncTransactionQueue syncQueue) {
+        return Optional.ofNullable(FreeformTaskListener.create(context, syncQueue));
     }
 
     //
