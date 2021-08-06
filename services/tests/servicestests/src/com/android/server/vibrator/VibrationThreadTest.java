@@ -83,7 +83,7 @@ import java.util.stream.Collectors;
 @Presubmit
 public class VibrationThreadTest {
 
-    private static final int TEST_TIMEOUT_MILLIS = 1_000;
+    private static final int TEST_TIMEOUT_MILLIS = 900;
     private static final int UID = Process.ROOT_UID;
     private static final int VIBRATOR_ID = 1;
     private static final String PACKAGE_NAME = "package";
