@@ -742,7 +742,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         void setListening(boolean listening, UiEventLogger uiEventLogger);
 
         /**
-         * Set the minimum number of rows to show
+         * Sets the minimum number of rows to show
          *
          * @param minRows the minimum.
          */
@@ -751,7 +751,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
 
         /**
-         * Set the max number of columns to show
+         * Sets the max number of columns to show
          *
          * @param maxColumns the maximum
          *
@@ -761,7 +761,10 @@ public class QSPanel extends LinearLayout implements Tunable {
             return false;
         }
 
-        default void setExpansion(float expansion) {}
+        /**
+         * Sets the expansion value and proposedTranslation to panel.
+         */
+        default void setExpansion(float expansion, float proposedTranslation) {}
 
         int getNumVisibleTiles();
     }

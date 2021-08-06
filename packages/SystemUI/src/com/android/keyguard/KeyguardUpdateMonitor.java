@@ -2842,6 +2842,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mSecureCameraLaunched = false;
         }
 
+        if (mKeyguardBypassController != null) {
+            // LS visibility has changed, so reset deviceEntryIntent
+            mKeyguardBypassController.setUserHasDeviceEntryIntent(false);
+        }
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {

@@ -91,7 +91,7 @@ public class MultiResolutionImageReader implements AutoCloseable {
      * </p>
      * <p>
      * The {@code maxImages} parameter determines the maximum number of
-     * {@link Image} objects that can be be acquired from each of the {@code ImageReader}
+     * {@link Image} objects that can be acquired from each of the {@code ImageReader}
      * within the {@code MultiResolutionImageReader}. However, requesting more buffers will
      * use up more memory, so it is important to use only the minimum number necessary. The
      * application is strongly recommended to acquire no more than {@code maxImages} images

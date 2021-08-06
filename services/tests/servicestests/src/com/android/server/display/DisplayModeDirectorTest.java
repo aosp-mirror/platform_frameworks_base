@@ -1340,11 +1340,19 @@ public class DisplayModeDirectorTest {
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
         director.start(createMockSensorManager());
 
-        ArgumentCaptor<ProximityActiveListener> captor =
+        ArgumentCaptor<ProximityActiveListener> ProximityCaptor =
                 ArgumentCaptor.forClass(ProximityActiveListener.class);
         verify(mSensorManagerInternalMock).addProximityActiveListener(any(Executor.class),
-                captor.capture());
-        ProximityActiveListener listener = captor.getValue();
+                ProximityCaptor.capture());
+        ProximityActiveListener proximityListener = ProximityCaptor.getValue();
+
+        ArgumentCaptor<DisplayListener> DisplayCaptor =
+                ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(DisplayCaptor.capture(), any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED));
+        DisplayListener displayListener = DisplayCaptor.getValue();
 
         // Verify that there is no proximity vote initially
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
@@ -1353,13 +1361,38 @@ public class DisplayModeDirectorTest {
         when(mDisplayManagerInternalMock.getRefreshRateForDisplayAndSensor(eq(DISPLAY_ID), eq(null),
                   eq(Sensor.STRING_TYPE_PROXIMITY))).thenReturn(new RefreshRateRange(60, 60));
 
+        when(mInjector.isDozeState(any(Display.class))).thenReturn(false);
+
         // Set the proximity to active and verify that we added a vote.
-        listener.onProximityActive(true);
+        proximityListener.onProximityActive(true);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertVoteForRefreshRate(vote, 60.f);
+
+        // Set the display state to doze and verify that the vote is gone
+        when(mInjector.isDozeState(any(Display.class))).thenReturn(true);
+        displayListener.onDisplayAdded(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertNull(vote);
+
+        // Set the display state to on and verify that we added the vote back.
+        when(mInjector.isDozeState(any(Display.class))).thenReturn(false);
+        displayListener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertVoteForRefreshRate(vote, 60.f);
+
+        // Set the display state to doze and verify that the vote is gone
+        when(mInjector.isDozeState(any(Display.class))).thenReturn(true);
+        displayListener.onDisplayAdded(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertNull(vote);
+
+        // Remove the display to cause the doze state to be removed
+        displayListener.onDisplayRemoved(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
         assertVoteForRefreshRate(vote, 60.f);
 
         // Turn prox off and verify vote is gone.
-        listener.onProximityActive(false);
+        proximityListener.onProximityActive(false);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
         assertNull(vote);
     }
@@ -1708,6 +1741,11 @@ public class DisplayModeDirectorTest {
         @Override
         public BrightnessInfo getBrightnessInfo(int displayId) {
             return null;
+        }
+
+        @Override
+        public boolean isDozeState(Display d) {
+            return false;
         }
 
         void notifyPeakRefreshRateChanged() {

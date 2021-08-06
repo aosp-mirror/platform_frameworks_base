@@ -177,6 +177,8 @@ public class QuickQSPanel extends QSPanel {
 
     static class QQSSideLabelTileLayout extends SideLabelTileLayout {
 
+        private boolean mLastSelected;
+
         QQSSideLabelTileLayout(Context context) {
             super(context, null);
             setClipChildren(false);
@@ -221,6 +223,30 @@ public class QuickQSPanel extends QSPanel {
                             tile.getMetricsSpec(), tile.getInstanceId());
                 }
             }
+        }
+
+        @Override
+        public void setExpansion(float expansion, float proposedTranslation) {
+            if (expansion > 0f && expansion < 1f) {
+                return;
+            }
+            // The cases we must set select for marquee when QQS/QS collapsed, and QS full expanded.
+            // Expansion == 0f is when QQS is fully showing (as opposed to 1f, which is QS). At this
+            // point we want them to be selected so the tiles will marquee (but not at other points
+            // of expansion.
+            boolean selected = (expansion == 1f || proposedTranslation < 0f);
+            if (mLastSelected == selected) {
+                return;
+            }
+            // We set it as not important while we change this, so setting each tile as selected
+            // will not cause them to announce themselves until the user has actually selected the
+            // item.
+            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+            for (int i = 0; i < getChildCount(); i++) {
+                getChildAt(i).setSelected(selected);
+            }
+            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            mLastSelected = selected;
         }
     }
 }
