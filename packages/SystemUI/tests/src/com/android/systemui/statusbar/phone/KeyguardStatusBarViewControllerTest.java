@@ -17,11 +17,14 @@
 package com.android.systemui.statusbar.phone;
 
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.view.ViewGroup;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
@@ -37,15 +40,14 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
-    @Mock
-    private KeyguardStatusBarView mKeyguardStatusBarView;
-    @Mock
-    private ViewGroup mViewGroup;
     @Mock
     private CarrierTextController mCarrierTextController;
     @Mock
@@ -63,15 +65,19 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
 
+    private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mKeyguardStatusBarView.getResources()).thenReturn(mContext.getResources());
-        when(mKeyguardStatusBarView.findViewById(R.id.statusIcons)).thenReturn(mViewGroup);
-        when(mViewGroup.getContext()).thenReturn(mContext);
+        allowTestableLooperAsMainThread();
+        TestableLooper.get(this).runWithLooper(() -> {
+            mKeyguardStatusBarView =
+                    (KeyguardStatusBarView) LayoutInflater.from(mContext)
+                            .inflate(R.layout.keyguard_status_bar, null);
+        });
 
         mController = new KeyguardStatusBarViewController(
                 mKeyguardStatusBarView,
@@ -132,5 +138,28 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.setBatteryListening(true);
 
         verify(mBatteryController).addCallback(any());
+    }
+
+    @Test
+    public void updateTopClipping_viewClippingUpdated() {
+        int viewTop = 20;
+        mKeyguardStatusBarView.setTop(viewTop);
+        int notificationPanelTop = 30;
+
+        mController.updateTopClipping(notificationPanelTop);
+
+        assertThat(mKeyguardStatusBarView.getClipBounds().top).isEqualTo(
+                notificationPanelTop - viewTop);
+    }
+
+    @Test
+    public void setNotTopClipping_viewClippingUpdatedToZero() {
+        // Start out with some amount of top clipping.
+        mController.updateTopClipping(50);
+        assertThat(mKeyguardStatusBarView.getClipBounds().top).isGreaterThan(0);
+
+        mController.setNoTopClipping();
+
+        assertThat(mKeyguardStatusBarView.getClipBounds().top).isEqualTo(0);
     }
 }

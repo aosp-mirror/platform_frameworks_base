@@ -201,6 +201,21 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         }
     }
 
+    /** Set the view to have no top clipping. */
+    public void setNoTopClipping() {
+        mView.setTopClipping(0);
+    }
+
+    /**
+     * Update the view's top clipping based on the value of notificationPanelTop and the view's
+     * current top.
+     *
+     * @param notificationPanelTop the current top of the notification panel view.
+     */
+    public void updateTopClipping(int notificationPanelTop) {
+        mView.setTopClipping(notificationPanelTop - mView.getTop());
+    }
+
     /** */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
