@@ -32,10 +32,6 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
@@ -215,7 +211,7 @@ class InsetsPolicy {
     InsetsState getInsetsForWindow(WindowState target) {
         final InsetsState originalState = mStateController.getInsetsForWindow(target);
         final InsetsState state = adjustVisibilityForTransientTypes(originalState);
-        return adjustVisibilityForIme(target, state, state == originalState);
+        return target.mIsImWindow ? adjustVisibilityForIme(state, state == originalState) : state;
     }
 
     /**
@@ -245,38 +241,16 @@ class InsetsPolicy {
         return state;
     }
 
-    private InsetsState adjustVisibilityForIme(WindowState w, InsetsState originalState,
+    // Navigation bar insets is always visible to IME.
+    private static InsetsState adjustVisibilityForIme(InsetsState originalState,
             boolean copyState) {
-        if (w.mIsImWindow) {
-            // Navigation bar insets is always visible to IME.
-            final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
-            if (originalNavSource != null && !originalNavSource.isVisible()) {
-                final InsetsState state = copyState ? new InsetsState(originalState)
-                        : originalState;
-                final InsetsSource navSource = new InsetsSource(originalNavSource);
-                navSource.setVisible(true);
-                state.addSource(navSource);
-                return state;
-            }
-        } else if (w.mActivityRecord != null && !w.mActivityRecord.mLastImeShown) {
-            // During switching tasks with gestural navigation, if the IME is attached to
-            // one app window on that time, even the next app window is behind the IME window,
-            // conceptually the window should not receive the IME insets if the next window is
-            // not eligible IME requester and ready to show IME on top of it.
-            final boolean shouldImeAttachedToApp = mDisplayContent.shouldImeAttachedToApp();
-            final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
-
-            if (originalImeSource != null && shouldImeAttachedToApp
-                    && (w.isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_RECENTS)
-                            || !w.getRequestedVisibility(ITYPE_IME))) {
-                final InsetsState state = copyState ? new InsetsState(originalState)
-                        : originalState;
-
-                final InsetsSource imeSource = new InsetsSource(originalImeSource);
-                imeSource.setVisible(false);
-                state.addSource(imeSource);
-                return state;
-            }
+        final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
+        if (originalNavSource != null && !originalNavSource.isVisible()) {
+            final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
+            final InsetsSource navSource = new InsetsSource(originalNavSource);
+            navSource.setVisible(true);
+            state.addSource(navSource);
+            return state;
         }
         return originalState;
     }
