@@ -21,6 +21,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import javax.inject.Inject;
 
@@ -41,13 +43,16 @@ public class BrightnessDialog extends Activity {
     private BrightnessController mBrightnessController;
     private final BrightnessSlider.Factory mToggleSliderFactory;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final Handler mBackgroundHandler;
 
     @Inject
     public BrightnessDialog(
             BroadcastDispatcher broadcastDispatcher,
-            BrightnessSlider.Factory factory) {
+            BrightnessSlider.Factory factory,
+            @Background Handler bgHandler) {
         mBroadcastDispatcher = broadcastDispatcher;
         mToggleSliderFactory = factory;
+        mBackgroundHandler = bgHandler;
     }
 
 
@@ -76,7 +81,8 @@ public class BrightnessDialog extends Activity {
         controller.init();
         frame.addView(controller.getRootView(), MATCH_PARENT, WRAP_CONTENT);
 
-        mBrightnessController = new BrightnessController(this, controller, mBroadcastDispatcher);
+        mBrightnessController = new BrightnessController(
+                this, controller, mBroadcastDispatcher, mBackgroundHandler);
     }
 
     @Override
