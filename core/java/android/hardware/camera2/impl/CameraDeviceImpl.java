@@ -697,12 +697,12 @@ public class CameraDeviceImpl extends CameraDevice
             }
 
             if (mCurrentExtensionSession != null) {
-                mCurrentExtensionSession.release();
+                mCurrentExtensionSession.release(false /*skipCloseNotification*/);
                 mCurrentExtensionSession = null;
             }
 
             if (mCurrentAdvancedExtensionSession != null) {
-                mCurrentAdvancedExtensionSession.release();
+                mCurrentAdvancedExtensionSession.release(false /*skipCloseNotification*/);
                 mCurrentAdvancedExtensionSession = null;
             }
 
@@ -1352,12 +1352,12 @@ public class CameraDeviceImpl extends CameraDevice
             }
 
             if (mCurrentExtensionSession != null) {
-                mCurrentExtensionSession.release();
+                mCurrentExtensionSession.release(true /*skipCloseNotification*/);
                 mCurrentExtensionSession = null;
             }
 
             if (mCurrentAdvancedExtensionSession != null) {
-                mCurrentAdvancedExtensionSession.release();
+                mCurrentAdvancedExtensionSession.release(true /*skipCloseNotification*/);
                 mCurrentAdvancedExtensionSession = null;
             }
 
