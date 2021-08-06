@@ -51,19 +51,13 @@ class EnterpriseSpecificIdCalculator {
 
     EnterpriseSpecificIdCalculator(Context context) {
         TelephonyManager telephonyService = context.getSystemService(TelephonyManager.class);
-        if (telephonyService != null) {
-            mImei = telephonyService.getImei(0);
-            mMeid = telephonyService.getMeid(0);
-        } else {
-            mImei = "";
-            mMeid = "";
-        }
+        Preconditions.checkState(telephonyService != null, "Unable to access telephony service");
+        mImei = telephonyService.getImei(0);
+        mMeid = telephonyService.getMeid(0);
         mSerialNumber = Build.getSerial();
         WifiManager wifiManager = context.getSystemService(WifiManager.class);
-        String[] macAddresses = null;
-        if (wifiManager != null) {
-            macAddresses = wifiManager.getFactoryMacAddresses();
-        }
+        Preconditions.checkState(wifiManager != null, "Unable to access WiFi service");
+        final String[] macAddresses = wifiManager.getFactoryMacAddresses();
         if (macAddresses == null || macAddresses.length == 0) {
             mMacAddress = "";
         } else {

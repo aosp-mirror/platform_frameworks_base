@@ -13736,8 +13736,6 @@ public class DevicePolicyManager {
      *
      * It is recommended that the Enterprise ID is at least 6 characters long, and no more than
      * 64 characters.
-     * This API is supposed to be called only after the boot phase is complete,
-     * throws {@link IllegalStateException} if called before boot phase is complete.
      *
      * @param enterpriseId An identifier of the organization this work profile or device is
      *                     enrolled into.
