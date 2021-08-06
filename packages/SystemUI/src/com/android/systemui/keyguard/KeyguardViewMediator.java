@@ -2603,7 +2603,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             if (mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_guestUserAutoCreated)) {
                 // TODO(b/191067027): Move post-boot guest creation to system_server
-                mUserSwitcherController.guaranteeGuestPresent();
+                mUserSwitcherController.schedulePostBootGuestCreation();
             }
             mBootCompleted = true;
             adjustStatusBarLocked(false, true);
