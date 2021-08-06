@@ -116,7 +116,7 @@ public class NavigationBarController implements Callbacks,
     private final TaskbarDelegate mTaskbarDelegate;
     private final NotificationShadeDepthController mNotificationShadeDepthController;
     private int mNavMode;
-    private boolean mIsTablet;
+    @VisibleForTesting boolean mIsTablet;
     private final UserTracker mUserTracker;
 
     /** A displayId - nav bar maps. */
