@@ -13511,6 +13511,54 @@ public final class Settings {
         public static final int DEFAULT_ENABLE_TARE = 0;
 
         /**
+         * Whether to enable the TARE AlarmManager economic policy or not.
+         * 1 means enable, 0 means disable.
+         *
+         * @hide
+         */
+        public static final String ENABLE_TARE_ALARM_MANAGER = "enable_tare_alarm_manager";
+
+        /**
+         * Default value for {@link #ENABLE_TARE_ALARM_MANAGER}.
+         *
+         * @hide
+         */
+        public static final int DEFAULT_ENABLE_TARE_ALARM_MANAGER = 0;
+
+        /**
+         * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).
+         *
+         * Keys are listed in {@link android.app.tare.EconomyManager}.
+         *
+         * @hide
+         */
+        public static final String TARE_ALARM_MANAGER_CONSTANTS = "tare_alarm_manager_constants";
+
+        /**
+         * Whether to enable the TARE JobScheduler economic policy or not.
+         * 1 means enable, 0 means disable.
+         *
+         * @hide
+         */
+        public static final String ENABLE_TARE_JOB_SCHEDULER = "enable_tare_job_scheduler";
+
+        /**
+         * Default value for {@link #ENABLE_TARE_JOB_SCHEDULER}.
+         *
+         * @hide
+         */
+        public static final int DEFAULT_ENABLE_TARE_JOB_SCHEDULER = 0;
+
+        /**
+         * Settings for JobScheduler's TARE EconomicPolicy (list of its economic factors).
+         *
+         * Keys are listed in {@link android.app.tare.EconomyManager}.
+         *
+         * @hide
+         */
+        public static final String TARE_JOB_SCHEDULER_CONSTANTS = "tare_job_scheduler_constants";
+
+        /**
          * Whether or not to enable the User Absent, Radios Off feature on small battery devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0
