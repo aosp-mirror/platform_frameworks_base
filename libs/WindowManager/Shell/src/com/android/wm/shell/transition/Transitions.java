@@ -54,6 +54,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
@@ -113,15 +114,16 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final ArrayList<ActiveTransition> mActiveTransitions = new ArrayList<>();
 
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
-            @NonNull Context context, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
+            @NonNull DisplayController displayController, @NonNull Context context,
+            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
         mPlayerImpl = new TransitionPlayerImpl();
         // The very last handler (0 in the list) should be the default one.
-        mHandlers.add(new DefaultTransitionHandler(pool, context, mainExecutor, animExecutor));
+        mHandlers.add(new DefaultTransitionHandler(displayController, pool, context, mainExecutor,
+                animExecutor));
         // Next lowest priority is remote transitions.
         mRemoteTransitionHandler = new RemoteTransitionHandler(mainExecutor);
         mHandlers.add(mRemoteTransitionHandler);
