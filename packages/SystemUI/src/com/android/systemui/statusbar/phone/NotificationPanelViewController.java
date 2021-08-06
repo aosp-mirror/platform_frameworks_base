@@ -991,7 +991,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
         if (mKeyguardStatusBarViewController != null) {
             // TODO(b/194181195): This shouldn't be necessary.
-            mKeyguardStatusBarViewController.onViewDetached();
+            mKeyguardStatusBarViewController.destroy();
         }
         mKeyguardStatusBarViewController =
                 statusBarViewComponent.getKeyguardStatusBarViewController();

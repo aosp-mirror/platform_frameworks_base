@@ -1769,6 +1769,13 @@ public class AudioSystem
     public static native int setAssistantUid(int uid);
 
     /**
+     * Communicate UID of the current {@link android.service.voice.HotwordDetectionService} to audio
+     * policy service.
+     * @hide
+     */
+    public static native int setHotwordDetectionServiceUid(int uid);
+
+    /**
      * @hide
      * Communicate UIDs of active accessibility services to audio policy service.
      */

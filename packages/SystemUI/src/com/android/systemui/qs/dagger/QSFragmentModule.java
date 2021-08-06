@@ -28,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
+import com.android.systemui.qs.QSFooterActionsView;
 import com.android.systemui.qs.QSFooterView;
 import com.android.systemui.qs.QSFooterViewController;
 import com.android.systemui.qs.QSFragment;
@@ -118,6 +119,12 @@ public interface QSFragmentModule {
     @Provides
     static QSFooterView providesQSFooterView(@RootView View view) {
         return view.findViewById(R.id.qs_footer);
+    }
+
+    /** */
+    @Provides
+    static QSFooterActionsView providesQSFooterActionsView(@RootView View view) {
+        return view.findViewById(R.id.qs_footer_actions_container);
     }
 
     /** */

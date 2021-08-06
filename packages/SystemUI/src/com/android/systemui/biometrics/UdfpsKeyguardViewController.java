@@ -20,14 +20,10 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
-import android.hardware.biometrics.BiometricSourceType;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 
-import androidx.annotation.Nullable;
-
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -47,14 +43,8 @@ import java.util.Optional;
 
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
- *
- * Highlights the udfps icon when:
- * - Face authentication has failed
- * - Face authentication has been run for > 2 seconds
  */
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
-    private static final long AFTER_FACE_AUTH_HINT_DELAY = 2000;
-
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final DelayableExecutor mExecutor;
@@ -63,12 +53,10 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final UdfpsController mUdfpsController;
 
-    @Nullable private Runnable mCancelDelayedHintRunnable;
     private boolean mShowingUdfpsBouncer;
     private boolean mUdfpsRequested;
     private boolean mQsExpanded;
     private boolean mFaceDetectRunning;
-    private boolean mHintShown;
     private int mStatusBarState;
     private float mTransitionToFullShadeProgress;
     private float mLastDozeAmount;
@@ -111,10 +99,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        mHintShown = false;
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-        updateFaceDetectRunning(mKeyguardUpdateMonitor.isFaceDetectionRunning());
-
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
         mLastDozeAmount = dozeAmount;
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
@@ -137,7 +121,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
-        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mFaceDetectRunning = false;
 
         mStatusBarStateController.removeCallback(mStateListener);
@@ -146,11 +129,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mConfigurationController.removeCallback(mConfigurationListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
-        }
-
-        if (mCancelDelayedHintRunnable != null) {
-            mCancelDelayedHintRunnable.run();
-            mCancelDelayedHintRunnable = null;
         }
     }
 
@@ -250,36 +228,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
     }
 
-    private void cancelDelayedHint() {
-        if (mCancelDelayedHintRunnable != null) {
-            mCancelDelayedHintRunnable.run();
-            mCancelDelayedHintRunnable = null;
-        }
-    }
-
-    private void updateFaceDetectRunning(boolean running) {
-        if (mFaceDetectRunning == running) {
-            return;
-        }
-
-        // show udfps hint a few seconds after face auth started running
-        if (!mFaceDetectRunning && running && !mHintShown && mCancelDelayedHintRunnable == null) {
-            // Face detect started running, show udfps hint after a delay
-            mCancelDelayedHintRunnable = mExecutor.executeDelayed(() -> showHint(false),
-                    AFTER_FACE_AUTH_HINT_DELAY);
-        }
-
-        mFaceDetectRunning = running;
-    }
-
-    private void showHint(boolean forceShow) {
-        cancelDelayedHint();
-        if (!mHintShown || forceShow) {
-            mHintShown = true;
-            mView.animateHint();
-        }
-    }
-
     /**
      * Set the progress we're currently transitioning to the full shade. 0.0f means we're not
      * transitioning yet, while 1.0f means we've fully dragged down.
@@ -318,39 +266,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             updatePauseAuth();
         }
     };
-
-    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
-            new KeyguardUpdateMonitorCallback() {
-                public void onBiometricRunningStateChanged(boolean running,
-                        BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        updateFaceDetectRunning(running);
-                    }
-                }
-
-                public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        // show udfps hint when face auth fails
-                        showHint(true);
-                    }
-                }
-
-                public void onBiometricError(int msgId, String errString,
-                        BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        // show udfps hint when face auth fails
-                        showHint(true);
-                    }
-                }
-
-                public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType, boolean isStrongBiometric) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        // cancel delayed hint if face auth succeeded
-                        cancelDelayedHint();
-                    }
-                }
-            };
 
     private final StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor =
             new StatusBarKeyguardViewManager.AlternateAuthInterceptor() {

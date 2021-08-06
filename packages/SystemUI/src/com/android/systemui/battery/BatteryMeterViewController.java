@@ -15,22 +15,44 @@
  */
 package com.android.systemui.battery;
 
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
+
 /** Controller for {@link BatteryMeterView}. **/
 public class BatteryMeterViewController extends ViewController<BatteryMeterView> {
+    private final ConfigurationController mConfigurationController;
+
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onDensityOrFontScaleChanged() {
+                    mView.scaleBatteryMeterViews();
+                }
+            };
 
     @Inject
-    public BatteryMeterViewController(BatteryMeterView view) {
+    public BatteryMeterViewController(
+            BatteryMeterView view,
+            ConfigurationController configurationController) {
         super(view);
+        mConfigurationController = configurationController;
     }
 
     @Override
     protected void onViewAttached() {
+        mConfigurationController.addCallback(mConfigurationListener);
     }
 
     @Override
     protected void onViewDetached() {
+        destroy();
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 }
