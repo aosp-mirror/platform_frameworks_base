@@ -59,7 +59,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     @Mock
     private TextView mBuildText;
     @Mock
-    private QSFooterActionsController mQSFooterActionsController;
+    private FooterActionsController mFooterActionsController;
 
     private QSFooterViewController mController;
 
@@ -79,7 +79,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         when(mView.findViewById(R.id.build)).thenReturn(mBuildText);
 
         mController = new QSFooterViewController(mView, mUserTracker, mQSPanelController,
-                mQuickQSPanelController, mQSFooterActionsController);
+                mQuickQSPanelController, mFooterActionsController);
 
         mController.init();
     }

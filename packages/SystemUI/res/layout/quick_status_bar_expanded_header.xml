@@ -56,7 +56,18 @@
             android:clipToPadding="false"
             android:focusable="true"
             android:paddingBottom="24dp"
-            android:importantForAccessibility="yes" />
+            android:importantForAccessibility="yes">
+
+            <include
+                layout="@layout/footer_actions"
+                android:id="@+id/qqs_footer_actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="@dimen/qs_footer_margin"
+                android:layout_marginEnd="@dimen/qs_footer_margin"
+                />
+        </com.android.systemui.qs.QuickQSPanel>
     </RelativeLayout>
 
 </com.android.systemui.qs.QuickStatusBarHeader>

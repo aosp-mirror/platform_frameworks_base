@@ -14,6 +14,9 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.dagger.QSFragmentModule.QQS_FOOTER;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FOOTER;
+
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.util.Log;
@@ -43,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /** */
 @QSScope
@@ -67,13 +71,15 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
      * position to the normal QS panel. These views will only show once the animation is complete,
      * to prevent overlapping of semi transparent views
      */
-    private final ArrayList<View> mQuickQsViews = new ArrayList<>();
+    private final ArrayList<View> mAnimatedQsViews = new ArrayList<>();
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanelController mQsPanelController;
     private final QuickQSPanelController mQuickQSPanelController;
     private final QuickStatusBarHeader mQuickStatusBarHeader;
     private final QSSecurityFooter mSecurityFooter;
     private final QS mQs;
+    private final View mQSFooterActions;
+    private final View mQQSFooterActions;
 
     private PagedTileLayout mPagedLayout;
 
@@ -88,6 +94,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     // This animates fading of SecurityFooter and media divider
     private TouchAnimator mAllPagesDelayedAnimator;
     private TouchAnimator mBrightnessAnimator;
+    private TouchAnimator mQQSFooterActionsAnimator;
     private HeightExpansionAnimator mQQSTileHeightAnimator;
     private HeightExpansionAnimator mOtherTilesExpandAnimator;
 
@@ -110,12 +117,16 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
             QSSecurityFooter securityFooter, @Main Executor executor, TunerService tunerService,
-            QSExpansionPathInterpolator qsExpansionPathInterpolator) {
+            QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            @Named(QS_FOOTER) FooterActionsView qsFooterActionsView,
+            @Named(QQS_FOOTER) FooterActionsView qqsFooterActionsView) {
         mQs = qs;
         mQuickQsPanel = quickPanel;
         mQsPanelController = qsPanelController;
         mQuickQSPanelController = quickQSPanelController;
         mQuickStatusBarHeader = quickStatusBarHeader;
+        mQQSFooterActions = qqsFooterActionsView;
+        mQSFooterActions = qsFooterActionsView;
         mSecurityFooter = securityFooter;
         mHost = qsTileHost;
         mExecutor = executor;
@@ -262,7 +273,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
         clearAnimationState();
         mAllViews.clear();
-        mQuickQsViews.clear();
+        mAnimatedQsViews.clear();
         mQQSTileHeightAnimator = null;
         mOtherTilesExpandAnimator = null;
 
@@ -360,7 +371,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                     firstPageBuilder.addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 1);
 
-                    mQuickQsViews.add(tileView);
+                    mAnimatedQsViews.add(tileView);
                     mAllViews.add(quickTileView);
                     mAllViews.add(quickTileView.getSecondaryLabel());
                 } else if (mFullRows && isIconInAnimatedRow(count)) {
@@ -417,6 +428,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     .addFloat(tileLayout, "alpha", 0, 1);
             mFirstPageDelayedAnimator = builder.build();
 
+            if (mQQSFooterActions.getVisibility() != View.GONE) {
+                // only when qqs footer is present (which means split shade mode) it needs to
+                // be animated
+                updateQQSFooterAnimation();
+            }
+
+
             // Fade in the security footer and the divider as we reach the final position
             builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
             builder.addFloat(mSecurityFooter.getView(), "alpha", 0, 1);
@@ -450,6 +468,20 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mNonfirstPageDelayedAnimator = new TouchAnimator.Builder()
                 .setStartDelay(.14f)
                 .addFloat(tileLayout, "alpha", 0, 1).build();
+    }
+
+    private void updateQQSFooterAnimation() {
+        int[] qsPosition = new int[2];
+        int[] qqsPosition = new int[2];
+        View commonView = mQs.getView();
+        getRelativePositionInt(qsPosition, mQSFooterActions, commonView);
+        getRelativePositionInt(qqsPosition, mQQSFooterActions, commonView);
+        int translationY = (qsPosition[1] - qqsPosition[1])
+                - mQuickStatusBarHeader.getOffsetTranslation();
+        mQQSFooterActionsAnimator = new TouchAnimator.Builder()
+                .addFloat(mQQSFooterActions, "translationY", 0, translationY)
+                .build();
+        mAnimatedQsViews.add(mQSFooterActions);
     }
 
     private boolean isIconInAnimatedRow(int count) {
@@ -521,6 +553,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             if (mBrightnessAnimator != null) {
                 mBrightnessAnimator.setPosition(position);
             }
+            if (mQQSFooterActionsAnimator != null) {
+                mQQSFooterActionsAnimator.setPosition(position);
+            }
         }
     }
 
@@ -532,9 +567,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     @Override
     public void onAnimationAtEnd() {
         mQuickQsPanel.setVisibility(View.INVISIBLE);
-        final int N = mQuickQsViews.size();
+        final int N = mAnimatedQsViews.size();
         for (int i = 0; i < N; i++) {
-            mQuickQsViews.get(i).setVisibility(View.VISIBLE);
+            mAnimatedQsViews.get(i).setVisibility(View.VISIBLE);
         }
     }
 
@@ -542,9 +577,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     public void onAnimationStarted() {
         updateQQSVisibility();
         if (mOnFirstPage) {
-            final int N = mQuickQsViews.size();
+            final int N = mAnimatedQsViews.size();
             for (int i = 0; i < N; i++) {
-                mQuickQsViews.get(i).setVisibility(View.INVISIBLE);
+                mAnimatedQsViews.get(i).setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -569,9 +604,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mOtherTilesExpandAnimator != null) {
             mOtherTilesExpandAnimator.resetViewsHeights();
         }
-        final int N2 = mQuickQsViews.size();
+        final int N2 = mAnimatedQsViews.size();
         for (int i = 0; i < N2; i++) {
-            mQuickQsViews.get(i).setVisibility(View.VISIBLE);
+            mAnimatedQsViews.get(i).setVisibility(View.VISIBLE);
         }
     }
 

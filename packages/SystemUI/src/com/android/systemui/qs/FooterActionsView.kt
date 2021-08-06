@@ -37,7 +37,7 @@ import com.android.systemui.statusbar.phone.SettingsButton
  * in split shade mode visible also in collapsed state. May contain up to 5 buttons: settings,
  * edit tiles, power off and conditionally: user switch and tuner
  */
-class QSFooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     private lateinit var settingsContainer: View
     private lateinit var settingsButton: SettingsButton
     private lateinit var multiUserSwitch: MultiUserSwitch
@@ -48,7 +48,6 @@ class QSFooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayou
     private var settingsCogAnimator: TouchAnimator? = null
 
     private var qsDisabled = false
-    private var isExpanded = false
     private var expansionAmount = 0f
 
     override fun onFinishInflate() {
@@ -102,27 +101,30 @@ class QSFooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayou
         setExpansion(expansionAmount)
     }
 
-    fun setExpanded(expanded: Boolean, isTunerEnabled: Boolean, multiUserEnabled: Boolean) {
-        if (isExpanded == expanded) return
-        isExpanded = expanded
-        updateEverything(isTunerEnabled, multiUserEnabled)
-    }
-
     fun setExpansion(headerExpansionFraction: Float) {
         expansionAmount = headerExpansionFraction
         if (settingsCogAnimator != null) settingsCogAnimator!!.setPosition(headerExpansionFraction)
     }
 
-    fun disable(state2: Int, isTunerEnabled: Boolean, multiUserEnabled: Boolean) {
+    fun disable(
+        buttonsVisible: Boolean,
+        state2: Int,
+        isTunerEnabled: Boolean,
+        multiUserEnabled: Boolean
+    ) {
         val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
         if (disabled == qsDisabled) return
         qsDisabled = disabled
-        updateEverything(isTunerEnabled, multiUserEnabled)
+        updateEverything(buttonsVisible, isTunerEnabled, multiUserEnabled)
     }
 
-    fun updateEverything(isTunerEnabled: Boolean, multiUserEnabled: Boolean) {
+    fun updateEverything(
+        buttonsVisible: Boolean,
+        isTunerEnabled: Boolean,
+        multiUserEnabled: Boolean
+    ) {
         post {
-            updateVisibilities(isTunerEnabled, multiUserEnabled)
+            updateVisibilities(buttonsVisible, isTunerEnabled, multiUserEnabled)
             updateClickabilities()
             isClickable = false
         }
@@ -134,16 +136,16 @@ class QSFooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayou
         settingsButton.isClickable = settingsButton.visibility == VISIBLE
     }
 
-    private fun updateVisibilities(isTunerEnabled: Boolean, multiUserEnabled: Boolean) {
+    private fun updateVisibilities(
+        buttonsVisible: Boolean,
+        isTunerEnabled: Boolean,
+        multiUserEnabled: Boolean
+    ) {
         settingsContainer.visibility = if (qsDisabled) GONE else VISIBLE
         tunerIcon.visibility = if (isTunerEnabled) VISIBLE else INVISIBLE
-        multiUserSwitch.visibility = if (showUserSwitcher(multiUserEnabled)) VISIBLE else GONE
+        multiUserSwitch.visibility = if (buttonsVisible && multiUserEnabled) VISIBLE else GONE
         val isDemo = UserManager.isDeviceInDemoMode(context)
-        settingsButton.visibility = if (isDemo || !isExpanded) INVISIBLE else VISIBLE
-    }
-
-    private fun showUserSwitcher(multiUserEnabled: Boolean): Boolean {
-        return isExpanded && multiUserEnabled
+        settingsButton.visibility = if (isDemo || !buttonsVisible) INVISIBLE else VISIBLE
     }
 
     fun onUserInfoChanged(picture: Drawable?, isGuestUser: Boolean) {

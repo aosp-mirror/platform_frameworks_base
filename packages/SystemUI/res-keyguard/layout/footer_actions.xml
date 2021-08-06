@@ -14,9 +14,10 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 -->
-<com.android.systemui.qs.QSFooterActionsView
+
+<!-- Action buttons for footer in QS/QQS, containing settings button, power off button etc -->
+<com.android.systemui.qs.FooterActionsView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/qs_footer_actions_container"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:gravity="center_vertical">
@@ -101,4 +102,4 @@
 
     </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
-</com.android.systemui.qs.QSFooterActionsView>
+</com.android.systemui.qs.FooterActionsView>

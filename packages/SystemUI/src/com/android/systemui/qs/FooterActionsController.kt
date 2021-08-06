@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.qs
 
 import android.content.Intent
@@ -16,6 +32,8 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.FooterActionsController.ExpansionState.COLLAPSED
+import com.android.systemui.qs.FooterActionsController.ExpansionState.EXPANDED
 import com.android.systemui.qs.dagger.QSFlagsModule.PM_LITE_ENABLED
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.phone.SettingsButton
@@ -27,8 +45,13 @@ import com.android.systemui.util.ViewController
 import javax.inject.Inject
 import javax.inject.Named
 
-class QSFooterActionsController @Inject constructor(
-    view: QSFooterActionsView,
+/**
+ * Manages [FooterActionsView] behaviour, both when it's placed in QS or QQS (split shade).
+ * Main difference between QS and QQS behaviour is condition when buttons should be visible,
+ * determined by [buttonsVisibleState]
+ */
+class FooterActionsController @Inject constructor(
+    view: FooterActionsView,
     private val qsPanelController: QSPanelController,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
@@ -40,15 +63,20 @@ class QSFooterActionsController @Inject constructor(
     private val tunerService: TunerService,
     private val globalActionsDialog: GlobalActionsDialogLite,
     private val uiEventLogger: UiEventLogger,
-    @Named(PM_LITE_ENABLED) private val showPMLiteButton: Boolean
-) : ViewController<QSFooterActionsView>(view) {
+    @Named(PM_LITE_ENABLED) private val showPMLiteButton: Boolean,
+    private val buttonsVisibleState: ExpansionState
+) : ViewController<FooterActionsView>(view) {
+
+    enum class ExpansionState { COLLAPSED, EXPANDED }
 
     private var listening: Boolean = false
+
     var expanded = false
         set(value) {
-            field = value
-            mView.setExpanded(value, isTunerEnabled(),
-                    multiUserSwitchController.isMultiUserEnabled)
+            if (field != value) {
+                field = value
+                updateView()
+            }
         }
 
     private val settingsButton: SettingsButton = view.findViewById(R.id.settings_button)
@@ -64,7 +92,7 @@ class QSFooterActionsController @Inject constructor(
     private val onClickListener = View.OnClickListener { v ->
         // Don't do anything until views are unhidden. Don't do anything if the tap looks
         // suspicious.
-        if (!expanded || falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+        if (!buttonsVisible() || falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return@OnClickListener
         }
         if (v === settingsButton) {
@@ -98,8 +126,24 @@ class QSFooterActionsController @Inject constructor(
         }
     }
 
+    private fun buttonsVisible(): Boolean {
+        return when (buttonsVisibleState) {
+            EXPANDED -> expanded
+            COLLAPSED -> !expanded
+        }
+    }
+
     override fun onInit() {
         multiUserSwitchController.init()
+    }
+
+    fun hideFooter() {
+        mView.visibility = View.GONE
+    }
+
+    fun showFooter() {
+        mView.visibility = View.VISIBLE
+        updateView()
     }
 
     private fun startSettingsActivity() {
@@ -128,7 +172,12 @@ class QSFooterActionsController @Inject constructor(
             activityStarter.postQSRunnableDismissingKeyguard { qsPanelController.showEdit(view) }
         })
 
-        mView.updateEverything(isTunerEnabled(), multiUserSwitchController.isMultiUserEnabled)
+        updateView()
+    }
+
+    private fun updateView() {
+        mView.updateEverything(buttonsVisible(), isTunerEnabled(),
+                multiUserSwitchController.isMultiUserEnabled)
     }
 
     override fun onViewDetached() {
@@ -148,7 +197,8 @@ class QSFooterActionsController @Inject constructor(
     }
 
     fun disable(state2: Int) {
-        mView.disable(state2, isTunerEnabled(), multiUserSwitchController.isMultiUserEnabled)
+        mView.disable(buttonsVisible(), state2, isTunerEnabled(),
+                multiUserSwitchController.isMultiUserEnabled)
     }
 
     fun setExpansion(headerExpansionFraction: Float) {
