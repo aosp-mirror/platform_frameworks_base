@@ -529,6 +529,9 @@
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
 
+    <!-- Padding for the lock icon on the keyguard. In pixels - should not scale with display size. -->
+    <dimen name="lock_icon_padding">48px</dimen>
+
     <!-- Height of the carrier/wifi name label -->
     <dimen name="carrier_label_height">24dp</dimen>
 

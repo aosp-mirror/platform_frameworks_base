@@ -21,7 +21,7 @@
             android:strokeColor="#FF000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:strokeWidth="2.5"
+            android:strokeWidth="2"
             android:pathData="M4.75 15 C4.75,15 23.25,15 23.25,15 C24.35,15 25.25,15.9 25.25,17 C25.25,17 25.25,33 25.25,33 C25.25,34.1 24.35,35 23.25,35 C23.25,35 4.75,35 4.75,35 C3.65,35 2.75,34.1 2.75,33 C2.75,33 2.75,17 2.75,17 C2.75,15.9 3.65,15 4.75,15c " />
     </group>
     <group android:translateX="14" android:translateY="13.5">
@@ -29,7 +29,7 @@
             android:strokeColor="#FF000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:strokeWidth="2.5"
+            android:strokeWidth="2"
             android:pathData="M27.19 14.81 C27.19,14.81 27.19,8.3 27.19,8.3 C27.19,4.92 24.44,2.88 21.19,2.75 C17.74,2.62 15,4.74 15,8.11 C15,8.11 15,15 15,15 " />
     </group>
     <group android:translateX="20" android:translateY="35.75">
