@@ -3251,7 +3251,7 @@ class Task extends TaskFragment {
             boolean consumed = false;
             if (traverseTopToBottom) {
                 for (int i = task.mChildren.size() - 1; i >= 0; --i) {
-                    final WindowContainer child = mChildren.get(i);
+                    final WindowContainer child = task.mChildren.get(i);
                     if (child.asTaskFragment() != null) {
                         child.forAllLeafTaskFragments(callback, traverseTopToBottom);
                     } else if (child.asActivityRecord() != null && !consumed) {
@@ -3261,7 +3261,7 @@ class Task extends TaskFragment {
                 }
             } else {
                 for (int i = 0; i < task.mChildren.size(); i++) {
-                    final WindowContainer child = mChildren.get(i);
+                    final WindowContainer child = task.mChildren.get(i);
                     if (child.asTaskFragment() != null) {
                         child.forAllLeafTaskFragments(callback, traverseTopToBottom);
                     } else if (child.asActivityRecord() != null && !consumed) {
