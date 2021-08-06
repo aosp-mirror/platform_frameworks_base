@@ -5386,6 +5386,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
 
     /**
+     * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD},
+     * that specifies whether the system displayed attribution information in the
+     * permission usage system UI for the chosen entry.
+     *
+     * <p> The extra can only be true if application has specified attributionsAreUserVisible
+     * in its manifest. </p>
+     *
+     * <p> Applications can use this extra to improve their permission usage explanation
+     * experience. </p>
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SHOWING_ATTRIBUTION =
+            "android.intent.extra.SHOWING_ATTRIBUTION";
+
+    /**
      * An Intent[] describing additional, alternate choices you would like shown with
      * {@link #ACTION_CHOOSER}.
      *
