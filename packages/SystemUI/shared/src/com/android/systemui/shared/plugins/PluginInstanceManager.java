@@ -45,6 +45,7 @@ import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class PluginInstanceManager<T extends Plugin> {
 
@@ -60,21 +61,20 @@ public class PluginInstanceManager<T extends Plugin> {
     private final VersionInfo mVersion;
 
     @VisibleForTesting
-    final MainHandler mMainHandler;
-    @VisibleForTesting
     final PluginHandler mPluginHandler;
     private final boolean isDebuggable;
     private final PackageManager mPm;
     private final PluginManagerImpl mManager;
     private final ArraySet<String> mWhitelistedPlugins = new ArraySet<>();
     private final PluginInitializer mInitializer;
+    private final Executor mMainExecutor;
 
     PluginInstanceManager(Context context, PackageManager pm, String action,
-            PluginListener<T> listener, boolean allowMultiple, Looper looper, VersionInfo version,
-            PluginManagerImpl manager, boolean debuggable, String[] pluginWhitelist,
-            PluginInitializer initializer) {
+            PluginListener<T> listener, boolean allowMultiple, Executor mainExecutor,
+            Looper looper, VersionInfo version, PluginManagerImpl manager, boolean debuggable,
+            String[] pluginWhitelist, PluginInitializer initializer) {
         mInitializer = initializer;
-        mMainHandler = new MainHandler(Looper.getMainLooper());
+        mMainExecutor = mainExecutor;
         mPluginHandler = new PluginHandler(looper);
         mManager = manager;
         mContext = context;
@@ -87,21 +87,6 @@ public class PluginInstanceManager<T extends Plugin> {
         isDebuggable = debuggable;
     }
 
-    public PluginInfo<T> getPlugin() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new RuntimeException("Must be called from UI thread");
-        }
-        mPluginHandler.handleQueryPlugins(null /* All packages */);
-        if (mPluginHandler.mPlugins.size() > 0) {
-            mMainHandler.removeMessages(MainHandler.PLUGIN_CONNECTED);
-            PluginInfo<T> info = mPluginHandler.mPlugins.get(0);
-            PluginPrefs.setHasPlugins(mContext);
-            info.mPlugin.onCreate(mContext, info.mPluginContext);
-            return info;
-        }
-        return null;
-    }
-
     public void loadAll() {
         if (DEBUG) Log.d(TAG, "startListening");
         mPluginHandler.sendEmptyMessage(PluginHandler.QUERY_ALL);
@@ -109,10 +94,9 @@ public class PluginInstanceManager<T extends Plugin> {
 
     public void destroy() {
         if (DEBUG) Log.d(TAG, "stopListening");
-        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
-        for (PluginInfo plugin : plugins) {
-            mMainHandler.obtainMessage(MainHandler.PLUGIN_DISCONNECTED,
-                    plugin.mPlugin).sendToTarget();
+        ArrayList<PluginInfo<T>> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        for (PluginInfo<T> pluginInfo : plugins) {
+            mMainExecutor.execute(() -> onPluginDisconnected(pluginInfo.mPlugin));
         }
     }
 
@@ -127,8 +111,8 @@ public class PluginInstanceManager<T extends Plugin> {
 
     public boolean checkAndDisable(String className) {
         boolean disableAny = false;
-        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
-        for (PluginInfo info : plugins) {
+        ArrayList<PluginInfo<T>> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        for (PluginInfo<T> info : plugins) {
             if (className.startsWith(info.mPackage)) {
                 disableAny |= disable(info, PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH);
             }
@@ -137,7 +121,7 @@ public class PluginInstanceManager<T extends Plugin> {
     }
 
     public boolean disableAll() {
-        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
+        ArrayList<PluginInfo<T>> plugins = new ArrayList<>(mPluginHandler.mPlugins);
         boolean disabledAny = false;
         for (int i = 0; i < plugins.size(); i++) {
             disabledAny |= disable(plugins.get(i), PluginEnabler.DISABLED_FROM_SYSTEM_CRASH);
@@ -161,7 +145,7 @@ public class PluginInstanceManager<T extends Plugin> {
         return false;
     }
 
-    private boolean disable(PluginInfo info, @PluginEnabler.DisableReason int reason) {
+    private boolean disable(PluginInfo<T> info, @PluginEnabler.DisableReason int reason) {
         // Live by the sword, die by the sword.
         // Misbehaving plugins get disabled and won't come back until uninstall/reinstall.
 
@@ -179,9 +163,9 @@ public class PluginInstanceManager<T extends Plugin> {
         return true;
     }
 
-    public <T> boolean dependsOn(Plugin p, Class<T> cls) {
-        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
-        for (PluginInfo info : plugins) {
+    <C> boolean dependsOn(Plugin p, Class<C> cls) {
+        ArrayList<PluginInfo<T>> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        for (PluginInfo<T> info : plugins) {
             if (info.mPlugin.getClass().getName().equals(p.getClass().getName())) {
                 return info.mVersion != null && info.mVersion.hasClass(cls);
             }
@@ -195,42 +179,25 @@ public class PluginInstanceManager<T extends Plugin> {
                 getClass().getSimpleName(), hashCode(), mAction);
     }
 
-    private class MainHandler extends Handler {
-        private static final int PLUGIN_CONNECTED = 1;
-        private static final int PLUGIN_DISCONNECTED = 2;
-
-        public MainHandler(Looper looper) {
-            super(looper);
+    private void onPluginConnected(PluginInfo<T> pluginInfo) {
+        if (DEBUG) Log.d(TAG, "onPluginConnected");
+        PluginPrefs.setHasPlugins(mContext);
+        mInitializer.handleWtfs();
+        if (!(pluginInfo.mPlugin instanceof PluginFragment)) {
+            // Only call onCreate for plugins that aren't fragments, as fragments
+            // will get the onCreate as part of the fragment lifecycle.
+            pluginInfo.mPlugin.onCreate(mContext, pluginInfo.mPluginContext);
         }
+        mListener.onPluginConnected(pluginInfo.mPlugin, pluginInfo.mPluginContext);
+    }
 
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case PLUGIN_CONNECTED:
-                    if (DEBUG) Log.d(TAG, "onPluginConnected");
-                    PluginPrefs.setHasPlugins(mContext);
-                    PluginInfo<T> info = (PluginInfo<T>) msg.obj;
-                    mInitializer.handleWtfs();
-                    if (!(msg.obj instanceof PluginFragment)) {
-                        // Only call onDestroy for plugins that aren't fragments, as fragments
-                        // will get the onCreate as part of the fragment lifecycle.
-                        info.mPlugin.onCreate(mContext, info.mPluginContext);
-                    }
-                    mListener.onPluginConnected(info.mPlugin, info.mPluginContext);
-                    break;
-                case PLUGIN_DISCONNECTED:
-                    if (DEBUG) Log.d(TAG, "onPluginDisconnected");
-                    mListener.onPluginDisconnected((T) msg.obj);
-                    if (!(msg.obj instanceof PluginFragment)) {
-                        // Only call onDestroy for plugins that aren't fragments, as fragments
-                        // will get the onDestroy as part of the fragment lifecycle.
-                        ((T) msg.obj).onDestroy();
-                    }
-                    break;
-                default:
-                    super.handleMessage(msg);
-                    break;
-            }
+    private void onPluginDisconnected(T plugin) {
+        if (DEBUG) Log.d(TAG, "onPluginDisconnected");
+        mListener.onPluginDisconnected(plugin);
+        if (!(plugin instanceof PluginFragment)) {
+            // Only call onDestroy for plugins that aren't fragments, as fragments
+            // will get the onDestroy as part of the fragment lifecycle.
+            plugin.onDestroy();
         }
     }
 
@@ -252,8 +219,7 @@ public class PluginInstanceManager<T extends Plugin> {
                     if (DEBUG) Log.d(TAG, "queryAll " + mAction);
                     for (int i = mPlugins.size() - 1; i >= 0; i--) {
                         PluginInfo<T> pluginInfo = mPlugins.get(i);
-                        mMainHandler.obtainMessage(
-                                MainHandler.PLUGIN_DISCONNECTED, pluginInfo.mPlugin).sendToTarget();
+                        mMainExecutor.execute(() -> onPluginDisconnected(pluginInfo.mPlugin));
                     }
                     mPlugins.clear();
                     handleQueryPlugins(null);
@@ -261,10 +227,9 @@ public class PluginInstanceManager<T extends Plugin> {
                 case REMOVE_PKG:
                     String pkg = (String) msg.obj;
                     for (int i = mPlugins.size() - 1; i >= 0; i--) {
-                        final PluginInfo<T> plugin = mPlugins.get(i);
-                        if (plugin.mPackage.equals(pkg)) {
-                            mMainHandler.obtainMessage(MainHandler.PLUGIN_DISCONNECTED,
-                                    plugin.mPlugin).sendToTarget();
+                        final PluginInfo<T> pluginInfo = mPlugins.get(i);
+                        if (pluginInfo.mPackage.equals(pkg)) {
+                            mMainExecutor.execute(() -> onPluginDisconnected(pluginInfo.mPlugin));
                             mPlugins.remove(i);
                         }
                     }
@@ -307,12 +272,12 @@ public class PluginInstanceManager<T extends Plugin> {
             for (ResolveInfo info : result) {
                 ComponentName name = new ComponentName(info.serviceInfo.packageName,
                         info.serviceInfo.name);
-                PluginInfo<T> t = handleLoadPlugin(name);
-                if (t == null) continue;
+                PluginInfo<T> pluginInfo = handleLoadPlugin(name);
+                if (pluginInfo == null) continue;
 
                 // add plugin before sending PLUGIN_CONNECTED message
-                mPlugins.add(t);
-                mMainHandler.obtainMessage(mMainHandler.PLUGIN_CONNECTED, t).sendToTarget();
+                mPlugins.add(pluginInfo);
+                mMainExecutor.execute(() -> onPluginConnected(pluginInfo));
             }
         }
 
@@ -349,7 +314,7 @@ public class PluginInstanceManager<T extends Plugin> {
                 try {
                     VersionInfo version = checkVersion(pluginClass, plugin, mVersion);
                     if (DEBUG) Log.d(TAG, "createPlugin");
-                    return new PluginInfo(pkg, cls, plugin, pluginContext, version);
+                    return new PluginInfo<>(pkg, cls, plugin, pluginContext, version);
                 } catch (InvalidVersionException e) {
                     final int icon = Resources.getSystem().getIdentifier(
                             "stat_sys_warning", "drawable", "android");
@@ -419,13 +384,15 @@ public class PluginInstanceManager<T extends Plugin> {
     public static class Factory {
         private final Context mContext;
         private final PackageManager mPackageManager;
+        private final Executor mMainExecutor;
         private final Looper mLooper;
         private final PluginInitializer mInitializer;
 
-        public Factory(Context context, PackageManager packageManager, Looper looper,
-                PluginInitializer initializer) {
+        public Factory(Context context, PackageManager packageManager,
+                Executor mainExecutor, Looper looper, PluginInitializer initializer) {
             mContext = context;
             mPackageManager = packageManager;
+            mMainExecutor = mainExecutor;
             mLooper = looper;
             mInitializer = initializer;
         }
@@ -435,8 +402,8 @@ public class PluginInstanceManager<T extends Plugin> {
                 PluginListener<T> listener, boolean allowMultiple, VersionInfo version,
                 PluginManagerImpl manager, boolean debuggable, String[] pluginWhitelist) {
             return new PluginInstanceManager<>(mContext, mPackageManager, action, listener,
-                    allowMultiple, mLooper, version, manager, debuggable, pluginWhitelist,
-                    mInitializer);
+                    allowMultiple, mMainExecutor, mLooper, version, manager, debuggable,
+                    pluginWhitelist, mInitializer);
         }
     }
 
@@ -466,10 +433,10 @@ public class PluginInstanceManager<T extends Plugin> {
         }
     }
 
-    static class PluginInfo<T> {
+    static class PluginInfo<T extends Plugin> {
         private final Context mPluginContext;
         private final VersionInfo mVersion;
-        private String mClass;
+        private final String mClass;
         T mPlugin;
         String mPackage;
 
