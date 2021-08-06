@@ -149,14 +149,18 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         lightRevealAnimationPlaying = false
         aodUiAnimationPlaying = false
 
-        // Make sure the status bar is in the correct keyguard state, forcing it if necessary. This
-        // is required if the screen off animation is cancelled, since it might be incorrectly left
-        // in the KEYGUARD or SHADE states depending on when it was cancelled and whether 'lock
-        // instantly' is enabled. We need to force it so that the state is set even if we're going
-        // from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have changed parts of the UI
-        // (such as showing AOD in the shade) without actually changing the StatusBarState. This
-        // ensures that the UI definitely reflects the desired state.
-        statusBar.updateIsKeyguard(true /* force */)
+        // If we can't control the screen off animation, we shouldn't mess with the StatusBar's
+        // keyguard state unnecessarily.
+        if (dozeParameters.get().canControlUnlockedScreenOff()) {
+            // Make sure the status bar is in the correct keyguard state, forcing it if necessary.
+            // This is required if the screen off animation is cancelled, since it might be
+            // incorrectly left in the KEYGUARD or SHADE states depending on when it was cancelled
+            // and whether 'lock instantly' is enabled. We need to force it so that the state is set
+            // even if we're going from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have
+            // changed parts of the UI (such as showing AOD in the shade) without actually changing
+            // the StatusBarState. This ensures that the UI definitely reflects the desired state.
+            statusBar.updateIsKeyguard(true /* force */)
+        }
     }
 
     override fun onStartedGoingToSleep() {
