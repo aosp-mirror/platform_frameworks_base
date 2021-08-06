@@ -60,7 +60,7 @@ final class SoundTriggerSessionPermissionsDecorator implements
 
     @Override
     public SoundTrigger.ModuleProperties getDspModuleProperties() throws RemoteException {
-        // No permission needed.
+        // No permission needed here (the app must have the Assistant Role to retrieve the session).
         return mDelegate.getDspModuleProperties();
     }
 
@@ -71,7 +71,9 @@ final class SoundTriggerSessionPermissionsDecorator implements
         if (DEBUG) {
             Slog.d(TAG, "startRecognition");
         }
-        enforcePermissions();
+        if (!isHoldingPermissions()) {
+            return SoundTrigger.STATUS_PERMISSION_DENIED;
+        }
         return mDelegate.startRecognition(i, s, iHotwordRecognitionStatusCallback,
                 recognitionConfig, b);
     }
@@ -80,25 +82,28 @@ final class SoundTriggerSessionPermissionsDecorator implements
     public int stopRecognition(int i,
             IHotwordRecognitionStatusCallback iHotwordRecognitionStatusCallback)
             throws RemoteException {
-        enforcePermissions();
+        // Stopping a model does not require special permissions. Having a handle to the session is
+        // sufficient.
         return mDelegate.stopRecognition(i, iHotwordRecognitionStatusCallback);
     }
 
     @Override
     public int setParameter(int i, int i1, int i2) throws RemoteException {
-        enforcePermissions();
+        if (!isHoldingPermissions()) {
+            return SoundTrigger.STATUS_PERMISSION_DENIED;
+        }
         return mDelegate.setParameter(i, i1, i2);
     }
 
     @Override
     public int getParameter(int i, int i1) throws RemoteException {
-        enforcePermissions();
+        // No permission needed here (the app must have the Assistant Role to retrieve the session).
         return mDelegate.getParameter(i, i1);
     }
 
     @Override
     public SoundTrigger.ModelParamRange queryParameter(int i, int i1) throws RemoteException {
-        enforcePermissions();
+        // No permission needed here (the app must have the Assistant Role to retrieve the session).
         return mDelegate.queryParameter(i, i1);
     }
 
@@ -109,9 +114,15 @@ final class SoundTriggerSessionPermissionsDecorator implements
     }
 
     // TODO: Share this code with SoundTriggerMiddlewarePermission.
-    private void enforcePermissions() {
-        enforcePermissionForPreflight(mContext, mOriginatorIdentity, RECORD_AUDIO);
-        enforcePermissionForPreflight(mContext, mOriginatorIdentity, CAPTURE_AUDIO_HOTWORD);
+    private boolean isHoldingPermissions() {
+        try {
+            enforcePermissionForPreflight(mContext, mOriginatorIdentity, RECORD_AUDIO);
+            enforcePermissionForPreflight(mContext, mOriginatorIdentity, CAPTURE_AUDIO_HOTWORD);
+            return true;
+        } catch (SecurityException e) {
+            Slog.e(TAG, e.toString());
+            return false;
+        }
     }
 
     /**
