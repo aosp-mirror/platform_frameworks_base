@@ -18,6 +18,7 @@ package android.hardware.soundtrigger;
 
 import android.annotation.Nullable;
 import android.media.AudioFormat;
+import android.media.audio.common.AidlConversion;
 import android.media.audio.common.AudioConfig;
 import android.media.soundtrigger.AudioCapabilities;
 import android.media.soundtrigger.ConfidenceLevel;
@@ -224,105 +225,12 @@ class ConversionUtil {
                 apiExtras);
     }
 
-    public static AudioFormat aidl2apiAudioFormat(AudioConfig audioConfig) {
-        AudioFormat.Builder apiBuilder = new AudioFormat.Builder();
-        apiBuilder.setSampleRate(audioConfig.sampleRateHz);
-        apiBuilder.setChannelMask(aidl2apiChannelInMask(audioConfig.channelMask));
-        apiBuilder.setEncoding(aidl2apiEncoding(audioConfig.format));
-        return apiBuilder.build();
-    }
-
-    // Same as above, but in case of a null input returns a non-null valid output.
+    // In case of a null input returns a non-null valid output.
     public static AudioFormat aidl2apiAudioFormatWithDefault(@Nullable AudioConfig audioConfig) {
         if (audioConfig != null) {
-            return aidl2apiAudioFormat(audioConfig);
+            return AidlConversion.aidl2api_AudioConfig_AudioFormat(audioConfig);
         }
         return new AudioFormat.Builder().build();
-    }
-
-    public static int aidl2apiEncoding(int aidlFormat) {
-        switch (aidlFormat) {
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_16_BIT:
-                return AudioFormat.ENCODING_PCM_16BIT;
-
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_8_BIT:
-                return AudioFormat.ENCODING_PCM_8BIT;
-
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_FLOAT:
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_8_24_BIT:
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_24_BIT_PACKED:
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_32_BIT:
-                return AudioFormat.ENCODING_PCM_FLOAT;
-
-            case android.media.audio.common.AudioFormat.AC3:
-                return AudioFormat.ENCODING_AC3;
-
-            case android.media.audio.common.AudioFormat.E_AC3:
-                return AudioFormat.ENCODING_E_AC3;
-
-            case android.media.audio.common.AudioFormat.DTS:
-                return AudioFormat.ENCODING_DTS;
-
-            case android.media.audio.common.AudioFormat.DTS_HD:
-                return AudioFormat.ENCODING_DTS_HD;
-
-            case android.media.audio.common.AudioFormat.MP3:
-                return AudioFormat.ENCODING_MP3;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_LC:
-                return AudioFormat.ENCODING_AAC_LC;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_HE_V1:
-                return AudioFormat.ENCODING_AAC_HE_V1;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_HE_V2:
-                return AudioFormat.ENCODING_AAC_HE_V2;
-
-            case android.media.audio.common.AudioFormat.IEC61937:
-                return AudioFormat.ENCODING_IEC61937;
-
-            case android.media.audio.common.AudioFormat.DOLBY_TRUEHD:
-                return AudioFormat.ENCODING_DOLBY_TRUEHD;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_ELD:
-                return AudioFormat.ENCODING_AAC_ELD;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_XHE:
-                return AudioFormat.ENCODING_AAC_XHE;
-
-            case android.media.audio.common.AudioFormat.AC4:
-                return AudioFormat.ENCODING_AC4;
-
-            case android.media.audio.common.AudioFormat.E_AC3
-                    | android.media.audio.common.AudioFormat.E_AC3_SUB_JOC:
-                return AudioFormat.ENCODING_E_AC3_JOC;
-
-            case android.media.audio.common.AudioFormat.MAT:
-            case android.media.audio.common.AudioFormat.MAT
-                    | android.media.audio.common.AudioFormat.MAT_SUB_1_0:
-            case android.media.audio.common.AudioFormat.MAT
-                    | android.media.audio.common.AudioFormat.MAT_SUB_2_0:
-            case android.media.audio.common.AudioFormat.MAT
-                    | android.media.audio.common.AudioFormat.MAT_SUB_2_1:
-                return AudioFormat.ENCODING_DOLBY_MAT;
-
-            case android.media.audio.common.AudioFormat.DEFAULT:
-                return AudioFormat.ENCODING_DEFAULT;
-
-            default:
-                return AudioFormat.ENCODING_INVALID;
-        }
     }
 
     public static int api2aidlModelParameter(int apiParam) {
@@ -332,12 +240,6 @@ class ConversionUtil {
             default:
                 return android.media.soundtrigger.ModelParameter.INVALID;
         }
-    }
-
-    public static int aidl2apiChannelInMask(int aidlMask) {
-        // We're assuming AudioFormat.CHANNEL_IN_* constants are kept in sync with
-        // android.media.audio.common.AudioChannelMask.
-        return aidlMask;
     }
 
     public static SoundTrigger.ModelParamRange aidl2apiModelParameterRange(
