@@ -36,6 +36,7 @@ import android.content.PermissionChecker;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.media.AudioManagerInternal;
 import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
 import android.os.Binder;
@@ -44,6 +45,7 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
@@ -275,6 +277,7 @@ final class HotwordDetectionConnection {
             LocalServices.getService(PermissionManagerServiceInternal.class)
                     .setHotwordDetectionServiceProvider(null);
             mIdentity = null;
+            updateServiceUidForAudioPolicy(Process.INVALID_UID);
         }
         mCancellationTaskFuture.cancel(/* may interrupt */ true);
         if (mAudioFlinger != null) {
@@ -893,6 +896,8 @@ final class HotwordDetectionConnection {
         connection.run(service -> service.ping(new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle bundle) throws RemoteException {
+                // TODO: Exit if the service has been unbound already (though there's a very low
+                // chance this happens).
                 if (DEBUG) {
                     Slog.d(TAG, "updating hotword UID " + Binder.getCallingUid());
                 }
@@ -902,8 +907,19 @@ final class HotwordDetectionConnection {
                 LocalServices.getService(PermissionManagerServiceInternal.class)
                         .setHotwordDetectionServiceProvider(() -> uid);
                 mIdentity = new HotwordDetectionServiceIdentity(uid, mVoiceInteractionServiceUid);
+                updateServiceUidForAudioPolicy(uid);
             }
         }));
+    }
+
+    private void updateServiceUidForAudioPolicy(int uid) {
+        mScheduledExecutorService.execute(() -> {
+            final AudioManagerInternal audioManager =
+                    LocalServices.getService(AudioManagerInternal.class);
+            if (audioManager != null) {
+                audioManager.setHotwordDetectionServiceUid(uid);
+            }
+        });
     }
 
     private static void bestEffortClose(Closeable closeable) {
