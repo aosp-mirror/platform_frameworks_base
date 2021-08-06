@@ -205,6 +205,14 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.setTopClipping(notificationPanelTop - mView.getTop());
     }
 
+    /**
+     * Updates the {@link KeyguardStatusBarView} state based on the provided values.
+     */
+    public void updateViewState(float alpha, int visibility) {
+        mView.setAlpha(alpha);
+        mView.setVisibility(visibility);
+    }
+
     /** */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
