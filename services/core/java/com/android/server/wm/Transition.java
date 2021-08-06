@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
@@ -36,6 +38,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
+import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -1066,11 +1069,29 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
                 task.fillTaskInfo(tinfo);
                 change.setTaskInfo(tinfo);
+                change.setRotationAnimation(getTaskRotationAnimation(task));
             }
             out.addChange(change);
         }
 
         return out;
+    }
+
+    private static int getTaskRotationAnimation(@NonNull Task task) {
+        final ActivityRecord top = task.getTopVisibleActivity();
+        if (top == null) return ROTATION_ANIMATION_UNSPECIFIED;
+        final WindowState mainWin = top.findMainWindow(false);
+        if (mainWin == null) return ROTATION_ANIMATION_UNSPECIFIED;
+        int anim = mainWin.getRotationAnimationHint();
+        if (anim >= 0) return anim;
+        anim = mainWin.getAttrs().rotationAnimation;
+        if (anim != ROTATION_ANIMATION_SEAMLESS) return anim;
+        if (mainWin != task.mDisplayContent.getDisplayPolicy().getTopFullscreenOpaqueWindow()
+                || !top.matchParentBounds()) {
+            // At the moment, we only support seamless rotation if there is only one window showing.
+            return ROTATION_ANIMATION_UNSPECIFIED;
+        }
+        return mainWin.getAttrs().rotationAnimation;
     }
 
     boolean getLegacyIsReady() {
@@ -1166,6 +1187,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final DisplayContent dc = wc.asDisplayContent();
             if (dc != null) {
                 flags |= FLAG_IS_DISPLAY;
+                if (dc.hasAlertWindowSurfaces()) {
+                    flags |= FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+                }
             }
             if (isWallpaper(wc)) {
                 flags |= FLAG_IS_WALLPAPER;
