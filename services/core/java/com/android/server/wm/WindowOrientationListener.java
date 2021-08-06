@@ -68,7 +68,7 @@ public abstract class WindowOrientationListener {
     private static final String KEY_ROTATION_MEMORIZATION_TIMEOUT =
             "rotation_memorization_timeout_millis";
     private static final long DEFAULT_ROTATION_RESOLVER_TIMEOUT_MILLIS = 700L;
-    private static final long DEFAULT_ROTATION_MEMORIZATION_TIMEOUT_MILLIS = 10_000L; // 10 seconds
+    private static final long DEFAULT_ROTATION_MEMORIZATION_TIMEOUT_MILLIS = 3_000L; // 3 seconds
 
     private Handler mHandler;
     private SensorManager mSensorManager;
