@@ -119,6 +119,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mNotificationIcons.getLayoutParams()).thenReturn(
                 mock(RelativeLayout.LayoutParams.class));
         when(mView.getContext()).thenReturn(getContext());
+        when(mView.getResources()).thenReturn(mResources);
 
         when(mView.findViewById(R.id.animatable_clock_view)).thenReturn(mClockView);
         when(mView.findViewById(R.id.animatable_clock_view_large)).thenReturn(mLargeClockView);
@@ -127,7 +128,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mLargeClockView.getContext()).thenReturn(getContext());
 
         when(mView.isAttachedToWindow()).thenReturn(true);
-        when(mResources.getString(anyInt())).thenReturn("h:mm");
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mController = new KeyguardClockSwitchController(
                 mView,
