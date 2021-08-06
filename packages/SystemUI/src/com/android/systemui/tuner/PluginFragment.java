@@ -106,8 +106,8 @@ public class PluginFragment extends PreferenceFragment {
                 PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_SERVICES);
         apps.forEach(app -> {
             if (!plugins.containsKey(app.packageName)) return;
-            if (ArrayUtils.contains(manager.getWhitelistedPlugins(), app.packageName)) {
-                // Don't manage whitelisted plugins, they are part of the OS.
+            if (ArrayUtils.contains(manager.getPrivilegedPlugins(), app.packageName)) {
+                // Don't manage privileged plugins, they are part of the OS.
                 return;
             }
             SwitchPreference pref = new PluginPreference(prefContext, app, mPluginEnabler);

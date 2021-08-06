@@ -15,16 +15,17 @@
 package com.android.systemui.plugins;
 
 import android.content.Context;
-import android.os.Build;
-import android.os.Looper;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInitializer;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/** */
+@Singleton
 public class PluginInitializerImpl implements PluginInitializer {
 
     /**
@@ -33,44 +34,24 @@ public class PluginInitializerImpl implements PluginInitializer {
     private static final boolean WTFS_SHOULD_CRASH = false;
     private boolean mWtfsSet;
 
-    @Override
-    public Looper getBgLooper() {
-        return Dependency.get(Dependency.BG_LOOPER);
+    @Inject
+    public PluginInitializerImpl(PluginDependencyProvider  dependencyProvider) {
+        dependencyProvider.allowPluginDependency(ActivityStarter.class);
     }
 
     @Override
-    public void onPluginManagerInit() {
-        // Plugin dependencies that don't have another good home can go here, but
-        // dependencies that have better places to init can happen elsewhere.
-        Dependency.get(PluginDependencyProvider.class)
-                .allowPluginDependency(ActivityStarter.class);
-    }
-
-    @Override
-    public String[] getWhitelistedPlugins(Context context) {
+    public String[] getPrivilegedPlugins(Context context) {
         return context.getResources().getStringArray(R.array.config_pluginWhitelist);
     }
 
-    public PluginEnabler getPluginEnabler(Context context) {
-        return new PluginEnablerImpl(context);
-    }
 
     @Override
     public void handleWtfs() {
         if (WTFS_SHOULD_CRASH && !mWtfsSet) {
             mWtfsSet = true;
-            Log.setWtfHandler(new Log.TerribleFailureHandler() {
-                @Override
-                public void onTerribleFailure(String tag, Log.TerribleFailure what,
-                        boolean system) {
-                    throw new PluginManagerImpl.CrashWhilePluginActiveException(what);
-                }
+            Log.setWtfHandler((tag, what, system) -> {
+                throw new PluginManagerImpl.CrashWhilePluginActiveException(what);
             });
         }
-    }
-
-    @Override
-    public boolean isDebuggable() {
-        return Build.IS_DEBUGGABLE;
     }
 }
