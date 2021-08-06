@@ -202,6 +202,5 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         verify(mPanelView).removeTrackingHeadsUpListener(any());
         verify(mPanelView).setHeadsUpAppearanceController(isNull());
         verify(mStackScrollerController).removeOnExpandedHeightChangedListener(any());
-        verify(mStackScrollerController).removeOnLayoutChangeListener(any());
     }
 }
