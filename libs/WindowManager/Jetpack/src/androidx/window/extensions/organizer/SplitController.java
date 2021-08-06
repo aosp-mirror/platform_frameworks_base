@@ -128,7 +128,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Check if there are no running activities - consider the container empty if there are no
         // non-finishing activities left.
         if (!taskFragmentInfo.hasRunningActivity()) {
-            cleanupContainer(container, true /* shouldFinishDependent */);
+            mPresenter.cleanupContainer(container, true /* shouldFinishDependent */);
             updateCallbackIfNecessary();
         }
     }
@@ -140,7 +140,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
 
-        cleanupContainer(container, true /* shouldFinishDependent */);
+        mPresenter.cleanupContainer(container, true /* shouldFinishDependent */);
         updateCallbackIfNecessary();
     }
 
@@ -307,13 +307,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         mSplitContainers.add(splitContainer);
     }
 
-    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
-        if (container.isFinished()) {
-            return;
-        }
-
-        container.finish(shouldFinishDependent);
-
+    /**
+     * Removes the container from bookkeeping records.
+     */
+    void removeContainer(@NonNull TaskFragmentContainer container) {
         // Remove all split containers that included this one
         mContainers.remove(container);
         List<SplitContainer> containersToRemove = new ArrayList<>();
@@ -324,8 +321,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         mSplitContainers.removeAll(containersToRemove);
-
-        mPresenter.deleteContainer(container);
     }
 
     /**
@@ -462,7 +457,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
-        cleanupContainer(splitContainer.getSecondaryContainer(),
+        mPresenter.cleanupContainer(splitContainer.getSecondaryContainer(),
                 false /* shouldFinishDependent */);
         return true;
     }
