@@ -106,6 +106,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     }
 
     @Override
+    public boolean wasUserDetected() {
+        // TODO: Update if it needs to be used for fingerprint, i.e. success/reject, error_timeout
+        return false;
+    }
+
+    @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         super.onAuthenticated(identifier, authenticated, token);

@@ -23,7 +23,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -68,8 +67,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private float mBurnInProgress;
     private float mInterpolatedDarkAmount;
 
-    private ValueAnimator mHintAnimator;
-
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mFingerprintDrawable = new UdfpsFpDrawable(context);
@@ -94,9 +91,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
                 new KeyPath("**"), LottieProperty.COLOR_FILTER,
                 frameInfo -> new PorterDuffColorFilter(mTextColorPrimary, PorterDuff.Mode.SRC_ATOP)
         );
-
-        mHintAnimator = ObjectAnimator.ofFloat(mLockScreenFp, "progress", 1f, 0f, 1f);
-        mHintAnimator.setDuration(4000);
     }
 
     @Override
@@ -183,17 +177,9 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     void onDozeAmountChanged(float linear, float eased) {
-        mHintAnimator.cancel();
         mInterpolatedDarkAmount = eased;
         updateAlpha();
         updateBurnInOffsets();
-    }
-
-    void animateHint() {
-        if (!isShadeLocked() && !mUdfpsRequested && mAlpha == 255
-                && mLockScreenFp.isVisibleToUser()) {
-            mHintAnimator.start();
-        }
     }
 
     /**

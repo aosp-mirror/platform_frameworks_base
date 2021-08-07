@@ -160,6 +160,23 @@ public class SurfaceUtils {
     }
 
     /**
+     * Detect and retrieve the Surface format without any
+     * additional overrides.
+     *
+     * @param surface The surface to be queried for format.
+     * @return format of the surface.
+     *
+     * @throws IllegalArgumentException if the surface is already abandoned.
+     */
+    public static int detectSurfaceFormat(Surface surface) {
+        checkNotNull(surface);
+        int surfaceType = nativeDetectSurfaceType(surface);
+        if (surfaceType == BAD_VALUE) throw new IllegalArgumentException("Surface was abandoned");
+
+        return surfaceType;
+    }
+
+    /**
      * Get the Surface dataspace.
      *
      * @param surface The surface to be queried for dataspace.

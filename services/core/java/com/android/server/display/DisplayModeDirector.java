@@ -52,6 +52,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
@@ -153,7 +154,7 @@ public class DisplayModeDirector {
                 updateVoteLocked(displayId, priority, vote);
             }
         };
-        mSensorObserver = new SensorObserver(context, ballotBox);
+        mSensorObserver = new SensorObserver(context, ballotBox, injector);
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler());
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mDeviceConfig = injector.getDeviceConfig();
@@ -2127,27 +2128,36 @@ public class DisplayModeDirector {
         }
     }
 
-    private static class SensorObserver implements ProximityActiveListener {
-        private static final String PROXIMITY_SENSOR_NAME = null;
-        private static final String PROXIMITY_SENSOR_TYPE = Sensor.STRING_TYPE_PROXIMITY;
+    private static final class SensorObserver implements ProximityActiveListener,
+            DisplayManager.DisplayListener {
+        private final String mProximitySensorName = null;
+        private final String mProximitySensorType = Sensor.STRING_TYPE_PROXIMITY;
 
         private final BallotBox mBallotBox;
         private final Context mContext;
+        private final Injector mInjector;
+        @GuardedBy("mSensorObserverLock")
+        private final SparseBooleanArray mDozeStateByDisplay = new SparseBooleanArray();
+        private final Object mSensorObserverLock = new Object();
 
         private DisplayManager mDisplayManager;
         private DisplayManagerInternal mDisplayManagerInternal;
+        @GuardedBy("mSensorObserverLock")
         private boolean mIsProxActive = false;
 
-        SensorObserver(Context context, BallotBox ballotBox) {
+        SensorObserver(Context context, BallotBox ballotBox, Injector injector) {
             mContext = context;
             mBallotBox = ballotBox;
+            mInjector = injector;
         }
 
         @Override
         public void onProximityActive(boolean isActive) {
-            if (mIsProxActive != isActive) {
-                mIsProxActive = isActive;
-                recalculateVotes();
+            synchronized (mSensorObserverLock) {
+                if (mIsProxActive != isActive) {
+                    mIsProxActive = isActive;
+                    recalculateVotesLocked();
+                }
             }
         }
 
@@ -2158,17 +2168,27 @@ public class DisplayModeDirector {
             final SensorManagerInternal sensorManager =
                     LocalServices.getService(SensorManagerInternal.class);
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
+
+            synchronized (mSensorObserverLock) {
+                for (Display d : mDisplayManager.getDisplays()) {
+                    mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
+                }
+            }
+            mInjector.registerDisplayListener(this, BackgroundThread.getHandler(),
+                    DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                            | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                            | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
         }
 
-        private void recalculateVotes() {
+        private void recalculateVotesLocked() {
             final Display[] displays = mDisplayManager.getDisplays();
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
-                if (mIsProxActive) {
+                if (mIsProxActive && !mDozeStateByDisplay.get(displayId)) {
                     final RefreshRateRange rate =
                             mDisplayManagerInternal.getRefreshRateForDisplayAndSensor(
-                                    displayId, PROXIMITY_SENSOR_NAME, PROXIMITY_SENSOR_TYPE);
+                                    displayId, mProximitySensorName, mProximitySensorType);
                     if (rate != null) {
                         vote = Vote.forRefreshRates(rate.min, rate.max);
                     }
@@ -2179,7 +2199,44 @@ public class DisplayModeDirector {
 
         void dumpLocked(PrintWriter pw) {
             pw.println("  SensorObserver");
-            pw.println("    mIsProxActive=" + mIsProxActive);
+            synchronized (mSensorObserverLock) {
+                pw.println("    mIsProxActive=" + mIsProxActive);
+                pw.println("    mDozeStateByDisplay:");
+                for (int i = 0; i < mDozeStateByDisplay.size(); i++) {
+                    final int id = mDozeStateByDisplay.keyAt(i);
+                    final boolean dozed = mDozeStateByDisplay.valueAt(i);
+                    pw.println("      " + id + " -> " + dozed);
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            boolean isDozeState = mInjector.isDozeState(mDisplayManager.getDisplay(displayId));
+            synchronized (mSensorObserverLock) {
+                mDozeStateByDisplay.put(displayId, isDozeState);
+                recalculateVotesLocked();
+            }
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            boolean wasDozeState = mDozeStateByDisplay.get(displayId);
+            synchronized (mSensorObserverLock) {
+                mDozeStateByDisplay.put(displayId,
+                        mInjector.isDozeState(mDisplayManager.getDisplay(displayId)));
+                if (wasDozeState != mDozeStateByDisplay.get(displayId)) {
+                    recalculateVotesLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            synchronized (mSensorObserverLock) {
+                mDozeStateByDisplay.delete(displayId);
+                recalculateVotesLocked();
+            }
         }
     }
 
@@ -2411,6 +2468,8 @@ public class DisplayModeDirector {
                 Handler handler, long flags);
 
         BrightnessInfo getBrightnessInfo(int displayId);
+
+        boolean isDozeState(Display d);
     }
 
     @VisibleForTesting
@@ -2461,6 +2520,14 @@ public class DisplayModeDirector {
                 return display.getBrightnessInfo();
             }
             return null;
+        }
+
+        @Override
+        public boolean isDozeState(Display d) {
+            if (d == null) {
+                return false;
+            }
+            return Display.isDozeState(d.getState());
         }
 
         private DisplayManager getDisplayManager() {

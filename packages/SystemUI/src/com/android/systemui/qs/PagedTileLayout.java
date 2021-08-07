@@ -268,7 +268,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
-    public void setExpansion(float expansion) {
+    public void setExpansion(float expansion, float proposedTranslation) {
         mLastExpansion = expansion;
         updateSelected();
     }

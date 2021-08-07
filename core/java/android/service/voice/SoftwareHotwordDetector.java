@@ -82,6 +82,9 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         try {
             mManagerService.startListeningFromMic(
                     mAudioFormat, new BinderCallback(mHandler, mCallback));
+        } catch (SecurityException e) {
+            Slog.e(TAG, "startRecognition failed: " + e);
+            return false;
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
