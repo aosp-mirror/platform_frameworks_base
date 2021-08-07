@@ -24,6 +24,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -47,6 +48,7 @@ public class ShellInitImpl {
     private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
+    private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
     private final StartingWindowController mStartingWindow;
@@ -62,6 +64,7 @@ public class ShellInitImpl {
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Optional<Optional<FreeformTaskListener>> freeformTaskListenerOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
             ShellExecutor mainExecutor) {
@@ -74,6 +77,7 @@ public class ShellInitImpl {
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
+        mFreeformTaskListenerOptional = freeformTaskListenerOptional.flatMap(f -> f);
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
         mStartingWindow = startingWindow;
@@ -108,6 +112,11 @@ public class ShellInitImpl {
         // controller instead of the feature interface, can just initialize the touch handler if
         // needed
         mPipTouchHandlerOptional.ifPresent((handler) -> handler.init());
+
+        // Initialize optional freeform
+        mFreeformTaskListenerOptional.ifPresent(f ->
+                mShellTaskOrganizer.addListenerForType(
+                        f, ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM));
     }
 
     @ExternalThread

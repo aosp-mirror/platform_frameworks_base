@@ -19,11 +19,14 @@ package com.android.systemui.flags;
 import android.content.Context;
 import android.util.FeatureFlagUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.plugins.FlagReaderPlugin;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -37,11 +40,26 @@ import javax.inject.Inject;
 public class FeatureFlags {
     private final FeatureFlagReader mFlagReader;
     private final Context mContext;
+    private final Map<Integer, Flag<?>> mFlagMap = new HashMap<>();
+    private final Map<Integer, List<Listener>> mListeners = new HashMap<>();
 
     @Inject
     public FeatureFlags(FeatureFlagReader flagReader, Context context) {
         mFlagReader = flagReader;
         mContext = context;
+
+        flagReader.addListener(mListener);
+    }
+
+    private final FlagReaderPlugin.Listener mListener = id -> {
+        if (mListeners.containsKey(id) && mFlagMap.containsKey(id)) {
+            mListeners.get(id).forEach(listener -> listener.onFlagChanged(mFlagMap.get(id)));
+        }
+    };
+
+    @VisibleForTesting
+    void addFlag(Flag flag) {
+        mFlagMap.put(flag.getId(), flag);
     }
 
     /**
@@ -90,6 +108,20 @@ public class FeatureFlags {
      */
     public double getValue(DoubleFlag flag) {
         return mFlagReader.getValue(flag);
+    }
+
+    /** Add a listener for a specific flag. */
+    public void addFlagListener(Flag<?> flag, Listener listener) {
+        mListeners.putIfAbsent(flag.getId(), new ArrayList<>());
+        mListeners.get(flag.getId()).add(listener);
+        mFlagMap.putIfAbsent(flag.getId(), flag);
+    }
+
+    /** Remove a listener for a specific flag. */
+    public void removeFlagListener(Flag<?> flag, Listener listener) {
+        if (mListeners.containsKey(flag.getId())) {
+            mListeners.get(flag.getId()).remove(listener);
+        }
     }
 
     public boolean isNewNotifPipelineEnabled() {
@@ -158,27 +190,6 @@ public class FeatureFlags {
     /** static method for the system setting */
     public static boolean isProviderModelSettingEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
-    }
-
-    private Map<Integer, Flag<?>> collectFlags() {
-        Map<Integer, Flag<?>> flags = new HashMap<>();
-
-        Field[] fields = this.getClass().getFields();
-
-        for (Field field : fields) {
-            Class<?> t = field.getType();
-            if (Flag.class.isAssignableFrom(t)) {
-                try {
-                    //flags.add((Flag<?>) field.get(null));
-                    Flag flag = (Flag) field.get(null);
-                    flags.put(flag.getId(), flag);
-                } catch (IllegalAccessException e) {
-                    // no-op
-                }
-            }
-        }
-
-        return flags;
     }
 
     /** Simple interface for beinga alerted when a specific flag changes value. */
