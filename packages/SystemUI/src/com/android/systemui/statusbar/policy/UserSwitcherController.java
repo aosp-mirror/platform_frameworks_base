@@ -343,8 +343,7 @@ public class UserSwitcherController implements Dumpable {
                                 true /* isGuest */, false /* isCurrent */,
                                 false /* isAddUser */, false /* isRestricted */,
                                 isSwitchToGuestEnabled);
-                        // Don't call checkIfAddUserDisallowedByAdminOnly if
-                        // config_guestUserAutoCreated=true.
+                        checkIfAddUserDisallowedByAdminOnly(guestRecord);
                         records.add(guestRecord);
                     } else if (canCreateGuest) {
                         guestRecord = new UserRecord(null /* info */, null /* picture */,
