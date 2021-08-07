@@ -265,7 +265,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 new FalsingManagerFake(),
                                 new FalsingCollectorFake(),
                                 mPeopleNotificationIdentifier,
-                                Optional.of(mock(BubblesManager.class))
+                                Optional.of(mock(BubblesManager.class)),
+                                mock(ExpandableNotificationRowDragController.class)
                         ));
 
         when(mNotificationRowComponentBuilder.activatableNotificationView(any()))
