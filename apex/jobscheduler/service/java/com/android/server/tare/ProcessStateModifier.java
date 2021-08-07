@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.IUidObserver;
-import android.content.pm.PackageManagerInternal;
 import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -28,7 +27,6 @@ import android.util.SparseArrayMap;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.LocalServices;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,7 +54,6 @@ class ProcessStateModifier extends Modifier {
 
     private final Object mLock = new Object();
     private final InternalResourceService mIrs;
-    private final PackageManagerInternal mPackageManagerInternal;
 
     /** Cached mapping of userId+package to their UIDs (for all users) */
     private final SparseArrayMap<String, Integer> mPackageToUidCache = new SparseArrayMap<>();
@@ -105,7 +102,6 @@ class ProcessStateModifier extends Modifier {
     ProcessStateModifier(@NonNull InternalResourceService irs) {
         super();
         mIrs = irs;
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     @Override
@@ -143,7 +139,7 @@ class ProcessStateModifier extends Modifier {
         final int procState;
         synchronized (mLock) {
             procState = mUidProcStateBucketCache.get(
-                    getUidLocked(userId, pkgName), PROC_STATE_BUCKET_NONE);
+                    mIrs.getUid(userId, pkgName), PROC_STATE_BUCKET_NONE);
         }
         switch (procState) {
             case PROC_STATE_BUCKET_TOP:
@@ -164,15 +160,6 @@ class ProcessStateModifier extends Modifier {
     void dump(IndentingPrintWriter pw) {
         pw.print("Proc state bucket cache = ");
         pw.println(mUidProcStateBucketCache);
-    }
-
-    @GuardedBy("mLock")
-    private int getUidLocked(final int userId, @NonNull final String pkgName) {
-        if (!mPackageToUidCache.contains(userId, pkgName)) {
-            mPackageToUidCache.add(userId, pkgName,
-                    mPackageManagerInternal.getPackageUid(pkgName, 0, userId));
-        }
-        return mPackageToUidCache.get(userId, pkgName);
     }
 
     @ProcStateBucket

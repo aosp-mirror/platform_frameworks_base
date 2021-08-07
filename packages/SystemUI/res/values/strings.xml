@@ -3014,6 +3014,8 @@
     <string name="pref_title_network_details" msgid="7329759534269363308">"Network details"</string>
     <!-- Provider Model: Panel subtitle for tapping a network to connect to internet. [CHAR LIMIT=60] -->
     <string name="tap_a_network_to_connect">Tap a network to connect</string>
+    <!-- Provider Model: Panel subtitle for unlocking screen to view networks. [CHAR LIMIT=60] -->
+    <string name="unlock_to_view_networks">Unlock to view networks</string>
     <!-- Provider Model: Wi-Fi settings. text displayed when Wi-Fi is on and network list is empty [CHAR LIMIT=50]-->
     <string name="wifi_empty_list_wifi_on">Searching for networks\u2026</string>
     <!-- Provider Model: Failure notification for connect -->

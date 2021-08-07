@@ -1908,15 +1908,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         if (r.moveFocusableActivityToTop("setFocusedTask")) {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
-        } else if (touchedActivity != null && touchedActivity != r
-                && touchedActivity.getTask() == r.getTask()
-                && touchedActivity.getTaskFragment() != r.getTaskFragment()) {
-            // Set the focused app directly since the focused window is not on the
-            // top-most TaskFragment of the top-most Task
-            final DisplayContent displayContent = touchedActivity.getDisplayContent();
-            displayContent.setFocusedApp(touchedActivity);
-            mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
-                    true /* updateInputWindows */);
+        } else if (touchedActivity != null && touchedActivity.isFocusable()) {
+            final TaskFragment parent = touchedActivity.getTaskFragment();
+            if (parent != null && parent.isEmbedded()) {
+                // Set the focused app directly if the focused window is currently embedded
+                final DisplayContent displayContent = touchedActivity.getDisplayContent();
+                displayContent.setFocusedApp(touchedActivity);
+                mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                        true /* updateInputWindows */);
+            }
         }
     }
 

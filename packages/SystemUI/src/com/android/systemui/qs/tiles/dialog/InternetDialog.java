@@ -287,14 +287,22 @@ public class InternetDialog extends SystemUIDialog implements
         }
         showProgressBar();
         setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular());
-        setConnectedWifiLayout();
-        boolean isWifiEnabled = mWifiManager.isWifiEnabled();
-        mWiFiToggle.setChecked(isWifiEnabled);
-        int visible = isWifiEnabled ? View.VISIBLE : View.GONE;
-        mWifiRecyclerView.setVisibility(visible);
-        mAdapter.notifyDataSetChanged();
-        mSeeAllLayout.setVisibility(visible);
-        mSpace.setVisibility(isWifiEnabled ? View.GONE : View.VISIBLE);
+
+        final boolean isDeviceLocked = mInternetDialogController.isDeviceLocked();
+        final boolean isWifiEnabled = mWifiManager.isWifiEnabled();
+        updateWifiToggle(isWifiEnabled, isDeviceLocked);
+        updateConnectedWifi(isWifiEnabled, isDeviceLocked);
+
+        List<WifiEntry> wifiEntryList = mInternetDialogController.getWifiEntryList();
+        final int wifiListVisibility =
+                (isDeviceLocked || wifiEntryList == null || wifiEntryList.size() <= 0)
+                        ? View.GONE : View.VISIBLE;
+        mWifiRecyclerView.setVisibility(wifiListVisibility);
+        if (wifiListVisibility == View.VISIBLE) {
+            mAdapter.notifyDataSetChanged();
+        }
+        mSeeAllLayout.setVisibility(wifiListVisibility);
+        mSpace.setVisibility(wifiListVisibility == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
 
     private void setOnClickListener() {
@@ -358,8 +366,14 @@ public class InternetDialog extends SystemUIDialog implements
         }
     }
 
-    private void setConnectedWifiLayout() {
-        if (!mWifiManager.isWifiEnabled() || mConnectedWifiEntry == null) {
+    private void updateWifiToggle(boolean isWifiEnabled, boolean isDeviceLocked) {
+        mWiFiToggle.setChecked(isWifiEnabled);
+        mTurnWifiOnLayout.setBackground(
+                (isDeviceLocked && mConnectedWifiEntry != null) ? mBackgroundOn : null);
+    }
+
+    private void updateConnectedWifi(boolean isWifiEnabled, boolean isDeviceLocked) {
+        if (!isWifiEnabled || mConnectedWifiEntry == null || isDeviceLocked) {
             mConnectedWifListLayout.setBackground(null);
             mConnectedWifListLayout.setVisibility(View.GONE);
             return;
@@ -418,7 +432,8 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     protected void showProgressBar() {
-        if (mWifiManager == null || !mWifiManager.isWifiEnabled()) {
+        if (mWifiManager == null || !mWifiManager.isWifiEnabled()
+                || mInternetDialogController.isDeviceLocked()) {
             setProgressBarVisible(false);
             return;
         }

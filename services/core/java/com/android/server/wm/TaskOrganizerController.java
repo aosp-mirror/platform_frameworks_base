@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
@@ -66,14 +63,6 @@ import java.util.function.Consumer;
  */
 class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private static final String TAG = "TaskOrganizerController";
-
-    // The set of modes that are currently supports
-    // TODO: Remove once the task organizer can support all modes
-    @VisibleForTesting
-    static final int[] UNSUPPORTED_WINDOWING_MODES = {
-            WINDOWING_MODE_UNDEFINED,
-            WINDOWING_MODE_FREEFORM
-    };
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         ITaskOrganizer mTaskOrganizer;
@@ -373,11 +362,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
                 final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 mService.mRootWindowContainer.forAllTasks((task) -> {
-                    if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES,
-                            task.getWindowingMode())) {
-                        return;
-                    }
-
                     boolean returnTask = !task.mCreatedByOrganizer;
                     task.updateTaskOrganizerState(true /* forceUpdate */,
                             returnTask /* skipTaskAppeared */);
@@ -433,14 +417,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     /**
      * @return the task organizer key for a given windowing mode.
      */
-    ITaskOrganizer getTaskOrganizer(int windowingMode) {
-        return isSupportedWindowingMode(windowingMode)
-                ? mTaskOrganizers.peekLast()
-                : null;
-    }
-
-    boolean isSupportedWindowingMode(int winMode) {
-        return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
+    ITaskOrganizer getTaskOrganizer() {
+        return mTaskOrganizers.peekLast();
     }
 
     // Capture the animation surface control for activity's main window
@@ -993,9 +971,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             for (int k = 0; k < tasks.size(); k++) {
                 final Task task = tasks.get(k);
                 final int mode = task.getWindowingMode();
-                if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, mode)) {
-                    continue;
-                }
                 pw.println(innerPrefix + "    ("
                         + WindowConfiguration.windowingModeToString(mode) + ") " + task);
             }

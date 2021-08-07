@@ -26,6 +26,7 @@ import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
 import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
+import static com.android.server.tare.TareUtils.appToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import static com.android.server.tare.TareUtils.narcToString;
 
@@ -195,6 +196,11 @@ class Agent {
     @GuardedBy("mLock")
     void noteInstantaneousEventLocked(final int userId, @NonNull final String pkgName,
             final int eventId, @Nullable String tag) {
+        if (mIrs.isSystem(userId, pkgName)) {
+            // Events are free for the system. Don't bother recording them.
+            return;
+        }
+
         final long now = getCurrentTimeMillis();
         final Ledger ledger = getLedgerLocked(userId, pkgName);
 
@@ -416,12 +422,15 @@ class Agent {
         }
         ongoingEvent.refCount--;
         if (ongoingEvent.refCount <= 0) {
-            final long startElapsed = ongoingEvent.startTimeElapsed;
-            final long startTime = now - (nowElapsed - startElapsed);
-            final long actualDelta = getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
-            recordTransactionLocked(userId, pkgName, ledger,
-                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
-                    notifyOnAffordabilityChange);
+            if (!mIrs.isSystem(userId, pkgName)) {
+                final long startElapsed = ongoingEvent.startTimeElapsed;
+                final long startTime = now - (nowElapsed - startElapsed);
+                final long actualDelta =
+                        getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
+                recordTransactionLocked(userId, pkgName, ledger,
+                        new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
+                        notifyOnAffordabilityChange);
+            }
             ongoingEvents.delete(eventId, tag);
         }
         if (updateBalanceCheck) {
@@ -447,6 +456,15 @@ class Agent {
     private void recordTransactionLocked(final int userId, @NonNull final String pkgName,
             @NonNull Ledger ledger, @NonNull Ledger.Transaction transaction,
             final boolean notifyOnAffordabilityChange) {
+        if (transaction.delta == 0) {
+            // Skip recording transactions with a delta of 0 to save on space.
+            return;
+        }
+        if (mIrs.isSystem(userId, pkgName)) {
+            Slog.wtfStack(TAG,
+                    "Tried to adjust system balance for " + appToString(userId, pkgName));
+            return;
+        }
         final long maxCirculationAllowed = mIrs.getMaxCirculationLocked();
         final long newArcsInCirculation = mCurrentNarcsInCirculation + transaction.delta;
         if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
@@ -549,6 +567,10 @@ class Agent {
             final PackageInfo pkgInfo = pkgs.get(i);
             final int userId = UserHandle.getUserId(pkgInfo.applicationInfo.uid);
             final String pkgName = pkgInfo.packageName;
+            if (mIrs.isSystem(userId, pkgName)) {
+                // No point allocating ARCs to the system. It can do whatever it wants.
+                continue;
+            }
             Ledger ledger = getLedgerLocked(userId, pkgName);
             final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
             final double perc = batteryLevel / 100d;
@@ -585,6 +607,10 @@ class Agent {
             final PackageInfo packageInfo = pkgs.get(i);
             final String pkgName = packageInfo.packageName;
             final Ledger ledger = getLedgerLocked(userId, pkgName);
+            if (mIrs.isSystem(userId, pkgName)) {
+                // No point allocating ARCs to the system. It can do whatever it wants.
+                continue;
+            }
             if (ledger.getCurrentBalance() > 0) {
                 // App already got credits somehow. Move along.
                 Slog.wtf(TAG, "App " + pkgName + " had credits before economy was set up");

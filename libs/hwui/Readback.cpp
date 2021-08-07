@@ -251,6 +251,8 @@ CopyResult Readback::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
 
     Rect srcRect;
     Matrix4 transform;
+    transform.loadScale(1, -1, 1);
+    transform.translate(0, -1);
 
     return copyImageInto(hwBitmap->makeImage(), transform, srcRect, bitmap);
 }
@@ -278,6 +280,8 @@ CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
     Rect srcRect;
     Matrix4 transform;
+    transform.loadScale(1, -1, 1);
+    transform.translate(0, -1);
     return copyImageInto(image, transform, srcRect, bitmap);
 }
 
@@ -316,6 +320,7 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
 
     Layer layer(mRenderThread.renderState(), nullptr, 255, SkBlendMode::kSrc);
     layer.setSize(displayedWidth, displayedHeight);
+    texTransform.copyTo(layer.getTexTransform());
     layer.setImage(image);
     // Scaling filter is not explicitly set here, because it is done inside copyLayerInfo
     // after checking the necessity based on the src/dest rect size and the transformation.

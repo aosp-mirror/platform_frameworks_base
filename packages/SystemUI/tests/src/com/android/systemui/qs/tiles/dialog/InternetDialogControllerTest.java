@@ -33,13 +33,13 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -79,7 +79,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private GlobalSettings mGlobalSettings;
     @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private NetworkController.AccessPointController mAccessPointController;
     @Mock
@@ -99,15 +99,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(SUB_ID);
+        doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
         when(mWifiManager.getConnectionInfo()).thenReturn(mWifiInfo);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         when(mConnectedEntry.isDefaultNetwork()).thenReturn(true);
 
         mInternetDialogController = new MockInternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
-                mKeyguardUpdateMonitor, mGlobalSettings);
+                mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(
@@ -171,6 +172,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
                 getResourcesString("tap_a_network_to_connect")));
+    }
+
+    @Test
+    public void getSubtitleText_deviceLockedWithWifiOn_returnUnlockToViewNetworks() {
+        mInternetDialogController.setAirplaneModeEnabled(false);
+        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
+                getResourcesString("unlock_to_view_networks")));
     }
 
     @Test
@@ -311,6 +322,20 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
 
+    @Test
+    public void isDeviceLocked_keyguardIsUnlocked_returnFalse() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+
+        assertThat(mInternetDialogController.isDeviceLocked()).isFalse();
+    }
+
+    @Test
+    public void isDeviceLocked_keyguardIsLocked_returnTrue() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        assertThat(mInternetDialogController.isDeviceLocked()).isTrue();
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }
@@ -331,10 +356,12 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
                 @Main Handler handler, @Main Executor mainExecutor,
                 BroadcastDispatcher broadcastDispatcher,
-                KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings) {
+                KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings,
+                KeyguardStateController keyguardStateController) {
             super(context, uiEventLogger, starter, accessPointController, subscriptionManager,
                     telephonyManager, wifiManager, connectivityManager, handler, mainExecutor,
-                    broadcastDispatcher, keyguardUpdateMonitor, globalSettings);
+                    broadcastDispatcher, keyguardUpdateMonitor, globalSettings,
+                    keyguardStateController);
             mGlobalSettings = globalSettings;
         }
 
