@@ -498,11 +498,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                             : headerTranslation);
         }
         int currentHeight = getView().getHeight();
-        mLastHeaderTranslation = headerTranslation;
-        if (expansion == mLastQSExpansion && mLastKeyguardAndExpanded == onKeyguardAndExpanded
-                && mLastViewHeight == currentHeight) {
+        if (expansion == mLastQSExpansion
+                && mLastKeyguardAndExpanded == onKeyguardAndExpanded
+                && mLastViewHeight == currentHeight
+                && mLastHeaderTranslation == headerTranslation) {
             return;
         }
+        mLastHeaderTranslation = headerTranslation;
         mLastQSExpansion = expansion;
         mLastKeyguardAndExpanded = onKeyguardAndExpanded;
         mLastViewHeight = currentHeight;
@@ -522,8 +524,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSPanelController.setRevealExpansion(expansion);
-        mQSPanelController.getTileLayout().setExpansion(expansion);
-        mQuickQSPanelController.getTileLayout().setExpansion(expansion);
+        mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
+        mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQSPanelScrollView.setTranslationY(translationScaleY * heightDiff);
         if (fullyCollapsed) {
             mQSPanelScrollView.setScrollY(0);

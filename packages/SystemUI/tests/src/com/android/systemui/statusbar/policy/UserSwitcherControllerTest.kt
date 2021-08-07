@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.IActivityTaskManager
+import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -63,6 +64,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var handler: Handler
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var userManager: UserManager
@@ -107,6 +110,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 userManager,
                 userTracker,
                 keyguardStateController,
+                deviceProvisionedController,
+                devicePolicyManager,
                 handler,
                 activityStarter,
                 broadcastDispatcher,

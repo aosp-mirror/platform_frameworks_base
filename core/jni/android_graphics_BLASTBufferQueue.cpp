@@ -105,9 +105,11 @@ static void nativeSetNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong
 }
 
 static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
-                         jlong height, jint format) {
+                         jlong height, jint format, jlong transactionPtr) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format);
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
+    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format,
+                  transaction);
 }
 
 static void nativeFlushShadowQueue(JNIEnv* env, jclass clazz, jlong ptr) {
@@ -144,7 +146,7 @@ static const JNINativeMethod gMethods[] = {
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
-        {"nativeUpdate", "(JJJJI)V", (void*)nativeUpdate},
+        {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
         {"nativeFlushShadowQueue", "(J)V", (void*)nativeFlushShadowQueue},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeSetTransactionCompleteCallback",

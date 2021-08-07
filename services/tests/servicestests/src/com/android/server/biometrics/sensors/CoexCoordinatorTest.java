@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricConstants;
 import android.os.Handler;
 import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
@@ -61,6 +62,8 @@ public class CoexCoordinatorTest {
     private Context mContext;
     @Mock
     private CoexCoordinator.Callback mCallback;
+    @Mock
+    private CoexCoordinator.ErrorCallback mErrorCallback;
 
     @Before
     public void setUp() {
@@ -255,13 +258,16 @@ public class CoexCoordinatorTest {
         mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
         mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_UDFPS, udfpsClient);
 
+        // For easier reading
+        final CoexCoordinator.Callback faceCallback = mCallback;
+
         mCoexCoordinator.onAuthenticationSucceeded(0 /* currentTimeMillis */, faceClient,
-                mCallback);
-        verify(mCallback, never()).sendHapticFeedback();
-        verify(mCallback, never()).sendAuthenticationResult(anyBoolean());
+                faceCallback);
+        verify(faceCallback, never()).sendHapticFeedback();
+        verify(faceCallback, never()).sendAuthenticationResult(anyBoolean());
         // CoexCoordinator requests the system to hold onto this AuthenticationClient until
         // UDFPS result is known
-        verify(mCallback, never()).handleLifecycleAfterAuth();
+        verify(faceCallback, never()).handleLifecycleAfterAuth();
 
         // Reset the mock
         CoexCoordinator.Callback udfpsCallback = mock(CoexCoordinator.Callback.class);
@@ -274,6 +280,8 @@ public class CoexCoordinatorTest {
             verify(udfpsCallback).sendAuthenticationResult(true /* addAuthTokenIfStrong */);
             verify(udfpsCallback).handleLifecycleAfterAuth();
 
+            verify(faceCallback).sendAuthenticationCanceled();
+
             assertTrue(mCoexCoordinator.mSuccessfulAuths.isEmpty());
         } else {
             mCoexCoordinator.onAuthenticationRejected(udfpsRejectedAfterMs, udfpsClient,
@@ -281,16 +289,16 @@ public class CoexCoordinatorTest {
             if (udfpsRejectedAfterMs <= CoexCoordinator.SUCCESSFUL_AUTH_VALID_DURATION_MS) {
                 verify(udfpsCallback, never()).sendHapticFeedback();
 
-                verify(mCallback).sendHapticFeedback();
-                verify(mCallback).sendAuthenticationResult(eq(true) /* addAuthTokenIfStrong */);
-                verify(mCallback).handleLifecycleAfterAuth();
+                verify(faceCallback).sendHapticFeedback();
+                verify(faceCallback).sendAuthenticationResult(eq(true) /* addAuthTokenIfStrong */);
+                verify(faceCallback).handleLifecycleAfterAuth();
 
                 assertTrue(mCoexCoordinator.mSuccessfulAuths.isEmpty());
             } else {
                 assertTrue(mCoexCoordinator.mSuccessfulAuths.isEmpty());
 
-                verify(mCallback, never()).sendHapticFeedback();
-                verify(mCallback, never()).sendAuthenticationResult(anyBoolean());
+                verify(faceCallback, never()).sendHapticFeedback();
+                verify(faceCallback, never()).sendAuthenticationResult(anyBoolean());
 
                 verify(udfpsCallback).sendHapticFeedback();
                 verify(udfpsCallback)
@@ -484,5 +492,83 @@ public class CoexCoordinatorTest {
 
         verify(callback).handleLifecycleAfterAuth();
         verify(successfulAuths).remove(eq(auth));
+    }
+
+    @Test
+    public void testBiometricPrompt_FaceError() {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> client = mock(AuthenticationClient.class);
+        when(client.isBiometricPrompt()).thenReturn(true);
+        when(client.wasAuthAttempted()).thenReturn(true);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, client);
+
+        mCoexCoordinator.onAuthenticationError(client, BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
+                mErrorCallback);
+        verify(mErrorCallback).sendHapticFeedback();
+    }
+
+    @Test
+    public void testKeyguard_faceAuthOnly_errorWhenBypassEnabled() {
+        testKeyguard_faceAuthOnly(true /* bypassEnabled */);
+    }
+
+    @Test
+    public void testKeyguard_faceAuthOnly_errorWhenBypassDisabled() {
+        testKeyguard_faceAuthOnly(false /* bypassEnabled */);
+    }
+
+    private void testKeyguard_faceAuthOnly(boolean bypassEnabled) {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> client = mock(AuthenticationClient.class);
+        when(client.isKeyguard()).thenReturn(true);
+        when(client.isKeyguardBypassEnabled()).thenReturn(bypassEnabled);
+        when(client.wasAuthAttempted()).thenReturn(true);
+        when(client.wasUserDetected()).thenReturn(true);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, client);
+
+        mCoexCoordinator.onAuthenticationError(client, BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
+                mErrorCallback);
+        verify(mErrorCallback).sendHapticFeedback();
+    }
+
+    @Test
+    public void testKeyguard_coex_faceErrorWhenBypassEnabled() {
+        testKeyguard_coex_faceError(true /* bypassEnabled */);
+    }
+
+    @Test
+    public void testKeyguard_coex_faceErrorWhenBypassDisabled() {
+        testKeyguard_coex_faceError(false /* bypassEnabled */);
+    }
+
+    private void testKeyguard_coex_faceError(boolean bypassEnabled) {
+        mCoexCoordinator.reset();
+
+        AuthenticationClient<?> faceClient = mock(AuthenticationClient.class);
+        when(faceClient.isKeyguard()).thenReturn(true);
+        when(faceClient.isKeyguardBypassEnabled()).thenReturn(bypassEnabled);
+        when(faceClient.wasAuthAttempted()).thenReturn(true);
+        when(faceClient.wasUserDetected()).thenReturn(true);
+
+        AuthenticationClient<?> udfpsClient = mock(AuthenticationClient.class,
+                withSettings().extraInterfaces(Udfps.class));
+        when(udfpsClient.isKeyguard()).thenReturn(true);
+        when(((Udfps) udfpsClient).isPointerDown()).thenReturn(false);
+
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_FACE, faceClient);
+        mCoexCoordinator.addAuthenticationClient(SENSOR_TYPE_UDFPS, udfpsClient);
+
+        mCoexCoordinator.onAuthenticationError(faceClient,
+                BiometricConstants.BIOMETRIC_ERROR_TIMEOUT, mErrorCallback);
+
+        if (bypassEnabled) {
+            verify(mErrorCallback).sendHapticFeedback();
+        } else {
+            verify(mErrorCallback, never()).sendHapticFeedback();
+        }
     }
 }
