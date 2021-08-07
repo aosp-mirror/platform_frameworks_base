@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Prepoznavanje lica nije uspjelo. Upotrijebite otisak prsta."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Nastavite pomoću otiska prsta"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Prepoznavanje otiska prsta nije uspjelo. Umjesto toga upotrebljavajte zaključavanje zaslona."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Tražimo vas…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona lica"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Gumb za kompatibilnost zumiranja."</string>

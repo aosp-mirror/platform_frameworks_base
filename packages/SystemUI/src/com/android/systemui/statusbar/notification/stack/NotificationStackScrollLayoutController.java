@@ -183,6 +183,8 @@ public class NotificationStackScrollLayoutController {
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
+    private View mLongPressedView;
+
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
 
@@ -489,6 +491,11 @@ public class NotificationStackScrollLayoutController {
                         }
                     }
                     return child;
+                }
+
+                @Override
+                public void onLongPressSent(View v) {
+                    mLongPressedView = v;
                 }
 
                 @Override
@@ -1435,6 +1442,10 @@ public class NotificationStackScrollLayoutController {
         return mDynamicPrivacyController.isInLockedDownShade();
     }
 
+    public boolean isLongPressInProgress() {
+        return mLongPressedView != null;
+    }
+
     /**
      * Set the dimmed state for all of the notification views.
      */
@@ -1689,17 +1700,23 @@ public class NotificationStackScrollLayoutController {
             mView.handleEmptySpaceClick(ev);
 
             NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+
+            boolean longPressWantsIt = false;
+            if (mLongPressedView != null) {
+                longPressWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
+            }
             boolean expandWantsIt = false;
-            if (!mSwipeHelper.isSwiping()
+            if (mLongPressedView == null && !mSwipeHelper.isSwiping()
                     && !mView.getOnlyScrollingInThisMotion() && guts == null) {
                 expandWantsIt = mView.getExpandHelper().onInterceptTouchEvent(ev);
             }
             boolean scrollWantsIt = false;
-            if (!mSwipeHelper.isSwiping() && !mView.isExpandingNotification()) {
+            if (mLongPressedView == null && !mSwipeHelper.isSwiping()
+                    && !mView.isExpandingNotification()) {
                 scrollWantsIt = mView.onInterceptTouchEventScroll(ev);
             }
             boolean swipeWantsIt = false;
-            if (!mView.isBeingDragged()
+            if (mLongPressedView == null && !mView.isBeingDragged()
                     && !mView.isExpandingNotification()
                     && !mView.getExpandedInThisMotion()
                     && !mView.getOnlyScrollingInThisMotion()
@@ -1727,7 +1744,7 @@ public class NotificationStackScrollLayoutController {
                 InteractionJankMonitor.getInstance().begin(mView,
                         CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
-            return swipeWantsIt || scrollWantsIt || expandWantsIt;
+            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt;
         }
 
         @Override
@@ -1736,11 +1753,15 @@ public class NotificationStackScrollLayoutController {
             boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
                     || ev.getActionMasked() == MotionEvent.ACTION_UP;
             mView.handleEmptySpaceClick(ev);
+            boolean longPressWantsIt = false;
+            if (guts != null && mLongPressedView != null) {
+                longPressWantsIt = mSwipeHelper.onTouchEvent(ev);
+            }
             boolean expandWantsIt = false;
             boolean onlyScrollingInThisMotion = mView.getOnlyScrollingInThisMotion();
             boolean expandingNotification = mView.isExpandingNotification();
-            if (mView.getIsExpanded() && !mSwipeHelper.isSwiping() && !onlyScrollingInThisMotion
-                    && guts == null) {
+            if (mLongPressedView == null && mView.getIsExpanded()
+                    && !mSwipeHelper.isSwiping() && !onlyScrollingInThisMotion && guts == null) {
                 ExpandHelper expandHelper = mView.getExpandHelper();
                 if (isCancelOrUp) {
                     expandHelper.onlyObserveMovements(false);
@@ -1754,12 +1775,12 @@ public class NotificationStackScrollLayoutController {
                 }
             }
             boolean scrollerWantsIt = false;
-            if (mView.isExpanded() && !mSwipeHelper.isSwiping() && !expandingNotification
-                    && !mView.getDisallowScrollingInThisMotion()) {
+            if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
+                    && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
                 scrollerWantsIt = mView.onScrollTouch(ev);
             }
             boolean horizontalSwipeWantsIt = false;
-            if (!mView.isBeingDragged()
+            if (mLongPressedView == null && !mView.isBeingDragged()
                     && !expandingNotification
                     && !mView.getExpandedInThisMotion()
                     && !onlyScrollingInThisMotion
@@ -1785,7 +1806,7 @@ public class NotificationStackScrollLayoutController {
                 mView.setCheckForLeaveBehind(true);
             }
             traceJankOnTouchEvent(ev.getActionMasked(), scrollerWantsIt);
-            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt;
+            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || longPressWantsIt;
         }
 
         private void traceJankOnTouchEvent(int action, boolean scrollerWantsIt) {

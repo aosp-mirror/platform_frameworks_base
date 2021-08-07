@@ -173,8 +173,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
         assertThat(mCachedAppOptimizerUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB);
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMinOomAdj).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMaxOomAdj).isEqualTo(
@@ -188,6 +186,10 @@ public final class CachedAppOptimizerTest {
         }
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle)
                 .containsExactlyElementsIn(expected);
+
+        Assume.assumeTrue(mCachedAppOptimizerUnderTest.isFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
+                CachedAppOptimizer.DEFAULT_USE_FREEZER);
     }
 
     @Test
@@ -244,9 +246,8 @@ public final class CachedAppOptimizerTest {
                     CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ - 10), false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_PROC_STATE_THROTTLE, "1,2,3", false);
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, CachedAppOptimizer.DEFAULT_USE_FREEZER
                         ? "false" : "true", false);
 
@@ -291,7 +292,8 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1);
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle).containsExactly(1, 2, 3);
 
-        if (mCachedAppOptimizerUnderTest.isFreezerSupported()) {
+        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
+        if (CachedAppOptimizer.isFreezerSupported()) {
             if (CachedAppOptimizer.DEFAULT_USE_FREEZER) {
                 assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
             } else {
@@ -325,15 +327,15 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_doesNotListenToDeviceConfigChanges() throws InterruptedException {
-        Assume.assumeTrue(mCachedAppOptimizerUnderTest.isFreezerSupported());
+        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
 
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
 
         // The freezer DeviceConfig property is read at boot only
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "true", false);
         mCachedAppOptimizerUnderTest.init();
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
         mCountDown = new CountDownLatch(1);
 
         // No notifications should get to the cached app optimizer.
@@ -346,14 +348,13 @@ public final class CachedAppOptimizerTest {
 
         // Set the flag the other way without rebooting. It shall not change.
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "false", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
 
-
         // Now, set the flag to false and restart the cached app optimizer
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "false", false);
         mCachedAppOptimizerUnderTest.init();
 
@@ -380,18 +381,17 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_listensToDeviceConfigChangesBadValues() throws InterruptedException {
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
 
         // When we push an invalid flag value...
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "foobar", false);
 
         mCachedAppOptimizerUnderTest.init();
 
-        // Then we set the default.
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        // DeviceConfig treats invalid value as false
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
     }
 
     @Test

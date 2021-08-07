@@ -16,6 +16,8 @@
 
 package android.app.backup;
 
+import static android.app.backup.FullBackup.ConfigSection.CLOUD_BACKUP;
+
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.test.AndroidTestCase;
@@ -412,6 +414,37 @@ public class FullBackupTest extends AndroidTestCase {
 
         Set<PathWithRequiredFlags> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
         assertNull("Didn't throw away invalid \"..\" path.", fileDomainIncludes);
+    }
+
+    public void testParseNewBackupSchemeFromXml_emptyCloudSectionIsRespected() throws Exception {
+        mXpp.setInput(new StringReader(
+                "<data-extraction-rules>" +
+                        "<cloud-backup>" +
+                        "</cloud-backup>" +
+                        "</data-extraction-rules>"));
+
+        FullBackup.BackupScheme backupScheme = FullBackup.getBackupSchemeForTest(mContext);
+        boolean result = backupScheme.parseNewBackupSchemeFromXmlLocked(mXpp, CLOUD_BACKUP,
+                excludesSet, includeMap);
+
+        assertTrue(result);
+    }
+
+    public void testParseNewBackupSchemeFromXml_emptyCloudSectionWithEncryptionFlagIsRespected()
+            throws Exception {
+        mXpp.setInput(new StringReader(
+                "<data-extraction-rules>" +
+                        "<cloud-backup disableIfNoEncryptionCapabilities=\"true\">" +
+                        "</cloud-backup>" +
+                        "</data-extraction-rules>"));
+
+        FullBackup.BackupScheme backupScheme = FullBackup.getBackupSchemeForTest(mContext);
+        boolean result = backupScheme.parseNewBackupSchemeFromXmlLocked(mXpp, CLOUD_BACKUP,
+                excludesSet, includeMap);
+
+        assertTrue(result);
+        assertEquals(backupScheme.getRequiredTransportFlags(),
+                BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED);
     }
 
     public void testDoubleDotInPath_isIgnored() throws Exception {

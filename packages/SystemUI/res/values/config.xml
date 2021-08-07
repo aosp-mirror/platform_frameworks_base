@@ -671,4 +671,7 @@
          1 - Override the setting to always bypass keyguard
          2 - Override the setting to never bypass keyguard -->
     <integer name="config_face_unlock_bypass_override">0</integer>
+
+    <!-- Flag to activate notification to contents feature -->
+    <bool name="config_notificationToContents">false</bool>
 </resources>
