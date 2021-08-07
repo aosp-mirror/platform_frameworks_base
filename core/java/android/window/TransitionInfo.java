@@ -23,6 +23,7 @@ import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -94,8 +95,16 @@ public final class TransitionInfo implements Parcelable {
     /** The container can show on top of lock screen. */
     public static final int FLAG_OCCLUDES_KEYGUARD = 1 << 6;
 
+    /**
+     * Only for IS_DISPLAY containers. Is set if the display has system alert windows. This is
+     * used to prevent seamless rotation.
+     * TODO(b/194540864): Once we can include all windows in transition, then replace this with
+     *         something like FLAG_IS_SYSTEM_ALERT instead. Then we can do mixed rotations.
+     */
+    public static final int FLAG_DISPLAY_HAS_ALERT_WINDOWS = 1 << 7;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 7;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 8;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -107,6 +116,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_IS_VOICE_INTERACTION,
             FLAG_IS_DISPLAY,
             FLAG_OCCLUDES_KEYGUARD,
+            FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -209,6 +219,10 @@ public final class TransitionInfo implements Parcelable {
         return mOptions;
     }
 
+    /**
+     * @return the list of {@link Change}s in this transition. The list is sorted top-to-bottom
+     *         in Z (meaning index 0 is the top-most container).
+     */
     @NonNull
     public List<Change> getChanges() {
         return mChanges;
@@ -290,6 +304,9 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "OCCLUDES_KEYGUARD");
         }
+        if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "DISPLAY_HAS_ALERT_WINDOWS");
+        }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");
         }
@@ -337,6 +354,7 @@ public final class TransitionInfo implements Parcelable {
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
         private int mStartRotation = ROTATION_UNDEFINED;
         private int mEndRotation = ROTATION_UNDEFINED;
+        private int mRotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -356,6 +374,7 @@ public final class TransitionInfo implements Parcelable {
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
             mStartRotation = in.readInt();
             mEndRotation = in.readInt();
+            mRotationAnimation = in.readInt();
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -400,6 +419,14 @@ public final class TransitionInfo implements Parcelable {
         public void setRotation(@Surface.Rotation int start, @Surface.Rotation int end) {
             mStartRotation = start;
             mEndRotation = end;
+        }
+
+        /**
+         * Sets the app-requested animation type for rotation. Will be one of the
+         * ROTATION_ANIMATION_ values in {@link android.view.WindowManager.LayoutParams};
+         */
+        public void setRotationAnimation(int anim) {
+            mRotationAnimation = anim;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -473,6 +500,11 @@ public final class TransitionInfo implements Parcelable {
             return mEndRotation;
         }
 
+        /** @return the rotation animation. */
+        public int getRotationAnimation() {
+            return mRotationAnimation;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -487,6 +519,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeTypedObject(mTaskInfo, flags);
             dest.writeInt(mStartRotation);
             dest.writeInt(mEndRotation);
+            dest.writeInt(mRotationAnimation);
         }
 
         @NonNull
@@ -514,7 +547,7 @@ public final class TransitionInfo implements Parcelable {
             return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
                     + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
                     + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
-                    + mStartRotation + "->" + mEndRotation + "}";
+                    + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation + "}";
         }
     }
 

@@ -777,10 +777,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return true;
             }
 
-            if (focusedApp.getTask() == activity.getTask()
-                    && focusedApp.getTaskFragment() != activity.getTaskFragment()) {
-                // Do not use the activity window of another TaskFragment in the same leaf Task
-                return false;
+            // If the candidate activity is currently being embedded in the focused task, the
+            // activity cannot be focused unless it is on the same TaskFragment as the focusedApp's.
+            TaskFragment parent = activity.getTaskFragment();
+            if (parent != null && parent.isEmbedded()) {
+                Task hostTask = focusedApp.getTask();
+                if (hostTask.isEmbedded()) {
+                    // Use the hosting task if the current task is embedded.
+                    hostTask = hostTask.getParent().asTaskFragment().getTask();
+                }
+                if (activity.isDescendantOf(hostTask)
+                        && activity.getTaskFragment() != focusedApp.getTaskFragment()) {
+                    return false;
+                }
             }
         }
 
@@ -4591,7 +4600,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return true;
             }
 
-            if (task.isOrganized()) {
+            // TODO(b/165794880): Freeform task organizer doesn't support drag-resize yet. Remove
+            // the special case when it does.
+            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
                 return true;
             }
 

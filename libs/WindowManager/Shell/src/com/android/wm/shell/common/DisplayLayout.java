@@ -82,6 +82,9 @@ public class DisplayLayout {
     private boolean mHasNavigationBar = false;
     private boolean mHasStatusBar = false;
     private int mNavBarFrameHeight = 0;
+    private boolean mAllowSeamlessRotationDespiteNavBarMoving = false;
+    private boolean mNavigationBarCanMove = false;
+    private boolean mReverseDefaultRotation = false;
 
     @Override
     public boolean equals(Object o) {
@@ -98,6 +101,10 @@ public class DisplayLayout {
                 && Objects.equals(mStableInsets, other.mStableInsets)
                 && mHasNavigationBar == other.mHasNavigationBar
                 && mHasStatusBar == other.mHasStatusBar
+                && mAllowSeamlessRotationDespiteNavBarMoving
+                        == other.mAllowSeamlessRotationDespiteNavBarMoving
+                && mNavigationBarCanMove == other.mNavigationBarCanMove
+                && mReverseDefaultRotation == other.mReverseDefaultRotation
                 && mNavBarFrameHeight == other.mNavBarFrameHeight;
     }
 
@@ -105,7 +112,8 @@ public class DisplayLayout {
     public int hashCode() {
         return Objects.hash(mUiMode, mWidth, mHeight, mCutout, mRotation, mDensityDpi,
                 mNonDecorInsets, mStableInsets, mHasNavigationBar, mHasStatusBar,
-                mNavBarFrameHeight);
+                mNavBarFrameHeight, mAllowSeamlessRotationDespiteNavBarMoving,
+                mNavigationBarCanMove, mReverseDefaultRotation);
     }
 
     /**
@@ -150,6 +158,9 @@ public class DisplayLayout {
         mDensityDpi = dl.mDensityDpi;
         mHasNavigationBar = dl.mHasNavigationBar;
         mHasStatusBar = dl.mHasStatusBar;
+        mAllowSeamlessRotationDespiteNavBarMoving = dl.mAllowSeamlessRotationDespiteNavBarMoving;
+        mNavigationBarCanMove = dl.mNavigationBarCanMove;
+        mReverseDefaultRotation = dl.mReverseDefaultRotation;
         mNavBarFrameHeight = dl.mNavBarFrameHeight;
         mNonDecorInsets.set(dl.mNonDecorInsets);
         mStableInsets.set(dl.mStableInsets);
@@ -165,6 +176,10 @@ public class DisplayLayout {
         mDensityDpi = info.logicalDensityDpi;
         mHasNavigationBar = hasNavigationBar;
         mHasStatusBar = hasStatusBar;
+        mAllowSeamlessRotationDespiteNavBarMoving = res.getBoolean(
+            R.bool.config_allowSeamlessRotationDespiteNavBarMoving);
+        mNavigationBarCanMove = res.getBoolean(R.bool.config_navBarCanMove);
+        mReverseDefaultRotation = res.getBoolean(R.bool.config_reverseDefaultRotation);
         recalcInsets(res);
     }
 
@@ -247,6 +262,28 @@ public class DisplayLayout {
     /** Get the navbar frame height (used by ime). */
     public int navBarFrameHeight() {
         return mNavBarFrameHeight;
+    }
+
+    /** @return whether we can seamlessly rotate even if nav-bar can change sides. */
+    public boolean allowSeamlessRotationDespiteNavBarMoving() {
+        return mAllowSeamlessRotationDespiteNavBarMoving;
+    }
+
+    /** @return whether the navigation bar will change sides during rotation. */
+    public boolean navigationBarCanMove() {
+        return mNavigationBarCanMove;
+    }
+
+    /** @return the rotation that would make the physical display "upside down". */
+    public int getUpsideDownRotation() {
+        boolean displayHardwareIsLandscape = mWidth > mHeight;
+        if ((mRotation % 2) != 0) {
+            displayHardwareIsLandscape = !displayHardwareIsLandscape;
+        }
+        if (displayHardwareIsLandscape) {
+            return mReverseDefaultRotation ? Surface.ROTATION_270 : Surface.ROTATION_90;
+        }
+        return Surface.ROTATION_180;
     }
 
     /** Gets the orientation of this layout */

@@ -114,6 +114,14 @@ public class FeatureFlagReader {
         return mPlugin.getValue(flag.getId(), flag.getDefault());
     }
 
+    void addListener(FlagReaderPlugin.Listener listener) {
+        mPlugin.addListener(listener);
+    }
+
+    void removeListener(FlagReaderPlugin.Listener listener) {
+        mPlugin.removeListener(listener);
+    }
+
     /**
      * Returns true if the specified feature flag has been enabled.
      *

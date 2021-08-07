@@ -307,7 +307,10 @@ final class InputMonitor {
         boolean useSurfaceCrop = false;
         final Task task = w.getTask();
         if (task != null) {
-            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            // TODO(b/165794636): Remove the special case for freeform window once drag resizing is
+            // handled by WM shell.
+            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
+                        && !task.inFreeformWindowingMode()) {
                 // If the window is in a TaskManaged by a TaskOrganizer then most cropping will
                 // be applied using the SurfaceControl hierarchy from the Organizer. This means
                 // we need to make sure that these changes in crop are reflected in the input
@@ -539,7 +542,8 @@ final class InputMonitor {
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
-                    mRecentsAnimationInputConsumer.show(mInputTransaction, w.mActivityRecord);
+                    mRecentsAnimationInputConsumer.show(mInputTransaction,
+                            recentsAnimationController.getHighestLayerTask());
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
             }
