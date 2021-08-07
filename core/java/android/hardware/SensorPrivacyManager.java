@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
@@ -47,6 +48,8 @@ import java.util.concurrent.Executor;
  */
 @SystemService(Context.SENSOR_PRIVACY_SERVICE)
 public final class SensorPrivacyManager {
+
+    private static final String LOG_TAG = SensorPrivacyManager.class.getSimpleName();
 
     /**
      * Unique Id of this manager to identify to the service
@@ -501,6 +504,25 @@ public final class SensorPrivacyManager {
                     token, suppress);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * If sensor privacy for the provided sensor is enabled then this call will show the user the
+     * dialog which is shown when an application attempts to use that sensor. If privacy isn't
+     * enabled then this does nothing.
+     *
+     * This call can only be made by the system uid.
+     *
+     * @throws SecurityException when called by someone other than system uid.
+     *
+     * @hide
+     */
+    public void showSensorUseDialog(int sensor) {
+        try {
+            mService.showSensorUseDialog(sensor);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Received exception while trying to show sensor use dialog", e);
         }
     }
 
