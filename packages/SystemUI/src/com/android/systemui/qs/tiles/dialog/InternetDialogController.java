@@ -334,9 +334,9 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return mContext.getText(SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE);
     }
 
-    Drawable getConnectedWifiDrawable(@NonNull WifiEntry wifiEntry) {
+    Drawable getInternetWifiDrawable(@NonNull WifiEntry wifiEntry) {
         final Drawable drawable =
-                mWifiIconInjector.getIcon(false /* noInternet*/, wifiEntry.getLevel());
+                mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(), wifiEntry.getLevel());
         if (drawable == null) {
             return null;
         }
@@ -549,24 +549,24 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return summary;
     }
 
-    String getDefaultWifiTitle() {
-        if (getDefaultWifiEntry() == null) {
+    String getInternetWifiTitle() {
+        if (getInternetWifiEntry() == null) {
             if (DEBUG) {
                 Log.d(TAG, "connected entry is null");
             }
             return "";
         }
-        return getDefaultWifiEntry().getTitle();
+        return getInternetWifiEntry().getTitle();
     }
 
-    String getDefaultWifiSummary() {
-        if (getDefaultWifiEntry() == null) {
+    String getInternetWifiSummary() {
+        if (getInternetWifiEntry() == null) {
             if (DEBUG) {
                 Log.d(TAG, "connected entry is null");
             }
             return "";
         }
-        return getDefaultWifiEntry().getSummary(false);
+        return getInternetWifiEntry().getSummary(false);
     }
 
     void launchNetworkSetting() {
@@ -594,11 +594,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return mWifiEntry;
     }
 
-    WifiEntry getDefaultWifiEntry() {
-        if (mConnectedEntry != null && mConnectedEntry.isDefaultNetwork()) {
-            return mConnectedEntry;
+    WifiEntry getInternetWifiEntry() {
+        if (mConnectedEntry == null || !mConnectedEntry.isDefaultNetwork()
+                || !mConnectedEntry.hasInternetAccess()) {
+            return null;
         }
-        return null;
+        return mConnectedEntry;
     }
 
     WifiManager getWifiManager() {
@@ -801,7 +802,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             mConnectedEntry = null;
         }
 
-        mCallback.onAccessPointsChanged(mWifiEntry, getDefaultWifiEntry());
+        mCallback.onAccessPointsChanged(mWifiEntry, getInternetWifiEntry());
     }
 
     @Override

@@ -97,7 +97,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         }
 
         return mInternetDialogController.getWifiEntryList().stream()
-                .filter(wifiEntry -> !wifiEntry.isDefaultNetwork())
+                .filter(wifiEntry -> (!wifiEntry.isDefaultNetwork()
+                        || !wifiEntry.hasInternetAccess()))
                 .limit(getItemCount())
                 .collect(Collectors.toList());
     }
@@ -107,21 +108,21 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
      * {@link InternetDialog}.
      *
      * Airplane mode is ON (mobile network is gone):
-     *   Return four Wi-Fi's entries if no default Wi-Fi.
-     *   Return three Wi-Fi's entries if one default Wi-Fi.
+     *   Return four Wi-Fi's entries if no internet Wi-Fi.
+     *   Return three Wi-Fi's entries if one internet Wi-Fi.
      * Airplane mode is OFF (mobile network is visible):
-     *   Return three Wi-Fi's entries if no default Wi-Fi.
-     *   Return two Wi-Fi's entries if one default Wi-Fi.
+     *   Return three Wi-Fi's entries if no internet Wi-Fi.
+     *   Return two Wi-Fi's entries if one internet Wi-Fi.
      *
      * @return The total number of networks.
      */
     @Override
     public int getItemCount() {
-        final boolean hasDefaultWifi = mInternetDialogController.getDefaultWifiEntry() != null;
+        final boolean hasInternetWifi = mInternetDialogController.getInternetWifiEntry() != null;
         if (mInternetDialogController.isAirplaneModeEnabled()) {
-            return hasDefaultWifi ? 3 : 4;
+            return hasInternetWifi ? 3 : 4;
         } else {
-            return hasDefaultWifi ? 2 : 3;
+            return hasInternetWifi ? 2 : 3;
         }
     }
 
