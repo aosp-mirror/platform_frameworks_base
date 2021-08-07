@@ -932,14 +932,20 @@ public interface InputConnection {
     boolean requestCursorUpdates(int cursorUpdateMode);
 
     /**
-     * Called by the {@link InputMethodManager} to enable application developers to specify a
-     * dedicated {@link Handler} on which incoming IPC method calls from input methods will be
-     * dispatched.
+     * Called by the system to enable application developers to specify a dedicated thread on which
+     * {@link InputConnection} methods are called back.
      *
-     * <p>Note: This does nothing when called from input methods.</p>
+     * <p><strong>Editor authors</strong>: although you can return your custom subclasses of
+     * {@link Handler}, the system only uses {@link android.os.Looper} returned from
+     * {@link Handler#getLooper()}.  You cannot intercept or cancel {@link InputConnection}
+     * callbacks by implementing this method.</p>
+     *
+     * <p><strong>IME authors</strong>: This method is not intended to be called from the IME.  You
+     * will always receive {@code null}.</p>
      *
      * @return {@code null} to use the default {@link Handler}.
      */
+    @Nullable
     Handler getHandler();
 
     /**

@@ -12627,76 +12627,72 @@ public class ActivityManagerService extends IActivityManager.Stub
         int pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
 
         List<ResolveInfo> receivers = null;
-        try {
-            HashSet<ComponentName> singleUserReceivers = null;
-            boolean scannedFirstReceivers = false;
-            for (int user : users) {
-                // Skip users that have Shell restrictions
-                if (callingUid == SHELL_UID
-                        && mUserController.hasUserRestriction(
-                                UserManager.DISALLOW_DEBUGGING_FEATURES, user)) {
-                    continue;
-                }
-                List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
-                        .queryIntentReceivers(intent, resolvedType, pmFlags, user).getList();
-                if (user != UserHandle.USER_SYSTEM && newReceivers != null) {
-                    // If this is not the system user, we need to check for
-                    // any receivers that should be filtered out.
-                    for (int i=0; i<newReceivers.size(); i++) {
-                        ResolveInfo ri = newReceivers.get(i);
-                        if ((ri.activityInfo.flags&ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
-                            newReceivers.remove(i);
-                            i--;
-                        }
+        HashSet<ComponentName> singleUserReceivers = null;
+        boolean scannedFirstReceivers = false;
+        for (int user : users) {
+            // Skip users that have Shell restrictions
+            if (callingUid == SHELL_UID
+                    && mUserController.hasUserRestriction(
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, user)) {
+                continue;
+            }
+            List<ResolveInfo> newReceivers = mPackageManagerInt
+                    .queryIntentReceivers(intent, resolvedType, pmFlags, callingUid, user);
+            if (user != UserHandle.USER_SYSTEM && newReceivers != null) {
+                // If this is not the system user, we need to check for
+                // any receivers that should be filtered out.
+                for (int i = 0; i < newReceivers.size(); i++) {
+                    ResolveInfo ri = newReceivers.get(i);
+                    if ((ri.activityInfo.flags & ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
+                        newReceivers.remove(i);
+                        i--;
                     }
                 }
-                if (newReceivers != null && newReceivers.size() == 0) {
-                    newReceivers = null;
-                }
-                if (receivers == null) {
-                    receivers = newReceivers;
-                } else if (newReceivers != null) {
-                    // We need to concatenate the additional receivers
-                    // found with what we have do far.  This would be easy,
-                    // but we also need to de-dup any receivers that are
-                    // singleUser.
-                    if (!scannedFirstReceivers) {
-                        // Collect any single user receivers we had already retrieved.
-                        scannedFirstReceivers = true;
-                        for (int i=0; i<receivers.size(); i++) {
-                            ResolveInfo ri = receivers.get(i);
-                            if ((ri.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                                ComponentName cn = new ComponentName(
-                                        ri.activityInfo.packageName, ri.activityInfo.name);
-                                if (singleUserReceivers == null) {
-                                    singleUserReceivers = new HashSet<ComponentName>();
-                                }
-                                singleUserReceivers.add(cn);
-                            }
-                        }
-                    }
-                    // Add the new results to the existing results, tracking
-                    // and de-dupping single user receivers.
-                    for (int i=0; i<newReceivers.size(); i++) {
-                        ResolveInfo ri = newReceivers.get(i);
+            }
+            if (newReceivers != null && newReceivers.size() == 0) {
+                newReceivers = null;
+            }
+            if (receivers == null) {
+                receivers = newReceivers;
+            } else if (newReceivers != null) {
+                // We need to concatenate the additional receivers
+                // found with what we have do far.  This would be easy,
+                // but we also need to de-dup any receivers that are
+                // singleUser.
+                if (!scannedFirstReceivers) {
+                    // Collect any single user receivers we had already retrieved.
+                    scannedFirstReceivers = true;
+                    for (int i = 0; i < receivers.size(); i++) {
+                        ResolveInfo ri = receivers.get(i);
                         if ((ri.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
                             ComponentName cn = new ComponentName(
                                     ri.activityInfo.packageName, ri.activityInfo.name);
                             if (singleUserReceivers == null) {
                                 singleUserReceivers = new HashSet<ComponentName>();
                             }
-                            if (!singleUserReceivers.contains(cn)) {
-                                singleUserReceivers.add(cn);
-                                receivers.add(ri);
-                            }
-                        } else {
-                            receivers.add(ri);
+                            singleUserReceivers.add(cn);
                         }
                     }
                 }
+                // Add the new results to the existing results, tracking
+                // and de-dupping single user receivers.
+                for (int i = 0; i < newReceivers.size(); i++) {
+                    ResolveInfo ri = newReceivers.get(i);
+                    if ((ri.activityInfo.flags & ActivityInfo.FLAG_SINGLE_USER) != 0) {
+                        ComponentName cn = new ComponentName(
+                                ri.activityInfo.packageName, ri.activityInfo.name);
+                        if (singleUserReceivers == null) {
+                            singleUserReceivers = new HashSet<ComponentName>();
+                        }
+                        if (!singleUserReceivers.contains(cn)) {
+                            singleUserReceivers.add(cn);
+                            receivers.add(ri);
+                        }
+                    } else {
+                        receivers.add(ri);
+                    }
+                }
             }
-        } catch (RemoteException ex) {
-            // pm is in same process, this will never happen.
         }
         if (receivers != null && broadcastAllowList != null) {
             for (int i = receivers.size() - 1; i >= 0; i--) {
@@ -13330,8 +13326,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         List receivers = null;
         List<BroadcastFilter> registeredReceivers = null;
         // Need to resolve the intent to interested receivers...
-        if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
-                 == 0) {
+        if ((intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
             receivers = collectReceiverComponents(
                     intent, resolvedType, callingUid, users, broadcastAllowList);
         }

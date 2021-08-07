@@ -8588,6 +8588,15 @@ public final class ContactsContract {
          * Type: INTEGER
          */
         public static final String UNGROUPED_WITH_PHONES = "summ_phones";
+
+        /**
+         * Flag indicating if the account is the default account for new contacts. At most one
+         * account has this flag set at a time. It can only be set to 1 on a row with null data set.
+         * <p>
+         * Type: INTEGER (boolean)
+         * @hide
+         */
+        String IS_DEFAULT = "x_is_default";
     }
 
     /**
@@ -8681,6 +8690,13 @@ public final class ContactsContract {
          * The MIME-type of {@link #CONTENT_URI} providing a single setting.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
+
+        /**
+         * Action used to launch the UI to set the default account for new contacts.
+         */
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_SET_DEFAULT_ACCOUNT =
+                "android.provider.action.SET_DEFAULT_ACCOUNT";
     }
 
     /**

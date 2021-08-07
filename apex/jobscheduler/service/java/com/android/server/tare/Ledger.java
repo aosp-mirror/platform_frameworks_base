@@ -19,6 +19,7 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.server.tare.TareUtils.dumpTime;
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
@@ -109,8 +110,8 @@ class Ledger {
 
     /** Deletes transactions that are older than {@code minAgeMs}. */
     void removeOldTransactions(long minAgeMs) {
-        final long cutoff = System.currentTimeMillis() - minAgeMs;
-        while (mTransactions.get(0).endTimeMs <= cutoff) {
+        final long cutoff = getCurrentTimeMillis() - minAgeMs;
+        while (mTransactions.size() > 0 && mTransactions.get(0).endTimeMs <= cutoff) {
             mTransactions.remove(0);
         }
     }

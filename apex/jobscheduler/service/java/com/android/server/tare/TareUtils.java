@@ -20,7 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.text.SimpleDateFormat;
+import java.time.Clock;
 
 class TareUtils {
     private static final long NARC_IN_ARC = 1_000_000_000L;
@@ -29,12 +32,19 @@ class TareUtils {
     private static final SimpleDateFormat sDumpDateFormat =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
+    @VisibleForTesting
+    static Clock sSystemClock = Clock.systemUTC();
+
     static long arcToNarc(int arcs) {
         return arcs * NARC_IN_ARC;
     }
 
     static void dumpTime(IndentingPrintWriter pw, long time) {
         pw.print(sDumpDateFormat.format(time));
+    }
+
+    static long getCurrentTimeMillis() {
+        return sSystemClock.millis();
     }
 
     static int narcToArc(long narcs) {
@@ -58,5 +68,11 @@ class TareUtils {
         }
         sb.append(" ARCs");
         return sb.toString();
+    }
+
+    /** Returns a standardized format for printing userId+pkgName combinations. */
+    @NonNull
+    static String appToString(int userId, String pkgName) {
+        return "<" + userId + ">" + pkgName;
     }
 }

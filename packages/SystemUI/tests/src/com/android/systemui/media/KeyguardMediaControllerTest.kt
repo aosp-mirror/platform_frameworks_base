@@ -69,7 +69,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
                 .thenReturn(true)
         whenever(mediaHost.hostView).thenReturn(hostView)
-
+        hostView.layoutParams = FrameLayout.LayoutParams(100, 100)
         keyguardMediaController = KeyguardMediaController(
             mediaHost,
             bypassController,

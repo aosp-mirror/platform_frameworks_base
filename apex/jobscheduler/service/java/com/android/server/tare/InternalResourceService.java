@@ -19,6 +19,8 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -30,6 +32,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManagerInternal;
@@ -45,6 +48,7 @@ import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -81,6 +85,7 @@ public class InternalResourceService extends SystemService {
     private final Handler mHandler;
     private final BatteryManagerInternal mBatteryManagerInternal;
     private final PackageManager mPackageManager;
+    private final PackageManagerInternal mPackageManagerInternal;
 
     private final Agent mAgent;
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
@@ -94,6 +99,10 @@ public class InternalResourceService extends SystemService {
     /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
     @GuardedBy("mLock")
     private final SparseSetArray<String> mUidToPackageCache = new SparseSetArray<>();
+
+    /** Cached mapping of userId+package to their UIDs (for all users) */
+    @GuardedBy("mPackageToUidCache")
+    private final SparseArrayMap<String, Integer> mPackageToUidCache = new SparseArrayMap<>();
 
     private volatile boolean mIsEnabled;
     private volatile int mBootPhase;
@@ -158,7 +167,7 @@ public class InternalResourceService extends SystemService {
                 public void onAlarm() {
                     synchronized (mLock) {
                         mAgent.reclaimUnusedAssetsLocked(DEFAULT_UNUSED_RECLAMATION_PERCENTAGE);
-                        mLastUnusedReclamationTime = System.currentTimeMillis();
+                        mLastUnusedReclamationTime = getCurrentTimeMillis();
                         scheduleUnusedWealthReclamationLocked();
                     }
                 }
@@ -184,6 +193,7 @@ public class InternalResourceService extends SystemService {
         mHandler = new IrsHandler(TareHandlerThread.get().getLooper());
         mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
         mPackageManager = context.getPackageManager();
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mEconomyManagerStub = new EconomyManagerStub();
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
         mAgent = new Agent(this, mCompleteEconomicPolicy);
@@ -231,8 +241,26 @@ public class InternalResourceService extends SystemService {
                 / 100;
     }
 
+    int getUid(final int userId, @NonNull final String pkgName) {
+        synchronized (mPackageToUidCache) {
+            Integer uid = mPackageToUidCache.get(userId, pkgName);
+            if (uid == null) {
+                uid = mPackageManagerInternal.getPackageUid(pkgName, 0, userId);
+                mPackageToUidCache.add(userId, pkgName, uid);
+            }
+            return uid;
+        }
+    }
+
     boolean isEnabled() {
         return mIsEnabled;
+    }
+
+    boolean isSystem(final int userId, @NonNull String pkgName) {
+        if ("android".equals(pkgName)) {
+            return true;
+        }
+        return UserHandle.isCore(getUid(userId, pkgName));
     }
 
     void onBatteryLevelChanged() {
@@ -260,6 +288,9 @@ public class InternalResourceService extends SystemService {
             Slog.wtf(TAG, "PM couldn't find newly added package: " + pkgName);
             return;
         }
+        synchronized (mPackageToUidCache) {
+            mPackageToUidCache.add(userId, pkgName, uid);
+        }
         synchronized (mLock) {
             mPkgCache.add(packageInfo);
             mUidToPackageCache.add(uid, pkgName);
@@ -276,6 +307,9 @@ public class InternalResourceService extends SystemService {
 
     void onPackageRemoved(final int uid, @NonNull final String pkgName) {
         final int userId = UserHandle.getUserId(uid);
+        synchronized (mPackageToUidCache) {
+            mPackageToUidCache.delete(userId, pkgName);
+        }
         synchronized (mLock) {
             mUidToPackageCache.remove(uid, pkgName);
             for (int i = 0; i < mPkgCache.size(); ++i) {
@@ -341,7 +375,7 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private void scheduleUnusedWealthReclamationLocked() {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nextReclamationTime =
                 Math.max(mLastUnusedReclamationTime + UNUSED_RECLAMATION_PERIOD_MS, now + 30_000);
         mHandler.post(() -> {
@@ -446,6 +480,9 @@ public class InternalResourceService extends SystemService {
             mUidToPackageCache.clear();
             getContext().unregisterReceiver(mBroadcastReceiver);
         }
+        synchronized (mPackageToUidCache) {
+            mPackageToUidCache.clear();
+        }
     }
 
     private final class IrsHandler extends Handler {
@@ -525,6 +562,10 @@ public class InternalResourceService extends SystemService {
         @Override
         public void registerAffordabilityChangeListener(int userId, @NonNull String pkgName,
                 @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
+            if (isSystem(userId, pkgName)) {
+                // The system's affordability never changes.
+                return;
+            }
             synchronized (mLock) {
                 mAgent.registerAffordabilityChangeListenerLocked(userId, pkgName, listener, bill);
             }
@@ -533,6 +574,10 @@ public class InternalResourceService extends SystemService {
         @Override
         public void unregisterAffordabilityChangeListener(int userId, @NonNull String pkgName,
                 @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
+            if (isSystem(userId, pkgName)) {
+                // The system's affordability never changes.
+                return;
+            }
             synchronized (mLock) {
                 mAgent.unregisterAffordabilityChangeListenerLocked(userId, pkgName, listener, bill);
             }
@@ -541,6 +586,11 @@ public class InternalResourceService extends SystemService {
         @Override
         public boolean canPayFor(int userId, @NonNull String pkgName, @NonNull ActionBill bill) {
             if (!mIsEnabled) {
+                return true;
+            }
+            if (isSystem(userId, pkgName)) {
+                // The government, I mean the system, can create ARCs as it needs to in order to
+                // operate.
                 return true;
             }
             // TODO: take temp-allowlist into consideration
@@ -563,6 +613,9 @@ public class InternalResourceService extends SystemService {
         public long getMaxDurationMs(int userId, @NonNull String pkgName,
                 @NonNull ActionBill bill) {
             if (!mIsEnabled) {
+                return FOREVER_MS;
+            }
+            if (isSystem(userId, pkgName)) {
                 return FOREVER_MS;
             }
             long totalCostPerSecond = 0;
@@ -612,7 +665,7 @@ public class InternalResourceService extends SystemService {
                 return;
             }
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long now = System.currentTimeMillis();
+            final long now = getCurrentTimeMillis();
             synchronized (mLock) {
                 mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
             }

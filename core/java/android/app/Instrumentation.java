@@ -2112,7 +2112,8 @@ public class Instrumentation {
                     throw new ActivityNotFoundException(
                             "Unable to find explicit activity class "
                             + ((Intent)intent).getComponent().toShortString()
-                            + "; have you declared this activity in your AndroidManifest.xml?");
+                            + "; have you declared this activity in your AndroidManifest.xml"
+                            + ", or does your intent not match its declared <intent-filter>?");
                 throw new ActivityNotFoundException(
                         "No Activity found to handle " + intent);
             case ActivityManager.START_PERMISSION_DENIED:

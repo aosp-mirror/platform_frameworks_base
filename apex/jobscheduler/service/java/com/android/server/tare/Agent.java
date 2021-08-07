@@ -26,6 +26,8 @@ import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
 import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
+import static com.android.server.tare.TareUtils.appToString;
+import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
@@ -183,7 +185,7 @@ class Agent {
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents != null) {
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long now = System.currentTimeMillis();
+            final long now = getCurrentTimeMillis();
             mTotalDeltaCalculator.reset(ledger, nowElapsed, now);
             ongoingEvents.forEach(mTotalDeltaCalculator);
             balance += mTotalDeltaCalculator.mTotal;
@@ -194,7 +196,12 @@ class Agent {
     @GuardedBy("mLock")
     void noteInstantaneousEventLocked(final int userId, @NonNull final String pkgName,
             final int eventId, @Nullable String tag) {
-        final long now = System.currentTimeMillis();
+        if (mIrs.isSystem(userId, pkgName)) {
+            // Events are free for the system. Don't bother recording them.
+            return;
+        }
+
+        final long now = getCurrentTimeMillis();
         final Ledger ledger = getLedgerLocked(userId, pkgName);
 
         final int eventType = getEventType(eventId);
@@ -278,7 +285,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void onDeviceStateChangedLocked() {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
 
         mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
@@ -326,7 +333,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void onAppStatesChangedLocked(final int userId, @NonNull ArraySet<String> pkgNames) {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
 
         for (int i = 0; i < pkgNames.size(); ++i) {
@@ -415,12 +422,15 @@ class Agent {
         }
         ongoingEvent.refCount--;
         if (ongoingEvent.refCount <= 0) {
-            final long startElapsed = ongoingEvent.startTimeElapsed;
-            final long startTime = now - (nowElapsed - startElapsed);
-            final long actualDelta = getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
-            recordTransactionLocked(userId, pkgName, ledger,
-                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
-                    notifyOnAffordabilityChange);
+            if (!mIrs.isSystem(userId, pkgName)) {
+                final long startElapsed = ongoingEvent.startTimeElapsed;
+                final long startTime = now - (nowElapsed - startElapsed);
+                final long actualDelta =
+                        getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
+                recordTransactionLocked(userId, pkgName, ledger,
+                        new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
+                        notifyOnAffordabilityChange);
+            }
             ongoingEvents.delete(eventId, tag);
         }
         if (updateBalanceCheck) {
@@ -446,6 +456,15 @@ class Agent {
     private void recordTransactionLocked(final int userId, @NonNull final String pkgName,
             @NonNull Ledger ledger, @NonNull Ledger.Transaction transaction,
             final boolean notifyOnAffordabilityChange) {
+        if (transaction.delta == 0) {
+            // Skip recording transactions with a delta of 0 to save on space.
+            return;
+        }
+        if (mIrs.isSystem(userId, pkgName)) {
+            Slog.wtfStack(TAG,
+                    "Tried to adjust system balance for " + appToString(userId, pkgName));
+            return;
+        }
         final long maxCirculationAllowed = mIrs.getMaxCirculationLocked();
         final long newArcsInCirculation = mCurrentNarcsInCirculation + transaction.delta;
         if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
@@ -477,7 +496,7 @@ class Agent {
             // The earliest transaction won't change until we clean up the ledger, so no point
             // continuing to reschedule an existing cleanup.
             final long cleanupAlarmElapsed = SystemClock.elapsedRealtime() + MAX_TRANSACTION_AGE_MS
-                    - (System.currentTimeMillis() - ledger.getEarliestTransaction().endTimeMs);
+                    - (getCurrentTimeMillis() - ledger.getEarliestTransaction().endTimeMs);
             mLedgerCleanupAlarmListener.addAlarmLocked(userId, pkgName, cleanupAlarmElapsed);
         }
         // TODO: save changes to disk in a background thread
@@ -509,7 +528,7 @@ class Agent {
     @GuardedBy("mLock")
     void reclaimUnusedAssetsLocked(double percentage) {
         final List<PackageInfo> pkgs = mIrs.getInstalledPackages();
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
             final int userId = UserHandle.getUserId(pkgs.get(i).applicationInfo.uid);
             final String pkgName = pkgs.get(i).packageName;
@@ -543,11 +562,15 @@ class Agent {
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo pkgInfo = pkgs.get(i);
             final int userId = UserHandle.getUserId(pkgInfo.applicationInfo.uid);
             final String pkgName = pkgInfo.packageName;
+            if (mIrs.isSystem(userId, pkgName)) {
+                // No point allocating ARCs to the system. It can do whatever it wants.
+                continue;
+            }
             Ledger ledger = getLedgerLocked(userId, pkgName);
             final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
             final double perc = batteryLevel / 100d;
@@ -578,12 +601,16 @@ class Agent {
         List<PackageInfo> pkgs = packageManager.getInstalledPackagesAsUser(0, userId);
         final long maxBirthright =
                 mIrs.getMaxCirculationLocked() / mIrs.getInstalledPackages().size();
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
 
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo packageInfo = pkgs.get(i);
             final String pkgName = packageInfo.packageName;
             final Ledger ledger = getLedgerLocked(userId, pkgName);
+            if (mIrs.isSystem(userId, pkgName)) {
+                // No point allocating ARCs to the system. It can do whatever it wants.
+                continue;
+            }
             if (ledger.getCurrentBalance() > 0) {
                 // App already got credits somehow. Move along.
                 Slog.wtf(TAG, "App " + pkgName + " had credits before economy was set up");
@@ -609,7 +636,7 @@ class Agent {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
         final int numPackages = pkgs.size();
         final long maxBirthright = mIrs.getMaxCirculationLocked() / numPackages;
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeMillis();
 
         recordTransactionLocked(userId, pkgName, ledger,
                 new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,

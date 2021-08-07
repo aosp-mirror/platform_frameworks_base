@@ -56,4 +56,16 @@ public interface FlagReaderPlugin extends Plugin {
     default double getValue(int id, double def) {
         return def;
     }
+
+    /** Add a listener to be alerted when any flag changes. */
+    default void addListener(Listener listener) {}
+
+    /** Remove a listener to be alerted when any flag changes. */
+    default void removeListener(Listener listener) {}
+
+    /** A simple listener to be alerted when a flag changes. */
+    interface Listener {
+        /** */
+        void onFlagChanged(int id);
+    }
 }

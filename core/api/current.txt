@@ -31684,6 +31684,7 @@ package android.os {
     method public boolean isDeviceIdleMode();
     method public boolean isIgnoringBatteryOptimizations(String);
     method public boolean isInteractive();
+    method public boolean isLightDeviceIdleMode();
     method public boolean isPowerSaveMode();
     method public boolean isRebootingUserspaceSupported();
     method @Deprecated public boolean isScreenOn();
@@ -31694,6 +31695,7 @@ package android.os {
     method public void removeThermalStatusListener(@NonNull android.os.PowerManager.OnThermalStatusChangedListener);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final String ACTION_DEVICE_IDLE_MODE_CHANGED = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
+    field public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_POWER_SAVE_MODE_CHANGED = "android.os.action.POWER_SAVE_MODE_CHANGED";
     field @Deprecated public static final int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF = 2; // 0x2
@@ -34832,6 +34834,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
+    field public static final String ACTION_SET_DEFAULT_ACCOUNT = "android.provider.action.SET_DEFAULT_ACCOUNT";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/setting";
     field public static final android.net.Uri CONTENT_URI;
@@ -51941,7 +51944,7 @@ package android.view.inputmethod {
     method public boolean finishComposingText();
     method public int getCursorCapsMode(int);
     method public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
-    method public android.os.Handler getHandler();
+    method @Nullable public android.os.Handler getHandler();
     method public CharSequence getSelectedText(int);
     method @Nullable public default android.view.inputmethod.SurroundingText getSurroundingText(@IntRange(from=0) int, @IntRange(from=0) int, int);
     method @Nullable public CharSequence getTextAfterCursor(@IntRange(from=0) int, int);

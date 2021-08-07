@@ -55,6 +55,7 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
@@ -213,6 +214,13 @@ public abstract class WMShellBaseModule {
     }
 
     //
+    // Freeform (optional feature)
+    //
+
+    @BindsOptionalOf
+    abstract Optional<FreeformTaskListener> optionalFreeformTaskListener();
+
+    //
     // Hide display cutout
     //
 
@@ -328,9 +336,11 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Transitions provideTransitions(ShellTaskOrganizer organizer, TransactionPool pool,
-            Context context, @ShellMainThread ShellExecutor mainExecutor,
+            DisplayController displayController, Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
             @ShellAnimationThread ShellExecutor animExecutor) {
-        return new Transitions(organizer, pool, context, mainExecutor, animExecutor);
+        return new Transitions(organizer, pool, displayController, context, mainExecutor,
+                animExecutor);
     }
 
     //
@@ -451,6 +461,7 @@ public abstract class WMShellBaseModule {
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Optional<Optional<FreeformTaskListener>> freeformTaskListener,
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -463,6 +474,7 @@ public abstract class WMShellBaseModule {
                 appPairsOptional,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
+                freeformTaskListener,
                 transitions,
                 startingWindow,
                 mainExecutor);

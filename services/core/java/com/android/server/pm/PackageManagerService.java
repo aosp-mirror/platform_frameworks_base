@@ -289,6 +289,7 @@ import android.util.MathUtils;
 import android.util.PackageUtils;
 import android.util.Pair;
 import android.util.PrintStreamPrinter;
+import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -327,6 +328,7 @@ import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
+import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.PackageWatchdog;
@@ -700,6 +702,20 @@ public class PackageManagerService extends IPackageManager.Stub
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES = 142191088;
+
+    /**
+     * Components of apps targeting Android T and above will stop receiving intents from
+     * external callers that do not match its declared intent filters.
+     *
+     * When an app registers an exported component in its manifest and adds an <intent-filter>,
+     * the component can be started by any intent - even those that do not match the intent filter.
+     * This has proven to be something that many developers find counterintuitive.
+     * Without checking the intent when the component is started, in some circumstances this can
+     * allow 3P apps to trigger internal-only functionality.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     public static final String PLATFORM_PACKAGE_NAME = "android";
 
@@ -2160,9 +2176,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /* requireFullPermission */, false /* checkShell */,
                     "query intent activities");
             final String pkgName = intent.getPackage();
+            Intent originalIntent = null;
             ComponentName comp = intent.getComponent();
             if (comp == null) {
                 if (intent.getSelector() != null) {
+                    originalIntent = intent;
                     intent = intent.getSelector();
                     comp = intent.getComponent();
                 }
@@ -2172,8 +2190,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     comp != null || pkgName != null /*onlyExposedExplicitly*/,
                     isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
                             flags));
+            List<ResolveInfo> list = Collections.emptyList();
+            boolean skipPostResolution = false;
             if (comp != null) {
-                final List<ResolveInfo> list = new ArrayList<>(1);
                 final ActivityInfo ai = getActivityInfo(comp, flags, userId);
                 if (ai != null) {
                     // When specifying an explicit component, we prevent the activity from being
@@ -2216,35 +2235,45 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (!blockInstantResolution && !blockNormalResolution) {
                         final ResolveInfo ri = new ResolveInfo();
                         ri.activityInfo = ai;
+                        list = new ArrayList<>(1);
                         list.add(ri);
+                        applyEnforceIntentFilterMatching(
+                                mInjector.getCompatibility(), mComponentResolver,
+                                list, false, intent, resolvedType, filterCallingUid);
                     }
                 }
-
-                return applyPostResolutionFilter(
-                        list, instantAppPkgName, allowDynamicSplits, filterCallingUid,
-                        resolveForStart,
-                        userId, intent);
+            } else {
+                QueryIntentActivitiesResult lockedResult =
+                        queryIntentActivitiesInternalBody(
+                                intent, resolvedType, flags, filterCallingUid, userId,
+                                resolveForStart, allowDynamicSplits, pkgName, instantAppPkgName);
+                if (lockedResult.answer != null) {
+                    skipPostResolution = true;
+                    list = lockedResult.answer;
+                } else {
+                    if (lockedResult.addInstant) {
+                        String callingPkgName = getInstantAppPackageName(filterCallingUid);
+                        boolean isRequesterInstantApp = isInstantApp(callingPkgName, userId);
+                        lockedResult.result = maybeAddInstantAppInstaller(
+                                lockedResult.result, intent, resolvedType, flags,
+                                userId, resolveForStart, isRequesterInstantApp);
+                    }
+                    if (lockedResult.sortResult) {
+                        lockedResult.result.sort(RESOLVE_PRIORITY_SORTER);
+                    }
+                    list = lockedResult.result;
+                }
             }
 
-            QueryIntentActivitiesResult lockedResult =
-                    queryIntentActivitiesInternalBody(
-                        intent, resolvedType, flags, filterCallingUid, userId, resolveForStart,
-                        allowDynamicSplits, pkgName, instantAppPkgName);
-            if (lockedResult.answer != null) {
-                return lockedResult.answer;
+            if (originalIntent != null) {
+                // We also have to ensure all components match the original intent
+                applyEnforceIntentFilterMatching(
+                        mInjector.getCompatibility(), mComponentResolver,
+                        list, false, originalIntent, resolvedType, filterCallingUid);
             }
 
-            if (lockedResult.addInstant) {
-                String callingPkgName = getInstantAppPackageName(filterCallingUid);
-                boolean isRequesterInstantApp = isInstantApp(callingPkgName, userId);
-                lockedResult.result = maybeAddInstantAppInstaller(lockedResult.result, intent,
-                        resolvedType, flags, userId, resolveForStart, isRequesterInstantApp);
-            }
-            if (lockedResult.sortResult) {
-                Collections.sort(lockedResult.result, RESOLVE_PRIORITY_SORTER);
-            }
-            return applyPostResolutionFilter(
-                    lockedResult.result, instantAppPkgName, allowDynamicSplits, filterCallingUid,
+            return skipPostResolution ? list : applyPostResolutionFilter(
+                    list, instantAppPkgName, allowDynamicSplits, filterCallingUid,
                     resolveForStart, userId, intent);
         }
 
@@ -2267,15 +2296,17 @@ public class PackageManagerService extends IPackageManager.Stub
             final String instantAppPkgName = getInstantAppPackageName(callingUid);
             flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps,
                     false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
+            Intent originalIntent = null;
             ComponentName comp = intent.getComponent();
             if (comp == null) {
                 if (intent.getSelector() != null) {
+                    originalIntent = intent;
                     intent = intent.getSelector();
                     comp = intent.getComponent();
                 }
             }
+            List<ResolveInfo> list = Collections.emptyList();
             if (comp != null) {
-                final List<ResolveInfo> list = new ArrayList<>(1);
                 final ServiceInfo si = getServiceInfo(comp, flags, userId);
                 if (si != null) {
                     // When specifying an explicit component, we prevent the service from being
@@ -2308,14 +2339,26 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (!blockInstantResolution && !blockNormalResolution) {
                         final ResolveInfo ri = new ResolveInfo();
                         ri.serviceInfo = si;
+                        list = new ArrayList<>(1);
                         list.add(ri);
+                        applyEnforceIntentFilterMatching(
+                                mInjector.getCompatibility(), mComponentResolver,
+                                list, false, intent, resolvedType, callingUid);
                     }
                 }
-                return list;
+            } else {
+                list = queryIntentServicesInternalBody(intent, resolvedType, flags,
+                        userId, callingUid, instantAppPkgName);
             }
 
-            return queryIntentServicesInternalBody(intent, resolvedType, flags,
-                    userId, callingUid, instantAppPkgName);
+            if (originalIntent != null) {
+                // We also have to ensure all components match the original intent
+                applyEnforceIntentFilterMatching(
+                        mInjector.getCompatibility(), mComponentResolver,
+                        list, false, originalIntent, resolvedType, callingUid);
+            }
+
+            return list;
         }
 
         protected @NonNull List<ResolveInfo> queryIntentServicesInternalBody(Intent intent,
@@ -5544,10 +5587,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
     }
-    private static final ThreadLocal<ThreadComputer> sThreadComputer = new ThreadLocal<>() {
-            @Override protected ThreadComputer initialValue() {
-                return new ThreadComputer();
-            }};
+    private static final ThreadLocal<ThreadComputer> sThreadComputer =
+            ThreadLocal.withInitial(ThreadComputer::new);
 
     /**
      * This lock is used to make reads from {@link #sSnapshotInvalid} and
@@ -8136,7 +8177,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
+                UserHandle.USER_SYSTEM, Binder.getCallingUid());
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else if (matches.size() == 0) {
@@ -8232,7 +8273,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
+                UserHandle.USER_SYSTEM, Binder.getCallingUid());
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -8260,7 +8301,7 @@ public class PackageManagerService extends IPackageManager.Stub
         Intent intent = new Intent(Intent.ACTION_DOMAINS_NEED_VERIFICATION);
         List<ResolveInfo> matches = queryIntentReceiversInternal(intent, null,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
+                UserHandle.USER_SYSTEM, Binder.getCallingUid());
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -10939,30 +10980,32 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, int flags, int userId) {
-        return new ParceledListSlice<>(
-                queryIntentReceiversInternal(intent, resolvedType, flags, userId,
-                        false /*allowDynamicSplits*/));
+        return new ParceledListSlice<>(queryIntentReceiversInternal(intent, resolvedType,
+                flags, userId, Binder.getCallingUid()));
     }
 
+    // In this method, we have to know the actual calling UID, but in some cases Binder's
+    // call identity is removed, so the UID has to be passed in explicitly.
     private @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
-            String resolvedType, int flags, int userId, boolean allowDynamicSplits) {
+            String resolvedType, int flags, int userId, int filterCallingUid) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
-        final int callingUid = Binder.getCallingUid();
-        enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
+        enforceCrossUserPermission(filterCallingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "query intent receivers");
-        final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+        final String instantAppPkgName = getInstantAppPackageName(filterCallingUid);
+        flags = updateFlagsForResolve(flags, userId, filterCallingUid, false /*includeInstantApps*/,
                 isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
                         flags));
+        Intent originalIntent = null;
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
+                originalIntent = intent;
                 intent = intent.getSelector();
                 comp = intent.getComponent();
             }
         }
+        List<ResolveInfo> list = Collections.emptyList();
         if (comp != null) {
-            final List<ResolveInfo> list = new ArrayList<>(1);
             final ActivityInfo ai = getReceiverInfo(comp, flags, userId);
             if (ai != null) {
                 // When specifying an explicit component, we prevent the activity from being
@@ -10998,40 +11041,44 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (!blockResolution) {
                     ResolveInfo ri = new ResolveInfo();
                     ri.activityInfo = ai;
+                    list = new ArrayList<>(1);
                     list.add(ri);
+                    applyEnforceIntentFilterMatching(
+                            mInjector.getCompatibility(), mComponentResolver,
+                            list, true, intent, resolvedType, filterCallingUid);
                 }
             }
-            return applyPostResolutionFilter(
-                    list, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
-                    intent);
+        } else {
+            // reader
+            synchronized (mLock) {
+                String pkgName = intent.getPackage();
+                if (pkgName == null) {
+                    final List<ResolveInfo> result =
+                            mComponentResolver.queryReceivers(intent, resolvedType, flags, userId);
+                    if (result != null) {
+                        list = result;
+                    }
+                }
+                final AndroidPackage pkg = mPackages.get(pkgName);
+                if (pkg != null) {
+                    final List<ResolveInfo> result = mComponentResolver.queryReceivers(
+                            intent, resolvedType, flags, pkg.getReceivers(), userId);
+                    if (result != null) {
+                        list = result;
+                    }
+                }
+            }
         }
 
-        // reader
-        synchronized (mLock) {
-            String pkgName = intent.getPackage();
-            if (pkgName == null) {
-                final List<ResolveInfo> result =
-                        mComponentResolver.queryReceivers(intent, resolvedType, flags, userId);
-                if (result == null) {
-                    return Collections.emptyList();
-                }
-                return applyPostResolutionFilter(
-                        result, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
-                        intent);
-            }
-            final AndroidPackage pkg = mPackages.get(pkgName);
-            if (pkg != null) {
-                final List<ResolveInfo> result = mComponentResolver.queryReceivers(
-                        intent, resolvedType, flags, pkg.getReceivers(), userId);
-                if (result == null) {
-                    return Collections.emptyList();
-                }
-                return applyPostResolutionFilter(
-                        result, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
-                        intent);
-            }
-            return Collections.emptyList();
+        if (originalIntent != null) {
+            // We also have to ensure all components match the original intent
+            applyEnforceIntentFilterMatching(
+                    mInjector.getCompatibility(), mComponentResolver,
+                    list, true, originalIntent, resolvedType, filterCallingUid);
         }
+
+        return applyPostResolutionFilter(
+                list, instantAppPkgName, false, filterCallingUid, false, userId, intent);
     }
 
     @Override
@@ -11071,6 +11118,68 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.queryIntentServicesInternal(intent,
                 resolvedType, flags, userId, callingUid,
                 includeInstantApps);
+    }
+
+    // Static to give access to ComputeEngine
+    private static void applyEnforceIntentFilterMatching(
+            PlatformCompat compat, ComponentResolver resolver,
+            List<ResolveInfo> resolveInfos, boolean isReceiver,
+            Intent intent, String resolvedType, int filterCallingUid) {
+        // Do not enforce filter matching when the caller is system or root.
+        // see ActivityManager#checkComponentPermission(String, int, int, boolean)
+        if (filterCallingUid == Process.ROOT_UID || filterCallingUid == Process.SYSTEM_UID) {
+            return;
+        }
+
+        final Printer logPrinter = DEBUG_INTENT_MATCHING
+                ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
+                : null;
+
+        for (int i = resolveInfos.size() - 1; i >= 0; --i) {
+            final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
+
+            // Do not enforce filter matching when the caller is the same app
+            if (info.applicationInfo.uid == filterCallingUid) {
+                continue;
+            }
+
+            // Only enforce filter matching if target app's target SDK >= T
+            if (!compat.isChangeEnabledInternal(
+                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo)) {
+                continue;
+            }
+
+            final ParsedMainComponent comp;
+            if (info instanceof ActivityInfo) {
+                if (isReceiver) {
+                    comp = resolver.getReceiver(info.getComponentName());
+                } else {
+                    comp = resolver.getActivity(info.getComponentName());
+                }
+            } else if (info instanceof ServiceInfo) {
+                comp = resolver.getService(info.getComponentName());
+            } else {
+                // This shall never happen
+                throw new IllegalArgumentException("Unsupported component type");
+            }
+
+            if (comp.getIntents().isEmpty()) {
+                continue;
+            }
+
+            final boolean match = comp.getIntents().stream().anyMatch(
+                    f -> IntentResolver.intentMatchesFilter(f, intent, resolvedType));
+            if (!match) {
+                Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
+                Slog.w(TAG, "Access blocked: " + comp.getComponentName());
+                if (DEBUG_INTENT_MATCHING) {
+                    Slog.v(TAG, "Component intent filters:");
+                    comp.getIntents().forEach(f -> f.dump(logPrinter, "  "));
+                    Slog.v(TAG, "-----------------------------");
+                }
+                resolveInfos.remove(i);
+            }
+        }
     }
 
     @Override
@@ -23409,6 +23518,13 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this
                     .queryIntentActivitiesInternal(intent, resolvedType, flags, 0, filterCallingUid,
                             userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
+        }
+
+        @Override
+        public List<ResolveInfo> queryIntentReceivers(Intent intent,
+                String resolvedType, int flags, int filterCallingUid, int userId) {
+            return PackageManagerService.this.queryIntentReceiversInternal(intent, resolvedType,
+                    flags, userId, filterCallingUid);
         }
 
         @Override

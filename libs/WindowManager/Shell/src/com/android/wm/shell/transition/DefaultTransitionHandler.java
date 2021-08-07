@@ -23,6 +23,10 @@ import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
@@ -31,8 +35,10 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -68,9 +74,12 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -97,6 +106,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     private final TransactionPool mTransactionPool;
+    private final DisplayController mDisplayController;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
@@ -114,8 +124,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private ScreenRotationAnimation mRotationAnimation;
 
-    DefaultTransitionHandler(@NonNull TransactionPool transactionPool, Context context,
+    DefaultTransitionHandler(@NonNull DisplayController displayController,
+            @NonNull TransactionPool transactionPool, Context context,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
+        mDisplayController = displayController;
         mTransactionPool = transactionPool;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -124,6 +136,110 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         mCurrentUserId = UserHandle.myUserId();
 
         AttributeCache.init(context);
+    }
+
+    @VisibleForTesting
+    static boolean isRotationSeamless(@NonNull TransitionInfo info,
+            DisplayController displayController) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "Display is rotating, check if it should be seamless.");
+        boolean checkedDisplayLayout = false;
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+
+            // Only look at changing things. showing/hiding don't need to rotate.
+            if (change.getMode() != TRANSIT_CHANGE) continue;
+
+            // This container isn't rotating, so we can ignore it.
+            if (change.getEndRotation() == change.getStartRotation()) continue;
+
+            if ((change.getFlags() & FLAG_IS_DISPLAY) != 0) {
+                // In the presence of System Alert windows we can not seamlessly rotate.
+                if ((change.getFlags() & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "  display has system alert windows, so not seamless.");
+                    return false;
+                }
+            } else if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+                if (change.getRotationAnimation() != ROTATION_ANIMATION_SEAMLESS) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "  wallpaper is participating but isn't seamless.");
+                    return false;
+                }
+            } else if (change.getTaskInfo() != null) {
+                // We only enable seamless rotation if all the visible task windows requested it.
+                if (change.getRotationAnimation() != ROTATION_ANIMATION_SEAMLESS) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "  task %s isn't requesting seamless, so not seamless.",
+                            change.getTaskInfo().taskId);
+                    return false;
+                }
+
+                // This is the only way to get display-id currently, so we will check display
+                // capabilities here
+                if (!checkedDisplayLayout) {
+                    // only need to check display once.
+                    checkedDisplayLayout = true;
+                    final DisplayLayout displayLayout = displayController.getDisplayLayout(
+                            change.getTaskInfo().displayId);
+                    // For the upside down rotation we don't rotate seamlessly as the navigation
+                    // bar moves position. Note most apps (using orientation:sensor or user as
+                    // opposed to fullSensor) will not enter the reverse portrait orientation, so
+                    // actually the orientation won't change at all.
+                    int upsideDownRotation = displayLayout.getUpsideDownRotation();
+                    if (change.getStartRotation() == upsideDownRotation
+                            || change.getEndRotation() == upsideDownRotation) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                                "  rotation involves upside-down portrait, so not seamless.");
+                        return false;
+                    }
+
+                    // If the navigation bar can't change sides, then it will jump when we change
+                    // orientations and we don't rotate seamlessly - unless that is allowed, eg.
+                    // with gesture navigation where the navbar is low-profile enough that this
+                    // isn't very noticeable.
+                    if (!displayLayout.allowSeamlessRotationDespiteNavBarMoving()
+                            && (!(displayLayout.navigationBarCanMove()
+                                    && (change.getStartAbsBounds().width()
+                                            != change.getStartAbsBounds().height())))) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                                "  nav bar changes sides, so not seamless.");
+                        return false;
+                    }
+                }
+            }
+        }
+
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  Rotation IS seamless.");
+        return true;
+    }
+
+    /**
+     * Gets the rotation animation for the topmost task. Assumes that seamless is checked
+     * elsewhere, so it will default SEAMLESS to ROTATE.
+     */
+    private int getRotationAnimation(@NonNull TransitionInfo info) {
+        // Traverse in top-to-bottom order so that the first task is top-most
+        for (int i = 0; i < info.getChanges().size(); ++i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+
+            // Only look at changing things. showing/hiding don't need to rotate.
+            if (change.getMode() != TRANSIT_CHANGE) continue;
+
+            // This container isn't rotating, so we can ignore it.
+            if (change.getEndRotation() == change.getStartRotation()) continue;
+
+            if (change.getTaskInfo() != null) {
+                final int anim = change.getRotationAnimation();
+                if (anim == ROTATION_ANIMATION_UNSPECIFIED
+                        // Fallback animation for seamless should also be default.
+                        || anim == ROTATION_ANIMATION_SEAMLESS) {
+                    return ROTATION_ANIMATION_ROTATE;
+                }
+                return anim;
+            }
+        }
+        return ROTATION_ANIMATION_ROTATE;
     }
 
     @Override
@@ -168,11 +284,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             if (info.getType() == TRANSIT_CHANGE && change.getMode() == TRANSIT_CHANGE
                     && (change.getEndRotation() != change.getStartRotation())
                     && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
-                mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
-                        mTransactionPool, startTransaction, change, info.getRootLeash());
-                mRotationAnimation.startAnimation(animations, onAnimFinish,
-                        mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
-                continue;
+                boolean isSeamless = isRotationSeamless(info, mDisplayController);
+                final int anim = getRotationAnimation(info);
+                if (!(isSeamless || anim == ROTATION_ANIMATION_JUMPCUT)) {
+                    mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
+                            mTransactionPool, startTransaction, change, info.getRootLeash());
+                    mRotationAnimation.startAnimation(animations, onAnimFinish,
+                            mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
+                    continue;
+                }
             }
 
             if (change.getMode() == TRANSIT_CHANGE) {
