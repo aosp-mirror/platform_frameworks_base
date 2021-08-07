@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowDragController;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -397,6 +398,53 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     }
                 });
             }
+        }
+
+        mIsCollapsingToShowActivityOverLockscreen = false;
+    }
+
+    /**
+     * Called when a notification is dropped on proper target window.
+     * Intent that is included in this entry notification,
+     * will be sent by {@link ExpandableNotificationRowDragController}
+     *
+     * @param entry notification entry that is dropped.
+     */
+    @Override
+    public void onDragSuccess(NotificationEntry entry) {
+        // this method is not responsible for intent sending.
+        // will focus follow operation only after drag-and-drop that notification.
+        NotificationVisibility.NotificationLocation location =
+                NotificationLogger.getNotificationLocation(entry);
+        final NotificationVisibility nv = NotificationVisibility.obtain(entry.getKey(),
+                entry.getRanking().getRank(), getVisibleNotificationsCount(), true, location);
+
+        // retrieve the group summary to remove with this entry before we tell NMS the
+        // notification was clicked to avoid a race condition
+        final boolean shouldAutoCancel = shouldAutoCancel(entry.getSbn());
+        final NotificationEntry summaryToRemove = shouldAutoCancel
+                ? mOnUserInteractionCallback.getGroupSummaryToDismiss(entry) : null;
+
+        String notificationKey = entry.getKey();
+        // inform NMS that the notification was clicked
+        mClickNotifier.onNotificationClick(notificationKey, nv);
+
+        if (shouldAutoCancel || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
+                notificationKey)) {
+            // Immediately remove notification from visually showing.
+            // We have to post the removal to the UI thread for synchronization.
+            mMainThreadHandler.post(() -> {
+                final Runnable removeNotification = () ->
+                        mOnUserInteractionCallback.onDismiss(
+                                entry, REASON_CLICK, summaryToRemove);
+                if (mPresenter.isCollapsing()) {
+                    // To avoid lags we're only performing the remove
+                    // after the shade is collapsed
+                    mShadeController.addPostCollapseAction(removeNotification);
+                } else {
+                    removeNotification.run();
+                }
+            });
         }
 
         mIsCollapsingToShowActivityOverLockscreen = false;
