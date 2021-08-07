@@ -52,4 +52,6 @@ interface ISensorPrivacyManager {
     void addUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
 
     void removeUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+
+    void showSensorUseDialog(int sensor);
 }
