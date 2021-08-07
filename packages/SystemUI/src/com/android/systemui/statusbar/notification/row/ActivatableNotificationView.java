@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.MathUtils;
@@ -139,6 +140,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mIsHeadsUpAnimation;
     private int mHeadsUpAddStartLocation;
     private float mHeadsUpLocation;
+    /* In order to track headsup longpress coorindate. */
+    protected Point mTargetPoint;
     private boolean mIsAppearing;
     private boolean mDismissed;
     private boolean mRefocusOnDismiss;
@@ -568,8 +571,19 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         final int actualHeight = getActualHeight();
         float bottom = actualHeight * interpolatedFraction;
 
-        setOutlineRect(0, mAppearAnimationTranslation, getWidth(),
-                bottom + mAppearAnimationTranslation);
+        if (mTargetPoint != null) {
+            int width = getWidth();
+            float fraction = 1 - mAppearAnimationFraction;
+
+            setOutlineRect(mTargetPoint.x * fraction,
+                    mAnimationTranslationY
+                            + (mAnimationTranslationY - mTargetPoint.y) * fraction,
+                    width - (width - mTargetPoint.x) * fraction,
+                    actualHeight - (actualHeight - mTargetPoint.y) * fraction);
+        } else {
+            setOutlineRect(0, mAppearAnimationTranslation, getWidth(),
+                    bottom + mAppearAnimationTranslation);
+        }
     }
 
     private float getInterpolatedAppearAnimationFraction() {
