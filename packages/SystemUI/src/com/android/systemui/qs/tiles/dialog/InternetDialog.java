@@ -379,10 +379,10 @@ public class InternetDialog extends SystemUIDialog implements
             return;
         }
         mConnectedWifListLayout.setVisibility(View.VISIBLE);
-        mConnectedWifiTitleText.setText(getConnectedWifiTitle());
-        mConnectedWifiSummaryText.setText(getConnectedWifiSummary());
+        mConnectedWifiTitleText.setText(mInternetDialogController.getInternetWifiTitle());
+        mConnectedWifiSummaryText.setText(mInternetDialogController.getInternetWifiSummary());
         mConnectedWifiIcon.setImageDrawable(
-                mInternetDialogController.getConnectedWifiDrawable(mConnectedWifiEntry));
+                mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
         if (mInternetDialogController.isNightMode()) {
             mConnectedWifiTitleText.setTextColor(
                     mContext.getColor(R.color.connected_network_primary_color));
@@ -421,14 +421,6 @@ public class InternetDialog extends SystemUIDialog implements
 
     String getMobileNetworkSummary() {
         return mInternetDialogController.getMobileNetworkSummary();
-    }
-
-    String getConnectedWifiTitle() {
-        return mInternetDialogController.getDefaultWifiTitle();
-    }
-
-    String getConnectedWifiSummary() {
-        return mInternetDialogController.getDefaultWifiSummary();
     }
 
     protected void showProgressBar() {
