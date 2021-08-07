@@ -2524,6 +2524,9 @@ public class DisplayModeDirector {
 
         @Override
         public boolean isDozeState(Display d) {
+            if (d == null) {
+                return false;
+            }
             return Display.isDozeState(d.getState());
         }
 
