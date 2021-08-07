@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.window.TaskFragmentInfo;
+import android.window.WindowContainerTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,7 +180,8 @@ class TaskFragmentContainer {
      * Removes all activities that belong to this process and finishes other containers/activities
      * configured to finish together.
      */
-    void finish(boolean shouldFinishDependent) {
+    void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
+            @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         if (mIsFinished) {
             return;
         }
@@ -190,13 +192,19 @@ class TaskFragmentContainer {
             activity.finish();
         }
 
+        // Cleanup the visuals
+        presenter.deleteTaskFragment(wct, getTaskFragmentToken());
+        // Cleanup the records
+        controller.removeContainer(this);
+
         if (!shouldFinishDependent) {
             return;
         }
 
         // Finish dependent containers
         for (TaskFragmentContainer container : mContainersToFinishOnExit) {
-            container.finish(true /* shouldFinishDependent */);
+            container.finish(true /* shouldFinishDependent */, presenter,
+                    wct, controller);
         }
         mContainersToFinishOnExit.clear();
 

@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"မျက်နှာကို မမှတ်မိပါ။ လက်ဗွေကို အစားထိုးသုံးပါ။"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ရှေ့ဆက်ရန် သင့်လက်ဗွေကို သုံးပါ"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"လက်ဗွေကို မမှတ်မိပါ။ ဖန်သားပြင်လော့ခ်ချခြင်းကို အစားထိုးသုံးပါ။"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"သင့်ကို ရှာဖွေနေသည်…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"မျက်နှာသင်္ကေတ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"အံဝင်ခွင်ကျ ဇူးမ်ခလုတ်"</string>

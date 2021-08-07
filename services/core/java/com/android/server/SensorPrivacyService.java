@@ -413,17 +413,18 @@ public final class SensorPrivacyService extends SystemService {
                 return;
             }
 
+            if (uid == Process.SYSTEM_UID) {
+                // If the system uid is being blamed for sensor access, the ui must be shown
+                // explicitly using SensorPrivacyManager#showSensorUseDialog
+                return;
+            }
+
             synchronized (mLock) {
                 if (mSuppressReminders.containsKey(new Pair<>(sensor, user))) {
                     Log.d(TAG,
                             "Suppressed sensor privacy reminder for " + packageName + "/" + user);
                     return;
                 }
-            }
-
-            if (uid == Process.SYSTEM_UID) {
-                enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
-                return;
             }
 
             // TODO: Handle reminders with multiple sensors
@@ -1239,6 +1240,18 @@ public final class SensorPrivacyService extends SystemService {
                     mHandler.removeSuppressPackageReminderToken(key, token);
                 }
             }
+        }
+
+        @Override
+        public void showSensorUseDialog(int sensor) {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("Can only be called by the system uid");
+            }
+            if (!isIndividualSensorPrivacyEnabled(mCurrentUser, sensor)) {
+                return;
+            }
+            enqueueSensorUseReminderDialogAsync(
+                    -1, UserHandle.of(mCurrentUser), "android", sensor);
         }
 
         private void userSwitching(int from, int to) {

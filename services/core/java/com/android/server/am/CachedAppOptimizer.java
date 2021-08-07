@@ -101,7 +101,7 @@ public final class CachedAppOptimizer {
 
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
-    @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = false;
+    @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
     @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE;
     @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
@@ -276,7 +276,7 @@ public final class CachedAppOptimizer {
             DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ;
     @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
-    private volatile boolean mUseFreezer = DEFAULT_USE_FREEZER;
+    private volatile boolean mUseFreezer = false; // set to DEFAULT in init()
     @GuardedBy("this")
     private int mFreezerDisableCount = 1; // Freezer is initially disabled, until enabled
     private final Random mRandom = new Random();
@@ -678,6 +678,8 @@ public final class CachedAppOptimizer {
                     KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
             mUseFreezer = isFreezerSupported();
             updateFreezerDebounceTimeout();
+        } else {
+            mUseFreezer = false;
         }
 
         final boolean useFreezer = mUseFreezer;

@@ -68,11 +68,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
-     * Deletes the provided container and updates the presentation if necessary.
+     * Deletes the specified container and all other associated and dependent containers in the same
+     * transaction.
      */
-    void deleteContainer(TaskFragmentContainer container) {
+    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        deleteTaskFragment(wct, container.getTaskFragmentToken());
+
+        container.finish(shouldFinishDependent, this, wct, mController);
 
         final TaskFragmentContainer newTopContainer = mController.getTopActiveContainer();
         if (newTopContainer != null) {
