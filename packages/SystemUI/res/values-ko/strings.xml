@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"계속하려면 지문을 사용하세요."</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"지문을 인식할 수 없습니다. 화면 잠금을 대신 사용하세요."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"찾는 중..."</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"얼굴 아이콘"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"호환성 확대/축소 버튼입니다."</string>
