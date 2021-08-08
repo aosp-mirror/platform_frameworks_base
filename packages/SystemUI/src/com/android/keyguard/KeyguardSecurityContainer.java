@@ -54,6 +54,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.util.ArrayList;
@@ -471,6 +472,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
                     mIsSecurityViewLeftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
                             : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
+
+            int keyguardState = mIsSecurityViewLeftAligned
+                    ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT
+                    : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_RIGHT;
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, keyguardState);
 
             updateSecurityViewLocation(animate);
         }
