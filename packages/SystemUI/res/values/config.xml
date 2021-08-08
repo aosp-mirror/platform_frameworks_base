@@ -700,4 +700,7 @@
          source. This value is used as the base value in an exponential backoff in subsequent
          attempts. -->
     <integer name="config_communalSourceReconnectBaseDelay">1000</integer>
+
+    <!-- Flag to activate notification to contents feature -->
+    <bool name="config_notificationToContents">false</bool>
 </resources>

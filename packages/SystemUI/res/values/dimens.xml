@@ -1629,4 +1629,6 @@
 
     <!-- Height percentage of the parent container occupied by the communal view -->
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
+
+    <dimen name="drag_and_drop_icon_size">70dp</dimen>
 </resources>
