@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nije moguće prepoznati lice. Koristite otisak prsta."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Nastavite pomoću otiska prsta"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Nije moguće prepoznati otisak prsta. Umjesto toga koristite zaključavanje ekrana."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Tražimo vas…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona lica"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Dugme za uvećavanje u slučaju nekompatibilnosti."</string>
@@ -993,7 +995,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> da prikazuje isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Može čitati informacije iz aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Može poduzeti radnje u aplikaciji <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Dozvoli aplikaciji <xliff:g id="APP">%1$s</xliff:g> prikazivanje isječaka iz svake aplikacije"</string>
@@ -1176,6 +1178,8 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"WiFi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"Detalji o mreži"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Dodirnite mrežu da se povežete"</string>
+    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
+    <skip />
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traženje mreža…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje s mrežom nije uspjelo"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>

@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Gesicht wurde nicht erkannt. Verwende stattdessen den Fingerabdruck."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Mithilfe deines Fingerabdrucks fortfahren"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Fingerabdruck wurde nicht erkannt. Verwende stattdessen die Displaysperre."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Wir suchen nach dir…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Gesichtssymbol"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Schaltfläche für Kompatibilitätszoom"</string>
@@ -1083,7 +1085,7 @@
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
     <string name="controls_media_close_session" msgid="1193000643003066508">"Diese Mediensitzung ausblenden?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Die Mediensitzung kann nicht ausgeblendet werden."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ablehnen"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ausblenden"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>
@@ -1170,6 +1172,8 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"WLAN"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"Netzwerkdetails"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Tippe auf ein Netzwerk, um eine Verbindung herzustellen"</string>
+    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
+    <skip />
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Netzwerke werden gesucht…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Netzwerkverbindung konnte nicht hergestellt werden"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
