@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چہرے کی شناخت نہیں ہو سکی۔ اس کے بجائے فنگر پرنٹ استعمال کریں۔"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"جاری رکھنے کے لیے اپنا فنگر پرنٹ استعمال کریں"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"فنگر پرنٹ کی شناخت نہیں کی جا سکی۔ اس کے بجائے اسکرین لاک کا استعمال کریں۔"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"آپ کے لیے تلاش کیا جا رہا ہے…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"چہرے کا آئیکن"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"مطابقت پذیری زوم بٹن۔"</string>
@@ -1170,6 +1172,8 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"نیٹ ورک کی تفصیلات"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"منسلک کرنے کے لیے نیٹ ورک پر تھپتھپائیں"</string>
+    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
+    <skip />
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"نیٹ ورکس تلاش کیے جا رہے ہیں…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"نیٹ ورک سے منسلک ہونے میں ناکام ہو گیا"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"سبھی دیکھیں"</string>
