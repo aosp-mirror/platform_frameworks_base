@@ -81,6 +81,7 @@ import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.StartingWindowInfo;
 import android.window.TaskAppearedInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
@@ -1273,6 +1274,24 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(mWm.mAtmService.mTaskSupervisor, times(1)).startActivityFromRecents(
                 anyInt(), anyInt(), eq(2), optionsCaptor.capture());
         assertTrue(optionsCaptor.getValue().getOriginalOptions().getTransientLaunch());
+    }
+
+    @Test
+    public void testResumeTopsWhenLeavingPinned() {
+        final ActivityRecord record = makePipableActivity();
+        final Task rootTask = record.getRootTask();
+
+        clearInvocations(mWm.mAtmService.mRootWindowContainer);
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+        WindowContainerToken wct = rootTask.mRemoteToken.toWindowContainerToken();
+        t.setWindowingMode(wct, WINDOWING_MODE_PINNED);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+
+        clearInvocations(mWm.mAtmService.mRootWindowContainer);
+        t.setWindowingMode(wct, WINDOWING_MODE_FULLSCREEN);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 
     /**
