@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -56,6 +57,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.R;
+import com.android.internal.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +79,7 @@ public class LockPatternView extends View {
     private static final int LINE_END_ANIMATION_DURATION_MILLIS = 50;
     private static final int LINE_FADE_OUT_DURATION_MILLIS = 500;
     private static final int LINE_FADE_OUT_DELAY_MILLIS = 150;
+    private static final int DOT_ACTIVATION_DURATION_MILLIS = 50;
     private final CellState[][] mCellStates;
 
     private final int mDotSize;
@@ -156,6 +159,7 @@ public class LockPatternView extends View {
     private int mErrorColor;
     private int mSuccessColor;
     private int mDotColor;
+    private int mDotActivatedColor;
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
@@ -237,6 +241,7 @@ public class LockPatternView extends View {
         float radius;
         float translationY;
         float alpha = 1f;
+        float activationAnimationProgress;
         public float lineEndX = Float.MIN_VALUE;
         public float lineEndY = Float.MIN_VALUE;
         @Nullable
@@ -330,6 +335,7 @@ public class LockPatternView extends View {
         mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, 0);
         mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, 0);
         mDotColor = a.getColor(R.styleable.LockPatternView_dotColor, mRegularColor);
+        mDotActivatedColor = a.getColor(R.styleable.LockPatternView_dotActivatedColor, mDotColor);
 
         int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, mRegularColor);
         mPathPaint.setColor(pathColor);
@@ -798,18 +804,50 @@ public class LockPatternView extends View {
 
     private void startCellActivatedAnimation(Cell cell) {
         final CellState cellState = mCellStates[cell.row][cell.column];
-        startRadiusAnimation(mDotSize/2, mDotSizeActivated/2, 96, mLinearOutSlowInInterpolator,
-                cellState, new Runnable() {
-                    @Override
-                    public void run() {
-                        startRadiusAnimation(mDotSizeActivated/2, mDotSize/2, 192,
-                                mFastOutSlowInInterpolator,
-                                cellState, null);
-                    }
-                });
+        if (mDotSize != mDotSizeActivated) {
+            startRadiusAnimation(mDotSize / 2, mDotSizeActivated / 2, 96,
+                    mLinearOutSlowInInterpolator,
+                    cellState, new Runnable() {
+                        @Override
+                        public void run() {
+                            startRadiusAnimation(mDotSizeActivated / 2, mDotSize / 2, 192,
+                                    mFastOutSlowInInterpolator,
+                                    cellState, null);
+                        }
+                    });
+        }
+        startDotActivationColorAnimation(cellState);
         startLineEndAnimation(cellState, mInProgressX, mInProgressY,
                 getCenterXForColumn(cell.column), getCenterYForRow(cell.row));
         startLineDisappearingAnimation(cellState);
+    }
+
+    private void startDotActivationColorAnimation(CellState cellState) {
+        ValueAnimator.AnimatorUpdateListener updateListener =
+                new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        cellState.activationAnimationProgress =
+                                (float) valueAnimator.getAnimatedValue();
+                        invalidate();
+                    }
+                };
+        ValueAnimator activateAnimator = ValueAnimator.ofFloat(0f, 1f);
+        ValueAnimator deactivateAnimator = ValueAnimator.ofFloat(1f, 0f);
+        activateAnimator.addUpdateListener(updateListener);
+        deactivateAnimator.addUpdateListener(updateListener);
+        activateAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        deactivateAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+
+        // Align dot animation duration with line fade out animation.
+        activateAnimator.setDuration(DOT_ACTIVATION_DURATION_MILLIS);
+        deactivateAnimator.setDuration(DOT_ACTIVATION_DURATION_MILLIS);
+        AnimatorSet set = new AnimatorSet();
+        set.play(deactivateAnimator)
+                .after(LINE_FADE_OUT_DELAY_MILLIS + LINE_FADE_OUT_DURATION_MILLIS
+                        - DOT_ACTIVATION_DURATION_MILLIS * 2)
+                .after(activateAnimator);
+        set.start();
     }
 
     /**
@@ -1295,7 +1333,8 @@ public class LockPatternView extends View {
                                 cellState.hwRadius, cellState.hwPaint);
                     } else {
                         drawCircle(canvas, (int) centerX, (int) centerY + translationY,
-                                cellState.radius, drawLookup[i][j], cellState.alpha);
+                                cellState.radius, drawLookup[i][j], cellState.alpha,
+                                cellState.activationAnimationProgress);
                     }
                 }
             }
@@ -1395,8 +1434,14 @@ public class LockPatternView extends View {
      * @param partOfPattern Whether this circle is part of the pattern.
      */
     private void drawCircle(Canvas canvas, float centerX, float centerY, float radius,
-            boolean partOfPattern, float alpha) {
-        mPaint.setColor(getDotColor());
+            boolean partOfPattern, float alpha, float activationAnimationProgress) {
+        if (mFadePattern && !mInStealthMode) {
+            int resultColor = ColorUtils.blendARGB(mDotColor, mDotActivatedColor,
+                    /* ratio= */ activationAnimationProgress);
+            mPaint.setColor(resultColor);
+        } else {
+            mPaint.setColor(getDotColor());
+        }
         mPaint.setAlpha((int) (alpha * 255));
         canvas.drawCircle(centerX, centerY, radius, mPaint);
     }
