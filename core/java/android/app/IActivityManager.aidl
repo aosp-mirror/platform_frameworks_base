@@ -221,7 +221,7 @@ interface IActivityManager {
     int getProcessLimit();
     int checkUriPermission(in Uri uri, int pid, int uid, int mode, int userId,
             in IBinder callerToken);
-    int[] checkUriPermissions(in List<Uri> uris, int pid, int uid, int mode,
+    int[] checkUriPermissions(in List<Uri> uris, int pid, int uid, int mode, int userId,
                 in IBinder callerToken);
     void grantUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
             int mode, int userId);
