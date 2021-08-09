@@ -587,6 +587,7 @@ cc_defaults {
                 "HardwareBitmapUploader.cpp",
                 "HWUIProperties.sysprop",
                 "JankTracker.cpp",
+                "FrameMetricsReporter.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
                 "ProfileData.cpp",
