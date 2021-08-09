@@ -471,7 +471,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
                 SessionsListenerRecord listener = mSessionsListeners.get(i);
                 try {
-                    enforceMediaPermissions(listener.componentName, listener.pid, listener.uid,
+                    String packageName = listener.componentName == null ? null :
+                            listener.componentName.getPackageName();
+                    enforceMediaPermissions(packageName, listener.pid, listener.uid,
                             listener.userId);
                 } catch (SecurityException e) {
                     Log.i(TAG, "ActiveSessionsListener " + listener.componentName
@@ -593,15 +595,13 @@ public class MediaSessionService extends SystemService implements Monitor {
      * for the caller's user</li>
      * </ul>
      */
-    private void enforceMediaPermissions(ComponentName compName, int pid, int uid,
+    private void enforceMediaPermissions(String packageName, int pid, int uid,
             int resolvedUserId) {
         if (hasStatusBarServicePermission(pid, uid)) return;
-        // TODO: Refactor to use hasMediaControlPermission and hasEnabledNotificationListener
-        if (mContext
-                .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
-                != PackageManager.PERMISSION_GRANTED
-                && !isEnabledNotificationListener(compName,
-                UserHandle.getUserHandleForUid(uid), resolvedUserId)) {
+        if (hasMediaControlPermission(pid, uid)) return;
+
+        if (packageName == null || !hasEnabledNotificationListener(
+                packageName, UserHandle.getUserHandleForUid(uid), resolvedUserId)) {
             throw new SecurityException("Missing permission to control media.");
         }
     }
@@ -632,29 +632,26 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     /**
-     * This checks if the component is an enabled notification listener for the
+     * This checks if the given package has an enabled notification listener for the
      * specified user. Enabled components may only operate on behalf of the user
      * they're running as.
      *
-     * @param compName The component that is enabled.
+     * @param packageName The package name.
      * @param userHandle The user handle of the caller.
      * @param forUserId The user id they're making the request on behalf of.
-     * @return True if the component is enabled, false otherwise
+     * @return True if the app has an enabled notification listener for the user, false otherwise
      */
-    private boolean isEnabledNotificationListener(ComponentName compName, UserHandle userHandle,
-            int forUserId) {
+    private boolean hasEnabledNotificationListener(String packageName,
+            UserHandle userHandle, int forUserId) {
         if (userHandle.getIdentifier() != forUserId) {
             // You may not access another user's content as an enabled listener.
             return false;
         }
         if (DEBUG) {
-            Log.d(TAG, "Checking if enabled notification listener " + compName);
+            Log.d(TAG, "Checking whether the package " + packageName + " has an"
+                    + " enabled notification listener.");
         }
-        if (compName != null) {
-            return mNotificationManager.hasEnabledNotificationListener(compName.getPackageName(),
-                    userHandle);
-        }
-        return false;
+        return mNotificationManager.hasEnabledNotificationListener(packageName, userHandle);
     }
 
     /*
@@ -1237,20 +1234,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public MediaSession.Token getMediaKeyEventSession(ComponentName notificationListener) {
+        public MediaSession.Token getMediaKeyEventSession(final String packageName) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)
-                        && !isEnabledNotificationListener(
-                                notificationListener, userHandle, userId)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission or an enabled"
-                            + " notification listener is required to"
-                            + " get media key event session.");
-                }
+                enforcePackageName(packageName, uid);
+                enforceMediaPermissions(packageName, pid, uid, userId);
+
                 MediaSessionRecordImpl record;
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(userId);
@@ -1272,20 +1265,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public String getMediaKeyEventSessionPackageName(ComponentName notificationListener) {
+        public String getMediaKeyEventSessionPackageName(final String packageName) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)
-                        && !isEnabledNotificationListener(
-                        notificationListener, userHandle, userId)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission or an enabled"
-                            + " notification listener is required to"
-                            + " get media key event session package name");
-                }
+                enforcePackageName(packageName, uid);
+                enforceMediaPermissions(packageName, pid, uid, userId);
+
                 MediaSessionRecordImpl record;
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(userId);
@@ -1597,7 +1586,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void addOnMediaKeyEventSessionChangedListener(
                 final IOnMediaKeyEventSessionChangedListener listener,
-                final ComponentName notificationListener) {
+                final String packageName) {
             if (listener == null) {
                 Log.w(TAG, "addOnMediaKeyEventSessionChangedListener: listener is null, ignoring");
                 return;
@@ -1609,13 +1598,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!hasMediaControlPermission(pid, uid)
-                        && !isEnabledNotificationListener(
-                                notificationListener, userHandle, userId)) {
-                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission or an enabled"
-                            + " notification listener is required to"
-                            + " add MediaKeyEventSessionChangedListener.");
-                }
+                enforcePackageName(packageName, uid);
+                enforceMediaPermissions(packageName, pid, uid, userId);
+
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(userId);
                     if (user == null || user.mFullUserId != userId) {
@@ -1625,7 +1610,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                     user.addOnMediaKeyEventSessionChangedListenerLocked(listener, uid);
                     Log.d(TAG, "The MediaKeyEventSessionChangedListener (" + listener.asBinder()
-                            + ") is added by " + getCallingPackageName(uid));
+                            + ") is added by " + packageName);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2128,7 +2113,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
             // Check if they have the permissions or their component is enabled for the user
             // they're calling from.
-            enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
+            enforceMediaPermissions(packageName, pid, uid, resolvedUserId);
             return resolvedUserId;
         }
 
