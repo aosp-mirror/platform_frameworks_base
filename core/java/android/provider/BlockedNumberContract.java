@@ -231,7 +231,7 @@ public class BlockedNumberContract {
             prefix = { "STATUS_" },
             value = {STATUS_NOT_BLOCKED, STATUS_BLOCKED_IN_LIST, STATUS_BLOCKED_RESTRICTED,
                     STATUS_BLOCKED_UNKNOWN_NUMBER, STATUS_BLOCKED_PAYPHONE,
-                    STATUS_BLOCKED_NOT_IN_CONTACTS})
+                    STATUS_BLOCKED_NOT_IN_CONTACTS, STATUS_BLOCKED_UNAVAILABLE})
     public @interface BlockStatus {}
 
     /**
@@ -275,6 +275,13 @@ public class BlockedNumberContract {
      * @hide
      */
     public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5;
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was blocked
+     * because it is from a number not available.
+     * @hide
+     */
+    public static final int STATUS_BLOCKED_UNAVAILABLE = 6;
 
     /**
      * Integer reason indicating whether a call was blocked, and if so why.
@@ -441,6 +448,9 @@ public class BlockedNumberContract {
         /* Preference key for whether should show an emergency call notification. */
         public static final String ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION =
                 "show_emergency_call_notification";
+        /* Preference key of block unavailable calls setting. */
+        public static final String ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE =
+                "block_unavailable_calls_setting";
 
         /**
          * Notifies the provider that emergency services were contacted by the user.
@@ -547,6 +557,7 @@ public class BlockedNumberContract {
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PRIVATE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
          *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
          * @return {@code true} if the setting is enabled. {@code false} otherwise.
          */
@@ -574,6 +585,7 @@ public class BlockedNumberContract {
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PRIVATE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
          *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
          * @param value the enabled statue of the setting to set.
          */
@@ -603,6 +615,8 @@ public class BlockedNumberContract {
                     return "blocked - payphone";
                 case STATUS_BLOCKED_NOT_IN_CONTACTS:
                     return "blocked - not in contacts";
+                case STATUS_BLOCKED_UNAVAILABLE:
+                    return "blocked - unavailable";
             }
             return "unknown";
         }
