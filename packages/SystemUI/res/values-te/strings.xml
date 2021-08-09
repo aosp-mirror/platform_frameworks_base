@@ -103,7 +103,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నైనా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో ఉంటాయి."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే సంగీతం, కాల్‌లు, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే సంగీతం, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"మైక్రోఫోన్"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"పరికరం ఆడియో, మైక్రోఫోన్"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభించు"</string>
@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ముఖం గుర్తించలేము. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"వేలిముద్రను గుర్తించడం సాధ్యపడదు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"మీ కోసం చూస్తోంది…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"ముఖ చిహ్నం"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"అనుకూలత జూమ్ బటన్."</string>
@@ -445,7 +447,7 @@
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"అలారాలు నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"అనుకూలీకరించు"</string>
-    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"ఇది అలారాలు, సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా అన్ని ధ్వనులు మరియు వైబ్రేషన్‌లను బ్లాక్ చేస్తుంది. మీరు ఇప్పటికీ ఫోన్ కాల్‌లు చేయగలుగుతారు."</string>
+    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"ఇది అలారాలు, సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా అన్ని ధ్వనులు మరియు వైబ్రేషన్‌లను బ్లాక్ చేస్తుంది. మీరు ఇప్పటికీ ఫోన్ కాల్స్‌ చేయగలుగుతారు."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"ఇది అలారాలు, సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా అన్ని ధ్వనులు మరియు వైబ్రేషన్‌లను బ్లాక్ చేస్తుంది."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"తక్కువ అత్యవసర నోటిఫికేషన్‌లు దిగువన"</string>
@@ -629,7 +631,7 @@
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"బ్లూటూత్"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"డ్యూయల్ మల్టీ టోన్ ఫ్రీక్వెన్సీ"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"యాక్సెసిబిలిటీ"</string>
-    <string name="ring_toggle_title" msgid="5973120187287633224">"కాల్‌లు"</string>
+    <string name="ring_toggle_title" msgid="5973120187287633224">"కాల్స్‌"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"రింగ్"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"వైబ్రేట్"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"మ్యూట్"</string>
@@ -645,7 +647,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"అన్‌మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"వైబ్రేట్"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s వాల్యూమ్ నియంత్రణలు"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"కాల్‌లు మరియు నోటిఫికేషన్‌లు రింగ్ అవుతాయి (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు రింగ్ అవుతాయి (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"మీడియా అవుట్‌పుట్"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"ఫోన్ కాల్ అవుట్‌పుట్"</string>
     <string name="output_none_found" msgid="5488087293120982770">"పరికరాలు ఏవీ కనుగొనబడలేదు"</string>
@@ -935,7 +937,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"వేడెక్కినందుకు ఫోన్ ఆఫ్ చేయబడింది"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తోంది.\nమరింత సమాచారం కోసం ట్యాప్ చేయండి"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"మీ ఫోన్ చాలా వేడిగా ఉంది, కనుక చల్లబర్చడానికి ఆఫ్ చేయబడింది. మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది.\n\nమీరు ఇలా చేస్తే మీ ఫోన్ చాలా వేడెక్కవచ్చు:\n	• వనరు-ఆధారిత యాప్‌లు (గేమింగ్, వీడియో లేదా నావిగేషన్ వంటి యాప్‌లు) ఉపయోగించడం\n	• పెద్ద ఫైల్‌లను డౌన్‌లోడ్ లేదా అప్‌లోడ్ చేయడం\n	• అధిక ఉష్ణోగ్రతలలో మీ ఫోన్‌ని ఉపయోగించడం"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"మీ ఫోన్ చాలా వేడిగా ఉంది, కనుక చల్లబర్చడానికి ఆఫ్ చేయబడింది. మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది.\n\nమీరు ఇలా చేస్తే మీ ఫోన్ చాలా వేడెక్కవచ్చు:\n	• వనరు-ఆధారిత యాప్‌లు (గేమింగ్, వీడియో లేదా నావిగేషన్ వంటి యాప్‌లు) ఉపయోగించడం\n	• పెద్ద ఫైళ్లను డౌన్‌లోడ్ లేదా అప్‌లోడ్ చేయడం\n	• అధిక ఉష్ణోగ్రతలలో మీ ఫోన్‌ని ఉపయోగించడం"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ఫోన్ వేడెక్కుతోంది"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ఫోన్‌ను చల్లబరిచే క్రమంలో కొన్ని ఫీచర్లు పరిమితం చేయబడ్డాయి.\nమరింత సమాచారం కోసం ట్యాప్ చేయండి"</string>
@@ -1142,7 +1144,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"కంటెంట్ త్వరలో కనిపిస్తుంది"</string>
     <string name="missed_call" msgid="4228016077700161689">"మిస్డ్ కాల్"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్డ్ కాల్‌లు, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్డ్ కాల్స్‌, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"సంభాషణ"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"అంతరాయం కలిగించవద్దు ద్వారా పాజ్ చేయబడింది"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> మెసేజ్‌ను పంపారు: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -1170,6 +1172,8 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"నెట్‌వర్క్ వివరాలు"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"కనెక్ట్ చేయడానికి నెట్‌వర్క్‌ను ట్యాప్ చేయండి"</string>
+    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
+    <skip />
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"నెట్‌వర్క్‌ల కోసం సెర్చ్ చేస్తోంది…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"నెట్‌వర్క్‌కు కనెక్ట్ చేయడం విఫలమైంది"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"అన్నీ చూడండి"</string>

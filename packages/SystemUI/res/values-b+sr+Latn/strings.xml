@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Lice nije prepoznato. Koristite otisak prsta."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Nastavite pomoću otiska prsta"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Prepoznavanje otiska prsta nije uspelo. Koristite zaključavanje ekrana umesto toga."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Tražimo vas…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona lica"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Dugme Zum kompatibilnosti."</string>
@@ -1176,6 +1178,8 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"WiFi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"Detalji o mreži"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Dodirnite mrežu da biste se povezali"</string>
+    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
+    <skip />
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traže se mreže…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje sa mrežom nije uspelo"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Pogledajte sve"</string>
