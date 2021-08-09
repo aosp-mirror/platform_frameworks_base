@@ -139,7 +139,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                                 + " with ducking", e);
                     }
                     player.start();
-                    if (DEBUG) { Log.d(mTag, "player.start"); }
+                    if (DEBUG) { Log.d(mTag, "player.start piid:" + player.getPlayerIId()); }
                 } catch (Exception e) {
                     if (player != null) {
                         player.release();
@@ -155,7 +155,13 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                     mPlayer = player;
                 }
                 if (mp != null) {
-                    if (DEBUG) { Log.d(mTag, "mPlayer.release"); }
+                    if (DEBUG) {
+                        Log.d(mTag, "mPlayer.pause+release piid:" + player.getPlayerIId());
+                    }
+                    mp.pause();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ie) { }
                     mp.release();
                 }
                 this.notify();
@@ -244,6 +250,10 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                         try {
                             mp.stop();
                         } catch (Exception e) { }
+                        if (DEBUG) {
+                            Log.i(mTag, "About to release MediaPlayer piid:"
+                                    + mp.getPlayerIId() + " due to notif cancelled");
+                        }
                         mp.release();
                         synchronized(mQueueAudioFocusLock) {
                             if (mAudioManagerWithAudioFocus != null) {
@@ -284,7 +294,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
     public void onCompletion(MediaPlayer mp) {
         synchronized(mQueueAudioFocusLock) {
             if (mAudioManagerWithAudioFocus != null) {
-                if (DEBUG) Log.d(mTag, "onCompletion() abandonning AudioFocus");
+                if (DEBUG) Log.d(mTag, "onCompletion() abandoning AudioFocus");
                 mAudioManagerWithAudioFocus.abandonAudioFocus(null);
                 mAudioManagerWithAudioFocus = null;
             } else {
@@ -310,6 +320,10 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
             }
         }
         if (mp != null) {
+            if (DEBUG) {
+                Log.i("NotificationPlayer", "About to release MediaPlayer piid:"
+                        + mp.getPlayerIId() + " due to onCompletion");
+            }
             mp.release();
         }
     }
