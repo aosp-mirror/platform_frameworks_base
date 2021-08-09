@@ -270,7 +270,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken,
             Activity activityToAdd) {
         final IBinder taskFragmentToken = ActivityThread.currentActivityThread().getActivityClient(
-                activityToken).mTaskFragmentToken;
+                activityToken).mInitialTaskFragmentToken;
         for (TaskFragmentContainer container : mContainers) {
             if (container.hasActivity(activityToken)) {
                 return container;
