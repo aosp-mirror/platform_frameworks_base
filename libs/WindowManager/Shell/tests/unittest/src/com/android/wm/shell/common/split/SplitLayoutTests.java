@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
@@ -42,6 +43,8 @@ import com.android.wm.shell.common.DisplayImeController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -53,19 +56,20 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock SurfaceControl mRootLeash;
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
+    @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mSplitLayout = new SplitLayout(
+        mSplitLayout = spy(new SplitLayout(
                 "TestSplitLayout",
                 mContext,
                 getConfiguration(),
                 mSplitLayoutHandler,
                 b -> b.setParent(mRootLeash),
                 mDisplayImeController,
-                mTaskOrganizer);
+                mTaskOrganizer));
     }
 
     @Test
@@ -109,16 +113,31 @@ public class SplitLayoutTests extends ShellTestCase {
 
     @Test
     @UiThreadTest
-    public void testSnapToDismissTarget() {
+    public void testSnapToDismissStart() {
         // verify it callbacks properly when the snap target indicates dismissing split.
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
+
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(false));
-        snapTarget = getSnapTarget(0 /* position */,
+    }
+
+    @Test
+    @UiThreadTest
+    public void testSnapToDismissEnd() {
+        // verify it callbacks properly when the snap target indicates dismissing split.
+        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
+
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true));
+    }
+
+    private void waitDividerFlingFinished() {
+        verify(mSplitLayout).flingDividePosition(anyInt(), anyInt(), mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
     }
 
     private static Configuration getConfiguration() {
