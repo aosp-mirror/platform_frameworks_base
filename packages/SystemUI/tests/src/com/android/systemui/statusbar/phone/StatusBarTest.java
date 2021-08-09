@@ -138,6 +138,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -262,6 +263,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private IWallpaperManager mIWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private TunerService mTunerService;
     @Mock private StartingSurface mStartingSurface;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -425,7 +427,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mWallpaperManager,
                 mUnlockedScreenOffAnimationController,
-                Optional.of(mStartingSurface));
+                Optional.of(mStartingSurface),
+                mTunerService);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))
