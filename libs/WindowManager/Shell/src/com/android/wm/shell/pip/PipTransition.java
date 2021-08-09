@@ -19,6 +19,7 @@ package com.android.wm.shell.pip;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.util.RotationUtils.deltaRotation;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
@@ -124,6 +125,12 @@ public class PipTransition extends PipTransitionController {
                     mPipBoundsState.getDisplayBounds());
             finishCallback.onTransitionFinished(null, null);
             return true;
+        }
+
+        // We only support TRANSIT_PIP type (from RootWindowContainer) or TRANSIT_OPEN (from apps
+        // that enter PiP instantly on opening, mostly from CTS/Flicker tests)
+        if (info.getType() != TRANSIT_PIP && info.getType() != TRANSIT_OPEN) {
+            return false;
         }
 
         // Search for an Enter PiP transition (along with a show wallpaper one)
