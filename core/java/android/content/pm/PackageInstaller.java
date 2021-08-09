@@ -1616,7 +1616,7 @@ public class PackageInstaller {
         /** {@hide} */
         public DataLoaderParams dataLoaderParams;
         /** {@hide} */
-        public int rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
+        public int rollbackDataPolicy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
         /** {@hide} */
         public boolean forceQueryableOverride;
         /** {@hide} */
@@ -1887,7 +1887,7 @@ public class PackageInstaller {
             } else {
                 installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
             }
-            rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
+            rollbackDataPolicy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
         }
 
         /**

@@ -800,7 +800,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         // precedence only when it is not the default (i.e. RESTORE). We will remove
         // SessionParams#setEnableRollback(boolean, int) and related code when Play has migrated to
         // using the manifest to specify the policy.
-        if (manifestPolicy != PackageManager.RollbackDataPolicy.RESTORE) {
+        if (manifestPolicy != PackageManager.ROLLBACK_DATA_POLICY_RESTORE) {
             return manifestPolicy;
         }
         return sessionPolicy;

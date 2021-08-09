@@ -301,9 +301,9 @@ public class StagedRollbackTest {
         InstallUtils.processUserData(TestApp.C);
 
         Install a2 = Install.single(TestApp.A2).setStaged()
-                .setEnableRollback(PackageManager.RollbackDataPolicy.WIPE);
+                .setEnableRollback(PackageManager.ROLLBACK_DATA_POLICY_WIPE);
         Install b2 = Install.single(TestApp.B2).setStaged()
-                .setEnableRollback(PackageManager.RollbackDataPolicy.RESTORE);
+                .setEnableRollback(PackageManager.ROLLBACK_DATA_POLICY_RESTORE);
         // The rollback data policy of C2 is specified in the manifest
         Install c2 = Install.single(TestApp.C2).setStaged().setEnableRollback();
         Install.multi(a2, b2, c2).setEnableRollback().setStaged().commit();
