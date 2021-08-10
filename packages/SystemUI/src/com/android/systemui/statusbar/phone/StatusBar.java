@@ -1218,7 +1218,10 @@ public class StatusBar extends SystemUI implements
                     mBatteryMeterViewController = new BatteryMeterViewController(
                             mStatusBarView.findViewById(R.id.battery),
                             mConfigurationController,
-                            mTunerService
+                            mTunerService,
+                            mBroadcastDispatcher,
+                            mMainThreadHandler,
+                            mContext.getContentResolver()
                     );
                     mBatteryMeterViewController.init();
 
