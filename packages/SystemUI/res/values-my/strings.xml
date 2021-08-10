@@ -1172,8 +1172,7 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"ကွန်ရက် အသေးစိတ်များ"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"ချိတ်ဆက်ရန် ကွန်ရက်ကို တို့ပါ"</string>
-    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
-    <skip />
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"ကွန်ရက်များကြည့်ရန် ဖွင့်ပါ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ကွန်ရက်များကို ရှာဖွေနေသည်…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ကွန်ရက်သို့ ချိတ်ဆက်၍မရပါ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"အားလုံးကြည့်ရန်"</string>
