@@ -2107,6 +2107,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid BASE_UUID;
     field @NonNull public static final android.os.ParcelUuid BNEP;
     field @NonNull public static final android.os.ParcelUuid DIP;
+    field @NonNull public static final android.os.ParcelUuid GENERIC_MEDIA_CONTROL;
     field @NonNull public static final android.os.ParcelUuid HEARING_AID;
     field @NonNull public static final android.os.ParcelUuid HFP;
     field @NonNull public static final android.os.ParcelUuid HFP_AG;
@@ -2117,6 +2118,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid LE_AUDIO;
     field @NonNull public static final android.os.ParcelUuid MAP;
     field @NonNull public static final android.os.ParcelUuid MAS;
+    field @NonNull public static final android.os.ParcelUuid MEDIA_CONTROL;
     field @NonNull public static final android.os.ParcelUuid MNS;
     field @NonNull public static final android.os.ParcelUuid NAP;
     field @NonNull public static final android.os.ParcelUuid OBEX_OBJECT_PUSH;
