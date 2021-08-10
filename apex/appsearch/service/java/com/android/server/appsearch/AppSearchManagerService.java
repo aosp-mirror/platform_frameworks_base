@@ -332,17 +332,20 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     List<AppSearchSchema> schemas = new ArrayList<>(schemaBundles.size());
                     for (int i = 0; i < schemaBundles.size(); i++) {
                         schemas.add(new AppSearchSchema(schemaBundles.get(i)));
@@ -359,7 +362,7 @@ public class AppSearchManagerService extends SystemService {
                         }
                         schemasVisibleToPackages.put(entry.getKey(), packageIdentifiers);
                     }
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     SetSchemaResponse setSchemaResponse = instance.getAppSearchImpl().setSchema(
                             packageName,
                             databaseName,
@@ -418,15 +421,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     GetSchemaResponse response =
                             instance.getAppSearchImpl().getSchema(packageName, databaseName);
                     invokeCallbackOnResult(
@@ -450,15 +456,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     List<String> namespaces =
                             instance.getAppSearchImpl().getNamespaces(packageName, databaseName);
                     invokeCallbackOnResult(
@@ -485,20 +494,23 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     for (int i = 0; i < documentBundles.size(); i++) {
                         GenericDocument document = new GenericDocument(documentBundles.get(i));
                         try {
@@ -571,20 +583,23 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     for (int i = 0; i < ids.size(); i++) {
                         String id = ids.get(i);
                         try {
@@ -652,18 +667,21 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     SearchResultPage searchResultPage = instance.getAppSearchImpl().query(
                             packageName,
                             databaseName,
@@ -718,18 +736,21 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
 
                     boolean callerHasSystemAccess =
                             instance.getVisibilityStore().doesCallerHaveSystemAccess(packageName);
@@ -783,17 +804,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
-            // TODO(b/162450968) check nextPageToken is being advanced by the same uid as originally
-            // opened it
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     SearchResultPage searchResultPage =
                             instance.getAppSearchImpl().getNextPage(packageName, nextPageToken);
                     invokeCallbackOnResult(
@@ -812,15 +834,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     instance.getAppSearchImpl().invalidateNextPageToken(packageName, nextPageToken);
                 } catch (Throwable t) {
                     Log.e(TAG, "Unable to invalidate the query page token", t);
@@ -846,15 +871,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     // we don't need to append the file. The file is always brand new.
                     try (DataOutputStream outputStream = new DataOutputStream(
                             new FileOutputStream(fileDescriptor.getFileDescriptor()))) {
@@ -895,15 +923,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
 
                     GenericDocument document;
                     ArrayList<Bundle> migrationFailureBundles = new ArrayList<>();
@@ -957,15 +988,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
 
                     if (systemUsage
                             && !instance.getVisibilityStore()
@@ -1004,20 +1038,23 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     for (int i = 0; i < ids.size(); i++) {
                         String id = ids.get(i);
                         try {
@@ -1090,18 +1127,21 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     instance.getAppSearchImpl().removeByQuery(
                             packageName,
                             databaseName,
@@ -1154,15 +1194,18 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
                     AppSearchUserInstance instance =
-                            mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                            mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     StorageInfo storageInfo = instance.getAppSearchImpl()
                             .getStorageInfoForDatabase(packageName, databaseName);
                     Bundle storageInfoBundle = storageInfo.getBundle();
@@ -1184,18 +1227,21 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
-                    instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
+                    instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.FULL);
                     ++operationSuccessCount;
                 } catch (Throwable t) {
@@ -1236,7 +1282,6 @@ public class AppSearchManagerService extends SystemService {
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
-            UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
 
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -1244,12 +1289,18 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
-                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
-                    verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
-                    verifyNotInstantApp(userContext, packageName);
+                    verifyCaller(callingUid, packageName);
+
+                    // Obtain the user where the client wants to run the operations in. This should
+                    // end up being the same as userHandle, assuming it is not a special user and
+                    // the client is allowed to run operations in that user.
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    verifyUserUnlocked(targetUser);
+
+                    Context targetUserContext = mContext.createContextAsUser(targetUser,
+                            /*flags=*/ 0);
                     instance = mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                            userContext, callingUser, AppSearchConfig.getInstance(EXECUTOR));
+                            targetUserContext, targetUser, AppSearchConfig.getInstance(EXECUTOR));
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
                 } catch (Throwable t) {
@@ -1276,29 +1327,6 @@ public class AppSearchManagerService extends SystemService {
                     }
                 }
             });
-        }
-
-        private void verifyCallingPackage(
-                @NonNull Context userContext,
-                @NonNull UserHandle actualCallingUser,
-                int actualCallingUid,
-                @NonNull String claimedCallingPackage) {
-            Objects.requireNonNull(actualCallingUser);
-            Objects.requireNonNull(claimedCallingPackage);
-
-            int claimedCallingUid = PackageUtil.getPackageUid(
-                    userContext, claimedCallingPackage);
-            if (claimedCallingUid == INVALID_UID) {
-                throw new SecurityException(
-                        "Specified calling package [" + claimedCallingPackage + "] not found");
-            }
-            if (claimedCallingUid != actualCallingUid) {
-                throw new SecurityException(
-                        "Specified calling package ["
-                                + claimedCallingPackage
-                                + "] does not match the calling uid "
-                                + actualCallingUid);
-            }
         }
 
         /** Invokes the {@link IAppSearchResultCallback} with the result. */
@@ -1354,33 +1382,72 @@ public class AppSearchManagerService extends SystemService {
     /**
      * Helper for dealing with incoming user arguments to system service calls.
      *
-     * @param requestedUser The user which the caller is requesting to execute as.
+     * @param targetUserHandle The user which the caller is requesting to execute as.
      * @param callingUid The actual uid of the caller as determined by Binder.
      * @return the user handle that the call should run as. Will always be a concrete user.
      */
     @NonNull
-    private UserHandle handleIncomingUser(@NonNull UserHandle requestedUser, int callingUid) {
-        UserHandle callingUser = UserHandle.getUserHandleForUid(callingUid);
-        if (callingUser.equals(requestedUser)) {
-            return requestedUser;
+    private UserHandle handleIncomingUser(@NonNull UserHandle targetUserHandle, int callingUid) {
+        UserHandle callingUserHandle = UserHandle.getUserHandleForUid(callingUid);
+        if (callingUserHandle.equals(targetUserHandle)) {
+            return targetUserHandle;
         }
 
         // Duplicates UserController#ensureNotSpecialUser
-        if (requestedUser.getIdentifier() < 0) {
+        if (targetUserHandle.getIdentifier() < 0) {
             throw new IllegalArgumentException(
-                    "Call does not support special user " + requestedUser);
+                    "Call does not support special user " + targetUserHandle);
         }
 
         throw new SecurityException(
-                "Requested user, " + requestedUser + ", is not the same as the calling user, "
-                        + callingUser + ".");
+                "Requested user, " + targetUserHandle + ", is not the same as the calling user, "
+                        + callingUserHandle + ".");
     }
 
     /**
-     * Helper for ensuring instant apps can't make calls to AppSearch.
+     * Verify various aspects of the calling user.
      *
-     * @param userContext Context of the user making the call.
-     * @param packageName Package name of the caller.
+     * @param callingUid Uid of the caller, usually retrieved from Binder for authenticity.
+     * @param claimedCallingPackage Package name the caller claims to be.
+     */
+    private void verifyCaller(int callingUid, @NonNull String claimedCallingPackage) {
+        // Obtain the user where the client is running in. Note that this could be different from
+        // the userHandle where the client wants to run the AppSearch operation in.
+        UserHandle callingUserHandle = UserHandle.getUserHandleForUid(callingUid);
+        Context callingUserContext = mContext.createContextAsUser(callingUserHandle,
+                /*flags=*/ 0);
+
+        verifyCallingPackage(callingUserContext, callingUid, claimedCallingPackage);
+        verifyNotInstantApp(callingUserContext, claimedCallingPackage);
+    }
+
+    /**
+     * Check that the caller's supposed package name matches the uid making the call.
+     *
+     * @throws SecurityException if the package name and uid don't match.
+     */
+    private void verifyCallingPackage(
+            @NonNull Context actualCallingUserContext,
+            int actualCallingUid,
+            @NonNull String claimedCallingPackage) {
+        int claimedCallingUid = PackageUtil.getPackageUid(
+                actualCallingUserContext, claimedCallingPackage);
+        if (claimedCallingUid == INVALID_UID) {
+            throw new SecurityException(
+                    "Specified calling package [" + claimedCallingPackage + "] not found");
+        }
+        if (claimedCallingUid != actualCallingUid) {
+            throw new SecurityException(
+                    "Specified calling package ["
+                            + claimedCallingPackage
+                            + "] does not match the calling uid "
+                            + actualCallingUid);
+        }
+    }
+
+    /**
+     * Ensure instant apps can't make calls to AppSearch.
+     *
      * @throws SecurityException if the caller is an instant app.
      */
     private void verifyNotInstantApp(@NonNull Context userContext, @NonNull String packageName) {
