@@ -514,7 +514,15 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     if (!wasClickableOnDownEvent()) {
                         return false;
                     }
+                    onAffordanceClick();
+                    return true;
+                }
 
+                public boolean onFling(MotionEvent e1, MotionEvent e2,
+                        float velocityX, float velocityY) {
+                    if (!wasClickableOnDownEvent()) {
+                        return false;
+                    }
                     onAffordanceClick();
                     return true;
                 }
