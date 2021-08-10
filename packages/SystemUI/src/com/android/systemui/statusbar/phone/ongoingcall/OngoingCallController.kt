@@ -216,6 +216,10 @@ class OngoingCallController @Inject constructor(
         isCallAppVisible = isProcessVisibleToUser(
                 iActivityManager.getUidProcessState(currentCallNotificationInfo.uid, null))
 
+        if (uidObserver != null) {
+            iActivityManager.unregisterUidObserver(uidObserver)
+        }
+
         uidObserver = object : IUidObserver.Stub() {
             override fun onUidStateChanged(
                 uid: Int,
