@@ -196,6 +196,22 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     boolean mKeepWarming; // Whether or not it'll keep critical code path of the host warm
 
+    /**
+     * The original earliest restart time, which considers the number of crashes, etc.,
+     * but doesn't include the extra delays we put in between to scatter the restarts;
+     * it's the earliest time this auto service restart could happen alone(except those
+     * batch restarts which happens at time of process attach).
+     */
+    long mEarliestRestartTime;
+
+    /**
+     * The original time when the service start is scheduled, it does NOT include the reschedules.
+     *
+     * <p>The {@link #restartDelay} would be updated when its restart is rescheduled, but this field
+     * won't, so it could be used when dumping how long the restart is delayed actually.</p>
+     */
+    long mRestartSchedulingTime;
+
     static class StartItem {
         final ServiceRecord sr;
         final boolean taskRemoved;
@@ -373,10 +389,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (destroying || destroyTime != 0) {
             ProtoUtils.toDuration(proto, ServiceRecordProto.DESTORY_TIME, destroyTime, now);
         }
-        if (crashCount != 0 || restartCount != 0 || restartDelay != 0 || nextRestartTime != 0) {
+        if (crashCount != 0 || restartCount != 0 || (nextRestartTime - mRestartSchedulingTime) != 0
+                || nextRestartTime != 0) {
             long crashToken = proto.start(ServiceRecordProto.CRASH);
             proto.write(ServiceRecordProto.Crash.RESTART_COUNT, restartCount);
-            ProtoUtils.toDuration(proto, ServiceRecordProto.Crash.RESTART_DELAY, restartDelay, now);
+            ProtoUtils.toDuration(proto, ServiceRecordProto.Crash.RESTART_DELAY,
+                    (nextRestartTime - mRestartSchedulingTime), now);
             ProtoUtils.toDuration(proto,
                     ServiceRecordProto.Crash.NEXT_RESTART_TIME, nextRestartTime, now);
             proto.write(ServiceRecordProto.Crash.CRASH_COUNT, crashCount);
@@ -504,10 +522,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     pw.println();
         }
         if (crashCount != 0 || restartCount != 0
-                || restartDelay != 0 || nextRestartTime != 0) {
+                || (nextRestartTime - mRestartSchedulingTime) != 0 || nextRestartTime != 0) {
             pw.print(prefix); pw.print("restartCount="); pw.print(restartCount);
                     pw.print(" restartDelay=");
-                    TimeUtils.formatDuration(restartDelay, now, pw);
+                    TimeUtils.formatDuration(nextRestartTime - mRestartSchedulingTime, now, pw);
                     pw.print(" nextRestartTime=");
                     TimeUtils.formatDuration(nextRestartTime, now, pw);
                     pw.print(" crashCount="); pw.println(crashCount);
@@ -899,6 +917,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         restartCount = 0;
         restartDelay = 0;
         restartTime = 0;
+        mEarliestRestartTime  = 0;
+        mRestartSchedulingTime = 0;
     }
 
     public StartItem findDeliveredStart(int id, boolean taskRemoved, boolean remove) {

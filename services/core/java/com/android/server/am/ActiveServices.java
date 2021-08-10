@@ -153,7 +153,6 @@ import android.webkit.WebViewZygote;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -165,6 +164,7 @@ import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
+import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 
@@ -174,6 +174,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -3530,6 +3531,8 @@ public final class ActiveServices {
         final long now = SystemClock.uptimeMillis();
 
         final String reason;
+        final int oldPosInRestarting = mRestartingServices.indexOf(r);
+        boolean inRestarting = oldPosInRestarting != -1;
         if ((r.serviceInfo.applicationInfo.flags
                 &ApplicationInfo.FLAG_PERSISTENT) == 0) {
             long minDuration = mAm.mConstants.SERVICE_RESTART_DURATION;
@@ -3597,58 +3600,89 @@ public final class ActiveServices {
             }
 
             if (isServiceRestartBackoffEnabledLocked(r.packageName)) {
-                r.nextRestartTime = now + r.restartDelay;
+                r.nextRestartTime = r.mEarliestRestartTime = now + r.restartDelay;
 
-                // Make sure that we don't end up restarting a bunch of services
-                // all at the same time.
-                boolean repeat;
-                final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
-                do {
-                    repeat = false;
-                    for (int i = mRestartingServices.size() - 1; i >= 0; i--) {
-                        final ServiceRecord r2 = mRestartingServices.get(i);
-                        if (r2 != r
-                                && r.nextRestartTime >= (r2.nextRestartTime - restartTimeBetween)
-                                && r.nextRestartTime < (r2.nextRestartTime + restartTimeBetween)) {
-                            r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
-                            r.restartDelay = r.nextRestartTime - now;
-                            repeat = true;
-                            break;
+                if (inRestarting) {
+                    // Take it out of the list temporarily for easier maintenance of the list.
+                    mRestartingServices.remove(oldPosInRestarting);
+                    inRestarting = false;
+                }
+                if (mRestartingServices.isEmpty()) {
+                    // Apply the extra delay even if it's the only one in the list.
+                    final long extraDelay = getExtraRestartTimeInBetweenLocked();
+                    r.nextRestartTime = Math.max(now + extraDelay, r.nextRestartTime);
+                    r.restartDelay = r.nextRestartTime - now;
+                } else {
+                    // Make sure that we don't end up restarting a bunch of services
+                    // all at the same time.
+                    boolean repeat;
+                    final long restartTimeBetween = getExtraRestartTimeInBetweenLocked()
+                            + mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
+                    do {
+                        repeat = false;
+                        final long nextRestartTime = r.nextRestartTime;
+                        // mRestartingServices is sorted by nextRestartTime.
+                        for (int i = mRestartingServices.size() - 1; i >= 0; i--) {
+                            final ServiceRecord r2 = mRestartingServices.get(i);
+                            final long nextRestartTime2 = r2.nextRestartTime;
+                            if (nextRestartTime >= (nextRestartTime2 - restartTimeBetween)
+                                    && nextRestartTime < (nextRestartTime2 + restartTimeBetween)) {
+                                r.nextRestartTime = nextRestartTime2 + restartTimeBetween;
+                                r.restartDelay = r.nextRestartTime - now;
+                                repeat = true;
+                                break;
+                            } else if (nextRestartTime >= nextRestartTime2 + restartTimeBetween) {
+                                // This spot fulfills our needs, bail out.
+                                break;
+                            }
                         }
-                    }
-                } while (repeat);
+                    } while (repeat);
+                }
             } else {
                 // It's been forced to ignore the restart backoff, fix the delay here.
                 r.restartDelay = mAm.mConstants.SERVICE_RESTART_DURATION;
                 r.nextRestartTime = now + r.restartDelay;
             }
-
         } else {
             // Persistent processes are immediately restarted, so there is no
             // reason to hold of on restarting their services.
             r.totalRestartCount++;
             r.restartCount = 0;
             r.restartDelay = 0;
+            r.mEarliestRestartTime = 0;
             r.nextRestartTime = now;
             reason = "persistent";
         }
 
-        if (!mRestartingServices.contains(r)) {
-            r.createdFromFg = false;
-            mRestartingServices.add(r);
-            synchronized (mAm.mProcessStats.mLock) {
-                r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
+        r.mRestartSchedulingTime = now;
+        if (!inRestarting) {
+            if (oldPosInRestarting == -1) {
+                r.createdFromFg = false;
+                synchronized (mAm.mProcessStats.mLock) {
+                    r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
+                }
+            }
+            boolean added = false;
+            for (int i = 0, size = mRestartingServices.size(); i < size; i++) {
+                final ServiceRecord r2 = mRestartingServices.get(i);
+                if (r2.nextRestartTime > r.nextRestartTime) {
+                    mRestartingServices.add(i, r);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                mRestartingServices.add(r);
             }
         }
 
         cancelForegroundNotificationLocked(r);
 
-        performScheduleRestartLocked(r, "Scheduling", reason, SystemClock.uptimeMillis());
+        performScheduleRestartLocked(r, "Scheduling", reason, now);
 
         return true;
     }
 
-    @VisibleForTesting
     @GuardedBy("mAm")
     void performScheduleRestartLocked(ServiceRecord r, @NonNull String scheduling,
             @NonNull String reason, @UptimeMillisLong long now) {
@@ -3659,6 +3693,161 @@ public final class ActiveServices {
                 + r.shortInstanceName + " in " + r.restartDelay + "ms for " + reason);
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.userId, r.shortInstanceName, r.restartDelay);
+    }
+
+    /**
+     * Reschedule service restarts based on the given memory pressure.
+     *
+     * @param prevMemFactor The previous memory factor.
+     * @param curMemFactor The current memory factor.
+     * @param reason The human-readable text about why we're doing rescheduling.
+     * @param now The uptimeMillis
+     */
+    @GuardedBy("mAm")
+    void rescheduleServiceRestartOnMemoryPressureIfNeededLocked(@MemFactor int prevMemFactor,
+            @MemFactor int curMemFactor, @NonNull String reason, @UptimeMillisLong long now) {
+        final boolean enabled = mAm.mConstants.mEnableExtraServiceRestartDelayOnMemPressure;
+        if (!enabled) {
+            return;
+        }
+        performRescheduleServiceRestartOnMemoryPressureLocked(
+                mAm.mConstants.mExtraServiceRestartDelayOnMemPressure[prevMemFactor],
+                mAm.mConstants.mExtraServiceRestartDelayOnMemPressure[curMemFactor], reason, now);
+    }
+
+    /**
+     * Reschedule service restarts based on if the extra delays are enabled or not.
+     *
+     * @param prevEnable The previous state of whether or not it's enabled.
+     * @param curEnabled The current state of whether or not it's enabled.
+     * @param now The uptimeMillis
+     */
+    @GuardedBy("mAm")
+    void rescheduleServiceRestartOnMemoryPressureIfNeededLocked(boolean prevEnabled,
+            boolean curEnabled, @UptimeMillisLong long now) {
+        if (prevEnabled == curEnabled) {
+            return;
+        }
+        final @MemFactor int memFactor = mAm.mAppProfiler.getLastMemoryLevelLocked();
+        final long delay = mAm.mConstants.mExtraServiceRestartDelayOnMemPressure[memFactor];
+        performRescheduleServiceRestartOnMemoryPressureLocked(prevEnabled ? delay : 0,
+                curEnabled ? delay : 0, "config", now);
+    }
+
+    /**
+     * Rescan the list of pending restarts, reschedule them if needed.
+     *
+     * @param extraRestartTimeBetween The extra interval between restarts.
+     * @param minRestartTimeBetween The minimal interval between restarts.
+     * @param reason The human-readable text about why we're doing rescheduling.
+     * @param now The uptimeMillis
+     */
+    @GuardedBy("mAm")
+    void rescheduleServiceRestartIfPossibleLocked(long extraRestartTimeBetween,
+            long minRestartTimeBetween, @NonNull String reason, @UptimeMillisLong long now) {
+        final long restartTimeBetween = extraRestartTimeBetween + minRestartTimeBetween;
+        final long spanForInsertOne = restartTimeBetween * 2; // Min space to insert a restart.
+
+        long lastRestartTime = now;
+        int lastRestartTimePos = -1; // The list index where the "lastRestartTime" comes from.
+        for (int i = 0, size = mRestartingServices.size(); i < size; i++) {
+            final ServiceRecord r = mRestartingServices.get(i);
+            if ((r.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0
+                    || !isServiceRestartBackoffEnabledLocked(r.packageName)) {
+                lastRestartTime = r.nextRestartTime;
+                lastRestartTimePos = i;
+                continue;
+            }
+            if (lastRestartTime + restartTimeBetween <= r.mEarliestRestartTime) {
+                // Bounded by the earliest restart time, honor it; but we also need to
+                // check if the interval between the earlist and its prior one is enough or not.
+                r.nextRestartTime = Math.max(now, Math.max(r.mEarliestRestartTime, i > 0
+                        ? mRestartingServices.get(i - 1).nextRestartTime + restartTimeBetween
+                        : 0));
+            } else {
+                if (lastRestartTime <= now) {
+                    // It hasn't moved, this is the first one (besides persistent process),
+                    // we don't need to insert the minRestartTimeBetween for it, but need
+                    // the extraRestartTimeBetween still.
+                    r.nextRestartTime = Math.max(now, Math.max(r.mEarliestRestartTime,
+                            r.mRestartSchedulingTime + extraRestartTimeBetween));
+                } else {
+                    r.nextRestartTime = Math.max(now, lastRestartTime + restartTimeBetween);
+                }
+                if (i > lastRestartTimePos + 1) {
+                    // Move the current service record ahead in the list.
+                    mRestartingServices.remove(i);
+                    mRestartingServices.add(lastRestartTimePos + 1, r);
+                }
+            }
+            // Find the next available slot to insert one if there is any
+            for (int j = lastRestartTimePos + 1; j <= i; j++) {
+                final ServiceRecord r2 = mRestartingServices.get(j);
+                final long timeInBetween = r2.nextRestartTime - (j == 0 ? lastRestartTime
+                        : mRestartingServices.get(j - 1).nextRestartTime);
+                if (timeInBetween >= spanForInsertOne) {
+                    break;
+                }
+                lastRestartTime = r2.nextRestartTime;
+                lastRestartTimePos = j;
+            }
+            r.restartDelay = r.nextRestartTime - now;
+            performScheduleRestartLocked(r, "Rescheduling", reason, now);
+        }
+    }
+
+    @GuardedBy("mAm")
+    void performRescheduleServiceRestartOnMemoryPressureLocked(long oldExtraDelay,
+            long newExtraDelay, @NonNull String reason, @UptimeMillisLong long now) {
+        final long delta = newExtraDelay - oldExtraDelay;
+        if (delta == 0) {
+            return;
+        }
+        if (delta > 0) {
+            final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN
+                    + newExtraDelay;
+            long lastRestartTime = now;
+            // Make the delay in between longer.
+            for (int i = 0, size = mRestartingServices.size(); i < size; i++) {
+                final ServiceRecord r = mRestartingServices.get(i);
+                if ((r.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0
+                        || !isServiceRestartBackoffEnabledLocked(r.packageName)) {
+                    lastRestartTime = r.nextRestartTime;
+                    continue;
+                }
+                boolean reschedule = false;
+                if (lastRestartTime <= now) {
+                    // It hasn't moved, this is the first one (besides persistent process),
+                    // we don't need to insert the minRestartTimeBetween for it, but need
+                    // the newExtraDelay still.
+                    final long oldVal = r.nextRestartTime;
+                    r.nextRestartTime = Math.max(now, Math.max(r.mEarliestRestartTime,
+                            r.mRestartSchedulingTime + newExtraDelay));
+                    reschedule = r.nextRestartTime != oldVal;
+                } else if (r.nextRestartTime - lastRestartTime < restartTimeBetween) {
+                    r.nextRestartTime = Math.max(lastRestartTime + restartTimeBetween, now);
+                    reschedule = true;
+                }
+                r.restartDelay = r.nextRestartTime - now;
+                lastRestartTime = r.nextRestartTime;
+                if (reschedule) {
+                    performScheduleRestartLocked(r, "Rescheduling", reason, now);
+                }
+            }
+        } else if (delta < 0) {
+            // Make the delay in between shorter, we'd do a rescan and reschedule.
+            rescheduleServiceRestartIfPossibleLocked(newExtraDelay,
+                    mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN, reason, now);
+        }
+    }
+
+    @GuardedBy("mAm")
+    long getExtraRestartTimeInBetweenLocked() {
+        if (!mAm.mConstants.mEnableExtraServiceRestartDelayOnMemPressure) {
+            return 0;
+        }
+        final @MemFactor int memFactor = mAm.mAppProfiler.getLastMemoryLevelLocked();
+        return mAm.mConstants.mExtraServiceRestartDelayOnMemPressure[memFactor];
     }
 
     final void performServiceRestartLocked(ServiceRecord r) {
@@ -3749,6 +3938,9 @@ public final class ActiveServices {
                         performScheduleRestartLocked(r, "Rescheduling", reason, now);
                     }
                 }
+                // mRestartingServices is sorted by nextRestartTime.
+                Collections.sort(mRestartingServices,
+                        (a, b) -> (int) (a.nextRestartTime - b.nextRestartTime));
             }
         } else {
             removeServiceRestartBackoffEnabledLocked(packageName);
@@ -4731,6 +4923,7 @@ public final class ActiveServices {
         // run at this point just because their restart time hasn't come up.
         if (mRestartingServices.size() > 0) {
             ServiceRecord sr;
+            boolean didImmediateRestart = false;
             for (int i=0; i<mRestartingServices.size(); i++) {
                 sr = mRestartingServices.get(i);
                 if (proc != sr.isolatedProc && (proc.uid != sr.appInfo.uid
@@ -4739,6 +4932,18 @@ public final class ActiveServices {
                 }
                 mAm.mHandler.removeCallbacks(sr.restarter);
                 mAm.mHandler.post(sr.restarter);
+                didImmediateRestart = true;
+            }
+            if (didImmediateRestart) {
+                // Since we kicked off all its pending restarts, there could be some open slots
+                // in the pending restarts list, schedule a check on it. We are posting to the same
+                // handler, so by the time of the check, those immediate restarts should be done.
+                mAm.mHandler.post(() ->
+                        rescheduleServiceRestartIfPossibleLocked(
+                                getExtraRestartTimeInBetweenLocked(),
+                                mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN,
+                                "other", SystemClock.uptimeMillis())
+                );
             }
         }
         return didSomething;

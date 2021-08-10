@@ -393,6 +393,7 @@ public class AppProfiler {
         static final int COLLECT_PSS_BG_MSG = 1;
         static final int DEFER_PSS_MSG = 2;
         static final int STOP_DEFERRING_PSS_MSG = 3;
+        static final int MEMORY_PRESSURE_CHANGED = 4;
         BgHandler(Looper looper) {
             super(looper);
         }
@@ -408,6 +409,11 @@ public class AppProfiler {
                     break;
                 case STOP_DEFERRING_PSS_MSG:
                     stopDeferPss();
+                    break;
+                case MEMORY_PRESSURE_CHANGED:
+                    synchronized (mService) {
+                        handleMemoryPressureChangedLocked(msg.arg1, msg.arg2);
+                    }
                     break;
             }
         }
@@ -912,12 +918,18 @@ public class AppProfiler {
     }
 
     @GuardedBy("mService")
-    int getLastMemoryLevelLocked() {
+    @MemFactor int getLastMemoryLevelLocked() {
+        if (mMemFactorOverride != ADJ_MEM_FACTOR_NOTHING) {
+            return mMemFactorOverride;
+        }
         return mLastMemoryLevel;
     }
 
     @GuardedBy("mService")
     boolean isLastMemoryLevelNormal() {
+        if (mMemFactorOverride != ADJ_MEM_FACTOR_NOTHING) {
+            return mMemFactorOverride <= ADJ_MEM_FACTOR_NORMAL;
+        }
         return mLastMemoryLevel <= ADJ_MEM_FACTOR_NORMAL;
     }
 
@@ -989,6 +1001,8 @@ public class AppProfiler {
         if (memFactor != mLastMemoryLevel) {
             EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
             FrameworkStatsLog.write(FrameworkStatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
+            mBgHandler.obtainMessage(BgHandler.MEMORY_PRESSURE_CHANGED, mLastMemoryLevel, memFactor)
+                    .sendToTarget();
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
@@ -1634,6 +1648,13 @@ public class AppProfiler {
                 mLastMemUsageReportTime = now;
             }
         }
+    }
+
+    @GuardedBy("mService")
+    private void handleMemoryPressureChangedLocked(@MemFactor int oldMemFactor,
+            @MemFactor int newMemFactor) {
+        mService.mServices.rescheduleServiceRestartOnMemoryPressureIfNeededLocked(
+                oldMemFactor, newMemFactor, "mem-pressure-event", SystemClock.uptimeMillis());
     }
 
     @GuardedBy("mProfilerLock")
