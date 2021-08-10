@@ -26,7 +26,7 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.Utils;
+import com.android.systemui.R;
 
 /**
  * Similar to the {@link NumPadKey}, but displays an image.
@@ -92,8 +92,7 @@ public class NumPadButton extends AlphaOptimizedImageButton {
     public void reloadColors() {
         if (mAnimator != null) mAnimator.reloadColors(getContext());
 
-        int textColor = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.colorBackground);
-        ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(textColor));
+        int imageColor = getContext().getColor(R.color.keyguard_keypad_image_color);
+        ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(imageColor));
     }
 }
