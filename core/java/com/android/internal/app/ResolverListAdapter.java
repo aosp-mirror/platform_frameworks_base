@@ -789,6 +789,9 @@ public class ResolverListAdapter extends BaseAdapter {
             } else {
                 mDisplayResolveInfo.setDisplayIcon(d);
                 mHolder.bindIcon(mDisplayResolveInfo);
+                // Notify in case view is already bound to resolve the race conditions on
+                // low end devices
+                notifyDataSetChanged();
             }
         }
 
