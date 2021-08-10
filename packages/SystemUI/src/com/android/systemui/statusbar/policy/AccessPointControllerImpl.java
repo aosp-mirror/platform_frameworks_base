@@ -68,6 +68,7 @@ public class AccessPointControllerImpl
 
     private final ArrayList<AccessPointCallback> mCallbacks = new ArrayList<AccessPointCallback>();
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final Executor mMainExecutor;
 
     private @Nullable WifiPickerTracker mWifiPickerTracker;
@@ -84,6 +85,7 @@ public class AccessPointControllerImpl
             WifiPickerTrackerFactory wifiPickerTrackerFactory
     ) {
         mUserManager = userManager;
+        mUserTracker = userTracker;
         mCurrentUser = userTracker.getUserId();
         mMainExecutor = mainExecutor;
         mWifiPickerTrackerFactory = wifiPickerTrackerFactory;
@@ -120,7 +122,7 @@ public class AccessPointControllerImpl
 
     public boolean canConfigMobileData() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
-                UserHandle.of(mCurrentUser));
+                UserHandle.of(mCurrentUser)) || mUserTracker.getUserInfo().isAdmin();
     }
 
     public void onUserSwitched(int newUserId) {
