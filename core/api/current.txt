@@ -6652,7 +6652,7 @@ package android.app {
     method public boolean onUnbind(android.content.Intent);
     method public final void startForeground(int, android.app.Notification);
     method public final void startForeground(int, @NonNull android.app.Notification, int);
-    method public final void stopForeground(boolean);
+    method @Deprecated public final void stopForeground(boolean);
     method public final void stopForeground(int);
     method public final void stopSelf();
     method public final void stopSelf(int);

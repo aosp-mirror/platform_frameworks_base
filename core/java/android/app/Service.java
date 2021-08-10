@@ -312,29 +312,25 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     private static final String TAG = "Service";
 
     /**
-     * Flag for {@link #stopForeground(int)}: if set, the notification previously provided
-     * to {@link #startForeground} will be removed.  Otherwise it will remain
-     * until a later call (to {@link #startForeground(int, Notification)} or
-     * {@link #stopForeground(int)} removes it, or the service is destroyed.
+     * Selector for {@link #stopForeground(int)}: if supplied, the notification previously
+     * supplied to {@link #startForeground} will be cancelled and removed from display.
      */
     public static final int STOP_FOREGROUND_REMOVE = 1<<0;
 
     /**
-     * Flag for {@link #stopForeground(int)}: if set, the notification previously provided
-     * to {@link #startForeground} will be detached from the service.  Only makes sense
-     * when {@link #STOP_FOREGROUND_REMOVE} is <b>not</b> set -- in this case, the notification
-     * will remain shown, but be completely detached from the service and so no longer changed
-     * except through direct calls to the notification manager.
+     * Selector for {@link #stopForeground(int)}: if set, the notification previously supplied
+     * to {@link #startForeground} will be detached from the service's lifecycle.  The notification
+     * will remain shown even after the service is stopped and destroyed.
      */
     public static final int STOP_FOREGROUND_DETACH = 1<<1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "STOP_FOREGROUND_" }, value = {
+    @IntDef(flag = false, prefix = { "STOP_FOREGROUND_" }, value = {
             STOP_FOREGROUND_REMOVE,
             STOP_FOREGROUND_DETACH
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StopForegroundFlags {}
+    public @interface StopForegroundSelector {}
 
     public Service() {
         super(null);
@@ -784,12 +780,16 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
 
     /**
-     * Synonym for {@link #stopForeground(int)}.
-     * @param removeNotification If true, the {@link #STOP_FOREGROUND_REMOVE} flag
-     * will be supplied.
+     * Legacy version of {@link #stopForeground(int)}.
+     * @param removeNotification If true, the {@link #STOP_FOREGROUND_REMOVE}
+     * selector will be passed to {@link #stopForeground(int)}; otherwise
+     * {@code zero} will be passed.
      * @see #stopForeground(int)
      * @see #startForeground(int, Notification)
+     *
+     * @deprecated use {@link #stopForeground(int)} instead.
      */
+    @Deprecated
     public final void stopForeground(boolean removeNotification) {
         stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : 0);
     }
@@ -800,14 +800,29 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * you use {@link #stopSelf()} or related methods), just takes it out of the
      * foreground state.
      *
-     * @param flags additional behavior options.
+     * <p>If {@link #STOP_FOREGROUND_REMOVE} is supplied, the service's associated
+     * notification will be cancelled immediately.</p>
+     * <p>If {@link #STOP_FOREGROUND_DETACH} is supplied, the service's association
+     * with the notification will be severed.  If the notification had not yet been
+     * shown, due to foreground-service notification deferral policy, it is
+     * immediately posted when {@code stopForeground(STOP_FOREGROUND_DETACH)}
+     * is called.  In all cases, the notification remains shown
+     * even after this service is stopped fully and destroyed.</p>
+     * <p>If {@code zero} is passed as the argument, the result will be the legacy
+     * behavior as defined prior to Android L: the notification will remain posted until
+     * the service is fully stopped, at which time it will automatically be cancelled.</p>
+     *
+     * @param notificationBehavior the intended behavior for the service's associated
+     * notification
      * @see #startForeground(int, Notification)
+     * @see #STOP_FOREGROUND_DETACH
+     * @see #STOP_FOREGROUND_REMOVE
      */
-    public final void stopForeground(@StopForegroundFlags int flags) {
+    public final void stopForeground(@StopForegroundSelector int notificationBehavior) {
         try {
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, 0, null,
-                    flags, 0);
+                    notificationBehavior, 0);
         } catch (RemoteException ex) {
         }
     }
