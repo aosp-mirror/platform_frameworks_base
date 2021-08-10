@@ -79,6 +79,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
             configurationController
         )
         keyguardMediaController.attachSinglePaneContainer(mediaHeaderView)
+        keyguardMediaController.useSplitShade = false
     }
 
     @Test
