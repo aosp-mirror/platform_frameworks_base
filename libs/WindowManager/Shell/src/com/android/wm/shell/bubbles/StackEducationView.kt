@@ -18,8 +18,11 @@ package com.android.wm.shell.bubbles
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PointF
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnKeyListener
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.internal.util.ContrastColorUtil
@@ -30,13 +33,21 @@ import com.android.wm.shell.animation.Interpolators
  * User education view to highlight the collapsed stack of bubbles.
  * Shown only the first time a user taps the stack.
  */
-class StackEducationView constructor(context: Context) : LinearLayout(context) {
+class StackEducationView constructor(
+    context: Context,
+    positioner: BubblePositioner,
+    controller: BubbleController
+)
+    : LinearLayout(context) {
 
     private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleStackEducationView"
         else BubbleDebugConfig.TAG_BUBBLES
 
     private val ANIMATE_DURATION: Long = 200
     private val ANIMATE_DURATION_SHORT: Long = 40
+
+    private val positioner: BubblePositioner = positioner
+    private val controller: BubbleController = controller
 
     private val view by lazy { findViewById<View>(R.id.stack_education_layout) }
     private val titleTextView by lazy { findViewById<TextView>(R.id.stack_education_title) }
@@ -67,6 +78,28 @@ class StackEducationView constructor(context: Context) : LinearLayout(context) {
         setTextColor()
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        setFocusableInTouchMode(true)
+        setOnKeyListener(object : OnKeyListener {
+            override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
+                // if the event is a key down event on the enter button
+                if (event.action == KeyEvent.ACTION_UP &&
+                        keyCode == KeyEvent.KEYCODE_BACK && !isHiding) {
+                    hide(false)
+                    return true
+                }
+                return false
+            }
+        })
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        setOnKeyListener(null)
+        controller.updateWindowFlagsForBackpress(false /* interceptBack */)
+    }
+
     private fun setTextColor() {
         val ta = mContext.obtainStyledAttributes(intArrayOf(android.R.attr.colorAccent,
             android.R.attr.textColorPrimaryInverse))
@@ -94,13 +127,25 @@ class StackEducationView constructor(context: Context) : LinearLayout(context) {
     fun show(stackPosition: PointF): Boolean {
         if (visibility == VISIBLE) return false
 
+        controller.updateWindowFlagsForBackpress(true /* interceptBack */)
+        layoutParams.width = if (positioner.isLargeScreen)
+            context.resources.getDimensionPixelSize(
+                    R.dimen.bubbles_user_education_width_large_screen)
+        else ViewGroup.LayoutParams.MATCH_PARENT
+
         setAlpha(0f)
         setVisibility(View.VISIBLE)
         post {
+            requestFocus()
             with(view) {
-                val bubbleSize = context.resources.getDimensionPixelSize(
-                    R.dimen.bubble_size)
-                translationY = stackPosition.y + bubbleSize / 2 - getHeight() / 2
+                if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+                    setPadding(positioner.bubbleSize + paddingRight, paddingTop, paddingRight,
+                            paddingBottom)
+                } else {
+                    setPadding(paddingLeft, paddingTop, positioner.bubbleSize + paddingLeft,
+                            paddingBottom)
+                }
+                translationY = stackPosition.y + positioner.bubbleSize / 2 - getHeight() / 2
             }
             animate()
                 .setDuration(ANIMATE_DURATION)
@@ -114,15 +159,16 @@ class StackEducationView constructor(context: Context) : LinearLayout(context) {
     /**
      * If necessary, hides the stack education view.
      *
-     * @param fromExpansion if true this indicates the hide is happening due to the bubble being
+     * @param isExpanding if true this indicates the hide is happening due to the bubble being
      *                      expanded, false if due to a touch outside of the bubble stack.
      */
-    fun hide(fromExpansion: Boolean) {
+    fun hide(isExpanding: Boolean) {
         if (visibility != VISIBLE || isHiding) return
 
+        controller.updateWindowFlagsForBackpress(false /* interceptBack */)
         animate()
             .alpha(0f)
-            .setDuration(if (fromExpansion) ANIMATE_DURATION_SHORT else ANIMATE_DURATION)
+            .setDuration(if (isExpanding) ANIMATE_DURATION_SHORT else ANIMATE_DURATION)
             .withEndAction { visibility = GONE }
     }
 

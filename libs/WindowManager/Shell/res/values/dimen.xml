@@ -184,14 +184,8 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
     <dimen name="bubble_manage_menu_elevation">4dp</dimen>
-
-    <!-- Bubbles user education views -->
-    <dimen name="bubbles_manage_education_width">160dp</dimen>
-    <!-- The inset from the top bound of the manage button to place the user education. -->
-    <dimen name="bubbles_manage_education_top_inset">65dp</dimen>
-    <!-- Size of padding for the user education cling, this should at minimum be larger than
-        individual_bubble_size + some padding. -->
-    <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
+    <!-- Size of user education views on large screens (phone is just match parent). -->
+    <dimen name="bubbles_user_education_width_large_screen">400dp</dimen>
 
     <!-- The width/height of the size compat restart button. -->
     <dimen name="size_compat_button_size">48dp</dimen>
