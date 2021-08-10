@@ -184,6 +184,21 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 .isGreaterThan(0)
     }
 
+    /** Regression test for b/194731244. */
+    @Test
+    fun onEntryUpdated_calledManyTimes_uidObserverUnregisteredManyTimes() {
+        val numCalls = 4
+
+        for (i in 0 until numCalls) {
+            // Re-create the notification each time so that it's considered a different object and
+            // observers will get re-registered (and hopefully unregistered).
+            notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        }
+
+        // There should be 1 observer still registered, so we should unregister n-1 times.
+        verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
+    }
+
     /**
      * If a call notification is never added before #onEntryRemoved is called, then the listener
      * should never be notified.
