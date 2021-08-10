@@ -242,6 +242,13 @@ public class BubblePositioner {
     }
 
     /**
+     * @return a rect of the screen size.
+     */
+    public Rect getScreenRect() {
+        return mScreenRect;
+    }
+
+    /**
      * @return the relevant insets (status bar, nav bar, cutouts). If taskbar is showing, its
      * inset is not included here.
      */

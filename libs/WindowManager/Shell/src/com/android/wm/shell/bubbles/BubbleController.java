@@ -636,10 +636,16 @@ public class BubbleController {
         }
     }
 
-    /** For the overflow to be focusable & receive key events the flags must be update. **/
-    void updateWindowFlagsForOverflow(boolean showingOverflow) {
+    /**
+     * In some situations bubble's should be able to receive key events for back:
+     * - when the bubble overflow is showing
+     * - when the user education for the stack is showing.
+     *
+     * @param interceptBack whether back should be intercepted or not.
+     */
+    void updateWindowFlagsForBackpress(boolean interceptBack) {
         if (mStackView != null && mAddedToWindowManager) {
-            mWmLayoutParams.flags = showingOverflow
+            mWmLayoutParams.flags = interceptBack
                     ? 0
                     : WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
