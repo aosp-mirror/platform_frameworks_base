@@ -1321,6 +1321,50 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDefaultFreeformSizeRespectsMinAspectRatio() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+
+        mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
+        mActivity.info.setMinAspectRatio(5f);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setOptions(options).calculate());
+
+        final float aspectRatio =
+                (float) Math.max(mResult.mBounds.width(), mResult.mBounds.height())
+                        / (float) Math.min(mResult.mBounds.width(), mResult.mBounds.height());
+        assertTrue("Bounds aspect ratio should be at least 5.0, but was " + aspectRatio,
+                aspectRatio >= 5f);
+    }
+
+    @Test
+    public void testDefaultFreeformSizeRespectsMaxAspectRatio() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+
+        mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
+        mActivity.info.setMaxAspectRatio(1.5f);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setOptions(options).calculate());
+
+        final float aspectRatio =
+                (float) Math.max(mResult.mBounds.width(), mResult.mBounds.height())
+                        / (float) Math.min(mResult.mBounds.width(), mResult.mBounds.height());
+        assertTrue("Bounds aspect ratio should be at most 1.5, but was " + aspectRatio,
+                aspectRatio <= 1.5f);
+    }
+
+    @Test
     public void testCascadesToSourceSizeForFreeform() {
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
@@ -1345,6 +1389,72 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         assertTrue("Bounds should be centered at somewhere in the top half, but it's "
                         + "centerY is " + mResult.mBounds.centerY(),
                 mResult.mBounds.centerY() < displayBounds.centerY());
+    }
+
+    @Test
+    public void testCascadesToSourceSizeForFreeformRespectingMinAspectRatio() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+
+        final ActivityRecord source = createSourceActivity(freeformDisplay);
+        source.setBounds(0, 0, 412, 732);
+
+        mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
+        mActivity.info.setMinAspectRatio(5f);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
+
+        final Rect displayBounds = freeformDisplay.getBounds();
+        assertTrue("Left bounds should be larger than 0.", mResult.mBounds.left > 0);
+        assertTrue("Top bounds should be larger than 0.", mResult.mBounds.top > 0);
+        assertTrue("Bounds should be centered at somewhere in the left half, but it's "
+                        + "centerX is " + mResult.mBounds.centerX(),
+                mResult.mBounds.centerX() < displayBounds.centerX());
+        assertTrue("Bounds should be centered at somewhere in the top half, but it's "
+                        + "centerY is " + mResult.mBounds.centerY(),
+                mResult.mBounds.centerY() < displayBounds.centerY());
+        final float aspectRatio =
+                (float) Math.max(mResult.mBounds.width(), mResult.mBounds.height())
+                        / (float) Math.min(mResult.mBounds.width(), mResult.mBounds.height());
+        assertTrue("Bounds aspect ratio should be at least 5.0, but was " + aspectRatio,
+                aspectRatio >= 5f);
+    }
+
+    @Test
+    public void testCascadesToSourceSizeForFreeformRespectingMaxAspectRatio() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+
+        final ActivityRecord source = createSourceActivity(freeformDisplay);
+        source.setBounds(0, 0, 412, 732);
+
+        mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
+        mActivity.info.setMaxAspectRatio(1.5f);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).setOptions(options).calculate());
+
+        final Rect displayBounds = freeformDisplay.getBounds();
+        assertTrue("Left bounds should be larger than 0.", mResult.mBounds.left > 0);
+        assertTrue("Top bounds should be larger than 0.", mResult.mBounds.top > 0);
+        assertTrue("Bounds should be centered at somewhere in the left half, but it's "
+                        + "centerX is " + mResult.mBounds.centerX(),
+                mResult.mBounds.centerX() < displayBounds.centerX());
+        assertTrue("Bounds should be centered at somewhere in the top half, but it's "
+                        + "centerY is " + mResult.mBounds.centerY(),
+                mResult.mBounds.centerY() < displayBounds.centerY());
+        final float aspectRatio =
+                (float) Math.max(mResult.mBounds.width(), mResult.mBounds.height())
+                        / (float) Math.min(mResult.mBounds.width(), mResult.mBounds.height());
+        assertTrue("Bounds aspect ratio should be at most 1.5, but was " + aspectRatio,
+                aspectRatio <= 1.5f);
     }
 
     @Test

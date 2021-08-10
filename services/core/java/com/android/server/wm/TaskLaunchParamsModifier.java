@@ -713,7 +713,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // First we get the default size we want.
-        getDefaultFreeformSize(displayArea, layout, orientation, mTmpBounds);
+        getDefaultFreeformSize(root.info, displayArea, layout, orientation, mTmpBounds);
         if (hasInitialBounds || sizeMatches(inOutBounds, mTmpBounds)) {
             // We're here because either input parameters specified initial bounds, or the suggested
             // bounds have the same size of the default freeform size. We should use the suggested
@@ -781,7 +781,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void getDefaultFreeformSize(@NonNull TaskDisplayArea displayArea,
+    private void getDefaultFreeformSize(@NonNull ActivityInfo info,
+            @NonNull TaskDisplayArea displayArea,
             @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
         // Default size, which is letterboxing/pillarboxing in displayArea. That's to say the large
         // dimension of default size is the small dimension of displayArea size, and the small
@@ -812,11 +813,38 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int layoutMinWidth = (layout == null) ? -1 : layout.minWidth;
         final int layoutMinHeight = (layout == null) ? -1 : layout.minHeight;
 
-        // Final result.
+        // Aspect ratio requirements.
+        final float minAspectRatio = info.getMinAspectRatio();
+        final float maxAspectRatio = info.getMaxAspectRatio();
+
         final int width = Math.min(defaultWidth, Math.max(phoneWidth, layoutMinWidth));
         final int height = Math.min(defaultHeight, Math.max(phoneHeight, layoutMinHeight));
+        final float aspectRatio = (float) Math.max(width, height) / (float) Math.min(width, height);
 
-        bounds.set(0, 0, width, height);
+        // Adjust the width and height to the aspect ratio requirements.
+        int adjWidth = width;
+        int adjHeight = height;
+        if (minAspectRatio >= 1 && aspectRatio < minAspectRatio) {
+            // The aspect ratio is below the minimum, adjust it to the minimum.
+            if (orientation == SCREEN_ORIENTATION_LANDSCAPE) {
+                // Fix the width, scale the height.
+                adjHeight = (int) (adjWidth / minAspectRatio + 0.5f);
+            } else {
+                // Fix the height, scale the width.
+                adjWidth = (int) (adjHeight / minAspectRatio + 0.5f);
+            }
+        } else if (maxAspectRatio >= 1 && aspectRatio > maxAspectRatio) {
+            // The aspect ratio exceeds the maximum, adjust it to the maximum.
+            if (orientation == SCREEN_ORIENTATION_LANDSCAPE) {
+                // Fix the width, scale the height.
+                adjHeight = (int) (adjWidth / maxAspectRatio + 0.5f);
+            } else {
+                // Fix the height, scale the width.
+                adjWidth = (int) (adjHeight / maxAspectRatio + 0.5f);
+            }
+        }
+
+        bounds.set(0, 0, adjWidth, adjHeight);
         bounds.offset(stableBounds.left, stableBounds.top);
     }
 
