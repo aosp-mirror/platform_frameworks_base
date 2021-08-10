@@ -981,7 +981,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> da prikazuje isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Može čitati informacije iz aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Može poduzeti radnje u aplikaciji <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Dozvoli aplikaciji <xliff:g id="APP">%1$s</xliff:g> prikazivanje isječaka iz svake aplikacije"</string>
