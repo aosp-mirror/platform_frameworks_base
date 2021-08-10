@@ -307,5 +307,16 @@ public final class HdmiCecMessage {
     private static boolean isUserControlPressedMessage(int opcode) {
         return Constants.MESSAGE_USER_CONTROL_PRESSED == opcode;
     }
+
+    static boolean isCecTransportMessage(int opcode) {
+        switch (opcode) {
+            case Constants.MESSAGE_REQUEST_CURRENT_LATENCY:
+            case Constants.MESSAGE_REPORT_CURRENT_LATENCY:
+            case Constants.MESSAGE_CDC_MESSAGE:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
