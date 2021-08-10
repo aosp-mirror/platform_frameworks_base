@@ -240,21 +240,21 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"పవర్"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"రీస్టార్ట్ చేయి"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ఎమర్జెన్సీ"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ నివేదిక"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ రిపోర్ట్‌"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"స్క్రీన్‌షాట్"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"బగ్ రిపోర్ట్‌"</string>
-    <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
-    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల నివేదిక"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది నివేదిక ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
-    <string name="bugreport_option_full_title" msgid="7681035745950045690">"పూర్తి నివేదిక"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"మీ పరికరం ప్రతిస్పందనరహితంగా ఉన్నప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని నివేదిక విభాగాలు అవసరమైనప్పుడు సిస్టమ్‌కి అంతరాయ స్థాయి కనిష్టంగా ఉండేలా చేయడానికి ఈ ఎంపిక ఉపయోగించండి. ఇది మరిన్ని వివరాలను నమోదు చేయడానికి లేదా అదనపు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతించదు."</string>
+    <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ రిపోర్ట్‌ను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
+    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల రిపోర్ట్‌"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది రిపోర్ట్‌ ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
+    <string name="bugreport_option_full_title" msgid="7681035745950045690">"పూర్తి రిపోర్ట్‌"</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"మీ పరికరం ప్రతిస్పందనరహితంగా ఉన్నప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని రిపోర్ట్‌ విభాగాలు అవసరమైనప్పుడు సిస్టమ్‌కి అంతరాయ స్థాయి కనిష్టంగా ఉండేలా చేయడానికి ఈ ఎంపిక ఉపయోగించండి. ఇది మరిన్ని వివరాలను నమోదు చేయడానికి లేదా అదనపు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతించదు."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
-      <item quantity="one">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
+      <item quantity="other">బగ్ రిపోర్ట్‌ కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
+      <item quantity="one">బగ్ రిపోర్ట్‌ కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
     </plurals>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"బగ్ నివేదికతో ఉన్న స్క్రీన్‌షాట్ తీయబడింది"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"బగ్ నివేదికతో ఉన్న స్క్రీన్‌షాట్‌ను తీయడం విఫలమైంది"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"బగ్ రిపోర్ట్‌తో ఉన్న స్క్రీన్‌షాట్ తీయబడింది"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"బగ్ రిపోర్ట్‌తో ఉన్న స్క్రీన్‌షాట్‌ను తీయడం విఫలమైంది"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"నిశ్శబ్ద మోడ్"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ధ్వని ఆఫ్‌లో ఉంది"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ధ్వని ఆన్‌లో ఉంది"</string>
@@ -1320,10 +1320,10 @@
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB పోర్ట్ ఆటోమేటిక్‌గా నిలిపివేయబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB పోర్ట్‌ను ఉపయోగించడం సురక్షితం"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"ఫోన్ ఇకపై ద్రవ లేదా వ్యర్థ పదార్థాలను గుర్తించదు."</string>
-    <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"బగ్ నివేదికను తీస్తోంది…"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>
-    <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"బగ్ నివేదికను భాగస్వామ్యం చేస్తోంది..."</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"మీ నిర్వాహకులు ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ నివేదికను అభ్యర్థించారు. యాప్‌లు మరియు డేటా భాగస్వామ్యం చేయబడవచ్చు."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"బగ్ రిపోర్ట్‌ను తీస్తోంది…"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"బగ్ రిపోర్ట్‌ను భాగస్వామ్యం చేయాలా?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"బగ్ రిపోర్ట్‌ను భాగస్వామ్యం చేస్తోంది..."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"మీ నిర్వాహకులు ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ రిపోర్ట్‌ను అభ్యర్థించారు. యాప్‌లు మరియు డేటా భాగస్వామ్యం చేయబడవచ్చు."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయి"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
