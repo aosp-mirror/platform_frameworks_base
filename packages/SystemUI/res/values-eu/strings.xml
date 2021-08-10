@@ -58,7 +58,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Ireki <xliff:g id="APPLICATION">%1$s</xliff:g> <xliff:g id="USB_DEVICE">%2$s</xliff:g> konektatzen den guztietan"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Ireki <xliff:g id="APPLICATION">%1$s</xliff:g> <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> konektatzen den guztietan"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB bidezko arazketa onartu?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"Ordenagailuaren RSA gakoaren erreferentzia-gako digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Ordenagailuaren RSA gakoaren aztarna digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Eman beti ordenagailu honetatik arazteko baimena"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Eman baimena"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ez da onartzen USB bidezko arazketa"</string>
@@ -577,7 +577,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Ireki kredentzial fidagarriak"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikazio bati VPN konexio bat konfiguratzeko baimena eman diozu.\n\nAplikazio horrek gailuko eta sareko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikazio bati VPN bidezko konexio bat konfiguratzeko baimena eman diozu.\n\nAplikazio horrek gailuko eta sareko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen du zure laneko profila.\n\nAdministratzaileak sareko jarduerak kontrola diezazkizuke, besteak beste, posta elektronikoa, aplikazioak eta webguneak.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan.\n\nHorrez gain, VPN batera zaude konektatuta, eta hark ere kontrola ditzake zure sareko jarduerak."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN konexioa"</string>
@@ -1172,8 +1172,7 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wifia"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"Sarearen xehetasunak"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Sakatu sare bat hartara konektatzeko"</string>
-    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
-    <skip />
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Sareak ikusteko, desblokeatu pantaila"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Sareak bilatzen…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ezin izan da konektatu sarera"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ikusi guztiak"</string>
