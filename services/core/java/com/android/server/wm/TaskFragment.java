@@ -61,6 +61,8 @@ import static com.android.server.wm.TaskFragmentProto.DISPLAY_ID;
 import static com.android.server.wm.TaskFragmentProto.MIN_HEIGHT;
 import static com.android.server.wm.TaskFragmentProto.MIN_WIDTH;
 import static com.android.server.wm.TaskFragmentProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK_FRAGMENT;
 
 import android.annotation.IntDef;
@@ -158,8 +160,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    /** Avoid reentrant of {@link #removeImmediately()}. */
-    private boolean mRemoving;
+    /** This task fragment will be removed when the cleanup of its children are done. */
+    private boolean mIsRemovalRequested;
 
     /** The TaskFragment that is adjacent to this one. */
     @Nullable
@@ -2047,15 +2049,67 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    void removeImmediately() {
-        if (mRemoving) {
+    void removeChild(WindowContainer child) {
+        removeChild(child, true /* removeSelfIfPossible */);
+    }
+
+    void removeChild(WindowContainer child, boolean removeSelfIfPossible) {
+        super.removeChild(child);
+        if (removeSelfIfPossible && (!mCreatedByOrganizer || mIsRemovalRequested) && !hasChild()) {
+            removeImmediately("removeLastChild " + child);
+        }
+    }
+
+    /**
+     * Requests to remove this task fragment. If it doesn't have children, it is removed
+     * immediately. Otherwise it will be removed until all activities are destroyed.
+     *
+     * @param withTransition Whether to use transition animation when removing activities. Set to
+     *                       {@code false} if this is invisible to user, e.g. display removal.
+     */
+    void remove(boolean withTransition, String reason) {
+        if (!hasChild()) {
+            removeImmediately(reason);
             return;
         }
-        mRemoving = true;
+        mIsRemovalRequested = true;
+        forAllActivities(r -> {
+            if (withTransition) {
+                r.finishIfPossible(reason, false /* oomAdj */);
+            } else {
+                r.destroyIfPossible(reason);
+            }
+        });
+    }
+
+    boolean shouldDeferRemoval() {
+        if (!hasChild()) {
+            return false;
+        }
+        return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES)
+                || mAtmService.getTransitionController().inTransition(this);
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (shouldDeferRemoval()) {
+            return true;
+        }
+        return super.handleCompleteDeferredRemoval();
+    }
+
+    /** The overridden method must call {@link #removeImmediately()} instead of super. */
+    void removeImmediately(String reason) {
+        Slog.d(TAG, "Remove task fragment: " + reason);
+        removeImmediately();
+    }
+
+    @Override
+    void removeImmediately() {
+        mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
         super.removeImmediately();
         sendTaskFragmentVanished();
-        mRemoving = false;
     }
 
     boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,
@@ -2083,10 +2137,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             WindowContainer child = mChildren.get(i);
             if (child.asTaskFragment() != null) {
-                printed |= child.asTaskFragment().dump(prefix + "      ", fd, pw, dumpAll,
+                printed |= child.asTaskFragment().dump(prefix + "  ", fd, pw, dumpAll,
                         dumpClient, dumpPackage, needSep, headerPrinter);
             } else if (child.asActivityRecord() != null) {
-                ActivityRecord.dumpActivity(fd, pw, i, child.asActivityRecord(), prefix + "      ",
+                ActivityRecord.dumpActivity(fd, pw, i, child.asActivityRecord(), prefix + "  ",
                         "Hist ", true, !dumpAll, dumpClient, dumpPackage, false, headerPrinter,
                         getTask());
             }
@@ -2097,10 +2151,32 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void dumpInner(String prefix, PrintWriter pw, boolean dumpAll, String dumpPackage) {
         pw.print(prefix); pw.print("* "); pw.println(this);
-        pw.println(prefix + "  mBounds=" + getRequestedOverrideBounds());
+        final Rect bounds = getRequestedOverrideBounds();
+        if (!bounds.isEmpty()) {
+            pw.println(prefix + "  mBounds=" + bounds);
+        }
+        if (mIsRemovalRequested) {
+            pw.println(prefix + "  mIsRemovalRequested=true");
+        }
         if (dumpAll) {
             printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
                     prefix + "  mLastPausedActivity: ", null);
+        }
+    }
+
+    @Override
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
+        pw.println(prefix + "bounds=" + getBounds().toShortString());
+        final String doublePrefix = prefix + "  ";
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowContainer<?> child = mChildren.get(i);
+            pw.println(prefix + "* " + child);
+            // Only dump non-activity because full activity info is already printed by
+            // RootWindowContainer#dumpActivities.
+            if (child.asActivityRecord() == null) {
+                child.dump(pw, doublePrefix, dumpAll);
+            }
         }
     }
 
