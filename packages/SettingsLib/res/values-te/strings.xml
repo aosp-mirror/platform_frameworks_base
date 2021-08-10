@@ -33,11 +33,11 @@
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'కు కనెక్ట్ చేయడం సాధ్యపడదు"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"పాస్‌వర్డ్‌ను చెక్ చేసి, మళ్లీ ప్రయత్నించండి"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"పరిధిలో లేదు"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"స్వయంచాలకంగా కనెక్ట్ కాదు"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ఆటోమేటిక్‌గా కనెక్ట్ కాదు"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> ద్వారా సేవ్ చేయబడింది"</string>
-    <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s ద్వారా స్వయంచాలకంగా కనెక్ట్ చేయబడింది"</string>
-    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"నెట్‌వర్క్ రేటింగ్ ప్రదాత ద్వారా స్వయంచాలకంగా కనెక్ట్ చేయబడింది"</string>
+    <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s ద్వారా ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"నెట్‌వర్క్ రేటింగ్ ప్రదాత ద్వారా ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
@@ -82,7 +82,7 @@
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> బ్యాటరీ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"యాక్టివ్‌గా ఉంది"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"మీడియా ఆడియో"</string>
-    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ఫోన్ కాల్‌లు"</string>
+    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ఫోన్ కాల్స్‌"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ఫైల్ బదిలీ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ఇన్‌పుట్ పరికరం"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ఇంటర్నెట్ యాక్సెస్"</string>
@@ -301,7 +301,7 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ఎల్లప్పుడూ మొబైల్ డేటాను యాక్టివ్‌గా ఉంచు, Wi‑Fi యాక్టివ్‌గా ఉన్నా కూడా (వేగవంతమైన నెట్‌వర్క్ మార్పు కోసం)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"అందుబాటులో ఉంటే టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధిని ఉపయోగించండి"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"USB డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్ మరియు మీ పరికరం మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో అనువర్తనాలను ఇన్‌స్టాల్ చేయడానికి మరియు లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్ మరియు మీ పరికరం మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మరియు లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"వైర్‌లెస్ డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్, పరికరాల మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో యాప్‌లను ఇన్‌స్టాల్ చేయడానికి, లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"మీరు గతంలో ప్రామాణీకరించిన అన్ని కంప్యూటర్‌ల నుండి USB డీబగ్గింగ్‌కు ప్రాప్యతను ఉపసంహరించాలా?"</string>
@@ -526,8 +526,8 @@
     <string name="accessor_expires_text" msgid="4625619273236786252">"లీజు గడువు <xliff:g id="DATE">%s</xliff:g>తో ముగుస్తుంది"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"షేర్ చేసిన డేటాను తొలగించు"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"మీరు ఖచ్చితంగా ఈ షేర్ చేసిన డేటాను తొలగించాలనుకుంటున్నారా?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"వినియోగదారులు వారి స్వంత అనువర్తనాలను మరియు కంటెంట్‌ను కలిగి ఉన్నారు"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"మీరు మీ ఖాతా నుండి అనువర్తనాలకు మరియు కంటెంట్‌కు ప్రాప్యతను పరిమితం చేయవచ్చు"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"వినియోగదారులు వారి స్వంత యాప్‌లను మరియు కంటెంట్‌ను కలిగి ఉన్నారు"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"మీరు మీ ఖాతా నుండి యాప్‌లకు మరియు కంటెంట్‌కు ప్రాప్యతను పరిమితం చేయవచ్చు"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"యూజర్"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"పరిమితం చేయబడిన ప్రొఫైల్"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త వినియోగదారుని జోడించాలా?"</string>
