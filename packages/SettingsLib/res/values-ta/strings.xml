@@ -98,7 +98,7 @@
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"செவித்துணை கருவிகளுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"மீடியா ஆடியோவுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"மொபைல் ஆடியோவுடன் இணைக்கப்பட்டது"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"கோப்பைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ஃபைலைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"வரைபடத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP உடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"கோப்பு இடமாற்றும் சேவையகத்துடன் இணைக்கப்படவில்லை"</string>
@@ -426,7 +426,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம். இதன் மூலம் நீங்கள் விரும்பும்போதெல்லாம்:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் தெளிவாகப் பார்க்கலாம்&lt;/li&gt; &lt;li&gt;கவனம் சிதறாமல் இருக்க வண்ணங்களை நீக்கலாம்&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம். இதன் மூலம் நீங்கள் விரும்பும்போதெல்லாம்:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் தெளிவாகப் பார்க்கலாம்&lt;/li&gt; &lt;li&gt;&amp;nbsp;கவனம் சிதறாமல் இருக்க வண்ணங்களை நீக்கலாம்&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
