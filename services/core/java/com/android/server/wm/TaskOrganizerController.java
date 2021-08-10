@@ -658,7 +658,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Delete root task display=%d winMode=%d",
                         task.getDisplayId(), task.getWindowingMode());
-                task.removeImmediately("deleteRootTask");
+                task.remove(true /* withTransition */, "deleteRootTask");
                 return true;
             }
         } finally {

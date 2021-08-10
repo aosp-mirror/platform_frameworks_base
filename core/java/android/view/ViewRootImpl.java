@@ -9931,7 +9931,10 @@ public final class ViewRootImpl implements ViewParent,
         if (!mUseMTRenderer) {
             return;
         }
-        mWindowDrawCountDown = new CountDownLatch(mWindowCallbacks.size());
+        // Only wait if it will report next draw.
+        if (mReportNextDraw) {
+            mWindowDrawCountDown = new CountDownLatch(mWindowCallbacks.size());
+        }
         for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
             mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
         }

@@ -2682,7 +2682,7 @@ class ActivityStarter {
                             && mTargetRootTask != intentTask.getParent().asTask()) {
                         intentTask.getParent().positionChildAt(POSITION_TOP, intentTask,
                                 false /* includingParents */);
-                        intentTask = intentTask.getParent().asTask();
+                        intentTask = intentTask.getParent().asTaskFragment().getTask();
                     }
                     // If the task is in multi-windowing mode, the activity may already be on
                     // the top (visible to user but not the global top), then the result code
