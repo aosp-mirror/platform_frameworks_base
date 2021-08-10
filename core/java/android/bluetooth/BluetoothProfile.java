@@ -220,12 +220,19 @@ public interface BluetoothProfile {
     int VOLUME_CONTROL = 23;
 
     /**
+     * @hide
+     * Media Control Profile server
+     *
+     */
+    int MCP_SERVER = 24;
+
+    /**
      * Max profile ID. This value should be updated whenever a new profile is added to match
      * the largest value assigned to a profile.
      *
      * @hide
      */
-    int MAX_PROFILE_ID = 23;
+    int MAX_PROFILE_ID = 24;
 
     /**
      * Default priority for devices that we try to auto-connect to and
