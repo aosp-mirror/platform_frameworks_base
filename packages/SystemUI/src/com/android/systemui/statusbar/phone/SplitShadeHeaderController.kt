@@ -20,8 +20,8 @@ import android.view.View
 import com.android.systemui.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
-import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_HEADER
 import javax.inject.Inject
@@ -54,11 +54,12 @@ class SplitShadeHeaderController @Inject constructor(
         }
 
     init {
-        val batteryIcon: BatteryMeterView = statusBar.findViewById(R.id.batteryRemainingIcon)
-        // battery settings same as in QS icons
-        batteryIcon.setIgnoreTunerUpdates(true)
-        batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
         batteryMeterViewController.init()
+        val batteryIcon: BatteryMeterView = statusBar.findViewById(R.id.batteryRemainingIcon)
+
+        // battery settings same as in QS icons
+        batteryMeterViewController.ignoreTunerUpdates()
+        batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
         val iconContainer: StatusIconContainer = statusBar.findViewById(R.id.statusIcons)
         iconManager = StatusBarIconController.IconManager(iconContainer, featureFlags)

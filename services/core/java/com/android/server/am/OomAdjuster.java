@@ -2820,8 +2820,10 @@ public class OomAdjuster {
                 state.setNotCachedSinceIdle(false);
             }
             if (!doingAll) {
-                mService.setProcessTrackerStateLOSP(app,
-                        mService.mProcessStats.getMemFactorLocked(), now);
+                synchronized (mService.mProcessStats.mLock) {
+                    mService.setProcessTrackerStateLOSP(app,
+                            mService.mProcessStats.getMemFactorLocked(), now);
+                }
             } else {
                 state.setProcStateChanged(true);
             }

@@ -17,12 +17,15 @@
 package com.android.systemui.battery;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +39,8 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private TunerService mTunerService;
 
     private BatteryMeterViewController mController;
 
@@ -43,9 +48,13 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        when(mBatteryMeterView.getContext()).thenReturn(mContext);
+        when(mBatteryMeterView.getResources()).thenReturn(mContext.getResources());
+
         mController = new BatteryMeterViewController(
                 mBatteryMeterView,
-                mConfigurationController
+                mConfigurationController,
+                mTunerService
         );
     }
 
@@ -54,6 +63,7 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
 
         verify(mConfigurationController).addCallback(any());
+        verify(mTunerService).addTunable(any(), any());
     }
 
     @Test
@@ -64,5 +74,25 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
         mController.onViewDetached();
 
         verify(mConfigurationController).removeCallback(any());
+        verify(mTunerService).removeTunable(any());
+    }
+
+    @Test
+    public void ignoreTunerUpdates_afterOnViewAttached_callbackUnregistered() {
+        // Start out receiving tuner updates
+        mController.onViewAttached();
+
+        mController.ignoreTunerUpdates();
+
+        verify(mTunerService).removeTunable(any());
+    }
+
+    @Test
+    public void ignoreTunerUpdates_beforeOnViewAttached_callbackNeverRegistered() {
+        mController.ignoreTunerUpdates();
+
+        mController.onViewAttached();
+
+        verify(mTunerService, never()).addTunable(any(), any());
     }
 }

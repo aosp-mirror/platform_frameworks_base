@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.bugpatterns.android.RequiresPermissionChecker.simpleNameMatches;
 import static com.google.errorprone.matchers.Matchers.allOf;
@@ -60,6 +61,7 @@ import java.util.regex.Pattern;
 @BugPattern(
     name = "AndroidFrameworkBluetoothPermission",
     summary = "Verifies that all Bluetooth APIs have consistent permissions",
+    linkType = NONE,
     severity = WARNING)
 public final class BluetoothPermissionChecker extends BugChecker implements MethodTreeMatcher {
     private static final Matcher<MethodTree> BLUETOOTH_API = allOf(

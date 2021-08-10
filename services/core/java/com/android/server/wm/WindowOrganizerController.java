@@ -322,6 +322,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
+        mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
         try {
             if (transition != null) {
                 // First check if we have a display rotation transition and if so, update it.
@@ -411,6 +412,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 task.setMainWindowSizeChangeTransaction(sft);
             }
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
+                mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
                 mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -432,6 +434,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
             }
         } finally {
+            mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             mService.continueWindowLayout();
         }
     }
@@ -472,7 +475,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 throw new UnsupportedOperationException("Not supported to set multi-window"
                         + " windowing mode during locked task mode.");
             }
+
+            final int prevMode = container.getWindowingMode();
             container.setWindowingMode(windowingMode);
+            if (prevMode != container.getWindowingMode()) {
+                // The activity in the container may become focusable or non-focusable due to
+                // windowing modes changes (such as entering or leaving pinned windowing mode),
+                // so also apply the lifecycle effects to this transaction.
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
         return effects;
     }
