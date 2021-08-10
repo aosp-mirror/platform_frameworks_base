@@ -1070,6 +1070,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 task.fillTaskInfo(tinfo);
                 change.setTaskInfo(tinfo);
                 change.setRotationAnimation(getTaskRotationAnimation(task));
+                final ActivityRecord topMostActivity = task.getTopMostActivity();
+                change.setAllowEnterPip(topMostActivity != null
+                        && topMostActivity.checkEnterPictureInPictureAppOpsState());
             }
             out.addChange(change);
         }
