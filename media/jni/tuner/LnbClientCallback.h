@@ -17,8 +17,9 @@
 #ifndef _ANDROID_MEDIA_TV_LNB_CLIENT_CALLBACK_H_
 #define _ANDROID_MEDIA_TV_LNB_CLIENT_CALLBACK_H_
 
-using ::android::hardware::hidl_vec;
-using ::android::hardware::tv::tuner::V1_0::LnbEventType;
+#include <utils/RefBase.h>
+
+using ::aidl::android::hardware::tv::tuner::LnbEventType;
 
 using namespace std;
 
@@ -26,8 +27,8 @@ namespace android {
 
 struct LnbClientCallback : public RefBase {
     virtual void onEvent(const LnbEventType lnbEventType);
-    virtual void onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
+    virtual void onDiseqcMessage(const vector<uint8_t>& diseqcMessage);
 };
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_TV_LNB_CLIENT_CALLBACK_H_
+#endif // _ANDROID_MEDIA_TV_LNB_CLIENT_CALLBACK_H_

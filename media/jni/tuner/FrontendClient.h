@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,53 +17,29 @@
 #ifndef _ANDROID_MEDIA_TV_FRONTEND_CLIENT_H_
 #define _ANDROID_MEDIA_TV_FRONTEND_CLIENT_H_
 
+#include <aidl/android/hardware/tv/tuner/DemuxFilterSettings.h>
+#include <aidl/android/hardware/tv/tuner/FrontendType.h>
+#include <aidl/android/hardware/tv/tuner/Result.h>
 #include <aidl/android/media/tv/tuner/BnTunerFrontendCallback.h>
 #include <aidl/android/media/tv/tuner/ITunerFrontend.h>
-#include <android/hardware/tv/tuner/1.1/IFrontend.h>
-#include <android/hardware/tv/tuner/1.1/IFrontendCallback.h>
-#include <android/hardware/tv/tuner/1.1/types.h>
+#include <utils/RefBase.h>
 
 #include "ClientHelper.h"
 #include "FrontendClientCallback.h"
 #include "LnbClient.h"
 
 using Status = ::ndk::ScopedAStatus;
-
+using ::aidl::android::hardware::tv::tuner::FrontendEventType;
+using ::aidl::android::hardware::tv::tuner::FrontendScanMessage;
+using ::aidl::android::hardware::tv::tuner::FrontendScanMessageType;
+using ::aidl::android::hardware::tv::tuner::FrontendScanType;
+using ::aidl::android::hardware::tv::tuner::FrontendSettings;
+using ::aidl::android::hardware::tv::tuner::FrontendStatus;
+using ::aidl::android::hardware::tv::tuner::FrontendStatusType;
+using ::aidl::android::hardware::tv::tuner::FrontendType;
+using ::aidl::android::hardware::tv::tuner::Result;
 using ::aidl::android::media::tv::tuner::BnTunerFrontendCallback;
 using ::aidl::android::media::tv::tuner::ITunerFrontend;
-using ::aidl::android::media::tv::tuner::TunerFrontendAnalogSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendAtscSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendAtsc3Settings;
-using ::aidl::android::media::tv::tuner::TunerFrontendCableSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendDvbsSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendDvbtSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendDtmbSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendIsdbsSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendIsdbs3Settings;
-using ::aidl::android::media::tv::tuner::TunerFrontendIsdbtSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendScanMessage;
-using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
-using ::aidl::android::media::tv::tuner::TunerFrontendStatus;
-
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-using ::android::hardware::tv::tuner::V1_0::FrontendInfo;
-using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
-using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
-using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
-using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
-using ::android::hardware::tv::tuner::V1_0::FrontendSettings;
-using ::android::hardware::tv::tuner::V1_0::FrontendStatus;
-using ::android::hardware::tv::tuner::V1_0::FrontendStatusType;
-using ::android::hardware::tv::tuner::V1_0::IFrontend;
-using ::android::hardware::tv::tuner::V1_0::Result;
-
-using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
-using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
-using ::android::hardware::tv::tuner::V1_1::FrontendSettingsExt1_1;
-using ::android::hardware::tv::tuner::V1_1::FrontendStatusExt1_1;
-using ::android::hardware::tv::tuner::V1_1::FrontendStatusTypeExt1_1;
-using ::android::hardware::tv::tuner::V1_1::IFrontendCallback;
 
 using namespace std;
 
@@ -74,32 +50,8 @@ class TunerFrontendCallback : public BnTunerFrontendCallback {
 public:
     TunerFrontendCallback(sp<FrontendClientCallback> frontendClientCallback);
 
-    Status onEvent(int frontendEventType);
-
-    Status onScanMessage(int messageType, const TunerFrontendScanMessage& message);
-
-    void setFrontendType(int frontendType) { mType = frontendType; }
-
-private:
-    FrontendScanMessage getHalScanMessage(int messageType, const TunerFrontendScanMessage& message);
-    FrontendScanMessageExt1_1 getHalScanMessageExt1_1(int messageType,
-            const TunerFrontendScanMessage& message);
-    bool is1_1ExtendedScanMessage(int messageType);
-
-    sp<FrontendClientCallback> mFrontendClientCallback;
-    int mType;
-};
-
-struct HidlFrontendCallback : public IFrontendCallback {
-
-public:
-    HidlFrontendCallback(sp<FrontendClientCallback> frontendClientCallback);
-
-    virtual Return<void> onEvent(FrontendEventType frontendEventType);
-    virtual Return<void> onScanMessage(
-            FrontendScanMessageType type, const FrontendScanMessage& message);
-    virtual Return<void> onScanMessageExt1_1(
-            FrontendScanMessageTypeExt1_1 type, const FrontendScanMessageExt1_1& messageExt);
+    Status onEvent(FrontendEventType frontendEventType);
+    Status onScanMessage(FrontendScanMessageType messageType, const FrontendScanMessage& message);
 
 private:
     sp<FrontendClientCallback> mFrontendClientCallback;
@@ -108,7 +60,7 @@ private:
 struct FrontendClient : public RefBase {
 
 public:
-    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int type);
+    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, FrontendType type);
     ~FrontendClient();
 
     /**
@@ -116,13 +68,10 @@ public:
      */
     Result setCallback(sp<FrontendClientCallback> frontendClientCallback);
 
-    // TODO: remove after migration to Tuner Service is done.
-    void setHidlFrontend(sp<IFrontend> frontend);
-
     /**
      * Tuner Frontend with Frontend Settings.
      */
-    Result tune(const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    Result tune(const FrontendSettings& settings);
 
     /**
      * Stop tune Frontend.
@@ -132,8 +81,7 @@ public:
     /**
      * Scan the frontend to use the settings given.
      */
-    Result scan(const FrontendSettings& settings, FrontendScanType frontendScanType,
-            const FrontendSettingsExt1_1& settingsExt1_1);
+    Result scan(const FrontendSettings& settings, FrontendScanType frontendScanType);
 
     /**
      * Stop the previous scanning.
@@ -144,12 +92,6 @@ public:
      * Gets the statuses of the frontend.
      */
     vector<FrontendStatus> getStatus(vector<FrontendStatusType> statusTypes);
-
-    /**
-     * Gets the 1.1 extended statuses of the frontend.
-     */
-    vector<FrontendStatusExt1_1> getStatusExtended_1_1(
-            vector<FrontendStatusTypeExt1_1> statusTypes);
 
     /**
      * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
@@ -166,68 +108,28 @@ public:
      *
      * @return lts id
      */
-    int linkCiCamToFrontend(int ciCamId);
+    int32_t linkCiCamToFrontend(int32_t ciCamId);
 
     /**
      * Unink Frontend to the cicam with given id.
      */
-    Result unlinkCiCamToFrontend(int ciCamId);
+    Result unlinkCiCamToFrontend(int32_t ciCamId);
 
     /**
      * Close Frontend.
      */
     Result close();
 
+    int32_t getId();
     shared_ptr<ITunerFrontend> getAidlFrontend();
-
-    void setId(int id);
-    int getId();
-
 private:
-    vector<FrontendStatus> getHidlStatus(vector<TunerFrontendStatus>& aidlStatus);
-    vector<FrontendStatusExt1_1> getHidlStatusExt(vector<TunerFrontendStatus>& aidlStatus);
-
-    TunerFrontendSettings getAidlFrontendSettings(
-            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
-    TunerFrontendAnalogSettings getAidlAnalogSettings(
-            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
-    TunerFrontendDvbsSettings getAidlDvbsSettings(
-            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
-    TunerFrontendCableSettings getAidlCableSettings(
-            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
-    TunerFrontendDvbtSettings getAidlDvbtSettings(
-            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
-    TunerFrontendDtmbSettings getAidlDtmbSettings(const FrontendSettingsExt1_1& settingsExt1_1);
-    TunerFrontendAtscSettings getAidlAtscSettings(const FrontendSettings& settings);
-    TunerFrontendAtsc3Settings getAidlAtsc3Settings(const FrontendSettings& settings);
-    TunerFrontendIsdbsSettings getAidlIsdbsSettings(const FrontendSettings& settings);
-    TunerFrontendIsdbs3Settings getAidlIsdbs3Settings(const FrontendSettings& settings);
-    TunerFrontendIsdbtSettings getAidlIsdbtSettings(const FrontendSettings& settings);
-
-    bool validateExtendedSettings(const FrontendSettingsExt1_1& settingsExt1_1);
-
     /**
      * An AIDL Tuner Frontend Singleton assigned at the first time when the Tuner Client
      * opens a frontend cient. Default null when the service does not exist.
      */
     shared_ptr<ITunerFrontend> mTunerFrontend;
 
-    /**
-     * A Frontend 1.0 HAL interface as a fall back interface when the Tuner Service does not exist.
-     * This is a temprary connection before the Tuner Framework fully migrates to the TunerService.
-     * Default null.
-     */
-    sp<IFrontend> mFrontend;
-
-    /**
-     * A Frontend 1.1 HAL interface as a fall back interface when the Tuner Service does not exist.
-     * This is a temprary connection before the Tuner Framework fully migrates to the TunerService.
-     * Default null.
-     */
-    sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFrontend_1_1;
-
-    int mId;
-    int mType;
+    FrontendType mType;
 };
 }  // namespace android
 
