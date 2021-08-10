@@ -15339,6 +15339,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
+
+        @Override
+        public Pair<String, String> getAppProfileStatsForDebugging(long time, int lines) {
+            return mAppProfiler.getAppProfileStatsForDebugging(time, lines);
+        }
+
         @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return mCpHelper.checkContentProviderAccess(authority, userId);

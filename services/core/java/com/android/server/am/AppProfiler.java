@@ -2339,6 +2339,27 @@ public class AppProfiler {
         }
     }
 
+    Pair<String, String> getAppProfileStatsForDebugging(long time, int linesOfStats) {
+        String cpuLoad = null;
+        String stats = null;
+        synchronized (mProcessCpuTracker) {
+            updateCpuStatsNow();
+            cpuLoad = mProcessCpuTracker.printCurrentLoad();
+            stats = mProcessCpuTracker.printCurrentState(time);
+        }
+        // Only return linesOfStats lines of Cpu stats.
+        int toIndex = 0;
+        for (int i = 0; i <= linesOfStats; i++) {
+            int nextIndex = stats.indexOf('\n', toIndex);
+            if (nextIndex == -1) {
+                toIndex = stats.length();
+                break;
+            }
+            toIndex = nextIndex + 1;
+        }
+        return new Pair(cpuLoad, stats.substring(0, toIndex));
+    }
+
     @GuardedBy("mProfilerLock")
     void writeProcessesToGcToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
         if (mProcessesToGc.size() > 0) {
