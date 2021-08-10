@@ -230,11 +230,16 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         validateAndGetState(organizer);
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
-        synchronized (mGlobalLock) {
-            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
-                    "Unregister task fragment organizer=%s uid=%d pid=%d",
-                    organizer.asBinder(), uid, pid);
-            removeOrganizer(organizer);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                        "Unregister task fragment organizer=%s uid=%d pid=%d",
+                        organizer.asBinder(), uid, pid);
+                removeOrganizer(organizer);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 

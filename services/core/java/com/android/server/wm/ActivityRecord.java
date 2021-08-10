@@ -1179,7 +1179,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             header.run();
         }
 
-        String innerPrefix = prefix + "      ";
+        String innerPrefix = prefix + "  ";
         String[] args = new String[0];
         if (lastTask != r.getTask()) {
             lastTask = r.getTask();
@@ -2444,20 +2444,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private void removeAppTokenFromDisplay() {
-        if (mWmService.mRoot == null) return;
-
-        final DisplayContent dc = mWmService.mRoot.getDisplayContent(getDisplayId());
-        if (dc == null) {
-            Slog.w(TAG, "removeAppTokenFromDisplay: Attempted to remove token: "
-                    + appToken + " from non-existing displayId=" + getDisplayId());
-            return;
-        }
-        // Resume key dispatching if it is currently paused before we remove the container.
-        resumeKeyDispatchingLocked();
-        dc.removeAppToken(appToken.asBinder());
-    }
-
     /**
      * Reparents this activity into {@param newTaskFrag} at the provided {@param position}. The
      * caller should ensure that the {@param newTaskFrag} is not already the parent of this
@@ -3008,7 +2994,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @interface FinishRequest {}
 
     /**
-     * See {@link #finishIfPossible(int, Intent, String, boolean)}
+     * See {@link #finishIfPossible(int, Intent, NeededUriGrants, String, boolean)}
      */
     @FinishRequest int finishIfPossible(String reason, boolean oomAdj) {
         return finishIfPossible(Activity.RESULT_CANCELED,
@@ -3470,7 +3456,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         setState(DESTROYED, "removeFromHistory");
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + this);
         detachFromProcess();
-        removeAppTokenFromDisplay();
+        // Resume key dispatching if it is currently paused before we remove the container.
+        resumeKeyDispatchingLocked();
+        mDisplayContent.removeAppToken(appToken);
 
         cleanUpActivityServices();
         removeUriPermissionsLocked();
@@ -3687,12 +3675,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void removeImmediately() {
-        if (!isState(DESTROYING, DESTROYED)) {
+        if (mState != DESTROYED) {
+            Slog.w(TAG, "Force remove immediately " + this + " state=" + mState);
             // If Task#removeImmediately is called directly with alive activities, ensure that the
             // activities are destroyed and detached from process.
             destroyImmediately("removeImmediately");
+            // Complete the destruction immediately because this activity will not be found in
+            // hierarchy, it is unable to report completion.
+            destroyed("removeImmediately");
+        } else {
+            onRemovedFromDisplay();
         }
-        onRemovedFromDisplay();
         super.removeImmediately();
     }
 
@@ -6622,17 +6615,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 win.removeIfPossible();
             }
         }
-    }
-
-    boolean hasWindowsAlive() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            // No need to loop through child windows as the answer should be the same as that of the
-            // parent window.
-            if (!(mChildren.get(i)).mAppDied) {
-                return true;
-            }
-        }
-        return false;
     }
 
     void setWillReplaceWindows(boolean animate) {

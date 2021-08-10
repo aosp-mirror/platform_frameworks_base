@@ -255,7 +255,11 @@ public final class HintManagerService extends SystemService {
     private boolean checkTidValid(int uid, int tgid, int [] tids) {
         // Make sure all tids belongs to the same UID (including isolated UID),
         // tids can belong to different application processes.
-        List<Integer> eligiblePids = mAmInternal.getIsolatedProcesses(uid);
+        List<Integer> eligiblePids = null;
+        // To avoid deadlock, do not call into AMS if the call is from system.
+        if (uid != Process.SYSTEM_UID) {
+            eligiblePids = mAmInternal.getIsolatedProcesses(uid);
+        }
         if (eligiblePids == null) {
             eligiblePids = new ArrayList<>();
         }

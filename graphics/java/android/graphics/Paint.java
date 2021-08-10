@@ -255,12 +255,6 @@ public class Paint {
             | FILTER_BITMAP_FLAG;
 
     /**
-     * These flags are always set on a reset paint or a new paint instantiated using
-     * {@link #Paint()}.
-     */
-    private static final int DEFAULT_PAINT_FLAGS = ANTI_ALIAS_FLAG | DITHER_FLAG;
-
-    /**
      * Font hinter option that disables font hinting.
      *
      * @see #setHinting(int)
@@ -577,12 +571,12 @@ public class Paint {
      * On devices running {@link Build.VERSION_CODES#Q} and above,
      * {@code FILTER_BITMAP_FLAG} is set by this constructor, and it can be
      * cleared with {@link #setFlags} or {@link #setFilterBitmap}.
-     * On devices running {@link Build.VERSION_CODES#S} and above, {@code ANTI_ALIAS_FLAG} and
-     * {@code DITHER_FLAG} are set by this constructor, and they can be cleared with
-     * {@link #setFlags} or {@link #setAntiAlias} and {@link #setDither}, respectively.</p>
+     * On devices running {@link Build.VERSION_CODES#S} and above, {@code ANTI_ALIAS_FLAG}
+     * is set by this constructor, and it can be cleared with {@link #setFlags} or
+     * {@link #setAntiAlias}.</p>
      */
     public Paint() {
-        this(DEFAULT_PAINT_FLAGS);
+        this(ANTI_ALIAS_FLAG);
     }
 
     /**
@@ -627,7 +621,7 @@ public class Paint {
     /** Restores the paint to its default settings. */
     public void reset() {
         nReset(mNativePaint);
-        setFlags(HIDDEN_DEFAULT_PAINT_FLAGS | DEFAULT_PAINT_FLAGS);
+        setFlags(HIDDEN_DEFAULT_PAINT_FLAGS | ANTI_ALIAS_FLAG);
 
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning

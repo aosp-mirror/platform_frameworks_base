@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.IntArray;
 import android.util.Slog;
@@ -338,6 +339,28 @@ public abstract class DisplayManagerInternal {
      * @return a list of {@link RefreshRateLimitation}s describing the various limits.
      */
     public abstract List<RefreshRateLimitation> getRefreshRateLimitations(int displayId);
+
+    /**
+     * Returns the window token of the level of the WindowManager hierarchy to mirror. Returns null
+     * if layer mirroring by SurfaceFlinger should not be performed for the given displayId.
+     * For now, only used for mirroring started from MediaProjection.
+     */
+    public abstract IBinder getWindowTokenClientToMirror(int displayId);
+
+    /**
+     * For the given displayId, updates the window token of the level of the WindowManager hierarchy
+     * to mirror. If windowToken is null, then SurfaceFlinger performs no layer mirroring to the
+     * given display.
+     * For now, only used for mirroring started from MediaProjection.
+     */
+    public abstract void setWindowTokenClientToMirror(int displayId, IBinder windowToken);
+
+    /**
+     * Returns the default size of the surface associated with the display, or null if the surface
+     * is not provided for layer mirroring by SurfaceFlinger.
+     * For now, only used for mirroring started from MediaProjection.
+     */
+    public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 
     /**
      * Describes the requested power state of the display.
