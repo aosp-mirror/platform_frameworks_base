@@ -216,7 +216,7 @@ public class RemoteAnimationTargetCompat {
             activityType = ACTIVITY_TYPE_UNDEFINED;
         }
         taskInfo = change.getTaskInfo();
-        allowEnterPip = false; /* always false in shell-transition case */
+        allowEnterPip = change.getAllowEnterPip();
         mStartLeash = null;
         rotationChange = change.getEndRotation() - change.getStartRotation();
         windowType = INVALID_WINDOW_TYPE;
