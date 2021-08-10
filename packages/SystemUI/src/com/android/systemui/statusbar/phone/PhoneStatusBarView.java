@@ -23,6 +23,7 @@ import static java.lang.Float.isNaN;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
@@ -52,6 +53,7 @@ public class PhoneStatusBarView extends PanelBar {
     private static final boolean DEBUG = StatusBar.DEBUG;
     private static final boolean DEBUG_GESTURES = false;
     private final CommandQueue mCommandQueue;
+    private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
     StatusBar mBar;
 
@@ -85,11 +87,10 @@ public class PhoneStatusBarView extends PanelBar {
     private int mCutoutSideNudge = 0;
     private boolean mHeadsUpVisible;
 
-    private int mRoundedCornerPadding = 0;
-
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mCommandQueue = Dependency.get(CommandQueue.class);
+        mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
     public void setBar(StatusBar bar) {
@@ -305,8 +306,6 @@ public class PhoneStatusBarView extends PanelBar {
     public void updateResources() {
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
-        mRoundedCornerPadding = getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_content_padding);
 
         updateStatusBarHeight();
     }
@@ -341,8 +340,7 @@ public class PhoneStatusBarView extends PanelBar {
     private void updateLayoutForCutout() {
         updateStatusBarHeight();
         updateCutoutLocation(StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay()));
-        updateSafeInsets(StatusBarWindowView.statusBarCornerCutoutMargins(mDisplayCutout,
-                getDisplay(), mRotationOrientation, mStatusBarHeight));
+        updateSafeInsets();
     }
 
     private void updateCutoutLocation(Pair<Integer, Integer> cornerCutoutMargins) {
@@ -370,15 +368,18 @@ public class PhoneStatusBarView extends PanelBar {
         lp.height = bounds.height();
     }
 
-    private void updateSafeInsets(Pair<Integer, Integer> cornerCutoutMargins) {
-        // Depending on our rotation, we may have to work around a cutout in the middle of the view,
-        // or letterboxing from the right or left sides.
+    private void updateSafeInsets() {
+        Rect contentRect = mContentInsetsProvider
+                .getStatusBarContentInsetsForRotation(RotationUtils.getExactRotation(getContext()));
 
-        Pair<Integer, Integer> padding =
-                StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
-                        mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
+        Point size = new Point();
+        getDisplay().getRealSize(size);
 
-        setPadding(padding.first, getPaddingTop(), padding.second, getPaddingBottom());
+        setPadding(
+                contentRect.left,
+                getPaddingTop(),
+                size.x - contentRect.right,
+                getPaddingBottom());
     }
 
     public void setHeadsUpVisible(boolean headsUpVisible) {

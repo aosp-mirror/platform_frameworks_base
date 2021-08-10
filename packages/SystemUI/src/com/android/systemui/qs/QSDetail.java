@@ -212,6 +212,11 @@ public class QSDetail extends LinearLayout {
                 Dependency.get(CommandQueue.class).animateCollapsePanels();
                 mTriggeredExpand = false;
             }
+            // Always animate on close, even if the last opened detail adapter had shouldAnimate()
+            // return false. This is necessary to avoid a race condition which could leave the
+            // keyguard in a bad state where QS remains visible underneath the notifications, clock,
+            // and status area.
+            mShouldAnimate = true;
         }
 
         boolean visibleDiff = wasShowingDetail != showingDetail;
@@ -245,10 +250,15 @@ public class QSDetail extends LinearLayout {
             mClosingDetail = true;
             mDetailAdapter = null;
             listener = mTeardownDetailWhenDone;
-            mHeader.setVisibility(View.VISIBLE);
-            mFooter.setVisibility(View.VISIBLE);
-            mQsPanelController.setGridContentVisibility(true);
-            mQsPanelCallback.onScanStateChanged(false);
+            // Only update visibility if already expanded. Otherwise, a race condition can cause the
+            // keyguard to enter a bad state where the QS tiles are displayed underneath the
+            // notifications, clock, and status area.
+            if (mQsPanelController.isExpanded()) {
+                mHeader.setVisibility(View.VISIBLE);
+                mFooter.setVisibility(View.VISIBLE);
+                mQsPanelController.setGridContentVisibility(true);
+                mQsPanelCallback.onScanStateChanged(false);
+            }
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         animateDetailVisibleDiff(x, y, visibleDiff, listener);

@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -62,6 +63,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
 
+    private FakeSystemClock mClock = new FakeSystemClock();
     private QuickAccessWalletController mController;
 
     @Before
@@ -70,12 +72,14 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
+        mClock.setElapsedRealtime(100L);
 
         mController = new QuickAccessWalletController(
                 mContext,
                 MoreExecutors.directExecutor(),
                 mSecureSettings,
-                mQuickAccessWalletClient);
+                mQuickAccessWalletClient,
+                mClock);
     }
 
     @Test
@@ -120,6 +124,23 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     @Test
     public void getWalletClient_reCreateClient_notSameClient() {
         mController.reCreateWalletClient();
+
+        assertNotSame(mQuickAccessWalletClient, mController.getWalletClient());
+    }
+
+    @Test
+    public void queryWalletCards_avoidStale_recreateClient() {
+        // advance current time by 100 seconds, should not recreate the client.
+        mClock.setElapsedRealtime(100100L);
+
+        mController.queryWalletCards(mCardsRetriever);
+
+        assertSame(mQuickAccessWalletClient, mController.getWalletClient());
+
+        // advance current time by another 501 seconds, should recreate the client.
+        mClock.setElapsedRealtime(601100L);
+
+        mController.queryWalletCards(mCardsRetriever);
 
         assertNotSame(mQuickAccessWalletClient, mController.getWalletClient());
     }

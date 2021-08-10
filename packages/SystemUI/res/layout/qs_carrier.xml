@@ -39,6 +39,13 @@
         android:singleLine="true"
         android:maxEms="7"/>
 
+    <View
+        android:id="@+id/spacer"
+        android:layout_width="@dimen/qs_carrier_margin_width"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+    />
+
     <include
         layout="@layout/mobile_signal_group"
         android:layout_width="wrap_content"

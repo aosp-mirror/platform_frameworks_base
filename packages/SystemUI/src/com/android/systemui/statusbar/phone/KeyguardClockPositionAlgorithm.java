@@ -211,7 +211,7 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getStackScrollerPadding(int clockYPosition) {
         if (mBypassEnabled) {
-            return mUnlockedStackScrollerPadding;
+            return (int) (mUnlockedStackScrollerPadding + mOverStretchAmount);
         } else if (mIsSplitShade) {
             return clockYPosition;
         } else {

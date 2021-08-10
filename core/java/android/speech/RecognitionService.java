@@ -115,18 +115,14 @@ public abstract class RecognitionService extends Service {
             @NonNull AttributionSource attributionSource) {
         try {
             if (mCurrentCallback == null) {
-                Context attributionContext = createContext(new ContextParams.Builder()
-                        .setNextAttributionSource(attributionSource)
-                        .build());
                 boolean preflightPermissionCheckPassed = checkPermissionForPreflight(
-                        attributionContext.getAttributionSource());
+                        attributionSource);
                 if (preflightPermissionCheckPassed) {
                     if (DBG) {
                         Log.d(TAG, "created new mCurrentCallback, listener = "
                                 + listener.asBinder());
                     }
-                    mCurrentCallback = new Callback(listener, attributionSource,
-                            attributionContext);
+                    mCurrentCallback = new Callback(listener, attributionSource);
                     RecognitionService.this.onStartListening(intent, mCurrentCallback);
                 }
 
@@ -293,15 +289,8 @@ public abstract class RecognitionService extends Service {
 
         private Callback(IRecognitionListener listener,
                 @NonNull AttributionSource attributionSource) {
-            this(listener, attributionSource, null);
-        }
-
-        private Callback(IRecognitionListener listener,
-                @NonNull AttributionSource attributionSource,
-                @Nullable Context attributionContext) {
             mListener = listener;
             mCallingAttributionSource = attributionSource;
-            mAttributionContext = attributionContext;
         }
 
         /**

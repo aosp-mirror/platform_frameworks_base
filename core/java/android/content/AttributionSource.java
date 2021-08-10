@@ -252,7 +252,8 @@ public final class AttributionSource implements Parcelable {
      */
     public boolean checkCallingUid() {
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID
+        if (callingUid != Process.ROOT_UID
+                && callingUid != Process.SYSTEM_UID
                 && callingUid != mAttributionSourceState.uid) {
             return false;
         }

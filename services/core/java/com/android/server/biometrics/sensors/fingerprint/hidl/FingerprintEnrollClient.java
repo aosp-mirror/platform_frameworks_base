@@ -52,6 +52,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private final ISidefpsController mSidefpsController;
     private final @FingerprintManager.EnrollReason int mEnrollReason;
+    private boolean mIsPointerDown;
 
     FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
@@ -76,7 +77,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override
@@ -157,12 +158,19 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
+        mIsPointerDown = true;
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
     }
 
     @Override
     public void onPointerUp() {
+        mIsPointerDown = false;
         UdfpsHelper.onFingerUp(getFreshDaemon());
+    }
+
+    @Override
+    public boolean isPointerDown() {
+        return mIsPointerDown;
     }
 
     @Override

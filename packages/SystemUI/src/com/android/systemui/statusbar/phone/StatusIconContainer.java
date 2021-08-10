@@ -245,8 +245,19 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * @param slotName name of the icon slot to remove from the ignored list
      */
     public void removeIgnoredSlot(String slotName) {
-        if (mIgnoredSlots.contains(slotName)) {
-            mIgnoredSlots.remove(slotName);
+        mIgnoredSlots.remove(slotName);
+
+        requestLayout();
+    }
+
+    /**
+     * Remove a list of slots from the list of ignored icon slots.
+     * It will then be shown when set to visible by the {@link StatusBarIconController}.
+     * @param slots name of the icon slots to remove from the ignored list
+     */
+    public void removeIgnoredSlots(List<String> slots) {
+        for (String slot : slots) {
+            mIgnoredSlots.remove(slot);
         }
 
         requestLayout();

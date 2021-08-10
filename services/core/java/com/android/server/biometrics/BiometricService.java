@@ -73,6 +73,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
+import com.android.server.biometrics.sensors.CoexCoordinator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1100,6 +1101,16 @@ public class BiometricService extends SystemService {
             }
             return new ArrayList<>();
         }
+
+        public boolean isAdvancedCoexLogicEnabled(Context context) {
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    CoexCoordinator.SETTING_ENABLE_NAME, 1) != 0;
+        }
+
+        public boolean isCoexFaceNonBypassHapticsDisabled(Context context) {
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    CoexCoordinator.FACE_HAPTIC_DISABLE, 1) != 0;
+        }
     }
 
     /**
@@ -1125,6 +1136,14 @@ public class BiometricService extends SystemService {
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);
+
+        // TODO(b/193089985) This logic lives here (outside of CoexCoordinator) so that it doesn't
+        //  need to depend on context. We can remove this code once the advanced logic is enabled
+        //  by default.
+        CoexCoordinator coexCoordinator = CoexCoordinator.getInstance();
+        coexCoordinator.setAdvancedLogicEnabled(injector.isAdvancedCoexLogicEnabled(context));
+        coexCoordinator.setFaceHapticDisabledWhenNonBypass(
+                injector.isCoexFaceNonBypassHapticsDisabled(context));
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(
@@ -1436,6 +1455,8 @@ public class BiometricService extends SystemService {
         }
         pw.println();
         pw.println("CurrentSession: " + mCurrentAuthSession);
+        pw.println();
+        pw.println("CoexCoordinator: " + CoexCoordinator.getInstance().toString());
         pw.println();
     }
 }

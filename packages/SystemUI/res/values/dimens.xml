@@ -529,6 +529,9 @@
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
 
+    <!-- Padding for the lock icon on the keyguard. In pixels - should not scale with display size. -->
+    <dimen name="lock_icon_padding">48px</dimen>
+
     <!-- Height of the carrier/wifi name label -->
     <dimen name="carrier_label_height">24dp</dimen>
 
@@ -906,8 +909,8 @@
     <dimen name="keyguard_affordance_height">48dp</dimen>
     <dimen name="keyguard_affordance_width">48dp</dimen>
 
-    <dimen name="keyguard_affordance_wallet_height">48dp</dimen>
-    <dimen name="keyguard_affordance_wallet_width">48dp</dimen>
+    <dimen name="keyguard_affordance_fixed_height">48dp</dimen>
+    <dimen name="keyguard_affordance_fixed_width">48dp</dimen>
 
     <dimen name="keyguard_affordance_horizontal_offset">32dp</dimen>
     <dimen name="keyguard_affordance_vertical_offset">32dp</dimen>
@@ -921,6 +924,7 @@
     <dimen name="keyguard_lock_padding">20dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
+    <dimen name="lock_icon_margin_bottom">98dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -1266,6 +1270,8 @@
     <!--  Three privacy items. This value must not be exceeded  -->
     <dimen name="ongoing_appops_chip_max_width">76dp</dimen>
     <dimen name="ongoing_appops_dot_diameter">6dp</dimen>
+    <!--  Total minimum padding to enforce to ensure that the dot can always show  -->
+    <dimen name="ongoing_appops_dot_min_padding">20dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
 
@@ -1453,7 +1459,7 @@
     <dimen name="lockscreen_shade_notification_movement">24dp</dimen>
 
     <!-- Maximum overshoot for the pulse expansion -->
-    <dimen name="pulse_expansion_max_top_overshoot">16dp</dimen>
+    <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>

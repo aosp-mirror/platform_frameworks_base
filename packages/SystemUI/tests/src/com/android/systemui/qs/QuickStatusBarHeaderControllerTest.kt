@@ -48,6 +48,7 @@ import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -98,6 +99,10 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     private lateinit var controller: QuickStatusBarHeaderController
 
+    private lateinit var cameraSlotName: String
+    private lateinit var microphoneSlotName: String
+    private lateinit var locationSlotName: String
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -107,6 +112,13 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(view.resources).thenReturn(mContext.resources)
         `when`(view.isAttachedToWindow).thenReturn(true)
         `when`(view.context).thenReturn(context)
+
+        cameraSlotName = mContext.resources.getString(
+            com.android.internal.R.string.status_bar_camera)
+        microphoneSlotName = mContext.resources.getString(
+            com.android.internal.R.string.status_bar_microphone)
+        locationSlotName = mContext.resources.getString(
+            com.android.internal.R.string.status_bar_location)
 
         controller = QuickStatusBarHeaderController(
                 view,
@@ -141,10 +153,9 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         controller.init()
 
-        val captor = argumentCaptor<List<String>>()
-        verify(iconContainer).setIgnoredSlots(capture(captor))
-
-        assertThat(captor.value).isEmpty()
+        verify(iconContainer).removeIgnoredSlot(cameraSlotName)
+        verify(iconContainer).removeIgnoredSlot(microphoneSlotName)
+        verify(iconContainer).removeIgnoredSlot(locationSlotName)
     }
 
     @Test
@@ -153,15 +164,9 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         controller.init()
 
-        val captor = argumentCaptor<List<String>>()
-        verify(iconContainer).setIgnoredSlots(capture(captor))
-
-        val cameraString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_camera)
-        val micString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_microphone)
-
-        assertThat(captor.value).containsExactly(cameraString, micString)
+        verify(iconContainer).addIgnoredSlot(cameraSlotName)
+        verify(iconContainer).addIgnoredSlot(microphoneSlotName)
+        verify(iconContainer).removeIgnoredSlot(locationSlotName)
     }
 
     @Test
@@ -170,13 +175,9 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         controller.init()
 
-        val captor = argumentCaptor<List<String>>()
-        verify(iconContainer).setIgnoredSlots(capture(captor))
-
-        val locationString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_location)
-
-        assertThat(captor.value).containsExactly(locationString)
+        verify(iconContainer).removeIgnoredSlot(cameraSlotName)
+        verify(iconContainer).removeIgnoredSlot(microphoneSlotName)
+        verify(iconContainer).addIgnoredSlot(locationSlotName)
     }
 
     @Test
@@ -185,17 +186,9 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         controller.init()
 
-        val captor = argumentCaptor<List<String>>()
-        verify(iconContainer).setIgnoredSlots(capture(captor))
-
-        val cameraString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_camera)
-        val micString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_microphone)
-        val locationString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_location)
-
-        assertThat(captor.value).containsExactly(cameraString, micString, locationString)
+        verify(iconContainer).addIgnoredSlot(cameraSlotName)
+        verify(iconContainer).addIgnoredSlot(microphoneSlotName)
+        verify(iconContainer).addIgnoredSlot(locationSlotName)
     }
 
     @Test
@@ -208,6 +201,71 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         captor.value.onClick(privacyChip)
 
         verify(privacyDialogController).showDialog(any(Context::class.java))
+    }
+
+    @Test
+    fun testSingleCarrierListenerAttachedOnInit() {
+        controller.init()
+
+        verify(qsCarrierGroupController).setOnSingleCarrierChangedListener(any())
+    }
+
+    @Test
+    fun testSingleCarrierSetOnViewOnInit_false() {
+        `when`(qsCarrierGroupController.isSingleCarrier).thenReturn(false)
+        controller.init()
+
+        verify(view).setIsSingleCarrier(false)
+    }
+
+    @Test
+    fun testSingleCarrierSetOnViewOnInit_true() {
+        `when`(qsCarrierGroupController.isSingleCarrier).thenReturn(true)
+        controller.init()
+
+        verify(view).setIsSingleCarrier(true)
+    }
+
+    @Test
+    fun testRSSISlot_notCombined() {
+        `when`(featureFlags.isCombinedStatusBarSignalIconsEnabled).thenReturn(false)
+        controller.init()
+
+        val captor = argumentCaptor<List<String>>()
+        verify(view).onAttach(any(), any(), capture(captor))
+
+        assertThat(captor.value).containsExactly(
+            mContext.getString(com.android.internal.R.string.status_bar_mobile)
+        )
+    }
+
+    @Test
+    fun testRSSISlot_combined() {
+        `when`(featureFlags.isCombinedStatusBarSignalIconsEnabled).thenReturn(true)
+        controller.init()
+
+        val captor = argumentCaptor<List<String>>()
+        verify(view).onAttach(any(), any(), capture(captor))
+
+        assertThat(captor.value).containsExactly(
+            mContext.getString(com.android.internal.R.string.status_bar_no_calling),
+            mContext.getString(com.android.internal.R.string.status_bar_call_strength)
+        )
+    }
+
+    @Test
+    fun testSingleCarrierCallback() {
+        controller.init()
+        reset(view)
+
+        val captor = argumentCaptor<QSCarrierGroupController.OnSingleCarrierChangedListener>()
+        verify(qsCarrierGroupController).setOnSingleCarrierChangedListener(capture(captor))
+
+        captor.value.onSingleCarrierChanged(true)
+        verify(view).setIsSingleCarrier(true)
+
+        captor.value.onSingleCarrierChanged(false)
+        verify(view).setIsSingleCarrier(false)
     }
 
     private fun stubViews() {

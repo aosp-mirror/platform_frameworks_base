@@ -61,6 +61,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
@@ -728,11 +729,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // When switching the app task, we keep the IME window visibility for better
         // transitioning experiences.
-        // However, in case IME created a child window without dismissing during the task
-        // switching to keep the window focus because IME window has higher window hierarchy,
-        // we don't give it focus if the next IME layering target doesn't request IME visible.
+        // However, in case IME created a child window or the IME selection dialog without
+        // dismissing during the task switching to keep the window focus because IME window has
+        // higher window hierarchy, we don't give it focus if the next IME layering target
+        // doesn't request IME visible.
         if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
                 || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
+            return false;
+        }
+        if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
+                && !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME)
+                && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION)) {
             return false;
         }
 
@@ -1884,7 +1892,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
             }, true /* traverseTopToBottom */);
-            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction);
+            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
         }
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
@@ -3977,7 +3985,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update Ime parent when IME insets leash created or the new IME layering target might
         // updated from setImeLayeringTarget, which is the best time that default IME visibility
         // has been settled down after IME control target changed.
-        if (prevImeControlTarget != mImeControlTarget || forceUpdateImeParent) {
+        final boolean imeParentChanged =
+                prevImeControlTarget != mImeControlTarget || forceUpdateImeParent;
+        if (imeParentChanged) {
             updateImeParent();
         }
 
@@ -3985,7 +3995,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final IBinder token = win != null ? win.mClient.asBinder() : null;
         // Note: not allowed to call into IMMS with the WM lock held, hence the post.
         mWmService.mH.post(() ->
-                InputMethodManagerInternal.get().reportImeControl(token)
+                InputMethodManagerInternal.get().reportImeControl(token, imeParentChanged)
         );
     }
 
@@ -5829,7 +5839,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         return false; /* continue */
                     }
                 }
-
+                if (nextWindow.isSecureLocked()) {
+                    return false; /* continue */
+                }
                 return true; /* stop, match found */
             }
         });

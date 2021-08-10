@@ -984,7 +984,7 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nMöchtest du diese Seite wirklich verlassen?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tipp: Zum Vergrößern und Verkleinern doppeltippen"</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"AutoFill"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Automatisches Ausfüllen"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"Autom.Ausfüll.konf."</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"Mit <xliff:g id="SERVICENAME">%1$s</xliff:g> automatisch ausfüllen"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
@@ -1937,7 +1937,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-Warnung"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbeitsprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Gewarnt"</string>
-    <string name="notification_verified_content_description" msgid="6401483602782359391">"Bestätigt"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Verifiziert"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Maximieren"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Minimieren"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Maximierung ein-/auschalten"</string>
@@ -2012,7 +2012,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"Effizienz"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Bedienungshilfen"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Gerätespeicher"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-Fehlerbehebung"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-Debugging"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"Stunde"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"Minute"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Uhrzeit einstellen"</string>

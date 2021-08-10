@@ -74,6 +74,7 @@ public class UserAwareBiometricSchedulerTest {
         mUserStoppedCallback = new TestUserStoppedCallback();
 
         mScheduler = new UserAwareBiometricScheduler(TAG,
+                BiometricScheduler.SENSOR_TYPE_UNKNOWN,
                 null /* gestureAvailabilityDispatcher */,
                 mBiometricService,
                 () -> mCurrentUserId,
@@ -92,7 +93,8 @@ public class UserAwareBiometricSchedulerTest {
                         return new TestStartUserClient(mContext, Object::new, mToken, newUserId,
                                 TEST_SENSOR_ID, mUserStartedCallback, mStartOperationsFinish);
                     }
-                });
+                },
+                CoexCoordinator.getInstance());
     }
 
     @Test

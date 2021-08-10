@@ -55,16 +55,18 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import com.google.android.collect.Lists;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -100,7 +102,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private ForcePluginOpenListener mForcePluginOpenListener;
     private Consumer<Integer> mScrimsVisibilityListener;
     private final ArrayList<WeakReference<StatusBarWindowCallback>>
-            mCallbacks = Lists.newArrayList();
+            mCallbacks = new ArrayList<>();
 
     private final SysuiColorExtractor mColorExtractor;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -294,8 +296,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
         if (mKeyguardPreferredRefreshRate > 0) {
             boolean onKeyguard = state.mStatusBarState == StatusBarState.KEYGUARD
-                    && !state.mKeyguardFadingAway && !state.mKeyguardGoingAway
-                    && !state.mDozing;
+                    && !state.mKeyguardFadingAway && !state.mKeyguardGoingAway;
             if (onKeyguard
                     && mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
                 mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardPreferredRefreshRate;
@@ -464,13 +465,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void notifyStateChangedCallbacks() {
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            StatusBarWindowCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onStateChanged(mCurrentState.mKeyguardShowing,
-                        mCurrentState.mKeyguardOccluded,
-                        mCurrentState.mBouncerShowing);
-            }
+        // Copy callbacks to separate ArrayList to avoid concurrent modification
+        List<StatusBarWindowCallback> activeCallbacks = mCallbacks.stream()
+                .map(Reference::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        for (StatusBarWindowCallback cb : activeCallbacks) {
+            cb.onStateChanged(mCurrentState.mKeyguardShowing,
+                    mCurrentState.mKeyguardOccluded,
+                    mCurrentState.mBouncerShowing);
         }
     }
 

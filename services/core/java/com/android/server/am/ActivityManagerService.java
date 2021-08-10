@@ -5003,7 +5003,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
                     res.key.type);
         } else {
-            throw new IllegalArgumentException();
+            return new PendingIntentInfo(null, -1, false, ActivityManager.INTENT_SENDER_UNKNOWN);
         }
     }
 
@@ -11048,9 +11048,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-                if (gpuDmaBufUsage >= 0) {
-                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+                if (gpuPrivateUsage >= 0) {
+                    final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                     pw.print("      GPU: ");
                     pw.print(stringifyKBSize(gpuUsage));
                     pw.print(" (");
@@ -12423,6 +12423,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Register receiver " + filter + ": " + sticky);
         if (receiver == null) {
             return sticky;
+        }
+
+        // SafetyNet logging for b/177931370. If any process other than system_server tries to
+        // listen to this broadcast action, then log it.
+        if (callingPid != Process.myPid()) {
+            if (filter.hasAction("com.android.server.net.action.SNOOZE_WARNING")
+                    || filter.hasAction("com.android.server.net.action.SNOOZE_RAPID")) {
+                EventLog.writeEvent(0x534e4554, "177931370", callingUid, "");
+            }
         }
 
         synchronized (this) {

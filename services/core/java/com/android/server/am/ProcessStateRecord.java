@@ -1086,7 +1086,7 @@ final class ProcessStateRecord {
         mCurRawAdj = mSetRawAdj = mCurAdj = mSetAdj = mVerifiedAdj = ProcessList.INVALID_ADJ;
         mCurCapability = mSetCapability = PROCESS_CAPABILITY_NONE;
         mCurSchedGroup = mSetSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
-        mCurProcState = mRepProcState = mCurRawProcState = mSetProcState = mAllowStartFgsState =
+        mCurProcState = mCurRawProcState = mSetProcState = mAllowStartFgsState =
                 PROCESS_STATE_NONEXISTENT;
     }
 

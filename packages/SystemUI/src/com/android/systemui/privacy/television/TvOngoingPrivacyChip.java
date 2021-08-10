@@ -53,6 +53,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -88,6 +89,9 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     private static final int STATE_COLLAPSED = 3;
     private static final int STATE_DISAPPEARING = 4;
 
+    // Avoid multiple messages after rapid changes such as starting/stopping both camera and mic.
+    private static final int ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS = 500;
+
     private static final int EXPANDED_DURATION_MS = 4000;
     public final int mAnimationDurationMs;
 
@@ -112,6 +116,9 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
 
     private final Handler mUiThreadHandler = new Handler(Looper.getMainLooper());
     private final Runnable mCollapseRunnable = this::collapseChip;
+
+    private final Runnable mAccessibilityRunnable = this::makeAccessibilityAnnouncement;
+    private final List<PrivacyItem> mItemsBeforeLastAnnouncement = new LinkedList<>();
 
     @State
     private int mState = STATE_NOT_SHOWN;
@@ -169,6 +176,8 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         }
 
         mPrivacyItems = updatedPrivacyItems;
+
+        postAccessibilityAnnouncement();
         updateChip();
     }
 
@@ -301,6 +310,7 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
                                 mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
 
+                                postAccessibilityAnnouncement();
                                 animateIconAppearance();
                                 mChipDrawable.startInitialFadeIn();
                             }
@@ -457,6 +467,83 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         }
 
         mViewAndWindowAdded = false;
+    }
+
+    /**
+     * Schedules the accessibility announcement to be made after {@code
+     * ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS} (if possible). This is so that only one announcement is
+     * made instead of two separate ones if both the camera and the mic are started/stopped.
+     */
+    private void postAccessibilityAnnouncement() {
+        mUiThreadHandler.removeCallbacks(mAccessibilityRunnable);
+
+        if (mPrivacyItems.size() == 0) {
+            // Announce immediately since announcement cannot be made once the chip is gone.
+            makeAccessibilityAnnouncement();
+        } else {
+            mUiThreadHandler.postDelayed(mAccessibilityRunnable,
+                    ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS);
+        }
+    }
+
+    private void makeAccessibilityAnnouncement() {
+        if (mIndicatorView == null) {
+            return;
+        }
+
+        boolean cameraWasRecording = listContainsPrivacyType(mItemsBeforeLastAnnouncement,
+                PrivacyType.TYPE_CAMERA);
+        boolean cameraIsRecording = listContainsPrivacyType(mPrivacyItems,
+                PrivacyType.TYPE_CAMERA);
+        boolean micWasRecording = listContainsPrivacyType(mItemsBeforeLastAnnouncement,
+                PrivacyType.TYPE_MICROPHONE);
+        boolean micIsRecording = listContainsPrivacyType(mPrivacyItems,
+                PrivacyType.TYPE_MICROPHONE);
+
+        int announcement = 0;
+        if (!cameraWasRecording && cameraIsRecording && !micWasRecording && micIsRecording) {
+            // Both started
+            announcement = R.string.mic_and_camera_recording_announcement;
+        } else if (cameraWasRecording && !cameraIsRecording && micWasRecording && !micIsRecording) {
+            // Both stopped
+            announcement = R.string.mic_camera_stopped_recording_announcement;
+        } else {
+            // Did the camera start or stop?
+            if (cameraWasRecording && !cameraIsRecording) {
+                announcement = R.string.camera_stopped_recording_announcement;
+            } else if (!cameraWasRecording && cameraIsRecording) {
+                announcement = R.string.camera_recording_announcement;
+            }
+
+            // Announce camera changes now since we might need a second announcement about the mic.
+            if (announcement != 0) {
+                mIndicatorView.announceForAccessibility(mContext.getString(announcement));
+                announcement = 0;
+            }
+
+            // Did the mic start or stop?
+            if (micWasRecording && !micIsRecording) {
+                announcement = R.string.mic_stopped_recording_announcement;
+            } else if (!micWasRecording && micIsRecording) {
+                announcement = R.string.mic_recording_announcement;
+            }
+        }
+
+        if (announcement != 0) {
+            mIndicatorView.announceForAccessibility(mContext.getString(announcement));
+        }
+
+        mItemsBeforeLastAnnouncement.clear();
+        mItemsBeforeLastAnnouncement.addAll(mPrivacyItems);
+    }
+
+    private boolean listContainsPrivacyType(List<PrivacyItem> list, PrivacyType privacyType) {
+        for (PrivacyItem item : list) {
+            if (item.getPrivacyType() == privacyType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

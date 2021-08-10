@@ -58,6 +58,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IBatteryStats;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,7 +83,7 @@ import java.util.stream.Collectors;
 @Presubmit
 public class VibrationThreadTest {
 
-    private static final int TEST_TIMEOUT_MILLIS = 1_000;
+    private static final int TEST_TIMEOUT_MILLIS = 900;
     private static final int UID = Process.ROOT_UID;
     private static final int VIBRATOR_ID = 1;
     private static final String PACKAGE_NAME = "package";
@@ -106,6 +107,7 @@ public class VibrationThreadTest {
     private DeviceVibrationEffectAdapter mEffectAdapter;
     private PowerManager.WakeLock mWakeLock;
     private TestLooper mTestLooper;
+    private TestLooperAutoDispatcher mCustomTestLooperDispatcher;
 
     @Before
     public void setUp() throws Exception {
@@ -119,6 +121,13 @@ public class VibrationThreadTest {
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
 
         mockVibrators(VIBRATOR_ID);
+    }
+
+    @After
+    public void tearDown() {
+        if (mCustomTestLooperDispatcher != null) {
+            mCustomTestLooperDispatcher.cancel();
+        }
     }
 
     @Test
@@ -508,7 +517,7 @@ public class VibrationThreadTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
                 .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
-                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK), 10)
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK), /* delay= */ 100)
                 .compose();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -1290,7 +1299,9 @@ public class VibrationThreadTest {
             thread.vibratorComplete(answer.getArgument(0));
             return null;
         }).when(mControllerCallbacks).onComplete(anyInt(), eq(vib.id));
-        mTestLooper.startAutoDispatch();
+        // TestLooper.AutoDispatchThread has a fixed 1s duration. Use a custom auto-dispatcher.
+        mCustomTestLooperDispatcher = new TestLooperAutoDispatcher(mTestLooper);
+        mCustomTestLooperDispatcher.start();
         thread.start();
         return thread;
     }
@@ -1316,6 +1327,7 @@ public class VibrationThreadTest {
         } catch (InterruptedException e) {
         }
         assertFalse(thread.isAlive());
+        mCustomTestLooperDispatcher.cancel();
         mTestLooper.dispatchAll();
     }
 
@@ -1363,5 +1375,30 @@ public class VibrationThreadTest {
     private void verifyCallbacksTriggered(long vibrationId, Vibration.Status expectedStatus) {
         verify(mThreadCallbacks).onVibrationCompleted(eq(vibrationId), eq(expectedStatus));
         verify(mThreadCallbacks).onVibratorsReleased();
+    }
+
+    private final class TestLooperAutoDispatcher extends Thread {
+        private final TestLooper mTestLooper;
+        private boolean mCancelled;
+
+        TestLooperAutoDispatcher(TestLooper testLooper) {
+            mTestLooper = testLooper;
+        }
+
+        @Override
+        public void run() {
+            while (!mCancelled) {
+                mTestLooper.dispatchAll();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        }
+
+        public void cancel() {
+            mCancelled = true;
+        }
     }
 }

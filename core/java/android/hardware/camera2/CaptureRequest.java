@@ -2318,6 +2318,51 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Float>("android.control.zoomRatio", float.class);
 
     /**
+     * <p>Framework-only private key which informs camera fwk that the AF regions has been set
+     * by the client and those regions need not be corrected when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is
+     * set to MAXIMUM_RESOLUTION.</p>
+     * <p>This must be set to TRUE by the camera2 java fwk when the camera client sets
+     * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<Boolean> CONTROL_AF_REGIONS_SET =
+            new Key<Boolean>("android.control.afRegionsSet", boolean.class);
+
+    /**
+     * <p>Framework-only private key which informs camera fwk that the AE regions has been set
+     * by the client and those regions need not be corrected when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is
+     * set to MAXIMUM_RESOLUTION.</p>
+     * <p>This must be set to TRUE by the camera2 java fwk when the camera client sets
+     * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<Boolean> CONTROL_AE_REGIONS_SET =
+            new Key<Boolean>("android.control.aeRegionsSet", boolean.class);
+
+    /**
+     * <p>Framework-only private key which informs camera fwk that the AF regions has been set
+     * by the client and those regions need not be corrected when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is
+     * set to MAXIMUM_RESOLUTION.</p>
+     * <p>This must be set to TRUE by the camera2 java fwk when the camera client sets
+     * {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<Boolean> CONTROL_AWB_REGIONS_SET =
+            new Key<Boolean>("android.control.awbRegionsSet", boolean.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -3055,6 +3100,21 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> SCALER_ROTATE_AND_CROP =
             new Key<Integer>("android.scaler.rotateAndCrop", int.class);
+
+    /**
+     * <p>Framework-only private key which informs camera fwk that the scaler crop region
+     * ({@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}) has been set by the client and it need
+     * not be corrected when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to MAXIMUM_RESOLUTION.</p>
+     * <p>This must be set to TRUE by the camera2 java fwk when the camera client sets
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<Boolean> SCALER_CROP_REGION_SET =
+            new Key<Boolean>("android.scaler.cropRegionSet", boolean.class);
 
     /**
      * <p>Duration each pixel is exposed to
