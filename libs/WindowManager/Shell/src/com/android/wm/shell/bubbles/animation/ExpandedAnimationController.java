@@ -64,9 +64,6 @@ public class ExpandedAnimationController
     /** Stiffness for the expand/collapse path-following animation. */
     private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
 
-    /** What percentage of the screen to use when centering the bubbles in landscape. */
-    private static final float CENTER_BUBBLES_LANDSCAPE_PERCENT = 0.66f;
-
     /**
      * Velocity required to dismiss an individual bubble without dragging it into the dismiss
      * target.
