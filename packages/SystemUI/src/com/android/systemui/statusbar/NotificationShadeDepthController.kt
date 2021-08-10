@@ -178,7 +178,8 @@ class NotificationShadeDepthController @Inject constructor(
                 blurUtils.minBlurRadius, blurUtils.maxBlurRadius)
         var combinedBlur = (shadeSpring.radius * INTERACTION_BLUR_FRACTION +
                 normalizedBlurRadius * ANIMATION_BLUR_FRACTION).toInt()
-        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsPanelExpansion))
+        val qsExpandedRatio = qsPanelExpansion * shadeExpansion
+        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsExpandedRatio))
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius).toFloat()
 
