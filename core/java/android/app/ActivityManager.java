@@ -771,6 +771,11 @@ public class ActivityManager {
         return procState >= PROCESS_STATE_TRANSIENT_BACKGROUND;
     }
 
+    /** @hide Should this process state be considered in the cache? */
+    public static final boolean isProcStateCached(int procState) {
+        return procState >= PROCESS_STATE_CACHED_ACTIVITY;
+    }
+
     /** @hide Is this a foreground service type? */
     public static boolean isForegroundService(int procState) {
         return procState == PROCESS_STATE_FOREGROUND_SERVICE;
