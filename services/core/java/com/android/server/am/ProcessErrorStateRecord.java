@@ -117,6 +117,12 @@ class ProcessErrorStateRecord {
     private ComponentName mErrorReportReceiver;
 
     /**
+     * ANR dialog data used to dismiss any visible ANR dialogs if the app becomes responsive.
+     */
+    @CompositeRWLock({"mService", "mProcLock"})
+    private AppNotRespondingDialog.Data mAnrData;
+
+    /**
      * Optional local handler to be invoked in the process crash.
      */
     @CompositeRWLock({"mService", "mProcLock"})
@@ -207,6 +213,16 @@ class ProcessErrorStateRecord {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     ErrorDialogController getDialogController() {
         return mDialogController;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    void setAnrData(AppNotRespondingDialog.Data data) {
+        mAnrData = data;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    AppNotRespondingDialog.Data getAnrData() {
+        return mAnrData;
     }
 
     ProcessErrorStateRecord(ProcessRecord app) {

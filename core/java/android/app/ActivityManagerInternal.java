@@ -412,6 +412,13 @@ public abstract class ActivityManagerInternal {
     public abstract void inputDispatchingResumed(int pid);
 
     /**
+     * User tapped "wait" in the ANR dialog - reschedule the dialog to be shown again at a later
+     * time.
+     * @param data AppNotRespondingDialog.Data object
+     */
+    public abstract void rescheduleAnrDialog(Object data);
+
+    /**
      * Sends {@link android.content.Intent#ACTION_CONFIGURATION_CHANGED} with all the appropriate
      * flags.
      */

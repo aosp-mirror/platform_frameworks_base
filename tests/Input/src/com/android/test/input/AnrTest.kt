@@ -70,7 +70,45 @@ class AnrTest {
     }
 
     @Test
-    fun testGestureMonitorAnr() {
+    fun testGestureMonitorAnr_Close() {
+        triggerAnr()
+        clickCloseAppOnAnrDialog()
+    }
+
+    @Test
+    fun testGestureMonitorAnr_Wait() {
+        triggerAnr()
+        clickWaitOnAnrDialog()
+        SystemClock.sleep(500) // Wait at least 500ms after tapping on wait
+        // ANR dialog should reappear after a delay - find the close button on it to verify
+        clickCloseAppOnAnrDialog()
+    }
+
+    private fun clickCloseAppOnAnrDialog() {
+        // Find anr dialog and kill app
+        val uiDevice: UiDevice = UiDevice.getInstance(mInstrumentation)
+        val closeAppButton: UiObject2? =
+                uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
+        if (closeAppButton == null) {
+            fail("Could not find anr dialog")
+            return
+        }
+        closeAppButton.click()
+    }
+
+    private fun clickWaitOnAnrDialog() {
+        // Find anr dialog and tap on wait
+        val uiDevice: UiDevice = UiDevice.getInstance(mInstrumentation)
+        val waitButton: UiObject2? =
+                uiDevice.wait(Until.findObject(By.res("android:id/aerr_wait")), 20000)
+        if (waitButton == null) {
+            fail("Could not find anr dialog/wait button")
+            return
+        }
+        waitButton.click()
+    }
+
+    private fun triggerAnr() {
         startUnresponsiveActivity()
         val uiDevice: UiDevice = UiDevice.getInstance(mInstrumentation)
         val obj: UiObject2? = uiDevice.wait(Until.findObject(
@@ -91,20 +129,6 @@ class AnrTest {
 
         // Todo: replace using timeout from android.hardware.input.IInputManager
         SystemClock.sleep(5000) // default ANR timeout for gesture monitors
-
-        clickCloseAppOnAnrDialog()
-    }
-
-    private fun clickCloseAppOnAnrDialog() {
-        // Find anr dialog and kill app
-        val uiDevice: UiDevice = UiDevice.getInstance(mInstrumentation)
-        val closeAppButton: UiObject2? =
-                uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
-        if (closeAppButton == null) {
-            fail("Could not find anr dialog")
-            return
-        }
-        closeAppButton.click()
     }
 
     private fun startUnresponsiveActivity() {
