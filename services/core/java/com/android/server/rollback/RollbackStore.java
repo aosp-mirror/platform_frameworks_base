@@ -447,7 +447,7 @@ class RollbackStore {
 
         // Backward compatibility: no such field for old versions.
         final int rollbackDataPolicy = json.optInt("rollbackDataPolicy",
-                PackageManager.RollbackDataPolicy.RESTORE);
+                PackageManager.ROLLBACK_DATA_POLICY_RESTORE);
 
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
                 pendingBackups, pendingRestores, isApex, isApkInApex, snapshottedUsers,

@@ -149,12 +149,14 @@ void DeferredLayerUpdater::apply() {
             android_dataspace dataspace;
             int slot;
             bool newContent = false;
+            ARect currentCrop;
+            uint32_t outTransform;
             // Note: ASurfaceTexture_dequeueBuffer discards all but the last frame. This
             // is necessary if the SurfaceTexture queue is in synchronous mode, and we
             // cannot tell which mode it is in.
             AHardwareBuffer* hardwareBuffer = ASurfaceTexture_dequeueBuffer(
-                    mSurfaceTexture.get(), &slot, &dataspace, transformMatrix, &newContent,
-                    createReleaseFence, fenceWait, this);
+                    mSurfaceTexture.get(), &slot, &dataspace, transformMatrix, &outTransform,
+                    &newContent, createReleaseFence, fenceWait, this, &currentCrop);
 
             if (hardwareBuffer) {
                 mCurrentSlot = slot;

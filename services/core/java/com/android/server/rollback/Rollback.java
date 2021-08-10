@@ -438,7 +438,7 @@ class Rollback {
         for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
             if (pkgRollbackInfo.getPackageName().equals(packageName)) {
                 if (pkgRollbackInfo.getRollbackDataPolicy()
-                        == PackageManager.RollbackDataPolicy.RESTORE) {
+                        == PackageManager.ROLLBACK_DATA_POLICY_RESTORE) {
                     dataHelper.snapshotAppData(info.getRollbackId(), pkgRollbackInfo, userIds);
                     addAll(pkgRollbackInfo.getSnapshottedUsers(), userIds);
                     RollbackStore.saveRollback(this);

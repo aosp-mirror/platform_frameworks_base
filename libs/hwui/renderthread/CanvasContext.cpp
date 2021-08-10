@@ -483,6 +483,12 @@ nsecs_t CanvasContext::draw() {
     if (!Properties::isDrawingEnabled() ||
         (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+        if (auto grContext = getGrContext()) {
+            // Submit to ensure that any texture uploads complete and Skia can
+            // free its staging buffers.
+            grContext->flushAndSubmit();
+        }
+
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely
         waitOnFences();
