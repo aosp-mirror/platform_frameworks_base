@@ -313,8 +313,13 @@ public class InputShellCommand extends ShellCommand {
 
         injectKeyEvent(event);
         if (longpress) {
+            try {
+                Thread.sleep(ViewConfiguration.getLongPressTimeout());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             // Some long press behavior would check the event time, we set a new event time here.
-            final long nextEventTime = now + ViewConfiguration.getGlobalActionKeyTimeout();
+            final long nextEventTime = now + ViewConfiguration.getLongPressTimeout();
             injectKeyEvent(KeyEvent.changeTimeRepeat(event, nextEventTime, 1 /* repeatCount */,
                     KeyEvent.FLAG_LONG_PRESS));
         }
