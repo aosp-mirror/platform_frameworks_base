@@ -57,7 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"შემომავალი ზარის აბონენტის ID"</string>
-    <string name="ClirMmi" msgid="6752346475055446417">"გამავალი აბონენტის ID-ის დამალვა"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"გამავალი აბონენტის ID-ს დამალვა"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"დაუკავშირდა Line ID-ს"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"დაუკავშირდა Line ID Restriction-ს"</string>
     <string name="CfMmi" msgid="8390012691099787178">"ზარის გადამისამართება"</string>
