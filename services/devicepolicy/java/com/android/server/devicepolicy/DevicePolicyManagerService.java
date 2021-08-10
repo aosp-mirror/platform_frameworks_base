@@ -648,6 +648,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
+    private final Object mESIDInitilizationLock = new Object();
+    private EnterpriseSpecificIdCalculator mEsidCalculator;
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -1471,6 +1473,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         LockPatternUtils newLockPatternUtils() {
             return new LockPatternUtils(mContext);
+        }
+
+        EnterpriseSpecificIdCalculator newEnterpriseSpecificIdCalculator() {
+            return new EnterpriseSpecificIdCalculator(mContext);
         }
 
         boolean storageManagerIsFileBasedEncryptionEnabled() {
@@ -16930,6 +16936,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Slogf.i(LOG_TAG, "Setting Enterprise ID to %s for user %d", organizationId, userId);
 
+        synchronized (mESIDInitilizationLock) {
+            if (mEsidCalculator == null) {
+                mInjector.binderWithCleanCallingIdentity(() -> {
+                    mEsidCalculator = mInjector.newEnterpriseSpecificIdCalculator();
+                });
+            }
+        }
+
         final String ownerPackage;
         synchronized (getLockObject()) {
             final ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
@@ -16947,16 +16961,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     "The organization ID has been previously set to a different value and cannot "
                             + "be changed");
             final String dpcPackage = owner.info.getPackageName();
-            mInjector.binderWithCleanCallingIdentity(() -> {
-                EnterpriseSpecificIdCalculator esidCalculator =
-                        new EnterpriseSpecificIdCalculator(mContext);
-
-                final String esid = esidCalculator.calculateEnterpriseId(dpcPackage,
-                        organizationId);
-                owner.mOrganizationId = organizationId;
-                owner.mEnrollmentSpecificId = esid;
-                saveSettingsLocked(userId);
-            });
+            final String esid = mEsidCalculator.calculateEnterpriseId(dpcPackage,
+                    organizationId);
+            owner.mOrganizationId = organizationId;
+            owner.mEnrollmentSpecificId = esid;
+            saveSettingsLocked(userId);
         }
 
         DevicePolicyEventLogger
