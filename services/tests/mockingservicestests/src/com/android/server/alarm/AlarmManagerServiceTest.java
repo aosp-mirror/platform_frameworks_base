@@ -63,6 +63,7 @@ import static com.android.server.alarm.AlarmManagerService.AlarmHandler.EXACT_AL
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REFRESH_EXACT_ALARM_CANDIDATES;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_ALARMS;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TARE_AFFORDABILITY_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_QUOTA;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_WINDOW;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_QUOTA;
@@ -119,9 +120,12 @@ import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -137,6 +141,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -157,6 +162,7 @@ import com.android.server.SystemService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
 import libcore.util.EmptyArray;
@@ -200,6 +206,8 @@ public class AlarmManagerServiceTest {
     @Mock
     private Context mMockContext;
     @Mock
+    private ContentResolver mContentResolver;
+    @Mock
     private IActivityManager mIActivityManager;
     @Mock
     private IAppOpsService mIAppOpsService;
@@ -223,6 +231,8 @@ public class AlarmManagerServiceTest {
     private AlarmManagerService.ClockReceiver mClockReceiver;
     @Mock
     private PowerManager.WakeLock mWakeLock;
+    @Mock
+    private EconomyManagerInternal mEconomyManagerInternal;
     @Mock
     DeviceConfig.Properties mDeviceConfigProperties;
     HashSet<String> mDeviceConfigKeys = new HashSet<>();
@@ -349,6 +359,11 @@ public class AlarmManagerServiceTest {
         }
 
         @Override
+        void registerContentObserver(ContentObserver observer, Uri uri) {
+            // Do nothing.
+        }
+
+        @Override
         void registerDeviceConfigListener(DeviceConfig.OnPropertiesChangedListener listener) {
             // Do nothing.
             // The tests become flaky with an error message of
@@ -368,6 +383,7 @@ public class AlarmManagerServiceTest {
                 .initMocks(this)
                 .spyStatic(ActivityManager.class)
                 .mockStatic(CompatChanges.class)
+                .spyStatic(DateFormat.class)
                 .spyStatic(DeviceConfig.class)
                 .mockStatic(LocalServices.class)
                 .spyStatic(Looper.class)
@@ -383,6 +399,8 @@ public class AlarmManagerServiceTest {
         doReturn(mIActivityManager).when(ActivityManager::getService);
         doReturn(mDeviceIdleInternal).when(
                 () -> LocalServices.getService(DeviceIdleInternal.class));
+        doReturn(mEconomyManagerInternal).when(
+                () -> LocalServices.getService(EconomyManagerInternal.class));
         doReturn(mPermissionManagerInternal).when(
                 () -> LocalServices.getService(PermissionManagerServiceInternal.class));
         doReturn(mActivityManagerInternal).when(
@@ -402,6 +420,8 @@ public class AlarmManagerServiceTest {
                 eq(TEST_CALLING_USER), anyLong())).thenReturn(STANDBY_BUCKET_ACTIVE);
         doReturn(Looper.getMainLooper()).when(Looper::myLooper);
 
+        when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
+
         doReturn(mDeviceConfigKeys).when(mDeviceConfigProperties).getKeyset();
         when(mDeviceConfigProperties.getLong(anyString(), anyLong()))
                 .thenAnswer((Answer<Long>) invocationOnMock -> {
@@ -420,6 +440,9 @@ public class AlarmManagerServiceTest {
         doReturn(mDeviceConfigProperties).when(
                 () -> DeviceConfig.getProperties(
                         eq(DeviceConfig.NAMESPACE_ALARM_MANAGER), ArgumentMatchers.<String>any()));
+        // Needed to ensure logging doesn't cause tests to fail.
+        doReturn(true)
+                .when(() -> DateFormat.is24HourFormat(eq(mMockContext), anyInt()));
 
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManager);
 
@@ -446,6 +469,7 @@ public class AlarmManagerServiceTest {
 
         // Other boot phases don't matter
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        setTareEnabled(false);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
         mAllowWhileIdleWindow = mService.mConstants.ALLOW_WHILE_IDLE_WINDOW;
         ArgumentCaptor<AppStandbyInternal.AppIdleStateChangeListener> captor =
@@ -550,7 +574,6 @@ public class AlarmManagerServiceTest {
                 FLAG_STANDALONE, null, null, TEST_CALLING_UID, TEST_CALLING_PACKAGE, null, 0);
     }
 
-
     private PendingIntent getNewMockPendingIntent() {
         return getNewMockPendingIntent(TEST_CALLING_UID, TEST_CALLING_PACKAGE);
     }
@@ -584,6 +607,15 @@ public class AlarmManagerServiceTest {
         mDeviceConfigKeys.add(key);
         doReturn(val).when(mDeviceConfigProperties).getString(eq(key), anyString());
         mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
+    }
+
+    private void setTareEnabled(boolean enabled) {
+        doReturn(enabled ? 1 : 0).when(
+                () -> Settings.Global.getInt(mContentResolver, Settings.Global.ENABLE_TARE));
+        doReturn(enabled ? 1 : 0).when(
+                () -> Settings.Global.getInt(mContentResolver,
+                        Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE));
+        mService.mConstants.onChange(true);
     }
 
     /**
@@ -1978,6 +2010,44 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void tareThrottling() {
+        setTareEnabled(true);
+        final ArgumentCaptor<EconomyManagerInternal.AffordabilityChangeListener> listenerCaptor =
+                ArgumentCaptor.forClass(EconomyManagerInternal.AffordabilityChangeListener.class);
+        final ArgumentCaptor<EconomyManagerInternal.ActionBill> billCaptor =
+                ArgumentCaptor.forClass(EconomyManagerInternal.ActionBill.class);
+
+        when(mEconomyManagerInternal
+                .canPayFor(eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), billCaptor.capture()))
+                .thenReturn(false);
+
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 15, alarmPi);
+        assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
+
+        final EconomyManagerInternal.ActionBill bill = billCaptor.getValue();
+        verify(mEconomyManagerInternal).registerAffordabilityChangeListener(
+                eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE),
+                listenerCaptor.capture(), eq(bill));
+        final EconomyManagerInternal.AffordabilityChangeListener listener =
+                listenerCaptor.getValue();
+
+        when(mEconomyManagerInternal
+                .canPayFor(eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), eq(bill)))
+                .thenReturn(true);
+        listener.onAffordabilityChanged(TEST_CALLING_USER, TEST_CALLING_PACKAGE, bill, true);
+        assertAndHandleMessageSync(TARE_AFFORDABILITY_CHANGED);
+        assertEquals(mNowElapsedTest + 15, mTestTimer.getElapsed());
+
+        when(mEconomyManagerInternal
+                .canPayFor(eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), eq(bill)))
+                .thenReturn(false);
+        listener.onAffordabilityChanged(TEST_CALLING_USER, TEST_CALLING_PACKAGE, bill, false);
+        assertAndHandleMessageSync(TARE_AFFORDABILITY_CHANGED);
+        assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
+    }
+
+    @Test
     public void dispatchOrder() throws Exception {
         setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
@@ -3017,6 +3087,23 @@ public class AlarmManagerServiceTest {
         mTestTimer.expire();
 
         verify(() -> MetricsHelper.pushAlarmBatchDelivered(10, 5));
+    }
+
+    @Test
+    public void tareEventPushed() throws Exception {
+        setTareEnabled(true);
+
+        for (int i = 0; i < 10; i++) {
+            final int type = (i % 2 == 1) ? ELAPSED_REALTIME : ELAPSED_REALTIME_WAKEUP;
+            setTestAlarm(type, mNowElapsedTest + i, getNewMockPendingIntent());
+        }
+
+        final ArrayList<Alarm> alarms = mService.mAlarmStore.remove((alarm) -> {
+            return alarm.creatorUid == TEST_CALLING_UID;
+        });
+        mService.deliverAlarmsLocked(alarms, mNowElapsedTest);
+        verify(mEconomyManagerInternal, times(10)).noteInstantaneousEvent(
+                eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), anyInt(), any());
     }
 
     @Test
