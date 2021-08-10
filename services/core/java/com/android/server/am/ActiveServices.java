@@ -335,7 +335,9 @@ public final class ActiveServices {
         @Override
         public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                stopAllForegroundServicesLocked(uid, packageName);
+                if (!isForegroundServiceAllowedInBackgroundRestricted(uid, packageName)) {
+                    stopAllForegroundServicesLocked(uid, packageName);
+                }
             }
         }
     }
@@ -607,6 +609,17 @@ public final class ActiveServices {
         final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                 AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
         return (mode != AppOpsManager.MODE_ALLOWED);
+    }
+
+    void updateAppRestrictedAnyInBackgroundLocked(final int uid, final String packageName) {
+        final boolean restricted = appRestrictedAnyInBackground(uid, packageName);
+        final UidRecord uidRec = mAm.mProcessList.getUidRecordLOSP(uid);
+        if (uidRec != null) {
+            final ProcessRecord app = uidRec.getProcessInPackage(packageName);
+            if (app != null) {
+                app.mState.setBackgroundRestricted(restricted);
+            }
+        }
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
@@ -1448,7 +1461,8 @@ public final class ActiveServices {
                     if (!aa.mAppOnTop) {
                         // Transitioning a fg-service host app out of top: if it's bg restricted,
                         // it loses the fg service state now.
-                        if (!appRestrictedAnyInBackground(aa.mUid, aa.mPackageName)) {
+                        if (isForegroundServiceAllowedInBackgroundRestricted(
+                                aa.mUid, aa.mPackageName)) {
                             if (active == null) {
                                 active = new ArrayList<>();
                             }
@@ -1666,8 +1680,38 @@ public final class ActiveServices {
         }
     }
 
-    private boolean appIsTopLocked(int uid) {
-        return mAm.getUidStateLocked(uid) <= PROCESS_STATE_TOP;
+    /**
+     * Check if the given app is allowed to have FGS running even if it's background restricted.
+     *
+     * <p>
+     * Currently it needs to be in Top/Bound Top/FGS state. An uid could be in the FGS state if:
+     * a) Bound by another process in the FGS state;
+     * b) There is an active FGS running (ServiceRecord.isForeground is true);
+     * c) The startForegroundService() has been called but the startForeground() hasn't - in this
+     *    case, it must have passed the background FGS start check so we're safe here.
+     * </p>
+     */
+    private boolean isForegroundServiceAllowedInBackgroundRestricted(ProcessRecord app) {
+        final ProcessStateRecord state = app.mState;
+        if (!state.isBackgroundRestricted()
+                || state.getSetProcState() <= ActivityManager.PROCESS_STATE_BOUND_TOP) {
+            return true;
+        }
+        if (state.getSetProcState() == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+                && state.isSetBoundByNonBgRestrictedApp()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the given uid/pkg is allowed to have FGS running even if it's background restricted.
+     */
+    private boolean isForegroundServiceAllowedInBackgroundRestricted(int uid, String packageName) {
+        final UidRecord uidRec = mAm.mProcessList.getUidRecordLOSP(uid);
+        ProcessRecord app = null;
+        return uidRec != null && ((app = uidRec.getProcessInPackage(packageName)) != null)
+                && isForegroundServiceAllowedInBackgroundRestricted(app);
     }
 
     /**
@@ -1761,8 +1805,7 @@ public final class ActiveServices {
                 // Apps that are TOP or effectively similar may call startForeground() on
                 // their services even if they are restricted from doing that while in bg.
                 if (!ignoreForeground
-                        && !appIsTopLocked(r.appInfo.uid)
-                        && appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
+                        && !isForegroundServiceAllowedInBackgroundRestricted(r.app)) {
                     Slog.w(TAG,
                             "Service.startForeground() not allowed due to bg restriction: service "
                                     + r.shortInstanceName);
@@ -4640,6 +4683,11 @@ public final class ActiveServices {
     boolean attachApplicationLocked(ProcessRecord proc, String processName)
             throws RemoteException {
         boolean didSomething = false;
+
+        // Update the app background restriction of the caller
+        proc.mState.setBackgroundRestricted(appRestrictedAnyInBackground(
+                proc.uid, proc.info.packageName));
+
         // Collect any services that are waiting for this process to come up.
         if (mPendingServices.size() > 0) {
             ServiceRecord sr = null;
