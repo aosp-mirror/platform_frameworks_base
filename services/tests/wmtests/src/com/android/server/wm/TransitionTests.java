@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -41,6 +42,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.window.ITaskOrganizer;
+import android.window.ITransitionPlayer;
 import android.window.TransitionInfo;
 
 import androidx.test.filters.SmallTest;
@@ -442,6 +444,71 @@ public class TransitionTests extends WindowTestsBase {
         // open/close within a change are independent
         assertTrue(isIndependent(
                 info.getChange(openInChangeTask.mRemoteToken.toWindowContainerToken()), info));
+    }
+
+    @Test
+    public void testIntermediateVisibility() {
+        final TransitionController controller = new TransitionController(mAtm);
+        final ITransitionPlayer player = new ITransitionPlayer.Default();
+        controller.registerTransitionPlayer(player);
+        ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
+        final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
+
+        // Start out with task2 visible and set up a transition that closes task2 and opens task1
+        final Task task1 = createTask(mDisplayContent);
+        task1.mTaskOrganizer = mockOrg;
+        final ActivityRecord activity1 = createActivityRecord(task1);
+        activity1.mVisibleRequested = false;
+        activity1.setVisible(false);
+        final Task task2 = createTask(mDisplayContent);
+        task2.mTaskOrganizer = mockOrg;
+        final ActivityRecord activity2 = createActivityRecord(task1);
+        activity2.mVisibleRequested = true;
+        activity2.setVisible(true);
+
+        openTransition.collectExistenceChange(task1);
+        openTransition.collectExistenceChange(activity1);
+        openTransition.collectExistenceChange(task2);
+        openTransition.collectExistenceChange(activity2);
+
+        activity1.mVisibleRequested = true;
+        activity1.setVisible(true);
+        activity2.mVisibleRequested = false;
+
+        // Using abort to force-finish the sync (since we can't wait for drawing in unit test).
+        // We didn't call abort on the transition itself, so it will still run onTransactionReady
+        // normally.
+        mWm.mSyncEngine.abort(openTransition.getSyncId());
+
+        // Before finishing openTransition, we are now going to simulate closing task1 to return
+        // back to (open) task2.
+        final Transition closeTransition = controller.createTransition(TRANSIT_CLOSE);
+
+        closeTransition.collectExistenceChange(task1);
+        closeTransition.collectExistenceChange(activity1);
+        closeTransition.collectExistenceChange(task2);
+        closeTransition.collectExistenceChange(activity2);
+
+        activity1.mVisibleRequested = false;
+        activity2.mVisibleRequested = true;
+
+        openTransition.finishTransition();
+
+        // We finished the openTransition. Even though activity1 is visibleRequested=false, since
+        // the closeTransition animation hasn't played yet, make sure that we didn't commit
+        // visible=false on activity1 since it needs to remain visible for the animation.
+        assertTrue(activity1.isVisible());
+        assertTrue(activity2.isVisible());
+
+        // Using abort to force-finish the sync (since we obviously can't wait for drawing).
+        // We didn't call abort on the actual transition, so it will still run onTransactionReady
+        // normally.
+        mWm.mSyncEngine.abort(closeTransition.getSyncId());
+
+        closeTransition.finishTransition();
+
+        assertFalse(activity1.isVisible());
+        assertTrue(activity2.isVisible());
     }
 
     /** Fill the change map with all the parents of top. Change maps are usually fully populated */
