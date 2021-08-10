@@ -228,7 +228,7 @@ public class BubbleExpandedView extends LinearLayout {
         @Override
         public void onBackPressedOnTaskRoot(int taskId) {
             if (mTaskId == taskId && mStackView.isExpanded()) {
-                mController.collapseStack();
+                mStackView.onBackPressed();
             }
         }
     };
