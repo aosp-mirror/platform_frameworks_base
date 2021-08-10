@@ -184,8 +184,9 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Test
     fun setQsPanelExpansion_appliesBlur() {
         notificationShadeDepthController.qsPanelExpansion = 1f
+        notificationShadeDepthController.onPanelExpansionChanged(0.5f, tracking = false)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+        verify(blurUtils).applyBlur(any(), eq(maxBlur / 2), eq(false))
     }
 
     @Test
