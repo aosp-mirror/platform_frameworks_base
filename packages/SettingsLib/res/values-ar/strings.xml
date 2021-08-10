@@ -511,7 +511,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"السماح بضبط المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"المنبّهات والتذكيرات"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"عليك السماح لهذا التطبيق بضبط المنبّهات وتحديد مواعيد للإجراءات الحساسة زمنيًا. يسمح هذا الأذن بتشغيل التطبيق في الخلفية، ما قد يستهلك المزيد من شحن البطارية.\n\nإذا كان هذا الإذن غير مسموح به، لن تعمل الأحداث المستندة إلى وقت والمنبّهات الحالية التي يحدِّد هذا التطبيق موعدها."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات لتنفيذها في الوقت المناسب. ويسمح هذا الإذن بتشغيل التطبيق في الخلفية، ما قد يستهلك المزيد من البطارية.\n\nفي حال عدم تفعيل هذا الإذن، لن تعمل المنبهات الحالية والأحداث المستندة إلى الوقت المضبوطة في هذا التطبيق."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"جدول زمني، جدولة، منبّه، تذكير، ساعة"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل ميزة \"عدم الإزعاج\""</string>
