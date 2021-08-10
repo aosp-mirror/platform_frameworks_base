@@ -352,6 +352,7 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
+        private boolean mAllowEnterPip;
         private int mStartRotation = ROTATION_UNDEFINED;
         private int mEndRotation = ROTATION_UNDEFINED;
         private int mRotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
@@ -372,6 +373,7 @@ public final class TransitionInfo implements Parcelable {
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+            mAllowEnterPip = in.readBoolean();
             mStartRotation = in.readInt();
             mEndRotation = in.readInt();
             mRotationAnimation = in.readInt();
@@ -413,6 +415,11 @@ public final class TransitionInfo implements Parcelable {
          */
         public void setTaskInfo(@Nullable ActivityManager.RunningTaskInfo taskInfo) {
             mTaskInfo = taskInfo;
+        }
+
+        /** Sets the allowEnterPip flag which represents AppOpsManager check on PiP permission */
+        public void setAllowEnterPip(boolean allowEnterPip) {
+            mAllowEnterPip = allowEnterPip;
         }
 
         /** Sets the start and end rotation of this container. */
@@ -492,6 +499,10 @@ public final class TransitionInfo implements Parcelable {
             return mTaskInfo;
         }
 
+        public boolean getAllowEnterPip() {
+            return mAllowEnterPip;
+        }
+
         public int getStartRotation() {
             return mStartRotation;
         }
@@ -517,6 +528,7 @@ public final class TransitionInfo implements Parcelable {
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
+            dest.writeBoolean(mAllowEnterPip);
             dest.writeInt(mStartRotation);
             dest.writeInt(mEndRotation);
             dest.writeInt(mRotationAnimation);
