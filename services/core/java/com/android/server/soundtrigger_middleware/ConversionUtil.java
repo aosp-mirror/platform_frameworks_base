@@ -304,7 +304,7 @@ class ConversionUtil {
         aidlEvent.captureDelayMs = hidlEvent.captureDelayMs;
         aidlEvent.capturePreambleMs = hidlEvent.capturePreambleMs;
         aidlEvent.triggerInData = hidlEvent.triggerInData;
-        aidlEvent.audioConfig = hidl2aidlAudioConfig(hidlEvent.audioConfig);
+        aidlEvent.audioConfig = hidl2aidlAudioConfig(hidlEvent.audioConfig, true /*isInput*/);
         aidlEvent.data = new byte[hidlEvent.data.size()];
         for (int i = 0; i < aidlEvent.data.length; ++i) {
             aidlEvent.data[i] = hidlEvent.data.get(i);
@@ -349,12 +349,15 @@ class ConversionUtil {
 
     static @NonNull
     AudioConfig hidl2aidlAudioConfig(
-            @NonNull android.hardware.audio.common.V2_0.AudioConfig hidlConfig) {
+            @NonNull android.hardware.audio.common.V2_0.AudioConfig hidlConfig, boolean isInput) {
         AudioConfig aidlConfig = new AudioConfig();
         aidlConfig.sampleRateHz = hidlConfig.sampleRateHz;
-        aidlConfig.channelMask = AidlConversion.legacy2aidl_audio_channel_mask_t_AudioChannelMask(
-                hidlConfig.channelMask);
-        aidlConfig.format = AidlConversion.legacy2aidl_audio_format_t_AudioFormat(
+        // Relies on the fact that HIDL AudioChannelMask uses the same constant values as
+        // system/audio.h.
+        aidlConfig.channelMask = AidlConversion.legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
+                hidlConfig.channelMask, isInput);
+        // Relies on the fact that HIDL AudioFormat uses the same constant values as system/audio.h.
+        aidlConfig.format = AidlConversion.legacy2aidl_audio_format_t_AudioFormatDescription(
                 hidlConfig.format);
         aidlConfig.offloadInfo = hidl2aidlOffloadInfo(hidlConfig.offloadInfo);
         aidlConfig.frameCount = hidlConfig.frameCount;
@@ -366,9 +369,13 @@ class ConversionUtil {
             @NonNull android.hardware.audio.common.V2_0.AudioOffloadInfo hidlInfo) {
         AudioOffloadInfo aidlInfo = new AudioOffloadInfo();
         aidlInfo.sampleRateHz = hidlInfo.sampleRateHz;
-        aidlInfo.channelMask = AidlConversion.legacy2aidl_audio_channel_mask_t_AudioChannelMask(
-                hidlInfo.channelMask);
-        aidlInfo.format = AidlConversion.legacy2aidl_audio_format_t_AudioFormat(hidlInfo.format);
+        // Relies on the fact that HIDL AudioChannelMask uses the same constant values as
+        // system/audio.h.
+        aidlInfo.channelMask = AidlConversion.legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
+                hidlInfo.channelMask, false /*isInput*/);
+        // Relies on the fact that HIDL AudioFormat uses the same constant values as system/audio.h.
+        aidlInfo.format = AidlConversion.legacy2aidl_audio_format_t_AudioFormatDescription(
+                hidlInfo.format);
         aidlInfo.streamType = AidlConversion.legacy2aidl_audio_stream_type_t_AudioStreamType(
                 hidlInfo.streamType);
         aidlInfo.bitRatePerSecond = hidlInfo.bitRatePerSecond;

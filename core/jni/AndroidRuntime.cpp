@@ -98,6 +98,7 @@ extern int register_android_media_AudioVolumeGroups(JNIEnv *env);
 extern int register_android_media_AudioVolumeGroupChangeHandler(JNIEnv *env);
 extern int register_android_media_MicrophoneInfo(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
+extern int register_android_media_audio_common_AidlConversion(JNIEnv* env);
 extern int register_android_media_midi(JNIEnv *env);
 
 namespace android {
@@ -1616,6 +1617,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_media_MicrophoneInfo),
         REG_JNI(register_android_media_RemoteDisplay),
         REG_JNI(register_android_media_ToneGenerator),
+        REG_JNI(register_android_media_audio_common_AidlConversion),
         REG_JNI(register_android_media_midi),
 
         REG_JNI(register_android_opengl_classes),
