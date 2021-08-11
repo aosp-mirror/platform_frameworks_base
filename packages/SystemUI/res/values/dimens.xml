@@ -1296,7 +1296,7 @@
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_album_size_small">72dp</dimen>
-    <dimen name="qs_media_album_size">92dp</dimen>
+    <dimen name="qs_media_album_size">84dp</dimen>
     <dimen name="qs_media_album_radius">14dp</dimen>
     <dimen name="qs_media_album_device_padding">26dp</dimen>
     <dimen name="qs_media_info_margin">12dp</dimen>
@@ -1313,13 +1313,14 @@
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
     <dimen name="qs_media_enabled_seekbar_height">2dp</dimen>
-    <dimen name="qs_media_enabled_seekbar_vertical_padding">31dp</dimen>
-    <dimen name="qs_media_disabled_seekbar_vertical_padding">32dp</dimen>
+    <dimen name="qs_media_enabled_seekbar_vertical_padding">28dp</dimen>
+    <dimen name="qs_media_disabled_seekbar_vertical_padding">29dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
-    <dimen name="qs_aa_media_rec_album_size_expanded">80dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size_expanded">76dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
+    <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
 
     <!-- Window magnification -->

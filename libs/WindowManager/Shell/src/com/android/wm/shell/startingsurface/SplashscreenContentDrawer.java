@@ -360,7 +360,7 @@ public class SplashscreenContentDrawer {
                 createIconDrawable(iconDrawable, false);
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
-                final int densityDpi = mContext.getResources().getDisplayMetrics().densityDpi;
+                final int densityDpi = mContext.getResources().getConfiguration().densityDpi;
                 final int scaledIconDpi =
                         (int) (0.5f + iconScale * densityDpi * NO_BACKGROUND_SCALE);
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "getIcon");
