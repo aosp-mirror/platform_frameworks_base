@@ -201,6 +201,14 @@ public final class DeviceConfig {
             "intelligence_content_suggestions";
 
     /**
+     * Namespace for all lmkd related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_LMKD_NATIVE = "lmkd_native";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide
