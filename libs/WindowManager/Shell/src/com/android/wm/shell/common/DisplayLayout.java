@@ -25,6 +25,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON
 import static android.util.RotationUtils.rotateBounds;
 import static android.util.RotationUtils.rotateInsets;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -44,7 +45,10 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.Surface;
+import android.view.WindowInsets;
 
 import com.android.internal.R;
 
@@ -85,6 +89,7 @@ public class DisplayLayout {
     private boolean mAllowSeamlessRotationDespiteNavBarMoving = false;
     private boolean mNavigationBarCanMove = false;
     private boolean mReverseDefaultRotation = false;
+    private InsetsState mInsetsState = new InsetsState();
 
     @Override
     public boolean equals(Object o) {
@@ -105,7 +110,8 @@ public class DisplayLayout {
                         == other.mAllowSeamlessRotationDespiteNavBarMoving
                 && mNavigationBarCanMove == other.mNavigationBarCanMove
                 && mReverseDefaultRotation == other.mReverseDefaultRotation
-                && mNavBarFrameHeight == other.mNavBarFrameHeight;
+                && mNavBarFrameHeight == other.mNavBarFrameHeight
+                && Objects.equals(mInsetsState, other.mInsetsState);
     }
 
     @Override
@@ -113,7 +119,7 @@ public class DisplayLayout {
         return Objects.hash(mUiMode, mWidth, mHeight, mCutout, mRotation, mDensityDpi,
                 mNonDecorInsets, mStableInsets, mHasNavigationBar, mHasStatusBar,
                 mNavBarFrameHeight, mAllowSeamlessRotationDespiteNavBarMoving,
-                mNavigationBarCanMove, mReverseDefaultRotation);
+                mNavigationBarCanMove, mReverseDefaultRotation, mInsetsState);
     }
 
     /**
@@ -164,6 +170,7 @@ public class DisplayLayout {
         mNavBarFrameHeight = dl.mNavBarFrameHeight;
         mNonDecorInsets.set(dl.mNonDecorInsets);
         mStableInsets.set(dl.mStableInsets);
+        mInsetsState.set(dl.mInsetsState, true /* copySources */);
     }
 
     private void init(DisplayInfo info, Resources res, boolean hasNavigationBar,
@@ -183,9 +190,17 @@ public class DisplayLayout {
         recalcInsets(res);
     }
 
+    /**
+     * Updates the current insets.
+     */
+    public void setInsets(Resources res, InsetsState state) {
+        mInsetsState = state;
+        recalcInsets(res);
+    }
+
     private void recalcInsets(Resources res) {
-        computeNonDecorInsets(res, mRotation, mWidth, mHeight, mCutout, mUiMode, mNonDecorInsets,
-                mHasNavigationBar);
+        computeNonDecorInsets(res, mRotation, mWidth, mHeight, mCutout, mInsetsState, mUiMode,
+                mNonDecorInsets, mHasNavigationBar);
         mStableInsets.set(mNonDecorInsets);
         if (mHasStatusBar) {
             convertNonDecorInsetsToStableInsets(res, mStableInsets, mWidth, mHeight, mHasStatusBar);
@@ -259,7 +274,7 @@ public class DisplayLayout {
         return mWidth > mHeight;
     }
 
-    /** Get the navbar frame height (used by ime). */
+    /** Get the navbar frame (or window) height (used by ime). */
     public int navBarFrameHeight() {
         return mNavBarFrameHeight;
     }
@@ -328,21 +343,29 @@ public class DisplayLayout {
      * @param outInsets the insets to return
      */
     static void computeNonDecorInsets(Resources res, int displayRotation, int displayWidth,
-            int displayHeight, DisplayCutout displayCutout, int uiMode, Rect outInsets,
-            boolean hasNavigationBar) {
+            int displayHeight, DisplayCutout displayCutout, InsetsState insetsState, int uiMode,
+            Rect outInsets, boolean hasNavigationBar) {
         outInsets.setEmpty();
 
         // Only navigation bar
         if (hasNavigationBar) {
+            final InsetsSource extraNavBar = insetsState.getSource(ITYPE_EXTRA_NAVIGATION_BAR);
+            final boolean hasExtraNav = extraNavBar != null && extraNavBar.isVisible();
             int position = navigationBarPosition(res, displayWidth, displayHeight, displayRotation);
             int navBarSize =
                     getNavigationBarSize(res, position, displayWidth > displayHeight, uiMode);
             if (position == NAV_BAR_BOTTOM) {
-                outInsets.bottom = navBarSize;
+                outInsets.bottom = hasExtraNav
+                        ? Math.max(navBarSize, extraNavBar.getFrame().height())
+                        : navBarSize;
             } else if (position == NAV_BAR_RIGHT) {
-                outInsets.right = navBarSize;
+                outInsets.right = hasExtraNav
+                        ? Math.max(navBarSize, extraNavBar.getFrame().width())
+                        : navBarSize;
             } else if (position == NAV_BAR_LEFT) {
-                outInsets.left = navBarSize;
+                outInsets.left = hasExtraNav
+                        ? Math.max(navBarSize, extraNavBar.getFrame().width())
+                        : navBarSize;
             }
         }
 
@@ -364,13 +387,13 @@ public class DisplayLayout {
      * @param outInsets the insets to return
      */
     static void computeStableInsets(Resources res, int displayRotation, int displayWidth,
-            int displayHeight, DisplayCutout displayCutout, int uiMode, Rect outInsets,
-            boolean hasNavigationBar, boolean hasStatusBar) {
+            int displayHeight, DisplayCutout displayCutout, InsetsState insetsState, int uiMode,
+            Rect outInsets, boolean hasNavigationBar, boolean hasStatusBar) {
         outInsets.setEmpty();
 
         // Navigation bar and status bar.
         computeNonDecorInsets(res, displayRotation, displayWidth, displayHeight, displayCutout,
-                uiMode, outInsets, hasNavigationBar);
+                insetsState, uiMode, outInsets, hasNavigationBar);
         convertNonDecorInsetsToStableInsets(res, outInsets, displayWidth, displayHeight,
                 hasStatusBar);
     }
