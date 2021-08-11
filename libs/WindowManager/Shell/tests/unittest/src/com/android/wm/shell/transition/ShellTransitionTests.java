@@ -685,6 +685,7 @@ public class ShellTransitionTests {
             // No remote stuff happening, so this can't be hit
         }
         DisplayController out = new DisplayController(mContext, mockWM, mMainExecutor);
+        out.initialize();
         try {
             displayListener[0].onDisplayAdded(DEFAULT_DISPLAY);
             mMainExecutor.flushAll();

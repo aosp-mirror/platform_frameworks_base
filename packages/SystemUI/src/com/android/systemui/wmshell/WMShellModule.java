@@ -28,6 +28,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -83,10 +84,11 @@ public class WMShellModule {
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor,
+            DisplayController displayController, DisplayInsetsController displayInsetsController,
+            @ShellMainThread ShellExecutor mainExecutor,
             TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, mainExecutor,
-                transactionPool);
+        return new DisplayImeController(wmService, displayController, displayInsetsController,
+                mainExecutor, transactionPool);
     }
 
     //
