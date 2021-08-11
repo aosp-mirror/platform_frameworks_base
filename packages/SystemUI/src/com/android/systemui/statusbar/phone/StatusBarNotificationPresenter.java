@@ -24,12 +24,14 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 import android.util.Slog;
+import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
@@ -394,8 +396,10 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void onExpandClicked(NotificationEntry clickedEntry, boolean nowExpanded) {
+    public void onExpandClicked(NotificationEntry clickedEntry, View clickedView,
+            boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
+        mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK");
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());

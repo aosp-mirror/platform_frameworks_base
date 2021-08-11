@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"No se reconoce la cara. Usa la huella digital."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Usa tu huella digital para continuar"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"No se reconoce la huella digital. Usa el bloqueo de pantalla."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Buscando tu cara…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Icono de cara"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidad"</string>
@@ -429,12 +431,10 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Desbloquear el micrófono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"¿Desbloquear la cámara del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"¿Desbloquear la cámara y el micrófono del dispositivo?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si lo haces, todos los servicios y todas las aplicaciones que tengan permiso podrán usar tu micrófono."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si lo haces, todos los servicios y todas las aplicaciones que tengan permiso podrán usar tu cámara."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si lo haces, todos los servicios y todas las aplicaciones que tengan permiso podrán usar tu cámara o tu micrófono."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu micrófono."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu cámara."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu cámara o tu micrófono."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Desliza el dedo hacia arriba para cambiar de aplicación"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra hacia la derecha para cambiar rápidamente de aplicación"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Mostrar u ocultar aplicaciones recientes"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Cargada"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Cargando"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de nuevo para abrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Toca de nuevo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pulsa para abrirlo"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volverlo a intentar"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea para usar el NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>

@@ -1287,20 +1287,6 @@ public class AppsFilter implements Watchable, Snappable {
                 }
             }
 
-            // This package isn't technically installed and won't be written to settings, so we can
-            // treat it as filtered until it's available again.
-            final AndroidPackage targetPkg = targetPkgSetting.pkg;
-            if (targetPkg == null) {
-                if (DEBUG_LOGGING) {
-                    Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
-                }
-                return true;
-            }
-            if (targetPkg.isStaticSharedLibrary()) {
-                // not an app, this filtering takes place at a higher level
-                return false;
-            }
-            final String targetName = targetPkg.getPackageName();
             if (DEBUG_TRACING) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "getAppId");
             }
@@ -1343,6 +1329,21 @@ public class AppsFilter implements Watchable, Snappable {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             }
+
+            // This package isn't technically installed and won't be written to settings, so we can
+            // treat it as filtered until it's available again.
+            final AndroidPackage targetPkg = targetPkgSetting.pkg;
+            if (targetPkg == null) {
+                if (DEBUG_LOGGING) {
+                    Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
+                }
+                return true;
+            }
+            if (targetPkg.isStaticSharedLibrary()) {
+                // not an app, this filtering takes place at a higher level
+                return false;
+            }
+
             try {
                 if (DEBUG_TRACING) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mForceQueryable");
@@ -1415,6 +1416,7 @@ public class AppsFilter implements Watchable, Snappable {
                 if (DEBUG_TRACING) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mOverlayReferenceMapper");
                 }
+                final String targetName = targetPkg.getPackageName();
                 if (callingSharedPkgSettings != null) {
                     int size = callingSharedPkgSettings.size();
                     for (int index = 0; index < size; index++) {

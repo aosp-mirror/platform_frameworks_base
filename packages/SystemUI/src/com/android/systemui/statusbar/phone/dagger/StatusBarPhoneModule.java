@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
@@ -216,6 +217,7 @@ public interface StatusBarPhoneModule {
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
+            StatusBarIconController statusBarIconController,
             LockscreenShadeTransitionController transitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -305,6 +307,7 @@ public interface StatusBarPhoneModule {
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,
+                statusBarIconController,
                 transitionController,
                 featureFlags,
                 keyguardUnlockAnimationController,

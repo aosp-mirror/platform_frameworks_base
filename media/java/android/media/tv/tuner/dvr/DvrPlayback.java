@@ -85,6 +85,7 @@ public class DvrPlayback implements AutoCloseable {
     private static int sInstantId = 0;
     private int mSegmentId = 0;
     private int mUnderflow;
+    private final Object mListenerLock = new Object();
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
@@ -106,16 +107,20 @@ public class DvrPlayback implements AutoCloseable {
     /** @hide */
     public void setListener(
             @NonNull Executor executor, @NonNull OnPlaybackStatusChangedListener listener) {
-        mExecutor = executor;
-        mListener = listener;
+        synchronized (mListenerLock) {
+            mExecutor = executor;
+            mListener = listener;
+        }
     }
 
     private void onPlaybackStatusChanged(int status) {
         if (status == PLAYBACK_STATUS_EMPTY) {
             mUnderflow++;
         }
-        if (mExecutor != null && mListener != null) {
-            mExecutor.execute(() -> mListener.onPlaybackStatusChanged(status));
+        synchronized (mListenerLock) {
+            if (mExecutor != null && mListener != null) {
+                mExecutor.execute(() -> mListener.onPlaybackStatusChanged(status));
+            }
         }
     }
 

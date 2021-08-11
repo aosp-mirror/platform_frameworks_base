@@ -22,12 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import android.os.PerformanceHintManager.Session;
 
@@ -120,92 +114,9 @@ public class PerformanceHintManagerTest {
     }
 
     @Test
-    public void testRateLimitWithDurationFastEnough() throws Exception {
-        FakeClock fakeClock = new FakeClock();
-        Session s = new Session(mIHintSessionMock, fakeClock, RATE_1000, TARGET_166);
-
-        reset(mIHintSessionMock);
-        fakeClock.setNow(0);
-        s.updateTargetWorkDuration(TARGET_166);
-
-        s.reportActualWorkDuration(TARGET_166 - 1);
-        s.reportActualWorkDuration(TARGET_166);
-        // we should not see update as the rate should be 10X for over-perform case.
-        verify(mIHintSessionMock, never()).reportActualWorkDuration(any(), any());
-        fakeClock.incrementClock(10 * RATE_1000);
-        s.reportActualWorkDuration(TARGET_166);
-        verify(mIHintSessionMock, never()).reportActualWorkDuration(any(), any());
-        fakeClock.incrementClock(1);
-        s.reportActualWorkDuration(TARGET_166);
-        // we should see update after rate limit
-        verify(mIHintSessionMock, times(1)).reportActualWorkDuration(
-                eq(new long[] {TARGET_166 - 1, TARGET_166, TARGET_166, TARGET_166}),
-                eq(new long[] {0, 0, 10 * RATE_1000, 10 * RATE_1000 + 1}));
-
-        reset(mIHintSessionMock);
-        s.reportActualWorkDuration(TARGET_166);
-        s.reportActualWorkDuration(TARGET_166 - 1);
-        s.reportActualWorkDuration(TARGET_166 - 2);
-        // we should not see update as the rate should be 10X for over-perform case.
-        verify(mIHintSessionMock, never()).reportActualWorkDuration(any(), any());
-        fakeClock.incrementClock(10 * RATE_1000 + 1);
-        s.reportActualWorkDuration(TARGET_166);
-        s.reportActualWorkDuration(TARGET_166 - 1);
-        // we should see update now
-        verify(mIHintSessionMock, times(1)).reportActualWorkDuration(
-                eq(new long[] {TARGET_166, TARGET_166 - 1, TARGET_166 - 2, TARGET_166}),
-                eq(new long[] {10 * RATE_1000 + 1, 10 * RATE_1000 + 1, 10 * RATE_1000 + 1,
-                    (10 * RATE_1000 + 1) * 2}));
-    }
-
-    @Test
-    public void testRateLimitWithDurationTooSlow() throws Exception {
-        FakeClock fakeClock = new FakeClock();
-        Session s = new Session(mIHintSessionMock, fakeClock, RATE_1000, TARGET_166);
-
-        reset(mIHintSessionMock);
-        fakeClock.setNow(0);
-        s.updateTargetWorkDuration(TARGET_166);
-
-        verify(mIHintSessionMock, times(1)).updateTargetWorkDuration(eq(TARGET_166));
-        // shouldn't update before rate limit
-        s.reportActualWorkDuration(TARGET_166 + 1);
-        verify(mIHintSessionMock, never()).reportActualWorkDuration(any(), any());
-
-        // shouldn't update when the time is exactly at rate limit
-        fakeClock.incrementClock(RATE_1000);
-        s.reportActualWorkDuration(TARGET_166 + 1);
-        verify(mIHintSessionMock, never()).reportActualWorkDuration(any(), any());
-
-        // should be ready for sending hint
-        fakeClock.incrementClock(1);
-        s.reportActualWorkDuration(TARGET_166 + 1);
-        verify(mIHintSessionMock, times(1)).reportActualWorkDuration(
-                eq(new long[] {TARGET_166 + 1, TARGET_166 + 1, TARGET_166 + 1}),
-                eq(new long[] {0 , RATE_1000, RATE_1000 + 1}));
-    }
-
-    @Test
     public void testCloseHintSession() {
         Session s = createSession();
         assumeNotNull(s);
         s.close();
-    }
-
-    private static class FakeClock implements PerformanceHintManager.NanoClock {
-        private long mCurrentTime = 0L;
-
-        @Override
-        public long nanos() {
-            return mCurrentTime;
-        }
-
-        public void setNow(long nanos) {
-            mCurrentTime = nanos;
-        }
-
-        public void incrementClock(long nanos) {
-            mCurrentTime += nanos;
-        }
     }
 }

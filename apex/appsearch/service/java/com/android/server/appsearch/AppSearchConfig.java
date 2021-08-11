@@ -81,6 +81,14 @@ public final class AppSearchConfig implements AutoCloseable {
             "sampling_interval_for_batch_call_stats";
     public static final String KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS =
             "sampling_interval_for_put_document_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS =
+            "sampling_interval_for_initialize_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS =
+            "sampling_interval_for_search_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS =
+            "sampling_interval_for_global_search_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS =
+            "sampling_interval_for_optimize_stats";
     public static final String KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES =
             "limit_config_max_document_size_bytes";
     public static final String KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT =
@@ -95,6 +103,10 @@ public final class AppSearchConfig implements AutoCloseable {
             KEY_SAMPLING_INTERVAL_DEFAULT,
             KEY_SAMPLING_INTERVAL_FOR_BATCH_CALL_STATS,
             KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS,
             KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES,
             KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT,
             KEY_BYTES_OPTIMIZE_THRESHOLD,
@@ -245,6 +257,58 @@ public final class AppSearchConfig implements AutoCloseable {
         }
     }
 
+    /**
+     * Returns cached value for sampling interval for initialize.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForInitializeStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
+    /**
+     * Returns cached value for sampling interval for search.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForSearchStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
+    /**
+     * Returns cached value for sampling interval for globalSearch.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForGlobalSearchStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
+    /**
+     * Returns cached value for sampling interval for optimize.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForOptimizeStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
     /** Returns the maximum serialized size an indexed document can be, in bytes. */
     public int getCachedLimitConfigMaxDocumentSizeBytes() {
         synchronized (mLock) {
@@ -343,6 +407,10 @@ public final class AppSearchConfig implements AutoCloseable {
             case KEY_SAMPLING_INTERVAL_DEFAULT:
             case KEY_SAMPLING_INTERVAL_FOR_BATCH_CALL_STATS:
             case KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS:
                 synchronized (mLock) {
                     mBundleLocked.putInt(key, properties.getInt(key, DEFAULT_SAMPLING_INTERVAL));
                 }

@@ -57,6 +57,7 @@ import android.service.contentcapture.FlushMetrics;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.SnapshotData;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -415,12 +416,25 @@ final class ContentCapturePerUserService
         }
         if (callingUid != packageUid && !LocalServices.getService(ActivityManagerInternal.class)
                 .hasRunningActivity(callingUid, packageName)) {
-            final String[] packages = pm.getPackagesForUid(callingUid);
-            final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
-            Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
-                    + ") passed package (" + packageName + ") owned by UID " + packageUid);
 
-            throw new SecurityException("Invalid package: " + packageName);
+            VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity
+                    hotwordDetectionServiceIdentity =
+                    LocalServices.getService(VoiceInteractionManagerInternal.class)
+                            .getHotwordDetectionServiceIdentity();
+
+            boolean isHotwordDetectionServiceCall =
+                    hotwordDetectionServiceIdentity != null
+                            && callingUid == hotwordDetectionServiceIdentity.getIsolatedUid()
+                            && packageUid == hotwordDetectionServiceIdentity.getOwnerUid();
+
+            if (!isHotwordDetectionServiceCall) {
+                final String[] packages = pm.getPackagesForUid(callingUid);
+                final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
+                Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
+                        + ") passed package (" + packageName + ") owned by UID " + packageUid);
+
+                throw new SecurityException("Invalid package: " + packageName);
+            }
         }
     }
 

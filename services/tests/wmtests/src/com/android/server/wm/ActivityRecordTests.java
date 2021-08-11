@@ -2561,19 +2561,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord sourceRecord = new ActivityBuilder(mAtm)
                 .setCreateTask(true).setLaunchedFromUid(Process.SYSTEM_UID).build();
         sourceRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
-                0 /* splashScreenTheme */, null);
+                true /* startActivity */, null);
 
         final ActivityRecord secondRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         secondRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
-                0 /* splashScreenTheme */, sourceRecord);
+                true /* startActivity */, sourceRecord);
         assertFalse(secondRecord.mSplashScreenStyleEmpty);
         secondRecord.onStartingWindowDrawn();
 
         final ActivityRecord finalRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         finalRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
-                0 /* splashScreenTheme */, secondRecord);
+                true /* startActivity */, secondRecord);
         assertTrue(finalRecord.mSplashScreenStyleEmpty);
     }
 
