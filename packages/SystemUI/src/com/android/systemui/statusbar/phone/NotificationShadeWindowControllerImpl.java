@@ -84,8 +84,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
+    private final KeyguardStateController mKeyguardStateController;
     private final LayoutParams mLpChanged;
-    private final boolean mKeyguardScreenRotation;
     private final long mLockScreenDisplayTimeout;
     private final float mKeyguardPreferredRefreshRate; // takes precedence over max
     private final float mKeyguardMaxRefreshRate;
@@ -123,8 +123,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
-        mKeyguardScreenRotation = keyguardStateController.isKeyguardScreenRotationAllowed();
         mDozeParameters = dozeParameters;
+        mKeyguardStateController = keyguardStateController;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -323,7 +323,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void adjustScreenOrientation(State state) {
         if (state.isKeyguardShowingAndNotOccluded() || state.mDozing) {
-            if (mKeyguardScreenRotation) {
+            if (mKeyguardStateController.isKeyguardScreenRotationAllowed()) {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
             } else {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
