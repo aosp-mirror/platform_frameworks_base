@@ -44,9 +44,15 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     private static final String TAG = "BiometricPrompt/AuthBiometricFaceToFingerprintView";
 
     protected static class UdfpsIconController extends IconController {
+        @BiometricState private int mIconState = STATE_IDLE;
+
         protected UdfpsIconController(
                 @NonNull Context context, @NonNull ImageView iconView, @NonNull TextView textView) {
             super(context, iconView, textView);
+        }
+
+        void updateState(@BiometricState int newState) {
+            updateState(mIconState, newState);
         }
 
         @Override
@@ -86,6 +92,7 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
             }
 
             mState = newState;
+            mIconState = newState;
         }
     }
 
@@ -191,11 +198,11 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
 
                 // Deactivate the face icon controller so it stops drawing to the view
                 mFaceIconController.deactivate();
-                // Then, activate this icon controller. We need to start in the "error" state
-                mUdfpsIconController.updateState(mState, newState);
+                // Then, activate this icon controller. We need to start in the "idle" state
+                mUdfpsIconController.updateState(STATE_IDLE);
             }
         } else { // Fingerprint
-            mUdfpsIconController.updateState(mState, newState);
+            mUdfpsIconController.updateState(newState);
         }
 
         super.updateState(newState);
