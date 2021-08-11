@@ -257,6 +257,7 @@ import android.os.IDeviceIdentifiersPolicyService;
 import android.os.IPermissionController;
 import android.os.IProcessInfoService;
 import android.os.IProgressListener;
+import android.os.InputConstants;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -1825,6 +1826,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (getAppOpsManager().checkOpNoThrow(op, uid, packageName)
                                     != AppOpsManager.MODE_ALLOWED) {
                                 runInBackgroundDisabled(uid);
+                            }
+                        }
+                    }
+                });
+
+        mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, null,
+                new IAppOpsCallback.Stub() {
+                    @Override public void opChanged(int op, int uid, String packageName) {
+                        if (op == AppOpsManager.OP_RUN_ANY_IN_BACKGROUND && packageName != null) {
+                            synchronized (ActivityManagerService.this) {
+                                mServices.updateAppRestrictedAnyInBackgroundLocked(
+                                        uid, packageName);
                             }
                         }
                     }
@@ -15326,6 +15339,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
+
+        @Override
+        public Pair<String, String> getAppProfileStatsForDebugging(long time, int lines) {
+            return mAppProfiler.getAppProfileStatsForDebugging(time, lines);
+        }
+
         @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return mCpHelper.checkContentProviderAccess(authority, userId);
@@ -15980,8 +15999,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void inputDispatchingResumed(int pid) {
-            // TODO (b/171218828)
-            return;
+            final ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+            if (proc != null) {
+                mAppErrors.handleDismissAnrDialogs(proc);
+            }
+        }
+
+        @Override
+        public void rescheduleAnrDialog(Object data) {
+            Message msg = Message.obtain();
+            msg.what = SHOW_NOT_RESPONDING_UI_MSG;
+            msg.obj = (AppNotRespondingDialog.Data) data;
+
+            mUiHandler.sendMessageDelayed(msg, InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
         }
 
         @Override

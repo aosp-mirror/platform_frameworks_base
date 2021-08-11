@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.entireScreenCovered
@@ -76,7 +76,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun finishSubActivity() {
         testSpec.assertWm {
@@ -88,13 +88,13 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun entireScreenCovered() {
         testSpec.entireScreenCovered(testSpec.config.startRotation)
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun launcherWindowNotVisible() {
         testSpec.assertWm {
@@ -102,7 +102,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun launcherLayerNotVisible() {
         testSpec.assertLayers { this.isInvisible(LAUNCHER_COMPONENT) }

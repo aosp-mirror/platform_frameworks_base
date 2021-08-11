@@ -600,6 +600,8 @@ public class ViewConfiguration {
     }
 
     /**
+     * Used for both key and motion events.
+     *
      * @return the duration in milliseconds before a press turns into
      * a long press
      */

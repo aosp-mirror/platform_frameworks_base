@@ -54,6 +54,7 @@ static struct {
     jmethodID onPointerCaptureEvent;
     jmethodID onDragEvent;
     jmethodID onBatchedInputEventPending;
+    jmethodID onTouchModeChanged;
 } gInputEventReceiverClassInfo;
 
 // Add prefix to the beginning of each line in 'str'
@@ -421,6 +422,18 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
                                     jboolean(dragEvent->isExiting()), dragEvent->getX(),
                                     dragEvent->getY());
+                finishInputEvent(seq, true /* handled */);
+                continue;
+            }
+            case AINPUT_EVENT_TYPE_TOUCH_MODE: {
+                const TouchModeEvent* touchModeEvent = static_cast<TouchModeEvent*>(inputEvent);
+                if (kDebugDispatchCycle) {
+                    ALOGD("channel '%s' ~ Received touch mode event: isInTouchMode=%s",
+                          getInputChannelName().c_str(), toString(touchModeEvent->isInTouchMode()));
+                }
+                env->CallVoidMethod(receiverObj.get(),
+                                    gInputEventReceiverClassInfo.onTouchModeChanged,
+                                    jboolean(touchModeEvent->isInTouchMode()));
                 finishInputEvent(seq, true /* handled */);
                 continue;
             }

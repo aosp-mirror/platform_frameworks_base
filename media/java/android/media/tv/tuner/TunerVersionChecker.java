@@ -38,8 +38,9 @@ public final class TunerVersionChecker {
     private TunerVersionChecker() {}
 
     /** @hide */
-    @IntDef(prefix = "TUNER_VERSION_", value = {TUNER_VERSION_UNKNOWN, TUNER_VERSION_1_0,
-                                                TUNER_VERSION_1_1})
+    @IntDef(prefix = "TUNER_VERSION_",
+            value = {TUNER_VERSION_UNKNOWN, TUNER_VERSION_1_0, TUNER_VERSION_1_1,
+                    TUNER_VERSION_2_0})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TunerVersion {}
     /**
@@ -54,6 +55,10 @@ public final class TunerVersionChecker {
      * Tuner version 1.1.
      */
     public static final int TUNER_VERSION_1_1 = ((1 << 16) | 1);
+    /**
+     * Tuner version 2.0.
+     */
+    public static final int TUNER_VERSION_2_0 = (2 << 16);
 
     /**
      * Get the current running Tuner version.

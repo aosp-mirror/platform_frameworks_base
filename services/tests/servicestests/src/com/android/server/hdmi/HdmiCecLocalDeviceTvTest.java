@@ -29,7 +29,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -527,71 +526,6 @@ public class HdmiCecLocalDeviceTvTest {
         // SAM must be on; ARC must be off
         assertTrue(mHdmiCecLocalDeviceTv.isSystemAudioActivated());
         assertFalse(mHdmiCecLocalDeviceTv.isArcEstablished());
-
-        HdmiCecMessage reportAudioStatus = HdmiCecMessageBuilder.buildReportAudioStatus(
-                ADDR_AUDIO_SYSTEM,
-                ADDR_TV,
-                50, // Volume of incoming message does not affect HDMI-CEC logic
-                false);
-        mNativeWrapper.onCecMessage(reportAudioStatus);
-
-        mTestLooper.dispatchAll();
-
-        verify(mAudioManager, never()).setStreamVolume(anyInt(), anyInt(), anyInt());
-    }
-
-    @Test
-    public void handleReportAudioStatus_SamOnArcOn_setStreamVolumeCalled() {
-        mNativeWrapper.setPortConnectionStatus(2, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
-
-        HdmiCecFeatureAction systemAudioAutoInitiationAction =
-                new SystemAudioAutoInitiationAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM);
-        mHdmiCecLocalDeviceTv.addAndStartAction(systemAudioAutoInitiationAction);
-
-        HdmiCecMessage reportSystemAudioMode =
-                HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                        ADDR_AUDIO_SYSTEM,
-                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
-                        true);
-        mHdmiControlService.handleCecCommand(reportSystemAudioMode);
-
-        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(
-                ADDR_AUDIO_SYSTEM,
-                ADDR_TV);
-        mNativeWrapper.onCecMessage(requestArcInitiation);
-
-        mTestLooper.dispatchAll();
-
-        // SAM and ARC must be on
-        assertTrue(mHdmiCecLocalDeviceTv.isSystemAudioActivated());
-        assertTrue(mHdmiCecLocalDeviceTv.isArcEstablished());
-
-        HdmiCecMessage reportAudioStatus = HdmiCecMessageBuilder.buildReportAudioStatus(
-                ADDR_AUDIO_SYSTEM,
-                ADDR_TV,
-                50, // Volume of incoming message does not affect HDMI-CEC logic
-                false);
-        mNativeWrapper.onCecMessage(reportAudioStatus);
-
-        mTestLooper.dispatchAll();
-
-        verify(mAudioManager, times(1)).setStreamVolume(anyInt(), anyInt(), anyInt());
-    }
-
-    @Test
-    public void handleReportAudioStatus_SamOff_setStreamVolumeNotCalled() {
-        // Emulate Audio device on port 0x1000 (does not support ARC)
-        mNativeWrapper.setPortConnectionStatus(1, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
-
-        mTestLooper.dispatchAll();
-
-        assertFalse(mHdmiCecLocalDeviceTv.isSystemAudioActivated());
 
         HdmiCecMessage reportAudioStatus = HdmiCecMessageBuilder.buildReportAudioStatus(
                 ADDR_AUDIO_SYSTEM,

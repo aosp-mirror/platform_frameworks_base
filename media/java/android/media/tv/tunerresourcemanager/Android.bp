@@ -24,7 +24,7 @@ aidl_interface {
             enabled: true,
         },
         cpp: {
-            enabled: true,
+            enabled: false,
         },
         ndk: {
             enabled: true,
@@ -33,5 +33,4 @@ aidl_interface {
     srcs: [
         ":framework-media-tv-tunerresourcemanager-sources-aidl",
     ],
-    imports: ["tv_tuner_frontend_info_aidl_interface"],
 }

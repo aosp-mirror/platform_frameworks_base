@@ -21,6 +21,7 @@ import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -31,6 +32,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerExemptionManager;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -39,6 +41,8 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -109,6 +113,10 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
     static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
+    static final String KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE =
+            "extra_delay_svc_restart_mem_pressure";
+    static final String KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE =
+            "enable_extra_delay_svc_restart_mem_pressure";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -158,6 +166,25 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int
             DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
     private static final boolean DEFAULT_FGS_ALLOW_OPT_OUT = false;
+
+    /**
+     * The extra delays we're putting to service restarts, based on current memory pressure.
+     */
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_NORMAL_MEM = 0; // ms
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MODERATE_MEM = 10000; // ms
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_LOW_MEM = 20000; // ms
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_CRITICAL_MEM = 30000; // ms
+    private static final long[] DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE  = {
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_NORMAL_MEM,
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MODERATE_MEM,
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_LOW_MEM,
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_CRITICAL_MEM,
+    };
+
+    /**
+     * Whether or not to enable the extra delays to service restarts on memory pressure.
+     */
+    private static final boolean DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE = true;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -501,6 +528,20 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile boolean mFgsAllowOptOut = DEFAULT_FGS_ALLOW_OPT_OUT;
 
+    /*
+     * The extra delays we're putting to service restarts, based on current memory pressure.
+     */
+    @GuardedBy("mService")
+    long[] mExtraServiceRestartDelayOnMemPressure =
+            DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE;
+
+    /**
+     * Whether or not to enable the extra delays to service restarts on memory pressure.
+     */
+    @GuardedBy("mService")
+    boolean mEnableExtraServiceRestartDelayOnMemPressure =
+            DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -713,6 +754,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_ALLOW_OPT_OUT:
                                 updateFgsAllowOptOut();
+                                break;
+                            case KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
+                                updateExtraServiceRestartDelayOnMemPressure();
+                                break;
+                            case KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
+                                updateEnableExtraServiceRestartDelayOnMemPressure();
                                 break;
                             default:
                                 break;
@@ -1062,6 +1109,51 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_ALLOW_OPT_OUT,
                 DEFAULT_FGS_ALLOW_OPT_OUT);
+    }
+
+    private void updateExtraServiceRestartDelayOnMemPressure() {
+        synchronized (mService) {
+            final int memFactor = mService.mAppProfiler.getLastMemoryLevelLocked();
+            final long[] prevDelays = mExtraServiceRestartDelayOnMemPressure;
+            mExtraServiceRestartDelayOnMemPressure = parseLongArray(
+                    KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE,
+                    DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE);
+            mService.mServices.performRescheduleServiceRestartOnMemoryPressureLocked(
+                    mExtraServiceRestartDelayOnMemPressure[memFactor],
+                    prevDelays[memFactor], "config", SystemClock.uptimeMillis());
+        }
+    }
+
+    private void updateEnableExtraServiceRestartDelayOnMemPressure() {
+        synchronized (mService) {
+            final boolean prevEnabled = mEnableExtraServiceRestartDelayOnMemPressure;
+            mEnableExtraServiceRestartDelayOnMemPressure = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE,
+                    DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE);
+            mService.mServices.rescheduleServiceRestartOnMemoryPressureIfNeededLocked(
+                    prevEnabled, mEnableExtraServiceRestartDelayOnMemPressure,
+                    SystemClock.uptimeMillis());
+        }
+    }
+
+    private long[] parseLongArray(@NonNull String key, @NonNull long[] def) {
+        final String val = DeviceConfig.getString(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                key, null);
+        if (!TextUtils.isEmpty(val)) {
+            final String[] ss = val.split(",");
+            if (ss.length == def.length) {
+                final long[] tmp = new long[ss.length];
+                try {
+                    for (int i = 0; i < ss.length; i++) {
+                        tmp[i] = Long.parseLong(ss[i]);
+                    }
+                    return tmp;
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+        return def;
     }
 
     private void updateImperceptibleKillExemptions() {

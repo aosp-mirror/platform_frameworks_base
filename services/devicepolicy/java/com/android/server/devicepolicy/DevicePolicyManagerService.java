@@ -11596,14 +11596,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Preconditions.checkCallAuthorization(
                         isProfileOwner(caller) || isDeviceOwner(caller));
             }
-            long id = mInjector.binderClearCallingIdentity();
             try {
                 return mIPackageManager.getBlockUninstallForUser(packageName, userId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slogf.e(LOG_TAG, "Failed to getBlockUninstallForUser", re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
             }
         }
         return false;

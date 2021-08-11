@@ -16,14 +16,14 @@
 
 package android.media.projection;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
-import android.media.projection.IMediaProjection;
-import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -106,7 +106,7 @@ public final class MediaProjection {
         if (isSecure) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
         }
-        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+        final VirtualDisplayConfig.Builder builder = buildMirroredVirtualDisplay(name, width,
                 height, dpi);
         builder.setFlags(flags);
         if (surface != null) {
@@ -141,13 +141,33 @@ public final class MediaProjection {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+        final VirtualDisplayConfig.Builder builder = buildMirroredVirtualDisplay(name, width,
                 height, dpi);
         builder.setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
         return createVirtualDisplay(builder.build(), callback, handler);
+    }
+
+    /**
+     * Constructs a {@link VirtualDisplayConfig.Builder}, which will mirror the contents of a
+     * DisplayArea. The DisplayArea to mirror is from the DisplayArea the caller is launched on.
+     *
+     * @param name   The name of the virtual display, must be non-empty.
+     * @param width  The width of the virtual display in pixels. Must be greater than 0.
+     * @param height The height of the virtual display in pixels. Must be greater than 0.
+     * @param dpi    The density of the virtual display in dpi. Must be greater than 0.
+     * @return a config representing a VirtualDisplay
+     */
+    private VirtualDisplayConfig.Builder buildMirroredVirtualDisplay(@NonNull String name,
+            int width, int height, int dpi) {
+        Context windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
+                TYPE_APPLICATION, null /* options */);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, dpi);
+        builder.setWindowTokenClientToMirror(windowContext.getWindowContextToken());
+        return builder;
     }
 
     /**

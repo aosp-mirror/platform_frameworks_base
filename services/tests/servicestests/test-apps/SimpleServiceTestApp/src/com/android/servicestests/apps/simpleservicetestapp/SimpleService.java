@@ -60,6 +60,9 @@ public class SimpleService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand");
+        if (intent == null) {
+            return START_STICKY;
+        }
         int command = intent.getIntExtra(EXTRA_COMMAND, COMMAND_INVALID);
         if (command != COMMAND_INVALID) {
             final String targetPkg = intent.getStringExtra(EXTRA_TARGET_PACKAGE);
