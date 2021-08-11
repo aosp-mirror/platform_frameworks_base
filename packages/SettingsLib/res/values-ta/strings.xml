@@ -97,7 +97,7 @@
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"செவித்துணை கருவிகளுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"மீடியா ஆடியோவுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"மொபைல் ஆடியோவுடன் இணைக்கப்பட்டது"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"கோப்பைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ஃபைலைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"வரைபடத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP உடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"கோப்பு இடமாற்றும் சேவையகத்துடன் இணைக்கப்படவில்லை"</string>
