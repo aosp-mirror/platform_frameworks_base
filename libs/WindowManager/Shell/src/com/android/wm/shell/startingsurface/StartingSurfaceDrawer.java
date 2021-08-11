@@ -52,6 +52,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 import android.window.SplashScreenView;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
@@ -115,6 +116,7 @@ public class StartingSurfaceDrawer {
     @VisibleForTesting
     final SplashscreenContentDrawer mSplashscreenContentDrawer;
     private Choreographer mChoreographer;
+    private final WindowManagerGlobal mWindowManagerGlobal;
 
     /**
      * @param splashScreenExecutor The thread used to control add and remove starting window.
@@ -126,6 +128,8 @@ public class StartingSurfaceDrawer {
         mSplashScreenExecutor = splashScreenExecutor;
         mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, pool);
         mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
+        mWindowManagerGlobal = WindowManagerGlobal.getInstance();
+        mDisplayManager.getDisplay(DEFAULT_DISPLAY);
     }
 
     private final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
@@ -137,21 +141,8 @@ public class StartingSurfaceDrawer {
     private final SparseArray<SurfaceControlViewHost> mAnimatedSplashScreenSurfaceHosts =
             new SparseArray<>(1);
 
-    /** Obtain proper context for showing splash screen on the provided display. */
-    private Context getDisplayContext(Context context, int displayId) {
-        if (displayId == DEFAULT_DISPLAY) {
-            // The default context fits.
-            return context;
-        }
-
-        final Display targetDisplay = mDisplayManager.getDisplay(displayId);
-        if (targetDisplay == null) {
-            // Failed to obtain the non-default display where splash screen should be shown,
-            // lets not show at all.
-            return null;
-        }
-
-        return context.createDisplayContext(targetDisplay);
+    private Display getDisplay(int displayId) {
+        return mDisplayManager.getDisplay(displayId);
     }
 
     private int getSplashScreenTheme(int splashScreenThemeResId, ActivityInfo activityInfo) {
@@ -186,13 +177,11 @@ public class StartingSurfaceDrawer {
                     + " suggestType=" + suggestType);
         }
 
-        // Obtain proper context to launch on the right display.
-        final Context displayContext = getDisplayContext(context, displayId);
-        if (displayContext == null) {
+        final Display display = getDisplay(displayId);
+        if (display == null) {
             // Can't show splash screen on requested display, so skip showing at all.
             return;
         }
-        context = displayContext;
         if (theme != context.getThemeResId()) {
             try {
                 context = context.createPackageContextAsUser(activityInfo.packageName,
@@ -330,10 +319,8 @@ public class StartingSurfaceDrawer {
         };
         mSplashscreenContentDrawer.createContentView(context, suggestType, activityInfo, taskId,
                 viewSupplier::setView);
-
         try {
-            final WindowManager wm = context.getSystemService(WindowManager.class);
-            if (addWindow(taskId, appToken, rootLayout, wm, params, suggestType)) {
+            if (addWindow(taskId, appToken, rootLayout, display, params, suggestType)) {
                 // We use the splash screen worker thread to create SplashScreenView while adding
                 // the window, as otherwise Choreographer#doFrame might be delayed on this thread.
                 // And since Choreographer#doFrame won't happen immediately after adding the window,
@@ -508,12 +495,14 @@ public class StartingSurfaceDrawer {
         viewHost.getView().post(viewHost::release);
     }
 
-    protected boolean addWindow(int taskId, IBinder appToken, View view, WindowManager wm,
+    protected boolean addWindow(int taskId, IBinder appToken, View view, Display display,
             WindowManager.LayoutParams params, @StartingWindowType int suggestType) {
         boolean shouldSaveView = true;
+        final Context context = view.getContext();
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addRootView");
-            wm.addView(view, params);
+            mWindowManagerGlobal.addView(view, params, display,
+                    null /* parentWindow */, context.getUserId());
         } catch (WindowManager.BadTokenException e) {
             // ignore
             Slog.w(TAG, appToken + " already running, starting window not displayed. "
@@ -521,9 +510,9 @@ public class StartingSurfaceDrawer {
             shouldSaveView = false;
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            if (view != null && view.getParent() == null) {
+            if (view.getParent() == null) {
                 Slog.w(TAG, "view not successfully added to wm, removing view");
-                wm.removeViewImmediate(view);
+                mWindowManagerGlobal.removeView(view, true /* immediate */);
                 shouldSaveView = false;
             }
         }
@@ -587,10 +576,7 @@ public class StartingSurfaceDrawer {
         if (hideView) {
             decorView.setVisibility(View.GONE);
         }
-        final WindowManager wm = decorView.getContext().getSystemService(WindowManager.class);
-        if (wm != null) {
-            wm.removeView(decorView);
-        }
+        mWindowManagerGlobal.removeView(decorView, false /* immediate */);
     }
 
     /**
