@@ -15,7 +15,6 @@
  */
 package com.android.settingslib.media;
 
-import static android.media.MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
@@ -388,34 +387,7 @@ public class InfoMediaManager extends MediaManager {
 
     @TargetApi(Build.VERSION_CODES.R)
     boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
-        if (sessionInfo == null) {
-            Log.w(TAG, "shouldEnableVolumeSeekBar() package name is null or empty!");
-            return false;
-        }
-        final List<MediaRoute2Info> mediaRoute2Infos =
-                mRouterManager.getSelectedRoutes(sessionInfo);
-        // More than one selected route
-        if (mediaRoute2Infos.size() > 1) {
-            if (DEBUG) {
-                Log.d(TAG, "shouldEnableVolumeSeekBar() package name : "
-                        + sessionInfo.getClientPackageName()
-                        + ", mediaRoute2Infos.size() " + mediaRoute2Infos.size());
-            }
-            return false;
-        }
-        // Route contains group feature
-        for (MediaRoute2Info mediaRoute2Info : mediaRoute2Infos) {
-            final List<String> features = mediaRoute2Info.getFeatures();
-            if (features.contains(FEATURE_REMOTE_GROUP_PLAYBACK)) {
-                if (DEBUG) {
-                    Log.d(TAG, "shouldEnableVolumeSeekBar() package name : "
-                            + mediaRoute2Info.getClientPackageName()
-                            + "contain group playback ");
-                }
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
     private void refreshDevices() {
