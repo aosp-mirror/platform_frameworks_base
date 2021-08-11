@@ -31,8 +31,8 @@ interface UnfoldTransitionProgressProvider : CallbackController<TransitionProgre
     fun destroy()
 
     interface TransitionProgressListener {
-        fun onTransitionStarted()
-        fun onTransitionFinished()
-        fun onTransitionProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float)
+        fun onTransitionStarted() {}
+        fun onTransitionFinished() {}
+        fun onTransitionProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float) {}
     }
 }
