@@ -107,6 +107,8 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
+import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
+import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -153,8 +155,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_STATE_BLAST_SYNC_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
