@@ -31,4 +31,6 @@ import com.android.internal.telecom.ICallRedirectionAdapter;
 oneway interface ICallRedirectionService {
     void placeCall(in ICallRedirectionAdapter adapter, in Uri handle,
             in PhoneAccountHandle initialPhoneAccount, boolean allowInteractiveResponse);
+
+    void notifyTimeout();
 }

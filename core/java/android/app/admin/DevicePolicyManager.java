@@ -10596,11 +10596,16 @@ public class DevicePolicyManager {
      * behavior of this API is changed such that passing {@code null} as the {@code admin} parameter
      * will return if any admin has blocked the uninstallation. Before L MR1, passing {@code null}
      * will cause a NullPointerException to be raised.
+     * <p>
+     * <strong>Note:</strong> If your app targets Android 11 (API level 30) or higher,
+     * this method returns a filtered result. Learn more about how to
+     * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
      *
      * @param admin The name of the admin component whose blocking policy will be checked, or
      *            {@code null} to check whether any admin has blocked the uninstallation.
      * @param packageName package to check.
-     * @return true if uninstallation is blocked.
+     * @return true if uninstallation is blocked and the given package is visible to you, false
+     *         otherwise if uninstallation isn't blocked or the given package isn't visible to you.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isUninstallBlocked(@Nullable ComponentName admin, String packageName) {

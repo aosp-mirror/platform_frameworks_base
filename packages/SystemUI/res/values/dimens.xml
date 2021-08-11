@@ -1598,7 +1598,8 @@
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
-    <dimen name="internet_dialog_list_max_height">614dp</dimen>
+    <dimen name="internet_dialog_list_max_height">646dp</dimen>
+    <dimen name="internet_dialog_list_max_width">412dp</dimen>
 
     <!-- Signal icon in internet dialog -->
     <dimen name="signal_strength_icon_size">24dp</dimen>
@@ -1609,23 +1610,23 @@
     <!-- Size of internet dialog -->
     <dimen name="settingslib_switchbar_margin">16dp</dimen>
     <!-- Minimum width of switch -->
-    <dimen name="settingslib_min_switch_width">48dp</dimen>
+    <dimen name="settingslib_min_switch_width">52dp</dimen>
     <!-- Size of layout margin left -->
     <dimen name="settingslib_switchbar_padding_left">20dp</dimen>
     <!-- Size of layout margin right -->
     <dimen name="settingslib_switchbar_padding_right">20dp</dimen>
     <!-- Radius of switch bar -->
-    <dimen name="settingslib_switch_bar_radius">24dp</dimen>
+    <dimen name="settingslib_switch_bar_radius">35dp</dimen>
     <!-- Margin of switch thumb -->
     <dimen name="settingslib_switch_thumb_margin">4dp</dimen>
     <!-- Size of switch thumb -->
-    <dimen name="settingslib_switch_thumb_size">16dp</dimen>
+    <dimen name="settingslib_switch_thumb_size">20dp</dimen>
     <!-- Width of switch track -->
-    <dimen name="settingslib_switch_track_width">48dp</dimen>
+    <dimen name="settingslib_switch_track_width">52dp</dimen>
     <!-- Height of switch track -->
-    <dimen name="settingslib_switch_track_height">24dp</dimen>
+    <dimen name="settingslib_switch_track_height">28dp</dimen>
     <!-- Radius of switch track -->
-    <dimen name="settingslib_switch_track_radius">31dp</dimen>
+    <dimen name="settingslib_switch_track_radius">35dp</dimen>
 
     <!-- Height percentage of the parent container occupied by the communal view -->
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>

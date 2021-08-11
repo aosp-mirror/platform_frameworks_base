@@ -102,7 +102,7 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
         mFaceToFpView.onDialogAnimatedIn();
         verify(mFaceToFpView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
-        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt(), anyInt());
+        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt());
     }
 
     @Test
@@ -110,13 +110,13 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
         mFaceToFpView.onDialogAnimatedIn();
         verify(mFaceToFpView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
-        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt(), anyInt());
+        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt());
 
         mFaceToFpView.updateState(AuthBiometricFaceView.STATE_AUTHENTICATED);
         verify(mFaceToFpView.mFaceIconController).updateState(
                 eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING),
                 eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATED));
-        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt(), anyInt());
+        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt());
 
         assertEquals(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATED, mFaceToFpView.mState);
     }
@@ -131,14 +131,12 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
 
         verify(mFaceToFpView.mFaceIconController).deactivate();
         verify(mFaceToFpView.mUdfpsIconController).updateState(
-                eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING),
-                eq(AuthBiometricFaceToFingerprintView.STATE_ERROR));
+                eq(AuthBiometricFaceToFingerprintView.STATE_IDLE));
         verify(mConfirmButton).setVisibility(eq(View.GONE));
 
         mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING);
 
         verify(mFaceToFpView.mUdfpsIconController).updateState(
-                eq(AuthBiometricFaceToFingerprintView.STATE_ERROR),
                 eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
     }
 

@@ -193,6 +193,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetManagerInternal;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -257,6 +258,7 @@ import android.os.IDeviceIdentifiersPolicyService;
 import android.os.IPermissionController;
 import android.os.IProcessInfoService;
 import android.os.IProgressListener;
+import android.os.InputConstants;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -1825,6 +1827,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (getAppOpsManager().checkOpNoThrow(op, uid, packageName)
                                     != AppOpsManager.MODE_ALLOWED) {
                                 runInBackgroundDisabled(uid);
+                            }
+                        }
+                    }
+                });
+
+        mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, null,
+                new IAppOpsCallback.Stub() {
+                    @Override public void opChanged(int op, int uid, String packageName) {
+                        if (op == AppOpsManager.OP_RUN_ANY_IN_BACKGROUND && packageName != null) {
+                            synchronized (ActivityManagerService.this) {
+                                mServices.updateAppRestrictedAnyInBackgroundLocked(
+                                        uid, packageName);
                             }
                         }
                     }
@@ -15326,6 +15340,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
+
+        @Override
+        public Pair<String, String> getAppProfileStatsForDebugging(long time, int lines) {
+            return mAppProfiler.getAppProfileStatsForDebugging(time, lines);
+        }
+
         @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return mCpHelper.checkContentProviderAccess(authority, userId);
@@ -15980,8 +16000,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void inputDispatchingResumed(int pid) {
-            // TODO (b/171218828)
-            return;
+            final ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+            if (proc != null) {
+                mAppErrors.handleDismissAnrDialogs(proc);
+            }
+        }
+
+        @Override
+        public void rescheduleAnrDialog(Object data) {
+            Message msg = Message.obtain();
+            msg.what = SHOW_NOT_RESPONDING_UI_MSG;
+            msg.obj = (AppNotRespondingDialog.Data) data;
+
+            mUiHandler.sendMessageDelayed(msg, InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
         }
 
         @Override
@@ -16624,13 +16658,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "scheduleApplicationInfoChanged()");
 
-        synchronized (mProcLock) {
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                updateApplicationInfoLOSP(packageNames, userId);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            final boolean updateFrameworkRes = packageNames.contains("android");
+            synchronized (mProcLock) {
+                updateApplicationInfoLOSP(packageNames, updateFrameworkRes, userId);
             }
+
+            AppWidgetManagerInternal widgets = LocalServices.getService(
+                    AppWidgetManagerInternal.class);
+            if (widgets != null) {
+                widgets.applyResourceOverlaysToWidgets(new HashSet<>(packageNames), userId,
+                        updateFrameworkRes);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -16647,11 +16689,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy(anyOf = {"this", "mProcLock"})
-    private void updateApplicationInfoLOSP(@NonNull List<String> packagesToUpdate, int userId) {
-        final boolean updateFrameworkRes = packagesToUpdate.contains("android");
+    private void updateApplicationInfoLOSP(@NonNull List<String> packagesToUpdate,
+            boolean updateFrameworkRes, int userId) {
         if (updateFrameworkRes) {
             ParsingPackageUtils.readConfigUseRoundIcon(null);
         }
+
         mProcessList.updateApplicationInfoLOSP(packagesToUpdate, userId, updateFrameworkRes);
 
         if (updateFrameworkRes) {

@@ -147,6 +147,7 @@ import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 
 /**
@@ -1603,31 +1604,23 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveImmediately() throws RemoteException {
-        final ActivityRecord activity = createActivityWithTask();
-        final WindowProcessController wpc = activity.app;
-        activity.getTask().removeImmediately("test");
-
-        verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
-                isA(DestroyActivityItem.class));
-        assertNull(activity.app);
-        assertEquals(DESTROYED, activity.getState());
-        assertFalse(wpc.hasActivities());
-    }
-
-    @Test
-    public void testRemoveImmediatelyWithFinishingActivity() throws RemoteException {
-        final ActivityRecord activity = createActivityWithTask();
-        final WindowProcessController wpc = activity.app;
-        activity.makeFinishingLocked();
-        assertTrue(activity.finishing);
-
-        activity.getTask().removeImmediately("test");
-
-        verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
-                isA(DestroyActivityItem.class));
-        assertFalse(wpc.hasActivities());
-        assertEquals(DESTROYING, activity.getState());
+    public void testRemoveImmediately() {
+        final Consumer<Consumer<ActivityRecord>> test = setup -> {
+            final ActivityRecord activity = createActivityWithTask();
+            final WindowProcessController wpc = activity.app;
+            setup.accept(activity);
+            activity.getTask().removeImmediately("test");
+            try {
+                verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
+                        isA(DestroyActivityItem.class));
+            } catch (RemoteException ignored) {
+            }
+            assertNull(activity.app);
+            assertEquals(DESTROYED, activity.getState());
+            assertFalse(wpc.hasActivities());
+        };
+        test.accept(activity -> activity.setState(RESUMED, "test"));
+        test.accept(activity -> activity.finishing = true);
     }
 
     @Test

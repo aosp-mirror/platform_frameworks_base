@@ -1178,8 +1178,7 @@
     <string name="turn_on_wifi" msgid="1308379840799281023">"WiFi"</string>
     <string name="pref_title_network_details" msgid="1639455355897668883">"Детаљи о мрежи"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Додирните мрежу да бисте се повезали"</string>
-    <!-- no translation found for unlock_to_view_networks (5072880496312015676) -->
-    <skip />
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Откључајте да бисте видели мреже"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Траже се мреже…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Повезивање са мрежом није успело"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>

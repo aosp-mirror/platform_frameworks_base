@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,15 @@
 #ifndef _ANDROID_MEDIA_TV_DESCRAMBLER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_DESCRAMBLER_CLIENT_H_
 
+#include <aidl/android/hardware/tv/tuner/Result.h>
 #include <aidl/android/media/tv/tuner/ITunerDescrambler.h>
-#include <android/hardware/tv/tuner/1.0/IDescrambler.h>
-#include <android/hardware/tv/tuner/1.1/types.h>
 
 #include "DemuxClient.h"
 #include "FilterClient.h"
 
+using ::aidl::android::hardware::tv::tuner::DemuxPid;
+using ::aidl::android::hardware::tv::tuner::Result;
 using ::aidl::android::media::tv::tuner::ITunerDescrambler;
-using ::aidl::android::media::tv::tuner::TunerDemuxPid;
-
-using ::android::hardware::tv::tuner::V1_0::IDescrambler;
-using ::android::hardware::tv::tuner::V1_0::Result;
-using ::android::hardware::tv::tuner::V1_0::DemuxPid;
 
 using namespace std;
 
@@ -40,9 +36,6 @@ struct DescramblerClient : public RefBase {
 public:
     DescramblerClient(shared_ptr<ITunerDescrambler> tunerDescrambler);
     ~DescramblerClient();
-
-    // TODO: remove after migration to Tuner Service is done.
-    void setHidlDescrambler(sp<IDescrambler> descrambler);
 
      /**
      * Set a demux as source of the descrambler.
@@ -70,20 +63,11 @@ public:
     Result close();
 
 private:
-    TunerDemuxPid getAidlDemuxPid(DemuxPid& pid);
-
     /**
      * An AIDL Tuner Descrambler Singleton assigned at the first time the Tuner Client
      * opens a descrambler. Default null when descrambler is not opened.
      */
     shared_ptr<ITunerDescrambler> mTunerDescrambler;
-
-    /**
-     * A Descrambler HAL interface that is ready before migrating to the TunerDescrambler.
-     * This is a temprary interface before Tuner Framework migrates to use TunerService.
-     * Default null when the HAL service does not exist.
-     */
-    sp<IDescrambler> mDescrambler;
 };
 }  // namespace android
 

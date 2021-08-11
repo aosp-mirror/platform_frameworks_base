@@ -9124,6 +9124,7 @@ package android.bluetooth {
     field public static final int GATT_CONNECTION_CONGESTED = 143; // 0x8f
     field public static final int GATT_FAILURE = 257; // 0x101
     field public static final int GATT_INSUFFICIENT_AUTHENTICATION = 5; // 0x5
+    field public static final int GATT_INSUFFICIENT_AUTHORIZATION = 8; // 0x8
     field public static final int GATT_INSUFFICIENT_ENCRYPTION = 15; // 0xf
     field public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 13; // 0xd
     field public static final int GATT_INVALID_OFFSET = 7; // 0x7
@@ -39695,6 +39696,7 @@ package android.telecom {
     method public final void cancelCall();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onPlaceCall(@NonNull android.net.Uri, @NonNull android.telecom.PhoneAccountHandle, boolean);
+    method public void onRedirectionTimeout();
     method public final boolean onUnbind(@NonNull android.content.Intent);
     method public final void placeCallUnmodified();
     method public final void redirectCall(@NonNull android.net.Uri, @NonNull android.telecom.PhoneAccountHandle, boolean);

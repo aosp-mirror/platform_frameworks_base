@@ -17,7 +17,7 @@
 <com.android.wm.shell.common.AlphaOptimizedButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@android:style/Widget.DeviceDefault.Button.Borderless"
-    android:id="@+id/settings_button"
+    android:id="@+id/manage_button"
     android:layout_gravity="start"
     android:layout_width="wrap_content"
     android:layout_height="@dimen/bubble_manage_button_height"
