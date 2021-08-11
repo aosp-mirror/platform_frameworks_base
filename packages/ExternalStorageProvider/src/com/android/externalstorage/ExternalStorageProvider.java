@@ -322,6 +322,11 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 return true;
             }
 
+            if (TextUtils.equals(Environment.DIRECTORY_ANDROID.toLowerCase(),
+                    path.toLowerCase())) {
+                return true;
+            }
+
             return false;
         } catch (IOException e) {
             throw new IllegalArgumentException(
