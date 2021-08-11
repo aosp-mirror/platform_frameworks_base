@@ -3295,6 +3295,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
     method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken);
+    method @NonNull public android.window.WindowContainerTransaction setAdjacentTaskFragments(@NonNull android.os.IBinder, @Nullable android.os.IBinder, @Nullable android.window.WindowContainerTransaction.TaskFragmentAdjacentParams);
     method @NonNull public android.window.WindowContainerTransaction setAppBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBoundsChangeTransaction(@NonNull android.window.WindowContainerToken, @NonNull android.view.SurfaceControl.Transaction);
@@ -3308,6 +3309,15 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction startActivityInTaskFragment(@NonNull android.os.IBinder, @NonNull android.os.IBinder, @NonNull android.content.Intent, @Nullable android.os.Bundle);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.WindowContainerTransaction> CREATOR;
+  }
+
+  public static class WindowContainerTransaction.TaskFragmentAdjacentParams {
+    ctor public WindowContainerTransaction.TaskFragmentAdjacentParams();
+    ctor public WindowContainerTransaction.TaskFragmentAdjacentParams(@NonNull android.os.Bundle);
+    method public void setShouldDelayPrimaryLastActivityRemoval(boolean);
+    method public void setShouldDelaySecondaryLastActivityRemoval(boolean);
+    method public boolean shouldDelayPrimaryLastActivityRemoval();
+    method public boolean shouldDelaySecondaryLastActivityRemoval();
   }
 
   public abstract class WindowContainerTransactionCallback {

@@ -733,18 +733,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 tf1.setAdjacentTaskFragment(tf2);
 
                 final Bundle bundle = hop.getLaunchOptions();
-                final WindowContainerTransaction.TaskFragmentAdjacentOptions adjacentOptions =
-                        bundle != null ? new WindowContainerTransaction.TaskFragmentAdjacentOptions(
+                final WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams =
+                        bundle != null ? new WindowContainerTransaction.TaskFragmentAdjacentParams(
                                 bundle) : null;
-                if (adjacentOptions == null) {
+                if (adjacentParams == null) {
                     break;
                 }
 
                 tf1.setDelayLastActivityRemoval(
-                        adjacentOptions.isDelayPrimaryLastActivityRemoval());
+                        adjacentParams.shouldDelayPrimaryLastActivityRemoval());
                 if (tf2 != null) {
                     tf2.setDelayLastActivityRemoval(
-                            adjacentOptions.isDelaySecondaryLastActivityRemoval());
+                            adjacentParams.shouldDelaySecondaryLastActivityRemoval());
                 }
                 break;
         }
