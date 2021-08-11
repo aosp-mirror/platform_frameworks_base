@@ -1498,11 +1498,6 @@ public class HdmiControlService extends SystemService {
                         Slog.e(TAG, "Callback cannot be null");
                         return;
                     }
-                    if (isPowerStandby()) {
-                        Slog.e(TAG, "Device is in standby. Not handling deviceSelect");
-                        invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
-                        return;
-                    }
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
                         if (!mAddressAllocated) {
@@ -1543,11 +1538,6 @@ public class HdmiControlService extends SystemService {
                 public void run() {
                     if (callback == null) {
                         Slog.e(TAG, "Callback cannot be null");
-                        return;
-                    }
-                    if (isPowerStandby()) {
-                        Slog.e(TAG, "Device is in standby. Not handling portSelect");
-                        invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
                         return;
                     }
                     HdmiCecLocalDeviceTv tv = tv();
