@@ -722,7 +722,7 @@ class Task extends TaskFragment {
             } catch (RemoteException e) {
             }
         }
-        if (autoRemoveFromRecents() || isVoiceSession) {
+        if (autoRemoveFromRecents(oldParent.asTaskFragment()) || isVoiceSession) {
             // Task creator asked to remove this when done, or this task was a voice
             // interaction, so it should not remain on the recent tasks list.
             mTaskSupervisor.mRecentTasks.remove(this);
@@ -1577,11 +1577,12 @@ class Task extends TaskFragment {
         return count > 0;
     }
 
-    private boolean autoRemoveFromRecents() {
+    private boolean autoRemoveFromRecents(TaskFragment oldParentFragment) {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
-        // the user.
-        return autoRemoveRecents || (!hasChild() && !getHasBeenVisible());
+        // the user, or it was being embedded in another Task.
+        return autoRemoveRecents || (!hasChild() && !getHasBeenVisible()
+                || (oldParentFragment != null && oldParentFragment.isEmbedded()));
     }
 
     private void clearPinnedTaskIfNeed() {
