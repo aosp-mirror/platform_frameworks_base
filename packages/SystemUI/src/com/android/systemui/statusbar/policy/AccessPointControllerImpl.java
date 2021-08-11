@@ -122,7 +122,7 @@ public class AccessPointControllerImpl
 
     public boolean canConfigMobileData() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
-                UserHandle.of(mCurrentUser)) || mUserTracker.getUserInfo().isAdmin();
+                UserHandle.of(mCurrentUser)) && mUserTracker.getUserInfo().isAdmin();
     }
 
     public void onUserSwitched(int newUserId) {
