@@ -746,7 +746,16 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_writeContacts"
         android:description="@string/permdesc_writeContacts"
-        android:protectionLevel="dangerous" />
+      android:protectionLevel="dangerous" />
+
+    <!-- Allows an application to set default account for new contacts.
+        <p> This permission is only granted to system applications fulfilling the Contacts app role.
+        <p>Protection level: internal|role
+        @SystemApi
+        @hide
+    -->
+    <permission android:name="android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS"
+        android:protectionLevel="internal|role" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing user's calendar                              -->

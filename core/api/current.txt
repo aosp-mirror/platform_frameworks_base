@@ -34900,6 +34900,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
+    method @Nullable public static android.accounts.Account getDefaultAccount(@NonNull android.content.ContentResolver);
     field public static final String ACTION_SET_DEFAULT_ACCOUNT = "android.provider.action.SET_DEFAULT_ACCOUNT";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/setting";

@@ -261,6 +261,7 @@ package android {
     field public static final String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final String SET_CLIP_SOURCE = "android.permission.SET_CLIP_SOURCE";
+    field public static final String SET_DEFAULT_ACCOUNT_FOR_CONTACTS = "android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS";
     field public static final String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
     field public static final String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
@@ -9115,6 +9116,10 @@ package android.provider {
     field @Deprecated public static final String ACCOUNT_TYPE = "account_type";
     field @Deprecated public static final String DATA_SET = "data_set";
     field @Deprecated public static final String STATE = "state";
+  }
+
+  public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
+    method @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static void setDefaultAccount(@NonNull android.content.ContentResolver, @Nullable android.accounts.Account);
   }
 
   public static final class ContactsContract.SimContacts {

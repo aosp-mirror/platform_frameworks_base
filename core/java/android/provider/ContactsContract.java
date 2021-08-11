@@ -8697,6 +8697,56 @@ public final class ContactsContract {
         @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_SET_DEFAULT_ACCOUNT =
                 "android.provider.action.SET_DEFAULT_ACCOUNT";
+
+        /**
+         * The method to invoke in order to set the default account for new contacts.
+         *
+         * @hide
+         */
+        public static final String SET_DEFAULT_ACCOUNT_METHOD = "setDefaultAccount";
+
+        /**
+         * The method to invoke in order to query the default account for new contacts.
+         *
+         * @hide
+         */
+        public static final String QUERY_DEFAULT_ACCOUNT_METHOD = "queryDefaultAccount";
+
+        /**
+         * Key in the incoming Bundle for the default account.
+         *
+         * @hide
+         */
+        public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
+
+        /**
+         * Return the account that was set to default account for new contacts.
+         */
+        @Nullable
+        public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
+            Bundle response = resolver.call(ContactsContract.AUTHORITY_URI,
+                    QUERY_DEFAULT_ACCOUNT_METHOD, null, null);
+            return response.getParcelable(KEY_DEFAULT_ACCOUNT);
+        }
+
+        /**
+         * Set the account to be the default account for new contacts.
+         *
+         * @param account the account to be set to default.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS)
+        public static void setDefaultAccount(@NonNull ContentResolver resolver,
+                @Nullable Account account) {
+            Bundle extras = new Bundle();
+            if (account != null) {
+                extras.putString(ACCOUNT_NAME, account.name);
+                extras.putString(ACCOUNT_TYPE, account.type);
+            }
+
+            resolver.call(ContactsContract.AUTHORITY_URI, SET_DEFAULT_ACCOUNT_METHOD, null, extras);
+        }
     }
 
     /**
