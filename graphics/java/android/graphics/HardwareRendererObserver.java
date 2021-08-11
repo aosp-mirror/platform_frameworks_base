@@ -21,12 +21,14 @@ import android.os.Handler;
 
 import com.android.internal.util.VirtualRefBasePtr;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Provides streaming access to frame stats information from HardwareRenderer to apps.
  *
  * @hide
  */
-public class HardwareRendererObserver {
+public final class HardwareRendererObserver {
     private final long[] mFrameMetrics;
     private final Handler mHandler;
     private final OnFrameMetricsAvailableListener mListener;
@@ -74,15 +76,14 @@ public class HardwareRendererObserver {
         mFrameMetrics = frameMetrics;
         mHandler = handler;
         mListener = listener;
-        mNativePtr = new VirtualRefBasePtr(nCreateObserver(waitForPresentTime));
+        mNativePtr = new VirtualRefBasePtr(nCreateObserver(
+                new WeakReference<>(this), waitForPresentTime));
     }
 
     /*package*/ long getNativeInstance() {
         return mNativePtr.get();
     }
 
-    // Called by native on the provided Handler
-    @SuppressWarnings("unused")
     private void notifyDataAvailable() {
         mHandler.post(() -> {
             boolean hasMoreData = true;
@@ -98,6 +99,21 @@ public class HardwareRendererObserver {
         });
     }
 
-    private native long nCreateObserver(boolean waitForPresentTime);
+    /**
+     * called by native
+     * @hide
+     * @return true to keep listening, false if this is a dead observer
+     */
+    static boolean invokeDataAvailable(WeakReference<HardwareRendererObserver> weakObserver) {
+        HardwareRendererObserver observer = weakObserver.get();
+        if (observer != null) {
+            observer.notifyDataAvailable();
+            return true;
+        }
+        return false;
+    }
+
+    private static native long nCreateObserver(WeakReference<HardwareRendererObserver> observer,
+            boolean waitForPresentTime);
     private static native int nGetNextBuffer(long nativePtr, long[] data);
 }
