@@ -65,7 +65,8 @@ public class BubblePositioner {
     public static final float FLYOUT_MAX_WIDTH_PERCENT_LARGE_SCREEN = 0.3f;
     /** The max percent of screen width to use for the flyout on phone. */
     public static final float FLYOUT_MAX_WIDTH_PERCENT = 0.6f;
-
+    /** The percent of screen width that should be used for the expanded view on a large screen. **/
+    public static final float EXPANDED_VIEW_LARGE_SCREEN_WIDTH_PERCENT = 0.72f;
 
     private Context mContext;
     private WindowManager mWindowManager;
@@ -78,7 +79,8 @@ public class BubblePositioner {
 
     private int mBubbleSize;
     private int mSpacingBetweenBubbles;
-    private int mExpandedViewLargeScreenWidth;
+    private float mExpandedViewLargeScreenWidth;
+    private int mOverflowWidth;
     private int mExpandedViewPadding;
     private int mPointerMargin;
     private int mPointerWidth;
@@ -166,9 +168,11 @@ public class BubblePositioner {
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
-
-        mExpandedViewLargeScreenWidth = res.getDimensionPixelSize(
-                R.dimen.bubble_expanded_view_tablet_width);
+        mExpandedViewLargeScreenWidth = bounds.width() * EXPANDED_VIEW_LARGE_SCREEN_WIDTH_PERCENT;
+        mOverflowWidth = mIsLargeScreen
+                ? (int) mExpandedViewLargeScreenWidth
+                : res.getDimensionPixelSize(
+                        R.dimen.bubble_expanded_view_phone_landscape_overflow_width);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
@@ -242,6 +246,13 @@ public class BubblePositioner {
     }
 
     /**
+     * @return a rect of the screen size.
+     */
+    public Rect getScreenRect() {
+        return mScreenRect;
+    }
+
+    /**
      * @return the relevant insets (status bar, nav bar, cutouts). If taskbar is showing, its
      * inset is not included here.
      */
@@ -292,16 +303,19 @@ public class BubblePositioner {
         int leftPadding = mInsets.left + mExpandedViewPadding;
         int rightPadding = mInsets.right + mExpandedViewPadding;
         final boolean isLargeOrOverflow = mIsLargeScreen || isOverflow;
+        final float expandedViewWidth = isOverflow
+                ? mOverflowWidth
+                : mExpandedViewLargeScreenWidth;
         if (showBubblesVertically()) {
             if (!onLeft) {
                 rightPadding += mBubbleSize - mPointerHeight;
                 leftPadding += isLargeOrOverflow
-                        ? (mPositionRect.width() - rightPadding - mExpandedViewLargeScreenWidth)
+                        ? (mPositionRect.width() - rightPadding - expandedViewWidth)
                         : 0;
             } else {
                 leftPadding += mBubbleSize - mPointerHeight;
                 rightPadding += isLargeOrOverflow
-                        ? (mPositionRect.width() - leftPadding - mExpandedViewLargeScreenWidth)
+                        ? (mPositionRect.width() - leftPadding - expandedViewWidth)
                         : 0;
             }
         }
