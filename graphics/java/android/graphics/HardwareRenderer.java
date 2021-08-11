@@ -752,22 +752,14 @@ public class HardwareRenderer {
         nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
-    private ASurfaceTransactionCallback mASurfaceTransactionCallback;
-
     /** @hide */
-    public void setASurfaceTransactionCallback(ASurfaceTransactionCallback callback) {
-        // ensure callback is kept alive on the java side since weak ref is used in native code
-        mASurfaceTransactionCallback = callback;
+    protected void setASurfaceTransactionCallback(ASurfaceTransactionCallback callback) {
         nSetASurfaceTransactionCallback(mNativeProxy, callback);
     }
 
-    private PrepareSurfaceControlForWebviewCallback mAPrepareSurfaceControlForWebviewCallback;
-
     /** @hide */
-    public void setPrepareSurfaceControlForWebviewCallback(
+    protected void setPrepareSurfaceControlForWebviewCallback(
             PrepareSurfaceControlForWebviewCallback callback) {
-        // ensure callback is kept alive on the java side since weak ref is used in native code
-        mAPrepareSurfaceControlForWebviewCallback = callback;
         nSetPrepareSurfaceControlForWebviewCallback(mNativeProxy, callback);
     }
 
@@ -1299,7 +1291,7 @@ public class HardwareRenderer {
     /**
      * @hide
      */
-    public static native boolean isWebViewOverlaysEnabled();
+    protected static native boolean isWebViewOverlaysEnabled();
 
     /** @hide */
     protected static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
