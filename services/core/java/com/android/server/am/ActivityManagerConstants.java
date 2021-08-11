@@ -56,7 +56,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+    static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
     private static final String KEY_FGSERVICE_MIN_REPORT_TIME
@@ -119,9 +120,11 @@ final class ActivityManagerConstants extends ContentObserver {
             "extra_delay_svc_restart_mem_pressure";
     static final String KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE =
             "enable_extra_delay_svc_restart_mem_pressure";
+    static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE = "kill_bg_restricted_cached_idle";
+    static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME =
+            "kill_bg_restricted_cached_idle_settle_time";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
-    private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -164,6 +167,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
     private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
     private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
+
+    static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
+    static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
+    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
+
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -541,6 +549,19 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile float mFgsStartDeniedLogSampleRate = DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE;
 
     /**
+     * Whether or not to kill apps in background restricted mode and it's cached, its UID state is
+     * idle.
+     */
+    volatile boolean mKillBgRestrictedAndCachedIdle = DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE;
+
+    /**
+     * The amount of time we allow an app in background restricted mode to settle after it goes
+     * into the cached &amp; UID idle, before we decide to kill it.
+     */
+    volatile long mKillBgRestrictedAndCachedIdleSettleTimeMs =
+            DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS;
+
+    /**
      * Whether to allow "opt-out" from the foreground service restrictions.
      * (https://developer.android.com/about/versions/12/foreground-services)
      */
@@ -775,6 +796,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_START_DENIED_LOG_SAMPLE_RATE:
                                 updateFgsStartDeniedLogSamplePercent();
+                                break;
+                            case KEY_KILL_BG_RESTRICTED_CACHED_IDLE:
+                                updateKillBgRestrictedCachedIdle();
+                                break;
+                            case KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME:
+                                updateKillBgRestrictedCachedIdleSettleTime();
                                 break;
                             case KEY_FGS_ALLOW_OPT_OUT:
                                 updateFgsAllowOptOut();
@@ -1140,6 +1167,28 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_START_DENIED_LOG_SAMPLE_RATE,
                 DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE);
+    }
+
+    private void updateKillBgRestrictedCachedIdle() {
+        mKillBgRestrictedAndCachedIdle = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_KILL_BG_RESTRICTED_CACHED_IDLE,
+                DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE);
+    }
+
+    private void updateKillBgRestrictedCachedIdleSettleTime() {
+        final long currentSettleTime = mKillBgRestrictedAndCachedIdleSettleTimeMs;
+        mKillBgRestrictedAndCachedIdleSettleTimeMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME,
+                DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS);
+        if (mKillBgRestrictedAndCachedIdleSettleTimeMs != currentSettleTime) {
+            mService.mHandler.removeMessages(
+                    ActivityManagerService.IDLE_UIDS_MSG);
+            mService.mHandler.sendEmptyMessageDelayed(
+                    ActivityManagerService.IDLE_UIDS_MSG,
+                    mKillBgRestrictedAndCachedIdleSettleTimeMs);
+        }
     }
 
     private void updateFgsAllowOptOut() {

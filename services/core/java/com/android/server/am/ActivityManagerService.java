@@ -1832,18 +1832,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 });
 
-        mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, null,
-                new IAppOpsCallback.Stub() {
-                    @Override public void opChanged(int op, int uid, String packageName) {
-                        if (op == AppOpsManager.OP_RUN_ANY_IN_BACKGROUND && packageName != null) {
-                            synchronized (ActivityManagerService.this) {
-                                mServices.updateAppRestrictedAnyInBackgroundLocked(
-                                        uid, packageName);
-                            }
-                        }
-                    }
-                });
-
         final int[] cameraOp = {AppOpsManager.OP_CAMERA};
         mAppOpsService.startWatchingActive(cameraOp, new IAppOpsActiveCallback.Stub() {
             @Override
@@ -9495,6 +9483,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
                 pw.println();
             });
+
+            if (!mProcessList.mAppsInBackgroundRestricted.isEmpty()) {
+                pw.println("  Processes that are in background restricted:");
+                for (int i = 0, size = mProcessList.mAppsInBackgroundRestricted.size();
+                        i < size; i++) {
+                    pw.println(String.format("%s #%2d: %s", "    ", i,
+                            mProcessList.mAppsInBackgroundRestricted.valueAt(i).toString()));
+                }
+            }
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -14440,6 +14437,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
         final int capability = uidRec != null ? uidRec.getSetCapability() : 0;
         final boolean ephemeral = uidRec != null ? uidRec.isEphemeral() : isEphemeralLocked(uid);
+
+        if (uidRec != null && uidRec.isIdle() && (change & UidRecord.CHANGE_IDLE) != 0) {
+            mProcessList.killAppIfBgRestrictedAndCachedIdleLocked(uidRec);
+        }
 
         if (uidRec != null && !uidRec.isIdle() && (change & UidRecord.CHANGE_GONE) != 0) {
             // If this uid is going away, and we haven't yet reported it is gone,
