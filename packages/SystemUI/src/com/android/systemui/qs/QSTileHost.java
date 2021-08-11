@@ -47,6 +47,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
+import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
@@ -106,6 +107,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
 
+    private final TileServiceRequestController mTileServiceRequestController;
+
     @Inject
     public QSTileHost(Context context,
             StatusBarIconController iconController,
@@ -122,7 +125,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
-            CustomTileStatePersister customTileStatePersister
+            CustomTileStatePersister customTileStatePersister,
+            TileServiceRequestController.Builder tileServiceRequestControllerBuilder
     ) {
         mIconController = iconController;
         mContext = context;
@@ -133,6 +137,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mQSLogger = qsLogger;
         mUiEventLogger = uiEventLogger;
         mBroadcastDispatcher = broadcastDispatcher;
+        mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
@@ -152,6 +157,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
             mAutoTiles = autoTiles.get();
+            mTileServiceRequestController.init();
         });
     }
 
@@ -171,6 +177,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mServices.destroy();
         mPluginManager.removePluginListener(this);
         mDumpManager.unregisterDumpable(TAG);
+        mTileServiceRequestController.destroy();
     }
 
     @Override

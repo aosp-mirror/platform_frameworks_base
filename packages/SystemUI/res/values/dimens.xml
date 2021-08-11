@@ -1636,4 +1636,8 @@
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
+
+    <dimen name="qs_tile_service_request_dialog_width">304dp</dimen>
+    <dimen name="qs_tile_service_request_tile_width">192dp</dimen>
+    <dimen name="qs_tile_service_request_content_space">24dp</dimen>
 </resources>

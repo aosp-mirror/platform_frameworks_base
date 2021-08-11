@@ -3022,4 +3022,12 @@
     <string name="wifi_failed_connect_message">Failed to connect to network</string>
     <!-- Provider Model: Title to see all the networks [CHAR LIMIT=50] -->
     <string name="see_all_networks">See all</string>
+
+    <!-- Text for TileService request dialog. This is shown to the user that an app is requesting
+         user approval to add the shown tile to Quick Settings [CHAR LIMIT=NONE] -->
+    <string name="qs_tile_request_dialog_text"><xliff:g id="appName" example="Fake App">%1$s</xliff:g> wants to add the following tile to Quick Settings</string>
+    <!-- Text for TileService request dialog. Text for button for user to approve adding the tile [CHAR LIMIT=20] -->
+    <string name="qs_tile_request_dialog_add">Add tile</string>
+    <!-- Text for TileService request dialog. Text for button for user to reject adding the tile [CHAR LIMIT=20] -->
+    <string name="qs_tile_request_dialog_not_add">Do not add tile</string>
 </resources>
