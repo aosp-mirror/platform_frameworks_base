@@ -3301,6 +3301,12 @@ public abstract class Context {
      * to startService() are not counted -- this stops the service no matter
      * how many times it was started.
      *
+     * <p>If the service is running as a foreground service when it is
+     * stopped, its associated notification will be removed.  To avoid this,
+     * apps can use {@link android.app.Service#stopForeground(int)
+     * stopForeground(STOP_FOREGROUND_DETACH)} to decouple the notification
+     * from the service's lifecycle before stopping it.</p>
+     *
      * <p>Note that if a stopped service still has {@link ServiceConnection}
      * objects bound to it with the {@link #BIND_AUTO_CREATE} set, it will
      * not be destroyed until all of these bindings are removed.  See
