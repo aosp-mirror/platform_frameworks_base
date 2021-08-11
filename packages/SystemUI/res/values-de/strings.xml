@@ -1076,7 +1076,7 @@
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Du kannst die aktuelle Sitzung ausblenden."</string>
     <string name="controls_media_active_session" msgid="1984383994625845642">"Aktuelle Sitzung kann nicht verborgen werden."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ablehnen"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ausblenden"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
