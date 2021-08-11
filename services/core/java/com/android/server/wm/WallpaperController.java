@@ -559,6 +559,9 @@ class WallpaperController {
         final WindowState prevWallpaperTarget = mWallpaperTarget;
         mWallpaperTarget = wallpaperTarget;
 
+        if (prevWallpaperTarget == null && wallpaperTarget != null) {
+            updateWallpaperOffsetLocked(mWallpaperTarget, false);
+        }
         if (wallpaperTarget == null || prevWallpaperTarget == null) {
             return;
         }
