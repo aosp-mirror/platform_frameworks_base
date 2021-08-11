@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
-import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -67,6 +66,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
             | ActivityInfo.CONFIG_ASSETS_PATHS | ActivityInfo.CONFIG_UI_MODE);
     private final KeyguardViewMediator mKeyguardViewMediator;
+    private final ActivityStarter mActivityStarter;
     private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
@@ -79,16 +79,20 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public VolumeDialogComponent(
             Context context,
             KeyguardViewMediator keyguardViewMediator,
+            ActivityStarter activityStarter,
             VolumeDialogControllerImpl volumeDialogController,
-            DemoModeController demoModeController) {
+            DemoModeController demoModeController,
+            PluginDependencyProvider pluginDependencyProvider,
+            ExtensionController extensionController,
+            TunerService tunerService) {
         mContext = context;
         mKeyguardViewMediator = keyguardViewMediator;
+        mActivityStarter = activityStarter;
         mController = volumeDialogController;
         mController.setUserActivityListener(this);
         // Allow plugins to reference the VolumeDialogController.
-        Dependency.get(PluginDependencyProvider.class)
-                .allowPluginDependency(VolumeDialogController.class);
-        Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
+        pluginDependencyProvider.allowPluginDependency(VolumeDialogController.class);
+        extensionController.newExtension(VolumeDialog.class)
                 .withPlugin(VolumeDialog.class)
                 .withDefault(this::createDefault)
                 .withCallback(dialog -> {
@@ -99,7 +103,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
                     mDialog.init(LayoutParams.TYPE_VOLUME_OVERLAY, mVolumeDialogCallback);
                 }).build();
         applyConfiguration();
-        Dependency.get(TunerService.class).addTunable(this, VOLUME_DOWN_SILENT, VOLUME_UP_SILENT,
+        tunerService.addTunable(this, VOLUME_DOWN_SILENT, VOLUME_UP_SILENT,
                 VOLUME_SILENT_DO_NOT_DISTURB);
         demoModeController.addCallback(this);
     }
@@ -189,8 +193,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     }
 
     private void startSettings(Intent intent) {
-        Dependency.get(ActivityStarter.class).startActivity(intent,
-                true /* onlyProvisioned */, true /* dismissShade */);
+        mActivityStarter.startActivity(intent, true /* onlyProvisioned */, true /* dismissShade */);
     }
 
     private final VolumeDialogImpl.Callback mVolumeDialogCallback = new VolumeDialogImpl.Callback() {
