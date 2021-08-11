@@ -16918,6 +16918,21 @@ public final class Settings {
              * @hide
              */
             public static final String WRIST_ORIENTATION_MODE = "wear_wrist_orientation_mode";
+
+            /**
+             * Setting indicating the name of the Wear OS app package containing the device's sysui.
+             *
+             * @hide
+             */
+            public static final String CLOCKWORK_SYSUI_PACKAGE = "clockwork_sysui_package";
+
+            /**
+             * Setting indicating the name of the main activity of the Wear OS sysui.
+             *
+             * @hide
+             */
+            public static final String CLOCKWORK_SYSUI_MAIN_ACTIVITY =
+                    "clockwork_sysui_main_activity";
         }
     }
 
