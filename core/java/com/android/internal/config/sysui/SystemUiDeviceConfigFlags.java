@@ -495,6 +495,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String SHORTCUT_APPSEARCH_INTEGRATION =
             "shortcut_appsearch_integration";
 
+    /**
+     * (boolean) Whether nearby share should be the first target in ranked apps.
+     */
+    public static final String IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP =
+            "is_nearby_share_first_target_in_ranked_app";
+
     private SystemUiDeviceConfigFlags() {
     }
 }
