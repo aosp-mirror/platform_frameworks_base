@@ -14981,6 +14981,16 @@ public final class Settings {
                 "power_button_long_press";
 
         /**
+         * Override internal R.integer.config_longPressOnPowerDurationMs. It determines the length
+         * of power button press to be considered a long press in milliseconds.
+         * Used by PhoneWindowManager.
+         * @hide
+         */
+        @Readable
+        public static final String POWER_BUTTON_LONG_PRESS_DURATION_MS =
+                "power_button_long_press_duration_ms";
+
+        /**
          * Overrides internal R.integer.config_veryLongPressOnPowerBehavior.
          * Allowable values detailed in frameworks/base/core/res/res/values/config.xml.
          * Used by PhoneWindowManager.
