@@ -135,6 +135,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -1301,7 +1302,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR,
-            W_NOTIFICATION_SHADE })
+            W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test
     public void testApplyTopFixedRotationTransform() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -1404,6 +1405,14 @@ public class DisplayContentTests extends WindowTestsBase {
                 WindowConfiguration.ACTIVITY_TYPE_UNDEFINED);
         assertEquals("The process should receive rotated configuration for compatibility",
                 expectedProcConfig, app2.app.getConfiguration());
+
+        // If the rotated activity requests to show IME, the IME window should use the
+        // transformation from activity to lay out in the same orientation.
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        LocalServices.getService(WindowManagerInternal.class).onToggleImeRequested(true /* show */,
+                app.token, app.token, mDisplayContent.mDisplayId);
+        assertTrue(mImeWindow.mToken.hasFixedRotationTransform());
+        assertTrue(mImeWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
 
         // The fixed rotation transform can only be finished when all animation finished.
         doReturn(false).when(app2).isAnimating(anyInt(), anyInt());
