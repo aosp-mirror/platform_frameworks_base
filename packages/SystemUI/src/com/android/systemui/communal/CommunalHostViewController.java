@@ -47,6 +47,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private static final String STATE_LIST_FORMAT = "[%s]";
 
     private final Executor mMainExecutor;
+    private final CommunalStateController mCommunalStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
@@ -117,10 +118,12 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
 
     @Inject
     protected CommunalHostViewController(@Main Executor mainExecutor,
+            CommunalStateController communalStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController, CommunalHostView view) {
         super(view);
+        mCommunalStateController = communalStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mMainExecutor = mainExecutor;
         mKeyguardStateController = keyguardStateController;
@@ -247,6 +250,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
             } else {
                 mView.removeAllViews();
                 mView.setVisibility(View.INVISIBLE);
+                mCommunalStateController.setCommunalViewShowing(false);
             }
         });
     }
