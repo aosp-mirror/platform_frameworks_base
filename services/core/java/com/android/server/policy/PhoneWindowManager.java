@@ -2696,6 +2696,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean canceled = event.isCanceled();
         final int displayId = event.getDisplayId();
         final long key_consumed = -1;
+        final long key_not_consumed = 0;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
@@ -2885,7 +2886,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_TAB:
                 if (event.isMetaPressed()) {
                     // Pass through keyboard navigation keys.
-                    return 0;
+                    return key_not_consumed;
                 }
                 // Display task switcher for ALT-TAB.
                 if (down && repeatCount == 0) {
@@ -2916,9 +2917,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return key_consumed;
 
             case KeyEvent.KEYCODE_SPACE:
-                // Handle keyboard layout switching.
-                if ((metaState & (KeyEvent.META_CTRL_MASK | KeyEvent.META_META_MASK)) == 0) {
-                    return 0;
+                // Handle keyboard layout switching. (META + SPACE)
+                if ((metaState & KeyEvent.META_META_MASK) == 0) {
+                    return key_not_consumed;
                 }
                 // Share the same behavior with KEYCODE_LANGUAGE_SWITCH.
             case KeyEvent.KEYCODE_LANGUAGE_SWITCH:
@@ -2992,7 +2993,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Let the application handle the key.
-        return 0;
+        return key_not_consumed;
     }
 
     /**
@@ -3058,6 +3059,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + ", policyFlags=" + policyFlags);
         }
 
+        if (interceptUnhandledKey(event)) {
+            return null;
+        }
+
         KeyEvent fallbackEvent = null;
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
             final KeyCharacterMap kcm = event.getKeyCharacterMap();
@@ -3112,13 +3117,46 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return fallbackEvent;
     }
 
+    private boolean interceptUnhandledKey(KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        final int repeatCount = event.getRepeatCount();
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        final int metaState = event.getModifiers();
+
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_SPACE:
+                if (down && repeatCount == 0) {
+                    // Handle keyboard layout switching. (CTRL + SPACE)
+                    if (KeyEvent.metaStateHasModifiers(metaState, KeyEvent.META_CTRL_ON)) {
+                        int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+                        mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_Z:
+                if (down && KeyEvent.metaStateHasModifiers(metaState,
+                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON)) {
+                    // Intercept the Accessibility keychord (CTRL + ALT + Z) for keyboard users.
+                    if (mAccessibilityShortcutController
+                            .isAccessibilityShortcutAvailable(isKeyguardLocked())) {
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_ACCESSIBILITY_SHORTCUT));
+                        return true;
+                    }
+                }
+                break;
+        }
+
+        return false;
+    }
+
     private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
             int policyFlags) {
         int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             long delayMillis = interceptKeyBeforeDispatching(
                     focusedToken, fallbackEvent, policyFlags);
-            if (delayMillis == 0) {
+            if (delayMillis == 0 && !interceptUnhandledKey(fallbackEvent)) {
                 return true;
             }
         }
@@ -3986,19 +4024,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Just drop if keys are not intercepted for direct key.
                 result &= ~ACTION_PASS_TO_USER;
                 break;
-            }
-        }
-
-        // Intercept the Accessibility keychord (CTRL + ALT + Z) for keyboard users.
-        if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(isKeyguardLocked())) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_Z: {
-                    if (down && event.isCtrlPressed() && event.isAltPressed()) {
-                        mHandler.sendMessage(mHandler.obtainMessage(MSG_ACCESSIBILITY_SHORTCUT));
-                        result &= ~ACTION_PASS_TO_USER;
-                    }
-                    break;
-                }
             }
         }
 
