@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -25,96 +24,69 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip launch and exit.
- * To run this test: `atest WMShellFlickerTests:EnterExitPipTest`
+ * Test expanding a pip window back to full screen via the expand button
+ *
+ * To run this test: `atest WMShellFlickerTests:ExitPipViaExpandButtonClickTest`
+ *
+ * Actions:
+ *     Launch an app in pip mode [pipApp],
+ *     Launch another full screen mode [testApp]
+ *     Expand [pipApp] app to full screen by clicking on the pip window and
+ *     then on the expand button
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class EnterExitPipTest(
+@Postsubmit
+class ExitPipViaExpandButtonClickTest(
     testSpec: FlickerTestParameter
-) : PipTransition(testSpec) {
-    private val testApp = FixedAppHelper(instrumentation)
+) : ExitPipToAppTransition(testSpec) {
 
+    /**
+     * Defines the transition used to run the test
+     */
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true) {
             setup {
                 eachRun {
+                    // launch an app behind the pip one
                     testApp.launchViaIntent(wmHelper)
                 }
             }
             transitions {
                 // This will bring PipApp to fullscreen
-                pipApp.launchViaIntent(wmHelper)
+                pipApp.expandPipWindowToApp(wmHelper)
             }
         }
 
-    @Presubmit
-    @Test
-    fun pipAppRemainInsideVisibleBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
-        }
-    }
-
-    @Postsubmit
-    @Test
-    fun showBothAppWindowsThenHidePip() {
-        testSpec.assertWm {
-            // when the activity is STOPPING, sometimes it becomes invisible in an entry before
-            // the window, sometimes in the same entry. This occurs because we log 1x per frame
-            // thus we ignore activity here
-            isAppWindowVisible(testApp.component, ignoreActivity = true)
-                .isAppWindowOnTop(pipApp.component)
-                .then()
-                .isAppWindowInvisible(testApp.component)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun showBothAppLayersThenHidePip() {
-        testSpec.assertLayers {
-            isVisible(testApp.component)
-                .isVisible(pipApp.component)
-                .then()
-                .isInvisible(testApp.component)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun testAppCoversFullScreenWithPipOnDisplay() {
-        testSpec.assertLayersStart {
-            visibleRegion(testApp.component).coversExactly(displayBounds)
-            visibleRegion(pipApp.component).coversAtMost(displayBounds)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun pipAppCoversFullScreen() {
-        testSpec.assertLayersEnd {
-            visibleRegion(pipApp.component).coversExactly(displayBounds)
-        }
-    }
-
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
         }
     }
 }
