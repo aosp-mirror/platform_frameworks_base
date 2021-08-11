@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FOOTER;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.text.TextUtils;
@@ -29,6 +31,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Controller for {@link QSFooterView}.
@@ -39,7 +42,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final UserTracker mUserTracker;
     private final QSPanelController mQsPanelController;
     private final QuickQSPanelController mQuickQSPanelController;
-    private final QSFooterActionsController mQsFooterActionsController;
+    private final FooterActionsController mFooterActionsController;
     private final TextView mBuildText;
     private final PageIndicator mPageIndicator;
 
@@ -48,12 +51,12 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
             UserTracker userTracker,
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController,
-            QSFooterActionsController qsFooterActionsController) {
+            @Named(QS_FOOTER) FooterActionsController footerActionsController) {
         super(view);
         mUserTracker = userTracker;
         mQsPanelController = qsPanelController;
         mQuickQSPanelController = quickQSPanelController;
-        mQsFooterActionsController = qsFooterActionsController;
+        mFooterActionsController = footerActionsController;
 
         mBuildText = mView.findViewById(R.id.build);
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
@@ -62,7 +65,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     protected void onInit() {
         super.onInit();
-        mQsFooterActionsController.init();
+        mFooterActionsController.init();
     }
 
     @Override
@@ -70,7 +73,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mView.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     mView.updateExpansion();
-                    mQsFooterActionsController.updateAnimator(right - left,
+                    mFooterActionsController.updateAnimator(right - left,
                             mQuickQSPanelController.getNumQuickTiles());
                 }
         );
@@ -104,25 +107,25 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
     @Override
     public void setExpanded(boolean expanded) {
-        mQsFooterActionsController.setExpanded(expanded);
+        mFooterActionsController.setExpanded(expanded);
         mView.setExpanded(expanded);
     }
 
     @Override
     public void setExpansion(float expansion) {
         mView.setExpansion(expansion);
-        mQsFooterActionsController.setExpansion(expansion);
+        mFooterActionsController.setExpansion(expansion);
     }
 
     @Override
     public void setListening(boolean listening) {
-        mQsFooterActionsController.setListening(listening);
+        mFooterActionsController.setListening(listening);
     }
 
     @Override
     public void setKeyguardShowing(boolean keyguardShowing) {
         mView.setKeyguardShowing();
-        mQsFooterActionsController.setKeyguardShowing();
+        mFooterActionsController.setKeyguardShowing();
     }
 
     /** */
@@ -134,6 +137,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     public void disable(int state1, int state2, boolean animate) {
         mView.disable(state2);
-        mQsFooterActionsController.disable(state2);
+        mFooterActionsController.disable(state2);
     }
 }

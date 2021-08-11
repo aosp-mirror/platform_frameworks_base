@@ -41,7 +41,7 @@ import com.android.systemui.R;
 
 /**
  * Footer of expanded Quick Settings, tiles page indicator, (optionally) build number and
- * {@link QSFooterActionsView}
+ * {@link FooterActionsView}
  */
 public class QSFooterView extends FrameLayout {
     private PageIndicator mPageIndicator;
@@ -75,7 +75,7 @@ public class QSFooterView extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPageIndicator = findViewById(R.id.footer_page_indicator);
-        mActionsContainer = requireViewById(R.id.qs_footer_actions_container);
+        mActionsContainer = requireViewById(R.id.qs_footer_actions);
         mBuildText = findViewById(R.id.build);
 
         updateResources();
