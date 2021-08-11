@@ -971,6 +971,20 @@
     -->
     <integer name="config_longPressOnPowerBehavior">5</integer>
 
+    <!-- The time in milliseconds after which a press on power button is considered "long". -->
+    <integer name="config_longPressOnPowerDurationMs">500</integer>
+
+    <!-- The possible UI options to be surfaced for configuring long press power on duration
+         action. Value set in config_longPressOnPowerDurationMs should be one of the available
+         options to allow users to restore default. -->
+    <integer-array name="config_longPressOnPowerDurationSettings">
+        <item>250</item>
+        <item>350</item>
+        <item>500</item>
+        <item>650</item>
+        <item>750</item>
+    </integer-array>
+
     <!-- Whether the setting to change long press on power behaviour from default to assistant (5)
          is available in Settings.
      -->
