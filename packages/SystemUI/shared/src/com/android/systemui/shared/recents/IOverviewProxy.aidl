@@ -90,4 +90,9 @@ oneway interface IOverviewProxy {
      * Sent when behavior changes. See WindowInsetsController#@Behavior
      */
     void onSystemBarAttributesChanged(int displayId, int behavior) = 20;
+
+    /**
+     * Sent when screen turned on and ready to use (blocker scrim is hidden)
+     */
+    void onScreenTurnedOn() = 21;
 }
