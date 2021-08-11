@@ -20,7 +20,9 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCR
 
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -39,7 +41,9 @@ import java.util.Optional;
 public class ShellInitImpl {
     private static final String TAG = ShellInitImpl.class.getSimpleName();
 
+    private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<BubbleController> mBubblesOptional;
@@ -55,7 +59,10 @@ public class ShellInitImpl {
 
     private final InitImpl mImpl = new InitImpl();
 
-    public ShellInitImpl(DisplayImeController displayImeController,
+    public ShellInitImpl(
+            DisplayController displayController,
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
@@ -68,7 +75,9 @@ public class ShellInitImpl {
             Transitions transitions,
             StartingWindowController startingWindow,
             ShellExecutor mainExecutor) {
+        mDisplayController = displayController;
         mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mBubblesOptional = bubblesOptional;
@@ -88,7 +97,9 @@ public class ShellInitImpl {
     }
 
     private void init() {
-        // Start listening for display changes
+        // Start listening for display and insets changes
+        mDisplayController.initialize();
+        mDisplayInsetsController.initialize();
         mDisplayImeController.startMonitorDisplays();
 
         // Setup the shell organizer
