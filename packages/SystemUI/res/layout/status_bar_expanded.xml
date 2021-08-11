@@ -68,7 +68,7 @@
             android:id="@+id/lock_icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="48px"
+            android:padding="@dimen/lock_icon_padding"
             android:layout_gravity="center"
             android:scaleType="centerCrop"/>
     </com.android.keyguard.LockIconView>
