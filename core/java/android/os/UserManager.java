@@ -114,6 +114,7 @@ public class UserManager {
      * User type representing a guest user that may be transient.
      * @hide
      */
+    @SystemApi
     public static final String USER_TYPE_FULL_GUEST = "android.os.usertype.full.GUEST";
 
     /**

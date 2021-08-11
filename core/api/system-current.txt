@@ -8700,6 +8700,7 @@ package android.os {
     field public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 4; // 0x4
     field public static final int SWITCHABILITY_STATUS_USER_IN_CALL = 1; // 0x1
     field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
+    field public static final String USER_TYPE_FULL_GUEST = "android.os.usertype.full.GUEST";
     field public static final String USER_TYPE_FULL_SECONDARY = "android.os.usertype.full.SECONDARY";
     field public static final String USER_TYPE_FULL_SYSTEM = "android.os.usertype.full.SYSTEM";
     field public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
