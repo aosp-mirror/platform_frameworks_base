@@ -304,10 +304,9 @@ public class ImePerfTest extends ImePerfTestBase
 
             while (state.keepRunning(measuredTimeNs)) {
                 setImeListener(activity, latchStart, latchEnd);
-                latchStart.set(new CountDownLatch(show ? 1 : 2));
-                latchEnd.set(new CountDownLatch(2));
                 // For measuring hide, lets show IME first.
                 if (!show) {
+                    initLatch(latchStart, latchEnd);
                     AtomicBoolean showCalled = new AtomicBoolean();
                     getInstrumentation().runOnMainSync(() -> {
                         if (!isImeVisible(activity)) {
@@ -316,9 +315,10 @@ public class ImePerfTest extends ImePerfTestBase
                         }
                     });
                     if (showCalled.get()) {
-                        PollingCheck.check("IME show animation should finish ", TIMEOUT_1_S_IN_MS,
-                                () -> latchStart.get().getCount() == 1
-                                        && latchEnd.get().getCount() == 1);
+                        PollingCheck.check("IME show animation should finish ",
+                                TIMEOUT_1_S_IN_MS * 3,
+                                () -> latchStart.get().getCount() == 0
+                                        && latchEnd.get().getCount() == 0);
                     }
                 }
                 if (!mIsTraceStarted && !state.isWarmingUp()) {
@@ -328,6 +328,7 @@ public class ImePerfTest extends ImePerfTestBase
 
                 AtomicLong startTime = new AtomicLong();
                 AtomicBoolean unexpectedVisibility = new AtomicBoolean();
+                initLatch(latchStart, latchEnd);
                 getInstrumentation().runOnMainSync(() -> {
                     boolean isVisible = isImeVisible(activity);
                     startTime.set(SystemClock.elapsedRealtimeNanos());
@@ -346,11 +347,15 @@ public class ImePerfTest extends ImePerfTestBase
                     long timeElapsed = waitForAnimationStart(latchStart, startTime);
                     if (timeElapsed != ANIMATION_NOT_STARTED) {
                         measuredTimeNs = timeElapsed;
+                        // wait for animation to end or we may start two animations and timing
+                        // will not be measured accurately.
+                        waitForAnimationEnd(latchEnd);
                     }
                 }
 
                 // hide IME before next iteration.
                 if (show) {
+                    initLatch(latchStart, latchEnd);
                     activity.runOnUiThread(() -> controller.hide(WindowInsets.Type.ime()));
                     try {
                         latchEnd.get().await(TIMEOUT_1_S_IN_MS * 5, TimeUnit.MILLISECONDS);
@@ -372,6 +377,12 @@ public class ImePerfTest extends ImePerfTestBase
         addResultToState(state);
     }
 
+    private void initLatch(AtomicReference<CountDownLatch> latchStart,
+            AtomicReference<CountDownLatch> latchEnd) {
+        latchStart.set(new CountDownLatch(1));
+        latchEnd.set(new CountDownLatch(1));
+    }
+
     @UiThread
     private boolean isImeVisible(@NonNull final Activity activity) {
         return activity.getWindow().getDecorView().getRootWindowInsets().isVisible(
@@ -381,13 +392,19 @@ public class ImePerfTest extends ImePerfTestBase
     private long waitForAnimationStart(
             AtomicReference<CountDownLatch> latchStart, AtomicLong startTime) {
         try {
-            latchStart.get().await(TIMEOUT_1_S_IN_MS * 5, TimeUnit.MILLISECONDS);
+            latchStart.get().await(5, TimeUnit.SECONDS);
             if (latchStart.get().getCount() != 0) {
                 return ANIMATION_NOT_STARTED;
             }
         } catch (InterruptedException e) { }
 
         return SystemClock.elapsedRealtimeNanos() - startTime.get();
+    }
+
+    private void waitForAnimationEnd(AtomicReference<CountDownLatch> latchEnd) {
+        try {
+            latchEnd.get().await(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) { }
     }
 
     private void addResultToState(ManualBenchmarkState state) {

@@ -269,6 +269,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
     @Mock private StatusBarLocationPublisher mLocationPublisher;
+    @Mock private StatusBarIconController mIconController;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private IWallpaperManager mWallpaperManager;
@@ -442,6 +443,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
+                mIconController,
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,

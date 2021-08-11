@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.app.appsearch.exceptions.IllegalSchemaException;
 import android.app.appsearch.util.BundleUtil;
 import android.app.appsearch.util.IndentingStringBuilder;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.util.ArraySet;
 
@@ -643,60 +642,8 @@ public final class AppSearchSchema {
         }
     }
 
-    /**
-     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-     * @hide
-     */
-    @Deprecated
-    public static class Int64PropertyConfig extends PropertyConfig {
-        @UnsupportedAppUsage
-        Int64PropertyConfig(@NonNull Bundle bundle) {
-            super(bundle);
-        }
-
-        /** Builder for {@link Int64PropertyConfig}. */
-        public static final class Builder {
-            private final String mPropertyName;
-            private @Cardinality int mCardinality = CARDINALITY_OPTIONAL;
-
-            /** Creates a new {@link Int64PropertyConfig.Builder}. */
-            @UnsupportedAppUsage
-            public Builder(@NonNull String propertyName) {
-                mPropertyName = Objects.requireNonNull(propertyName);
-            }
-
-            /**
-             * The cardinality of the property (whether it is optional, required or repeated).
-             *
-             * <p>If this method is not called, the default cardinality is {@link
-             * PropertyConfig#CARDINALITY_OPTIONAL}.
-             */
-            @SuppressWarnings("MissingGetterMatchingBuilder") // getter defined in superclass
-            @NonNull
-            @UnsupportedAppUsage
-            public Int64PropertyConfig.Builder setCardinality(@Cardinality int cardinality) {
-                Preconditions.checkArgumentInRange(
-                        cardinality, CARDINALITY_REPEATED, CARDINALITY_REQUIRED, "cardinality");
-                mCardinality = cardinality;
-                return this;
-            }
-
-            /** Constructs a new {@link Int64PropertyConfig} from the contents of this builder. */
-            @NonNull
-            @UnsupportedAppUsage
-            public Int64PropertyConfig build() {
-                Bundle bundle = new Bundle();
-                bundle.putString(NAME_FIELD, mPropertyName);
-                bundle.putInt(DATA_TYPE_FIELD, DATA_TYPE_LONG);
-                bundle.putInt(CARDINALITY_FIELD, mCardinality);
-                return new Int64PropertyConfig(bundle);
-            }
-        }
-    }
-
     /** Configuration for a property containing a 64-bit integer. */
-    // TODO(b/181887768): This should extend directly from PropertyConfig
-    public static final class LongPropertyConfig extends Int64PropertyConfig {
+    public static final class LongPropertyConfig extends PropertyConfig {
         LongPropertyConfig(@NonNull Bundle bundle) {
             super(bundle);
         }
@@ -896,8 +843,7 @@ public final class AppSearchSchema {
         /** Builder for {@link DocumentPropertyConfig}. */
         public static final class Builder {
             private final String mPropertyName;
-            // TODO(b/181887768): This should be final
-            private String mSchemaType;
+            private final String mSchemaType;
             private @Cardinality int mCardinality = CARDINALITY_OPTIONAL;
             private boolean mShouldIndexNestedProperties = false;
 
@@ -913,29 +859,6 @@ public final class AppSearchSchema {
             public Builder(@NonNull String propertyName, @NonNull String schemaType) {
                 mPropertyName = Objects.requireNonNull(propertyName);
                 mSchemaType = Objects.requireNonNull(schemaType);
-            }
-
-            /**
-             * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-             * @hide
-             */
-            @Deprecated
-            @UnsupportedAppUsage
-            public Builder(@NonNull String propertyName) {
-                mPropertyName = Objects.requireNonNull(propertyName);
-                mSchemaType = null;
-            }
-
-            /**
-             * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-             * @hide
-             */
-            @Deprecated
-            @UnsupportedAppUsage
-            @NonNull
-            public Builder setSchemaType(@NonNull String schemaType) {
-                mSchemaType = Objects.requireNonNull(schemaType);
-                return this;
             }
 
             /**
@@ -967,18 +890,6 @@ public final class AppSearchSchema {
                 return this;
             }
 
-            /**
-             * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-             * @hide
-             */
-            @Deprecated
-            @UnsupportedAppUsage
-            @NonNull
-            public DocumentPropertyConfig.Builder setIndexNestedProperties(
-                    boolean indexNestedProperties) {
-                return setShouldIndexNestedProperties(indexNestedProperties);
-            }
-
             /** Constructs a new {@link PropertyConfig} from the contents of this builder. */
             @NonNull
             public DocumentPropertyConfig build() {
@@ -987,9 +898,7 @@ public final class AppSearchSchema {
                 bundle.putInt(DATA_TYPE_FIELD, DATA_TYPE_DOCUMENT);
                 bundle.putInt(CARDINALITY_FIELD, mCardinality);
                 bundle.putBoolean(INDEX_NESTED_PROPERTIES_FIELD, mShouldIndexNestedProperties);
-                // TODO(b/181887768): Remove checkNotNull after the deprecated constructor (which
-                //  is the only way to get null here) is removed
-                bundle.putString(SCHEMA_TYPE_FIELD, Objects.requireNonNull(mSchemaType));
+                bundle.putString(SCHEMA_TYPE_FIELD, mSchemaType);
                 return new DocumentPropertyConfig(bundle);
             }
         }

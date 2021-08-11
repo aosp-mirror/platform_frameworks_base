@@ -1257,13 +1257,32 @@ public class ResolverActivity extends Activity implements
         // don't kill ourselves.
         StrictMode.disableDeathOnFileUriExposure();
         try {
-            safelyStartActivityInternal(cti);
+            UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
+            safelyStartActivityInternal(cti, currentUserHandle);
         } finally {
             StrictMode.enableDeathOnFileUriExposure();
         }
     }
 
-    private void safelyStartActivityInternal(TargetInfo cti) {
+    /**
+     * Start activity as a fixed user handle.
+     * @param cti TargetInfo to be launched.
+     * @param user User to launch this activity as.
+     */
+    @VisibleForTesting
+    public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user) {
+        // We're dispatching intents that might be coming from legacy apps, so
+        // don't kill ourselves.
+        StrictMode.disableDeathOnFileUriExposure();
+        try {
+            safelyStartActivityInternal(cti, user);
+        } finally {
+            StrictMode.enableDeathOnFileUriExposure();
+        }
+    }
+
+
+    private void safelyStartActivityInternal(TargetInfo cti, UserHandle user) {
         // If the target is suspended, the activity will not be successfully launched.
         // Do not unregister from package manager updates in this case
         if (!cti.isSuspended() && mRegistered) {
@@ -1280,18 +1299,17 @@ public class ResolverActivity extends Activity implements
         if (mProfileSwitchMessageId != -1) {
             Toast.makeText(this, getString(mProfileSwitchMessageId), Toast.LENGTH_LONG).show();
         }
-        UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
         if (!mSafeForwardingMode) {
-            if (cti.startAsUser(this, null, currentUserHandle)) {
+            if (cti.startAsUser(this, null, user)) {
                 onActivityStarted(cti);
-                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
+                maybeLogCrossProfileTargetLaunch(cti, user);
             }
             return;
         }
         try {
-            if (cti.startAsCaller(this, null, currentUserHandle.getIdentifier())) {
+            if (cti.startAsCaller(this, null, user.getIdentifier())) {
                 onActivityStarted(cti);
-                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
+                maybeLogCrossProfileTargetLaunch(cti, user);
             }
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unable to launch as uid " + mLaunchedFromUid

@@ -933,9 +933,11 @@ class ActivityMetricsLogger {
         // This will avoid any races with other operations that modify the ActivityRecord.
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.isInterestingToLoggerAndObserver()) {
+            final long timestamp = info.mTransitionStartTimeNs;
+            final long uptime = info.mTransitionDeviceUptimeMs;
+            final int transitionDelay = info.mCurrentTransitionDelayMs;
             mLoggerHandler.post(() -> logAppTransition(
-                    info.mTransitionDeviceUptimeMs, info.mCurrentTransitionDelayMs,
-                    infoSnapshot, isHibernating));
+                    timestamp, uptime, transitionDelay, infoSnapshot, isHibernating));
         }
         mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
         if (info.mPendingFullyDrawn != null) {
@@ -946,8 +948,8 @@ class ActivityMetricsLogger {
     }
 
     // This gets called on another thread without holding the activity manager lock.
-    private void logAppTransition(long transitionDeviceUptimeMs, int currentTransitionDelayMs,
-            TransitionInfoSnapshot info, boolean isHibernating) {
+    private void logAppTransition(long transitionStartTimeNs, long transitionDeviceUptimeMs,
+            int currentTransitionDelayMs, TransitionInfoSnapshot info, boolean isHibernating) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
         builder.setPackageName(info.packageName);
         builder.setType(info.type);
@@ -998,7 +1000,7 @@ class ActivityMetricsLogger {
                 info.launchedActivityName,
                 info.launchedActivityLaunchedFromPackage,
                 isInstantApp,
-                transitionDeviceUptimeMs,
+                0 /* deprecated transitionDeviceUptimeMs */,
                 info.reason,
                 currentTransitionDelayMs,
                 info.startingWindowDelayMs,
@@ -1012,7 +1014,8 @@ class ActivityMetricsLogger {
                 isHibernating,
                 isIncremental,
                 isLoading,
-                info.launchedActivityName.hashCode());
+                info.launchedActivityName.hashCode(),
+                TimeUnit.NANOSECONDS.toMillis(transitionStartTimeNs));
 
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",

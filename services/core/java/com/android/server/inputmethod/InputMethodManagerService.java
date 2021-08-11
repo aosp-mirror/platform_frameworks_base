@@ -4937,12 +4937,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mInputManagerInternal.transferTouchFocus(sourceInputToken, curHostInputToken);
     }
 
-    private void reportImeControl(@Nullable IBinder windowToken) {
+    private void reportImeControl(@Nullable IBinder windowToken, boolean imeParentChanged) {
         synchronized (mMethodMap) {
             if (mCurFocusedWindow != windowToken) {
                 // mCurPerceptible was set by the focused window, but it is no longer in control,
                 // so we reset mCurPerceptible.
                 mCurPerceptible = true;
+            }
+            if (imeParentChanged) {
+                // Hide the IME method menu earlier when the IME surface parent will change in
+                // case seeing the dialog dismiss flickering during the next focused window
+                // starting the input connection.
+                mMenuController.hideInputMethodMenu();
             }
         }
     }
@@ -5001,8 +5007,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void reportImeControl(@Nullable IBinder windowToken) {
-            mService.reportImeControl(windowToken);
+        public void reportImeControl(@Nullable IBinder windowToken, boolean imeParentChanged) {
+            mService.reportImeControl(windowToken, imeParentChanged);
         }
 
         @Override

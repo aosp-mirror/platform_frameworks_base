@@ -165,14 +165,14 @@ public class NotificationIconAreaController implements
      * Called by the Keyguard*ViewController whose view contains the aod icons.
      */
     public void setupAodIcons(@NonNull NotificationIconContainer aodIcons) {
-        boolean changed = mAodIcons != null;
+        boolean changed = mAodIcons != null && aodIcons != mAodIcons;
         if (changed) {
             mAodIcons.setAnimationsEnabled(false);
             mAodIcons.removeAllViews();
         }
         mAodIcons = aodIcons;
         mAodIcons.setOnLockScreen(true);
-        updateAodIconsVisibility(false /* animate */);
+        updateAodIconsVisibility(false /* animate */, changed);
         updateAnimations();
         if (changed) {
             updateAodNotificationIcons();
@@ -587,7 +587,7 @@ public class NotificationIconAreaController implements
 
     @Override
     public void onStateChanged(int newState) {
-        updateAodIconsVisibility(false /* animate */);
+        updateAodIconsVisibility(false /* animate */, false /* force */);
         updateAnimations();
     }
 
@@ -663,18 +663,18 @@ public class NotificationIconAreaController implements
             // since otherwise the unhide animation overlaps
             animate &= fullyHidden;
         }
-        updateAodIconsVisibility(animate);
+        updateAodIconsVisibility(animate, false /* force */);
         updateAodNotificationIcons();
     }
 
     @Override
     public void onPulseExpansionChanged(boolean expandingChanged) {
         if (expandingChanged) {
-            updateAodIconsVisibility(true /* animate */);
+            updateAodIconsVisibility(true /* animate */, false /* force */);
         }
     }
 
-    private void updateAodIconsVisibility(boolean animate) {
+    private void updateAodIconsVisibility(boolean animate, boolean forceUpdate) {
         if (mAodIcons == null) {
             return;
         }
@@ -688,10 +688,11 @@ public class NotificationIconAreaController implements
                 && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
             visible = false;
         }
-        if (visible && mWakeUpCoordinator.isPulseExpanding()) {
+        if (visible && mWakeUpCoordinator.isPulseExpanding()
+                && !mBypassController.getBypassEnabled()) {
             visible = false;
         }
-        if (mAodIconsVisible != visible) {
+        if (mAodIconsVisible != visible || forceUpdate) {
             mAodIconsVisible = visible;
             mAodIcons.animate().cancel();
             if (animate) {

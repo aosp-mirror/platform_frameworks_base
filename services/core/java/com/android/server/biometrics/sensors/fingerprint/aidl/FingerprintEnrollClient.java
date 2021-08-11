@@ -55,6 +55,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     private final @FingerprintManager.EnrollReason int mEnrollReason;
     @Nullable private ICancellationSignal mCancellationSignal;
     private final int mMaxTemplatesPerUser;
+    private boolean mIsPointerDown;
 
     FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
@@ -65,7 +66,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             @Nullable IUdfpsOverlayController udfpsOvelayController,
             @Nullable ISidefpsController sidefpsController,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
-        // UDFPS enroll vibrations are handled in SystemUI
+        // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
@@ -83,7 +84,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override
@@ -104,6 +105,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
         // See AcquiredInfo#GOOD and AcquiredInfo#RETRYING_CAPTURE
         if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
                 && mSensorProps.isAnyUdfpsType()) {
+            vibrateSuccess();
             UdfpsHelper.onAcquiredGood(getSensorId(), mUdfpsOverlayController);
         }
 
@@ -166,6 +168,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
+            mIsPointerDown = true;
             getFreshDaemon().onPointerDown(0 /* pointerId */, x, y, minor, major);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer down", e);
@@ -175,10 +178,16 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     @Override
     public void onPointerUp() {
         try {
+            mIsPointerDown = false;
             getFreshDaemon().onPointerUp(0 /* pointerId */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer up", e);
         }
+    }
+
+    @Override
+    public boolean isPointerDown() {
+        return mIsPointerDown;
     }
 
     @Override
