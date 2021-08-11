@@ -66,6 +66,8 @@ class KeyguardController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_ATM;
 
+    static final String KEYGUARD_SLEEP_TOKEN_TAG = "keyguard";
+
     private final ActivityTaskSupervisor mTaskSupervisor;
     private WindowManagerService mWindowManager;
     private boolean mKeyguardShowing;
@@ -82,7 +84,7 @@ class KeyguardController {
             ActivityTaskSupervisor taskSupervisor) {
         mService = service;
         mTaskSupervisor = taskSupervisor;
-        mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl("keyguard");
+        mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl(KEYGUARD_SLEEP_TOKEN_TAG);
     }
 
     void setWindowManager(WindowManagerService windowManager) {
@@ -372,7 +374,9 @@ class KeyguardController {
                 // can be committed before KEYGUARD_OCCLUDE transition is handled.
                 // Set mRequestForceTransition flag to make sure that the app transition animation
                 // is applied for such case.
-                if (topActivity != null) {
+                // TODO(b/194243906): Fix this before enabling the remote keyguard animation.
+                if (WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
+                        && topActivity != null) {
                     topActivity.mRequestForceTransition = true;
                 }
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);

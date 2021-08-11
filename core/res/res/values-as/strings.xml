@@ -2288,8 +2288,8 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ছেটিঙত অন কৰক"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"অগ্ৰাহ্য কৰক"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাওক"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ডিভাইচৰ কেমেৰ অৱৰোধৰ পৰা আঁতৰাওক"</string>
-    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; আৰু আটাইবোৰ এপ আৰু সেৱাৰ বাবে"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ডিভাইচৰ কেমেৰা অৱৰোধৰ পৰা আঁতৰাওক"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; আৰু আটাইবোৰ এপ্‌ আৰু সেৱাৰ বাবে"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"অৱৰোধৰ পৰা আঁতৰাওক"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ছেন্সৰ সম্পৰ্কীয় গোপনীয়তাৰ নীতি"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"এপ্লিকেশ্বনৰ চিহ্ন"</string>

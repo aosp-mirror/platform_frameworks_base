@@ -1248,9 +1248,9 @@
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"Зрабіць здымак з дапамогай"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Зрабіць здымак з дапамогай %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Зрабіць здымак"</string>
-    <string name="alwaysUse" msgid="3153558199076112903">"Выкарыстоўваць па змаўчанні для гэтага дзеяння."</string>
+    <string name="alwaysUse" msgid="3153558199076112903">"Выкарыстоўваць стандартна для гэтага дзеяння."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"Выкарыстоўваць іншую праграму"</string>
-    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Ачысціць па змаўчанні ў раздзеле \"Налады сістэмы &gt; Прыкладанні &gt; Спампаваныя\"."</string>
+    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Ачысціць стандартныя налады ў раздзеле \"Налады сістэмы &gt; Праграмы &gt; Спампаваныя\"."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Выберыце дзеянне"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Выберыце прыкладанне для USB-прылады"</string>
     <string name="noApplications" msgid="1186909265235544019">"Няма прыкладанняў, якія могуць выконваць гэты працэс."</string>
@@ -2357,7 +2357,7 @@
     <string name="dismiss_action" msgid="1728820550388704784">"Адхіліць"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Разблакіруйце мікрафон прылады"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Разблакіруйце камеру прылады"</string>
-    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для праграмы &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; і ўсіх праграм і сэрвісаў"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; і ўсіх праграм і сэрвісаў"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Разблакіраваць"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Прыватнасць інфармацыі з датчыка"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок праграмы"</string>

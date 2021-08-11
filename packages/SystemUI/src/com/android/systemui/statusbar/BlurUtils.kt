@@ -45,6 +45,8 @@ open class BlurUtils @Inject constructor(
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
 
+    private var lastAppliedBlur = 0
+
     init {
         dumpManager.registerDumpable(javaClass.name, this)
     }
@@ -75,17 +77,25 @@ open class BlurUtils @Inject constructor(
      *
      * @param viewRootImpl The window root.
      * @param radius blur radius in pixels.
+     * @param opaque if surface is opaque, regardless or having blurs or no.
      */
-    fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int, opaqueBackground: Boolean) {
+    fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int, opaque: Boolean) {
         if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
                 !supportsBlursOnWindows()) {
             return
         }
         createTransaction().use {
             it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
-            it.setOpaque(viewRootImpl.surfaceControl, opaqueBackground)
+            it.setOpaque(viewRootImpl.surfaceControl, opaque)
+            if (lastAppliedBlur == 0 && radius != 0) {
+                it.setEarlyWakeupStart()
+            }
+            if (lastAppliedBlur != 0 && radius == 0) {
+                it.setEarlyWakeupEnd()
+            }
             it.apply()
         }
+        lastAppliedBlur = radius
     }
 
     @VisibleForTesting

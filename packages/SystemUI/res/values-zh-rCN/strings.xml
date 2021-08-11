@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"无法识别人脸。请改用指纹。"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"使用指纹验证身份后才能继续"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"无法识别指纹。请改用屏幕锁定功能。"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"正在查找您的面孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"面孔图标"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"兼容性缩放按钮。"</string>
@@ -211,8 +213,8 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"信号强度为两格。"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"信号强度为三格。"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"信号满格。"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"开启。"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"关闭。"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"已开启。"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"已关闭。"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"已连接。"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"正在连接。"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
@@ -221,7 +223,7 @@
     <string name="accessibility_no_sim" msgid="1140839832913084973">"无 SIM 卡。"</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"移动数据"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"移动数据已开启"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"关闭"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"已关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"飞行模式。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 已开启。"</string>
@@ -426,15 +428,13 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"屏幕录制"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"开始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要取消禁用设备麦克风吗？"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要取消禁用设备摄像头吗？"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要取消禁用设备摄像头和麦克风吗？"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解锁设备麦克风吗？"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解锁设备摄像头吗？"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要解锁设备摄像头和麦克风吗？"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"这将会为所有获准使用您麦克风的应用和服务启用这项权限。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"这将会为所有获准使用您摄像头的应用和服务启用这项权限。"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"这将会为所有获准使用您摄像头或麦克风的应用和服务启用这项权限。"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"这将会为所有获准使用您的摄像头或麦克风的应用和服务启用这项权限。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"设备"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑动可切换应用"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖动可快速切换应用"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切换概览"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"已充满"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"正在充电"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次点按即可打开"</string>
     <string name="tap_again" msgid="1315420114387908655">"请再点按一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"按一下即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"需要解锁才能使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
@@ -706,8 +707,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"不静音"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"不静音也不屏蔽"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"高级通知设置"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"开启"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"关闭"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"已开启"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"已关闭"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"利用高级通知设置，您可以为应用通知设置从 0 级到 5 级的重要程度等级。\n\n"<b>"5 级"</b>" \n- 在通知列表顶部显示 \n- 允许全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"4 级"</b>" \n- 禁止全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"3 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n\n"<b>"2 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n\n"<b>"1 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n- 不在锁定屏幕和状态栏中显示 \n- 在通知列表底部显示 \n\n"<b>"0 级"</b>" \n- 屏蔽应用的所有通知"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"您将不会再看到这些通知"</string>
@@ -1149,8 +1150,7 @@
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g>发送了一条消息：<xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>发送了一张图片"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g>更新了状态：<xliff:g id="STATUS">%2$s</xliff:g>"</string>
-    <!-- no translation found for person_available (2318599327472755472) -->
-    <skip />
+    <string name="person_available" msgid="2318599327472755472">"在线"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"读取电池计量器时出现问题"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"点按即可了解详情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未设置闹钟"</string>

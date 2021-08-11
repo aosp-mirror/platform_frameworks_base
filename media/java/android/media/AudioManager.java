@@ -7062,14 +7062,11 @@ public class AudioManager {
     @TestApi
     @NonNull
     public Map<Integer, Boolean> getSurroundFormats() {
-        Map<Integer, Boolean> surroundFormats = new HashMap<>();
-        int status = AudioSystem.getSurroundFormats(surroundFormats);
-        if (status != AudioManager.SUCCESS) {
-            // fail and bail!
-            Log.e(TAG, "getSurroundFormats failed:" + status);
-            return new HashMap<Integer, Boolean>(); // Always return a map.
+        try {
+            return getService().getSurroundFormats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return surroundFormats;
     }
 
     /**
@@ -7116,15 +7113,14 @@ public class AudioManager {
      *
      * @return a list of surround formats
      */
-    public ArrayList<Integer> getReportedSurroundFormats() {
-        ArrayList<Integer> reportedSurroundFormats = new ArrayList<>();
-        int status = AudioSystem.getReportedSurroundFormats(reportedSurroundFormats);
-        if (status != AudioManager.SUCCESS) {
-            // fail and bail!
-            Log.e(TAG, "getReportedSurroundFormats failed:" + status);
-            return new ArrayList<Integer>(); // Always return a list.
+    @TestApi
+    @NonNull
+    public List<Integer> getReportedSurroundFormats() {
+        try {
+            return getService().getReportedSurroundFormats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return reportedSurroundFormats;
     }
 
     /**

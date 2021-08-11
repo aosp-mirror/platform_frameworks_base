@@ -2287,8 +2287,8 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Эми экрандын бир бөлүгүн чоңойто аласыз"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Жөндөөлөрдөн күйгүзүү"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Жабуу"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Түзмөктүн микрофонунун кулпусун ачуу"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Түзмөктүн камерасынын кулпусун ачуу"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Түзмөктүн микрофонун бөгөттөн чыгаруу"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Түзмөктүн камерасын бөгөттөн чыгаруу"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; жана башка бардык колдонмолор менен кызматтар үчүн"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгөттөн чыгаруу"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Сенсордун купуялыгы"</string>

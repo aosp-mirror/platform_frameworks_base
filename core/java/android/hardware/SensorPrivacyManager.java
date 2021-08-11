@@ -29,9 +29,11 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
@@ -46,6 +48,8 @@ import java.util.concurrent.Executor;
  */
 @SystemService(Context.SENSOR_PRIVACY_SERVICE)
 public final class SensorPrivacyManager {
+
+    private static final String LOG_TAG = SensorPrivacyManager.class.getSimpleName();
 
     /**
      * Unique Id of this manager to identify to the service
@@ -247,8 +251,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, mContext.getUserId(), mContext.getMainExecutor(),
-                listener);
+        addSensorPrivacyListener(sensor, mContext.getMainExecutor(), listener);
     }
 
     /**
@@ -283,7 +286,25 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor, @NonNull Executor executor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, mContext.getUserId(), executor, listener);
+        Pair<OnSensorPrivacyChangedListener, Integer> key = new Pair<>(listener, sensor);
+        synchronized (mIndividualListeners) {
+            ISensorPrivacyListener iListener = mIndividualListeners.get(key);
+            if (iListener == null) {
+                iListener = new ISensorPrivacyListener.Stub() {
+                    @Override
+                    public void onSensorPrivacyChanged(boolean enabled) {
+                        executor.execute(() -> listener.onSensorPrivacyChanged(sensor, enabled));
+                    }
+                };
+                mIndividualListeners.put(key, iListener);
+            }
+
+            try {
+                mService.addUserGlobalIndividualSensorPrivacyListener(sensor, iListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -361,7 +382,7 @@ public final class SensorPrivacyManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
-        return isSensorPrivacyEnabled(sensor, mContext.getUserId());
+        return isSensorPrivacyEnabled(sensor, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -392,7 +413,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable) {
-        setSensorPrivacy(source, sensor, enable, mContext.getUserId());
+        setSensorPrivacy(source, sensor, enable, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -428,7 +449,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacyForProfileGroup(source , sensor, enable, mContext.getUserId());
+        setSensorPrivacyForProfileGroup(source , sensor, enable, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -463,7 +484,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(sensor, suppress, mContext.getUserId());
+        suppressSensorPrivacyReminders(sensor, suppress, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -483,6 +504,25 @@ public final class SensorPrivacyManager {
                     token, suppress);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * If sensor privacy for the provided sensor is enabled then this call will show the user the
+     * dialog which is shown when an application attempts to use that sensor. If privacy isn't
+     * enabled then this does nothing.
+     *
+     * This call can only be made by the system uid.
+     *
+     * @throws SecurityException when called by someone other than system uid.
+     *
+     * @hide
+     */
+    public void showSensorUseDialog(int sensor) {
+        try {
+            mService.showSensorUseDialog(sensor);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Received exception while trying to show sensor use dialog", e);
         }
     }
 
@@ -590,4 +630,5 @@ public final class SensorPrivacyManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
 }

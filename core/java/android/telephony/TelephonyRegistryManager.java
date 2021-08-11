@@ -111,7 +111,12 @@ public class TelephonyRegistryManager {
         IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
             @Override
             public void onSubscriptionsChanged () {
-                executor.execute(() -> listener.onSubscriptionsChanged());
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onSubscriptionsChanged());
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         };
         mSubscriptionChangedListenerMap.put(listener, callback);
