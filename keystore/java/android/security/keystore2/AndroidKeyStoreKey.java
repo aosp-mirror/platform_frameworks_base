@@ -102,11 +102,9 @@ public class AndroidKeyStoreKey implements Key {
         final int prime = 31;
         int result = 1;
 
-        result = prime * result + ((mDescriptor == null) ? 0 : mDescriptor.hashCode());
+        result = prime * result + getClass().hashCode();
         result = prime * result + (int) (mKeyId >>> 32);
         result = prime * result + (int) (mKeyId & 0xffffffff);
-        result = prime * result + ((mAuthorizations == null) ? 0 : mAuthorizations.hashCode());
-        result = prime * result + ((mAlgorithm == null) ? 0 : mAlgorithm.hashCode());
         return result;
     }
 
@@ -122,10 +120,6 @@ public class AndroidKeyStoreKey implements Key {
             return false;
         }
         AndroidKeyStoreKey other = (AndroidKeyStoreKey) obj;
-        if (mKeyId != other.mKeyId) {
-            return false;
-        }
-
-        return true;
+        return mKeyId == other.mKeyId;
     }
 }
