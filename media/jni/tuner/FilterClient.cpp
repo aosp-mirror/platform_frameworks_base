@@ -160,7 +160,7 @@ Result FilterClient::getId64Bit(int64_t& id) {
 
 Result FilterClient::releaseAvHandle(native_handle_t* handle, uint64_t avDataId) {
     if (mTunerFilter != nullptr) {
-        Status s = mTunerFilter->releaseAvHandle(makeToAidl(handle), avDataId);
+        Status s = mTunerFilter->releaseAvHandle(dupToAidl(handle), avDataId);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
@@ -308,7 +308,7 @@ void FilterClient::handleAvShareMemory() {
         NativeHandle avMemory;
         Status s = mTunerFilter->getAvSharedHandle(&avMemory, &size);
         if (s.isOk()) {
-            mAvSharedHandle = native_handle_clone(makeFromAidl(avMemory));
+            mAvSharedHandle = dupFromAidl(avMemory);
             mAvSharedMemSize = size;
         }
     }
