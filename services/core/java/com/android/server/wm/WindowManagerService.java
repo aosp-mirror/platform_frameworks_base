@@ -7061,6 +7061,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             "requestScrollCapture: caught exception dispatching to window."
                                     + "token=%s", targetWindow.mClient.asBinder());
                     responseBuilder.setWindowTitle(targetWindow.getName());
+                    responseBuilder.setPackageName(targetWindow.getOwningPackage());
                     responseBuilder.setDescription(String.format("caught exception: %s", e));
                     listener.onScrollCaptureResponse(responseBuilder.build());
                 }
