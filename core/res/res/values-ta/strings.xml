@@ -166,7 +166,7 @@
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"நெறிமுறை ஆதரிக்கப்படவில்லை."</string>
     <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"பாதுகாப்பான இணைப்பை நிறுவ முடியவில்லை."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL தவறாக உள்ளதால் பக்கத்தைத் திறக்க முடியவில்லை."</string>
-    <string name="httpErrorFile" msgid="3400658466057744084">"கோப்பை அணுக முடியவில்லை."</string>
+    <string name="httpErrorFile" msgid="3400658466057744084">"ஃபைலை அணுக முடியவில்லை."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"கோரப்பட்ட கோப்பைக் கண்டறிய முடியவில்லை."</string>
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"மிக அதிகமான கோரிக்கைகள் செயல்படுத்தப்படுகின்றன. பிறகு முயற்சிக்கவும்."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g> க்கான உள்நுழைவு பிழை"</string>
