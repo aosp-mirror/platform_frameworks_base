@@ -372,6 +372,9 @@ public final class QuotaController extends StateController {
     private final BackgroundJobsController mBackgroundJobsController;
     private final ConnectivityController mConnectivityController;
 
+    @GuardedBy("mLock")
+    private boolean mIsEnabled;
+
     /** How much time each app will have to run jobs within their standby bucket window. */
     private long mAllowedTimePerPeriodMs = QcConstants.DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
 
@@ -590,6 +593,7 @@ public final class QuotaController extends StateController {
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
+        mIsEnabled = !mConstants.USE_TARE_POLICY;
 
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
@@ -837,6 +841,9 @@ public final class QuotaController extends StateController {
     /** @return true if the job is within expedited job quota. */
     @GuardedBy("mLock")
     public boolean isWithinEJQuotaLocked(@NonNull final JobStatus jobStatus) {
+        if (!mIsEnabled) {
+            return true;
+        }
         if (isQuotaFreeLocked(jobStatus.getEffectiveStandbyBucket())) {
             return true;
         }
@@ -884,6 +891,9 @@ public final class QuotaController extends StateController {
 
     @VisibleForTesting
     boolean isWithinQuotaLocked(@NonNull final JobStatus jobStatus) {
+        if (!mIsEnabled) {
+            return true;
+        }
         final int standbyBucket = jobStatus.getEffectiveStandbyBucket();
         // A job is within quota if one of the following is true:
         //   1. it was started while the app was in the TOP state
@@ -910,6 +920,9 @@ public final class QuotaController extends StateController {
     @GuardedBy("mLock")
     boolean isWithinQuotaLocked(final int userId, @NonNull final String packageName,
             final int standbyBucket) {
+        if (!mIsEnabled) {
+            return true;
+        }
         if (standbyBucket == NEVER_INDEX) return false;
 
         if (isQuotaFreeLocked(standbyBucket)) return true;
@@ -2980,7 +2993,8 @@ public final class QuotaController extends StateController {
 
     @Override
     public void onConstantsUpdatedLocked() {
-        if (mQcConstants.mShouldReevaluateConstraints) {
+        if (mQcConstants.mShouldReevaluateConstraints || mIsEnabled == mConstants.USE_TARE_POLICY) {
+            mIsEnabled = !mConstants.USE_TARE_POLICY;
             // Update job bookkeeping out of band.
             JobSchedulerBackgroundThread.getHandler().post(() -> {
                 synchronized (mLock) {
@@ -4120,6 +4134,7 @@ public final class QuotaController extends StateController {
     @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
+        pw.println("Is enabled: " + mIsEnabled);
         pw.println("Is charging: " + mChargeTracker.isChargingLocked());
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());
         pw.println();
