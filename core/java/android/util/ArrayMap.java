@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * ArrayMap is a generic key->value mapping data structure that is
@@ -977,6 +978,28 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public boolean containsAll(Collection<?> collection) {
         return MapCollections.containsAllHelper(this, collection);
+    }
+
+    /**
+     * Performs the given action for all elements in the stored order. This implementation overrides
+     * the default implementation to avoid iterating using the {@link #entrySet()} and iterates in
+     * the key-value order consistent with {@link #keyAt(int)} and {@link #valueAt(int)}.
+     *
+     * @param action The action to be performed for each element
+     */
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        if (action == null) {
+            throw new NullPointerException("action must not be null");
+        }
+
+        final int size = mSize;
+        for (int i = 0; i < size; ++i) {
+            if (size != mSize) {
+                throw new ConcurrentModificationException();
+            }
+            action.accept(keyAt(i), valueAt(i));
+        }
     }
 
     /**
