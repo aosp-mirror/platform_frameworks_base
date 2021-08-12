@@ -2456,6 +2456,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL, BLUETOOTH_PERM);
     }
 
+    private boolean isBleState(int state) {
+        switch (state) {
+            case BluetoothAdapter.STATE_BLE_ON:
+            case BluetoothAdapter.STATE_BLE_TURNING_ON:
+            case BluetoothAdapter.STATE_BLE_TURNING_OFF:
+                return true;
+        }
+        return false;
+    }
+
     private void bluetoothStateChangeHandler(int prevState, int newState) {
         boolean isStandardBroadcast = true;
         if (prevState == newState) { // No change. Nothing to do.
@@ -2474,8 +2484,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 sendBluetoothServiceDownCallback();
                 unbindAndFinish();
                 sendBleStateChanged(prevState, newState);
-                // Don't broadcast as it has already been broadcast before
-                isStandardBroadcast = false;
+
+                /* Currently, the OFF intent is broadcasted externally only when we transition
+                 * from TURNING_OFF to BLE_ON state. So if the previous state is a BLE state,
+                 * we are guaranteed that the OFF intent has been broadcasted earlier and we
+                 * can safely skip it.
+                 * Conversely, if the previous state is not a BLE state, it indicates that some
+                 * sort of crash has occurred, moving us directly to STATE_OFF without ever
+                 * passing through BLE_ON. We should broadcast the OFF intent in this case. */
+                isStandardBroadcast = !isBleState(prevState);
 
             } else if (!intermediate_off) {
                 // connect to GattService
@@ -2527,6 +2544,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             if (prevState == BluetoothAdapter.STATE_BLE_ON) {
                 // Show prevState of BLE_ON as OFF to standard users
                 prevState = BluetoothAdapter.STATE_OFF;
+            }
+            if (DBG) {
+                Slog.d(TAG,
+                        "Sending State Change: " + BluetoothAdapter.nameForState(prevState) + " > "
+                                + BluetoothAdapter.nameForState(newState));
             }
             Intent intent = new Intent(BluetoothAdapter.ACTION_STATE_CHANGED);
             intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);

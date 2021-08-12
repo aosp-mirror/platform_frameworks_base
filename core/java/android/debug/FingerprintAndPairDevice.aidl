@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.internal.telecom;
+package android.debug;
 
-import android.net.Uri;
-import android.telecom.PhoneAccountHandle;
-
-import com.android.internal.telecom.ICallRedirectionAdapter;
+import android.debug.PairDevice;
 
 /**
- * Internal remote interface for a call redirection service.
- *
- * @see android.telecom.CallRedirectionService
- *
+ * @see {@link android.debug.IAdbManager#getPairedDevices()}
  * @hide
  */
-oneway interface ICallRedirectionService {
-    void placeCall(in ICallRedirectionAdapter adapter, in Uri handle,
-            in PhoneAccountHandle initialPhoneAccount, boolean allowInteractiveResponse);
-
-    void notifyTimeout();
+parcelable FingerprintAndPairDevice {
+    String keyFingerprint;
+    PairDevice device;
 }
